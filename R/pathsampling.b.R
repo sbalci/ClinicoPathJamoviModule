@@ -105,12 +105,11 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>"
             welcome$setContent(welcomeHtml)
 
-            # Initialize with instructions
-            instructions <- self$results$instructions
+            # === Guided Instructions (Detailed Checklist) ===
+            if (self$options$showGuidedInstructions) {
+                guidedInstructions <- self$results$guidedInstructions
 
-            if (self$options$showGuidedChecklist) {
-                # Guided workflow checklist
-                html <- sprintf("<div style='%s'>
+                guidedHtml <- sprintf("<div style='%s'>
                     <div style='%s'>
                         <h3 style='%s'>Quick Start Checklist</h3>
                         <ol style='%s'>
@@ -217,9 +216,15 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "color: #856404;",
                     private$.styleConstants$fontSize14
                 ))
-            } else {
-                # Concise instructions
-                html <- sprintf("<div style='%s'>
+
+                guidedInstructions$setContent(guidedHtml)
+            }
+
+            # === Concise Instructions (Brief Overview) ===
+            if (self$options$showConciseInstructions) {
+                conciseInstructions <- self$results$conciseInstructions
+
+                conciseHtml <- sprintf("<div style='%s'>
                     <h3 style='%s %s'>Pathology Sampling Adequacy Analysis</h3>
                     <p style='%s %s'>This analysis determines the minimum number of tissue samples
                     (blocks, cassettes, sections, or lymph nodes) required to detect lesions with a
@@ -240,13 +245,25 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
                 private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
                 private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary)
+
+                conciseInstructions$setContent(conciseHtml)
             }
 
-            instructions$setContent(html)
+            if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) {
+                welcome$setVisible(TRUE)
+                # No variables selected - show welcome message only
+                return()
+            } else {
+                welcome$setVisible(FALSE)
+            }
+
 
         },
 
         .run = function() {
+
+            if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) return()
+
 
             # Get required variables
             totalSamples <- self$options$totalSamples
@@ -665,7 +682,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 <h3 style='margin: 0 0 10px 0; font-size: 16px; color: #0056b3;'>Key Results</h3>
                                 <p style='margin: 0; font-size: 14px; color: #0056b3;'>This section will be populated with the key findings from the analysis.</p>
                              </div>"
-            keyResults$setContent(keyResultsHtml)
+            if (self$options$showKeyResults) {
+                keyResults$setContent(keyResultsHtml)
+            }
 
             # === Data Summary ===
             dataInfo <- self$results$dataInfo
@@ -895,7 +914,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.styleConstants$colorPrimary,
                     "margin: 0;"
                 ))
-                binomialText$setContent(html)
+                if (self$options$showBinomialModel) {
+                    binomialText$setContent(html)
+                }
 
                 # Calculate detection probabilities for different sample sizes
                 binomialTable <- self$results$binomialTable
@@ -1189,7 +1210,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ),
             prevalence * 100)
 
-            probabilityExplanation$setContent(html)
+            if (self$options$showProbabilityExplanation) {
+                probabilityExplanation$setContent(html)
+            }
 
             # === Bootstrap Analysis ===
             if (self$options$showBootstrap) {
@@ -1259,7 +1282,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.styleConstants$colorPrimary,
                     "margin: 0;"
                 ))
-                bootstrapText$setContent(html)
+                if (self$options$showBootstrap) {
+                    bootstrapText$setContent(html)
+                }
 
                 # Perform bootstrap
                 bootstrapResults <- matrix(0, nrow = nBoot, ncol = maxSamp)
@@ -1434,7 +1459,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
                 private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
-                tumorBurdenText$setContent(html)
+                if (self$options$showTumorBurden) {
+                    tumorBurdenText$setContent(html)
+                }
 
                 # === Calculate SPR Statistics ===
                 tumorBurdenInfo <- self$results$tumorBurdenInfo
@@ -1597,7 +1624,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
                 private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
-                stageMigrationText$setContent(html)
+                if (self$options$showStageMigration) {
+                    stageMigrationText$setContent(html)
+                }
 
                 # Analyze detection rates by cassette groups
                 stageMigrationTable <- self$results$stageMigrationTable
@@ -1657,7 +1686,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 html <- "<h4>Examined vs Positive Correlation</h4>
                 <p>Relationship between total cassettes examined and number of positive cassettes.</p>
                 <p>Positive correlation suggests more extensive sampling yields more detection.</p>"
-                correlationText$setContent(html)
+                if (self$options$showCorrelation) {
+                    correlationText$setContent(html)
+                }
 
                 # Calculate correlation
                 corTest <- cor.test(totalSamplesData, positiveCassettesData, method = "spearman")
@@ -1718,7 +1749,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <p>This analysis classifies cases by how they meet the threshold for substantial involvement.</p>
                 <p><b>Reference:</b> Ates D, et al. Lymphovascular Space Invasion in Endometrial Cancer.
                 <i>Mod Pathol.</i> 2025;38:100885.</p>", threshold, threshold)
-                distributionPatternText$setContent(html)
+                if (self$options$showDistributionPattern) {
+                    distributionPatternText$setContent(html)
+                }
 
                 # Classify cases
                 # Focal: total < threshold
@@ -1858,7 +1891,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     max(firstDetectionData, na.rm=TRUE),
                     contextNote)
 
-                    empiricalCumulativeText$setContent(html)
+                    if (self$options$showEmpiricalCumulative) {
+                        empiricalCumulativeText$setContent(html)
+                    }
 
                     # Populate table
                     prev_cum <- 0
@@ -1924,7 +1959,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
                 private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
 
-                incrementalYieldText$setContent(html)
+                if (self$options$showIncrementalYield) {
+                    incrementalYieldText$setContent(html)
+                }
             }
 
             # ===== PHASE 3: Sample Type Stratification =====
@@ -1954,7 +1991,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
                     private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
 
-                    stratifiedText$setContent(html)
+                    if (self$options$showStratifiedAnalysis) {
+                        stratifiedText$setContent(html)
+                    }
 
                     # Calculate for each type
                     type_row <- 1
@@ -2033,7 +2072,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 100*prevalence, nDetected, length(firstDetectionData),
                 private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
-                populationDetectionText$setContent(html)
+                if (self$options$showPopulationDetection) {
+                    populationDetectionText$setContent(html)
+                }
 
                 # Populate table
                 for (n in 1:maxSamp) {
@@ -2100,7 +2141,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
                     private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
-                    spatialClusteringText$setContent(html)
+                    if (self$options$showSpatialClustering) {
+                        spatialClusteringText$setContent(html)
+                    }
 
                     # Populate table
                     clusteringTable$addRow(rowKey="clustered", values=list(
@@ -2166,7 +2209,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
                     private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
-                    multifocalText$setContent(html)
+                    if (self$options$showMultifocalAnalysis) {
+                        multifocalText$setContent(html)
+                    }
 
                     # Populate table
                     if (n_unifocal > 0) {
@@ -2233,7 +2278,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     hypergeometricText <- self$results$hypergeometricText
                     hypergeometricTable <- self$results$hypergeometricTable
                     hyperRecommendTable <- self$results$hyperRecommendTable
-                    hypergeometricText$setContent("<p>No valid cases with total population and success counts were found for the hypergeometric model.</p>")
+                    if (self$options$showHypergeometric) {
+                        hypergeometricText$setContent("<p>No valid cases with total population and success counts were found for the hypergeometric model.</p>")
+                    }
                     hypergeometricTable$clearRows()
                     hyperRecommendTable$clearRows()
                     return()
@@ -2268,7 +2315,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     hypergeometricText <- self$results$hypergeometricText
                     hypergeometricTable <- self$results$hypergeometricTable
                     hyperRecommendTable <- self$results$hyperRecommendTable
-                    hypergeometricText$setContent("<p>All cases were removed because population/success counts were invalid for the hypergeometric model.</p>")
+                    if (self$options$showHypergeometric) {
+                        hypergeometricText$setContent("<p>All cases were removed because population/success counts were invalid for the hypergeometric model.</p>")
+                    }
                     hypergeometricTable$clearRows()
                     hyperRecommendTable$clearRows()
                     return()
@@ -2291,7 +2340,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <p style='margin-left: 15px;'>P(detect ≥ %d) = mean<sub>i</sub>[1 - Σ<sub>x=0</sub><sup>%d-1</sup> dhyper(x, K<sub>i</sub>, N<sub>i</sub>-K<sub>i</sub>, min(n, N<sub>i</sub>))]</p>
                 <p><b>Reference:</b> Orange-peeling LN dissection study (2025) - Hypergeometric adequacy thresholds.</p>",
                 nHyperCases, medianN, medianK, notesHtml, target, target, max(target - 1, 0))
-                hypergeometricText$setContent(html)
+                if (self$options$showHypergeometric) {
+                    hypergeometricText$setContent(html)
+                }
 
                 # Pre-compute cumulative probabilities across cases
                 hypergeometricTable <- self$results$hypergeometricTable
@@ -2476,7 +2527,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 %s
                 <p><b>Reference:</b> Zhou J, et al. Beta-binomial model for lymph node yield. <i>Front Oncol.</i> 2022;12:872527.</p>",
                 alpha, beta, extraText)
-                betaBinomialText$setContent(html)
+                if (self$options$showBetaBinomial) {
+                    betaBinomialText$setContent(html)
+                }
 
                 # Calculate beta-binomial probabilities
                 betaBinomialTable <- self$results$betaBinomialTable
@@ -2603,7 +2656,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <br>• Tomlinson JS, et al. <i>Arch Surg.</i> 2007;142(8):767-774.
                 <br>• Pu N, et al. <i>J Natl Compr Canc Netw.</i> 2021;19(9):1029-1036.
                 <br>• Yoon SJ, et al. <i>Ann Surg Oncol.</i> 2025. doi:10.1245/s10434-025-18029-7</p>"
-                lnAnalysisText$setContent(html)
+                if (self$options$showLNAnalysis) {
+                    lnAnalysisText$setContent(html)
+                }
 
                 # Calculate LNR
                 LNR <- positiveLN / totalELN
@@ -2739,7 +2794,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <li>Cliff's Delta: |d| < 0.147 (negligible), 0.147-0.330 (small), 0.330-0.474 (medium), > 0.474 (large)</li>
                     <li>OR: 1.0 (no effect), 1.5-3.0 (small-moderate), 3.0-9.0 (moderate-large), > 9.0 (large)</li>
                 </ul>"
-                effectSizesText$setContent(html)
+                if (self$options$showEffectSizes) {
+                    effectSizesText$setContent(html)
+                }
 
                 # Define adequacy groups (e.g., <12 vs ≥12 LN)
                 adequate <- totalELN >= 12
@@ -2967,7 +3024,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 html <- "<p>No sufficient information to produce clinical recommendations.</p>"
             }
 
-            recommendText$setContent(html)
+            if (self$options$showRecommendText) {
+                recommendText$setContent(html)
+            }
 
             keyResults <- self$results$keyResults
 
@@ -3035,23 +3094,58 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 primaryLine,
                 comparisonSection)
 
-            keyResults$setContent(keyResultsHtml)
+            if (self$options$showKeyResults) {
+                keyResults$setContent(keyResultsHtml)
+            }
 
             # === Clinical Summary (Plain Language) ===
-            if (self$options$showClinicalSummary && self$options$showBootstrap) {
+            if (self$options$showClinicalSummary) {
                 clinicalSummary <- self$results$clinicalSummary
 
-                if (is.null(bootstrapMeansVec)) {
+                if (!self$options$showBootstrap || is.null(bootstrapMeansVec)) {
+                    # Provide basic summary without bootstrap
+                    perSampleText <- if (!is.na(pEstimate)) sprintf("%.1f%%", pEstimate * 100) else "Not estimated"
+                    medianDetectionText <- if (!is.na(medianFirst)) sprintf("%d", medianFirst) else "N/A"
+
                     html <- sprintf("<div style='%s %s %s %s'>
                         <h3 style='%s %s margin: 0 0 15px 0;'>Clinical Summary</h3>
-                        <p style='%s margin: 0;'>
-                            Unable to generate summary: Bootstrap analysis did not run.
-                        </p>
+                        <div style='%s %s %s %s'>
+                            <h4 style='%s %s margin: 0 0 10px 0;'>Study Overview</h4>
+                            <p style='%s margin: 0 0 5px 0;'>
+                                Analyzed <strong>%d cases</strong> with <strong>%d total samples</strong> (mean: %.2f samples per case).
+                            </p>
+                        </div>
+                        <div style='%s %s %s %s'>
+                            <h4 style='%s %s margin: 0 0 10px 0;'>Key Findings</h4>
+                            <ul style='margin: 0; padding-left: 20px; %s'>
+                                <li style='margin: 5px 0;'>Detection rate: <strong>%d of %d cases</strong> (%.1f%%%%)</li>
+                                <li style='margin: 5px 0;'>Median first detection: <strong>sample %s</strong></li>
+                                <li style='margin: 5px 0;'>Detection probability per sample: <strong>%s</strong></li>
+                            </ul>
+                        </div>
+                        <div style='%s %s %s %s'>
+                            <p style='%s margin: 0;'>
+                                <strong>Note:</strong> Enable 'Show Bootstrap Analysis' for detailed confidence intervals and sample size recommendations.
+                            </p>
+                        </div>
                     </div>",
-                    private$.styleConstants$font, private$.styleConstants$bgLight,
-                    private$.styleConstants$borderPrimary, private$.styleConstants$padding15,
-                    private$.styleConstants$colorPrimary, private$.styleConstants$fontSize16,
-                    private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary)
+                    private$.styleConstants$font, private$.styleConstants$bgLighter,
+                    private$.styleConstants$borderPrimary, private$.styleConstants$padding20,
+                    private$.styleConstants$colorPrimary, private$.styleConstants$fontSize18,
+                    private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
+                    private$.styleConstants$padding15, private$.styleConstants$margin10,
+                    private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
+                    private$.styleConstants$fontSize14,
+                    nCases, totalExamined, meanSamplesPerCase,
+                    private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
+                    private$.styleConstants$padding15, private$.styleConstants$margin10,
+                    private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
+                    private$.styleConstants$fontSize14,
+                    nDetected, nCases, (nDetected / nCases) * 100,
+                    medianDetectionText, perSampleText,
+                    private$.styleConstants$bgLight, private$.styleConstants$borderSecondary,
+                    private$.styleConstants$padding10, private$.styleConstants$margin10,
+                    private$.styleConstants$fontSize13)
 
                     clinicalSummary$setContent(html)
                 } else if (is.na(bootstrapTargetIdx) || length(bootstrapTargetIdx) == 0) {
@@ -3232,7 +3326,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><b>Bootstrap CIs:</b> Assume the analyzed sample is representative of the broader population of interest.</li>
             </ul>"
 
-            interpretText$setContent(html)
+            if (self$options$showInterpretText) {
+                interpretText$setContent(html)
+            }
 
             # === Omentum-Specific Analysis ===
             if (self$options$showOmentumAnalysis) {
@@ -3290,7 +3386,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </li>
             </ul>"
 
-            referencesText$setContent(html)
+            if (self$options$showReferencesText) {
+                referencesText$setContent(html)
+            }
 
         },
 
@@ -3569,7 +3667,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li>Skala SL, Hagemann IS. <i>Int J Gynecol Pathol.</i> 2015;34:281-287</li>
             </ul>"
 
-            omentumText$setContent(html)
+            if (self$options$showOmentumAnalysis) {
+                omentumText$setContent(html)
+            }
         },
 
         # ===== Helper Functions for Enhanced Analyses =====

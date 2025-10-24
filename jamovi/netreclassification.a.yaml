@@ -1,10 +1,10 @@
 ---
 name: netreclassification
 title: Net Reclassification Improvement (NRI)
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Performance Metrics
 menuSubtitle: Advanced model improvement assessment with reclassification analysis
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -403,5 +403,69 @@ options:
           R: >
             Random seed for bootstrap sampling and cross-validation.
             Ensures reproducible results across analyses.
+
+    # Advanced NRI Enhancements
+    - name: category_free_nri
+      title: Category-Free NRI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate category-free (continuous) NRI without predefined risk categories.
+            Provides unbiased assessment of reclassification across entire risk spectrum.
+
+    - name: event_specific_nri
+      title: Event-Specific NRI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate NRI separately for events and non-events with detailed breakdowns.
+            Essential for understanding which population benefits most from new model.
+
+    - name: clinical_nri_custom
+      title: Clinical NRI (Custom Categories)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use clinically validated custom risk categories instead of statistical thresholds.
+            More appropriate for guideline-based risk assessment.
+
+    - name: reclassification_visualization
+      title: Enhanced Reclassification Visualization
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create comprehensive visualization including Sankey diagrams and heatmaps
+            for reclassification patterns.
+
+    - name: relative_nri
+      title: Relative NRI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate relative NRI metrics normalized by baseline model performance.
+            Useful for comparing improvements across different populations.
+
+    - name: weighted_nri
+      title: Weighted NRI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Weight reclassification by clinical importance using utility weights.
+            Accounts for differential clinical impact of risk categories.
+
+    - name: utility_weights
+      title: Utility Weights
+      type: String
+      default: "1, 2, 4, 8"
+      description:
+          R: >
+            Comma-separated weights for each risk category (low to high).
+            Higher weights emphasize importance of correctly classifying high-risk individuals.
 
 ...

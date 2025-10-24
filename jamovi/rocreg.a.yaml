@@ -1,0 +1,361 @@
+---
+name: rocreg
+title: ROC Regression (Covariate-Adjusted ROC)
+menuGroup: meddecideT
+menuSubgroup: ROC Analysis
+menuSubtitle: Covariate-adjusted ROC curves for confounder control
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        ROC regression for covariate-adjusted diagnostic accuracy assessment. Traditional
+        ROC analysis assumes diagnostic test performance is constant across all patients,
+        but accuracy often varies by patient characteristics (age, disease stage, scanner
+        type, staining protocol). ROC regression models how sensitivity and specificity
+        change as functions of covariates, providing covariate-specific ROC curves and
+        adjusted summary measures (covariate-adjusted AUC). Essential for comparing
+        diagnostic tests across heterogeneous populations, adjusting for confounders
+        in test comparison studies, and identifying patient subgroups where tests
+        perform differently. Particularly valuable in digital pathology for accounting
+        for batch effects (different scanners, institutions, staining protocols) and
+        in biomarker studies for age/stage-specific performance assessment. Uses
+        binormal, non-parametric, or Bayesian approaches to model covariate effects
+        on ROC curves. Provides both population-averaged and covariate-specific
+        diagnostic accuracy estimates.
+    R:
+        dontrun: false
+        usage: >
+            result <- rocreg(
+                data = multi_center_data,
+                predictor = "biomarker_level",
+                outcome = "disease_status",
+                covariates = c("age", "scanner_type", "center")
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: predictor
+      title: Diagnostic Test Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Continuous diagnostic test variable (biomarker level, imaging score,
+            AI probability). The test whose accuracy varies by covariates.
+
+    - name: outcome
+      title: Binary Outcome (Disease Status)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Binary outcome variable (diseased vs non-diseased, positive vs negative).
+
+    - name: positive_level
+      title: Positive Level (Disease)
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Which level represents the diseased/positive state.
+
+    # Covariate Specification
+    - name: covariates
+      title: Covariates (Confounders)
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables that may affect diagnostic accuracy. Examples: age, sex, disease
+            stage, scanner type, institution, staining batch. Both continuous and
+            categorical covariates supported.
+
+    - name: covariate_effects
+      title: Model Covariate Effects On
+      type: List
+      options:
+        - title: Both Sensitivity and Specificity
+          name: both
+        - title: Sensitivity Only (Diseased Group)
+          name: sensitivity
+        - title: Specificity Only (Non-diseased Group)
+          name: specificity
+      default: both
+      description:
+          R: >
+            Where to model covariate effects. "Both" allows different effects in
+            diseased and non-diseased groups, "sensitivity" models effects only in
+            diseased, "specificity" only in non-diseased.
+
+    # ROC Regression Method
+    - name: method
+      title: ROC Regression Method
+      type: List
+      options:
+        - title: Binormal (Parametric)
+          name: binormal
+        - title: Non-parametric (Kernel)
+          name: nonparametric
+        - title: Semi-parametric
+          name: semiparametric
+        - title: Bayesian
+          name: bayesian
+      default: binormal
+      description:
+          R: >
+            Method for ROC regression. Binormal assumes normal distributions with
+            covariate effects on location/scale, non-parametric uses kernel smoothing,
+            semi-parametric combines both, Bayesian provides posterior distributions.
+
+    # Covariate-Adjusted AUC
+    - name: adjusted_auc
+      title: Covariate-Adjusted AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate population-averaged AUC adjusted for covariates. This is the
+            overall AUC accounting for covariate distribution in the population.
+
+    - name: covariate_specific_auc
+      title: Covariate-Specific AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate AUC at specific covariate values to show how diagnostic accuracy
+            varies across patient characteristics.
+
+    - name: covariate_profiles
+      title: Covariate Profile Specification
+      type: String
+      default: ""
+      description:
+          R: >
+            Specify covariate values for covariate-specific ROC curves. Example for
+            age: "30, 50, 70" to get curves for young/middle/elderly patients.
+            Leave empty for automatic selection (quartiles for continuous, all levels
+            for categorical).
+
+    # Confounder Adjustment
+    - name: compare_unadjusted
+      title: Compare to Unadjusted ROC
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comparison between covariate-adjusted and unadjusted (pooled) ROC
+            analysis. Demonstrates impact of covariate adjustment.
+
+    - name: test_covariate_effects
+      title: Test Significance of Covariate Effects
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform statistical tests to determine if covariates significantly affect
+            diagnostic accuracy. Likelihood ratio tests or Wald tests depending on method.
+
+    # Model Selection
+    - name: variable_selection
+      title: Automatic Variable Selection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use stepwise or information criteria to select which covariates to include
+            in final model. Helpful with many potential confounders.
+
+    - name: selection_criterion
+      title: Selection Criterion
+      type: List
+      options:
+        - title: AIC (Akaike Information Criterion)
+          name: aic
+        - title: BIC (Bayesian Information Criterion)
+          name: bic
+        - title: Stepwise (Forward)
+          name: forward
+        - title: Stepwise (Backward)
+          name: backward
+      default: aic
+      description:
+          R: >
+            Criterion for automatic variable selection.
+
+    # Interaction Effects
+    - name: test_interactions
+      title: Test Covariate Interactions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Test for interactions between covariates (e.g., does age effect differ
+            by sex? does scanner effect vary by institution?).
+
+    # Statistical Inference
+    - name: confidence_intervals
+      title: Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for covariate-adjusted AUC and ROC curves.
+
+    - name: ci_method
+      title: CI Method
+      type: List
+      options:
+        - title: Bootstrap
+          name: bootstrap
+        - title: Asymptotic (Delta Method)
+          name: asymptotic
+      default: bootstrap
+      description:
+          R: >
+            Method for confidence interval estimation. Bootstrap recommended for
+            small samples or non-parametric methods.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 500
+      min: 100
+      max: 5000
+      description:
+          R: >
+            Number of bootstrap samples for CI estimation.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for intervals.
+
+    # Visualization Options
+    - name: plot_covariate_specific_rocs
+      title: Covariate-Specific ROC Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display multiple ROC curves for different covariate profiles on same plot.
+            Shows how ROC curve changes with patient characteristics.
+
+    - name: plot_auc_by_covariate
+      title: AUC vs Covariate Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            For continuous covariates, plot how AUC changes as covariate varies.
+            Shows non-linear relationships between covariates and diagnostic accuracy.
+
+    - name: plot_effect_estimates
+      title: Covariate Effect Estimates
+      type: Bool
+      default: true
+      description:
+          R: >
+            Forest plot showing estimated covariate effects on diagnostic accuracy
+            with confidence intervals.
+
+    - name: plot_residual_diagnostics
+      title: Model Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display residual plots and goodness-of-fit diagnostics for ROC regression model.
+
+    # Clinical Context
+    - name: adjustment_purpose
+      title: Adjustment Purpose
+      type: List
+      options:
+        - title: Confounder Control
+          name: confounder
+        - title: Batch Effect Correction
+          name: batch
+        - title: Subgroup Analysis
+          name: subgroup
+        - title: Multi-Center Harmonization
+          name: multicenter
+      default: confounder
+      description:
+          R: >
+            Purpose of covariate adjustment for interpretation guidance.
+
+    - name: clinical_application
+      title: Clinical Application
+      type: List
+      options:
+        - title: General Diagnostic Test
+          name: general
+        - title: Digital Pathology AI
+          name: digital_path
+        - title: Biomarker Study
+          name: biomarker
+        - title: Imaging Study
+          name: imaging
+        - title: Multi-Center Trial
+          name: multicenter_trial
+      default: general
+      description:
+          R: >
+            Clinical application context for interpretation.
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide interpretation with clinical context and recommendations.
+
+    # Advanced Options
+    - name: standardize_covariates
+      title: Standardize Continuous Covariates
+      type: Bool
+      default: true
+      description:
+          R: >
+            Standardize continuous covariates (mean 0, SD 1) for better numerical
+            stability and interpretability of effect sizes.
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+      default: complete
+      description:
+          R: >
+            Method for handling missing covariate data.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap and stochastic procedures.
+
+...

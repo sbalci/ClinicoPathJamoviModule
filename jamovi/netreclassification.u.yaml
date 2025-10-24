@@ -167,3 +167,24 @@ children:
       - type: TextBox
         name: random_seed
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: category_free_nri
+      - type: CheckBox
+        name: event_specific_nri
+      - type: CheckBox
+        name: clinical_nri_custom
+      - type: CheckBox
+        name: reclassification_visualization
+      - type: CheckBox
+        name: relative_nri
+      - type: CheckBox
+        name: weighted_nri
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: utility_weights
+        format: string

@@ -1,0 +1,518 @@
+---
+name: segmentationmetrics
+title: Segmentation Metrics (Dice, IoU, Hausdorff)
+menuGroup: meddecideT
+menuSubgroup: AI & Machine Learning
+menuSubtitle: Image segmentation validation for digital pathology AI
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Comprehensive validation metrics for image segmentation tasks in digital pathology
+        and AI-based tissue analysis. Evaluates overlap and boundary accuracy between
+        AI-predicted segmentations and expert-annotated ground truth. Essential metrics
+        include Dice Coefficient (F1-score for spatial overlap), Jaccard Index (IoU -
+        Intersection over Union), Hausdorff Distance (maximum boundary deviation), and
+        Surface Distance metrics. Designed for tumor boundary delineation, gland segmentation,
+        cell nuclei detection, tissue region classification, and any pixel-level or
+        region-based segmentation task. Supports binary segmentation (single structure),
+        multi-class segmentation (multiple tissue types), and instance segmentation
+        (individual object detection). Provides statistical analysis across multiple
+        images, stratification by image characteristics (magnification, staining, scanner),
+        and clinical interpretation of segmentation quality. Critical for validating
+        AI algorithms before deployment in diagnostic workflows, comparing segmentation
+        methods, and establishing performance benchmarks for digital pathology systems.
+    R:
+        dontrun: false
+        usage: >
+            result <- segmentationmetrics(
+                data = segmentation_results,
+                prediction_mask = "ai_segmentation",
+                ground_truth_mask = "expert_annotation",
+                image_id = "slide_id",
+                metric_type = "all"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: prediction_mask
+      title: Predicted Segmentation Mask
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            AI-predicted segmentation mask. For binary segmentation, this is a binary
+            variable (0/1 or background/foreground). For multi-class, this contains
+            class labels. Can be pixel-level or region-level data.
+
+    - name: ground_truth_mask
+      title: Ground Truth Segmentation
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Expert-annotated ground truth segmentation mask. Must have the same
+            encoding scheme as prediction_mask.
+
+    - name: image_id
+      title: Image Identifier
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable identifying individual images or regions. Used to aggregate
+            metrics per image and calculate summary statistics across images.
+
+    # Segmentation Type
+    - name: segmentation_type
+      title: Segmentation Type
+      type: List
+      options:
+        - title: Binary (Single Structure)
+          name: binary
+        - title: Multi-class (Multiple Tissue Types)
+          name: multiclass
+        - title: Instance (Individual Objects)
+          name: instance
+      default: binary
+      description:
+          R: >
+            Type of segmentation task. Binary for single structure (e.g., tumor vs background),
+            multi-class for multiple tissue types (e.g., epithelium/stroma/necrosis),
+            instance for individual object detection (e.g., separate cell nuclei).
+
+    - name: positive_class
+      title: Positive Class (Binary Segmentation)
+      type: Level
+      variable: (prediction_mask)
+      description:
+          R: >
+            For binary segmentation, specify which level represents the foreground/
+            structure of interest (e.g., tumor, gland, nucleus).
+
+    # Overlap Metrics
+    - name: dice_coefficient
+      title: Dice Coefficient
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Dice coefficient (also known as F1-score for segmentation).
+            Measures spatial overlap: Dice = 2|A∩B| / (|A|+|B|). Range 0-1, where
+            1 = perfect overlap. Most commonly used segmentation metric.
+
+    - name: jaccard_index
+      title: Jaccard Index (IoU)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Jaccard Index (Intersection over Union). Measures overlap:
+            IoU = |A∩B| / |A∪B|. Range 0-1. Related to Dice: IoU = Dice/(2-Dice).
+            Standard metric in computer vision and AI segmentation.
+
+    - name: volumetric_similarity
+      title: Volumetric Similarity
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Volumetric Similarity coefficient for 3D segmentation or
+            area-based similarity in 2D. Useful for volume/area preservation analysis.
+
+    - name: sensitivity_specificity
+      title: Sensitivity & Specificity (Pixel-wise)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate pixel-wise sensitivity (true positive rate) and specificity
+            (true negative rate). Shows over-segmentation vs under-segmentation.
+
+    # Distance Metrics
+    - name: hausdorff_distance
+      title: Hausdorff Distance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Hausdorff Distance - maximum distance from predicted boundary
+            to ground truth boundary. Sensitive to outliers. Measures worst-case
+            boundary error. Reported in pixels or mm if pixel size provided.
+
+    - name: average_hausdorff
+      title: Average Hausdorff Distance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Average Hausdorff Distance (95th percentile). More robust
+            to outliers than maximum Hausdorff. Better represents typical boundary error.
+
+    - name: surface_distance
+      title: Average Surface Distance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate average distance between predicted and ground truth boundaries.
+            Mean of all point-to-surface distances. Provides average boundary error.
+
+    - name: surface_overlap
+      title: Surface Dice / Boundary F1
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Surface Dice (boundary-focused Dice). Only considers points
+            near boundaries. Emphasizes boundary accuracy over volume accuracy.
+
+    - name: boundary_tolerance
+      title: Boundary Tolerance (pixels)
+      type: Number
+      default: 2.0
+      min: 0.5
+      max: 20.0
+      description:
+          R: >
+            Tolerance distance for surface/boundary metrics in pixels. Points within
+            this distance are considered boundary points. Typical: 1-5 pixels depending
+            on magnification.
+
+    # Pixel Size Calibration
+    - name: pixel_size_provided
+      title: Pixel Size Available
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether pixel/voxel physical dimensions are available for converting
+            pixel-based metrics to physical distances (micrometers, millimeters).
+
+    - name: pixel_size_x
+      title: Pixel Size X (μm)
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 10.0
+      description:
+          R: >
+            Physical size of one pixel in X dimension (micrometers). Used to convert
+            pixel-based distances to micrometers. Typical WSI: 0.25-0.5 μm/pixel.
+
+    - name: pixel_size_y
+      title: Pixel Size Y (μm)
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 10.0
+      description:
+          R: >
+            Physical size of one pixel in Y dimension (micrometers).
+
+    # Multi-class Options
+    - name: class_specific_metrics
+      title: Class-Specific Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            For multi-class segmentation, calculate metrics separately for each class
+            (one-vs-rest approach). Shows performance per tissue type.
+
+    - name: macro_average
+      title: Macro-Average Across Classes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate macro-average (unweighted mean) of metrics across all classes.
+            Treats all classes equally regardless of size.
+
+    - name: weighted_average
+      title: Weighted Average by Class Size
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate weighted average of metrics, weighted by class prevalence/size.
+            Emphasizes performance on larger structures.
+
+    # Instance Segmentation
+    - name: object_detection_metrics
+      title: Object-Level Detection Metrics
+      type: Bool
+      default: false
+      description:
+          R: >
+            For instance segmentation, calculate object-level detection metrics:
+            precision, recall, F1-score based on IoU threshold for matching objects.
+
+    - name: iou_threshold
+      title: IoU Threshold for Object Matching
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 0.95
+      description:
+          R: >
+            Minimum IoU between predicted and ground truth objects to consider them
+            matched. Standard: 0.5 for object detection, 0.7 for strict matching.
+
+    - name: count_metrics
+      title: Object Count Metrics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate object counting accuracy for instance segmentation (e.g., cell
+            count accuracy, absolute/relative counting error).
+
+    # Statistical Analysis
+    - name: confidence_intervals
+      title: Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for metrics across images using bootstrap
+            or normal approximation.
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use bootstrap resampling for confidence intervals instead of normal approximation.
+            More accurate for small sample sizes or skewed distributions.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for interval estimation (default 95%).
+
+    # Quality Thresholds
+    - name: quality_thresholds
+      title: Clinical Quality Thresholds
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply clinical quality thresholds to categorize segmentation performance
+            (excellent/good/acceptable/poor) based on Dice/IoU values.
+
+    - name: dice_threshold_excellent
+      title: Dice Threshold - Excellent
+      type: Number
+      default: 0.90
+      min: 0.50
+      max: 1.00
+      description:
+          R: >
+            Dice coefficient threshold for "excellent" segmentation quality.
+            Typical: ≥0.90 for clinical deployment.
+
+    - name: dice_threshold_good
+      title: Dice Threshold - Good
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 1.00
+      description:
+          R: >
+            Dice coefficient threshold for "good" segmentation quality.
+
+    - name: dice_threshold_acceptable
+      title: Dice Threshold - Acceptable
+      type: Number
+      default: 0.70
+      min: 0.50
+      max: 1.00
+      description:
+          R: >
+            Dice coefficient threshold for minimally "acceptable" segmentation.
+            Below this may require human review.
+
+    # Stratification & Subgroup Analysis
+    - name: stratified_analysis
+      title: Stratified Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform stratified analysis by image characteristics (scanner, magnification,
+            staining protocol, tissue type) to assess consistency.
+
+    - name: stratify_by
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable for stratified analysis (e.g., scanner_type, magnification, stain).
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Detect outlier images with unusually poor segmentation performance.
+            Flags images requiring expert review.
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+        - title: IQR Method (1.5 × IQR)
+          name: iqr
+        - title: Z-Score (|z| > 3)
+          name: zscore
+        - title: Modified Z-Score
+          name: modified_zscore
+      default: iqr
+      description:
+          R: >
+            Method for outlier detection across images.
+
+    # Visualization Options
+    - name: plot_metric_distribution
+      title: Metric Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot distribution of metrics across images (histogram/violin plot).
+            Shows variability in segmentation quality.
+
+    - name: plot_scatter_comparison
+      title: Dice vs IoU Scatter Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Scatter plot showing relationship between Dice and IoU across images.
+
+    - name: plot_boundary_error
+      title: Boundary Error Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot Hausdorff and surface distances to visualize boundary accuracy.
+
+    - name: plot_confusion_matrix
+      title: Confusion Matrix (Multi-class)
+      type: Bool
+      default: false
+      description:
+          R: >
+            For multi-class segmentation, show confusion matrix of pixel classifications.
+
+    - name: plot_performance_by_class
+      title: Performance by Class (Multi-class)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Bar plot showing metrics for each class in multi-class segmentation.
+
+    # Clinical Context
+    - name: application_context
+      title: Application Context
+      type: List
+      options:
+        - title: General Segmentation
+          name: general
+        - title: Tumor Boundary Delineation
+          name: tumor
+        - title: Gland Segmentation
+          name: gland
+        - title: Cell Nuclei Detection
+          name: nuclei
+        - title: Tissue Region Classification
+          name: tissue
+        - title: Stain Separation
+          name: stain
+      default: general
+      description:
+          R: >
+            Clinical/research application context for interpretation guidance.
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide interpretation of results including recommendations for
+            clinical deployment based on performance metrics.
+
+    # Advanced Options
+    - name: paired_analysis
+      title: Paired Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform paired statistical tests comparing segmentation performance
+            between different AI models or methods on the same images.
+
+    - name: comparison_method
+      title: Comparison Method Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable identifying different segmentation methods for comparison.
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Exclude by Image
+          name: exclude_image
+      default: complete
+      description:
+          R: >
+            How to handle images with missing or incomplete segmentations.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap sampling and other stochastic procedures.
+
+...

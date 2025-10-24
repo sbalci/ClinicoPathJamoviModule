@@ -1,0 +1,183 @@
+---
+name: trichotomousroc
+title: Trichotomous (Three-way) ROC Analysis
+jus: '3.0'
+
+stage: 0
+
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - continuous
+      - nominal
+      - ordinal
+    children:
+      - type: TargetLayoutBox
+        label: Predictor (Continuous Score)
+        children:
+          - type: VariablesListBox
+            name: predictor
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Gold Standard Outcome (3 Levels)
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+
+  - type: CollapseBox
+    name: outcomelevels
+    label: Outcome Levels
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: positive_level
+        label: Positive Level
+
+      - type: ComboBox
+        name: indeterminate_level
+        label: Indeterminate Level
+
+      - type: ComboBox
+        name: negative_level
+        label: Negative Level
+
+  - type: CollapseBox
+    name: thresholdOptions
+    label: Threshold Selection
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: threshold_method
+        label: Threshold Method
+
+      - type: TextBox
+        name: lower_threshold
+        label: Lower Threshold (Neg vs Indet)
+        format: number
+        enable: (threshold_method:fixed)
+
+      - type: TextBox
+        name: upper_threshold
+        label: Upper Threshold (Indet vs Pos)
+        format: number
+        enable: (threshold_method:fixed)
+
+  - type: CollapseBox
+    name: clinicalUtility
+    label: Clinical Utility Costs
+    collapsed: true
+    children:
+      - type: TextBox
+        name: cost_fn
+        label: Cost of False Negative
+        format: number
+
+      - type: TextBox
+        name: cost_fp
+        label: Cost of False Positive
+        format: number
+
+      - type: TextBox
+        name: cost_indeterminate
+        label: Cost of Indeterminate
+        format: number
+
+  - type: CollapseBox
+    name: performanceMetrics
+    label: Performance Metrics
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: calculate_vus
+
+      - type: CheckBox
+        name: category_sensitivities
+
+      - type: CheckBox
+        name: pairwise_comparisons
+
+      - type: CheckBox
+        name: confusion_matrix_3x3
+
+  - type: CollapseBox
+    name: statisticalOptions
+    label: Statistical Options
+    collapsed: true
+    children:
+      - type: TextBox
+        name: confidence_level
+        label: Confidence Level
+        format: number
+
+      - type: TextBox
+        name: bootstrap_samples
+        label: Bootstrap Samples
+        format: number
+
+      - type: ComboBox
+        name: bootstrap_method
+        label: Bootstrap Method
+
+  - type: CollapseBox
+    name: clinicalContext
+    label: Clinical Context
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: clinical_context
+        label: Clinical Context
+
+      - type: ComboBox
+        name: indeterminate_action
+        label: Action for Indeterminate
+
+      - type: CheckBox
+        name: show_clinical_interpretation
+
+  - type: CollapseBox
+    name: plotOptions
+    label: Plot Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: plot_3d_surface
+
+      - type: CheckBox
+        name: plot_threshold_analysis
+
+      - type: CheckBox
+        name: plot_category_distributions
+
+      - type: CheckBox
+        name: plot_pairwise_rocs
+
+  - type: CollapseBox
+    name: advancedOptions
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: stratified_analysis
+
+      - type: VariablesListBox
+        name: stratify_by
+        maxItemCount: 1
+        enable: (stratified_analysis)
+
+      - type: ComboBox
+        name: missing_handling
+        label: Missing Data Handling
+
+      - type: TextBox
+        name: random_seed
+        label: Random Seed
+        format: number
+
+...

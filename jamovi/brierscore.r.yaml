@@ -1,0 +1,230 @@
+---
+name: brierscore
+title: Brier Score & Integrated Brier Score
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: brierSummary
+      title: Brier Score Summary
+      type: Table
+      description: Summary of Brier score at specified time point(s)
+      visible: true
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: brier_score
+          title: Brier Score
+          type: number
+          format: zto
+        - name: brier_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: brier_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: scaled_brier
+          title: Scaled Brier
+          type: number
+          visible: (scaled_brier)
+        - name: null_model_brier
+          title: Null Model Brier
+          type: number
+          format: zto
+          visible: (scaled_brier)
+        - name: n_events
+          title: N Events
+          type: integer
+        - name: n_censored
+          title: N Censored
+          type: integer
+
+    - name: integratedBrier
+      title: Integrated Brier Score (IBS)
+      type: Table
+      description: Integrated Brier score over time period
+      visible: (calculate_ibs)
+      rows: 1
+      columns:
+        - name: time_range
+          title: Time Range
+          type: text
+        - name: ibs
+          title: IBS
+          type: number
+          format: zto
+        - name: ibs_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ibs_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: scaled_ibs
+          title: Scaled IBS
+          type: number
+          visible: (scaled_brier)
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: modelComparison
+      title: Model Comparison (Brier Scores)
+      type: Table
+      description: Comparison of Brier scores across multiple models
+      visible: (compare_multiple_models || reference_model)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: brier_score
+          title: Brier Score
+          type: number
+          format: zto
+        - name: brier_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: brier_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: scaled_brier
+          title: Scaled Brier
+          type: number
+          visible: (scaled_brier)
+        - name: ibs
+          title: IBS
+          type: number
+          format: zto
+          visible: (calculate_ibs)
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: pairwiseComparisons
+      title: Pairwise Model Comparisons
+      type: Table
+      description: Statistical tests comparing Brier scores between models
+      visible: (compare_multiple_models)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: brier_diff
+          title: Brier Difference
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    - name: calibrationTable
+      title: Calibration Groups
+      type: Table
+      description: Predicted vs observed survival by risk group
+      visible: (plot_calibration_curve)
+      columns:
+        - name: group
+          title: Risk Group
+          type: integer
+        - name: n
+          title: N
+          type: integer
+        - name: mean_predicted
+          title: Mean Predicted Survival
+          type: number
+          format: zto
+        - name: observed_survival
+          title: Observed Survival (KM)
+          type: number
+          format: zto
+        - name: calibration_error
+          title: Calibration Error
+          type: number
+        - name: hosmer_lemeshow_contrib
+          title: HL Contribution
+          type: number
+
+    - name: stratifiedBrier
+      title: Stratified Brier Scores
+      type: Table
+      description: Brier scores by subgroup
+      visible: (stratified_brier)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: brier_score
+          title: Brier Score
+          type: number
+          format: zto
+        - name: brier_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: brier_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: scaled_brier
+          title: Scaled Brier
+          type: number
+          visible: (scaled_brier)
+
+    - name: brierOverTimePlot
+      title: Brier Score Over Time
+      type: Image
+      description: Time-dependent Brier score across follow-up period
+      width: 600
+      height: 500
+      renderFun: .plotBrierOverTime
+      visible: (plot_brier_over_time)
+
+    - name: calibrationPlot
+      title: Calibration Curve
+      type: Image
+      description: Predicted vs observed survival probabilities
+      width: 600
+      height: 500
+      renderFun: .plotCalibrationCurve
+      visible: (plot_calibration_curve)
+
+    - name: modelComparisonPlot
+      title: Model Comparison
+      type: Image
+      description: Bar plot comparing Brier scores across models
+      width: 600
+      height: 500
+      renderFun: .plotModelComparison
+      visible: (plot_model_comparison && (compare_multiple_models || reference_model))
+
+    - name: integratedBrierPlot
+      title: Integrated Brier Score Visualization
+      type: Image
+      description: Area under Brier score curve
+      width: 600
+      height: 500
+      renderFun: .plotIntegratedBrier
+      visible: (plot_integrated_brier && calculate_ibs)
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+
+...

@@ -178,3 +178,16 @@ children:
       - type: TextBox
         name: random_seed
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: relative_idi
+      - type: CheckBox
+        name: idi_competing_risks
+      - type: CheckBox
+        name: visual_discrimination_slopes
+      - type: CheckBox
+        name: idi_trajectory
+      - type: CheckBox
+        name: prediction_error_curves

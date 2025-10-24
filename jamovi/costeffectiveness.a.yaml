@@ -1,0 +1,546 @@
+---
+name: costeffectiveness
+title: Cost-Effectiveness Analysis
+menuGroup: meddecideT
+menuSubgroup: Economic Evaluation
+menuSubtitle: ICER and cost-utility analysis for diagnostic tests
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Cost-Effectiveness Analysis (CEA) for evaluating the economic value of diagnostic
+        tests, screening programs, and clinical decision strategies. Calculates Incremental
+        Cost-Effectiveness Ratio (ICER), which represents the additional cost per additional
+        unit of effectiveness (e.g., cost per correct diagnosis, cost per QALY gained).
+        The analysis compares new diagnostic strategies against standard of care or alternative
+        approaches, visualizing results on the cost-effectiveness plane and calculating net
+        monetary benefit at various willingness-to-pay thresholds. Essential for health
+        technology assessment, budget impact analysis, and justifying adoption of new
+        diagnostic technologies such as multiplex IHC, AI-assisted pathology, digital
+        pathology platforms, and molecular tests. Supports deterministic sensitivity analysis
+        (tornado plots) to identify key cost drivers and probabilistic sensitivity analysis
+        (Monte Carlo simulation) to quantify uncertainty in cost-effectiveness conclusions.
+        Particularly valuable for demonstrating value proposition of advanced diagnostics
+        to hospital administrators, payers, and policy makers.
+    R:
+        dontrun: false
+        usage: >
+            result <- costeffectiveness(
+                data = diagnostic_study,
+                strategy = "test_strategy",
+                cost = "total_cost",
+                effectiveness = "correct_diagnoses",
+                comparator = "standard_care"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    # Strategy and Comparator
+    - name: strategy
+      title: Strategy Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable indicating which diagnostic strategy was used for each observation.
+            Should have at least 2 levels (e.g., "New Test" vs. "Standard Care").
+
+    - name: comparator_level
+      title: Comparator Strategy
+      type: Level
+      variable: (strategy)
+      description:
+          R: >
+            Which level of strategy variable represents the comparator (baseline/reference)
+            strategy against which others are compared.
+
+    # Cost and Effectiveness Variables
+    - name: cost
+      title: Cost Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Total cost per patient for the diagnostic strategy. Should include all relevant
+            costs: test costs, follow-up procedures, treatment costs, adverse events.
+            Express in consistent currency units (e.g., USD, EUR).
+
+    - name: effectiveness
+      title: Effectiveness Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Effectiveness measure per patient. Can be correct diagnoses (0/1), QALYs,
+            life-years gained, cancers detected, etc. Higher values should represent
+            better outcomes.
+
+    - name: effectiveness_type
+      title: Effectiveness Measure Type
+      type: List
+      options:
+        - title: Correct Diagnoses (Binary Outcome)
+          name: binary
+        - title: QALYs (Quality-Adjusted Life Years)
+          name: qaly
+        - title: Life Years Gained
+          name: life_years
+        - title: Events Detected/Prevented
+          name: events
+        - title: Custom Continuous Measure
+          name: custom
+      default: binary
+      description:
+          R: >
+            Type of effectiveness measure being analyzed. Affects interpretation
+            and labeling of ICER results.
+
+    - name: effectiveness_label
+      title: Effectiveness Measure Label
+      type: String
+      default: "Correct Diagnoses"
+      description:
+          R: >
+            Custom label for effectiveness measure (e.g., "Cancers Detected",
+            "True Positives", "QALYs").
+
+    # Analysis Options
+    - name: calculate_icer
+      title: Calculate ICER
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Incremental Cost-Effectiveness Ratio. ICER = (Cost_new - Cost_comparator) /
+            (Effect_new - Effect_comparator). Represents additional cost per additional
+            unit of effectiveness.
+
+    - name: calculate_incremental
+      title: Show Incremental Costs and Effects
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display incremental costs and effects relative to comparator strategy.
+
+    - name: dominance_analysis
+      title: Dominance Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Identify dominated strategies (more costly and less effective) and
+            extended dominance (strategies on inefficient frontier).
+
+    # Willingness-to-Pay Analysis
+    - name: net_monetary_benefit
+      title: Calculate Net Monetary Benefit
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Net Monetary Benefit (NMB) at specified willingness-to-pay
+            thresholds. NMB = (Effectiveness × WTP) - Cost. Positive NMB indicates
+            cost-effective at that threshold.
+
+    - name: wtp_threshold
+      title: Willingness-to-Pay Threshold
+      type: Number
+      default: 50000
+      min: 0
+      description:
+          R: >
+            Willingness-to-pay threshold for primary analysis (e.g., $50,000 per QALY
+            in US, £20,000-30,000 per QALY in UK). Used for net benefit calculation.
+
+    - name: multiple_wtp_thresholds
+      title: Multiple WTP Thresholds
+      type: Bool
+      default: true
+      description:
+          R: >
+            Evaluate cost-effectiveness at multiple willingness-to-pay thresholds
+            to show robustness of conclusions.
+
+    - name: wtp_range
+      title: WTP Threshold Range
+      type: String
+      default: "0, 25000, 50000, 100000, 150000"
+      description:
+          R: >
+            Comma-separated list of willingness-to-pay thresholds for analysis.
+            Example: "0, 20000, 30000, 50000, 100000".
+
+    # Confidence Intervals
+    - name: confidence_intervals
+      title: Confidence Intervals for Costs and Effects
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for mean costs, mean effects, and ICER
+            using bootstrap or parametric methods.
+
+    - name: ci_method
+      title: Confidence Interval Method
+      type: List
+      options:
+        - title: Bootstrap (Percentile)
+          name: bootstrap
+        - title: Bootstrap (BCa)
+          name: bca
+        - title: Parametric (Normal Approximation)
+          name: parametric
+      default: bootstrap
+      description:
+          R: >
+            Method for confidence interval estimation. Bootstrap is recommended
+            for cost data (often skewed). BCa (Bias-Corrected Accelerated) provides
+            better coverage for skewed distributions.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap resamples for confidence interval estimation.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for interval estimation.
+
+    # Sensitivity Analysis
+    - name: deterministic_sensitivity
+      title: Deterministic Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            One-way sensitivity analysis varying individual parameters to assess
+            impact on ICER. Creates tornado diagram showing most influential parameters.
+
+    - name: sensitivity_parameters
+      title: Parameters for Sensitivity Analysis
+      type: String
+      default: "test_cost, follow_up_cost, test_sensitivity, test_specificity"
+      description:
+          R: >
+            Comma-separated list of parameter names for deterministic sensitivity
+            analysis. These should be column names in the data.
+
+    - name: sensitivity_range_pct
+      title: Sensitivity Analysis Range (%)
+      type: Number
+      default: 20
+      min: 5
+      max: 50
+      description:
+          R: >
+            Percentage variation around base case for sensitivity analysis.
+            For example, 20% means vary parameters from 80% to 120% of base value.
+
+    - name: probabilistic_sensitivity
+      title: Probabilistic Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Monte Carlo simulation to propagate uncertainty in all parameters
+            simultaneously. Generates cost-effectiveness acceptability curve (CEAC)
+            showing probability of cost-effectiveness at different WTP thresholds.
+
+    - name: psa_simulations
+      title: PSA Simulation Runs
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of Monte Carlo simulations for probabilistic sensitivity analysis.
+
+    - name: cost_distribution
+      title: Cost Distribution for PSA
+      type: List
+      options:
+        - title: Gamma (for costs)
+          name: gamma
+        - title: Log-Normal
+          name: lognormal
+        - title: Normal
+          name: normal
+      default: gamma
+      description:
+          R: >
+            Probability distribution for cost parameter uncertainty. Gamma is
+            recommended for costs (non-negative, often right-skewed).
+
+    - name: effect_distribution
+      title: Effectiveness Distribution for PSA
+      type: List
+      options:
+        - title: Beta (for proportions 0-1)
+          name: beta
+        - title: Normal
+          name: normal
+        - title: Binomial
+          name: binomial
+      default: normal
+      description:
+          R: >
+            Probability distribution for effectiveness parameter uncertainty.
+            Beta is recommended for proportions, normal for continuous measures.
+
+    # Value of Information Analysis
+    - name: voi_analysis
+      title: Value of Information Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Expected Value of Perfect Information (EVPI) to quantify the expected
+            cost of uncertainty in the decision. EVPI represents the maximum value of
+            conducting further research to eliminate all parameter uncertainty.
+
+    - name: evpi_population
+      title: Population Size for EVPI
+      type: Integer
+      default: 10000
+      min: 1
+      max: 100000000
+      description:
+          R: >
+            Population size affected by the decision over the relevant time horizon.
+            EVPI is calculated per-person and then multiplied by population to give
+            total value of eliminating uncertainty.
+
+    - name: evppi_parameters
+      title: Calculate EVPPI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Expected Value of Perfect Parameter Information (EVPPI) for specific
+            parameters. Shows which parameters contribute most to decision uncertainty.
+
+    - name: evppi_focus
+      title: EVPPI Focus
+      type: List
+      options:
+        - title: Cost Parameters Only
+          name: costs
+        - title: Effect Parameters Only
+          name: effects
+        - title: Both Cost and Effect
+          name: both
+      default: both
+      description:
+          R: >
+            Which parameters to include in EVPPI calculation. Useful for identifying
+            whether cost or effectiveness uncertainty drives decision uncertainty.
+
+    # Subgroup Analysis
+    - name: subgroup_analysis
+      title: Subgroup Cost-Effectiveness
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform cost-effectiveness analysis stratified by subgroups to identify
+            populations where new strategy is most cost-effective.
+
+    - name: subgroup_variable
+      title: Subgroup Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable defining subgroups for stratified analysis (e.g., disease stage,
+            age group, risk category).
+
+    # Time Horizon and Discounting
+    - name: time_horizon
+      title: Time Horizon (years)
+      type: Number
+      default: 1
+      min: 0
+      description:
+          R: >
+            Time horizon for cost-effectiveness analysis in years. Short-term for
+            diagnostic tests (1 year), longer for treatments affecting survival.
+
+    - name: discount_costs
+      title: Discount Future Costs
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply discounting to future costs (relevant for multi-year time horizons).
+
+    - name: discount_rate_costs
+      title: Discount Rate for Costs (%)
+      type: Number
+      default: 3
+      min: 0
+      max: 10
+      description:
+          R: >
+            Annual discount rate for future costs (typically 3-5% in health economics).
+
+    - name: discount_effects
+      title: Discount Future Effects
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply discounting to future health effects (QALYs, life-years).
+
+    - name: discount_rate_effects
+      title: Discount Rate for Effects (%)
+      type: Number
+      default: 3
+      min: 0
+      max: 10
+      description:
+          R: >
+            Annual discount rate for future effects (often same as cost discount rate).
+
+    # Visualization Options
+    - name: plot_ce_plane
+      title: Cost-Effectiveness Plane
+      type: Bool
+      default: true
+      description:
+          R: >
+            Scatter plot showing incremental costs (y-axis) vs. incremental effects
+            (x-axis). Quadrants indicate dominance relationships. Willingness-to-pay
+            threshold shown as diagonal line.
+
+    - name: plot_ce_acceptability
+      title: Cost-Effectiveness Acceptability Curve
+      type: Bool
+      default: false
+      description:
+          R: >
+            CEAC showing probability that each strategy is cost-effective across
+            range of willingness-to-pay thresholds. Requires probabilistic sensitivity
+            analysis.
+
+    - name: plot_nmb
+      title: Net Monetary Benefit Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Bar plot showing net monetary benefit for each strategy at specified
+            WTP threshold. Strategy with highest NMB is optimal.
+
+    - name: plot_tornado
+      title: Tornado Diagram
+      type: Bool
+      default: false
+      description:
+          R: >
+            Tornado diagram showing one-way sensitivity analysis results. Parameters
+            ordered by impact on ICER, showing range of ICER values across parameter
+            uncertainty ranges.
+
+    - name: plot_incremental_frontier
+      title: Incremental Cost-Effectiveness Frontier
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot showing efficient frontier connecting non-dominated strategies.
+
+    # Advanced Options
+    - name: perspective
+      title: Economic Perspective
+      type: List
+      options:
+        - title: Healthcare System
+          name: healthcare
+        - title: Hospital/Provider
+          name: provider
+        - title: Payer/Insurance
+          name: payer
+        - title: Societal
+          name: societal
+      default: healthcare
+      description:
+          R: >
+            Perspective for cost-effectiveness analysis determines which costs
+            are included. Healthcare system includes direct medical costs,
+            societal includes productivity losses and patient time costs.
+
+    - name: include_indirect_costs
+      title: Include Indirect Costs
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include indirect costs (productivity losses, patient time) for
+            societal perspective.
+
+    - name: currency
+      title: Currency
+      type: String
+      default: "USD"
+      description:
+          R: >
+            Currency for cost reporting (e.g., USD, EUR, GBP, JPY).
+
+    - name: cost_year
+      title: Cost Year
+      type: Integer
+      default: 2024
+      min: 2000
+      max: 2030
+      description:
+          R: >
+            Reference year for cost values (for inflation adjustment if needed).
+
+    - name: handling_missing
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Mean Imputation
+          name: mean
+        - title: Multiple Imputation
+          name: mi
+      default: complete
+      description:
+          R: >
+            Method for handling missing cost or effectiveness data.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 12345
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap and Monte Carlo simulations.
+
+...

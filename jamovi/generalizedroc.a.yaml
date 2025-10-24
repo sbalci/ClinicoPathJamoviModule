@@ -1,0 +1,226 @@
+---
+name: generalizedroc
+title: Generalized ROC Analysis
+menuGroup: meddecideT
+menuSubgroup: Medical Decision Analysis
+menuTitle: Generalized ROC Analysis
+menuSubtitle: ROC for continuous outcomes with unequal variance
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Generalized ROC (gROC) Analysis extends traditional binary ROC to handle
+        continuous or ordinal outcomes, particularly when the outcome distributions
+        have unequal variances across groups.
+
+        This method is particularly useful for continuous biomarkers (PD-L1 CPS,
+        Ki67 percentage), quantitative imaging features, and ordinal scales where
+        traditional ROC assumptions may be violated.
+
+        The generalized approach models the full distribution rather than imposing
+        binary cutoffs, providing more flexible and robust performance assessment.
+
+    R:
+        dontrun: false
+        usage: |
+            # Example with continuous Ki67 percentage
+            data <- data.frame(
+              outcome = factor(sample(c("Low", "High"), 100, replace=TRUE)),
+              ki67_percent = c(rnorm(50, 10, 5), rnorm(50, 40, 15))
+            )
+
+            generalizedroc(
+              data = data,
+              outcome = 'outcome',
+              predictor = 'ki67_percent',
+              assume_equal_variance = FALSE,
+              transformation = 'none'
+            )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            a string naming the outcome variable (binary or ordinal)
+
+    - name: predictor
+      title: Predictor Variable (Continuous)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            a string naming the continuous predictor variable
+
+    - name: assume_equal_variance
+      title: Assume Equal Variance
+      type: Bool
+      default: false
+      description:
+          R: >
+            if TRUE, assumes equal variance across groups (standard ROC);
+            if FALSE, allows unequal variances (generalized ROC)
+
+    - name: transformation
+      title: Data Transformation
+      type: List
+      options:
+        - name: none
+          title: None
+        - name: log
+          title: Log transformation
+        - name: sqrt
+          title: Square root
+        - name: boxcox
+          title: Box-Cox
+      default: none
+      description:
+          R: >
+            transformation applied to predictor before analysis
+
+    - name: distribution_model
+      title: Distribution Model
+      type: List
+      options:
+        - name: normal
+          title: Normal (Gaussian)
+        - name: empirical
+          title: Empirical (non-parametric)
+        - name: kernel
+          title: Kernel density
+      default: normal
+      description:
+          R: >
+            assumed distribution for each group
+
+    - name: calculate_auc
+      title: Calculate AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate area under the generalized ROC curve
+
+    - name: confidence_intervals
+      title: Calculate Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate confidence intervals for AUC and other parameters
+
+    - name: ci_method
+      title: CI Method
+      type: List
+      options:
+        - name: bootstrap
+          title: Bootstrap
+        - name: asymptotic
+          title: Asymptotic (normal approximation)
+      default: bootstrap
+      description:
+          R: >
+            method for confidence interval calculation
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: >
+            number of bootstrap samples for CI calculation
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            confidence level for intervals (default: 0.95 for 95% CI)
+
+    - name: show_diagnostics
+      title: Show Distribution Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            show diagnostic tests for normality and variance equality
+
+    - name: variance_test
+      title: Variance Equality Test
+      type: List
+      options:
+        - name: levene
+          title: Levene's Test
+        - name: fligner
+          title: Fligner-Killeen Test
+        - name: bartlett
+          title: Bartlett's Test
+      default: levene
+      description:
+          R: >
+            test for equality of variances across groups
+
+    - name: optimal_threshold
+      title: Calculate Optimal Threshold
+      type: Bool
+      default: true
+      description:
+          R: >
+            find optimal threshold using Youden's index
+
+    - name: plot_roc
+      title: Plot ROC Curve
+      type: Bool
+      default: true
+      description:
+          R: >
+            plot the generalized ROC curve
+
+    - name: plot_distributions
+      title: Plot Group Distributions
+      type: Bool
+      default: true
+      description:
+          R: >
+            plot predictor distributions for each outcome group
+
+    - name: plot_diagnostic
+      title: Plot Q-Q Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            plot Q-Q plots for normality assessment
+
+    - name: random_seed
+      title: Random Seed
+      type: Number
+      min: 1
+      max: 999999
+      default: 42
+      description:
+          R: >
+            random seed for reproducible bootstrap sampling
+...

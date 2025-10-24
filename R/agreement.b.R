@@ -357,6 +357,90 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             return(html_output)
         },
 
+        .populateBlandAltmanPlot = function(image, ...) {
+            # Generate Bland-Altman plot
+            data <- self$data
+            vars <- self$options$vars
+
+            if (length(vars) < 2) return()
+
+            # For now, plot the first pair
+            method1_name <- vars[1]
+            method2_name <- vars[2]
+
+            x <- as.numeric(data[[method1_name]])
+            y <- as.numeric(data[[method2_name]])
+
+            # Remove missing values
+            complete_cases <- complete.cases(x, y)
+            x <- x[complete_cases]
+            y <- y[complete_cases]
+
+            if (length(x) < 3) return()
+
+            # Calculate statistics
+            differences <- x - y
+            averages <- (x + y) / 2
+            mean_diff <- mean(differences)
+            sd_diff <- sd(differences)
+
+            conf_level <- self$options$baConfidenceLevel
+            z_value <- qnorm(1 - (1 - conf_level) / 2)
+
+            loa_lower <- mean_diff - z_value * sd_diff
+            loa_upper <- mean_diff + z_value * sd_diff
+
+            # Create plot data
+            plot_data <- data.frame(
+                average = averages,
+                difference = differences
+            )
+
+            # Create ggplot
+            if (requireNamespace("ggplot2", quietly = TRUE)) {
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = average, y = difference)) +
+                    ggplot2::geom_point(alpha = 0.6, size = 2) +
+                    ggplot2::geom_hline(yintercept = mean_diff, color = "blue", linetype = "solid", linewidth = 1) +
+                    ggplot2::geom_hline(yintercept = loa_lower, color = "red", linetype = "dashed", linewidth = 0.8) +
+                    ggplot2::geom_hline(yintercept = loa_upper, color = "red", linetype = "dashed", linewidth = 0.8) +
+                    ggplot2::geom_hline(yintercept = 0, color = "gray50", linetype = "dotted", linewidth = 0.5) +
+                    ggplot2::labs(
+                        title = paste("Bland-Altman Plot:", method1_name, "vs", method2_name),
+                        x = paste("Average of", method1_name, "and", method2_name),
+                        y = paste("Difference (", method1_name, "-", method2_name, ")", sep = "")
+                    ) +
+                    ggplot2::annotate("text", x = max(averages) * 0.95, y = mean_diff,
+                                     label = sprintf("Mean = %.2f", mean_diff),
+                                     hjust = 1, vjust = -0.5, color = "blue") +
+                    ggplot2::annotate("text", x = max(averages) * 0.95, y = loa_upper,
+                                     label = sprintf("+%.1f SD = %.2f", z_value, loa_upper),
+                                     hjust = 1, vjust = -0.5, color = "red") +
+                    ggplot2::annotate("text", x = max(averages) * 0.95, y = loa_lower,
+                                     label = sprintf("-%.1f SD = %.2f", z_value, loa_lower),
+                                     hjust = 1, vjust = 1.5, color = "red") +
+                    ggplot2::theme_classic() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                        axis.title = ggplot2::element_text(size = 11),
+                        axis.text = ggplot2::element_text(size = 10)
+                    )
+
+                # Add proportional bias line if requested
+                if (self$options$proportionalBias) {
+                    prop_bias_model <- lm(differences ~ averages)
+                    slope_p <- summary(prop_bias_model)$coefficients[2, 4]
+
+                    if (slope_p < 0.05) {
+                        p <- p + ggplot2::geom_smooth(method = "lm", se = FALSE,
+                                                      color = "purple", linetype = "dotted", linewidth = 0.8)
+                    }
+                }
+
+                print(p)
+                TRUE
+            }
+        },
+
         .run = function() {
 
         # Validate input ----
@@ -647,6 +731,238 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         }
 
 
+        # Consensus Score Derivation (if requested) ----
+        if (self$options$consensusVar) {
+            tryCatch({
+                ratings <- self$data[, self$options$vars, drop = FALSE]
+                n_raters <- length(self$options$vars)
+
+                # Calculate modal category for each row
+                consensus <- apply(ratings, 1, function(row) {
+                    row <- row[!is.na(row)]  # Remove NA
+                    if (length(row) == 0) return(NA)
+
+                    # Get frequency table
+                    freq_table <- table(row)
+                    max_freq <- max(freq_table)
+                    modes <- names(freq_table)[freq_table == max_freq]
+
+                    # Apply consensus rule
+                    rule <- self$options$consensusRule
+                    threshold <- switch(rule,
+                                      "majority" = 0.50,
+                                      "supermajority" = 0.75,
+                                      "unanimous" = 1.00,
+                                      0.50)  # default
+
+                    if (max_freq / length(row) < threshold) {
+                        return(NA)  # Threshold not met
+                    }
+
+                    # Handle ties
+                    if (length(modes) > 1) {
+                        tieBreaker <- self$options$tieBreaker
+                        if (tieBreaker == "exclude") return(NA)
+                        if (tieBreaker == "first") return(modes[1])
+                        if (tieBreaker == "lowest") {
+                            numeric_modes <- as.numeric(modes)
+                            if (all(!is.na(numeric_modes))) {
+                                return(as.character(min(numeric_modes)))
+                            } else {
+                                return(modes[1])
+                            }
+                        }
+                        if (tieBreaker == "highest") {
+                            numeric_modes <- as.numeric(modes)
+                            if (all(!is.na(numeric_modes))) {
+                                return(as.character(max(numeric_modes)))
+                            } else {
+                                return(modes[length(modes)])
+                            }
+                        }
+                    }
+
+                    return(modes[1])
+                })
+
+                # Add consensus variable to dataset (as computed column)
+                consensus_name <- self$options$consensusName
+
+                # Convert to factor with same levels as original raters
+                if (length(self$options$vars) > 0 && is.factor(self$data[[self$options$vars[1]]])) {
+                    consensus <- factor(consensus, levels = levels(self$data[[self$options$vars[1]]]))
+                }
+
+                # Create computed column
+                self$results$consensusTable$setRow(rowNo = 1, values = list(
+                    consensus_var = consensus_name,
+                    n_consensus = sum(!is.na(consensus)),
+                    n_ties = sum(is.na(consensus) & rowSums(!is.na(ratings)) > 0),
+                    pct_consensus = round(100 * sum(!is.na(consensus)) / nrow(ratings), 1)
+                ))
+
+                # Store consensus in data for potential downstream use
+                # Note: In jamovi, we would use jmvcore::addColumnComputed()
+                # For now, just report the results
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                self$results$consensusTable$setRow(rowNo = 1, values = list(
+                    consensus_var = self$options$consensusName,
+                    n_consensus = 0,
+                    n_ties = 0,
+                    pct_consensus = 0
+                ))
+                warning(paste("Error creating consensus variable:", e$message))
+            })
+        }
+
+        # Pairwise Kappa (each rater vs reference) ----
+        if (!is.null(self$options$referenceRater)) {
+            tryCatch({
+                reference_var <- self$options$referenceRater
+                reference_data <- self$data[[reference_var]]
+
+                rater_results <- list()
+
+                for (rater_var in self$options$vars) {
+                    if (rater_var == reference_var) next  # Skip self-comparison
+
+                    private$.checkpoint()  # Allow UI responsiveness
+
+                    rater_data <- self$data[[rater_var]]
+
+                    # Create pairwise data frame
+                    pair_data <- data.frame(reference_data, rater_data)
+                    pair_data <- pair_data[complete.cases(pair_data), ]
+
+                    n_cases <- nrow(pair_data)
+
+                    if (n_cases < 3) {
+                        kappa_val <- NA
+                        ci_lower <- NA
+                        ci_upper <- NA
+                    } else {
+                        # Calculate Cohen's kappa with specified weights
+                        kappa_result <- irr::kappa2(pair_data, weight = self$options$wght)
+                        kappa_val <- kappa_result$value
+
+                        # Compute CI from z-statistic
+                        z_stat <- kappa_result$statistic
+                        if (!is.null(z_stat) && !is.na(z_stat) && z_stat != 0) {
+                            se_kappa <- abs(kappa_val / z_stat)
+                            ci_lower <- kappa_val - 1.96 * se_kappa
+                            ci_upper <- kappa_val + 1.96 * se_kappa
+                        } else {
+                            ci_lower <- NA
+                            ci_upper <- NA
+                        }
+                    }
+
+                    rater_results[[rater_var]] <- list(
+                        rater = rater_var,
+                        n_cases = n_cases,
+                        kappa = kappa_val,
+                        ci_lower = ci_lower,
+                        ci_upper = ci_upper,
+                        interpretation = private$.interpretKappa(kappa_val)
+                    )
+                }
+
+                # Sort by kappa if requested
+                if (self$options$rankRaters && length(rater_results) > 0) {
+                    kappa_values <- sapply(rater_results, function(x) {
+                        if (is.na(x$kappa)) return(-Inf) else return(x$kappa)
+                    })
+                    rater_results <- rater_results[order(kappa_values, decreasing = TRUE)]
+                }
+
+                # Populate table
+                pairwiseTable <- self$results$pairwiseKappaTable
+                for (i in seq_along(rater_results)) {
+                    res <- rater_results[[i]]
+                    pairwiseTable$setRow(rowNo = i, values = list(
+                        rank = if (self$options$rankRaters) i else NA,
+                        rater = res$rater,
+                        n_cases = res$n_cases,
+                        kappa = res$kappa,
+                        ci_lower = res$ci_lower,
+                        ci_upper = res$ci_upper,
+                        interpretation = res$interpretation
+                    ))
+                }
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                warning(paste("Error in pairwise kappa analysis:", e$message))
+            })
+        }
+
+        # Level of Agreement (LoA) Categorization ----
+        if (self$options$loaVariable) {
+            tryCatch({
+                ratings <- self$data[, self$options$vars, drop = FALSE]
+                n_raters <- length(self$options$vars)
+
+                # Calculate agreement count for each row
+                agreement_counts <- apply(ratings, 1, function(row) {
+                    row <- row[!is.na(row)]
+                    if (length(row) == 0) return(0)
+
+                    # Get modal category count
+                    freq_table <- table(row)
+                    max_count <- max(freq_table)
+                    return(max_count)
+                })
+
+                # Calculate percent agreement
+                pct_agreement <- (agreement_counts / n_raters) * 100
+
+                # Categorize based on thresholds
+                if (self$options$loaThresholds == "custom") {
+                    high_thresh <- self$options$loaHighThreshold
+                    low_thresh <- self$options$loaLowThreshold
+
+                    loa_category <- ifelse(agreement_counts == n_raters, "Absolute",
+                                    ifelse(pct_agreement >= high_thresh, "High",
+                                    ifelse(pct_agreement >= low_thresh, "Low", "Poor")))
+                } else if (self$options$loaThresholds == "quartiles") {
+                    quartiles <- quantile(pct_agreement, probs = c(0.25, 0.50, 0.75), na.rm = TRUE)
+                    loa_category <- ifelse(agreement_counts == n_raters, "Absolute",
+                                    ifelse(pct_agreement >= quartiles[3], "High",
+                                    ifelse(pct_agreement >= quartiles[2], "Moderate",
+                                    ifelse(pct_agreement >= quartiles[1], "Low", "Poor"))))
+                } else if (self$options$loaThresholds == "tertiles") {
+                    tertiles <- quantile(pct_agreement, probs = c(0.33, 0.67), na.rm = TRUE)
+                    loa_category <- ifelse(agreement_counts == n_raters, "Absolute",
+                                    ifelse(pct_agreement >= tertiles[2], "High",
+                                    ifelse(pct_agreement >= tertiles[1], "Moderate", "Low")))
+                } else {
+                    # Default to custom
+                    loa_category <- ifelse(agreement_counts == n_raters, "Absolute", "Moderate")
+                }
+
+                # Populate summary table
+                loa_table <- table(loa_category)
+                loaTable <- self$results$loaTable
+
+                for (i in seq_along(loa_table)) {
+                    loaTable$setRow(rowNo = i, values = list(
+                        category = names(loa_table)[i],
+                        n = as.numeric(loa_table[i]),
+                        percent = round(100 * loa_table[i] / sum(loa_table), 1)
+                    ))
+                }
+
+                # Note: In full jamovi implementation, would add computed column here
+                # using jmvcore::addColumnComputed() to add loa_category to dataset
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                warning(paste("Error in LoA categorization:", e$message))
+            })
+        }
+
 
         # Krippendorff's Alpha (if requested) ----
         if (self$options$kripp) {
@@ -737,11 +1053,1104 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             })
         }
 
+        # Gwet's AC1/AC2 (if requested) ----
+        if (self$options$gwet) {
+            tryCatch({
+                # Use the same ratings matrix as Krippendorff
+                gwet_matrix <- as.matrix(ratings)
 
+                # Ensure numeric conversion if needed
+                if (!is.numeric(gwet_matrix)) {
+                    # If categorical/factor data, convert to numeric codes
+                    gwet_matrix <- matrix(
+                        as.numeric(factor(gwet_matrix)),
+                        nrow = nrow(gwet_matrix),
+                        ncol = ncol(gwet_matrix)
+                    )
+                }
 
+                # Remove rows with all NA
+                complete_rows <- apply(gwet_matrix, 1, function(x) !all(is.na(x)))
+                gwet_matrix <- gwet_matrix[complete_rows, , drop = FALSE]
 
+                n_raters <- ncol(gwet_matrix)
 
+                # Determine weights
+                weights <- switch(self$options$gwetWeights,
+                    "unweighted" = "unweighted",
+                    "linear" = "linear",
+                    "quadratic" = "quadratic"
+                )
 
+                # Calculate Gwet's AC using irrCAC package
+                if (requireNamespace("irrCAC", quietly = TRUE)) {
+                    gwet_result <- irrCAC::gwet.ac1.raw(gwet_matrix, weights = weights)
 
+                    # Prepare method name
+                    method_name <- if (weights == "unweighted") {
+                        "Gwet's AC1 (unweighted)"
+                    } else {
+                        paste0("Gwet's AC2 (", weights, " weights)")
+                    }
 
-    }))
+                    # Extract results - gwet.ac1.raw returns a data frame
+                    # The structure is: gwet_result$est with columns coefficient.value, std.error, etc.
+                    est_df <- gwet_result$est
+
+                    values_list <- list(
+                        method = method_name,
+                        subjects = sum(complete_rows),
+                        raters = n_raters,
+                        coefficient = as.numeric(est_df$coefficient.value[1]),
+                        se = as.numeric(est_df$std.error[1]),
+                        ci_lower = as.numeric(est_df$conf.interval[1]),
+                        ci_upper = as.numeric(est_df$conf.interval[2]),
+                        pvalue = as.numeric(est_df$p.value[1])
+                    )
+
+                    # Set results in table
+                    gwetTable <- self$results$gwetTable
+                    gwetTable$setRow(rowNo = 1, values = values_list)
+
+                } else {
+                    # Package not available
+                    errorMessage <- "Package 'irrCAC' is required for Gwet's AC calculation. Please install it using: install.packages('irrCAC')"
+
+                    values_list <- list(
+                        method = "Gwet's AC (Error)",
+                        subjects = sum(complete_rows),
+                        raters = n_raters,
+                        coefficient = NaN,
+                        se = NaN,
+                        ci_lower = NaN,
+                        ci_upper = NaN,
+                        pvalue = NaN
+                    )
+
+                    gwetTable <- self$results$gwetTable
+                    gwetTable$setRow(rowNo = 1, values = values_list)
+                    gwetTable$addFootnote(rowNo = 1, col = "coefficient", errorMessage)
+                }
+
+            }, error = function(e) {
+                # Handle errors
+                errorMessage <- paste("Error calculating Gwet's AC:", e$message)
+
+                values_list <- list(
+                    method = paste0("Gwet's AC (", self$options$gwetWeights, ")"),
+                    subjects = 0,
+                    raters = length(self$options$vars),
+                    coefficient = NaN,
+                    se = NaN,
+                    ci_lower = NaN,
+                    ci_upper = NaN,
+                    pvalue = NaN
+                )
+
+                gwetTable <- self$results$gwetTable
+                gwetTable$setRow(rowNo = 1, values = values_list)
+                gwetTable$addFootnote(rowNo = 1, col = "coefficient", paste0("Error calculating Gwet's AC: ", e$message))
+            })
+        }
+
+        # Bland-Altman Analysis for continuous data ----
+        if (self$options$blandAltman) {
+            tryCatch({
+                data <- self$data
+                vars <- self$options$vars
+
+                if (length(vars) < 2) {
+                    stop("Bland-Altman analysis requires at least 2 continuous variables")
+                }
+
+                baTable <- self$results$blandAltmanTable
+                propBiasTable <- self$results$proportionalBiasTable
+
+                # Calculate pairwise Bland-Altman for all combinations
+                for (i in 1:(length(vars) - 1)) {
+                    for (j in (i + 1):length(vars)) {
+                        private$.checkpoint()  # Allow UI to remain responsive
+
+                        method1_name <- vars[i]
+                        method2_name <- vars[j]
+
+                        # Get data vectors
+                        x <- as.numeric(data[[method1_name]])
+                        y <- as.numeric(data[[method2_name]])
+
+                        # Remove missing values
+                        complete_cases <- complete.cases(x, y)
+                        x <- x[complete_cases]
+                        y <- y[complete_cases]
+                        n <- length(x)
+
+                        if (n < 3) {
+                            stop("Insufficient data for Bland-Altman analysis")
+                        }
+
+                        # Calculate Bland-Altman statistics
+                        differences <- x - y
+                        averages <- (x + y) / 2
+                        mean_diff <- mean(differences)
+                        sd_diff <- sd(differences)
+
+                        # Get confidence level
+                        conf_level <- self$options$baConfidenceLevel
+                        z_value <- qnorm(1 - (1 - conf_level) / 2)
+
+                        # Limits of agreement
+                        loa_lower <- mean_diff - z_value * sd_diff
+                        loa_upper <- mean_diff + z_value * sd_diff
+
+                        # CI for limits of agreement (approximate)
+                        se_loa <- sqrt(3 * sd_diff^2 / n)
+                        loa_lower_ci <- loa_lower - 1.96 * se_loa
+                        loa_upper_ci <- loa_upper + 1.96 * se_loa
+
+                        # Test if mean difference is significantly different from zero
+                        t_test <- t.test(differences)
+                        bias_ttest_p <- t_test$p.value
+
+                        # Add to Bland-Altman table
+                        ba_row <- list(
+                            method1 = method1_name,
+                            method2 = method2_name,
+                            n = n,
+                            mean_diff = mean_diff,
+                            sd_diff = sd_diff,
+                            loa_lower = loa_lower,
+                            loa_upper = loa_upper,
+                            loa_lower_ci = loa_lower_ci,
+                            loa_upper_ci = loa_upper_ci,
+                            bias_ttest_p = bias_ttest_p
+                        )
+
+                        baTable$addRow(rowKey = paste0(method1_name, "_", method2_name), values = ba_row)
+
+                        # Proportional bias test
+                        if (self$options$proportionalBias) {
+                            # Regress differences on averages
+                            prop_bias_model <- lm(differences ~ averages)
+                            slope <- coef(prop_bias_model)[2]
+                            slope_se <- summary(prop_bias_model)$coefficients[2, 2]
+                            slope_p <- summary(prop_bias_model)$coefficients[2, 4]
+                            r_squared <- summary(prop_bias_model)$r.squared
+
+                            # Interpretation
+                            interpretation <- if (slope_p < 0.05) {
+                                if (slope > 0) {
+                                    "Significant positive proportional bias detected"
+                                } else {
+                                    "Significant negative proportional bias detected"
+                                }
+                            } else {
+                                "No significant proportional bias"
+                            }
+
+                            prop_bias_row <- list(
+                                comparison = paste(method1_name, "vs", method2_name),
+                                slope = slope,
+                                slope_se = slope_se,
+                                slope_p = slope_p,
+                                r_squared = r_squared,
+                                interpretation = interpretation
+                            )
+
+                            propBiasTable$addRow(rowKey = paste0(method1_name, "_", method2_name),
+                                               values = prop_bias_row)
+                        }
+                    }
+                }
+
+                # Bland-Altman plot is now rendered automatically via renderFun
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                baTable <- self$results$blandAltmanTable
+                error_row <- list(
+                    method1 = "Error",
+                    method2 = "",
+                    n = 0,
+                    mean_diff = NaN,
+                    sd_diff = NaN,
+                    loa_lower = NaN,
+                    loa_upper = NaN,
+                    loa_lower_ci = NaN,
+                    loa_upper_ci = NaN,
+                    bias_ttest_p = NaN
+                )
+                baTable$addRow(rowKey = "error", values = error_row)
+            })
+        }
+
+        # Concordance Correlation Coefficient (CCC) for continuous data ----
+        if (self$options$ccc) {
+            tryCatch({
+                # Check if variables are numeric (continuous)
+                data <- self$data
+                vars <- self$options$vars
+
+                # Check that we have exactly 2 variables for pairwise CCC
+                if (length(vars) < 2) {
+                    stop("CCC requires at least 2 continuous variables")
+                }
+
+                cccTable <- self$results$cccTable
+
+                # Calculate pairwise CCC for all combinations
+                for (i in 1:(length(vars) - 1)) {
+                    for (j in (i + 1):length(vars)) {
+                        private$.checkpoint()  # Allow UI to remain responsive
+
+                        var1_name <- vars[i]
+                        var2_name <- vars[j]
+
+                        # Get data vectors
+                        x <- as.numeric(data[[var1_name]])
+                        y <- as.numeric(data[[var2_name]])
+
+                        # Remove missing values
+                        complete_cases <- complete.cases(x, y)
+                        x <- x[complete_cases]
+                        y <- y[complete_cases]
+                        n <- length(x)
+
+                        if (n < 3) {
+                            stop("Insufficient data for CCC calculation")
+                        }
+
+                        # Calculate CCC components
+                        mean_x <- mean(x)
+                        mean_y <- mean(y)
+                        var_x <- var(x)
+                        var_y <- var(y)
+                        sd_x <- sd(x)
+                        sd_y <- sd(y)
+
+                        # Pearson correlation
+                        pearson_r <- cor(x, y, method = "pearson")
+
+                        # CCC = 2 * ρ * σ_x * σ_y / (σ_x² + σ_y² + (μ_x - μ_y)²)
+                        numerator <- 2 * pearson_r * sd_x * sd_y
+                        denominator <- var_x + var_y + (mean_x - mean_y)^2
+                        ccc_value <- numerator / denominator
+
+                        # Calculate precision (how close the data points are to the best-fit line)
+                        # Precision = r (Pearson correlation)
+                        precision <- pearson_r
+
+                        # Calculate accuracy (how far the best-fit line deviates from 45-degree line)
+                        # Accuracy (Cb) = 2 / ((σ_x/σ_y + σ_y/σ_x) + ((μ_x - μ_y)²/(σ_x * σ_y)))
+                        accuracy <- 2 / ((sd_x/sd_y + sd_y/sd_x) + ((mean_x - mean_y)^2 / (sd_x * sd_y)))
+
+                        # Calculate 95% CI using Fisher's Z transformation
+                        if (requireNamespace("psych", quietly = TRUE)) {
+                            # Use psych package if available for more accurate CI
+                            ccc_result <- psych::ICC(cbind(x, y), missing = FALSE, alpha = 0.05)
+                            ci_lower <- ccc_result$results$`lower bound`[1]
+                            ci_upper <- ccc_result$results$`upper bound`[1]
+                        } else {
+                            # Simple approximation using Fisher's Z
+                            z <- 0.5 * log((1 + ccc_value) / (1 - ccc_value))
+                            se_z <- 1 / sqrt(n - 3)
+                            z_lower <- z - 1.96 * se_z
+                            z_upper <- z + 1.96 * se_z
+                            ci_lower <- (exp(2 * z_lower) - 1) / (exp(2 * z_lower) + 1)
+                            ci_upper <- (exp(2 * z_upper) - 1) / (exp(2 * z_upper) + 1)
+                        }
+
+                        # Interpretation based on CCC value
+                        interpretation <- if (ccc_value < 0.90) {
+                            "Poor agreement"
+                        } else if (ccc_value < 0.95) {
+                            "Moderate agreement"
+                        } else if (ccc_value < 0.99) {
+                            "Substantial agreement"
+                        } else {
+                            "Almost perfect agreement"
+                        }
+
+                        # Add row to table
+                        row_values <- list(
+                            rater1 = var1_name,
+                            rater2 = var2_name,
+                            n = n,
+                            ccc = ccc_value,
+                            pearson_r = pearson_r,
+                            precision = precision,
+                            accuracy = accuracy,
+                            ci_lower = ci_lower,
+                            ci_upper = ci_upper,
+                            interpretation = interpretation
+                        )
+
+                        cccTable$addRow(rowKey = paste0(var1_name, "_", var2_name), values = row_values)
+                    }
+                }
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                cccTable <- self$results$cccTable
+                error_row <- list(
+                    rater1 = "Error",
+                    rater2 = "",
+                    n = 0,
+                    ccc = NaN,
+                    pearson_r = NaN,
+                    precision = NaN,
+                    accuracy = NaN,
+                    ci_lower = NaN,
+                    ci_upper = NaN,
+                    interpretation = paste0("Error: ", e$message)
+                )
+                cccTable$addRow(rowKey = "error", values = error_row)
+            })
+        }
+
+        # Hierarchical/Multilevel Kappa Analysis ----
+        if (self$options$hierarchicalKappa) {
+            tryCatch({
+                # Check for cluster variable
+                if (is.null(self$options$clusterVariable)) {
+                    stop("Hierarchical kappa requires a cluster/institution variable")
+                }
+
+                # Populate hierarchical ICC components
+                if (self$options$iccHierarchical) {
+                    private$.populateHierarchicalICC()
+                }
+
+                # Populate variance components
+                if (self$options$betweenClusterVariance || self$options$withinClusterVariance) {
+                    private$.populateVarianceComponents()
+                }
+
+                # Populate cluster-specific kappa estimates
+                if (self$options$clusterSpecificKappa) {
+                    private$.populateClusterSpecificKappa()
+                }
+
+                # Test cluster homogeneity
+                if (self$options$testClusterHomogeneity) {
+                    private$.testClusterHomogeneity()
+                }
+
+                # Populate cluster rankings
+                if (self$options$clusterRankings) {
+                    private$.populateClusterRankings()
+                }
+
+            }, error = function(e) {
+                # Handle hierarchical kappa errors
+                # For now, error is silently caught
+                # Could add error messaging to a result item if needed
+            })
+        }
+        },
+
+        # Hierarchical/Multilevel Kappa Methods
+        .populateHierarchicalICC = function() {
+            # Calculate hierarchical ICC using mixed effects model
+            # ICC(1): proportion of variance between clusters (reliability of single rating)
+            # ICC(2): reliability of cluster means
+            # ICC(3): average reliability of raters within clusters
+
+            table <- self$results$hierarchicalICCTable
+            if (is.null(table)) return()
+
+            # Check if required packages are available
+            if (!requireNamespace("lme4", quietly = TRUE) &&
+                !requireNamespace("nlme", quietly = TRUE)) {
+                stop("Hierarchical ICC requires either 'lme4' or 'nlme' package")
+            }
+
+            # Get data
+            data <- self$data
+            vars <- self$options$vars
+            cluster_var <- self$options$clusterVariable
+
+            if (length(vars) < 2) {
+                stop("Hierarchical ICC requires at least 2 raters")
+            }
+
+            # Reshape data to long format for mixed model
+            # Each row: subject, cluster, rater, rating
+            long_data <- data.frame()
+
+            for (rater_idx in seq_along(vars)) {
+                rater_name <- vars[rater_idx]
+                temp_data <- data.frame(
+                    subject = 1:nrow(data),
+                    cluster = data[[cluster_var]],
+                    rater = rater_name,
+                    rating = as.numeric(data[[rater_name]]),
+                    stringsAsFactors = FALSE
+                )
+                long_data <- rbind(long_data, temp_data)
+            }
+
+            # Remove missing values
+            long_data <- long_data[complete.cases(long_data), ]
+
+            if (nrow(long_data) < 10) {
+                stop("Insufficient data for hierarchical ICC calculation")
+            }
+
+            # Convert to factors
+            long_data$subject <- as.factor(long_data$subject)
+            long_data$cluster <- as.factor(long_data$cluster)
+            long_data$rater <- as.factor(long_data$rater)
+
+            # Fit mixed effects model
+            # rating ~ 1 + (1|cluster) + (1|subject) + (1|rater)
+            tryCatch({
+                if (requireNamespace("lme4", quietly = TRUE)) {
+                    # Use lme4 (preferred)
+                    model <- lme4::lmer(rating ~ 1 + (1|cluster) + (1|subject) + (1|rater),
+                                       data = long_data,
+                                       REML = TRUE)
+
+                    # Extract variance components
+                    vc <- as.data.frame(lme4::VarCorr(model))
+                    var_cluster <- vc$vcov[vc$grp == "cluster"]
+                    var_subject <- vc$vcov[vc$grp == "subject"]
+                    var_rater <- vc$vcov[vc$grp == "rater"]
+                    var_residual <- vc$vcov[vc$grp == "Residual"]
+
+                } else if (requireNamespace("nlme", quietly = TRUE)) {
+                    # Use nlme as fallback
+                    model <- nlme::lme(rating ~ 1,
+                                      random = list(cluster = ~1, subject = ~1, rater = ~1),
+                                      data = long_data,
+                                      method = "REML")
+
+                    vc <- nlme::VarCorr(model)
+                    var_cluster <- as.numeric(vc["cluster", "Variance"])
+                    var_subject <- as.numeric(vc["subject", "Variance"])
+                    var_rater <- as.numeric(vc["rater", "Variance"])
+                    var_residual <- as.numeric(vc["Residual", "Variance"])
+                }
+
+                # Calculate ICCs
+                total_var <- var_cluster + var_subject + var_rater + var_residual
+
+                # ICC(1): Between-cluster reliability (single measurement)
+                icc1 <- var_cluster / total_var
+
+                # ICC(2): Reliability of cluster means
+                k <- length(unique(long_data$rater))  # number of raters
+                icc2 <- var_cluster / (var_cluster + (var_subject + var_rater + var_residual) / k)
+
+                # ICC(3): Within-cluster agreement (average of raters)
+                icc3 <- (var_cluster + var_subject) / total_var
+
+                # Calculate approximate 95% CI using Fisher's Z transformation
+                .icc_ci <- function(icc, n) {
+                    if (is.na(icc) || icc <= 0 || icc >= 1) {
+                        return(c(NA, NA))
+                    }
+                    z <- 0.5 * log((1 + icc) / (1 - icc))
+                    se_z <- 1 / sqrt(n - 3)
+                    z_lower <- z - 1.96 * se_z
+                    z_upper <- z + 1.96 * se_z
+                    ci_lower <- (exp(2 * z_lower) - 1) / (exp(2 * z_lower) + 1)
+                    ci_upper <- (exp(2 * z_upper) - 1) / (exp(2 * z_upper) + 1)
+                    return(c(max(0, ci_lower), min(1, ci_upper)))
+                }
+
+                n_obs <- nrow(long_data)
+                icc1_ci <- .icc_ci(icc1, n_obs)
+                icc2_ci <- .icc_ci(icc2, n_obs)
+                icc3_ci <- .icc_ci(icc3, n_obs)
+
+                # Interpretation function
+                .interpret_icc <- function(icc) {
+                    if (is.na(icc)) return("Unable to calculate")
+                    if (icc < 0.40) return("Poor reliability")
+                    if (icc < 0.60) return("Fair reliability")
+                    if (icc < 0.75) return("Good reliability")
+                    return("Excellent reliability")
+                }
+
+                # Populate table
+                table$setRow(rowNo=1, values=list(
+                    icc_type = "ICC(1): Between-Cluster",
+                    icc_value = icc1,
+                    icc_ci_lower = icc1_ci[1],
+                    icc_ci_upper = icc1_ci[2],
+                    interpretation = .interpret_icc(icc1)
+                ))
+
+                table$setRow(rowNo=2, values=list(
+                    icc_type = "ICC(2): Cluster Means Reliability",
+                    icc_value = icc2,
+                    icc_ci_lower = icc2_ci[1],
+                    icc_ci_upper = icc2_ci[2],
+                    interpretation = .interpret_icc(icc2)
+                ))
+
+                table$setRow(rowNo=3, values=list(
+                    icc_type = "ICC(3): Within-Cluster Agreement",
+                    icc_value = icc3,
+                    icc_ci_lower = icc3_ci[1],
+                    icc_ci_upper = icc3_ci[2],
+                    interpretation = .interpret_icc(icc3)
+                ))
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                table$setRow(rowNo=1, values=list(
+                    icc_type = "ICC(1): Between-Cluster",
+                    icc_value = NA,
+                    icc_ci_lower = NA,
+                    icc_ci_upper = NA,
+                    interpretation = paste0("Error: ", e$message)
+                ))
+            })
+        },
+
+        .populateVarianceComponents = function() {
+            # Decompose total variance into hierarchical components
+            # Shows how much variance is attributable to clusters vs. raters vs. subjects
+
+            table <- self$results$varianceComponents
+            if (is.null(table)) return()
+
+            # Check if required packages are available
+            if (!requireNamespace("lme4", quietly = TRUE) &&
+                !requireNamespace("nlme", quietly = TRUE)) {
+                stop("Variance components require either 'lme4' or 'nlme' package")
+            }
+
+            # Get data
+            data <- self$data
+            vars <- self$options$vars
+            cluster_var <- self$options$clusterVariable
+
+            if (length(vars) < 2) {
+                stop("Variance components require at least 2 raters")
+            }
+
+            # Reshape data to long format
+            long_data <- data.frame()
+
+            for (rater_idx in seq_along(vars)) {
+                rater_name <- vars[rater_idx]
+                temp_data <- data.frame(
+                    subject = 1:nrow(data),
+                    cluster = data[[cluster_var]],
+                    rater = rater_name,
+                    rating = as.numeric(data[[rater_name]]),
+                    stringsAsFactors = FALSE
+                )
+                long_data <- rbind(long_data, temp_data)
+            }
+
+            # Remove missing values
+            long_data <- long_data[complete.cases(long_data), ]
+
+            if (nrow(long_data) < 10) {
+                stop("Insufficient data for variance component estimation")
+            }
+
+            # Convert to factors
+            long_data$subject <- as.factor(long_data$subject)
+            long_data$cluster <- as.factor(long_data$cluster)
+            long_data$rater <- as.factor(long_data$rater)
+
+            # Fit mixed effects model
+            tryCatch({
+                if (requireNamespace("lme4", quietly = TRUE)) {
+                    # Use lme4 (preferred)
+                    model <- lme4::lmer(rating ~ 1 + (1|cluster) + (1|subject) + (1|rater),
+                                       data = long_data,
+                                       REML = TRUE)
+
+                    # Extract variance components
+                    vc <- as.data.frame(lme4::VarCorr(model))
+                    var_cluster <- vc$vcov[vc$grp == "cluster"]
+                    var_subject <- vc$vcov[vc$grp == "subject"]
+                    var_rater <- vc$vcov[vc$grp == "rater"]
+                    var_residual <- vc$vcov[vc$grp == "Residual"]
+
+                } else if (requireNamespace("nlme", quietly = TRUE)) {
+                    # Use nlme as fallback
+                    model <- nlme::lme(rating ~ 1,
+                                      random = list(cluster = ~1, subject = ~1, rater = ~1),
+                                      data = long_data,
+                                      method = "REML")
+
+                    vc <- nlme::VarCorr(model)
+                    var_cluster <- as.numeric(vc["cluster", "Variance"])
+                    var_subject <- as.numeric(vc["subject", "Variance"])
+                    var_rater <- as.numeric(vc["rater", "Variance"])
+                    var_residual <- as.numeric(vc["Residual", "Variance"])
+                }
+
+                # Calculate total variance
+                total_var <- var_cluster + var_subject + var_rater + var_residual
+
+                # Calculate percentages
+                pct_cluster <- (var_cluster / total_var) * 100
+                pct_subject <- (var_subject / total_var) * 100
+                pct_rater <- (var_rater / total_var) * 100
+                pct_residual <- (var_residual / total_var) * 100
+
+                # Interpretation function
+                .interpret_variance <- function(pct, component_type) {
+                    if (is.na(pct)) return("Unable to calculate")
+
+                    if (component_type == "cluster") {
+                        if (pct < 5) return("Minimal between-cluster variation")
+                        if (pct < 15) return("Low between-cluster variation")
+                        if (pct < 30) return("Moderate between-cluster variation")
+                        return("High between-cluster variation - investigate differences")
+                    } else if (component_type == "subject") {
+                        if (pct < 20) return("Low between-subject variation")
+                        if (pct < 50) return("Moderate between-subject variation")
+                        return("High between-subject variation (expected)")
+                    } else if (component_type == "rater") {
+                        if (pct < 5) return("Minimal rater bias")
+                        if (pct < 15) return("Low rater bias")
+                        if (pct < 30) return("Moderate rater bias - consider training")
+                        return("High rater bias - training needed")
+                    } else {  # residual
+                        if (pct < 20) return("Low measurement error")
+                        if (pct < 40) return("Moderate measurement error")
+                        return("High measurement error - review protocol")
+                    }
+                }
+
+                # Add rows based on user selection
+                row_key <- 1
+
+                if (self$options$betweenClusterVariance) {
+                    table$addRow(rowKey=row_key, values=list(
+                        component = "Between-Cluster Variance",
+                        variance = var_cluster,
+                        sd = sqrt(var_cluster),
+                        percent_total = pct_cluster,
+                        interpretation = .interpret_variance(pct_cluster, "cluster")
+                    ))
+                    row_key <- row_key + 1
+                }
+
+                if (self$options$withinClusterVariance) {
+                    # Within-cluster includes subject, rater, and residual
+                    table$addRow(rowKey=row_key, values=list(
+                        component = "Between-Subject Variance",
+                        variance = var_subject,
+                        sd = sqrt(var_subject),
+                        percent_total = pct_subject,
+                        interpretation = .interpret_variance(pct_subject, "subject")
+                    ))
+                    row_key <- row_key + 1
+
+                    table$addRow(rowKey=row_key, values=list(
+                        component = "Between-Rater Variance",
+                        variance = var_rater,
+                        sd = sqrt(var_rater),
+                        percent_total = pct_rater,
+                        interpretation = .interpret_variance(pct_rater, "rater")
+                    ))
+                    row_key <- row_key + 1
+
+                    table$addRow(rowKey=row_key, values=list(
+                        component = "Residual Variance (Error)",
+                        variance = var_residual,
+                        sd = sqrt(var_residual),
+                        percent_total = pct_residual,
+                        interpretation = .interpret_variance(pct_residual, "residual")
+                    ))
+                }
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                table$addRow(rowKey=1, values=list(
+                    component = "Error",
+                    variance = NA,
+                    sd = NA,
+                    percent_total = NA,
+                    interpretation = paste0("Error: ", e$message)
+                ))
+            })
+        },
+
+        .populateClusterSpecificKappa = function() {
+            # Calculate kappa separately for each cluster/institution
+            # Identifies which sites have poor agreement for quality control
+
+            table <- self$results$clusterSpecificKappaTable
+            if (is.null(table)) return()
+
+            # Get data
+            data <- self$data
+            vars <- self$options$vars
+            cluster_var <- self$options$clusterVariable
+
+            if (length(vars) < 2) {
+                stop("Cluster-specific kappa requires at least 2 raters")
+            }
+
+            # Get unique clusters
+            clusters <- unique(data[[cluster_var]])
+            clusters <- clusters[!is.na(clusters)]
+
+            if (length(clusters) < 2) {
+                stop("Cluster-specific kappa requires at least 2 clusters")
+            }
+
+            # Calculate kappa for each cluster
+            for (cluster_name in clusters) {
+                tryCatch({
+                    private$.checkpoint()  # Allow UI to remain responsive
+
+                    # Subset data for this cluster
+                    cluster_data <- data[data[[cluster_var]] == cluster_name, ]
+
+                    # Extract ratings for this cluster
+                    ratings_matrix <- as.matrix(cluster_data[, vars, drop = FALSE])
+
+                    # Remove rows with all NA
+                    complete_rows <- rowSums(!is.na(ratings_matrix)) > 0
+                    ratings_matrix <- ratings_matrix[complete_rows, , drop = FALSE]
+
+                    n_cases <- nrow(ratings_matrix)
+                    n_raters <- length(vars)
+
+                    if (n_cases < 3) {
+                        # Not enough data for this cluster
+                        table$addRow(rowKey=as.character(cluster_name), values=list(
+                            cluster = as.character(cluster_name),
+                            n_cases = n_cases,
+                            n_raters = n_raters,
+                            kappa = NA,
+                            kappa_ci_lower = NA,
+                            kappa_ci_upper = NA,
+                            shrinkage_kappa = NA
+                        ))
+                        next
+                    }
+
+                    # Calculate kappa based on number of raters
+                    if (n_raters == 2) {
+                        # Cohen's kappa for 2 raters
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            kappa_result <- irr::kappa2(ratings_matrix, weight = "unweighted")
+                            kappa_val <- kappa_result$value
+
+                            # Approximate CI from standard error if available
+                            if (!is.null(kappa_result$statistic)) {
+                                se <- abs(kappa_val / kappa_result$statistic) * sqrt(n_cases)
+                                ci_lower <- max(0, kappa_val - 1.96 * se)
+                                ci_upper <- min(1, kappa_val + 1.96 * se)
+                            } else {
+                                ci_lower <- NA
+                                ci_upper <- NA
+                            }
+                        } else {
+                            kappa_val <- NA
+                            ci_lower <- NA
+                            ci_upper <- NA
+                        }
+                    } else {
+                        # Fleiss' kappa for 3+ raters
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            kappa_result <- irr::kappam.fleiss(ratings_matrix)
+                            kappa_val <- kappa_result$value
+
+                            # Approximate CI
+                            if (!is.null(kappa_result$statistic)) {
+                                se <- abs(kappa_val / kappa_result$statistic) * sqrt(n_cases)
+                                ci_lower <- max(0, kappa_val - 1.96 * se)
+                                ci_upper <- min(1, kappa_val + 1.96 * se)
+                            } else {
+                                ci_lower <- NA
+                                ci_upper <- NA
+                            }
+                        } else {
+                            kappa_val <- NA
+                            ci_lower <- NA
+                            ci_upper <- NA
+                        }
+                    }
+
+                    # Calculate shrinkage estimate if requested
+                    shrinkage_kappa <- NA
+                    if (self$options$shrinkageEstimates && !is.na(kappa_val)) {
+                        # Simple empirical Bayes shrinkage toward grand mean
+                        # This would require calculating the overall kappa across all clusters
+                        # For now, leave as NA - full implementation would need grand mean
+                        shrinkage_kappa <- NA
+                    }
+
+                    # Add row to table
+                    table$addRow(rowKey=as.character(cluster_name), values=list(
+                        cluster = as.character(cluster_name),
+                        n_cases = n_cases,
+                        n_raters = n_raters,
+                        kappa = kappa_val,
+                        kappa_ci_lower = ci_lower,
+                        kappa_ci_upper = ci_upper,
+                        shrinkage_kappa = shrinkage_kappa
+                    ))
+
+                }, error = function(e) {
+                    # Handle errors for this cluster
+                    table$addRow(rowKey=as.character(cluster_name), values=list(
+                        cluster = as.character(cluster_name),
+                        n_cases = 0,
+                        n_raters = 0,
+                        kappa = NA,
+                        kappa_ci_lower = NA,
+                        kappa_ci_upper = NA,
+                        shrinkage_kappa = NA
+                    ))
+                })
+            }
+        },
+
+        .testClusterHomogeneity = function() {
+            # Test whether kappa is homogeneous across clusters
+            # Null hypothesis: all clusters have equal kappa
+
+            table <- self$results$clusterHomogeneityTest
+            if (is.null(table)) return()
+
+            # Get data
+            data <- self$data
+            vars <- self$options$vars
+            cluster_var <- self$options$clusterVariable
+
+            if (length(vars) < 2) {
+                stop("Cluster homogeneity test requires at least 2 raters")
+            }
+
+            # Get unique clusters
+            clusters <- unique(data[[cluster_var]])
+            clusters <- clusters[!is.na(clusters)]
+
+            if (length(clusters) < 2) {
+                stop("Cluster homogeneity test requires at least 2 clusters")
+            }
+
+            tryCatch({
+                # Calculate kappa for each cluster and collect values
+                cluster_kappas <- c()
+                cluster_ns <- c()
+                cluster_names <- c()
+
+                for (cluster_name in clusters) {
+                    # Subset data for this cluster
+                    cluster_data <- data[data[[cluster_var]] == cluster_name, ]
+
+                    # Extract ratings for this cluster
+                    ratings_matrix <- as.matrix(cluster_data[, vars, drop = FALSE])
+
+                    # Remove rows with all NA
+                    complete_rows <- rowSums(!is.na(ratings_matrix)) > 0
+                    ratings_matrix <- ratings_matrix[complete_rows, , drop = FALSE]
+
+                    n_cases <- nrow(ratings_matrix)
+                    n_raters <- length(vars)
+
+                    if (n_cases < 3) next  # Skip clusters with insufficient data
+
+                    # Calculate kappa
+                    if (n_raters == 2) {
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            kappa_result <- irr::kappa2(ratings_matrix, weight = "unweighted")
+                            kappa_val <- kappa_result$value
+                        } else {
+                            next
+                        }
+                    } else {
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            kappa_result <- irr::kappam.fleiss(ratings_matrix)
+                            kappa_val <- kappa_result$value
+                        } else {
+                            next
+                        }
+                    }
+
+                    if (!is.na(kappa_val)) {
+                        cluster_kappas <- c(cluster_kappas, kappa_val)
+                        cluster_ns <- c(cluster_ns, n_cases)
+                        cluster_names <- c(cluster_names, as.character(cluster_name))
+                    }
+                }
+
+                if (length(cluster_kappas) < 2) {
+                    table$setRow(rowNo=1, values=list(
+                        test_statistic = NA,
+                        df = NA,
+                        p_value = NA,
+                        conclusion = "Insufficient data for homogeneity test"
+                    ))
+                    return()
+                }
+
+                # Perform Cochran's Q-like test for kappa heterogeneity
+                # Using weighted variance approach
+
+                # Calculate overall weighted kappa
+                total_n <- sum(cluster_ns)
+                weights <- cluster_ns / total_n
+                weighted_kappa <- sum(weights * cluster_kappas)
+
+                # Calculate Q statistic (weighted sum of squared deviations)
+                Q <- sum(cluster_ns * (cluster_kappas - weighted_kappa)^2)
+
+                # Degrees of freedom
+                df <- length(cluster_kappas) - 1
+
+                # P-value from chi-square distribution
+                p_value <- 1 - pchisq(Q, df)
+
+                # Interpretation
+                if (p_value < 0.001) {
+                    conclusion <- "Strong evidence of heterogeneity across clusters (p < 0.001)"
+                } else if (p_value < 0.01) {
+                    conclusion <- "Significant heterogeneity across clusters (p < 0.01)"
+                } else if (p_value < 0.05) {
+                    conclusion <- "Moderate heterogeneity across clusters (p < 0.05)"
+                } else {
+                    conclusion <- "No significant heterogeneity detected (homogeneous)"
+                }
+
+                # Populate table
+                table$setRow(rowNo=1, values=list(
+                    test_statistic = Q,
+                    df = df,
+                    p_value = p_value,
+                    conclusion = conclusion
+                ))
+
+            }, error = function(e) {
+                # Handle errors gracefully
+                table$setRow(rowNo=1, values=list(
+                    test_statistic = NA,
+                    df = NA,
+                    p_value = NA,
+                    conclusion = paste0("Error: ", e$message)
+                ))
+            })
+        },
+
+        .populateClusterRankings = function() {
+            # Rank clusters/institutions by agreement performance
+            # Identifies best and worst performing sites
+
+            table <- self$results$clusterRankingsTable
+            if (is.null(table)) return()
+
+            # Get data
+            data <- self$data
+            vars <- self$options$vars
+            cluster_var <- self$options$clusterVariable
+
+            if (length(vars) < 2) {
+                stop("Cluster rankings require at least 2 raters")
+            }
+
+            # Get unique clusters
+            clusters <- unique(data[[cluster_var]])
+            clusters <- clusters[!is.na(clusters)]
+
+            if (length(clusters) < 2) {
+                stop("Cluster rankings require at least 2 clusters")
+            }
+
+            # Calculate kappa for each cluster
+            cluster_results <- list()
+
+            for (cluster_name in clusters) {
+                tryCatch({
+                    # Subset data for this cluster
+                    cluster_data <- data[data[[cluster_var]] == cluster_name, ]
+
+                    # Extract ratings for this cluster
+                    ratings_matrix <- as.matrix(cluster_data[, vars, drop = FALSE])
+
+                    # Remove rows with all NA
+                    complete_rows <- rowSums(!is.na(ratings_matrix)) > 0
+                    ratings_matrix <- ratings_matrix[complete_rows, , drop = FALSE]
+
+                    n_cases <- nrow(ratings_matrix)
+                    n_raters <- length(vars)
+
+                    if (n_cases < 3) next  # Skip clusters with insufficient data
+
+                    # Calculate kappa
+                    if (n_raters == 2) {
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            kappa_result <- irr::kappa2(ratings_matrix, weight = "unweighted")
+                            kappa_val <- kappa_result$value
+                        } else {
+                            next
+                        }
+                    } else {
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            kappa_result <- irr::kappam.fleiss(ratings_matrix)
+                            kappa_val <- kappa_result$value
+                        } else {
+                            next
+                        }
+                    }
+
+                    if (!is.na(kappa_val)) {
+                        cluster_results[[as.character(cluster_name)]] <- list(
+                            cluster = as.character(cluster_name),
+                            kappa = kappa_val,
+                            n_cases = n_cases
+                        )
+                    }
+                }, error = function(e) {
+                    # Skip clusters with errors
+                })
+            }
+
+            if (length(cluster_results) < 2) {
+                return()  # Not enough clusters to rank
+            }
+
+            # Sort clusters by kappa (descending)
+            cluster_df <- do.call(rbind, lapply(cluster_results, function(x) {
+                data.frame(
+                    cluster = x$cluster,
+                    kappa = x$kappa,
+                    n_cases = x$n_cases,
+                    stringsAsFactors = FALSE
+                )
+            }))
+
+            cluster_df <- cluster_df[order(-cluster_df$kappa), ]
+
+            # Add ranks
+            cluster_df$rank <- 1:nrow(cluster_df)
+
+            # Performance rating based on kappa
+            .rate_performance <- function(kappa) {
+                if (is.na(kappa)) return("Unable to assess")
+                if (kappa < 0) return("Poor (worse than chance)")
+                if (kappa < 0.20) return("Slight agreement")
+                if (kappa < 0.40) return("Fair agreement")
+                if (kappa < 0.60) return("Moderate agreement")
+                if (kappa < 0.80) return("Substantial agreement")
+                return("Almost perfect agreement")
+            }
+
+            cluster_df$rating <- sapply(cluster_df$kappa, .rate_performance)
+
+            # Add rows to table
+            for (i in 1:nrow(cluster_df)) {
+                table$addRow(rowKey=as.character(i), values=list(
+                    rank = cluster_df$rank[i],
+                    cluster = cluster_df$cluster[i],
+                    kappa = cluster_df$kappa[i],
+                    rating = cluster_df$rating[i]
+                ))
+            }
+        }
+
+    ))  # Close private list and R6Class

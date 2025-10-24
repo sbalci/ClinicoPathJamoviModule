@@ -1,10 +1,10 @@
 ---
 name: decisioncurve
 title: Decision Curve Analysis
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -284,5 +284,126 @@ options:
       description:
           R: >
             Label for the clinical decision rule in plots and tables.
+
+    # Enhanced Decision Curve Analysis Options
+    - name: showClinicalImpactPlot
+      title: Clinical Impact Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display clinical impact plot showing number of true positives and false positives
+            per population unit across threshold probabilities.
+
+    - name: showNetBenefitCI
+      title: Show Net Benefit Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display confidence intervals around net benefit curves in the decision curve plot.
+
+    - name: costBenefitAnalysis
+      title: Cost-Benefit Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform cost-benefit analysis incorporating costs of testing, treatment, and outcomes.
+
+    - name: testCost
+      title: Cost of Test/Screening
+      type: Number
+      default: 100
+      min: 0
+      max: 1000000
+      description:
+          R: >
+            Cost per test or screening procedure (in currency units).
+
+    - name: treatmentCost
+      title: Cost of Treatment
+      type: Number
+      default: 1000
+      min: 0
+      max: 1000000
+      description:
+          R: >
+            Cost of treatment or intervention (in currency units).
+
+    - name: benefitCorrectTreatment
+      title: Benefit of Correct Treatment
+      type: Number
+      default: 10000
+      min: 0
+      max: 10000000
+      description:
+          R: >
+            Monetary benefit or QALY-equivalent value of correctly treating a true positive.
+
+    - name: harmFalseTreatment
+      title: Harm of False Treatment
+      type: Number
+      default: 500
+      min: 0
+      max: 1000000
+      description:
+          R: >
+            Cost or harm of treating a false positive (unnecessary treatment).
+
+    - name: showStandardizedNetBenefit
+      title: Standardized Net Benefit
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate and display standardized net benefit (net benefit per 100 patients).
+
+    - name: multiModelComparison
+      title: Enhanced Multi-Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform comprehensive pairwise comparisons between all models with statistical tests.
+
+    - name: comparisonMethod
+      title: Comparison Statistical Test
+      type: List
+      options:
+        - name: bootstrap
+          title: Bootstrap Test
+        - name: permutation
+          title: Permutation Test
+        - name: integral
+          title: Integral Difference Test
+      default: bootstrap
+      description:
+          R: >
+            Statistical method for comparing decision curves between models.
+
+    - name: showDecisionConsequences
+      title: Decision Consequences Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed table of decision consequences (TP, FP, TN, FN) at selected thresholds.
+
+    - name: resourceUtilization
+      title: Resource Utilization Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate resource utilization metrics (tests performed, treatments administered).
+
+    - name: showRelativeUtility
+      title: Relative Utility Curve
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display relative utility curve comparing each model to default strategies.
 
 ...

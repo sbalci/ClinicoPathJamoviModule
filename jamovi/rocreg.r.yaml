@@ -1,0 +1,111 @@
+---
+name: rocreg
+title: ROC Regression (Covariate-Adjusted ROC)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: adjustedAUC
+      title: Covariate-Adjusted AUC
+      type: Table
+      visible: (adjusted_auc)
+      rows: 1
+      columns:
+        - name: auc_adjusted
+          title: Adjusted AUC
+          type: number
+          format: zto
+        - name: auc_unadjusted
+          title: Unadjusted AUC
+          type: number
+          format: zto
+          visible: (compare_unadjusted)
+        - name: auc_se
+          title: SE
+          type: number
+        - name: auc_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: covariateEffects
+      title: Covariate Effects on ROC
+      type: Table
+      visible: (test_covariate_effects)
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: effect_location
+          title: Effect on Location
+          type: number
+        - name: effect_scale
+          title: Effect on Scale
+          type: number
+        - name: chi_square
+          title: Chi-Square
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+
+    - name: covariateSpecificAUC
+      title: Covariate-Specific AUC
+      type: Table
+      visible: (covariate_specific_auc)
+      columns:
+        - name: profile
+          title: Covariate Profile
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: auc_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: covariateROCPlot
+      title: Covariate-Specific ROC Curves
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotCovariateROCs
+      visible: (plot_covariate_specific_rocs)
+
+    - name: aucByCovPlot
+      title: AUC vs Covariate
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotAUCByCovariate
+      visible: (plot_auc_by_covariate)
+
+    - name: effectEstimatesPlot
+      title: Covariate Effect Estimates
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotEffectEstimates
+      visible: (plot_effect_estimates)
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_interpretation)
+
+...

@@ -1,0 +1,250 @@
+---
+name: trichotomousroc
+title: Trichotomous (Three-way) ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: performanceSummary
+      title: Trichotomous Performance Summary
+      type: Table
+      visible: true
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: vusTable
+      title: Volume Under Surface (VUS)
+      type: Table
+      visible: (calculate_vus)
+      columns:
+        - name: vus
+          title: VUS
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: comparison_to_random
+          title: vs Random (0.167)
+          type: text
+
+    - name: thresholdsTable
+      title: Optimal Thresholds
+      type: Table
+      visible: true
+      columns:
+        - name: threshold_type
+          title: Threshold
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: method
+          title: Selection Method
+          type: text
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: zto
+        - name: specificity
+          title: Specificity
+          type: number
+          format: zto
+
+    - name: confusionMatrix3x3
+      title: 3×3 Confusion Matrix
+      type: Table
+      visible: (confusion_matrix_3x3)
+      rows: 3
+      columns:
+        - name: true_category
+          title: True Category
+          type: text
+        - name: pred_positive
+          title: Predicted Positive
+          type: integer
+        - name: pred_indeterminate
+          title: Predicted Indeterminate
+          type: integer
+        - name: pred_negative
+          title: Predicted Negative
+          type: integer
+        - name: total
+          title: Total
+          type: integer
+        - name: sensitivity
+          title: Category Sensitivity
+          type: number
+          format: pc
+
+    - name: categorySensitivitiesTable
+      title: Category-Specific Sensitivities
+      type: Table
+      visible: (category_sensitivities)
+      columns:
+        - name: category
+          title: Category
+          type: text
+        - name: n_cases
+          title: N Cases
+          type: integer
+        - name: correctly_classified
+          title: Correctly Classified
+          type: integer
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: pc
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: pc
+
+    - name: pairwiseROCTable
+      title: Pairwise Binary ROC Comparisons
+      type: Table
+      visible: (pairwise_comparisons)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: n_cases
+          title: N Cases
+          type: integer
+
+    - name: clinicalImpactTable
+      title: Clinical Impact of Indeterminate Zone
+      type: Table
+      visible: true
+      columns:
+        - name: scenario
+          title: Scenario
+          type: text
+        - name: n_indeterminate
+          title: N Indeterminate
+          type: integer
+        - name: pct_indeterminate
+          title: "% Indeterminate"
+          type: number
+          format: pc
+        - name: additional_tests_needed
+          title: Additional Tests Needed
+          type: integer
+        - name: clinical_action
+          title: Clinical Action
+          type: text
+
+    - name: stratifiedAnalysisTable
+      title: Stratified Analysis by Subgroup
+      type: Table
+      visible: (stratified_analysis)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: vus
+          title: VUS
+          type: number
+          format: zto
+        - name: lower_threshold
+          title: Lower Threshold
+          type: number
+          format: zto
+        - name: upper_threshold
+          title: Upper Threshold
+          type: number
+          format: zto
+
+    # Plots
+    - name: surface3DPlot
+      title: 3D ROC Surface
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plot3DSurface
+      visible: (plot_3d_surface)
+
+    - name: thresholdAnalysisPlot
+      title: Threshold Sensitivity Analysis
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotThresholdAnalysis
+      visible: (plot_threshold_analysis)
+
+    - name: categoryDistributionPlot
+      title: Category Distribution with Thresholds
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotCategoryDistribution
+      visible: (plot_category_distributions)
+
+    - name: pairwiseROCPlot
+      title: Pairwise ROC Curves
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotPairwiseROC
+      visible: (plot_pairwise_rocs)
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_clinical_interpretation)
+
+refs:
+    - DiagTest3Grp
+    - ThreeWayROC
+    - pROC
+    - ggplot2
+    - plotly
+    - ClinicoPathJamoviModule
+
+...

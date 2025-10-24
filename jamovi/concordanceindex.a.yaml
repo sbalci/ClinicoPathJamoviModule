@@ -1,0 +1,424 @@
+---
+name: concordanceindex
+title: Concordance Index (Harrell's C-index)
+menuGroup: meddecideT
+menuSubgroup: Survival Model Validation
+menuSubtitle: Rank-based discrimination for time-to-event predictions
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Harrell's concordance index (C-index) for evaluating discrimination ability of
+        survival prediction models. The C-index measures the proportion of all comparable
+        pairs of patients in which the model correctly ranks their survival times - a
+        generalization of the ROC curve's AUC to censored survival data. Values range
+        from 0.5 (no discrimination) to 1.0 (perfect discrimination), with 0.7-0.8
+        considered good and >0.8 considered excellent. Unlike time-dependent ROC which
+        evaluates at specific time points, the C-index provides a global measure across
+        the entire follow-up period. Supports time-dependent concordance for dynamic
+        predictions, competing risks extensions, stratified analysis, and comparison
+        between models. Essential for validating Cox regression models, machine learning
+        survival predictions, and prognostic scores. The C-index accounts for censoring
+        through appropriate pair weighting and can be decomposed to identify which
+        risk groups contribute most to discrimination.
+    R:
+        dontrun: false
+        usage: >
+            result <- concordanceindex(
+                data = validation_data,
+                time = "follow_up_months",
+                event = "death",
+                predictor = "risk_score"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time-to-event or censoring variable (days, months, years).
+            For time-dependent concordance, this is the follow-up time.
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Binary event indicator (1 = event, 0 = censored). For competing
+            risks, can be multi-level factor with different event types.
+
+    - name: event_code
+      title: Event Code (for Event of Interest)
+      type: Level
+      variable: (event)
+      description:
+          R: >
+            Which level represents the event of interest (e.g., death, progression).
+
+    # Predictor Variables
+    - name: predictor
+      title: Predictor Variable (Risk Score or Probability)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Continuous predictor variable used for ranking patients. Can be a risk
+            score, linear predictor from Cox model, or predicted probability. Higher
+            values should indicate higher risk (or use reverse_direction option).
+
+    - name: reverse_direction
+      title: Reverse Predictor Direction
+      type: Bool
+      default: false
+      description:
+          R: >
+            If predictor is protective (lower values = higher risk), reverse the
+            direction for concordance calculation. Example: survival probability
+            where lower values indicate worse prognosis.
+
+    - name: predictor_formula
+      title: Prediction Model Formula (Alternative)
+      type: String
+      default: ""
+      description:
+          R: >
+            Formula for Cox model if predictor not directly provided. Example:
+            "~ age + stage + grade". Model will be fitted and linear predictor used.
+
+    # C-index Calculation Method
+    - name: cindex_method
+      title: C-index Calculation Method
+      type: List
+      options:
+        - title: Harrell's Method (survival package)
+          name: harrell
+        - title: Uno's Method (IPCW)
+          name: uno
+        - title: Gönen-Heller (non-censoring)
+          name: gonen_heller
+      default: harrell
+      description:
+          R: >
+            Method for C-index calculation. Harrell's is standard, Uno's uses inverse
+            probability weighting for censoring, Gönen-Heller is bias-free estimator
+            for proportional hazards models (doesn't require follow-up information).
+
+    # Time-Dependent C-index
+    - name: time_dependent
+      title: Time-Dependent C-index
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate time-dependent C-index at specific time horizons. Evaluates
+            discrimination for predictions at particular time points rather than
+            globally across follow-up.
+
+    - name: evaluation_times
+      title: Evaluation Time Points
+      type: String
+      default: "12, 36, 60"
+      description:
+          R: >
+            Comma-separated time points for time-dependent C-index evaluation.
+            Example: "12, 24, 36, 60" for 1, 2, 3, and 5 years in months.
+
+    # Statistical Inference
+    - name: confidence_intervals
+      title: Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for C-index using bootstrap or
+            asymptotic standard errors.
+
+    - name: ci_method
+      title: CI Method
+      type: List
+      options:
+        - title: Bootstrap
+          name: bootstrap
+        - title: Asymptotic (SE-based)
+          name: asymptotic
+      default: bootstrap
+      description:
+          R: >
+            Method for confidence interval estimation. Bootstrap is more accurate
+            but computationally intensive.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 500
+      min: 100
+      max: 5000
+      description:
+          R: >
+            Number of bootstrap samples for CI estimation.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for interval estimation.
+
+    # Model Comparison
+    - name: compare_models
+      title: Compare Multiple Models
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare C-index across multiple prediction models to identify
+            best discriminating model.
+
+    - name: additional_predictors
+      title: Additional Predictors for Comparison
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Additional predictor variables (risk scores) for model comparison.
+
+    - name: model_names
+      title: Model Names (for Comparison)
+      type: String
+      default: "Model 1, Model 2, Model 3"
+      description:
+          R: >
+            Comma-separated names for models being compared.
+
+    - name: compare_test
+      title: Statistical Test for Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform statistical test for differences in C-index between models.
+
+    # Competing Risks
+    - name: competing_risks
+      title: Handle Competing Risks
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use competing risks framework for C-index calculation when multiple
+            event types can occur. Requires cause-specific hazard approach.
+
+    - name: cause_specific
+      title: Cause-Specific C-index
+      type: Bool
+      default: true
+      description:
+          R: >
+            For competing risks, calculate cause-specific C-index for event
+            of interest treating other events as censoring.
+
+    # Decomposition and Diagnostics
+    - name: decompose_cindex
+      title: Decompose C-index by Risk Groups
+      type: Bool
+      default: false
+      description:
+          R: >
+            Decompose C-index to show contribution from different risk strata.
+            Identifies which patient groups contribute most to discrimination.
+
+    - name: risk_groups
+      title: Number of Risk Groups for Decomposition
+      type: Integer
+      default: 3
+      min: 2
+      max: 10
+      description:
+          R: >
+            Number of risk groups for C-index decomposition (e.g., 3 = low/medium/high,
+            4 = quartiles, 10 = deciles).
+
+    - name: somers_d
+      title: Calculate Somers' D
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Somers' D rank correlation (D = 2*(C-index - 0.5)). Ranges
+            from -1 to +1, interpretable as correlation between predictor and outcome.
+
+    - name: goodman_kruskal_gamma
+      title: Calculate Goodman-Kruskal Gamma
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Goodman-Kruskal gamma statistic for ordinal association.
+            Related to C-index but uses different pair weighting.
+
+    # Stratified Analysis
+    - name: stratified_cindex
+      title: Stratified C-index Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate C-index stratified by important subgroups to assess
+            consistency across populations.
+
+    - name: stratify_by
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable for stratified analysis (e.g., treatment arm, center, age group).
+
+    # Visualization Options
+    - name: plot_cindex_over_time
+      title: C-index Over Time Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot time-dependent C-index across follow-up period. Shows how
+            discrimination changes with prediction horizon.
+
+    - name: plot_model_comparison
+      title: Model Comparison Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Bar plot comparing C-index across multiple models with confidence intervals.
+
+    - name: plot_risk_group_kaplan_meier
+      title: Kaplan-Meier by Risk Groups
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display Kaplan-Meier curves stratified by risk groups defined by
+            predictor quantiles. Visual assessment of separation = discrimination.
+
+    - name: plot_decomposition
+      title: C-index Decomposition Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Visualize contribution of different risk strata to overall C-index.
+
+    # Clinical Context
+    - name: clinical_application
+      title: Clinical Application
+      type: List
+      options:
+        - title: General Prognostic Model
+          name: general
+        - title: Cancer Staging System
+          name: staging
+        - title: Risk Score Validation
+          name: risk_score
+        - title: Biomarker Prognostic Value
+          name: biomarker
+        - title: Machine Learning Model
+          name: ml_model
+      default: general
+      description:
+          R: >
+            Clinical application context for interpretation guidance.
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide interpretation of C-index with clinical context and
+            recommendations.
+
+    # Advanced Options
+    - name: external_validation
+      title: External Validation Mode
+      type: Bool
+      default: false
+      description:
+          R: >
+            Indicate this is external validation (model from different cohort).
+
+    - name: restricted_time
+      title: Restrict Follow-up Time
+      type: Bool
+      default: false
+      description:
+          R: >
+            Restrict C-index calculation to specific follow-up period to avoid
+            issues with long-term censoring.
+
+    - name: max_time
+      title: Maximum Follow-up Time
+      type: Number
+      default: 60
+      min: 0
+      description:
+          R: >
+            Maximum follow-up time for restricted C-index calculation.
+            Pairs beyond this time are not considered.
+
+    - name: handle_ties
+      title: Tie Handling Method
+      type: List
+      options:
+        - title: Average (count as 0.5)
+          name: average
+        - title: Exclude Ties
+          name: exclude
+        - title: Random
+          name: random
+      default: average
+      description:
+          R: >
+            Method for handling tied predictor values in concordance calculation.
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+      default: complete
+      description:
+          R: >
+            Method for handling missing predictor or outcome data.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap and other stochastic procedures.
+
+...

@@ -1,0 +1,187 @@
+---
+name: prauc
+title: Precision-Recall Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: prSummary
+      title: PR-AUC Summary
+      type: Table
+      description: Precision-Recall area under curve with baseline comparison
+      visible: true
+      rows: 1
+      columns:
+        - name: n
+          title: N
+          type: integer
+        - name: n_positive
+          title: N Positive
+          type: integer
+        - name: n_negative
+          title: N Negative
+          type: integer
+        - name: prevalence
+          title: Prevalence
+          type: number
+          format: pc
+        - name: prauc
+          title: PR-AUC
+          type: number
+          format: zto
+        - name: prauc_se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+          visible: (confidence_intervals)
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+          visible: (confidence_intervals)
+        - name: baseline_prauc
+          title: Baseline PR-AUC
+          type: number
+          format: zto
+          visible: (baseline_comparison)
+        - name: improvement
+          title: Improvement vs Baseline
+          type: number
+          format: zto
+          visible: (baseline_comparison)
+        - name: rocauc
+          title: ROC-AUC (for comparison)
+          type: number
+          format: zto
+          visible: (compare_to_roc)
+
+    - name: optimalThresholds
+      title: Optimal Thresholds
+      type: Table
+      description: Optimal operating points for different F-score metrics
+      visible: (calculate_fscore)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: optimal_threshold
+          title: Optimal Threshold
+          type: number
+        - name: precision
+          title: Precision
+          type: number
+          format: zto
+        - name: recall
+          title: Recall (Sensitivity)
+          type: number
+          format: zto
+        - name: fscore
+          title: F-Score
+          type: number
+          format: zto
+        - name: tp
+          title: TP
+          type: integer
+        - name: fp
+          title: FP
+          type: integer
+        - name: fn
+          title: FN
+          type: integer
+        - name: tn
+          title: TN
+          type: integer
+
+    - name: prCurveData
+      title: Precision-Recall Curve Points
+      type: Table
+      description: Precision and recall values across all thresholds
+      visible: false
+      columns:
+        - name: threshold
+          title: Threshold
+          type: number
+        - name: precision
+          title: Precision
+          type: number
+          format: zto
+        - name: recall
+          title: Recall
+          type: number
+          format: zto
+        - name: f1_score
+          title: F1-Score
+          type: number
+          format: zto
+
+    - name: performanceAtKey
+      title: Performance at Key Thresholds
+      type: Table
+      description: Precision and recall at clinically relevant thresholds
+      visible: true
+      columns:
+        - name: threshold
+          title: Threshold
+          type: number
+        - name: precision
+          title: Precision
+          type: number
+          format: zto
+        - name: recall
+          title: Recall
+          type: number
+          format: zto
+        - name: f1_score
+          title: F1-Score
+          type: number
+          format: zto
+        - name: positive_predictions
+          title: Predicted Positive
+          type: integer
+        - name: negative_predictions
+          title: Predicted Negative
+          type: integer
+        - name: ppv_interpretation
+          title: PPV Interpretation
+          type: text
+
+    - name: prCurvePlot
+      title: Precision-Recall Curve
+      type: Image
+      description: Precision-recall curve with optimal F1 threshold marked
+      width: 600
+      height: 500
+      renderFun: .plotPRCurve
+      visible: (plot_pr_curve)
+
+    - name: comparisonPlot
+      title: ROC vs PR Comparison
+      type: Image
+      description: Side-by-side comparison of ROC and PR curves
+      width: 800
+      height: 400
+      renderFun: .plotComparison
+      visible: (plot_comparison)
+
+    - name: fscorePlot
+      title: F-Score vs Threshold
+      type: Image
+      description: F-scores across thresholds for different beta values
+      width: 600
+      height: 500
+      renderFun: .plotFScore
+      visible: (plot_fscore)
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: true
+
+...

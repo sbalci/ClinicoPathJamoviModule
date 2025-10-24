@@ -1082,23 +1082,39 @@ enhancedROCClass <- R6::R6Class(
             range_min <- as.numeric(trimws(range_parts[1]))
             range_max <- as.numeric(trimws(range_parts[2]))
 
+            # Determine if using sensitivity or specificity range
+            range_type_name <- self$options$partialAucType
+
             for (predictor in names(private$.rocResults)) {
                 tryCatch({
                     roc_obj <- private$.rocObjects[[predictor]]
 
-                    # Calculate partial AUC
-                    pauc <- pROC::auc(roc_obj, partial.auc = c(range_min, range_max))
+                    # Calculate partial AUC based on type
+                    if (range_type_name == "sensitivity") {
+                        # Calculate pAUC over sensitivity range
+                        # pROC uses partial.auc.focus to specify sensitivity-based pAUC
+                        pauc <- pROC::auc(roc_obj,
+                                         partial.auc = c(range_min, range_max),
+                                         partial.auc.focus = "sensitivity")
+                        range_display <- "Sensitivity"
+                    } else {
+                        # Calculate pAUC over specificity range (default)
+                        pauc <- pROC::auc(roc_obj,
+                                         partial.auc = c(range_min, range_max),
+                                         partial.auc.focus = "specificity")
+                        range_display <- "Specificity"
+                    }
 
                     # Normalize partial AUC
                     range_width <- range_max - range_min
                     normalized_pauc <- pauc / range_width
 
                     clinical_relevance <- private$.assessPartialAUCRelevance(
-                        pauc, range_min, range_max, self$options$clinicalContext)
+                        pauc, range_min, range_max, self$options$clinicalContext, range_type_name)
 
                     row <- list(
                         predictor = predictor,
-                        range_type = .("Specificity"),
+                        range_type = range_display,
                         range_min = range_min,
                         range_max = range_max,
                         partial_auc = as.numeric(pauc),
@@ -1600,13 +1616,27 @@ enhancedROCClass <- R6::R6Class(
             }
         },
 
-        .assessPartialAUCRelevance = function(pauc, range_min, range_max, context) {
-            if (context == "screening" && range_min >= 0.8) {
-                return(.("Relevant for high-specificity screening applications"))
-            } else if (context == "diagnosis") {
-                return(.("Partial AUC for specific diagnostic range"))
+        .assessPartialAUCRelevance = function(pauc, range_min, range_max, context, range_type = "specificity") {
+            # Provide context-aware relevance assessment
+            if (range_type == "sensitivity") {
+                if (context == "screening" && range_min >= 0.8) {
+                    return(.("Relevant for high-sensitivity screening applications (minimizing false negatives)"))
+                } else if (range_min >= 0.9) {
+                    return(.("Very high sensitivity range - critical for screening/case-finding"))
+                } else {
+                    return(.("Partial AUC over sensitivity range"))
+                }
             } else {
-                return(.("Partial area under curve analysis"))
+                # Specificity-based assessment
+                if (context == "screening" && range_min >= 0.8) {
+                    return(.("Relevant for high-specificity screening applications (minimizing false positives)"))
+                } else if (context == "diagnosis" && range_min >= 0.9) {
+                    return(.("Confirmatory diagnostic range with high specificity"))
+                } else if (context == "diagnosis") {
+                    return(.("Partial AUC for specific diagnostic range"))
+                } else {
+                    return(.("Partial area under curve analysis"))
+                }
             }
         },
 

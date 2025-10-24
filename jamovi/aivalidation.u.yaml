@@ -100,10 +100,32 @@ children:
         
       - type: CheckBox
         name: youdensJ
-        
+
+      - type: CheckBox
+        name: matthewsCC
+
+      - type: Label
+        label: Calibration Metrics
+        children:
+          - type: CheckBox
+            name: expectedCalibrationError
+
+          - type: TextBox
+            name: eceBins
+            format: number
+            enable: (expectedCalibrationError)
+
+          - type: CheckBox
+            name: maxCalibrationError
+            enable: (expectedCalibrationError)
+
+          - type: CheckBox
+            name: reliabilityDiagram
+            enable: (expectedCalibrationError)
+
       - type: CheckBox
         name: bootstrapCI
-        
+
       - type: TextBox
         name: nBootstrap
         format: number

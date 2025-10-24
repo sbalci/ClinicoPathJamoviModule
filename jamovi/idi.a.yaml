@@ -1,10 +1,10 @@
 ---
 name: idi
 title: Integrated Discrimination Improvement (IDI)
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Performance Metrics
 menuSubtitle: Model improvement assessment through discrimination analysis
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -483,5 +483,51 @@ options:
           R: >
             Random seed for bootstrap sampling and cross-validation.
             Ensures reproducible results across analyses.
+
+    # Advanced IDI Enhancements
+    - name: relative_idi
+      title: Relative IDI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate relative IDI as percentage improvement over baseline discrimination.
+            More interpretable for comparing models across different populations.
+
+    - name: idi_competing_risks
+      title: IDI for Competing Risks
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate cause-specific IDI for competing risks data.
+            Accounts for multiple event types in discrimination improvement.
+
+    - name: visual_discrimination_slopes
+      title: Visual Discrimination Slopes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create enhanced visualizations of discrimination slopes with density plots.
+            Shows separation between events and non-events for both models.
+
+    - name: idi_trajectory
+      title: IDI Trajectory Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Analyze how IDI changes over time for time-to-event outcomes.
+            Useful for understanding when discrimination improvement is largest.
+
+    - name: prediction_error_curves
+      title: Prediction Error Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot prediction error curves alongside IDI to visualize improvement.
+            Shows integrated Brier score differences over time.
 
 ...

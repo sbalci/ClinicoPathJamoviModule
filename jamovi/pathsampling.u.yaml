@@ -4,6 +4,22 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Instructions
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Instructions"
+            children:
+              - type: CheckBox
+                name: showGuidedInstructions
+              - type: CheckBox
+                name: showConciseInstructions
+
+
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -28,39 +44,6 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-      - type: TargetLayoutBox
-        label: Positive Samples Count (Optional)
-        children:
-          - type: VariablesListBox
-            name: positiveCount
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-      - type: TargetLayoutBox
-        label: Positive Samples List (Optional)
-        children:
-          - type: VariablesListBox
-            name: positiveSamplesList
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-      - type: TargetLayoutBox
-        label: Sample Type/Subtype (Optional)
-        children:
-          - type: VariablesListBox
-            name: sampleType
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-      - type: TargetLayoutBox
-        label: Cohort Groups (Optional)
-        children:
-          - type: VariablesListBox
-            name: groupBy
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-
   - type: CollapseBox
     label: Analysis Parameters
     collapsed: false
@@ -68,6 +51,11 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          - type: Label
+            label: Clinical Context
+            children:
+              - type: ComboBox
+                name: analysisContext
           - type: Label
             label: Sampling Protocol Settings
             children:
@@ -85,7 +73,6 @@ children:
               - type: TextBox
                 name: bootstrapIterations
                 format: number
-
   - type: CollapseBox
     label: Core Analyses
     collapsed: false
@@ -96,8 +83,6 @@ children:
           - type: CheckBox
             name: showClinicalSummary
           - type: CheckBox
-            name: showGuidedChecklist
-          - type: CheckBox
             name: showBinomialModel
           - type: CheckBox
             name: showBootstrap
@@ -105,11 +90,26 @@ children:
             name: showDetectionCurve
           - type: CheckBox
             name: showSensitivityCI
-
   - type: CollapseBox
     label: Enhanced Detection (Requires Positive Count)
     collapsed: true
     children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        permitted:
+          - numeric
+          - factor
+          - id
+        children:
+          - type: TargetLayoutBox
+            label: Positive Samples Count (Optional)
+            children:
+              - type: VariablesListBox
+                name: positiveCount
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
       - type: LayoutBox
         margin: large
         children:
@@ -119,11 +119,26 @@ children:
             name: showIncrementalYield
           - type: CheckBox
             name: showPopulationDetection
-
   - type: CollapseBox
     label: Spatial & Multifocal Analyses (Requires Sample List)
     collapsed: true
     children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        permitted:
+          - numeric
+          - factor
+          - id
+        children:
+          - type: TargetLayoutBox
+            label: Positive Samples List (Optional)
+            children:
+              - type: VariablesListBox
+                name: positiveSamplesList
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
       - type: LayoutBox
         margin: large
         children:
@@ -131,17 +146,31 @@ children:
             name: showSpatialClustering
           - type: CheckBox
             name: showMultifocalAnalysis
-
   - type: CollapseBox
     label: Stratified Analyses (Requires Sample Type)
     collapsed: true
     children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        permitted:
+          - numeric
+          - factor
+          - id
+        children:
+          - type: TargetLayoutBox
+            label: Sample Type/Subtype (Optional)
+            children:
+              - type: VariablesListBox
+                name: sampleType
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: showStratifiedAnalysis
-
   - type: CollapseBox
     label: Tumor Burden & Stage Migration
     collapsed: true
@@ -181,7 +210,6 @@ children:
             name: distributionThreshold
             format: number
             enable: (showDistributionPattern)
-
   - type: CollapseBox
     label: Specialized Models
     collapsed: true
@@ -268,7 +296,26 @@ children:
             children:
               - type: CheckBox
                 name: showOmentumAnalysis
-
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Specific Text Outputs"
+            children:
+              - type: CheckBox
+                name: showProbabilityExplanation
+              - type: CheckBox
+                name: showKeyResults
+              - type: CheckBox
+                name: showRecommendText
+              - type: CheckBox
+                name: showInterpretText
+              - type: CheckBox
+                name: showReferencesText
   - type: CollapseBox
     label: Advanced Options
     collapsed: true

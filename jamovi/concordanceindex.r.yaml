@@ -1,0 +1,256 @@
+---
+name: concordanceindex
+title: Concordance Index (Harrell's C-index)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: cindexSummary
+      title: Concordance Index Summary
+      type: Table
+      description: Overall C-index with confidence intervals
+      visible: true
+      rows: 1
+      columns:
+        - name: predictor
+          title: Predictor
+          type: text
+        - name: method
+          title: Method
+          type: text
+        - name: n_pairs
+          title: N Pairs
+          type: integer
+        - name: concordant
+          title: Concordant
+          type: integer
+        - name: discordant
+          title: Discordant
+          type: integer
+        - name: tied
+          title: Tied
+          type: integer
+        - name: cindex
+          title: C-index
+          type: number
+          format: zto
+        - name: cindex_se
+          title: SE
+          type: number
+        - name: cindex_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: cindex_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: somersD
+      title: Somers' D Statistic
+      type: Table
+      description: Somers' D rank correlation
+      visible: (somers_d)
+      rows: 1
+      columns:
+        - name: somers_d
+          title: Somers' D
+          type: number
+        - name: d_se
+          title: SE
+          type: number
+        - name: d_ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: d_ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: timeDependentCindex
+      title: Time-Dependent C-index
+      type: Table
+      description: C-index evaluated at specific time points
+      visible: (time_dependent)
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: n_at_risk
+          title: N At Risk
+          type: integer
+        - name: cindex
+          title: C-index
+          type: number
+          format: zto
+        - name: cindex_se
+          title: SE
+          type: number
+        - name: cindex_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: cindex_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: modelComparison
+      title: Model Comparison (C-index)
+      type: Table
+      description: Comparison of C-index across multiple models
+      visible: (compare_models)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: cindex
+          title: C-index
+          type: number
+          format: zto
+        - name: cindex_se
+          title: SE
+          type: number
+        - name: cindex_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: cindex_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: pairwiseTests
+      title: Pairwise Model Comparison Tests
+      type: Table
+      description: Statistical tests comparing C-index between models
+      visible: (compare_models && compare_test)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: cindex_diff
+          title: C-index Difference
+          type: number
+        - name: se_diff
+          title: SE
+          type: number
+        - name: z_statistic
+          title: Z
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    - name: decomposition
+      title: C-index Decomposition by Risk Groups
+      type: Table
+      description: Contribution of risk strata to overall C-index
+      visible: (decompose_cindex)
+      columns:
+        - name: risk_group
+          title: Risk Group
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: n_events
+          title: Events
+          type: integer
+        - name: median_predictor
+          title: Median Risk
+          type: number
+        - name: contribution
+          title: C-index Contribution
+          type: number
+          format: zto
+        - name: percent_pairs
+          title: Percent of Pairs
+          type: number
+
+    - name: stratifiedCindex
+      title: Stratified C-index
+      type: Table
+      description: C-index by subgroup
+      visible: (stratified_cindex)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: n_events
+          title: Events
+          type: integer
+        - name: cindex
+          title: C-index
+          type: number
+          format: zto
+        - name: cindex_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: cindex_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: cindexOverTimePlot
+      title: C-index Over Time
+      type: Image
+      description: Time-dependent C-index across follow-up
+      width: 600
+      height: 500
+      renderFun: .plotCindexOverTime
+      visible: (plot_cindex_over_time && time_dependent)
+
+    - name: modelComparisonPlot
+      title: Model Comparison
+      type: Image
+      description: Bar plot comparing C-index across models
+      width: 600
+      height: 500
+      renderFun: .plotModelComparison
+      visible: (plot_model_comparison && compare_models)
+
+    - name: riskGroupKMPlot
+      title: Kaplan-Meier Curves by Risk Groups
+      type: Image
+      description: Survival curves stratified by predictor quantiles
+      width: 600
+      height: 500
+      renderFun: .plotRiskGroupKM
+      visible: (plot_risk_group_kaplan_meier)
+
+    - name: decompositionPlot
+      title: C-index Decomposition
+      type: Image
+      description: Contribution of risk strata to discrimination
+      width: 600
+      height: 500
+      renderFun: .plotDecomposition
+      visible: (plot_decomposition && decompose_cindex)
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_interpretation)
+
+...

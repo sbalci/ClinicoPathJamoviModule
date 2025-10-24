@@ -1,0 +1,337 @@
+---
+name: costeffectiveness
+title: Cost-Effectiveness Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: strategySummary
+      title: Strategy Summary (Mean Costs and Effects)
+      type: Table
+      description: Summary statistics for each diagnostic strategy
+      visible: true
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: mean_cost
+          title: Mean Cost
+          type: number
+        - name: cost_ci_lower
+          title: Cost 95% CI Lower
+          type: number
+          visible: (confidence_intervals)
+        - name: cost_ci_upper
+          title: Cost 95% CI Upper
+          type: number
+          visible: (confidence_intervals)
+        - name: mean_effect
+          title: Mean Effectiveness
+          type: number
+        - name: effect_ci_lower
+          title: Effect 95% CI Lower
+          type: number
+          visible: (confidence_intervals)
+        - name: effect_ci_upper
+          title: Effect 95% CI Upper
+          type: number
+          visible: (confidence_intervals)
+
+    - name: incrementalAnalysis
+      title: Incremental Cost-Effectiveness Analysis
+      type: Table
+      description: Incremental costs, effects, and ICER relative to comparator
+      visible: (calculate_incremental)
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: incremental_cost
+          title: Incremental Cost
+          type: number
+        - name: incremental_effect
+          title: Incremental Effect
+          type: number
+        - name: icer
+          title: ICER
+          type: number
+          visible: (calculate_icer)
+        - name: icer_interpretation
+          title: ICER Interpretation
+          type: text
+          visible: (calculate_icer)
+        - name: dominance
+          title: Dominance Status
+          type: text
+          visible: (dominance_analysis)
+
+    - name: netBenefit
+      title: Net Monetary Benefit Analysis
+      type: Table
+      description: Net monetary benefit at specified WTP thresholds
+      visible: (net_monetary_benefit)
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: wtp_threshold
+          title: WTP Threshold
+          type: number
+        - name: nmb
+          title: Net Monetary Benefit
+          type: number
+        - name: nmb_ci_lower
+          title: NMB 95% CI Lower
+          type: number
+          visible: (confidence_intervals)
+        - name: nmb_ci_upper
+          title: NMB 95% CI Upper
+          type: number
+          visible: (confidence_intervals)
+        - name: optimal
+          title: Optimal at WTP?
+          type: text
+        - name: probability_optimal
+          title: P(Optimal)
+          type: number
+          format: zto,pvalue
+          visible: (probabilistic_sensitivity)
+
+    - name: multipleWTP
+      title: Cost-Effectiveness at Multiple WTP Thresholds
+      type: Table
+      description: NMB and optimal strategy across WTP range
+      visible: (multiple_wtp_thresholds)
+      columns:
+        - name: wtp_threshold
+          title: WTP Threshold
+          type: number
+        - name: optimal_strategy
+          title: Optimal Strategy
+          type: text
+        - name: max_nmb
+          title: Maximum NMB
+          type: number
+        - name: icer_vs_comparator
+          title: ICER vs. Comparator
+          type: number
+        - name: cost_effective
+          title: Cost-Effective?
+          type: text
+
+    - name: dominanceTable
+      title: Dominance Analysis
+      type: Table
+      description: Identification of dominated and extendedly dominated strategies
+      visible: (dominance_analysis)
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: dominated
+          title: Dominated?
+          type: text
+        - name: dominated_by
+          title: Dominated By
+          type: text
+        - name: reason
+          title: Reason
+          type: text
+        - name: on_frontier
+          title: On Efficient Frontier?
+          type: text
+
+    - name: subgroupCEA
+      title: Subgroup Cost-Effectiveness
+      type: Table
+      description: ICER by subgroup
+      visible: (subgroup_analysis)
+      columns:
+        - name: subgroup
+          title: Subgroup
+          type: text
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: incremental_cost
+          title: Incremental Cost
+          type: number
+        - name: incremental_effect
+          title: Incremental Effect
+          type: number
+        - name: icer
+          title: ICER
+          type: number
+        - name: cost_effective_at_wtp
+          title: Cost-Effective at WTP?
+          type: text
+
+    - name: sensitivityAnalysis
+      title: One-Way Sensitivity Analysis (Deterministic)
+      type: Table
+      description: Impact of individual parameter variation on ICER
+      visible: (deterministic_sensitivity)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: base_value
+          title: Base Value
+          type: number
+        - name: low_value
+          title: Low Value
+          type: number
+        - name: high_value
+          title: High Value
+          type: number
+        - name: icer_at_low
+          title: ICER (Low)
+          type: number
+        - name: icer_at_high
+          title: ICER (High)
+          type: number
+        - name: icer_range
+          title: ICER Range
+          type: number
+        - name: sensitivity_rank
+          title: Rank (by Impact)
+          type: integer
+
+    - name: psaSummary
+      title: Probabilistic Sensitivity Analysis Summary
+      type: Table
+      description: Monte Carlo simulation results
+      visible: (probabilistic_sensitivity)
+      rows: 1
+      columns:
+        - name: n_simulations
+          title: Simulations
+          type: integer
+        - name: mean_icer
+          title: Mean ICER
+          type: number
+        - name: median_icer
+          title: Median ICER
+          type: number
+        - name: icer_ci_lower
+          title: ICER 95% CI Lower
+          type: number
+        - name: icer_ci_upper
+          title: ICER 95% CI Upper
+          type: number
+        - name: prob_cost_effective
+          title: P(Cost-Effective at WTP)
+          type: number
+          format: zto,pvalue
+        - name: prob_dominant
+          title: P(Dominant)
+          type: number
+          format: zto,pvalue
+
+    - name: voiSummary
+      title: Value of Information (EVPI)
+      type: Table
+      description: Expected value of perfect information analysis
+      visible: (voi_analysis)
+      rows: 1
+      columns:
+        - name: wtp_threshold
+          title: WTP Threshold
+          type: number
+        - name: evpi_per_person
+          title: EVPI per Person
+          type: number
+        - name: population_size
+          title: Population Size
+          type: integer
+        - name: total_evpi
+          title: Total Population EVPI
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: evppiTable
+      title: Expected Value of Perfect Parameter Information (EVPPI)
+      type: Table
+      description: Value of information by parameter group
+      visible: (evppi_parameters)
+      columns:
+        - name: parameter_group
+          title: Parameter Group
+          type: text
+        - name: evppi_per_person
+          title: EVPPI per Person
+          type: number
+        - name: total_evppi
+          title: Total Population EVPPI
+          type: number
+        - name: percent_of_evpi
+          title: '% of Total EVPI'
+          type: number
+          format: pc
+        - name: research_priority
+          title: Research Priority
+          type: text
+
+    - name: cePlanePlot
+      title: Cost-Effectiveness Plane
+      type: Image
+      description: Incremental costs vs. incremental effects scatter plot
+      width: 600
+      height: 500
+      renderFun: .plotCEPlane
+      visible: (plot_ce_plane)
+
+    - name: ceAcceptabilityCurve
+      title: Cost-Effectiveness Acceptability Curve (CEAC)
+      type: Image
+      description: Probability of cost-effectiveness across WTP thresholds
+      width: 600
+      height: 500
+      renderFun: .plotCEAC
+      visible: (plot_ce_acceptability)
+
+    - name: nmbPlot
+      title: Net Monetary Benefit by Strategy
+      type: Image
+      description: NMB comparison at specified WTP threshold
+      width: 600
+      height: 500
+      renderFun: .plotNMB
+      visible: (plot_nmb)
+
+    - name: tornadoPlot
+      title: Tornado Diagram (Sensitivity Analysis)
+      type: Image
+      description: One-way sensitivity analysis results
+      width: 600
+      height: 600
+      renderFun: .plotTornado
+      visible: (plot_tornado)
+
+    - name: incrementalFrontierPlot
+      title: Incremental Cost-Effectiveness Frontier
+      type: Image
+      description: Efficient frontier showing non-dominated strategies
+      width: 600
+      height: 500
+      renderFun: .plotFrontier
+      visible: (plot_incremental_frontier)
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: true
+
+...

@@ -1,0 +1,175 @@
+name: greyzoneroc
+title: Grey-zone (Fuzzy) ROC Analysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - continuous
+      - nominal
+    children:
+      - type: TargetLayoutBox
+        label: Predictor (Probability or Score)
+        children:
+          - type: VariablesListBox
+            name: predictor
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Binary Outcome (Gold Standard)
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    name: outcomeLevel
+    label: Outcome Level
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: positive_level
+        label: Positive Level
+  - type: CollapseBox
+    name: greyZoneDefinition
+    label: Grey Zone Definition
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: grey_zone_method
+        label: Grey Zone Method
+      - type: TextBox
+        name: grey_zone_width
+        label: Grey Zone Width
+        format: number
+        enable: (grey_zone_method:fixed_width)
+      - type: TextBox
+        name: lower_grey_boundary
+        label: Lower Boundary
+        format: number
+        enable: (grey_zone_method:custom)
+      - type: TextBox
+        name: upper_grey_boundary
+        label: Upper Boundary
+        format: number
+        enable: (grey_zone_method:custom)
+      - type: TextBox
+        name: confidence_threshold
+        label: Min Confidence
+        format: number
+        enable: (grey_zone_method:confidence)
+  - type: CollapseBox
+    name: thresholdSelection
+    label: Threshold Selection
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: optimal_threshold
+        label: Optimal Threshold Method
+      - type: TextBox
+        name: clinical_threshold
+        label: Clinical Threshold
+        format: number
+        enable: (optimal_threshold:clinical)
+  - type: CollapseBox
+    name: costBenefit
+    label: Cost-Benefit Parameters
+    collapsed: true
+    children:
+      - type: TextBox
+        name: cost_false_positive
+        label: Cost of False Positive
+        format: number
+      - type: TextBox
+        name: cost_false_negative
+        label: Cost of False Negative
+        format: number
+      - type: TextBox
+        name: cost_grey_zone
+        label: Cost of Grey Zone
+        format: number
+  - type: CollapseBox
+    name: performanceMetrics
+    label: Performance Metrics
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: calculate_definite_performance
+      - type: CheckBox
+        name: calculate_all_cases_performance
+      - type: CheckBox
+        name: grey_zone_characteristics
+  - type: CollapseBox
+    name: uncertaintyQuantification
+    label: Uncertainty Quantification
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: prediction_intervals
+      - type: CheckBox
+        name: bootstrap_grey_zone
+      - type: TextBox
+        name: bootstrap_samples
+        label: Bootstrap Samples
+        format: number
+        enable: (bootstrap_grey_zone)
+      - type: TextBox
+        name: confidence_level
+        label: Confidence Level
+        format: number
+  - type: CollapseBox
+    name: clinicalDecisions
+    label: Clinical Decision Rules
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: grey_zone_action
+        label: Grey Zone Action
+      - type: ComboBox
+        name: clinical_scenario
+        label: Clinical Scenario
+  - type: CollapseBox
+    name: plotOptions
+    label: Plot Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: plot_grey_zone_roc
+      - type: CheckBox
+        name: plot_threshold_distributions
+      - type: CheckBox
+        name: plot_grey_zone_size
+      - type: CheckBox
+        name: plot_uncertainty_map
+      - type: CheckBox
+        name: plot_cost_surface
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: reflex_test_name
+        format: string
+  - type: CollapseBox
+    name: advancedOptions
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: fuzzy_membership
+      - type: CheckBox
+        name: bayesian_grey_zone
+      - type: CheckBox
+        name: stratified_grey_zone
+      - type: VariablesListBox
+        name: stratify_by
+        maxItemCount: 1
+        enable: (stratified_grey_zone)
+      - type: ComboBox
+        name: missing_handling
+        label: Missing Data
+      - type: TextBox
+        name: random_seed
+        label: Random Seed
+        format: number

@@ -1,10 +1,10 @@
 ---
 name: aivalidation
 title: AI Model Validation with Cross-Validation
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: AI & Machine Learning
 menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -214,6 +214,58 @@ options:
       description:
           R: >
             calculate Youden's J statistic for optimal cutoff determination
+
+    - name: matthewsCC
+      title: Matthews Correlation Coefficient (MCC)
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate Matthews Correlation Coefficient, a balanced measure for binary classification
+            that accounts for all four confusion matrix categories. Especially useful for imbalanced datasets
+            (e.g., rare events like mitosis detection). MCC ranges from -1 to +1 where +1 represents
+            perfect prediction, 0 represents random prediction, and -1 represents total disagreement
+
+    # Calibration Metrics
+    - name: expectedCalibrationError
+      title: Expected Calibration Error (ECE)
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate Expected Calibration Error to assess reliability of predicted probabilities.
+            ECE measures the difference between predicted probabilities and actual outcomes across
+            probability bins. Essential for AI models to ensure predicted probabilities are well-calibrated.
+            Lower ECE values indicate better calibration (perfect calibration = 0)
+
+    - name: eceBins
+      title: Number of ECE Bins
+      type: Integer
+      min: 5
+      max: 20
+      default: 10
+      description:
+          R: >
+            number of bins for Expected Calibration Error calculation. Standard is 10 bins.
+            More bins provide finer granularity but require more data
+
+    - name: maxCalibrationError
+      title: Maximum Calibration Error (MCE)
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate Maximum Calibration Error (worst-case calibration error across all bins).
+            MCE identifies the bin with the largest deviation between predicted and actual outcomes
+
+    - name: reliabilityDiagram
+      title: Reliability Diagram
+      type: Bool
+      default: true
+      description:
+          R: >
+            display reliability diagram showing predicted probabilities vs observed frequencies.
+            Perfect calibration appears as a diagonal line. Useful for visualizing calibration quality
 
     - name: bootstrapCI
       title: Bootstrap Confidence Intervals

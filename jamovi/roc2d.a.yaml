@@ -1,0 +1,95 @@
+---
+name: roc2d
+title: Two-Dimensional ROC Analysis
+menuGroup: meddecideT
+menuSubgroup: ROC Analysis
+menuSubtitle: Joint ROC for dual biomarker combinations
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Two-dimensional ROC analysis for evaluating diagnostic accuracy of dual biomarker
+        combinations or multi-parametric tests. When two biomarkers are measured simultaneously
+        (e.g., ER and PR in breast cancer, dual IHC markers, imaging plus biomarker),
+        2D ROC analysis finds the optimal combined decision rule in two-dimensional
+        marker space. Unlike analyzing markers separately and combining results, 2D
+        ROC jointly optimizes both thresholds to maximize diagnostic accuracy. Provides
+        joint sensitivity/specificity, optimal threshold pairs, 3D ROC surface visualization,
+        and comparison to single-marker performance. Essential for multiplex assays,
+        dual biomarker panels, and situations where neither marker alone is sufficient
+        but combination improves diagnosis. Applications include ER/PR combinations,
+        dual IHC (e.g., p16/Ki67), imaging radiomics plus molecular markers, and
+        any scenario with two continuous diagnostic measurements.
+    R:
+        dontrun: false
+        usage: >
+            result <- roc2d(
+                data = dual_marker_data,
+                marker1 = "biomarker_A",
+                marker2 = "biomarker_B",
+                outcome = "disease_status"
+            )
+
+options:
+    - name: data
+      type: Data
+
+    - name: marker1
+      title: First Biomarker
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: marker2
+      title: Second Biomarker
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: outcome
+      title: Binary Outcome
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+
+    - name: positive_level
+      title: Positive Level
+      type: Level
+      variable: (outcome)
+
+    - name: decision_rule
+      title: Decision Rule
+      type: List
+      options:
+        - title: "AND Rule (Both Positive)"
+          name: and
+        - title: "OR Rule (Either Positive)"
+          name: or
+        - title: "Optimal Linear Combination"
+          name: linear
+        - title: "Optimal Non-linear"
+          name: nonlinear
+      default: linear
+
+    - name: compare_single_markers
+      title: Compare to Single Markers
+      type: Bool
+      default: true
+
+    - name: plot_2d_roc_surface
+      title: 3D ROC Surface
+      type: Bool
+      default: true
+
+    - name: plot_threshold_region
+      title: Optimal Threshold Region
+      type: Bool
+      default: true
+
+    - name: show_interpretation
+      title: Show Interpretation
+      type: Bool
+      default: true
+
+...

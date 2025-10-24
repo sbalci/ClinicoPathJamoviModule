@@ -1,0 +1,111 @@
+title: Generalized ROC Analysis
+name: generalizedroc
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variable (Continuous)
+        children:
+          - type: VariablesListBox
+            name: predictor
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Assumptions
+        children:
+          - type: CheckBox
+            name: assume_equal_variance
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Data Transformation
+        children:
+          - type: ComboBox
+            name: transformation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Distribution Model
+        children:
+          - type: ComboBox
+            name: distribution_model
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: AUC Calculation
+        children:
+          - type: CheckBox
+            name: calculate_auc
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Confidence Intervals
+        children:
+          - type: CheckBox
+            name: confidence_intervals
+          - type: ComboBox
+            name: ci_method
+          - type: TextBox
+            name: bootstrap_samples
+            format: number
+          - type: TextBox
+            name: confidence_level
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Diagnostics
+        children:
+          - type: CheckBox
+            name: show_diagnostics
+          - type: ComboBox
+            name: variance_test
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Threshold Analysis
+        children:
+          - type: CheckBox
+            name: optimal_threshold
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: plot_roc
+          - type: CheckBox
+            name: plot_distributions
+          - type: CheckBox
+            name: plot_diagnostic
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Random Seed
+        children:
+          - type: TextBox
+            name: random_seed
+            format: number

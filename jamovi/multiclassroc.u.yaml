@@ -1,0 +1,98 @@
+title: Multi-class ROC Analysis
+name: multiclassroc
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable (Categorical, 3+ levels)
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variables (Continuous)
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Multi-class Method
+        children:
+          - type: ComboBox
+            name: method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Summary Statistics
+        children:
+          - type: CheckBox
+            name: calculate_macro_auc
+          - type: CheckBox
+            name: calculate_micro_auc
+          - type: CheckBox
+            name: calculate_weighted_auc
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Confidence Intervals
+        children:
+          - type: CheckBox
+            name: confidence_intervals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: CI Options
+        children:
+          - type: ComboBox
+            name: ci_method
+          - type: TextBox
+            name: bootstrap_samples
+            format: number
+          - type: TextBox
+            name: confidence_level
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Additional Output
+        children:
+          - type: CheckBox
+            name: pairwise_comparisons
+          - type: CheckBox
+            name: confusion_matrix
+          - type: CheckBox
+            name: class_metrics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: plot_roc_curves
+          - type: ComboBox
+            name: plot_method
+          - type: CheckBox
+            name: plot_diagonal
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Random Seed
+        children:
+          - type: TextBox
+            name: random_seed
+            format: number

@@ -6,12 +6,12 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            analysisContext = "general",
             totalSamples = NULL,
             firstDetection = NULL,
             positiveCount = NULL,
             positiveSamplesList = NULL,
             sampleType = NULL,
-            groupBy = NULL,
             targetConfidence = 0.95,
             maxSamples = 10,
             bootstrapIterations = 10000,
@@ -42,13 +42,19 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             showEffectSizes = FALSE,
             showOmentumAnalysis = FALSE,
             showClinicalSummary = FALSE,
-            showGuidedChecklist = FALSE,
+            showGuidedInstructions = FALSE,
+            showConciseInstructions = FALSE,
             showEmpiricalCumulative = FALSE,
             showSpatialClustering = FALSE,
             showStratifiedAnalysis = FALSE,
             showPopulationDetection = FALSE,
             showIncrementalYield = FALSE,
             showMultifocalAnalysis = FALSE,
+            showProbabilityExplanation = FALSE,
+            showKeyResults = FALSE,
+            showRecommendText = FALSE,
+            showInterpretText = FALSE,
+            showReferencesText = FALSE,
             estimationMethod = "auto", ...) {
 
             super$initialize(
@@ -57,20 +63,32 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 requiresData=TRUE,
                 ...)
 
+            private$..analysisContext <- jmvcore::OptionList$new(
+                "analysisContext",
+                analysisContext,
+                options=list(
+                    "lymphnode",
+                    "omentum",
+                    "tumor",
+                    "margin",
+                    "general"),
+                default="general")
             private$..totalSamples <- jmvcore::OptionVariable$new(
                 "totalSamples",
                 totalSamples,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..firstDetection <- jmvcore::OptionVariable$new(
                 "firstDetection",
                 firstDetection,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..positiveCount <- jmvcore::OptionVariable$new(
                 "positiveCount",
                 positiveCount,
@@ -91,15 +109,6 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..sampleType <- jmvcore::OptionVariable$new(
                 "sampleType",
                 sampleType,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor"),
-                default=NULL)
-            private$..groupBy <- jmvcore::OptionVariable$new(
-                "groupBy",
-                groupBy,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -269,9 +278,13 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "showClinicalSummary",
                 showClinicalSummary,
                 default=FALSE)
-            private$..showGuidedChecklist <- jmvcore::OptionBool$new(
-                "showGuidedChecklist",
-                showGuidedChecklist,
+            private$..showGuidedInstructions <- jmvcore::OptionBool$new(
+                "showGuidedInstructions",
+                showGuidedInstructions,
+                default=FALSE)
+            private$..showConciseInstructions <- jmvcore::OptionBool$new(
+                "showConciseInstructions",
+                showConciseInstructions,
                 default=FALSE)
             private$..showEmpiricalCumulative <- jmvcore::OptionBool$new(
                 "showEmpiricalCumulative",
@@ -297,6 +310,26 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "showMultifocalAnalysis",
                 showMultifocalAnalysis,
                 default=FALSE)
+            private$..showProbabilityExplanation <- jmvcore::OptionBool$new(
+                "showProbabilityExplanation",
+                showProbabilityExplanation,
+                default=FALSE)
+            private$..showKeyResults <- jmvcore::OptionBool$new(
+                "showKeyResults",
+                showKeyResults,
+                default=FALSE)
+            private$..showRecommendText <- jmvcore::OptionBool$new(
+                "showRecommendText",
+                showRecommendText,
+                default=FALSE)
+            private$..showInterpretText <- jmvcore::OptionBool$new(
+                "showInterpretText",
+                showInterpretText,
+                default=FALSE)
+            private$..showReferencesText <- jmvcore::OptionBool$new(
+                "showReferencesText",
+                showReferencesText,
+                default=FALSE)
             private$..estimationMethod <- jmvcore::OptionList$new(
                 "estimationMethod",
                 estimationMethod,
@@ -306,12 +339,12 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "empirical"),
                 default="auto")
 
+            self$.addOption(private$..analysisContext)
             self$.addOption(private$..totalSamples)
             self$.addOption(private$..firstDetection)
             self$.addOption(private$..positiveCount)
             self$.addOption(private$..positiveSamplesList)
             self$.addOption(private$..sampleType)
-            self$.addOption(private$..groupBy)
             self$.addOption(private$..targetConfidence)
             self$.addOption(private$..maxSamples)
             self$.addOption(private$..bootstrapIterations)
@@ -342,22 +375,28 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..showEffectSizes)
             self$.addOption(private$..showOmentumAnalysis)
             self$.addOption(private$..showClinicalSummary)
-            self$.addOption(private$..showGuidedChecklist)
+            self$.addOption(private$..showGuidedInstructions)
+            self$.addOption(private$..showConciseInstructions)
             self$.addOption(private$..showEmpiricalCumulative)
             self$.addOption(private$..showSpatialClustering)
             self$.addOption(private$..showStratifiedAnalysis)
             self$.addOption(private$..showPopulationDetection)
             self$.addOption(private$..showIncrementalYield)
             self$.addOption(private$..showMultifocalAnalysis)
+            self$.addOption(private$..showProbabilityExplanation)
+            self$.addOption(private$..showKeyResults)
+            self$.addOption(private$..showRecommendText)
+            self$.addOption(private$..showInterpretText)
+            self$.addOption(private$..showReferencesText)
             self$.addOption(private$..estimationMethod)
         }),
     active = list(
+        analysisContext = function() private$..analysisContext$value,
         totalSamples = function() private$..totalSamples$value,
         firstDetection = function() private$..firstDetection$value,
         positiveCount = function() private$..positiveCount$value,
         positiveSamplesList = function() private$..positiveSamplesList$value,
         sampleType = function() private$..sampleType$value,
-        groupBy = function() private$..groupBy$value,
         targetConfidence = function() private$..targetConfidence$value,
         maxSamples = function() private$..maxSamples$value,
         bootstrapIterations = function() private$..bootstrapIterations$value,
@@ -388,21 +427,27 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         showEffectSizes = function() private$..showEffectSizes$value,
         showOmentumAnalysis = function() private$..showOmentumAnalysis$value,
         showClinicalSummary = function() private$..showClinicalSummary$value,
-        showGuidedChecklist = function() private$..showGuidedChecklist$value,
+        showGuidedInstructions = function() private$..showGuidedInstructions$value,
+        showConciseInstructions = function() private$..showConciseInstructions$value,
         showEmpiricalCumulative = function() private$..showEmpiricalCumulative$value,
         showSpatialClustering = function() private$..showSpatialClustering$value,
         showStratifiedAnalysis = function() private$..showStratifiedAnalysis$value,
         showPopulationDetection = function() private$..showPopulationDetection$value,
         showIncrementalYield = function() private$..showIncrementalYield$value,
         showMultifocalAnalysis = function() private$..showMultifocalAnalysis$value,
+        showProbabilityExplanation = function() private$..showProbabilityExplanation$value,
+        showKeyResults = function() private$..showKeyResults$value,
+        showRecommendText = function() private$..showRecommendText$value,
+        showInterpretText = function() private$..showInterpretText$value,
+        showReferencesText = function() private$..showReferencesText$value,
         estimationMethod = function() private$..estimationMethod$value),
     private = list(
+        ..analysisContext = NA,
         ..totalSamples = NA,
         ..firstDetection = NA,
         ..positiveCount = NA,
         ..positiveSamplesList = NA,
         ..sampleType = NA,
-        ..groupBy = NA,
         ..targetConfidence = NA,
         ..maxSamples = NA,
         ..bootstrapIterations = NA,
@@ -433,13 +478,19 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..showEffectSizes = NA,
         ..showOmentumAnalysis = NA,
         ..showClinicalSummary = NA,
-        ..showGuidedChecklist = NA,
+        ..showGuidedInstructions = NA,
+        ..showConciseInstructions = NA,
         ..showEmpiricalCumulative = NA,
         ..showSpatialClustering = NA,
         ..showStratifiedAnalysis = NA,
         ..showPopulationDetection = NA,
         ..showIncrementalYield = NA,
         ..showMultifocalAnalysis = NA,
+        ..showProbabilityExplanation = NA,
+        ..showKeyResults = NA,
+        ..showRecommendText = NA,
+        ..showInterpretText = NA,
+        ..showReferencesText = NA,
         ..estimationMethod = NA)
 )
 
@@ -448,9 +499,12 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Group,
     active = list(
         welcome = function() private$.items[["welcome"]],
-        instructions = function() private$.items[["instructions"]],
+        guidedInstructions = function() private$.items[["guidedInstructions"]],
+        conciseInstructions = function() private$.items[["conciseInstructions"]],
         dataInfo = function() private$.items[["dataInfo"]],
         probabilityExplanation = function() private$.items[["probabilityExplanation"]],
+        keyResults = function() private$.items[["keyResults"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         binomialText = function() private$.items[["binomialText"]],
         binomialTable = function() private$.items[["binomialTable"]],
         recommendTable = function() private$.items[["recommendTable"]],
@@ -458,6 +512,20 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         bootstrapTable = function() private$.items[["bootstrapTable"]],
         detectionCurve = function() private$.items[["detectionCurve"]],
         sensitivityPlot = function() private$.items[["sensitivityPlot"]],
+        empiricalCumulativeText = function() private$.items[["empiricalCumulativeText"]],
+        empiricalCumulativeTable = function() private$.items[["empiricalCumulativeTable"]],
+        empiricalCumulativePlot = function() private$.items[["empiricalCumulativePlot"]],
+        incrementalYieldText = function() private$.items[["incrementalYieldText"]],
+        incrementalYieldTable = function() private$.items[["incrementalYieldTable"]],
+        populationDetectionText = function() private$.items[["populationDetectionText"]],
+        populationDetectionTable = function() private$.items[["populationDetectionTable"]],
+        spatialClusteringText = function() private$.items[["spatialClusteringText"]],
+        clusteringTable = function() private$.items[["clusteringTable"]],
+        multifocalText = function() private$.items[["multifocalText"]],
+        multifocalTable = function() private$.items[["multifocalTable"]],
+        stratifiedText = function() private$.items[["stratifiedText"]],
+        prevalenceTable = function() private$.items[["prevalenceTable"]],
+        stratifiedDetectionTable = function() private$.items[["stratifiedDetectionTable"]],
         tumorBurdenText = function() private$.items[["tumorBurdenText"]],
         tumorBurdenInfo = function() private$.items[["tumorBurdenInfo"]],
         cassetteDistribution = function() private$.items[["cassetteDistribution"]],
@@ -469,8 +537,6 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         distributionPatternText = function() private$.items[["distributionPatternText"]],
         distributionPatternTable = function() private$.items[["distributionPatternTable"]],
         distributionComparisonTable = function() private$.items[["distributionComparisonTable"]],
-        recommendText = function() private$.items[["recommendText"]],
-        interpretText = function() private$.items[["interpretText"]],
         hypergeometricText = function() private$.items[["hypergeometricText"]],
         hypergeometricTable = function() private$.items[["hypergeometricTable"]],
         hyperRecommendTable = function() private$.items[["hyperRecommendTable"]],
@@ -484,22 +550,8 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         effectSizesText = function() private$.items[["effectSizesText"]],
         effectSizesTable = function() private$.items[["effectSizesTable"]],
         omentumText = function() private$.items[["omentumText"]],
-        clinicalSummary = function() private$.items[["clinicalSummary"]],
-        keyResults = function() private$.items[["keyResults"]],
-        empiricalCumulativeText = function() private$.items[["empiricalCumulativeText"]],
-        empiricalCumulativeTable = function() private$.items[["empiricalCumulativeTable"]],
-        empiricalCumulativePlot = function() private$.items[["empiricalCumulativePlot"]],
-        spatialClusteringText = function() private$.items[["spatialClusteringText"]],
-        clusteringTable = function() private$.items[["clusteringTable"]],
-        multifocalText = function() private$.items[["multifocalText"]],
-        multifocalTable = function() private$.items[["multifocalTable"]],
-        stratifiedText = function() private$.items[["stratifiedText"]],
-        prevalenceTable = function() private$.items[["prevalenceTable"]],
-        stratifiedDetectionTable = function() private$.items[["stratifiedDetectionTable"]],
-        populationDetectionText = function() private$.items[["populationDetectionText"]],
-        populationDetectionTable = function() private$.items[["populationDetectionTable"]],
-        incrementalYieldText = function() private$.items[["incrementalYieldText"]],
-        incrementalYieldTable = function() private$.items[["incrementalYieldTable"]],
+        recommendText = function() private$.items[["recommendText"]],
+        interpretText = function() private$.items[["interpretText"]],
         referencesText = function() private$.items[["referencesText"]]),
     private = list(),
     public=list(
@@ -511,11 +563,18 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
-                title=""))
+                title="",
+                visible="(is.null(totalSamples) || is.null(firstDetection))"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="instructions",
-                title="Analysis Overview"))
+                name="guidedInstructions",
+                title="Quick Start Checklist",
+                visible="(showGuidedInstructions)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="conciseInstructions",
+                title="Analysis Overview",
+                visible="(showConciseInstructions)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="dataInfo",
@@ -535,7 +594,18 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="probabilityExplanation",
-                title="Understanding Detection Probabilities"))
+                title="Understanding Detection Probabilities",
+                visible="(showProbabilityExplanation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="keyResults",
+                title="Key Results Summary",
+                visible="(showKeyResults)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible="(showClinicalSummary)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="binomialText",
@@ -635,6 +705,248 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 height=450,
                 renderFun=".sensitivityPlot",
                 visible="(showSensitivityCI && showBootstrap)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="empiricalCumulativeText",
+                title="Empirical Cumulative Detection Analysis",
+                visible="(showEmpiricalCumulative)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="empiricalCumulativeTable",
+                title="Empirical Detection Rates by Sample Threshold",
+                visible="(showEmpiricalCumulative)",
+                clearWith=list(
+                    "totalSamples",
+                    "firstDetection",
+                    "positiveCount"),
+                columns=list(
+                    list(
+                        `name`="nSamples", 
+                        `title`="Samples Examined", 
+                        `type`="integer"),
+                    list(
+                        `name`="cumDetection", 
+                        `title`="Cumulative Detection", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ciLower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ciUpper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="incrementalYield", 
+                        `title`="Incremental Yield", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="empiricalCumulativePlot",
+                title="Empirical Cumulative Detection Curve",
+                width=600,
+                height=450,
+                renderFun=".empiricalCumulativePlot",
+                visible="(showEmpiricalCumulative)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="incrementalYieldText",
+                title="Incremental Diagnostic Yield Analysis",
+                visible="(showIncrementalYield)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="incrementalYieldTable",
+                title="Marginal Benefit per Additional Sample",
+                visible="(showIncrementalYield)",
+                clearWith=list(
+                    "totalSamples",
+                    "firstDetection",
+                    "maxSamples"),
+                columns=list(
+                    list(
+                        `name`="fromSamples", 
+                        `title`="From N Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="toSamples", 
+                        `title`="To N+1 Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="incrementalDetection", 
+                        `title`="Additional Detection Rate", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="casesDetected", 
+                        `title`="Additional Cases per 100", 
+                        `type`="number"),
+                    list(
+                        `name`="costBenefit", 
+                        `title`="Cost-Benefit Rating", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="populationDetectionText",
+                title="Population-Level Detection Rates",
+                visible="(showPopulationDetection)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="populationDetectionTable",
+                title="Conditional vs Population Detection",
+                visible="(showPopulationDetection)",
+                clearWith=list(
+                    "totalSamples",
+                    "firstDetection",
+                    "maxSamples"),
+                columns=list(
+                    list(
+                        `name`="nSamples", 
+                        `title`="Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="prevalence", 
+                        `title`="Prevalence", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="conditional", 
+                        `title`="Sensitivity (given present)", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="population", 
+                        `title`="Detection Rate (overall)", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="spatialClusteringText",
+                title="Spatial Clustering Analysis",
+                visible="(showSpatialClustering)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clusteringTable",
+                title="Spatial Distribution Patterns",
+                visible="(showSpatialClustering)",
+                clearWith=list(
+                    "totalSamples",
+                    "positiveSamplesList"),
+                columns=list(
+                    list(
+                        `name`="pattern", 
+                        `title`="Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="meanClusterIndex", 
+                        `title`="Mean Clustering Index", 
+                        `type`="number"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multifocalText",
+                title="Multifocal Detection Analysis",
+                visible="(showMultifocalAnalysis)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multifocalTable",
+                title="Number of Foci Distribution",
+                visible="(showMultifocalAnalysis)",
+                clearWith=list(
+                    "totalSamples",
+                    "positiveSamplesList"),
+                columns=list(
+                    list(
+                        `name`="fociCount", 
+                        `title`="Number of Foci", 
+                        `type`="text"),
+                    list(
+                        `name`="cases", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="meanFirstDetection", 
+                        `title`="Mean First Detection", 
+                        `type`="number"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stratifiedText",
+                title="Stratified Analysis by Sample Type",
+                visible="(showStratifiedAnalysis)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="prevalenceTable",
+                title="Prevalence by Sample Type",
+                visible="(showStratifiedAnalysis)",
+                clearWith=list(
+                    "sampleType",
+                    "firstDetection"),
+                columns=list(
+                    list(
+                        `name`="sampleType", 
+                        `title`="Sample Type", 
+                        `type`="text"),
+                    list(
+                        `name`="totalCases", 
+                        `title`="Total Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="positiveCases", 
+                        `title`="Positive Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="prevalence", 
+                        `title`="Prevalence", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="qEstimate", 
+                        `title`="q (per-sample prob)", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stratifiedDetectionTable",
+                title="Detection Probability by Sample Type and Threshold",
+                visible="(showStratifiedAnalysis)",
+                clearWith=list(
+                    "sampleType",
+                    "firstDetection",
+                    "maxSamples"),
+                columns=list(
+                    list(
+                        `name`="sampleType", 
+                        `title`="Sample Type", 
+                        `type`="text"),
+                    list(
+                        `name`="nSamples", 
+                        `title`="Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="conditionalDetection", 
+                        `title`="P(detect | present)", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="populationDetection", 
+                        `title`="P(detect overall)", 
+                        `type`="number", 
+                        `format`="pc"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tumorBurdenText",
@@ -794,14 +1106,6 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `name`="value", 
                         `title`="Value", 
                         `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="recommendText",
-                title="Clinical Recommendations"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="interpretText",
-                title="Statistical Interpretation"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="hypergeometricText",
@@ -1037,259 +1341,19 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 visible="(showOmentumAnalysis)"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="clinicalSummary",
-                title="Clinical Summary",
-                visible="(showClinicalSummary)"))
+                name="recommendText",
+                title="Clinical Recommendations",
+                visible="(showRecommendText)"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="keyResults",
-                title="Key Results Summary"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="empiricalCumulativeText",
-                title="Empirical Cumulative Detection Analysis",
-                visible="(showEmpiricalCumulative)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="empiricalCumulativeTable",
-                title="Empirical Detection Rates by Sample Threshold",
-                visible="(showEmpiricalCumulative)",
-                clearWith=list(
-                    "totalSamples",
-                    "firstDetection",
-                    "positiveCount"),
-                columns=list(
-                    list(
-                        `name`="nSamples", 
-                        `title`="Samples Examined", 
-                        `type`="integer"),
-                    list(
-                        `name`="cumDetection", 
-                        `title`="Cumulative Detection", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="ciLower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="ciUpper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="incrementalYield", 
-                        `title`="Incremental Yield", 
-                        `type`="number", 
-                        `format`="pc"))))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="empiricalCumulativePlot",
-                title="Empirical Cumulative Detection Curve",
-                width=600,
-                height=450,
-                renderFun=".empiricalCumulativePlot",
-                visible="(showEmpiricalCumulative)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="spatialClusteringText",
-                title="Spatial Clustering Analysis",
-                visible="(showSpatialClustering)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clusteringTable",
-                title="Spatial Distribution Patterns",
-                visible="(showSpatialClustering)",
-                clearWith=list(
-                    "totalSamples",
-                    "positiveSamplesList"),
-                columns=list(
-                    list(
-                        `name`="pattern", 
-                        `title`="Pattern", 
-                        `type`="text"),
-                    list(
-                        `name`="count", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="percent", 
-                        `title`="Percentage", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="meanClusterIndex", 
-                        `title`="Mean Clustering Index", 
-                        `type`="number"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="multifocalText",
-                title="Multifocal Detection Analysis",
-                visible="(showMultifocalAnalysis)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="multifocalTable",
-                title="Number of Foci Distribution",
-                visible="(showMultifocalAnalysis)",
-                clearWith=list(
-                    "totalSamples",
-                    "positiveSamplesList"),
-                columns=list(
-                    list(
-                        `name`="fociCount", 
-                        `title`="Number of Foci", 
-                        `type`="text"),
-                    list(
-                        `name`="cases", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="percent", 
-                        `title`="Percentage", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="meanFirstDetection", 
-                        `title`="Mean First Detection", 
-                        `type`="number"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="stratifiedText",
-                title="Stratified Analysis by Sample Type",
-                visible="(showStratifiedAnalysis)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="prevalenceTable",
-                title="Prevalence by Sample Type",
-                visible="(showStratifiedAnalysis)",
-                clearWith=list(
-                    "sampleType",
-                    "firstDetection"),
-                columns=list(
-                    list(
-                        `name`="sampleType", 
-                        `title`="Sample Type", 
-                        `type`="text"),
-                    list(
-                        `name`="totalCases", 
-                        `title`="Total Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="positiveCases", 
-                        `title`="Positive Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="prevalence", 
-                        `title`="Prevalence", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="qEstimate", 
-                        `title`="q (per-sample prob)", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stratifiedDetectionTable",
-                title="Detection Probability by Sample Type and Threshold",
-                visible="(showStratifiedAnalysis)",
-                clearWith=list(
-                    "sampleType",
-                    "firstDetection",
-                    "maxSamples"),
-                columns=list(
-                    list(
-                        `name`="sampleType", 
-                        `title`="Sample Type", 
-                        `type`="text"),
-                    list(
-                        `name`="nSamples", 
-                        `title`="Samples", 
-                        `type`="integer"),
-                    list(
-                        `name`="conditionalDetection", 
-                        `title`="P(detect | present)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="populationDetection", 
-                        `title`="P(detect overall)", 
-                        `type`="number", 
-                        `format`="pc"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="populationDetectionText",
-                title="Population-Level Detection Rates",
-                visible="(showPopulationDetection)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="populationDetectionTable",
-                title="Conditional vs Population Detection",
-                visible="(showPopulationDetection)",
-                clearWith=list(
-                    "totalSamples",
-                    "firstDetection",
-                    "maxSamples"),
-                columns=list(
-                    list(
-                        `name`="nSamples", 
-                        `title`="Samples", 
-                        `type`="integer"),
-                    list(
-                        `name`="prevalence", 
-                        `title`="Prevalence", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="conditional", 
-                        `title`="Sensitivity (given present)", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="population", 
-                        `title`="Detection Rate (overall)", 
-                        `type`="number", 
-                        `format`="pc"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="incrementalYieldText",
-                title="Incremental Diagnostic Yield Analysis",
-                visible="(showIncrementalYield)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="incrementalYieldTable",
-                title="Marginal Benefit per Additional Sample",
-                visible="(showIncrementalYield)",
-                clearWith=list(
-                    "totalSamples",
-                    "firstDetection",
-                    "maxSamples"),
-                columns=list(
-                    list(
-                        `name`="fromSamples", 
-                        `title`="From N Samples", 
-                        `type`="integer"),
-                    list(
-                        `name`="toSamples", 
-                        `title`="To N+1 Samples", 
-                        `type`="integer"),
-                    list(
-                        `name`="incrementalDetection", 
-                        `title`="Additional Detection Rate", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="casesDetected", 
-                        `title`="Additional Cases per 100", 
-                        `type`="number"),
-                    list(
-                        `name`="costBenefit", 
-                        `title`="Cost-Benefit Rating", 
-                        `type`="text"))))
+                name="interpretText",
+                title="Statistical Interpretation",
+                visible="(showInterpretText)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="referencesText",
-                title="Statistical Methods & References"))}))
+                title="Statistical Methods & References",
+                visible="(showReferencesText)"))}))
 
 pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathsamplingBase",
@@ -1316,12 +1380,20 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data .
-#' @param totalSamples .
-#' @param firstDetection .
+#' @param analysisContext Select the type of pathology sampling analysis: -
+#'   Lymph Node: Adequacy of lymph node dissection - Omentum: Omentum sampling
+#'   in ovarian/gastric cancer - Tumor: Tumor block sampling for VI, EMVI, PNI,
+#'   or budding detection - Margin: Margin sampling adequacy - General: Custom
+#'   sampling adequacy analysis
+#' @param totalSamples Total number of samples examined per case. Examples:
+#'   total tumor blocks examined, total lymph nodes dissected, total omentum
+#'   sections.
+#' @param firstDetection Sample number where outcome was first detected (e.g.,
+#'   which block first showed VI). Leave as NA for negative cases. For positive
+#'   cases, enter the sequential sample number (1, 2, 3, etc.).
 #' @param positiveCount .
 #' @param positiveSamplesList .
 #' @param sampleType .
-#' @param groupBy .
 #' @param targetConfidence .
 #' @param maxSamples .
 #' @param bootstrapIterations .
@@ -1352,20 +1424,36 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showEffectSizes .
 #' @param showOmentumAnalysis .
 #' @param showClinicalSummary .
-#' @param showGuidedChecklist .
+#' @param showGuidedInstructions Display detailed step-by-step checklist with
+#'   examples and common use cases. Best for first-time users and training.
+#' @param showConciseInstructions Display brief analysis overview with
+#'   required variables and methods. Best for experienced users.
 #' @param showEmpiricalCumulative .
 #' @param showSpatialClustering .
 #' @param showStratifiedAnalysis .
 #' @param showPopulationDetection .
 #' @param showIncrementalYield .
 #' @param showMultifocalAnalysis .
+#' @param showProbabilityExplanation Show detailed explanation distinguishing
+#'   conditional vs population-level detection probabilities.
+#' @param showKeyResults Display a concise summary of key findings at the top
+#'   of results.
+#' @param showRecommendText Display context-specific clinical recommendations
+#'   based on analysis results.
+#' @param showInterpretText Show statistical interpretation and guidance for
+#'   result interpretation.
+#' @param showReferencesText Display statistical methods documentation and
+#'   literature references.
 #' @param estimationMethod .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$guidedInstructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$conciseInstructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$probabilityExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$keyResults} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$binomialText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$binomialTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$recommendTable} \tab \tab \tab \tab \tab a table \cr
@@ -1373,6 +1461,20 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detectionCurve} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$sensitivityPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$empiricalCumulativeText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$empiricalCumulativeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$empiricalCumulativePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$incrementalYieldText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$incrementalYieldTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$populationDetectionText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$populationDetectionTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spatialClusteringText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clusteringTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multifocalText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multifocalTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$prevalenceTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedDetectionTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tumorBurdenText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tumorBurdenInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cassetteDistribution} \tab \tab \tab \tab \tab a table \cr
@@ -1384,8 +1486,6 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$distributionPatternText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$distributionPatternTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$distributionComparisonTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$recommendText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$interpretText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$hypergeometricText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$hypergeometricTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$hyperRecommendTable} \tab \tab \tab \tab \tab a table \cr
@@ -1399,22 +1499,8 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$effectSizesText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$effectSizesTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$omentumText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$keyResults} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$empiricalCumulativeText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$empiricalCumulativeTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$empiricalCumulativePlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$spatialClusteringText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clusteringTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$multifocalText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$multifocalTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stratifiedText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$prevalenceTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stratifiedDetectionTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$populationDetectionText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$populationDetectionTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$incrementalYieldText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$incrementalYieldTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$recommendText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interpretText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$referencesText} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -1427,12 +1513,12 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 pathsampling <- function(
     data,
-    totalSamples,
-    firstDetection,
+    analysisContext = "general",
+    totalSamples = NULL,
+    firstDetection = NULL,
     positiveCount = NULL,
     positiveSamplesList = NULL,
     sampleType = NULL,
-    groupBy = NULL,
     targetConfidence = 0.95,
     maxSamples = 10,
     bootstrapIterations = 10000,
@@ -1463,13 +1549,19 @@ pathsampling <- function(
     showEffectSizes = FALSE,
     showOmentumAnalysis = FALSE,
     showClinicalSummary = FALSE,
-    showGuidedChecklist = FALSE,
+    showGuidedInstructions = FALSE,
+    showConciseInstructions = FALSE,
     showEmpiricalCumulative = FALSE,
     showSpatialClustering = FALSE,
     showStratifiedAnalysis = FALSE,
     showPopulationDetection = FALSE,
     showIncrementalYield = FALSE,
     showMultifocalAnalysis = FALSE,
+    showProbabilityExplanation = FALSE,
+    showKeyResults = FALSE,
+    showRecommendText = FALSE,
+    showInterpretText = FALSE,
+    showReferencesText = FALSE,
     estimationMethod = "auto") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -1480,7 +1572,6 @@ pathsampling <- function(
     if ( ! missing(positiveCount)) positiveCount <- jmvcore::resolveQuo(jmvcore::enquo(positiveCount))
     if ( ! missing(positiveSamplesList)) positiveSamplesList <- jmvcore::resolveQuo(jmvcore::enquo(positiveSamplesList))
     if ( ! missing(sampleType)) sampleType <- jmvcore::resolveQuo(jmvcore::enquo(sampleType))
-    if ( ! missing(groupBy)) groupBy <- jmvcore::resolveQuo(jmvcore::enquo(groupBy))
     if ( ! missing(positiveCassettes)) positiveCassettes <- jmvcore::resolveQuo(jmvcore::enquo(positiveCassettes))
     if ( ! missing(maxPositiveSingle)) maxPositiveSingle <- jmvcore::resolveQuo(jmvcore::enquo(maxPositiveSingle))
     if ( ! missing(totalPopulation)) totalPopulation <- jmvcore::resolveQuo(jmvcore::enquo(totalPopulation))
@@ -1495,7 +1586,6 @@ pathsampling <- function(
             `if`( ! missing(positiveCount), positiveCount, NULL),
             `if`( ! missing(positiveSamplesList), positiveSamplesList, NULL),
             `if`( ! missing(sampleType), sampleType, NULL),
-            `if`( ! missing(groupBy), groupBy, NULL),
             `if`( ! missing(positiveCassettes), positiveCassettes, NULL),
             `if`( ! missing(maxPositiveSingle), maxPositiveSingle, NULL),
             `if`( ! missing(totalPopulation), totalPopulation, NULL),
@@ -1504,15 +1594,14 @@ pathsampling <- function(
             `if`( ! missing(positiveLymphNodes), positiveLymphNodes, NULL))
 
     for (v in sampleType) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in groupBy) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- pathsamplingOptions$new(
+        analysisContext = analysisContext,
         totalSamples = totalSamples,
         firstDetection = firstDetection,
         positiveCount = positiveCount,
         positiveSamplesList = positiveSamplesList,
         sampleType = sampleType,
-        groupBy = groupBy,
         targetConfidence = targetConfidence,
         maxSamples = maxSamples,
         bootstrapIterations = bootstrapIterations,
@@ -1543,13 +1632,19 @@ pathsampling <- function(
         showEffectSizes = showEffectSizes,
         showOmentumAnalysis = showOmentumAnalysis,
         showClinicalSummary = showClinicalSummary,
-        showGuidedChecklist = showGuidedChecklist,
+        showGuidedInstructions = showGuidedInstructions,
+        showConciseInstructions = showConciseInstructions,
         showEmpiricalCumulative = showEmpiricalCumulative,
         showSpatialClustering = showSpatialClustering,
         showStratifiedAnalysis = showStratifiedAnalysis,
         showPopulationDetection = showPopulationDetection,
         showIncrementalYield = showIncrementalYield,
         showMultifocalAnalysis = showMultifocalAnalysis,
+        showProbabilityExplanation = showProbabilityExplanation,
+        showKeyResults = showKeyResults,
+        showRecommendText = showRecommendText,
+        showInterpretText = showInterpretText,
+        showReferencesText = showReferencesText,
         estimationMethod = estimationMethod)
 
     analysis <- pathsamplingClass$new(

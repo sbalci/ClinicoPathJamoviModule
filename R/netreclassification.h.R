@@ -40,7 +40,14 @@ netreclassificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             stratified_analysis = FALSE,
             subgroup_var = NULL,
             alpha_level = 0.05,
-            random_seed = 123, ...) {
+            random_seed = 123,
+            category_free_nri = FALSE,
+            event_specific_nri = FALSE,
+            clinical_nri_custom = FALSE,
+            reclassification_visualization = TRUE,
+            relative_nri = FALSE,
+            weighted_nri = FALSE,
+            utility_weights = "1, 2, 4, 8", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -231,6 +238,34 @@ netreclassificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 default=123,
                 min=1,
                 max=999999)
+            private$..category_free_nri <- jmvcore::OptionBool$new(
+                "category_free_nri",
+                category_free_nri,
+                default=FALSE)
+            private$..event_specific_nri <- jmvcore::OptionBool$new(
+                "event_specific_nri",
+                event_specific_nri,
+                default=FALSE)
+            private$..clinical_nri_custom <- jmvcore::OptionBool$new(
+                "clinical_nri_custom",
+                clinical_nri_custom,
+                default=FALSE)
+            private$..reclassification_visualization <- jmvcore::OptionBool$new(
+                "reclassification_visualization",
+                reclassification_visualization,
+                default=TRUE)
+            private$..relative_nri <- jmvcore::OptionBool$new(
+                "relative_nri",
+                relative_nri,
+                default=FALSE)
+            private$..weighted_nri <- jmvcore::OptionBool$new(
+                "weighted_nri",
+                weighted_nri,
+                default=FALSE)
+            private$..utility_weights <- jmvcore::OptionString$new(
+                "utility_weights",
+                utility_weights,
+                default="1, 2, 4, 8")
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..baseline_risk)
@@ -267,6 +302,13 @@ netreclassificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..subgroup_var)
             self$.addOption(private$..alpha_level)
             self$.addOption(private$..random_seed)
+            self$.addOption(private$..category_free_nri)
+            self$.addOption(private$..event_specific_nri)
+            self$.addOption(private$..clinical_nri_custom)
+            self$.addOption(private$..reclassification_visualization)
+            self$.addOption(private$..relative_nri)
+            self$.addOption(private$..weighted_nri)
+            self$.addOption(private$..utility_weights)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -303,7 +345,14 @@ netreclassificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         stratified_analysis = function() private$..stratified_analysis$value,
         subgroup_var = function() private$..subgroup_var$value,
         alpha_level = function() private$..alpha_level$value,
-        random_seed = function() private$..random_seed$value),
+        random_seed = function() private$..random_seed$value,
+        category_free_nri = function() private$..category_free_nri$value,
+        event_specific_nri = function() private$..event_specific_nri$value,
+        clinical_nri_custom = function() private$..clinical_nri_custom$value,
+        reclassification_visualization = function() private$..reclassification_visualization$value,
+        relative_nri = function() private$..relative_nri$value,
+        weighted_nri = function() private$..weighted_nri$value,
+        utility_weights = function() private$..utility_weights$value),
     private = list(
         ..outcome = NA,
         ..baseline_risk = NA,
@@ -339,7 +388,14 @@ netreclassificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..stratified_analysis = NA,
         ..subgroup_var = NA,
         ..alpha_level = NA,
-        ..random_seed = NA)
+        ..random_seed = NA,
+        ..category_free_nri = NA,
+        ..event_specific_nri = NA,
+        ..clinical_nri_custom = NA,
+        ..reclassification_visualization = NA,
+        ..relative_nri = NA,
+        ..weighted_nri = NA,
+        ..utility_weights = NA)
 )
 
 netreclassificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -681,7 +737,7 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 package = "ClinicoPath",
                 name = "netreclassification",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = netreclassificationResults$new(options=options),
                 data = data,
@@ -804,6 +860,26 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   intervals. Standard value is 0.05 for 95\% confidence.
 #' @param random_seed Random seed for bootstrap sampling and cross-validation.
 #'   Ensures reproducible results across analyses.
+#' @param category_free_nri Calculate category-free (continuous) NRI without
+#'   predefined risk categories. Provides unbiased assessment of
+#'   reclassification across entire risk spectrum.
+#' @param event_specific_nri Calculate NRI separately for events and
+#'   non-events with detailed breakdowns. Essential for understanding which
+#'   population benefits most from new model.
+#' @param clinical_nri_custom Use clinically validated custom risk categories
+#'   instead of statistical thresholds. More appropriate for guideline-based
+#'   risk assessment.
+#' @param reclassification_visualization Create comprehensive visualization
+#'   including Sankey diagrams and heatmaps for reclassification patterns.
+#' @param relative_nri Calculate relative NRI metrics normalized by baseline
+#'   model performance. Useful for comparing improvements across different
+#'   populations.
+#' @param weighted_nri Weight reclassification by clinical importance using
+#'   utility weights. Accounts for differential clinical impact of risk
+#'   categories.
+#' @param utility_weights Comma-separated weights for each risk category (low
+#'   to high). Higher weights emphasize importance of correctly classifying
+#'   high-risk individuals.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -864,7 +940,14 @@ netreclassification <- function(
     stratified_analysis = FALSE,
     subgroup_var,
     alpha_level = 0.05,
-    random_seed = 123) {
+    random_seed = 123,
+    category_free_nri = FALSE,
+    event_specific_nri = FALSE,
+    clinical_nri_custom = FALSE,
+    reclassification_visualization = TRUE,
+    relative_nri = FALSE,
+    weighted_nri = FALSE,
+    utility_weights = "1, 2, 4, 8") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("netreclassification requires jmvcore to be installed (restart may be required)")
@@ -920,7 +1003,14 @@ netreclassification <- function(
         stratified_analysis = stratified_analysis,
         subgroup_var = subgroup_var,
         alpha_level = alpha_level,
-        random_seed = random_seed)
+        random_seed = random_seed,
+        category_free_nri = category_free_nri,
+        event_specific_nri = event_specific_nri,
+        clinical_nri_custom = clinical_nri_custom,
+        reclassification_visualization = reclassification_visualization,
+        relative_nri = relative_nri,
+        weighted_nri = weighted_nri,
+        utility_weights = utility_weights)
 
     analysis <- netreclassificationClass$new(
         options = options,
