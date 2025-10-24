@@ -16,7 +16,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Event Indicator (1=event, 0=censored)
+        label: Event Indicator
         children:
           - type: VariablesListBox
             name: event
@@ -32,77 +32,68 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Time Points for Evaluation
-        children:
-          - type: TextBox
-            name: time_points
-            format: string
+      - type: TextBox
+        name: time_points
+        format: string
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Threshold Range
-        children:
-          - type: TextBox
-            name: threshold_range_min
-            format: number
-          - type: TextBox
-            name: threshold_range_max
-            format: number
-          - type: TextBox
-            name: threshold_steps
-            format: number
+      - type: TextBox
+        name: threshold_range_min
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Reference Strategy
-        children:
-          - type: ComboBox
-            name: reference_strategy
+      - type: TextBox
+        name: threshold_range_max
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Survival Estimation Method
-        children:
-          - type: ComboBox
-            name: estimate_survival
-          - type: CheckBox
-            name: smoothing
+      - type: TextBox
+        name: threshold_steps
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Confidence Intervals
-        children:
-          - type: CheckBox
-            name: confidence_intervals
-          - type: TextBox
-            name: bootstrap_samples
-            format: number
-          - type: TextBox
-            name: confidence_level
-            format: number
+      - type: ComboBox
+        name: reference_strategy
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Plots
-        children:
-          - type: CheckBox
-            name: plot_net_benefit
-          - type: CheckBox
-            name: plot_by_timepoint
-          - type: CheckBox
-            name: plot_interventions_avoided
+      - type: ComboBox
+        name: estimate_survival
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Random Seed
-        children:
-          - type: TextBox
-            name: random_seed
-            format: number
+      - type: CheckBox
+        name: smoothing
+      - type: CheckBox
+        name: confidence_intervals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: plot_net_benefit
+      - type: CheckBox
+        name: plot_by_timepoint
+      - type: CheckBox
+        name: plot_interventions_avoided
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: random_seed
+        format: number

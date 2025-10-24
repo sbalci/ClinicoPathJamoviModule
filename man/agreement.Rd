@@ -33,7 +33,18 @@ agreement(
   testClusterHomogeneity = FALSE,
   clusterRankings = FALSE,
   showSummary = FALSE,
-  showAbout = FALSE
+  showAbout = FALSE,
+  consensusVar = FALSE,
+  consensusRule = "majority",
+  tieBreaker = "exclude",
+  consensusName = "consensus_score",
+  referenceRater,
+  rankRaters = TRUE,
+  loaVariable = FALSE,
+  loaThresholds = "custom",
+  loaHighThreshold = 75,
+  loaLowThreshold = 56,
+  loaVarName = "loa_category"
 )
 }
 \arguments{
@@ -163,6 +174,46 @@ reports and presentations.}
 
 \item{showAbout}{Display an explanatory panel describing what this analysis
 does, when to use it, and how to interpret results.}
+
+\item{consensusVar}{Calculate consensus (modal) score across raters and add
+as new computed column. Essential for multi-rater studies requiring a
+reference standard.}
+
+\item{consensusRule}{Rule for defining consensus. Simple majority = modal
+category with >50\\% of votes. Supermajority requires ≥75\\% agreement.
+Unanimous requires 100\\% agreement.}
+
+\item{tieBreaker}{How to handle ties (e.g., 50-50 split). Exclude = set
+consensus to NA for tied cases. First = use first category that appears.
+Lowest/Highest = use min/max of tied categories.}
+
+\item{consensusName}{Name of the new computed variable to be added to the
+dataset.}
+
+\item{referenceRater}{Select a reference rater (e.g., consensus score, gold
+standard, senior pathologist). Each selected rater will be compared
+pairwise with this reference, producing individual kappas. Essential for
+training assessment, rater certification, and performance monitoring.}
+
+\item{rankRaters}{Rank raters from highest to lowest kappa (relative to
+reference). Shows best and worst performing raters for quality control and
+training needs.}
+
+\item{loaVariable}{Calculate level of agreement (LoA) for each case and add
+as new computed column. Categorizes cases as
+Absolute/High/Moderate/Low/Poor agreement based on proportion of raters
+agreeing. Useful for identifying difficult cases and quality control.}
+
+\item{loaThresholds}{How to define LoA categories. Custom = user-defined
+cutpoints. Quartiles/Tertiles = data-driven splits.}
+
+\item{loaHighThreshold}{Minimum \\% agreement for "High" LoA (e.g., 75\\% =
+≥12/16 raters for N=16).}
+
+\item{loaLowThreshold}{Minimum \\% agreement for "Low" LoA (e.g., 56\\% =
+≥9/16 raters for N=16).}
+
+\item{loaVarName}{Name of the new computed variable for level of agreement.}
 }
 \value{
 A results object containing:
@@ -188,6 +239,11 @@ A results object containing:
 \code{results$clusterSpecificKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterHomogeneityTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterRankingsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$headingPairwise} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$headingLoA} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 }

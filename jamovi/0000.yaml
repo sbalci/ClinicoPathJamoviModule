@@ -1248,7 +1248,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -5216,7 +5216,7 @@ analyses:
     name: brierscore
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Survival Model Validation
     menuTitle: Brier Score & Integrated Brier Score
     menuSubtitle: Calibration accuracy for time-to-event predictions
@@ -5357,6 +5357,85 @@ analyses:
       chance performance. Essential for validating biomarkers, imaging features,
       and AI models in multi-class clinicopathological applications where binary
       classification is insufficient.
+  - title: Entropy and Mutual Information Analysis
+    name: entropyanalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Medical Decision Analysis
+    menuTitle: Entropy Analysis
+    menuSubtitle: AI uncertainty quantification and information metrics
+    description: >-
+      Entropy and Mutual Information analysis quantifies uncertainty in AI
+      predictions
+
+      and measures information gain from diagnostic tests or features.
+  - title: Generalized ROC Analysis
+    name: generalizedroc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Medical Decision Analysis
+    menuTitle: Generalized ROC Analysis
+    menuSubtitle: ROC for continuous outcomes with unequal variance
+    description: >-
+      Generalized ROC (gROC) Analysis extends traditional binary ROC to handle
+
+      continuous or ordinal outcomes, particularly when the outcome
+      distributions
+
+      have unequal variances across groups.
+  - title: Multi-class ROC Analysis
+    name: multiclassroc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Medical Decision Analysis
+    menuTitle: Multi-class ROC Analysis
+    menuSubtitle: ROC curves for >2 diagnostic classes
+    description: >-
+      Multi-class ROC Analysis for evaluating diagnostic performance with 3 or
+      more
+
+      diagnostic classes. This analysis extends traditional binary ROC to handle
+
+      multi-category outcomes using one-vs-rest, one-vs-one, and global
+      approaches.
+  - title: Precision-Recall Analysis
+    name: prauc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: ROC Analysis
+    menuTitle: Precision-Recall Analysis
+    menuSubtitle: PR curves for imbalanced datasets
+    description: >
+      Precision-Recall (PR) analysis is superior to ROC analysis for highly
+      imbalanced datasets, which are common in digital pathology and AI
+      applications. While ROC curves can be misleading when the negative class
+      vastly outnumbers the positive class, PR curves focus on the performance
+      in the minority (positive) class. The area under the PR curve (PR-AUC or
+      Average Precision) provides a single-number summary of model performance.
+      PR analysis is essential for evaluating rare event detection (mitotic
+      figures <1%, rare tumor cells, micrometastases), cancer screening where
+      positives are rare, quality control in digital pathology where defects are
+      uncommon, and AI triage systems where abnormal cases are infrequent. This
+      module provides comprehensive PR analysis with optimal threshold
+      selection, comparison to baseline (random classifier), and F-score
+      optimization for different precision-recall trade-offs.
+  - title: Time-Dependent Decision Curve Analysis
+    name: timedependentdca
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Medical Decision Analysis
+    menuTitle: Time-Dependent DCA
+    menuSubtitle: Net benefit for survival and longitudinal data
+    description: >-
+      Time-Dependent Decision Curve Analysis (tdDCA) extends standard DCA to
+
+      evaluate the clinical utility of prognostic models with time-to-event
+      outcomes.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

@@ -275,6 +275,7 @@ Imports:
     RANN,
     fastICA,
     ResourceSelection,
+    PredictABEL,
     ggsegmentedtotalbar,
     tools,
     base64enc,

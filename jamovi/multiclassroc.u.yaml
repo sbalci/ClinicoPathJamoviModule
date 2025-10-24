@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome Variable (Categorical, 3+ levels)
+        label: Outcome Variable (Categorical)
         children:
           - type: VariablesListBox
             name: outcome
@@ -24,75 +24,60 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Multi-class Method
-        children:
-          - type: ComboBox
-            name: method
+      - type: ComboBox
+        name: method
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Summary Statistics
-        children:
-          - type: CheckBox
-            name: calculate_macro_auc
-          - type: CheckBox
-            name: calculate_micro_auc
-          - type: CheckBox
-            name: calculate_weighted_auc
+      - type: CheckBox
+        name: calculate_macro_auc
+      - type: CheckBox
+        name: calculate_micro_auc
+      - type: CheckBox
+        name: calculate_weighted_auc
+      - type: CheckBox
+        name: confidence_intervals
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Confidence Intervals
-        children:
-          - type: CheckBox
-            name: confidence_intervals
+      - type: ComboBox
+        name: ci_method
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: CI Options
-        children:
-          - type: ComboBox
-            name: ci_method
-          - type: TextBox
-            name: bootstrap_samples
-            format: number
-          - type: TextBox
-            name: confidence_level
-            format: number
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Additional Output
-        children:
-          - type: CheckBox
-            name: pairwise_comparisons
-          - type: CheckBox
-            name: confusion_matrix
-          - type: CheckBox
-            name: class_metrics
+      - type: TextBox
+        name: confidence_level
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Plots
-        children:
-          - type: CheckBox
-            name: plot_roc_curves
-          - type: ComboBox
-            name: plot_method
-          - type: CheckBox
-            name: plot_diagonal
+      - type: CheckBox
+        name: pairwise_comparisons
+      - type: CheckBox
+        name: confusion_matrix
+      - type: CheckBox
+        name: class_metrics
+      - type: CheckBox
+        name: plot_roc_curves
   - type: LayoutBox
     margin: large
     children:
-      - type: Label
-        label: Random Seed
-        children:
-          - type: TextBox
-            name: random_seed
-            format: number
+      - type: ComboBox
+        name: plot_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: plot_diagonal
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: random_seed
+        format: number
