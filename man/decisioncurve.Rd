@@ -33,7 +33,20 @@ decisioncurve(
   weightedAUC = FALSE,
   clinicalDecisionRule = FALSE,
   decisionRuleThreshold = 0.15,
-  decisionRuleLabel = "Clinical Rule"
+  decisionRuleLabel = "Clinical Rule",
+  showClinicalImpactPlot = FALSE,
+  showNetBenefitCI = FALSE,
+  costBenefitAnalysis = FALSE,
+  testCost = 100,
+  treatmentCost = 1000,
+  benefitCorrectTreatment = 10000,
+  harmFalseTreatment = 500,
+  showStandardizedNetBenefit = FALSE,
+  multiModelComparison = TRUE,
+  comparisonMethod = "bootstrap",
+  showDecisionConsequences = TRUE,
+  resourceUtilization = FALSE,
+  showRelativeUtility = FALSE
 )
 }
 \arguments{
@@ -111,6 +124,44 @@ rule (e.g., "screen if risk > 15\\%").}
 
 \item{decisionRuleLabel}{Label for the clinical decision rule in plots and
 tables.}
+
+\item{showClinicalImpactPlot}{Display clinical impact plot showing number
+of true positives and false positives per population unit across threshold
+probabilities.}
+
+\item{showNetBenefitCI}{Display confidence intervals around net benefit
+curves in the decision curve plot.}
+
+\item{costBenefitAnalysis}{Perform cost-benefit analysis incorporating
+costs of testing, treatment, and outcomes.}
+
+\item{testCost}{Cost per test or screening procedure (in currency units).}
+
+\item{treatmentCost}{Cost of treatment or intervention (in currency units).}
+
+\item{benefitCorrectTreatment}{Monetary benefit or QALY-equivalent value of
+correctly treating a true positive.}
+
+\item{harmFalseTreatment}{Cost or harm of treating a false positive
+(unnecessary treatment).}
+
+\item{showStandardizedNetBenefit}{Calculate and display standardized net
+benefit (net benefit per 100 patients).}
+
+\item{multiModelComparison}{Perform comprehensive pairwise comparisons
+between all models with statistical tests.}
+
+\item{comparisonMethod}{Statistical method for comparing decision curves
+between models.}
+
+\item{showDecisionConsequences}{Show detailed table of decision
+consequences (TP, FP, TN, FN) at selected thresholds.}
+
+\item{resourceUtilization}{Calculate resource utilization metrics (tests
+performed, treatments administered).}
+
+\item{showRelativeUtility}{Display relative utility curve comparing each
+model to default strategies.}
 }
 \value{
 A results object containing:
@@ -123,9 +174,15 @@ A results object containing:
 \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$weightedAUCTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$dcaPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab Number of true/false positives per population unit \cr
 \code{results$interventionsAvoidedPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
+\code{results$costBenefitTable} \tab \tab \tab \tab \tab Cost-benefit analysis at selected thresholds \cr
+\code{results$decisionConsequencesTable} \tab \tab \tab \tab \tab Detailed consequences at selected thresholds \cr
+\code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Pairwise statistical comparison of models \cr
+\code{results$resourceUtilizationTable} \tab \tab \tab \tab \tab Resource utilization at selected thresholds \cr
+\code{results$relativeUtilityPlot} \tab \tab \tab \tab \tab Relative utility compared to default strategies \cr
+\code{results$standardizedNetBenefitPlot} \tab \tab \tab \tab \tab Net benefit per 100 patients \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

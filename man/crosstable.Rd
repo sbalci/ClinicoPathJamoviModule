@@ -11,7 +11,10 @@ crosstable(
   sty = "nejm",
   excl = FALSE,
   cont = "mean",
-  pcat = "chisq"
+  pcat = "chisq",
+  stratify = NULL,
+  mantel_haenszel = FALSE,
+  breslow_day = FALSE
 )
 }
 \arguments{
@@ -29,6 +32,17 @@ table.}
 \item{cont}{.}
 
 \item{pcat}{.}
+
+\item{stratify}{Variable for stratified analysis (Mantel-Haenszel test).
+Controls for confounding when comparing groups across strata.}
+
+\item{mantel_haenszel}{Perform Mantel-Haenszel chi-square test for
+stratified 2x2 tables. Tests association between row and column variables
+controlling for stratification. Provides common odds ratio estimate across
+strata.}
+
+\item{breslow_day}{Test whether odds ratios are homogeneous across strata.
+Only applicable when Mantel-Haenszel test is enabled.}
 }
 \value{
 A results object containing:
@@ -42,6 +56,7 @@ A results object containing:
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
+\code{results$mantelHaenszelResults} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

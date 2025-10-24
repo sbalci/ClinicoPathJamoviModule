@@ -45,7 +45,12 @@ idi(
   calibration_aware = FALSE,
   time_dependent = FALSE,
   alpha_level = 0.05,
-  random_seed = 123
+  random_seed = 123,
+  relative_idi = FALSE,
+  idi_competing_risks = FALSE,
+  visual_discrimination_slopes = TRUE,
+  idi_trajectory = FALSE,
+  prediction_error_curves = FALSE
 )
 }
 \arguments{
@@ -178,6 +183,25 @@ intervals. Standard value is 0.05 for 95\\% confidence.}
 
 \item{random_seed}{Random seed for bootstrap sampling and cross-validation.
 Ensures reproducible results across analyses.}
+
+\item{relative_idi}{Calculate relative IDI as percentage improvement over
+baseline discrimination. More interpretable for comparing models across
+different populations.}
+
+\item{idi_competing_risks}{Calculate cause-specific IDI for competing risks
+data. Accounts for multiple event types in discrimination improvement.}
+
+\item{visual_discrimination_slopes}{Create enhanced visualizations of
+discrimination slopes with density plots. Shows separation between events
+and non-events for both models.}
+
+\item{idi_trajectory}{Analyze how IDI changes over time for time-to-event
+outcomes. Useful for understanding when discrimination improvement is
+largest.}
+
+\item{prediction_error_curves}{Plot prediction error curves alongside IDI
+to visualize improvement. Shows integrated Brier score differences over
+time.}
 }
 \value{
 A results object containing:

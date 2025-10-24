@@ -6,66 +6,80 @@
 \usage{
 pathsampling(
   data,
-  totalSamples,
-  firstDetection,
-  positiveCount,
-  positiveSamplesList,
-  sampleType,
-  groupBy,
+  analysisContext = "general",
+  totalSamples = NULL,
+  firstDetection = NULL,
+  positiveCount = NULL,
+  positiveSamplesList = NULL,
+  sampleType = NULL,
   targetConfidence = 0.95,
   maxSamples = 10,
   bootstrapIterations = 10000,
-  showBinomialModel = TRUE,
-  showBootstrap = TRUE,
-  showDetectionCurve = TRUE,
-  showSensitivityCI = TRUE,
-  setSeed = TRUE,
+  showBinomialModel = FALSE,
+  showBootstrap = FALSE,
+  showDetectionCurve = FALSE,
+  showSensitivityCI = FALSE,
+  setSeed = FALSE,
   seedValue = 42,
-  positiveCassettes,
-  maxPositiveSingle,
+  positiveCassettes = NULL,
+  maxPositiveSingle = NULL,
   showTumorBurden = FALSE,
-  showStageMigration = TRUE,
+  showStageMigration = FALSE,
   showCorrelation = FALSE,
   showDistributionPattern = FALSE,
   distributionThreshold = 5,
   modelType = "binomial",
-  totalPopulation,
-  successStates,
+  totalPopulation = NULL,
+  successStates = NULL,
   targetDetections = 1,
   showHypergeometric = FALSE,
   showBetaBinomial = FALSE,
-  totalLymphNodes,
-  positiveLymphNodes,
+  totalLymphNodes = NULL,
+  positiveLymphNodes = NULL,
   showLNAnalysis = FALSE,
   lnrThreshold1 = 0.1,
   lnrThreshold2 = 0.3,
   showEffectSizes = FALSE,
   showOmentumAnalysis = FALSE,
-  showClinicalSummary = TRUE,
-  showGuidedChecklist = TRUE,
+  showClinicalSummary = FALSE,
+  showGuidedInstructions = FALSE,
+  showConciseInstructions = FALSE,
   showEmpiricalCumulative = FALSE,
   showSpatialClustering = FALSE,
   showStratifiedAnalysis = FALSE,
   showPopulationDetection = FALSE,
   showIncrementalYield = FALSE,
   showMultifocalAnalysis = FALSE,
+  showProbabilityExplanation = FALSE,
+  showKeyResults = FALSE,
+  showRecommendText = FALSE,
+  showInterpretText = FALSE,
+  showReferencesText = FALSE,
   estimationMethod = "auto"
 )
 }
 \arguments{
 \item{data}{.}
 
-\item{totalSamples}{.}
+\item{analysisContext}{Select the type of pathology sampling analysis: -
+Lymph Node: Adequacy of lymph node dissection - Omentum: Omentum sampling
+in ovarian/gastric cancer - Tumor: Tumor block sampling for VI, EMVI, PNI,
+or budding detection - Margin: Margin sampling adequacy - General: Custom
+sampling adequacy analysis}
 
-\item{firstDetection}{.}
+\item{totalSamples}{Total number of samples examined per case. Examples:
+total tumor blocks examined, total lymph nodes dissected, total omentum
+sections.}
+
+\item{firstDetection}{Sample number where outcome was first detected (e.g.,
+which block first showed VI). Leave as NA for negative cases. For positive
+cases, enter the sequential sample number (1, 2, 3, etc.).}
 
 \item{positiveCount}{.}
 
 \item{positiveSamplesList}{.}
 
 \item{sampleType}{.}
-
-\item{groupBy}{.}
 
 \item{targetConfidence}{.}
 
@@ -127,7 +141,11 @@ pathsampling(
 
 \item{showClinicalSummary}{.}
 
-\item{showGuidedChecklist}{.}
+\item{showGuidedInstructions}{Display detailed step-by-step checklist with
+examples and common use cases. Best for first-time users and training.}
+
+\item{showConciseInstructions}{Display brief analysis overview with
+required variables and methods. Best for experienced users.}
 
 \item{showEmpiricalCumulative}{.}
 
@@ -141,14 +159,33 @@ pathsampling(
 
 \item{showMultifocalAnalysis}{.}
 
+\item{showProbabilityExplanation}{Show detailed explanation distinguishing
+conditional vs population-level detection probabilities.}
+
+\item{showKeyResults}{Display a concise summary of key findings at the top
+of results.}
+
+\item{showRecommendText}{Display context-specific clinical recommendations
+based on analysis results.}
+
+\item{showInterpretText}{Show statistical interpretation and guidance for
+result interpretation.}
+
+\item{showReferencesText}{Display statistical methods documentation and
+literature references.}
+
 \item{estimationMethod}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$guidedInstructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$conciseInstructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
+\code{results$probabilityExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$keyResults} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$binomialText} \tab \tab \tab \tab \tab a html \cr
 \code{results$binomialTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$recommendTable} \tab \tab \tab \tab \tab a table \cr
@@ -156,6 +193,20 @@ A results object containing:
 \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$detectionCurve} \tab \tab \tab \tab \tab an image \cr
 \code{results$sensitivityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$empiricalCumulativeText} \tab \tab \tab \tab \tab a html \cr
+\code{results$empiricalCumulativeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$empiricalCumulativePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$incrementalYieldText} \tab \tab \tab \tab \tab a html \cr
+\code{results$incrementalYieldTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$populationDetectionText} \tab \tab \tab \tab \tab a html \cr
+\code{results$populationDetectionTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$spatialClusteringText} \tab \tab \tab \tab \tab a html \cr
+\code{results$clusteringTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$multifocalText} \tab \tab \tab \tab \tab a html \cr
+\code{results$multifocalTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedText} \tab \tab \tab \tab \tab a html \cr
+\code{results$prevalenceTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedDetectionTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tumorBurdenText} \tab \tab \tab \tab \tab a html \cr
 \code{results$tumorBurdenInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$cassetteDistribution} \tab \tab \tab \tab \tab a table \cr
@@ -167,8 +218,6 @@ A results object containing:
 \code{results$distributionPatternText} \tab \tab \tab \tab \tab a html \cr
 \code{results$distributionPatternTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$distributionComparisonTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$recommendText} \tab \tab \tab \tab \tab a html \cr
-\code{results$interpretText} \tab \tab \tab \tab \tab a html \cr
 \code{results$hypergeometricText} \tab \tab \tab \tab \tab a html \cr
 \code{results$hypergeometricTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$hyperRecommendTable} \tab \tab \tab \tab \tab a table \cr
@@ -182,22 +231,8 @@ A results object containing:
 \code{results$effectSizesText} \tab \tab \tab \tab \tab a html \cr
 \code{results$effectSizesTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$omentumText} \tab \tab \tab \tab \tab a html \cr
-\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$keyResults} \tab \tab \tab \tab \tab a html \cr
-\code{results$empiricalCumulativeText} \tab \tab \tab \tab \tab a html \cr
-\code{results$empiricalCumulativeTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$empiricalCumulativePlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$spatialClusteringText} \tab \tab \tab \tab \tab a html \cr
-\code{results$clusteringTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$multifocalText} \tab \tab \tab \tab \tab a html \cr
-\code{results$multifocalTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$stratifiedText} \tab \tab \tab \tab \tab a html \cr
-\code{results$prevalenceTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$stratifiedDetectionTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$populationDetectionText} \tab \tab \tab \tab \tab a html \cr
-\code{results$populationDetectionTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$incrementalYieldText} \tab \tab \tab \tab \tab a html \cr
-\code{results$incrementalYieldTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$recommendText} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretText} \tab \tab \tab \tab \tab a html \cr
 \code{results$referencesText} \tab \tab \tab \tab \tab a html \cr
 }
 
