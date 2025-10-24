@@ -23,6 +23,11 @@ aivalidation(
   calculateNRI = TRUE,
   calculateIDI = TRUE,
   youdensJ = TRUE,
+  matthewsCC = TRUE,
+  expectedCalibrationError = FALSE,
+  eceBins = 10,
+  maxCalibrationError = FALSE,
+  reliabilityDiagram = TRUE,
   bootstrapCI = TRUE,
   nBootstrap = 1000,
   showModelSelection = TRUE,
@@ -84,6 +89,32 @@ confidence intervals}
 \item{youdensJ}{calculate Youden's J statistic for optimal cutoff
 determination}
 
+\item{matthewsCC}{calculate Matthews Correlation Coefficient, a balanced
+measure for binary classification that accounts for all four confusion
+matrix categories. Especially useful for imbalanced datasets (e.g., rare
+events like mitosis detection). MCC ranges from -1 to +1 where +1
+represents perfect prediction, 0 represents random prediction, and -1
+represents total disagreement}
+
+\item{expectedCalibrationError}{calculate Expected Calibration Error to
+assess reliability of predicted probabilities. ECE measures the difference
+between predicted probabilities and actual outcomes across probability
+bins. Essential for AI models to ensure predicted probabilities are
+well-calibrated. Lower ECE values indicate better calibration (perfect
+calibration = 0)}
+
+\item{eceBins}{number of bins for Expected Calibration Error calculation.
+Standard is 10 bins. More bins provide finer granularity but require more
+data}
+
+\item{maxCalibrationError}{calculate Maximum Calibration Error (worst-case
+calibration error across all bins). MCE identifies the bin with the largest
+deviation between predicted and actual outcomes}
+
+\item{reliabilityDiagram}{display reliability diagram showing predicted
+probabilities vs observed frequencies. Perfect calibration appears as a
+diagonal line. Useful for visualizing calibration quality}
+
 \item{bootstrapCI}{use bootstrap methods for confidence interval estimation}
 
 \item{nBootstrap}{number of bootstrap iterations for confidence intervals}
@@ -125,10 +156,13 @@ A results object containing:
 \code{results$modelComparisonTable} \tab \tab \tab \tab \tab Statistical comparison between different models \cr
 \code{results$nriIdiTable} \tab \tab \tab \tab \tab Net Reclassification Index and Integrated Discrimination Index \cr
 \code{results$calibrationTable} \tab \tab \tab \tab \tab Model calibration assessment including Hosmer-Lemeshow test \cr
+\code{results$eceTable} \tab \tab \tab \tab \tab Calibration error metrics for probabilistic predictions \cr
+\code{results$eceBinDetails} \tab \tab \tab \tab \tab Detailed calibration error for each probability bin \cr
 \code{results$variableImportanceTable} \tab \tab \tab \tab \tab Importance scores for variables in selected models \cr
 \code{results$cvFoldResults} \tab \tab \tab \tab \tab Performance metrics for each cross-validation fold \cr
 \code{results$rocPlot} \tab \tab \tab \tab \tab ROC curves showing cross-validated performance with confidence bands \cr
 \code{results$calibrationPlot} \tab \tab \tab \tab \tab Calibration plot showing observed vs predicted probabilities \cr
+\code{results$reliabilityDiagramPlot} \tab \tab \tab \tab \tab Reliability diagram showing predicted probabilities vs observed frequencies with ECE visualization \cr
 \code{results$comparisonPlot} \tab \tab \tab \tab \tab Forest plot comparing model performance with confidence intervals \cr
 \code{results$cvPerformancePlot} \tab \tab \tab \tab \tab Box plots showing performance distribution across CV folds \cr
 \code{results$variableImportancePlot} \tab \tab \tab \tab \tab Bar plot showing variable importance from model selection \cr

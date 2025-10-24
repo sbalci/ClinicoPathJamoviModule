@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.03
+version: 0.0.32.05
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-10-13'
+date: '2025-10-24'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1239,7 +1239,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -1421,7 +1421,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT2
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -3478,7 +3478,7 @@ analyses:
     name: idi
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT2
     menuSubgroup: Performance Metrics
     menuTitle: Integrated Discrimination Improvement (IDI)
     menuSubtitle: Model improvement assessment through discrimination analysis
@@ -3522,7 +3522,7 @@ analyses:
     name: netreclassification
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT2
     menuSubgroup: Performance Metrics
     menuTitle: Net Reclassification Improvement (NRI)
     menuSubtitle: Advanced model improvement assessment with reclassification analysis
@@ -4109,7 +4109,7 @@ analyses:
     name: aivalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: AI & Machine Learning
     menuTitle: AI Model Validation with Cross-Validation
     menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
@@ -5117,6 +5117,246 @@ analyses:
       Create publication-ready plots using the ggpubr package.
       Provides easy-to-use functions for creating customized plots with
       statistical annotations for scientific publications.
+  - title: Trichotomous (Three-way) ROC Analysis
+    name: trichotomousroc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: ROC Analysis
+    menuTitle: Trichotomous (Three-way) ROC Analysis
+    menuSubtitle: Three-category diagnostic test evaluation with indeterminate zone
+    description: >
+      Trichotomous ROC analysis for three-category diagnostic tests with
+      positive, indeterminate (grey zone), and negative outcomes. Essential for
+      biomarker scoring systems like HER2 (0-1+/2+/3+), PD-L1 expression levels,
+      and cytology classifications with "atypical" results. Unlike binary ROC
+      which only considers positive vs negative, trichotomous ROC accounts for
+      the clinically important indeterminate zone where additional testing may
+      be required. The analysis provides 3×3 confusion matrices,
+      category-specific sensitivities and specificities, volume under the ROC
+      surface (VUS) as a 3D extension of AUC, and optimal threshold
+      determination for each decision boundary. Particularly valuable for
+      establishing clinical cutoffs in molecular pathology where grey-zone
+      results trigger reflex testing (e.g., HER2 2+ requires FISH confirmation).
+  - title: Grey-zone (Fuzzy) ROC Analysis
+    name: greyzoneroc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: ROC Analysis
+    menuTitle: Grey-zone (Fuzzy) ROC Analysis
+    menuSubtitle: ROC analysis with uncertainty zones and deferred decisions
+    description: >
+      Grey-zone ROC analysis for diagnostic tests where uncertainty around
+      decision thresholds requires a "don't know" or "defer decision" option.
+      Unlike traditional binary ROC that forces every case into positive or
+      negative, grey-zone ROC acknowledges diagnostic uncertainty by creating an
+      indeterminate zone around the threshold where additional testing or expert
+      review is recommended. Essential for AI model deployment where uncertain
+      predictions should not drive clinical decisions, cytology with atypical
+      findings requiring repeat sampling, and biomarker cutoffs where borderline
+      values need confirmation. The analysis determines optimal grey-zone
+      boundaries that maximize diagnostic certainty while minimizing
+      inconclusive results, calculates performance metrics excluding vs
+      including grey-zone cases, and provides clinical decision rules for
+      handling uncertain classifications. Particularly valuable for real-world
+      implementation of diagnostic tests where "I don't know" is a valid and
+      often safer response than forcing a potentially incorrect binary
+      classification.
+  - title: Segmentation Metrics (Dice, IoU, Hausdorff)
+    name: segmentationmetrics
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: AI & Machine Learning
+    menuTitle: Segmentation Metrics (Dice, IoU, Hausdorff)
+    menuSubtitle: Image segmentation validation for digital pathology AI
+    description: >
+      Comprehensive validation metrics for image segmentation tasks in digital
+      pathology and AI-based tissue analysis. Evaluates overlap and boundary
+      accuracy between AI-predicted segmentations and expert-annotated ground
+      truth. Essential metrics include Dice Coefficient (F1-score for spatial
+      overlap), Jaccard Index (IoU - Intersection over Union), Hausdorff
+      Distance (maximum boundary deviation), and Surface Distance metrics.
+      Designed for tumor boundary delineation, gland segmentation, cell nuclei
+      detection, tissue region classification, and any pixel-level or
+      region-based segmentation task. Supports binary segmentation (single
+      structure), multi-class segmentation (multiple tissue types), and instance
+      segmentation (individual object detection). Provides statistical analysis
+      across multiple images, stratification by image characteristics
+      (magnification, staining, scanner), and clinical interpretation of
+      segmentation quality. Critical for validating AI algorithms before
+      deployment in diagnostic workflows, comparing segmentation methods, and
+      establishing performance benchmarks for digital pathology systems.
+  - title: Ordinal ROC Analysis
+    name: ordinalroc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: ROC Analysis
+    menuTitle: Ordinal ROC Analysis
+    menuSubtitle: ROC curves for ordered categorical outcomes (tumor grading, staging)
+    description: >
+      Ordinal ROC analysis for diagnostic tests predicting ordered categorical
+      outcomes such as tumor differentiation grade (well/moderate/poor),
+      fibrosis stage (F0-F4), inflammation severity (none/mild/moderate/severe),
+      or cancer stage (I/II/III/IV). Unlike binary ROC which dichotomizes
+      outcomes, ordinal ROC preserves the natural ordering of categories and
+      accounts for the severity/progression inherent in ordinal scales. The
+      analysis uses cumulative probability models and proportional odds
+      assumptions to generate ROC curves that reflect the ordinal nature of the
+      outcome. Provides cumulative AUC across all thresholds, partial
+      proportional odds models, and ordinal-specific performance metrics.
+      Essential for biomarker validation in grading systems, staging algorithms,
+      and any scenario where the outcome has more than 2 ordered levels.
+      Particularly valuable in pathology where grading and staging are
+      fundamental to diagnosis and prognosis (Gleason score, Nottingham grade,
+      FIGO stage, etc.).
+  - title: Brier Score & Integrated Brier Score
+    name: brierscore
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Survival Model Validation
+    menuTitle: Brier Score & Integrated Brier Score
+    menuSubtitle: Calibration accuracy for time-to-event predictions
+    description: >
+      Brier Score analysis for evaluating calibration accuracy of survival
+      probability predictions. The Brier score measures the mean squared
+      difference between predicted survival probabilities and observed outcomes
+      at specific time points, providing a comprehensive assessment of both
+      discrimination and calibration. Lower Brier scores indicate better
+      prediction accuracy (perfect prediction = 0, worst = 1). The Integrated
+      Brier Score (IBS) extends this by integrating the time-dependent Brier
+      score across the follow-up period, providing a single summary measure of
+      overall prediction performance. Includes scaled Brier scores relative to
+      null model (KM curve) and comparison to reference models. Essential for
+      validating Cox regression models, machine learning survival predictions,
+      and risk calculators. Particularly valuable for clinical prediction models
+      where accurate probability estimates are critical for patient counseling
+      and treatment decisions. Supports external validation, temporal
+      validation, and competing risks scenarios.
+  - title: Concordance Index (Harrell's C-index)
+    name: concordanceindex
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Survival Model Validation
+    menuTitle: Concordance Index (Harrell's C-index)
+    menuSubtitle: Rank-based discrimination for time-to-event predictions
+    description: >
+      Harrell's concordance index (C-index) for evaluating discrimination
+      ability of survival prediction models. The C-index measures the proportion
+      of all comparable pairs of patients in which the model correctly ranks
+      their survival times - a generalization of the ROC curve's AUC to censored
+      survival data. Values range from 0.5 (no discrimination) to 1.0 (perfect
+      discrimination), with 0.7-0.8 considered good and >0.8 considered
+      excellent. Unlike time-dependent ROC which evaluates at specific time
+      points, the C-index provides a global measure across the entire follow-up
+      period. Supports time-dependent concordance for dynamic predictions,
+      competing risks extensions, stratified analysis, and comparison between
+      models. Essential for validating Cox regression models, machine learning
+      survival predictions, and prognostic scores. The C-index accounts for
+      censoring through appropriate pair weighting and can be decomposed to
+      identify which risk groups contribute most to discrimination.
+  - title: Two-Dimensional ROC Analysis
+    name: roc2d
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: ROC Analysis
+    menuTitle: Two-Dimensional ROC Analysis
+    menuSubtitle: Joint ROC for dual biomarker combinations
+    description: >
+      Two-dimensional ROC analysis for evaluating diagnostic accuracy of dual
+      biomarker combinations or multi-parametric tests. When two biomarkers are
+      measured simultaneously (e.g., ER and PR in breast cancer, dual IHC
+      markers, imaging plus biomarker), 2D ROC analysis finds the optimal
+      combined decision rule in two-dimensional marker space. Unlike analyzing
+      markers separately and combining results, 2D ROC jointly optimizes both
+      thresholds to maximize diagnostic accuracy. Provides joint
+      sensitivity/specificity, optimal threshold pairs, 3D ROC surface
+      visualization, and comparison to single-marker performance. Essential for
+      multiplex assays, dual biomarker panels, and situations where neither
+      marker alone is sufficient but combination improves diagnosis.
+      Applications include ER/PR combinations, dual IHC (e.g., p16/Ki67),
+      imaging radiomics plus molecular markers, and any scenario with two
+      continuous diagnostic measurements.
+  - title: ROC Regression (Covariate-Adjusted ROC)
+    name: rocreg
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: ROC Analysis
+    menuTitle: ROC Regression (Covariate-Adjusted ROC)
+    menuSubtitle: Covariate-adjusted ROC curves for confounder control
+    description: >
+      ROC regression for covariate-adjusted diagnostic accuracy assessment.
+      Traditional ROC analysis assumes diagnostic test performance is constant
+      across all patients, but accuracy often varies by patient characteristics
+      (age, disease stage, scanner type, staining protocol). ROC regression
+      models how sensitivity and specificity change as functions of covariates,
+      providing covariate-specific ROC curves and adjusted summary measures
+      (covariate-adjusted AUC). Essential for comparing diagnostic tests across
+      heterogeneous populations, adjusting for confounders in test comparison
+      studies, and identifying patient subgroups where tests perform
+      differently. Particularly valuable in digital pathology for accounting for
+      batch effects (different scanners, institutions, staining protocols) and
+      in biomarker studies for age/stage-specific performance assessment. Uses
+      binormal, non-parametric, or Bayesian approaches to model covariate
+      effects on ROC curves. Provides both population-averaged and
+      covariate-specific diagnostic accuracy estimates.
+  - title: Cost-Effectiveness Analysis
+    name: costeffectiveness
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Economic Evaluation
+    menuTitle: Cost-Effectiveness Analysis
+    menuSubtitle: ICER and cost-utility analysis for diagnostic tests
+    description: >
+      Cost-Effectiveness Analysis (CEA) for evaluating the economic value of
+      diagnostic tests, screening programs, and clinical decision strategies.
+      Calculates Incremental Cost-Effectiveness Ratio (ICER), which represents
+      the additional cost per additional unit of effectiveness (e.g., cost per
+      correct diagnosis, cost per QALY gained). The analysis compares new
+      diagnostic strategies against standard of care or alternative approaches,
+      visualizing results on the cost-effectiveness plane and calculating net
+      monetary benefit at various willingness-to-pay thresholds. Essential for
+      health technology assessment, budget impact analysis, and justifying
+      adoption of new diagnostic technologies such as multiplex IHC, AI-assisted
+      pathology, digital pathology platforms, and molecular tests. Supports
+      deterministic sensitivity analysis (tornado plots) to identify key cost
+      drivers and probabilistic sensitivity analysis (Monte Carlo simulation) to
+      quantify uncertainty in cost-effectiveness conclusions. Particularly
+      valuable for demonstrating value proposition of advanced diagnostics to
+      hospital administrators, payers, and policy makers.
+  - title: Volume Under ROC Surface (VUS) Analysis
+    name: vusanalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT2
+    menuSubgroup: Multi-Class ROC Analysis
+    menuTitle: Volume Under ROC Surface (VUS) Analysis
+    menuSubtitle: VUS for 3+ class diagnostic accuracy
+    description: >
+      Volume Under ROC Surface (VUS) analysis extends the traditional Area Under
+      the ROC Curve (AUC) to diagnostic tests with three or more ordered
+      classes. While binary ROC analysis calculates the area under a 2D curve,
+      VUS calculates the volume under a 3D surface for multi-class problems. The
+      VUS represents the probability that a randomly selected triple of
+      observations (one from each class) will be correctly ordered by the
+      diagnostic marker. VUS ranges from 0 to 1, where 0.5 indicates random
+      classification (no discrimination), and 1 indicates perfect discrimination
+      across all classes. This method is particularly valuable for tumor grading
+      (Grade 1/2/3), disease staging (Stage I/II/III/IV), severity
+      classification (mild/moderate/severe), and any diagnostic scenario where
+      outcomes naturally fall into three or more ordered categories. The
+      analysis provides pairwise AUC comparisons between adjacent classes,
+      overall VUS with confidence intervals, and hypothesis testing against
+      chance performance. Essential for validating biomarkers, imaging features,
+      and AI models in multi-class clinicopathological applications where binary
+      classification is insufficient.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

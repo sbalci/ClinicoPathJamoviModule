@@ -18,6 +18,10 @@ enhancedROC(
   confidenceLevel = 95,
   bootstrapSamples = 1000,
   useBootstrap = TRUE,
+  bootstrapMethod = "bca",
+  bootstrapCutoffCI = FALSE,
+  bootstrapPartialAUC = FALSE,
+  stratifiedBootstrap = TRUE,
   pairwiseComparisons = TRUE,
   comparisonMethod = "delong",
   rocCurve = TRUE,
@@ -28,6 +32,7 @@ enhancedROC(
   clinicalMetrics = TRUE,
   smoothMethod = "none",
   partialAuc = FALSE,
+  partialAucType = "specificity",
   partialRange = "0.8,1.0",
   crocAnalysis = FALSE,
   crocAlpha = 7,
@@ -48,7 +53,44 @@ enhancedROC(
   showCutoffPoints = TRUE,
   showConfidenceBands = FALSE,
   showMetricsDiff = TRUE,
-  statisticalComparison = TRUE
+  statisticalComparison = TRUE,
+  calibrationAnalysis = FALSE,
+  calibrationPlot = TRUE,
+  hosmerLemeshow = TRUE,
+  hlGroups = 10,
+  brierScore = TRUE,
+  calibrationMetrics = TRUE,
+  splineCalibration = FALSE,
+  splineKnots = 4,
+  eoRatio = FALSE,
+  namDagostino = FALSE,
+  greenwoodNam = FALSE,
+  calibrationBelt = FALSE,
+  calibrationDensity = FALSE,
+  multiClassROC = FALSE,
+  multiClassStrategy = "ovr",
+  multiClassAveraging = "macro",
+  timeDependentROC = FALSE,
+  timePoints = "12,24,36",
+  tdRocMethod = "km",
+  clinicalImpact = FALSE,
+  nntCalculation = TRUE,
+  clinicalUtilityCurve = TRUE,
+  decisionImpactTable = TRUE,
+  survivalROC = FALSE,
+  harrellCIndex = FALSE,
+  unoCStatistic = FALSE,
+  incidentDynamic = FALSE,
+  cumulativeDynamic = FALSE,
+  competingRisksConcordance = FALSE,
+  internalValidation = FALSE,
+  validationMethod = "bootstrap",
+  optimismCorrection = TRUE,
+  externalValidation = FALSE,
+  decisionImpactCurves = FALSE,
+  netBenefitRegression = FALSE,
+  modelUpdating = FALSE,
+  transportability = FALSE
 )
 }
 \arguments{
@@ -84,6 +126,18 @@ intervals}
 
 \item{useBootstrap}{Use bootstrap methods for confidence intervals}
 
+\item{bootstrapMethod}{Method for calculating bootstrap confidence
+intervals. BCa provides better coverage but requires more computation.}
+
+\item{bootstrapCutoffCI}{Calculate bootstrap confidence intervals for
+sensitivity and specificity at optimal cutoff}
+
+\item{bootstrapPartialAUC}{Calculate bootstrap confidence intervals for
+partial AUC estimates}
+
+\item{stratifiedBootstrap}{Maintain outcome class proportions in bootstrap
+samples (recommended for imbalanced data)}
+
 \item{pairwiseComparisons}{Perform pairwise comparisons between ROC curves}
 
 \item{comparisonMethod}{Method for comparing ROC curves}
@@ -106,7 +160,11 @@ LR-)}
 \item{partialAuc}{Calculate partial AUC for specific
 sensitivity/specificity ranges}
 
-\item{partialRange}{Range for partial AUC (specificity_min,specificity_max)}
+\item{partialAucType}{Whether to calculate pAUC over a specificity or
+sensitivity range}
+
+\item{partialRange}{Range for partial AUC (min,max) - e.g., 0.8,1.0 for
+high specificity or sensitivity}
 
 \item{crocAnalysis}{Calculate Concentrated ROC curves for early retrieval
 analysis}
@@ -158,6 +216,103 @@ results}
 
 \item{statisticalComparison}{Perform comprehensive statistical comparison
 between models}
+
+\item{calibrationAnalysis}{Assess calibration (agreement between observed
+and predicted probabilities)}
+
+\item{calibrationPlot}{Display calibration plot with loess smoothing}
+
+\item{hosmerLemeshow}{Perform Hosmer-Lemeshow goodness-of-fit test}
+
+\item{hlGroups}{Number of groups for Hosmer-Lemeshow test}
+
+\item{brierScore}{Calculate Brier score and scaled Brier score}
+
+\item{calibrationMetrics}{Calculate calibration slope, intercept, and
+calibration-in-the-large}
+
+\item{splineCalibration}{Use restricted cubic splines for flexible
+calibration curves}
+
+\item{splineKnots}{Number of knots for restricted cubic splines (3-7
+recommended)}
+
+\item{eoRatio}{Calculate Expected/Observed ratio for overall calibration
+assessment}
+
+\item{namDagostino}{Perform Nam-D'Agostino calibration test (more powerful
+than H-L)}
+
+\item{greenwoodNam}{Greenwood-Nam-D'Agostino test for survival model
+calibration}
+
+\item{calibrationBelt}{Display calibration belt showing uncertainty around
+calibration curve}
+
+\item{calibrationDensity}{Show distribution of predicted probabilities as
+density overlay}
+
+\item{multiClassROC}{Enable multi-class ROC analysis for outcomes with >2
+levels}
+
+\item{multiClassStrategy}{Strategy for multi-class ROC analysis}
+
+\item{multiClassAveraging}{Method for averaging AUC across classes}
+
+\item{timeDependentROC}{Enable time-dependent ROC analysis for
+survival/time-to-event outcomes}
+
+\item{timePoints}{Comma-separated time points for time-dependent ROC (e.g.,
+12,24,36 months)}
+
+\item{tdRocMethod}{Method for estimating time-dependent ROC curves}
+
+\item{clinicalImpact}{Calculate clinical impact metrics (NNT, NND, clinical
+utility)}
+
+\item{nntCalculation}{Calculate number needed to test and number needed to
+diagnose}
+
+\item{clinicalUtilityCurve}{Display clinical utility curve showing test
+consequences}
+
+\item{decisionImpactTable}{Show decision impact at various thresholds}
+
+\item{survivalROC}{Enable survival-specific ROC methods (requires
+time-to-event data)}
+
+\item{harrellCIndex}{Calculate Harrell's concordance index for
+time-to-event outcomes}
+
+\item{unoCStatistic}{Calculate Uno's C-statistic (more robust to censoring)}
+
+\item{incidentDynamic}{Calculate incident/dynamic AUC (sensitivity for
+events at specific time)}
+
+\item{cumulativeDynamic}{Calculate cumulative/dynamic AUC (sensitivity for
+events by specific time)}
+
+\item{competingRisksConcordance}{Calculate cause-specific concordance for
+competing risks}
+
+\item{internalValidation}{Perform internal validation using
+cross-validation or bootstrap}
+
+\item{validationMethod}{Method for internal validation}
+
+\item{optimismCorrection}{Apply optimism correction to performance metrics}
+
+\item{externalValidation}{Enable external validation reporting framework}
+
+\item{decisionImpactCurves}{Plot decision impact curves showing clinical
+consequences}
+
+\item{netBenefitRegression}{Model net benefit as function of threshold
+probabilities}
+
+\item{modelUpdating}{Analyze need for model recalibration or updating}
+
+\item{transportability}{Assess model transportability across populations}
 }
 \value{
 A results object containing:
@@ -188,6 +343,18 @@ A results object containing:
 \code{results$results$clinicalDecisionPlot} \tab \tab \tab \tab \tab Clinical decision curves and threshold analysis \cr
 \code{results$results$crocCurvePlot} \tab \tab \tab \tab \tab Concentrated ROC curve with exponential magnifier transformation \cr
 \code{results$results$convexHullPlot} \tab \tab \tab \tab \tab ROC curve with convex hull overlay \cr
+\code{results$results$calibrationSummary} \tab \tab \tab \tab \tab Overall calibration metrics including Brier score \cr
+\code{results$results$hosmerLemeshowTable} \tab \tab \tab \tab \tab Hosmer-Lemeshow test for calibration \cr
+\code{results$results$calibrationPlotImage} \tab \tab \tab \tab \tab Calibration plot showing observed vs predicted probabilities \cr
+\code{results$results$multiClassAUC} \tab \tab \tab \tab \tab AUC values for each class in multi-class analysis \cr
+\code{results$results$multiClassAverage} \tab \tab \tab \tab \tab Averaged AUC across all classes \cr
+\code{results$results$multiClassROCPlot} \tab \tab \tab \tab \tab ROC curves for all classes \cr
+\code{results$results$timeDependentAUC} \tab \tab \tab \tab \tab AUC values at different time points \cr
+\code{results$results$timeDependentROCPlot} \tab \tab \tab \tab \tab ROC curves at multiple time points \cr
+\code{results$results$aucTimeCoursePlot} \tab \tab \tab \tab \tab AUC evolution over time \cr
+\code{results$results$clinicalImpactTable} \tab \tab \tab \tab \tab Number needed to test and clinical utility metrics \cr
+\code{results$results$decisionImpactSummary} \tab \tab \tab \tab \tab Clinical consequences at various decision thresholds \cr
+\code{results$results$clinicalUtilityPlot} \tab \tab \tab \tab \tab Clinical utility showing test consequences across thresholds \cr
 }
 }
 \description{

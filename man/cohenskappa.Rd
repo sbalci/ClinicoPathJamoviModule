@@ -19,7 +19,12 @@ cohenskappa(
   category_analysis = FALSE,
   interpretation_guide = TRUE,
   missing_treatment = "listwise",
-  minimum_categories = 2
+  minimum_categories = 2,
+  rater3 = NULL,
+  rater4 = NULL,
+  rater5 = NULL,
+  multi_rater_method = "auto",
+  show_pairwise_kappa = FALSE
 )
 }
 \arguments{
@@ -56,6 +61,18 @@ agreement}
 
 \item{minimum_categories}{Minimum number of categories required for
 analysis}
+
+\item{rater3}{Third rater for multi-rater agreement (Fleiss kappa)}
+
+\item{rater4}{Fourth rater for multi-rater agreement}
+
+\item{rater5}{Fifth rater for multi-rater agreement}
+
+\item{multi_rater_method}{Method for calculating multi-rater agreement (≥3
+raters)}
+
+\item{show_pairwise_kappa}{Show all pairwise kappa values between raters
+(multi-rater only)}
 }
 \value{
 A results object containing:
@@ -72,6 +89,9 @@ A results object containing:
 \code{results$confusionHeatmap} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$multiRaterKappa} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairwiseKappaMatrix} \tab \tab \tab \tab \tab a table \cr
+\code{results$multiRaterSummary} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

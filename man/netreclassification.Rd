@@ -40,7 +40,14 @@ netreclassification(
   stratified_analysis = FALSE,
   subgroup_var,
   alpha_level = 0.05,
-  random_seed = 123
+  random_seed = 123,
+  category_free_nri = FALSE,
+  event_specific_nri = FALSE,
+  clinical_nri_custom = FALSE,
+  reclassification_visualization = TRUE,
+  relative_nri = FALSE,
+  weighted_nri = FALSE,
+  utility_weights = "1, 2, 4, 8"
 )
 }
 \arguments{
@@ -161,6 +168,33 @@ intervals. Standard value is 0.05 for 95\\% confidence.}
 
 \item{random_seed}{Random seed for bootstrap sampling and cross-validation.
 Ensures reproducible results across analyses.}
+
+\item{category_free_nri}{Calculate category-free (continuous) NRI without
+predefined risk categories. Provides unbiased assessment of
+reclassification across entire risk spectrum.}
+
+\item{event_specific_nri}{Calculate NRI separately for events and
+non-events with detailed breakdowns. Essential for understanding which
+population benefits most from new model.}
+
+\item{clinical_nri_custom}{Use clinically validated custom risk categories
+instead of statistical thresholds. More appropriate for guideline-based
+risk assessment.}
+
+\item{reclassification_visualization}{Create comprehensive visualization
+including Sankey diagrams and heatmaps for reclassification patterns.}
+
+\item{relative_nri}{Calculate relative NRI metrics normalized by baseline
+model performance. Useful for comparing improvements across different
+populations.}
+
+\item{weighted_nri}{Weight reclassification by clinical importance using
+utility weights. Accounts for differential clinical impact of risk
+categories.}
+
+\item{utility_weights}{Comma-separated weights for each risk category (low
+to high). Higher weights emphasize importance of correctly classifying
+high-risk individuals.}
 }
 \value{
 A results object containing:

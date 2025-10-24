@@ -14,6 +14,24 @@ agreement(
   kripp = FALSE,
   krippMethod = "nominal",
   bootstrap = FALSE,
+  gwet = FALSE,
+  gwetWeights = "unweighted",
+  ccc = FALSE,
+  blandAltman = FALSE,
+  blandAltmanPlot = FALSE,
+  proportionalBias = FALSE,
+  baConfidenceLevel = 0.95,
+  hierarchicalKappa = FALSE,
+  clusterVariable,
+  randomEffectsRater = FALSE,
+  randomEffectsCluster = FALSE,
+  iccHierarchical = FALSE,
+  clusterSpecificKappa = FALSE,
+  betweenClusterVariance = FALSE,
+  withinClusterVariance = FALSE,
+  shrinkageEstimates = FALSE,
+  testClusterHomogeneity = FALSE,
+  clusterRankings = FALSE,
   showSummary = FALSE,
   showAbout = FALSE
 )
@@ -52,6 +70,93 @@ calculation.}
 \item{bootstrap}{Calculate bootstrap confidence intervals for
 Krippendorff's alpha.}
 
+\item{gwet}{Alternative agreement coefficient that is more stable than
+Cohen's kappa when dealing with high agreement rates or unbalanced marginal
+distributions (e.g., rare tumor subtypes). Gwet's AC corrects for the
+paradoxical behavior of kappa in extreme cases.}
+
+\item{gwetWeights}{Unweighted (AC1) for nominal categories. Linear or
+Quadratic weights (AC2) for ordinal data.}
+
+\item{ccc}{Calculate Lin's Concordance Correlation Coefficient for
+continuous measurement agreement. CCC assesses the agreement between two
+continuous measurements or raters, combining measures of both precision and
+accuracy. Particularly useful for method comparison studies, inter-rater
+reliability of continuous scores (e.g., quantitative pathology
+measurements, biomarker levels), and validation of new measurement
+techniques. CCC ranges from -1 to +1, with +1 indicating perfect
+concordance.}
+
+\item{blandAltman}{Perform Bland-Altman analysis for assessing agreement
+between two continuous measurement methods. Calculates mean difference
+(bias) and limits of agreement (LOA = mean ± 1.96×SD). Essential for method
+comparison and validation studies in clinical chemistry, pathology, and
+diagnostic imaging. Particularly useful for comparing a new measurement
+method against a reference standard, or assessing inter-rater reliability
+for continuous measurements.}
+
+\item{blandAltmanPlot}{Generate Bland-Altman plot showing difference vs.
+average of two measurements. Displays mean bias line and limits of
+agreement (±1.96 SD).}
+
+\item{proportionalBias}{Test whether the difference between methods is
+related to the magnitude of measurements (proportional bias). Uses linear
+regression of difference on average values.}
+
+\item{baConfidenceLevel}{Confidence level for limits of agreement (default
+95\\%).}
+
+\item{hierarchicalKappa}{Enable hierarchical (multilevel) kappa analysis
+for nested data structures (e.g., pathologists nested within institutions,
+readers nested within centers). Accounts for clustering effects and
+provides institution/cluster-specific agreement estimates. Essential for
+multi-center reliability studies.}
+
+\item{clusterVariable}{Variable defining clusters/institutions/centers. For
+example, hospital ID, institution name, or scanner ID. Raters are nested
+within these clusters.}
+
+\item{randomEffectsRater}{Model rater effects as random (raters are a
+random sample from population of potential raters). If false, raters are
+treated as fixed effects. Random effects recommended when generalizing
+beyond specific raters.}
+
+\item{randomEffectsCluster}{Model cluster/institution effects as random
+(institutions are random sample). Allows generalization beyond specific
+institutions in the study.}
+
+\item{iccHierarchical}{Calculate intraclass correlation coefficients for
+hierarchical data. ICC(1): between-cluster agreement, ICC(2): reliability
+of cluster means, ICC(3): within-cluster agreement. Decomposes variance
+into cluster-level and rater-level components.}
+
+\item{clusterSpecificKappa}{Calculate kappa separately for each
+cluster/institution to identify sites with poor agreement. Useful for
+quality control in multi-center studies.}
+
+\item{betweenClusterVariance}{Estimate variance component for
+between-cluster differences in agreement. Large between-cluster variance
+indicates institutional heterogeneity requiring investigation (different
+protocols, training, etc.).}
+
+\item{withinClusterVariance}{Estimate variance component for within-cluster
+rater disagreement. Comparison of within vs between variance informs
+whether issues are local (within institutions) or systematic (between
+institutions).}
+
+\item{shrinkageEstimates}{Calculate shrinkage estimates for
+cluster-specific kappas. Shrinks extreme estimates toward overall mean,
+providing more stable estimates for small clusters.}
+
+\item{testClusterHomogeneity}{Test whether agreement is homogeneous across
+clusters (null hypothesis: all clusters have equal kappa). Significant
+result indicates heterogeneity requiring investigation.}
+
+\item{clusterRankings}{Rank clusters/institutions by agreement performance
+with confidence intervals. Identifies best and worst performing sites. Use
+cautiously to avoid unfair comparisons when cluster sizes differ
+substantially.}
+
 \item{showSummary}{Display a natural-language interpretation of results
 with color-coded agreement levels and clinical guidance. Recommended for
 reports and presentations.}
@@ -63,11 +168,26 @@ does, when to use it, and how to interpret results.}
 A results object containing:
 \tabular{llllll}{
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+\code{results$headingIRR} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$headingKripp} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$headingGwet} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$headingCCC} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$cccTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$headingBlandAltman} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$blandAltmanTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$proportionalBiasTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$varianceComponents} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterSpecificKappaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterHomogeneityTest} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterRankingsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 }
