@@ -220,10 +220,30 @@ items:
                   title: 'Sensitivity'
                   type: number
                   format: zto
+                - name: sens_ci_lower
+                  title: 'Sens CI Lower'
+                  type: number
+                  format: zto
+                  visible: (bootstrapCutoffCI && useBootstrap)
+                - name: sens_ci_upper
+                  title: 'Sens CI Upper'
+                  type: number
+                  format: zto
+                  visible: (bootstrapCutoffCI && useBootstrap)
                 - name: specificity
                   title: 'Specificity'
                   type: number
                   format: zto
+                - name: spec_ci_lower
+                  title: 'Spec CI Lower'
+                  type: number
+                  format: zto
+                  visible: (bootstrapCutoffCI && useBootstrap)
+                - name: spec_ci_upper
+                  title: 'Spec CI Upper'
+                  type: number
+                  format: zto
+                  visible: (bootstrapCutoffCI && useBootstrap)
                 - name: accuracy
                   title: 'Accuracy'
                   type: number
@@ -551,6 +571,273 @@ items:
             description: ROC curve with convex hull overlay
             visible: (convexHull)
             renderFun: .plotConvexHull
+            width: 600
+            height: 600
+
+          # Calibration Analysis Results
+          - name: calibrationSummary
+            title: Calibration Performance Summary
+            type: Table
+            description: Overall calibration metrics including Brier score
+            visible: (calibrationAnalysis)
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: brier_score
+                  title: 'Brier Score'
+                  type: number
+                  format: zto
+                - name: scaled_brier
+                  title: 'Scaled Brier'
+                  type: number
+                  format: zto
+                - name: calibration_slope
+                  title: 'Calibration Slope'
+                  type: number
+                  format: zto
+                  visible: (calibrationMetrics)
+                - name: calibration_intercept
+                  title: 'Calibration Intercept'
+                  type: number
+                  format: zto
+                  visible: (calibrationMetrics)
+                - name: calibration_in_large
+                  title: 'Calibration-in-the-Large'
+                  type: number
+                  format: zto
+                  visible: (calibrationMetrics)
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          - name: hosmerLemeshowTable
+            title: Hosmer-Lemeshow Goodness-of-Fit Test
+            type: Table
+            description: Hosmer-Lemeshow test for calibration
+            visible: (calibrationAnalysis && hosmerLemeshow)
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: chi_square
+                  title: 'Chi-Square'
+                  type: number
+                  format: zto
+                - name: df
+                  title: 'df'
+                  type: integer
+                - name: p_value
+                  title: 'p-value'
+                  type: number
+                  format: zto;pvalue
+                - name: n_groups
+                  title: 'Groups'
+                  type: integer
+                - name: conclusion
+                  title: 'Conclusion'
+                  type: text
+
+          - name: calibrationPlotImage
+            title: Calibration Plot
+            type: Image
+            description: Calibration plot showing observed vs predicted probabilities
+            visible: (calibrationAnalysis && calibrationPlot)
+            renderFun: .plotCalibration
+            width: 600
+            height: 600
+
+          # Multi-Class ROC Results
+          - name: multiClassAUC
+            title: Multi-Class ROC Summary
+            type: Table
+            description: AUC values for each class in multi-class analysis
+            visible: (multiClassROC)
+            columns:
+                - name: class
+                  title: 'Class'
+                  type: text
+                - name: strategy
+                  title: 'Strategy'
+                  type: text
+                - name: auc
+                  title: 'AUC'
+                  type: number
+                  format: zto
+                - name: auc_lower
+                  title: 'AUC Lower CI'
+                  type: number
+                  format: zto
+                - name: auc_upper
+                  title: 'AUC Upper CI'
+                  type: number
+                  format: zto
+                - name: n_positive
+                  title: 'N Positive'
+                  type: integer
+                - name: n_negative
+                  title: 'N Negative'
+                  type: integer
+
+          - name: multiClassAverage
+            title: Multi-Class Average AUC
+            type: Table
+            description: Averaged AUC across all classes
+            visible: (multiClassROC)
+            rows: 1
+            columns:
+                - name: averaging_method
+                  title: 'Averaging Method'
+                  type: text
+                - name: macro_auc
+                  title: 'Macro AUC'
+                  type: number
+                  format: zto
+                - name: weighted_auc
+                  title: 'Weighted AUC'
+                  type: number
+                  format: zto
+                - name: micro_auc
+                  title: 'Micro AUC'
+                  type: number
+                  format: zto
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          - name: multiClassROCPlot
+            title: Multi-Class ROC Curves
+            type: Image
+            description: ROC curves for all classes
+            visible: (multiClassROC)
+            renderFun: .plotMultiClassROC
+            width: 600
+            height: 600
+
+          # Time-Dependent ROC Results
+          - name: timeDependentAUC
+            title: Time-Dependent AUC
+            type: Table
+            description: AUC values at different time points
+            visible: (timeDependentROC)
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: time_point
+                  title: 'Time Point'
+                  type: number
+                  format: zto
+                - name: auc
+                  title: 'AUC(t)'
+                  type: number
+                  format: zto
+                - name: auc_lower
+                  title: 'AUC Lower CI'
+                  type: number
+                  format: zto
+                - name: auc_upper
+                  title: 'AUC Upper CI'
+                  type: number
+                  format: zto
+                - name: n_events
+                  title: 'N Events'
+                  type: integer
+                - name: n_at_risk
+                  title: 'N At Risk'
+                  type: integer
+
+          - name: timeDependentROCPlot
+            title: Time-Dependent ROC Curves
+            type: Image
+            description: ROC curves at multiple time points
+            visible: (timeDependentROC)
+            renderFun: .plotTimeDependentROC
+            width: 600
+            height: 600
+
+          - name: aucTimeCoursePlot
+            title: AUC Time Course
+            type: Image
+            description: AUC evolution over time
+            visible: (timeDependentROC)
+            renderFun: .plotAUCTimeCourse
+            width: 600
+            height: 600
+
+          # Clinical Impact Results
+          - name: clinicalImpactTable
+            title: Clinical Impact Metrics
+            type: Table
+            description: Number needed to test and clinical utility metrics
+            visible: (clinicalImpact)
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: threshold
+                  title: 'Threshold'
+                  type: number
+                  format: zto
+                - name: nnt
+                  title: 'NNT'
+                  type: number
+                  format: zto
+                - name: nnd
+                  title: 'NND'
+                  type: number
+                  format: zto
+                - name: tested_positive
+                  title: 'Tested Positive (%)'
+                  type: number
+                  format: pc
+                - name: true_positive_rate
+                  title: 'True Positive Rate'
+                  type: number
+                  format: pc
+                - name: false_positive_rate
+                  title: 'False Positive Rate'
+                  type: number
+                  format: pc
+                - name: net_benefit_per_100
+                  title: 'Net Benefit per 100'
+                  type: number
+                  format: zto
+
+          - name: decisionImpactSummary
+            title: Decision Impact at Key Thresholds
+            type: Table
+            description: Clinical consequences at various decision thresholds
+            visible: (clinicalImpact && decisionImpactTable)
+            columns:
+                - name: threshold
+                  title: 'Risk Threshold'
+                  type: number
+                  format: pc
+                - name: n_high_risk
+                  title: 'N High Risk'
+                  type: integer
+                - name: n_high_risk_with_event
+                  title: 'N True Positives'
+                  type: integer
+                - name: n_high_risk_without_event
+                  title: 'N False Positives'
+                  type: integer
+                - name: ppv
+                  title: 'PPV'
+                  type: number
+                  format: pc
+                - name: npv
+                  title: 'NPV'
+                  type: number
+                  format: pc
+
+          - name: clinicalUtilityPlot
+            title: Clinical Utility Curve
+            type: Image
+            description: Clinical utility showing test consequences across thresholds
+            visible: (clinicalImpact && clinicalUtilityCurve)
+            renderFun: .plotClinicalUtility
             width: 600
             height: 600
 

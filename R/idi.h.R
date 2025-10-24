@@ -45,7 +45,12 @@ idiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             calibration_aware = FALSE,
             time_dependent = FALSE,
             alpha_level = 0.05,
-            random_seed = 123, ...) {
+            random_seed = 123,
+            relative_idi = FALSE,
+            idi_competing_risks = FALSE,
+            visual_discrimination_slopes = TRUE,
+            idi_trajectory = FALSE,
+            prediction_error_curves = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -273,6 +278,26 @@ idiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=123,
                 min=1,
                 max=999999)
+            private$..relative_idi <- jmvcore::OptionBool$new(
+                "relative_idi",
+                relative_idi,
+                default=FALSE)
+            private$..idi_competing_risks <- jmvcore::OptionBool$new(
+                "idi_competing_risks",
+                idi_competing_risks,
+                default=FALSE)
+            private$..visual_discrimination_slopes <- jmvcore::OptionBool$new(
+                "visual_discrimination_slopes",
+                visual_discrimination_slopes,
+                default=TRUE)
+            private$..idi_trajectory <- jmvcore::OptionBool$new(
+                "idi_trajectory",
+                idi_trajectory,
+                default=FALSE)
+            private$..prediction_error_curves <- jmvcore::OptionBool$new(
+                "prediction_error_curves",
+                prediction_error_curves,
+                default=FALSE)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..baseline_risk)
@@ -314,6 +339,11 @@ idiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..time_dependent)
             self$.addOption(private$..alpha_level)
             self$.addOption(private$..random_seed)
+            self$.addOption(private$..relative_idi)
+            self$.addOption(private$..idi_competing_risks)
+            self$.addOption(private$..visual_discrimination_slopes)
+            self$.addOption(private$..idi_trajectory)
+            self$.addOption(private$..prediction_error_curves)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -355,7 +385,12 @@ idiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         calibration_aware = function() private$..calibration_aware$value,
         time_dependent = function() private$..time_dependent$value,
         alpha_level = function() private$..alpha_level$value,
-        random_seed = function() private$..random_seed$value),
+        random_seed = function() private$..random_seed$value,
+        relative_idi = function() private$..relative_idi$value,
+        idi_competing_risks = function() private$..idi_competing_risks$value,
+        visual_discrimination_slopes = function() private$..visual_discrimination_slopes$value,
+        idi_trajectory = function() private$..idi_trajectory$value,
+        prediction_error_curves = function() private$..prediction_error_curves$value),
     private = list(
         ..outcome = NA,
         ..baseline_risk = NA,
@@ -396,7 +431,12 @@ idiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..calibration_aware = NA,
         ..time_dependent = NA,
         ..alpha_level = NA,
-        ..random_seed = NA)
+        ..random_seed = NA,
+        ..relative_idi = NA,
+        ..idi_competing_risks = NA,
+        ..visual_discrimination_slopes = NA,
+        ..idi_trajectory = NA,
+        ..prediction_error_curves = NA)
 )
 
 idiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -806,7 +846,7 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "idi",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = idiResults$new(options=options),
                 data = data,
@@ -935,6 +975,20 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   intervals. Standard value is 0.05 for 95\% confidence.
 #' @param random_seed Random seed for bootstrap sampling and cross-validation.
 #'   Ensures reproducible results across analyses.
+#' @param relative_idi Calculate relative IDI as percentage improvement over
+#'   baseline discrimination. More interpretable for comparing models across
+#'   different populations.
+#' @param idi_competing_risks Calculate cause-specific IDI for competing risks
+#'   data. Accounts for multiple event types in discrimination improvement.
+#' @param visual_discrimination_slopes Create enhanced visualizations of
+#'   discrimination slopes with density plots. Shows separation between events
+#'   and non-events for both models.
+#' @param idi_trajectory Analyze how IDI changes over time for time-to-event
+#'   outcomes. Useful for understanding when discrimination improvement is
+#'   largest.
+#' @param prediction_error_curves Plot prediction error curves alongside IDI
+#'   to visualize improvement. Shows integrated Brier score differences over
+#'   time.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -1003,7 +1057,12 @@ idi <- function(
     calibration_aware = FALSE,
     time_dependent = FALSE,
     alpha_level = 0.05,
-    random_seed = 123) {
+    random_seed = 123,
+    relative_idi = FALSE,
+    idi_competing_risks = FALSE,
+    visual_discrimination_slopes = TRUE,
+    idi_trajectory = FALSE,
+    prediction_error_curves = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("idi requires jmvcore to be installed (restart may be required)")
@@ -1064,7 +1123,12 @@ idi <- function(
         calibration_aware = calibration_aware,
         time_dependent = time_dependent,
         alpha_level = alpha_level,
-        random_seed = random_seed)
+        random_seed = random_seed,
+        relative_idi = relative_idi,
+        idi_competing_risks = idi_competing_risks,
+        visual_discrimination_slopes = visual_discrimination_slopes,
+        idi_trajectory = idi_trajectory,
+        prediction_error_curves = prediction_error_curves)
 
     analysis <- idiClass$new(
         options = options,

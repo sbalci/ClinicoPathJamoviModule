@@ -1,0 +1,211 @@
+---
+name: vusanalysis
+title: Volume Under ROC Surface (VUS) Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: vusSummary
+      title: VUS Summary
+      type: Table
+      description: Overall VUS with confidence intervals
+      visible: true
+      rows: 1
+      columns:
+        - name: n_classes
+          title: Number of Classes
+          type: integer
+        - name: total_n
+          title: Total N
+          type: integer
+        - name: vus
+          title: VUS
+          type: number
+          format: zto
+        - name: vus_se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+          visible: (confidence_intervals)
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+          visible: (confidence_intervals)
+        - name: null_vus
+          title: Null VUS (1/k!)
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: hypothesisTest
+      title: Hypothesis Test (VUS vs Chance)
+      type: Table
+      description: Test whether VUS differs from random classification
+      visible: (hypothesis_test)
+      rows: 1
+      columns:
+        - name: test_statistic
+          title: Test Statistic
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: test_method
+          title: Test Method
+          type: text
+        - name: conclusion
+          title: Conclusion (α=0.05)
+          type: text
+
+    - name: classBreakdown
+      title: Class Breakdown
+      type: Table
+      description: Sample sizes and summary statistics by class
+      visible: true
+      columns:
+        - name: class
+          title: Class
+          type: text
+        - name: class_order
+          title: Order
+          type: integer
+        - name: n
+          title: N
+          type: integer
+        - name: mean_predictor
+          title: Mean Predictor
+          type: number
+        - name: sd_predictor
+          title: SD Predictor
+          type: number
+        - name: median_predictor
+          title: Median Predictor
+          type: number
+        - name: min_predictor
+          title: Min
+          type: number
+        - name: max_predictor
+          title: Max
+          type: number
+
+    - name: pairwiseAUC
+      title: Pairwise AUC Comparisons
+      type: Table
+      description: AUC for all pairwise class comparisons
+      visible: (pairwise_auc)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: class1
+          title: Class 1
+          type: text
+        - name: class2
+          title: Class 2
+          type: text
+        - name: n1
+          title: N1
+          type: integer
+        - name: n2
+          title: N2
+          type: integer
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: auc_se
+          title: SE
+          type: number
+          visible: (pairwise_ci)
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+          visible: (pairwise_ci)
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+          visible: (pairwise_ci)
+        - name: p_value
+          title: 'P-value (H0: AUC=0.5)'
+          type: number
+          format: zto,pvalue
+          visible: (pairwise_tests)
+
+    - name: stratifiedVUS
+      title: Stratified VUS Analysis
+      type: Table
+      description: VUS by subgroup
+      visible: (stratified_analysis)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: n_classes
+          title: Classes Present
+          type: integer
+        - name: vus
+          title: VUS
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: p_value
+          title: P-value vs Overall
+          type: number
+          format: zto,pvalue
+
+    - name: pairwiseROCPlot
+      title: Pairwise ROC Curves
+      type: Image
+      description: ROC curves for all pairwise class comparisons
+      width: 700
+      height: 600
+      renderFun: .plotPairwiseROCs
+      visible: (plot_pairwise_rocs)
+
+    - name: classDistributionPlot
+      title: Predictor Distribution by Class
+      type: Image
+      description: Distribution of predictor values across outcome classes
+      width: 600
+      height: 500
+      renderFun: .plotClassDistributions
+      visible: (plot_class_distributions)
+
+    - name: surface3DPlot
+      title: 3D ROC Surface
+      type: Image
+      description: Three-dimensional ROC surface visualization
+      width: 700
+      height: 700
+      renderFun: .plot3DSurface
+      visible: (plot_3d_surface)
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: true
+
+...

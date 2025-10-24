@@ -1,0 +1,214 @@
+---
+name: multiclassroc
+title: Multi-class ROC Analysis
+menuGroup: meddecideT
+menuSubgroup: Medical Decision Analysis
+menuTitle: Multi-class ROC Analysis
+menuSubtitle: ROC curves for >2 diagnostic classes
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Multi-class ROC Analysis for evaluating diagnostic performance with 3 or more
+        diagnostic classes. This analysis extends traditional binary ROC to handle
+        multi-category outcomes using one-vs-rest, one-vs-one, and global approaches.
+
+        Common applications include tumor subtype classification, disease staging with
+        multiple levels, and AI model validation for multi-class predictions.
+
+    R:
+        dontrun: false
+        usage: |
+            # Example with tumor subtype classification
+            data <- data.frame(
+              true_class = factor(sample(c("TypeA", "TypeB", "TypeC"), 100, replace=TRUE)),
+              score_A = rnorm(100),
+              score_B = rnorm(100),
+              score_C = rnorm(100)
+            )
+
+            multiclassroc(
+              data = data,
+              outcome = 'true_class',
+              predictors = c('score_A', 'score_B', 'score_C'),
+              method = 'ovr',
+              calculate_macro_auc = TRUE,
+              confidence_intervals = TRUE
+            )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: outcome
+      title: Outcome Variable (Categorical)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            a string naming the outcome variable (must have 3+ levels)
+
+    - name: predictors
+      title: Predictor Variables (Continuous)
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            a vector of strings naming predictor variables (continuous scores)
+
+    - name: method
+      title: Multi-class Method
+      type: List
+      options:
+        - name: ovr
+          title: One-vs-Rest (OvR)
+        - name: ovo
+          title: One-vs-One (OvO)
+        - name: multinomial
+          title: Multinomial Extension
+      default: ovr
+      description:
+          R: >
+            method for multi-class ROC: 'ovr' (one class vs all others),
+            'ovo' (all pairwise comparisons), or 'multinomial' (global probability model)
+
+    - name: calculate_macro_auc
+      title: Calculate Macro-Average AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate macro-average AUC across all classes (unweighted mean)
+
+    - name: calculate_micro_auc
+      title: Calculate Micro-Average AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate micro-average AUC (aggregate all predictions)
+
+    - name: calculate_weighted_auc
+      title: Calculate Weighted-Average AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate weighted-average AUC (weighted by class prevalence)
+
+    - name: confidence_intervals
+      title: Calculate Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate confidence intervals for AUC estimates
+
+    - name: ci_method
+      title: CI Method
+      type: List
+      options:
+        - name: bootstrap
+          title: Bootstrap
+        - name: delong
+          title: DeLong
+      default: bootstrap
+      description:
+          R: >
+            method for confidence interval calculation
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: >
+            number of bootstrap samples for CI calculation
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            confidence level for intervals (default: 0.95 for 95% CI)
+
+    - name: pairwise_comparisons
+      title: Show All Pairwise Comparisons
+      type: Bool
+      default: false
+      description:
+          R: >
+            show detailed results for all pairwise class comparisons (OvO method)
+
+    - name: confusion_matrix
+      title: Show Confusion Matrix
+      type: Bool
+      default: true
+      description:
+          R: >
+            show confusion matrix at optimal global threshold
+
+    - name: class_metrics
+      title: Calculate Per-Class Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate sensitivity, specificity, PPV, NPV for each class
+
+    - name: plot_roc_curves
+      title: Plot ROC Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            plot ROC curves for each class
+
+    - name: plot_method
+      title: Plot Method
+      type: List
+      options:
+        - name: separate
+          title: Separate Curves
+        - name: overlay
+          title: Overlay All Classes
+      default: overlay
+      description:
+          R: >
+            display method for ROC curves
+
+    - name: plot_diagonal
+      title: Show Diagonal Reference
+      type: Bool
+      default: true
+      description:
+          R: >
+            show diagonal reference line (random classifier)
+
+    - name: random_seed
+      title: Random Seed
+      type: Number
+      min: 1
+      max: 999999
+      default: 42
+      description:
+          R: >
+            random seed for reproducible bootstrap sampling
+...

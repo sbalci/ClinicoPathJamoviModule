@@ -68,6 +68,11 @@ items:
           type: number
           format: zto
           visible: (youdensJ)
+        - name: mcc
+          title: "MCC"
+          type: number
+          format: zto
+          visible: (matthewsCC)
 
     - name: modelSelectionTable
       title: Model Selection Results
@@ -220,6 +225,72 @@ items:
           type: number
           format: zto
 
+    - name: eceTable
+      title: Expected Calibration Error (ECE)
+      type: Table
+      description: Calibration error metrics for probabilistic predictions
+      visible: (expectedCalibrationError)
+      clearWith:
+        - predictorVars
+        - outcomeVar
+        - eceBins
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: ece
+          title: ECE
+          type: number
+          format: zto
+        - name: mce
+          title: MCE
+          type: number
+          format: zto
+          visible: (maxCalibrationError)
+        - name: num_bins
+          title: Number of Bins
+          type: integer
+        - name: avg_confidence
+          title: Avg Confidence
+          type: number
+          format: zto
+        - name: avg_accuracy
+          title: Avg Accuracy
+          type: number
+          format: zto
+
+    - name: eceBinDetails
+      title: ECE Bin-Level Details
+      type: Table
+      description: Detailed calibration error for each probability bin
+      visible: (expectedCalibrationError)
+      clearWith:
+        - predictorVars
+        - outcomeVar
+        - eceBins
+      columns:
+        - name: bin
+          title: Bin
+          type: integer
+        - name: bin_range
+          title: Probability Range
+          type: text
+        - name: n_samples
+          title: N Samples
+          type: integer
+        - name: avg_confidence
+          title: Avg Confidence
+          type: number
+          format: zto
+        - name: avg_accuracy
+          title: Avg Accuracy
+          type: number
+          format: zto
+        - name: calibration_error
+          title: Calibration Error
+          type: number
+          format: zto
+
     - name: variableImportanceTable
       title: Variable Importance
       type: Table
@@ -306,6 +377,18 @@ items:
         - predictorVars
         - outcomeVar
         - calibrationTest
+
+    - name: reliabilityDiagramPlot
+      title: Reliability Diagram
+      type: Image
+      description: Reliability diagram showing predicted probabilities vs observed frequencies with ECE visualization
+      visible: (reliabilityDiagram && expectedCalibrationError)
+      requiresData: true
+      clearWith:
+        - predictorVars
+        - outcomeVar
+        - eceBins
+        - expectedCalibrationError
 
     - name: comparisonPlot
       title: Model Comparison Forest Plot

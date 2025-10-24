@@ -1,0 +1,240 @@
+---
+name: prauc
+title: Precision-Recall Analysis
+menuGroup: meddecideT
+menuSubgroup: ROC Analysis
+menuSubtitle: PR curves for imbalanced datasets
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Precision-Recall (PR) analysis is superior to ROC analysis for highly imbalanced datasets,
+        which are common in digital pathology and AI applications. While ROC curves can be misleading
+        when the negative class vastly outnumbers the positive class, PR curves focus on the performance
+        in the minority (positive) class. The area under the PR curve (PR-AUC or Average Precision)
+        provides a single-number summary of model performance. PR analysis is essential for evaluating
+        rare event detection (mitotic figures <1%, rare tumor cells, micrometastases), cancer screening
+        where positives are rare, quality control in digital pathology where defects are uncommon,
+        and AI triage systems where abnormal cases are infrequent. This module provides comprehensive
+        PR analysis with optimal threshold selection, comparison to baseline (random classifier),
+        and F-score optimization for different precision-recall trade-offs.
+    R:
+        dontrun: false
+        usage: >
+            result <- prauc(
+                data = pathology_data,
+                outcome = "cancer",
+                predictor = "ai_score",
+                positive_level = "positive"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Binary outcome variable (e.g., cancer/non-cancer, positive/negative).
+            Must have exactly two levels.
+
+    - name: predictor
+      title: Predictor Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Continuous predictor variable (e.g., AI score, biomarker level, probability).
+            Higher values should indicate higher likelihood of positive outcome.
+
+    - name: positive_level
+      title: Positive Class Level
+      type: String
+      default: ""
+      description:
+          R: >
+            Level of outcome variable to treat as "positive" class. If not specified,
+            the second level of the factor is used. Critical for correct PR analysis.
+
+    - name: prevalence
+      title: Dataset Prevalence
+      type: Number
+      default: -1
+      min: 0
+      max: 1
+      description:
+          R: >
+            Observed prevalence of positive class in dataset. Automatically calculated
+            if not specified (-1). Used for baseline comparison and interpretation.
+
+    - name: calculate_auc
+      title: Calculate PR-AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate area under precision-recall curve (also called Average Precision).
+            Uses trapezoidal integration. Essential summary metric for imbalanced data.
+
+    - name: calculate_fscore
+      title: Optimize F-Score
+      type: Bool
+      default: true
+      description:
+          R: >
+            Find optimal threshold that maximizes F1-score (harmonic mean of precision
+            and recall). Also calculates F2-score (emphasizes recall) and F0.5-score
+            (emphasizes precision).
+
+    - name: beta_weights
+      title: F-Score Beta Values
+      type: String
+      default: "1, 2, 0.5"
+      description:
+          R: >
+            Comma-separated list of beta values for F-score calculation. F1 (beta=1)
+            balances precision and recall. F2 (beta=2) weights recall higher. F0.5
+            (beta=0.5) weights precision higher. Example: "1, 2, 0.5, 3"
+
+    - name: confidence_intervals
+      title: Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for PR-AUC using bootstrap resampling.
+            Provides uncertainty quantification for imbalanced datasets.
+
+    - name: ci_method
+      title: CI Method
+      type: List
+      options:
+        - title: Bootstrap (Percentile)
+          name: bootstrap
+        - title: Bootstrap (BCa)
+          name: bca
+      default: bootstrap
+      description:
+          R: >
+            Method for confidence interval calculation. Bootstrap percentile is
+            standard. BCa (bias-corrected and accelerated) adjusts for skewness.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap resamples for confidence interval calculation.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for interval estimation.
+
+    - name: compare_to_roc
+      title: Compare to ROC Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate ROC-AUC for comparison. Demonstrates advantage of PR analysis
+            for imbalanced data where ROC-AUC may be misleadingly high.
+
+    - name: baseline_comparison
+      title: Compare to Baseline
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare PR-AUC to baseline (random classifier). Baseline PR-AUC equals
+            the prevalence. Shows improvement over chance performance.
+
+    - name: interpolation_method
+      title: Interpolation Method
+      type: List
+      options:
+        - title: Step Function (Standard)
+          name: step
+        - title: Linear Interpolation
+          name: linear
+      default: step
+      description:
+          R: >
+            Method for interpolating PR curve between points. Step function is standard
+            for PR curves. Linear interpolation can smooth the curve.
+
+    - name: plot_pr_curve
+      title: Precision-Recall Curve
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot precision-recall curve with optimal F-score threshold marked.
+            Shows trade-off between precision and recall across all thresholds.
+
+    - name: plot_comparison
+      title: ROC vs PR Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Side-by-side comparison of ROC and PR curves to demonstrate differences
+            in imbalanced dataset evaluation.
+
+    - name: plot_fscore
+      title: F-Score vs Threshold
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot F-scores (F1, F2, F0.5) across all thresholds to visualize optimal
+            operating points for different precision-recall trade-offs.
+
+    - name: min_threshold
+      title: Minimum Threshold
+      type: Number
+      default: 0
+      min: 0
+      max: 1
+      description:
+          R: >
+            Minimum predictor threshold to evaluate. Use to focus on clinically
+            relevant range.
+
+    - name: max_threshold
+      title: Maximum Threshold
+      type: Number
+      default: 1
+      min: 0
+      max: 1
+      description:
+          R: >
+            Maximum predictor threshold to evaluate.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 12345
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap procedures to ensure reproducibility.
+
+...

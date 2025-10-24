@@ -1,9 +1,9 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Agreement
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -113,6 +113,194 @@ options:
           R: >
             Calculate bootstrap confidence intervals for Krippendorff's alpha.
 
+    - name: gwet
+      title: "Calculate Gwet's AC1/AC2"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Alternative agreement coefficient that is more stable than Cohen's kappa when dealing with
+            high agreement rates or unbalanced marginal distributions (e.g., rare tumor subtypes).
+            Gwet's AC corrects for the paradoxical behavior of kappa in extreme cases.
+
+    - name: gwetWeights
+      title: "Weights for Gwet's AC"
+      type: List
+      options:
+        - title: Unweighted (AC1 for nominal)
+          name: unweighted
+        - title: Linear Weights (ordinal)
+          name: linear
+        - title: Quadratic Weights (ordinal)
+          name: quadratic
+      default: unweighted
+      description:
+          R: >
+            Unweighted (AC1) for nominal categories. Linear or Quadratic weights (AC2) for ordinal data.
+
+    - name: ccc
+      title: "Calculate Concordance Correlation Coefficient (CCC)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Lin's Concordance Correlation Coefficient for continuous measurement agreement.
+            CCC assesses the agreement between two continuous measurements or raters, combining
+            measures of both precision and accuracy. Particularly useful for method comparison studies,
+            inter-rater reliability of continuous scores (e.g., quantitative pathology measurements,
+            biomarker levels), and validation of new measurement techniques. CCC ranges from -1 to +1,
+            with +1 indicating perfect concordance.
+
+    - name: blandAltman
+      title: "Bland-Altman Analysis"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform Bland-Altman analysis for assessing agreement between two continuous measurement
+            methods. Calculates mean difference (bias) and limits of agreement (LOA = mean ± 1.96×SD).
+            Essential for method comparison and validation studies in clinical chemistry, pathology,
+            and diagnostic imaging. Particularly useful for comparing a new measurement method against
+            a reference standard, or assessing inter-rater reliability for continuous measurements.
+
+    - name: blandAltmanPlot
+      title: "Bland-Altman Plot"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate Bland-Altman plot showing difference vs. average of two measurements.
+            Displays mean bias line and limits of agreement (±1.96 SD).
+
+    - name: proportionalBias
+      title: "Test for Proportional Bias"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Test whether the difference between methods is related to the magnitude of measurements
+            (proportional bias). Uses linear regression of difference on average values.
+
+    - name: baConfidenceLevel
+      title: "Bland-Altman CI Level"
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for limits of agreement (default 95%).
+
+    # Hierarchical/Multilevel Agreement Analysis
+    - name: hierarchicalKappa
+      title: "Hierarchical/Multilevel Kappa"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable hierarchical (multilevel) kappa analysis for nested data structures
+            (e.g., pathologists nested within institutions, readers nested within centers).
+            Accounts for clustering effects and provides institution/cluster-specific agreement
+            estimates. Essential for multi-center reliability studies.
+
+    - name: clusterVariable
+      title: "Cluster/Institution Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable defining clusters/institutions/centers. For example, hospital ID,
+            institution name, or scanner ID. Raters are nested within these clusters.
+
+    - name: randomEffectsRater
+      title: "Random Effects for Raters"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Model rater effects as random (raters are a random sample from population
+            of potential raters). If false, raters are treated as fixed effects.
+            Random effects recommended when generalizing beyond specific raters.
+
+    - name: randomEffectsCluster
+      title: "Random Effects for Clusters"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Model cluster/institution effects as random (institutions are random sample).
+            Allows generalization beyond specific institutions in the study.
+
+    - name: iccHierarchical
+      title: "Hierarchical ICC"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate intraclass correlation coefficients for hierarchical data.
+            ICC(1): between-cluster agreement, ICC(2): reliability of cluster means,
+            ICC(3): within-cluster agreement. Decomposes variance into cluster-level
+            and rater-level components.
+
+    - name: clusterSpecificKappa
+      title: "Cluster-Specific Kappa Estimates"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate kappa separately for each cluster/institution to identify
+            sites with poor agreement. Useful for quality control in multi-center studies.
+
+    - name: betweenClusterVariance
+      title: "Between-Cluster Variance Component"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Estimate variance component for between-cluster differences in agreement.
+            Large between-cluster variance indicates institutional heterogeneity
+            requiring investigation (different protocols, training, etc.).
+
+    - name: withinClusterVariance
+      title: "Within-Cluster Variance Component"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Estimate variance component for within-cluster rater disagreement.
+            Comparison of within vs between variance informs whether issues are
+            local (within institutions) or systematic (between institutions).
+
+    - name: shrinkageEstimates
+      title: "Shrinkage (Empirical Bayes) Estimates"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate shrinkage estimates for cluster-specific kappas. Shrinks extreme
+            estimates toward overall mean, providing more stable estimates for small clusters.
+
+    - name: testClusterHomogeneity
+      title: "Test Cluster Homogeneity"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Test whether agreement is homogeneous across clusters (null hypothesis:
+            all clusters have equal kappa). Significant result indicates heterogeneity
+            requiring investigation.
+
+    - name: clusterRankings
+      title: "Cluster Performance Rankings"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Rank clusters/institutions by agreement performance with confidence intervals.
+            Identifies best and worst performing sites. Use cautiously to avoid
+            unfair comparisons when cluster sizes differ substantially.
+
     - name: showSummary
       title: "Show Plain-Language Summary"
       type: Bool
@@ -129,6 +317,134 @@ options:
       description:
           R: >
             Display an explanatory panel describing what this analysis does, when to use it, and how to interpret results.
+
+    # Consensus Score Derivation
+    - name: consensusVar
+      title: "Create Consensus Variable"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate consensus (modal) score across raters and add as new computed column.
+            Essential for multi-rater studies requiring a reference standard.
+
+    - name: consensusRule
+      title: "Consensus Rule"
+      type: List
+      options:
+        - title: Simple Majority (>50%)
+          name: majority
+        - title: Supermajority (≥75%)
+          name: supermajority
+        - title: Unanimous (100%)
+          name: unanimous
+      default: majority
+      description:
+          R: >
+            Rule for defining consensus. Simple majority = modal category with >50% of votes.
+            Supermajority requires ≥75% agreement. Unanimous requires 100% agreement.
+
+    - name: tieBreaker
+      title: "Tie Handling"
+      type: List
+      options:
+        - title: Exclude case (set to NA)
+          name: exclude
+        - title: Use first occurring mode
+          name: first
+        - title: Use lowest category
+          name: lowest
+        - title: Use highest category
+          name: highest
+      default: exclude
+      description:
+          R: >
+            How to handle ties (e.g., 50-50 split). Exclude = set consensus to NA for tied cases.
+            First = use first category that appears. Lowest/Highest = use min/max of tied categories.
+
+    - name: consensusName
+      title: "Consensus Variable Name"
+      type: String
+      default: "consensus_score"
+      description:
+          R: >
+            Name of the new computed variable to be added to the dataset.
+
+    # Pairwise Kappa Analysis
+    - name: referenceRater
+      title: "Reference Rater"
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Select a reference rater (e.g., consensus score, gold standard, senior pathologist).
+            Each selected rater will be compared pairwise with this reference, producing individual kappas.
+            Essential for training assessment, rater certification, and performance monitoring.
+
+    - name: rankRaters
+      title: "Rank Raters by Kappa"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Rank raters from highest to lowest kappa (relative to reference).
+            Shows best and worst performing raters for quality control and training needs.
+
+    # Level of Agreement Categorization
+    - name: loaVariable
+      title: "Create Level of Agreement Variable"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate level of agreement (LoA) for each case and add as new computed column.
+            Categorizes cases as Absolute/High/Moderate/Low/Poor agreement based on proportion
+            of raters agreeing. Useful for identifying difficult cases and quality control.
+
+    - name: loaThresholds
+      title: "LoA Thresholds"
+      type: List
+      options:
+        - title: Custom
+          name: custom
+        - title: Quartiles
+          name: quartiles
+        - title: Tertiles
+          name: tertiles
+      default: custom
+      description:
+          R: >
+            How to define LoA categories. Custom = user-defined cutpoints.
+            Quartiles/Tertiles = data-driven splits.
+
+    - name: loaHighThreshold
+      title: "High LoA Threshold (%)"
+      type: Number
+      default: 75
+      min: 50
+      max: 99
+      description:
+          R: >
+            Minimum % agreement for "High" LoA (e.g., 75% = ≥12/16 raters for N=16).
+
+    - name: loaLowThreshold
+      title: "Low LoA Threshold (%)"
+      type: Number
+      default: 56
+      min: 30
+      max: 75
+      description:
+          R: >
+            Minimum % agreement for "Low" LoA (e.g., 56% = ≥9/16 raters for N=16).
+
+    - name: loaVarName
+      title: "LoA Variable Name"
+      type: String
+      default: "loa_category"
+      description:
+          R: >
+            Name of the new computed variable for level of agreement.
 
 
 ...

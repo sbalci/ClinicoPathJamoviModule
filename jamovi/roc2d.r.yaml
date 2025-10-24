@@ -1,0 +1,43 @@
+---
+name: roc2d
+title: Two-Dimensional ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: combinedAUC
+      title: Combined Marker Performance
+      type: Table
+      rows: 1
+      columns:
+        - name: auc_combined
+          title: Combined AUC
+          type: number
+          format: zto
+        - name: auc_marker1
+          title: Marker 1 AUC
+          type: number
+          format: zto
+        - name: auc_marker2
+          title: Marker 2 AUC
+          type: number
+          format: zto
+
+    - name: roc2dPlot
+      title: 2D ROC Surface
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plot2DROC
+      visible: (plot_2d_roc_surface)
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: (show_interpretation)
+
+...

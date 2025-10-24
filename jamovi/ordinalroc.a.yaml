@@ -1,0 +1,407 @@
+---
+name: ordinalroc
+title: Ordinal ROC Analysis
+menuGroup: meddecideT
+menuSubgroup: ROC Analysis
+menuSubtitle: ROC curves for ordered categorical outcomes (tumor grading, staging)
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Ordinal ROC analysis for diagnostic tests predicting ordered categorical outcomes
+        such as tumor differentiation grade (well/moderate/poor), fibrosis stage (F0-F4),
+        inflammation severity (none/mild/moderate/severe), or cancer stage (I/II/III/IV).
+        Unlike binary ROC which dichotomizes outcomes, ordinal ROC preserves the natural
+        ordering of categories and accounts for the severity/progression inherent in
+        ordinal scales. The analysis uses cumulative probability models and proportional
+        odds assumptions to generate ROC curves that reflect the ordinal nature of the
+        outcome. Provides cumulative AUC across all thresholds, partial proportional odds
+        models, and ordinal-specific performance metrics. Essential for biomarker validation
+        in grading systems, staging algorithms, and any scenario where the outcome has
+        more than 2 ordered levels. Particularly valuable in pathology where grading and
+        staging are fundamental to diagnosis and prognosis (Gleason score, Nottingham grade,
+        FIGO stage, etc.).
+    R:
+        dontrun: false
+        usage: >
+            result <- ordinalroc(
+                data = grading_data,
+                predictor = "biomarker_score",
+                ordinal_outcome = "tumor_grade",
+                outcome_order = c("well", "moderate", "poor")
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: predictor
+      title: Predictor Variable (Continuous)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Continuous predictor variable (biomarker level, risk score, imaging feature)
+            used to predict the ordinal outcome. Should increase or decrease monotonically
+            with outcome severity.
+
+    - name: ordinal_outcome
+      title: Ordinal Outcome Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Ordered categorical outcome variable with 3 or more levels representing
+            increasing severity or progression (e.g., well/moderate/poor differentiation,
+            stage I/II/III/IV, FIGO stage, fibrosis score F0-F4).
+
+    - name: outcome_order
+      title: Outcome Level Order (Low to High)
+      type: Variables
+      description:
+          R: >
+            Specify the correct ordering of outcome levels from lowest to highest severity.
+            This ensures proper cumulative probability calculation. For example, for tumor
+            differentiation, order should be: well, moderate, poor.
+
+    # ROC Method Options
+    - name: roc_method
+      title: Ordinal ROC Method
+      type: List
+      options:
+        - title: Empirical (Non-parametric)
+          name: empirical
+        - title: Binormal (Parametric)
+          name: binormal
+        - title: Proportional Odds Model
+          name: proportional_odds
+      default: empirical
+      description:
+          R: >
+            Method for constructing ordinal ROC curves. Empirical uses observed cumulative
+            distributions (non-parametric), binormal assumes normal distributions within
+            categories, proportional odds uses logistic regression framework.
+
+    - name: cumulative_direction
+      title: Cumulative Probability Direction
+      type: List
+      options:
+        - title: Greater Than or Equal (≥)
+          name: geq
+        - title: Less Than or Equal (≤)
+          name: leq
+      default: geq
+      description:
+          R: >
+            Direction for cumulative probabilities. Use ≥ if higher predictor values
+            indicate higher severity (e.g., higher biomarker = worse grade). Use ≤ if
+            lower predictor values indicate higher severity.
+
+    # Performance Metrics
+    - name: calculate_auc
+      title: Area Under ROC Curve (AUC)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate area under the ordinal ROC curve. For ordinal outcomes, this is
+            often called the concordance probability or generalized AUC. Values >0.5
+            indicate discriminatory ability.
+
+    - name: auc_ci_method
+      title: AUC Confidence Interval Method
+      type: List
+      options:
+        - title: DeLong (Asymptotic)
+          name: delong
+        - title: Bootstrap
+          name: bootstrap
+      default: delong
+      description:
+          R: >
+            Method for calculating confidence intervals around AUC. DeLong is faster,
+            bootstrap is more accurate for small samples.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation when using
+            bootstrap method.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for interval estimation around AUC and other metrics.
+
+    - name: category_specific_auc
+      title: Category-Specific AUC
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate AUC for each cumulative dichotomization (e.g., for grades 1/2/3,
+            calculate AUC for 1 vs 2+3, 1+2 vs 3). Shows discriminatory ability at
+            each threshold.
+
+    # Proportional Odds Model Options
+    - name: test_proportional_odds
+      title: Test Proportional Odds Assumption
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test whether the proportional odds assumption holds. This assumption states
+            that the effect of the predictor is the same across all category thresholds.
+            Violation suggests non-proportional odds model may be needed.
+
+    - name: show_coefficients
+      title: Show Model Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display coefficients from the proportional odds logistic regression model.
+            Shows the log-odds ratio for predictor and threshold intercepts.
+
+    - name: partial_proportional_odds
+      title: Allow Partial Proportional Odds
+      type: Bool
+      default: false
+      description:
+          R: >
+            If proportional odds assumption is violated, fit partial proportional odds
+            model where predictor effects can vary across thresholds.
+
+    # Threshold Analysis
+    - name: optimal_thresholds
+      title: Optimal Threshold Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Identify optimal predictor thresholds for each cumulative dichotomization
+            using Youden index or other criteria.
+
+    - name: threshold_method
+      title: Threshold Selection Method
+      type: List
+      options:
+        - title: Youden Index (Maximize J)
+          name: youden
+        - title: Sensitivity = Specificity
+          name: equal
+        - title: Minimize Distance to (0,1)
+          name: topleft
+        - title: Cost-Benefit Optimized
+          name: cost
+      default: youden
+      description:
+          R: >
+            Method for selecting optimal threshold at each cumulative split.
+
+    - name: sensitivity_target
+      title: Target Sensitivity
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Target sensitivity for threshold selection if using sensitivity-constrained
+            approach.
+
+    - name: specificity_target
+      title: Target Specificity
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Target specificity for threshold selection if using specificity-constrained
+            approach.
+
+    # Visualization Options
+    - name: plot_ordinal_roc
+      title: Ordinal ROC Curve(s)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display ordinal ROC curve(s). For empirical method, shows cumulative ROC
+            for each dichotomization. For proportional odds, shows model-based curve.
+
+    - name: plot_all_cumulative
+      title: Show All Cumulative ROC Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display separate ROC curves for each cumulative dichotomization on the same
+            plot. Helps visualize how discrimination varies across severity levels.
+
+    - name: plot_category_distributions
+      title: Category Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show distribution of predictor values stratified by outcome category.
+            Visualizes separation between ordinal levels.
+
+    - name: plot_cumulative_probabilities
+      title: Cumulative Probability Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display cumulative probability curves as a function of predictor value.
+            Shows how predicted probabilities change with predictor level.
+
+    - name: plot_confusion_matrix
+      title: Confusion Matrix (at Optimal Thresholds)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show confusion matrix using optimal thresholds to classify observations
+            into ordinal categories.
+
+    # Clinical Interpretation
+    - name: clinical_context
+      title: Clinical Context
+      type: List
+      options:
+        - title: General Ordinal Outcome
+          name: general
+        - title: Tumor Differentiation (Well/Moderate/Poor)
+          name: differentiation
+        - title: Fibrosis Stage (F0-F4)
+          name: fibrosis
+        - title: Cancer Stage (I/II/III/IV)
+          name: stage
+        - title: Gleason Score
+          name: gleason
+        - title: Inflammation Severity
+          name: inflammation
+      default: general
+      description:
+          R: >
+            Clinical context for interpretation guidance. Provides context-specific
+            recommendations for threshold selection and clinical application.
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide clinical interpretation of results including guidance on biomarker
+            utility for distinguishing between ordinal categories.
+
+    # Advanced Options
+    - name: stratified_analysis
+      title: Stratified Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform stratified ordinal ROC analysis by important subgroups to assess
+            consistency of biomarker performance across populations.
+
+    - name: stratify_by
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable defining strata for stratified analysis (e.g., age group, sex,
+            institution). Each level receives separate ordinal ROC analysis.
+
+    - name: covariate_adjustment
+      title: Covariate-Adjusted Ordinal ROC
+      type: Bool
+      default: false
+      description:
+          R: >
+            Adjust ordinal ROC analysis for covariates (confounders) using regression
+            framework. Useful for scanner effects, batch effects, or demographic variables.
+
+    - name: covariates
+      title: Adjustment Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to adjust for in covariate-adjusted ordinal ROC analysis.
+
+    - name: compare_predictors
+      title: Compare Multiple Predictors
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare multiple predictor variables on the same ordinal outcome to determine
+            which biomarker has superior discrimination across ordinal categories.
+
+    - name: additional_predictors
+      title: Additional Predictors for Comparison
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Additional continuous predictors to compare with the primary predictor.
+            Each will receive ordinal ROC analysis and AUC comparison tests.
+
+    - name: auc_comparison_test
+      title: AUC Comparison Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            When comparing multiple predictors, perform statistical test for differences
+            in AUC values (DeLong test or bootstrap comparison).
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+      default: complete
+      description:
+          R: >
+            Method for handling missing data in predictor or outcome variables.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap sampling and other stochastic procedures.
+            Ensures reproducible results.
+
+...

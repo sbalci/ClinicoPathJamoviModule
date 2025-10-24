@@ -1,0 +1,209 @@
+---
+name: multiclassroc
+title: Multi-class ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructionsText
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summaryTable
+      title: Multi-class ROC Summary
+      type: Table
+      rows: 1
+      visible: (calculate_macro_auc || calculate_micro_auc || calculate_weighted_auc)
+      clearWith:
+        - outcome
+        - predictors
+        - method
+        - confidence_intervals
+      columns:
+        - name: n_classes
+          title: "Number of Classes"
+          type: integer
+        - name: method
+          title: "Method"
+          type: text
+        - name: macro_auc
+          title: "Macro-Average AUC"
+          type: number
+          format: zto,pvalue
+        - name: macro_ci_lower
+          title: "Lower CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: macro_ci_upper
+          title: "Upper CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: micro_auc
+          title: "Micro-Average AUC"
+          type: number
+          format: zto,pvalue
+        - name: micro_ci_lower
+          title: "Lower CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: micro_ci_upper
+          title: "Upper CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: weighted_auc
+          title: "Weighted-Average AUC"
+          type: number
+          format: zto,pvalue
+
+    - name: classAucTable
+      title: Per-Class AUC Values
+      type: Table
+      visible: true
+      clearWith:
+        - outcome
+        - predictors
+        - method
+        - confidence_intervals
+      columns:
+        - name: class_name
+          title: "Class"
+          type: text
+          combineBelow: true
+        - name: n
+          title: "N"
+          type: integer
+        - name: prevalence
+          title: "Prevalence"
+          type: number
+          format: zto,pvalue
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: "Lower CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: ci_upper
+          title: "Upper CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: pairwiseTable
+      title: Pairwise Class Comparisons (One-vs-One)
+      type: Table
+      visible: (pairwise_comparisons && method:ovo)
+      clearWith:
+        - outcome
+        - predictors
+        - confidence_intervals
+      columns:
+        - name: class_a
+          title: "Class A"
+          type: text
+        - name: class_b
+          title: "Class B"
+          type: text
+        - name: n_a
+          title: "N(A)"
+          type: integer
+        - name: n_b
+          title: "N(B)"
+          type: integer
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: "Lower CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: ci_upper
+          title: "Upper CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: p_value
+          title: "p"
+          type: number
+          format: zto,pvalue
+
+    - name: classMetricsTable
+      title: Per-Class Performance Metrics
+      type: Table
+      visible: (class_metrics)
+      clearWith:
+        - outcome
+        - predictors
+        - method
+      columns:
+        - name: class_name
+          title: "Class"
+          type: text
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: zto,pvalue
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: zto,pvalue
+        - name: ppv
+          title: "PPV"
+          type: number
+          format: zto,pvalue
+        - name: npv
+          title: "NPV"
+          type: number
+          format: zto,pvalue
+        - name: f1_score
+          title: "F1-Score"
+          type: number
+          format: zto,pvalue
+        - name: optimal_threshold
+          title: "Optimal Threshold"
+          type: number
+
+    - name: confusionMatrix
+      title: Confusion Matrix
+      type: Table
+      visible: (confusion_matrix)
+      clearWith:
+        - outcome
+        - predictors
+        - method
+      columns:
+        - name: true_class
+          title: "True Class"
+          type: text
+          combineBelow: true
+
+    - name: rocPlot
+      title: Multi-class ROC Curves
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .rocPlot
+      visible: (plot_roc_curves)
+      clearWith:
+        - outcome
+        - predictors
+        - method
+        - plot_method
+        - plot_diagonal
+
+    - name: interpretationText
+      title: Interpretation Guide
+      type: Html
+      visible: true
+...

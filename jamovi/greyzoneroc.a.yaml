@@ -1,0 +1,430 @@
+---
+name: greyzoneroc
+title: Grey-zone (Fuzzy) ROC Analysis
+menuGroup: meddecideT
+menuSubgroup: ROC Analysis
+menuSubtitle: ROC analysis with uncertainty zones and deferred decisions
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Grey-zone ROC analysis for diagnostic tests where uncertainty around decision
+        thresholds requires a "don't know" or "defer decision" option. Unlike traditional
+        binary ROC that forces every case into positive or negative, grey-zone ROC
+        acknowledges diagnostic uncertainty by creating an indeterminate zone around
+        the threshold where additional testing or expert review is recommended. Essential
+        for AI model deployment where uncertain predictions should not drive clinical
+        decisions, cytology with atypical findings requiring repeat sampling, and
+        biomarker cutoffs where borderline values need confirmation. The analysis
+        determines optimal grey-zone boundaries that maximize diagnostic certainty
+        while minimizing inconclusive results, calculates performance metrics excluding
+        vs including grey-zone cases, and provides clinical decision rules for handling
+        uncertain classifications. Particularly valuable for real-world implementation
+        of diagnostic tests where "I don't know" is a valid and often safer response
+        than forcing a potentially incorrect binary classification.
+    R:
+        dontrun: false
+        usage: >
+            result <- greyzoneroc(
+                data = ai_predictions,
+                predictor = "ai_probability",
+                outcome = "true_diagnosis",
+                positive_level = "disease",
+                grey_zone_width = 0.1,
+                confidence_threshold = 0.80
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: predictor
+      title: Predictor Variable (Continuous or Probability)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Continuous predictor variable or probability score from diagnostic test.
+            For AI models, this is typically the predicted probability. For biomarkers,
+            this is the measured concentration or expression level.
+
+    - name: outcome
+      title: Binary Outcome (Gold Standard)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Binary gold standard outcome variable defining true disease status.
+            Must have exactly 2 levels (positive/negative or diseased/healthy).
+
+    - name: positive_level
+      title: Positive Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Level of the outcome variable representing the positive/diseased state.
+
+    # Grey Zone Definition
+    - name: grey_zone_method
+      title: Grey Zone Definition Method
+      type: List
+      options:
+        - title: Fixed Width Around Threshold
+          name: fixed_width
+        - title: Confidence-Based (Prediction Uncertainty)
+          name: confidence
+        - title: Cost-Benefit Optimized
+          name: cost_benefit
+        - title: Youden-Based Symmetric
+          name: youden_symmetric
+        - title: Custom Boundaries
+          name: custom
+      default: fixed_width
+      description:
+          R: >
+            Method for defining the grey-zone boundaries. Fixed width creates equal margins
+            around the optimal threshold, confidence uses prediction uncertainty from the model,
+            cost-benefit minimizes expected costs, Youden creates symmetric zone maximizing
+            certainty, custom allows manual boundary specification.
+
+    - name: grey_zone_width
+      title: Grey Zone Width
+      type: Number
+      default: 0.1
+      min: 0.01
+      max: 0.5
+      description:
+          R: >
+            Width of the grey zone when using fixed_width method. For probability scores (0-1),
+            0.1 creates a ±0.05 margin around the threshold. Larger values increase the
+            indeterminate region but improve certainty for definite classifications.
+
+    - name: lower_grey_boundary
+      title: Lower Grey Zone Boundary
+      type: Number
+      default: 0.45
+      min: 0
+      max: 1
+      description:
+          R: >
+            Lower boundary of grey zone when using custom method. Values below this are
+            classified as negative. Should be less than upper_grey_boundary.
+
+    - name: upper_grey_boundary
+      title: Upper Grey Zone Boundary
+      type: Number
+      default: 0.55
+      min: 0
+      max: 1
+      description:
+          R: >
+            Upper boundary of grey zone when using custom method. Values above this are
+            classified as positive. Should be greater than lower_grey_boundary.
+
+    - name: confidence_threshold
+      title: Minimum Confidence for Definite Classification
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Minimum confidence level required for definite classification when using
+            confidence-based method. Predictions with lower confidence are assigned to grey zone.
+            Higher values increase grey-zone size but improve reliability of definite calls.
+
+    # Cost-Benefit Parameters
+    - name: cost_false_positive
+      title: Cost of False Positive
+      type: Number
+      default: 1.0
+      min: 0
+      description:
+          R: >
+            Relative cost of false positive classification. Used in cost-benefit optimization
+            to determine grey-zone boundaries that minimize expected costs.
+
+    - name: cost_false_negative
+      title: Cost of False Negative
+      type: Number
+      default: 1.0
+      min: 0
+      description:
+          R: >
+            Relative cost of false negative classification. Higher values widen the grey zone
+            for low scores to avoid missing positive cases.
+
+    - name: cost_grey_zone
+      title: Cost of Grey Zone Classification
+      type: Number
+      default: 0.3
+      min: 0
+      max: 2
+      description:
+          R: >
+            Relative cost of classifying a case as grey zone (requiring additional testing).
+            Typically lower than misclassification costs but higher than correct classification.
+            Reflects the burden of deferred decisions and additional testing.
+
+    # Performance Analysis
+    - name: calculate_definite_performance
+      title: Performance on Definite Classifications Only
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate sensitivity, specificity, and AUC using only cases with definite
+            classifications (excluding grey-zone). Shows the reliability of the test
+            when it makes a definite call.
+
+    - name: calculate_all_cases_performance
+      title: Performance on All Cases
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate performance treating grey-zone as misclassifications. Provides
+            worst-case scenario where all deferred decisions are considered failures.
+
+    - name: grey_zone_characteristics
+      title: Grey Zone Characteristics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Analyze characteristics of cases falling in the grey zone including
+            prevalence distribution, risk factors, and suggestions for resolution.
+
+    - name: optimal_threshold
+      title: Optimal Threshold Selection
+      type: List
+      options:
+        - title: Youden Index
+          name: youden
+        - title: Sensitivity = Specificity
+          name: equal
+        - title: Closest to (0,1)
+          name: topleft
+        - title: Cost-Minimizing
+          name: cost
+        - title: Clinical Prespecified
+          name: clinical
+      default: youden
+      description:
+          R: >
+            Method for selecting the central threshold around which the grey zone is defined.
+
+    - name: clinical_threshold
+      title: Clinical Threshold Value
+      type: Number
+      default: 0.5
+      min: 0
+      max: 1
+      description:
+          R: >
+            Prespecified clinical threshold when using clinical threshold selection.
+            Common values: 0.5 for balanced classification, varies by clinical context.
+
+    # Uncertainty Quantification
+    - name: prediction_intervals
+      title: Prediction Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate prediction intervals around ROC curve to visualize uncertainty.
+            Particularly useful for AI models with calibrated probabilities.
+
+    - name: bootstrap_grey_zone
+      title: Bootstrap Grey Zone Stability
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use bootstrap to assess stability of grey-zone boundaries and performance metrics.
+            Provides confidence intervals for grey-zone size and definite classification rates.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for intervals around performance metrics and grey-zone boundaries.
+
+    # Clinical Decision Rules
+    - name: grey_zone_action
+      title: Action for Grey Zone Cases
+      type: List
+      options:
+        - title: Additional Testing (Reflex Test)
+          name: reflex
+        - title: Expert Review Required
+          name: expert
+        - title: Repeat Test
+          name: repeat
+        - title: Clinical Follow-up
+          name: followup
+        - title: Default to Positive (Conservative)
+          name: default_positive
+        - title: Default to Negative (Liberal)
+          name: default_negative
+      default: reflex
+      description:
+          R: >
+            Recommended clinical action for cases in the grey zone. This affects
+            interpretation of diagnostic performance and workflow design.
+
+    - name: reflex_test_name
+      title: Reflex Test Name
+      type: String
+      default: "Confirmatory test"
+      description:
+          R: >
+            Name of the reflex/confirmatory test used for grey-zone cases.
+            For example: FISH for HER2 2+, HPV testing for ASCUS cytology.
+
+    # Visualization Options
+    - name: plot_grey_zone_roc
+      title: ROC Curve with Grey Zone
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display ROC curve with grey-zone boundaries highlighted and performance
+            metrics for definite vs all classifications shown.
+
+    - name: plot_threshold_distributions
+      title: Score Distributions with Grey Zone
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show distribution of predictor scores for positive and negative cases
+            with grey-zone boundaries marked. Visualizes overlap and uncertainty.
+
+    - name: plot_grey_zone_size
+      title: Grey Zone Size vs Performance Trade-off
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot showing how varying grey-zone width affects the trade-off between
+            percentage of definite classifications and their accuracy.
+
+    - name: plot_uncertainty_map
+      title: Uncertainty Heatmap
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create heatmap showing prediction uncertainty across the score range.
+            Useful for AI models with calibrated confidence estimates.
+
+    - name: plot_cost_surface
+      title: Cost Surface Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Visualize expected costs across different grey-zone boundary configurations.
+            Helps identify cost-optimal grey-zone width.
+
+    # Advanced Options
+    - name: fuzzy_membership
+      title: Fuzzy Set Membership Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use fuzzy set theory to model gradual transition between definite positive,
+            grey zone, and definite negative. Provides soft boundaries instead of hard cutoffs.
+
+    - name: bayesian_grey_zone
+      title: Bayesian Grey Zone Definition
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use Bayesian approach to define grey zone based on posterior probability
+            intervals. Incorporates prior information and uncertainty quantification.
+
+    - name: stratified_grey_zone
+      title: Stratified Grey Zone Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform grey-zone analysis stratified by important covariates to assess
+            whether grey-zone boundaries should vary by subpopulation.
+
+    - name: stratify_by
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable for stratified analysis. Each level gets separate grey-zone analysis.
+
+    - name: clinical_scenario
+      title: Clinical Scenario
+      type: List
+      options:
+        - title: General Diagnostic Test
+          name: general
+        - title: AI Model Deployment
+          name: ai
+        - title: Cytology Screening
+          name: cytology
+        - title: Biomarker Cutoff
+          name: biomarker
+        - title: Risk Stratification
+          name: risk
+      default: general
+      description:
+          R: >
+            Clinical scenario for context-specific interpretation and recommendations.
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+      default: complete
+      description:
+          R: >
+            Method for handling missing predictor or outcome data.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap and other stochastic procedures.
+
+...

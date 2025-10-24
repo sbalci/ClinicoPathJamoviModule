@@ -1,0 +1,272 @@
+---
+name: greyzoneroc
+title: Grey-zone (Fuzzy) ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: greyZoneSummary
+      title: Grey Zone Summary
+      type: Table
+      visible: true
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: greyZoneBoundaries
+      title: Grey Zone Boundaries
+      type: Table
+      visible: true
+      columns:
+        - name: boundary
+          title: Boundary
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: method
+          title: Selection Method
+          type: text
+        - name: rationale
+          title: Rationale
+          type: text
+
+    - name: definitePerformanceTable
+      title: Performance - Definite Classifications Only
+      type: Table
+      visible: (calculate_definite_performance)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: n_cases
+          title: N Cases
+          type: integer
+
+    - name: allCasesPerformanceTable
+      title: Performance - All Cases (Grey as Incorrect)
+      type: Table
+      visible: (calculate_all_cases_performance)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: greyZoneCharacteristics
+      title: Grey Zone Case Characteristics
+      type: Table
+      visible: (grey_zone_characteristics)
+      columns:
+        - name: characteristic
+          title: Characteristic
+          type: text
+        - name: grey_zone
+          title: Grey Zone
+          type: text
+        - name: definite_positive
+          title: Definite Positive
+          type: text
+        - name: definite_negative
+          title: Definite Negative
+          type: text
+
+    - name: classificationBreakdown
+      title: Classification Breakdown
+      type: Table
+      visible: true
+      rows: 2
+      columns:
+        - name: true_status
+          title: True Status
+          type: text
+        - name: definite_positive
+          title: Definite Positive
+          type: integer
+        - name: grey_zone
+          title: Grey Zone
+          type: integer
+        - name: definite_negative
+          title: Definite Negative
+          type: integer
+        - name: total
+          title: Total
+          type: integer
+        - name: pct_grey
+          title: "% in Grey Zone"
+          type: number
+          format: pc
+
+    - name: costAnalysisTable
+      title: Cost-Benefit Analysis
+      type: Table
+      visible: true
+      columns:
+        - name: scenario
+          title: Scenario
+          type: text
+        - name: total_cost
+          title: Total Cost
+          type: number
+          format: zto
+        - name: misclass_cost
+          title: Misclassification Cost
+          type: number
+          format: zto
+        - name: grey_zone_cost
+          title: Grey Zone Cost
+          type: number
+          format: zto
+        - name: n_reflex_tests
+          title: N Reflex Tests Needed
+          type: integer
+
+    - name: tradeoffAnalysisTable
+      title: Grey Zone Width Trade-off Analysis
+      type: Table
+      visible: true
+      columns:
+        - name: grey_zone_width
+          title: Grey Zone Width
+          type: number
+          format: zto
+        - name: pct_definite
+          title: "% Definite"
+          type: number
+          format: pc
+        - name: definite_accuracy
+          title: Definite Accuracy
+          type: number
+          format: pc
+        - name: definite_sensitivity
+          title: Definite Sensitivity
+          type: number
+          format: pc
+        - name: definite_specificity
+          title: Definite Specificity
+          type: number
+          format: pc
+
+    - name: stratifiedGreyZoneTable
+      title: Stratified Grey Zone Analysis
+      type: Table
+      visible: (stratified_grey_zone)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: lower_boundary
+          title: Lower Boundary
+          type: number
+          format: zto
+        - name: upper_boundary
+          title: Upper Boundary
+          type: number
+          format: zto
+        - name: pct_grey
+          title: "% Grey Zone"
+          type: number
+          format: pc
+        - name: definite_performance
+          title: Definite AUC
+          type: number
+          format: zto
+
+    # Plots
+    - name: greyZoneROCPlot
+      title: ROC Curve with Grey Zone
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotGreyZoneROC
+      visible: (plot_grey_zone_roc)
+
+    - name: thresholdDistributionsPlot
+      title: Score Distributions with Grey Zone Boundaries
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotThresholdDistributions
+      visible: (plot_threshold_distributions)
+
+    - name: greyZoneSizePlot
+      title: Grey Zone Size vs Performance Trade-off
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotGreyZoneSize
+      visible: (plot_grey_zone_size)
+
+    - name: uncertaintyMapPlot
+      title: Prediction Uncertainty Heatmap
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotUncertaintyMap
+      visible: (plot_uncertainty_map)
+
+    - name: costSurfacePlot
+      title: Cost Surface Analysis
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotCostSurface
+      visible: (plot_cost_surface)
+
+    - name: clinicalRecommendations
+      title: Clinical Recommendations
+      type: Html
+      visible: true
+
+refs:
+    - pROC
+    - ggplot2
+    - dplyr
+    - boot
+    - ClinicoPathJamoviModule
+
+...

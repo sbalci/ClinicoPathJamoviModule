@@ -58,6 +58,11 @@ items:
     #       - wght
     #       - exct
 
+    - name:  headingIRR
+      title: 'Interrater Reliability'
+      type:  Preformatted
+
+
     - name:  irrtable
       title: 'Interrater Reliability'
       type: Table
@@ -127,6 +132,11 @@ items:
     #       - wght
     #       - exct
 
+    - name:  headingKripp
+      title: "Krippendorff's Alpha"
+      type:  Preformatted
+      visible: (kripp)
+
 
     - name: krippTable
       title: "Krippendorff's Alpha Results"
@@ -159,10 +169,389 @@ items:
           - krippMethod
           - bootstrap
 
+    - name:  headingGwet
+      title: "Gwet's AC Results"
+      type:  Preformatted
+      visible: (gwet)
+
+
+    - name: gwetTable
+      title: "Gwet's AC Results"
+      type: Table
+      visible: (gwet)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: coefficient
+          title: 'Gwet AC'
+          type: number
+        - name: se
+          title: 'Std Error'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: pvalue
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+          - gwetWeights
+
+    - name:  headingCCC
+      title: "Concordance Correlation Coefficient"
+      type:  Preformatted
+      visible: (ccc)
+
+
+    - name: cccTable
+      title: "Concordance Correlation Coefficient Results"
+      type: Table
+      visible: (ccc)
+      columns:
+        - name: rater1
+          title: 'Rater 1'
+          type: text
+        - name: rater2
+          title: 'Rater 2'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: ccc
+          title: 'CCC'
+          type: number
+        - name: pearson_r
+          title: 'Pearson r'
+          type: number
+        - name: precision
+          title: 'Precision (ρ)'
+          type: number
+        - name: accuracy
+          title: 'Accuracy (Cb)'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+
+    - name:  headingBlandAltman
+      title: "Bland-Altman"
+      type:  Preformatted
+      visible: (blandAltman)
+
+    - name: blandAltmanTable
+      title: "Bland-Altman Statistics"
+      type: Table
+      visible: (blandAltman)
+      columns:
+        - name: method1
+          title: 'Method 1'
+          type: text
+        - name: method2
+          title: 'Method 2'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: mean_diff
+          title: 'Mean Difference (Bias)'
+          type: number
+        - name: sd_diff
+          title: 'SD of Differences'
+          type: number
+        - name: loa_lower
+          title: 'Lower LOA'
+          type: number
+        - name: loa_upper
+          title: 'Upper LOA'
+          type: number
+        - name: loa_lower_ci
+          title: 'Lower LOA 95% CI'
+          type: number
+        - name: loa_upper_ci
+          title: 'Upper LOA 95% CI'
+          type: number
+        - name: bias_ttest_p
+          title: 'Bias t-test p'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+          - baConfidenceLevel
+
+    - name: proportionalBiasTable
+      title: "Proportional Bias Test"
+      type: Table
+      visible: (blandAltman && proportionalBias)
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: slope
+          title: 'Slope'
+          type: number
+        - name: slope_se
+          title: 'Slope SE'
+          type: number
+        - name: slope_p
+          title: 'Slope p-value'
+          type: number
+          format: zto,pvalue
+        - name: r_squared
+          title: 'R²'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: blandAltmanPlot
+      title: "Bland-Altman Plot"
+      type: Image
+      visible: (blandAltman && blandAltmanPlot)
+      requiresData: true
+      renderFun: .populateBlandAltmanPlot
+      clearWith:
+          - vars
+          - baConfidenceLevel
+          - proportionalBias
+
     - name: weightedKappaGuide
       title: "Weighted Kappa Interpretation Guide"
       type: Html
       visible: (showAbout && (wght:unweighted == FALSE))
+
+    # Hierarchical/Multilevel Agreement Results
+    - name: hierarchicalICCTable
+      title: "Hierarchical ICC Components"
+      type: Table
+      visible: (hierarchicalKappa && iccHierarchical)
+      rows: 3
+      columns:
+        - name: icc_type
+          title: ICC Type
+          type: text
+        - name: icc_value
+          title: ICC
+          type: number
+          format: zto
+        - name: icc_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: icc_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: varianceComponents
+      title: "Variance Components"
+      type: Table
+      visible: (hierarchicalKappa && (betweenClusterVariance || withinClusterVariance))
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+          type: number
+        - name: sd
+          title: SD
+          type: number
+        - name: percent_total
+          title: Percent of Total
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: clusterSpecificKappaTable
+      title: "Cluster-Specific Kappa Estimates"
+      type: Table
+      visible: (hierarchicalKappa && clusterSpecificKappa)
+      columns:
+        - name: cluster
+          title: Cluster/Institution
+          type: text
+        - name: n_cases
+          title: N Cases
+          type: integer
+        - name: n_raters
+          title: N Raters
+          type: integer
+        - name: kappa
+          title: Kappa
+          type: number
+          format: zto
+        - name: kappa_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: kappa_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: shrinkage_kappa
+          title: Shrinkage Kappa
+          type: number
+          format: zto
+          visible: (shrinkageEstimates)
+
+    - name: clusterHomogeneityTest
+      title: "Test of Cluster Homogeneity"
+      type: Table
+      visible: (hierarchicalKappa && testClusterHomogeneity)
+      rows: 1
+      columns:
+        - name: test_statistic
+          title: Chi-Square
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    - name: clusterRankingsTable
+      title: "Cluster Performance Rankings"
+      type: Table
+      visible: (hierarchicalKappa && clusterRankings)
+      columns:
+        - name: rank
+          title: Rank
+          type: integer
+        - name: cluster
+          title: Cluster
+          type: text
+        - name: kappa
+          title: Kappa
+          type: number
+          format: zto
+        - name: rating
+          title: Performance Rating
+          type: text
+
+    # Consensus Score Results
+    - name: consensusTable
+      title: "Consensus Score Summary"
+      type: Table
+      visible: (consensusVar)
+      rows: 1
+      columns:
+        - name: consensus_var
+          title: 'Variable Name'
+          type: text
+        - name: n_consensus
+          title: 'N Consensus'
+          type: integer
+        - name: n_ties
+          title: 'N Ties/Excluded'
+          type: integer
+        - name: pct_consensus
+          title: '% Consensus'
+          type: number
+      clearWith:
+          - vars
+          - consensusRule
+          - tieBreaker
+
+    # Pairwise Kappa Results
+    - name: headingPairwise
+      title: "Pairwise Kappa (Each Rater vs. Reference)"
+      type: Preformatted
+      visible: (referenceRater)
+
+    - name: pairwiseKappaTable
+      title: "Pairwise Kappa Results"
+      type: Table
+      visible: (referenceRater)
+      columns:
+        - name: rank
+          title: 'Rank'
+          type: integer
+          visible: (rankRaters)
+        - name: rater
+          title: 'Rater'
+          type: text
+        - name: n_cases
+          title: 'N'
+          type: integer
+        - name: kappa
+          title: 'Kappa'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - referenceRater
+          - rankRaters
+          - wght
+
+    # Level of Agreement Results
+    - name: headingLoA
+      title: "Level of Agreement (LoA)"
+      type: Preformatted
+      visible: (loaVariable)
+
+    - name: loaTable
+      title: "Level of Agreement Distribution"
+      type: Table
+      visible: (loaVariable)
+      columns:
+        - name: category
+          title: 'LoA Category'
+          type: text
+        - name: n
+          title: 'N Cases'
+          type: integer
+        - name: percent
+          title: 'Percent'
+          type: number
+      clearWith:
+          - vars
+          - loaThresholds
+          - loaHighThreshold
+          - loaLowThreshold
 
     - name: summary
       title: "Summary"

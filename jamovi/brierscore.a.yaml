@@ -1,0 +1,421 @@
+---
+name: brierscore
+title: Brier Score & Integrated Brier Score
+menuGroup: meddecideT
+menuSubgroup: Survival Model Validation
+menuSubtitle: Calibration accuracy for time-to-event predictions
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Brier Score analysis for evaluating calibration accuracy of survival probability
+        predictions. The Brier score measures the mean squared difference between predicted
+        survival probabilities and observed outcomes at specific time points, providing
+        a comprehensive assessment of both discrimination and calibration. Lower Brier
+        scores indicate better prediction accuracy (perfect prediction = 0, worst = 1).
+        The Integrated Brier Score (IBS) extends this by integrating the time-dependent
+        Brier score across the follow-up period, providing a single summary measure of
+        overall prediction performance. Includes scaled Brier scores relative to null
+        model (KM curve) and comparison to reference models. Essential for validating
+        Cox regression models, machine learning survival predictions, and risk calculators.
+        Particularly valuable for clinical prediction models where accurate probability
+        estimates are critical for patient counseling and treatment decisions. Supports
+        external validation, temporal validation, and competing risks scenarios.
+    R:
+        dontrun: false
+        usage: >
+            result <- brierscore(
+                data = validation_data,
+                time = "follow_up_time",
+                event = "death",
+                predictions = "predicted_survival_prob",
+                prediction_time = 60
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time-to-event or censoring variable. For survival analysis, this is the
+            follow-up time in days, months, or years.
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Binary event indicator variable (1 = event occurred, 0 = censored).
+            For competing risks, can be multi-level factor.
+
+    - name: event_code
+      title: Event Code (for Event)
+      type: Level
+      variable: (event)
+      description:
+          R: >
+            Which level of the event variable represents the event of interest
+            (e.g., death, progression, recurrence).
+
+    # Prediction Variables
+    - name: predicted_survival
+      title: Predicted Survival Probabilities
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Pre-computed survival probabilities at the specified prediction time.
+            Should be between 0 and 1. For example, predicted 5-year survival probability
+            from a Cox model or machine learning algorithm.
+
+    - name: linear_predictor
+      title: Linear Predictor (Alternative Input)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Linear predictor from Cox model (log hazard ratio). If provided instead of
+            predicted_survival, survival probabilities will be computed using Breslow
+            estimator and baseline hazard.
+
+    - name: prediction_formula
+      title: Prediction Model Formula (Alternative)
+      type: String
+      default: ""
+      description:
+          R: >
+            Formula for prediction model if neither predicted_survival nor linear_predictor
+            is provided. Example: "~ age + stage + grade". Cox model will be fitted
+            internally and predictions generated.
+
+    # Time Points
+    - name: prediction_time
+      title: Prediction Time Point
+      type: Number
+      default: 60
+      min: 0
+      description:
+          R: >
+            Time point at which to evaluate Brier score (in same units as time variable).
+            For example, 60 months for 5-year predictions, 1825 days for 5-year predictions
+            in days.
+
+    - name: multiple_time_points
+      title: Evaluate at Multiple Time Points
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Brier scores at multiple time points to show how calibration
+            changes over time.
+
+    - name: time_points
+      title: Additional Time Points
+      type: String
+      default: "12, 36, 60"
+      description:
+          R: >
+            Comma-separated list of additional time points for evaluation.
+            Example: "12, 24, 36, 60" for 1, 2, 3, and 5 years (in months).
+
+    # Integrated Brier Score
+    - name: calculate_ibs
+      title: Calculate Integrated Brier Score (IBS)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Integrated Brier Score by integrating time-dependent Brier score
+            across follow-up period. Provides single summary measure of overall prediction
+            performance across time.
+
+    - name: ibs_start_time
+      title: IBS Start Time
+      type: Number
+      default: 0
+      min: 0
+      description:
+          R: >
+            Start time for IBS integration. Usually 0 to include entire follow-up period.
+
+    - name: ibs_end_time
+      title: IBS End Time
+      type: Number
+      default: 60
+      min: 0
+      description:
+          R: >
+            End time for IBS integration. Should not exceed maximum follow-up time.
+            Determines the time horizon over which prediction performance is summarized.
+
+    # Scaled Brier Score
+    - name: scaled_brier
+      title: Scaled Brier Score
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate scaled (standardized) Brier score relative to null model
+            (Kaplan-Meier survival curve). Scaled Brier = 1 - (Brier_model / Brier_null).
+            Values near 0 indicate no improvement over KM, positive values indicate
+            better predictions than KM.
+
+    - name: reference_model
+      title: Compare to Reference Model
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare Brier score to a reference prediction model to assess incremental
+            value of new predictors.
+
+    - name: reference_predictions
+      title: Reference Model Predictions
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Pre-computed survival probabilities from reference model for comparison.
+
+    - name: reference_formula
+      title: Reference Model Formula
+      type: String
+      default: ""
+      description:
+          R: >
+            Formula for reference model if reference_predictions not provided.
+            Example: "~ age + stage" (simpler than full model).
+
+    # Statistical Inference
+    - name: confidence_intervals
+      title: Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for Brier scores using bootstrap or
+            influence function methods.
+
+    - name: ci_method
+      title: Confidence Interval Method
+      type: List
+      options:
+        - title: Bootstrap
+          name: bootstrap
+        - title: Influence Function (Asymptotic)
+          name: influence
+      default: bootstrap
+      description:
+          R: >
+            Method for confidence interval estimation. Bootstrap is more accurate
+            but computationally intensive, influence function is faster.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 500
+      min: 100
+      max: 5000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation.
+            More samples provide more stable estimates.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for interval estimation.
+
+    # Model Comparison
+    - name: compare_multiple_models
+      title: Compare Multiple Prediction Models
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare Brier scores across multiple prediction models to identify
+            the best calibrated model.
+
+    - name: additional_predictions
+      title: Additional Prediction Variables
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Additional prediction variables (survival probabilities) from competing
+            models for comparison.
+
+    - name: model_names
+      title: Model Names (for Comparison)
+      type: String
+      default: "Model 1, Model 2, Model 3"
+      description:
+          R: >
+            Comma-separated names for prediction models being compared.
+            Used for labeling output tables and plots.
+
+    # Competing Risks
+    - name: competing_risks
+      title: Handle Competing Risks
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use competing risks framework when multiple event types can occur.
+            Brier score accounts for cumulative incidence rather than survival.
+
+    - name: cause_specific
+      title: Cause-Specific Brier Score
+      type: Bool
+      default: true
+      description:
+          R: >
+            For competing risks, calculate cause-specific Brier score for the
+            event of interest.
+
+    # Visualization Options
+    - name: plot_brier_over_time
+      title: Brier Score Over Time Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot time-dependent Brier score across follow-up period. Shows how
+            prediction accuracy changes over time.
+
+    - name: plot_calibration_curve
+      title: Calibration Curve
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display calibration curve showing agreement between predicted and
+            observed survival probabilities. Perfect calibration appears as 45° line.
+
+    - name: calibration_groups
+      title: Number of Calibration Groups
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description:
+          R: >
+            Number of risk groups for calibration curve (e.g., deciles = 10).
+            More groups provide finer resolution but require larger sample size.
+
+    - name: plot_model_comparison
+      title: Model Comparison Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Bar plot comparing Brier scores across multiple models with confidence
+            intervals.
+
+    - name: plot_integrated_brier
+      title: Integrated Brier Score Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Visualize IBS as area under the Brier score curve over time.
+
+    # Advanced Options
+    - name: stratified_brier
+      title: Stratified Brier Score Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate Brier scores stratified by important subgroups to assess
+            calibration consistency across populations.
+
+    - name: stratify_by
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable for stratified analysis (e.g., treatment arm, age group, center).
+
+    - name: inverse_probability_weighting
+      title: Inverse Probability Censoring Weighting
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use inverse probability of censoring weighting (IPCW) to handle
+            censored observations. Recommended for proper Brier score estimation.
+
+    - name: external_validation
+      title: External Validation Mode
+      type: Bool
+      default: false
+      description:
+          R: >
+            Indicate this is external validation (model developed on different dataset).
+            Affects interpretation and may trigger additional diagnostics.
+
+    - name: temporal_validation
+      title: Temporal Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Indicate this is temporal validation (more recent patients than development
+            cohort). May assess calibration drift over time.
+
+    - name: development_period
+      title: Development Period End Date
+      type: String
+      default: ""
+      description:
+          R: >
+            End date of development period for temporal validation assessment
+            (format: YYYY-MM-DD).
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+      default: complete
+      description:
+          R: >
+            Method for handling missing predictor or outcome data.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap sampling and other stochastic procedures.
+
+...

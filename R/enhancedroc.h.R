@@ -18,6 +18,10 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             confidenceLevel = 95,
             bootstrapSamples = 1000,
             useBootstrap = TRUE,
+            bootstrapMethod = "bca",
+            bootstrapCutoffCI = FALSE,
+            bootstrapPartialAUC = FALSE,
+            stratifiedBootstrap = TRUE,
             pairwiseComparisons = TRUE,
             comparisonMethod = "delong",
             rocCurve = TRUE,
@@ -28,6 +32,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             clinicalMetrics = TRUE,
             smoothMethod = "none",
             partialAuc = FALSE,
+            partialAucType = "specificity",
             partialRange = "0.8,1.0",
             crocAnalysis = FALSE,
             crocAlpha = 7,
@@ -48,7 +53,44 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             showCutoffPoints = TRUE,
             showConfidenceBands = FALSE,
             showMetricsDiff = TRUE,
-            statisticalComparison = TRUE, ...) {
+            statisticalComparison = TRUE,
+            calibrationAnalysis = FALSE,
+            calibrationPlot = TRUE,
+            hosmerLemeshow = TRUE,
+            hlGroups = 10,
+            brierScore = TRUE,
+            calibrationMetrics = TRUE,
+            splineCalibration = FALSE,
+            splineKnots = 4,
+            eoRatio = FALSE,
+            namDagostino = FALSE,
+            greenwoodNam = FALSE,
+            calibrationBelt = FALSE,
+            calibrationDensity = FALSE,
+            multiClassROC = FALSE,
+            multiClassStrategy = "ovr",
+            multiClassAveraging = "macro",
+            timeDependentROC = FALSE,
+            timePoints = "12,24,36",
+            tdRocMethod = "km",
+            clinicalImpact = FALSE,
+            nntCalculation = TRUE,
+            clinicalUtilityCurve = TRUE,
+            decisionImpactTable = TRUE,
+            survivalROC = FALSE,
+            harrellCIndex = FALSE,
+            unoCStatistic = FALSE,
+            incidentDynamic = FALSE,
+            cumulativeDynamic = FALSE,
+            competingRisksConcordance = FALSE,
+            internalValidation = FALSE,
+            validationMethod = "bootstrap",
+            optimismCorrection = TRUE,
+            externalValidation = FALSE,
+            decisionImpactCurves = FALSE,
+            netBenefitRegression = FALSE,
+            modelUpdating = FALSE,
+            transportability = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -127,6 +169,26 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "useBootstrap",
                 useBootstrap,
                 default=TRUE)
+            private$..bootstrapMethod <- jmvcore::OptionList$new(
+                "bootstrapMethod",
+                bootstrapMethod,
+                options=list(
+                    "percentile",
+                    "bca",
+                    "basic"),
+                default="bca")
+            private$..bootstrapCutoffCI <- jmvcore::OptionBool$new(
+                "bootstrapCutoffCI",
+                bootstrapCutoffCI,
+                default=FALSE)
+            private$..bootstrapPartialAUC <- jmvcore::OptionBool$new(
+                "bootstrapPartialAUC",
+                bootstrapPartialAUC,
+                default=FALSE)
+            private$..stratifiedBootstrap <- jmvcore::OptionBool$new(
+                "stratifiedBootstrap",
+                stratifiedBootstrap,
+                default=TRUE)
             private$..pairwiseComparisons <- jmvcore::OptionBool$new(
                 "pairwiseComparisons",
                 pairwiseComparisons,
@@ -175,6 +237,13 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "partialAuc",
                 partialAuc,
                 default=FALSE)
+            private$..partialAucType <- jmvcore::OptionList$new(
+                "partialAucType",
+                partialAucType,
+                options=list(
+                    "specificity",
+                    "sensitivity"),
+                default="specificity")
             private$..partialRange <- jmvcore::OptionString$new(
                 "partialRange",
                 partialRange,
@@ -289,6 +358,172 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "statisticalComparison",
                 statisticalComparison,
                 default=TRUE)
+            private$..calibrationAnalysis <- jmvcore::OptionBool$new(
+                "calibrationAnalysis",
+                calibrationAnalysis,
+                default=FALSE)
+            private$..calibrationPlot <- jmvcore::OptionBool$new(
+                "calibrationPlot",
+                calibrationPlot,
+                default=TRUE)
+            private$..hosmerLemeshow <- jmvcore::OptionBool$new(
+                "hosmerLemeshow",
+                hosmerLemeshow,
+                default=TRUE)
+            private$..hlGroups <- jmvcore::OptionInteger$new(
+                "hlGroups",
+                hlGroups,
+                default=10,
+                min=5,
+                max=20)
+            private$..brierScore <- jmvcore::OptionBool$new(
+                "brierScore",
+                brierScore,
+                default=TRUE)
+            private$..calibrationMetrics <- jmvcore::OptionBool$new(
+                "calibrationMetrics",
+                calibrationMetrics,
+                default=TRUE)
+            private$..splineCalibration <- jmvcore::OptionBool$new(
+                "splineCalibration",
+                splineCalibration,
+                default=FALSE)
+            private$..splineKnots <- jmvcore::OptionInteger$new(
+                "splineKnots",
+                splineKnots,
+                default=4,
+                min=3,
+                max=7)
+            private$..eoRatio <- jmvcore::OptionBool$new(
+                "eoRatio",
+                eoRatio,
+                default=FALSE)
+            private$..namDagostino <- jmvcore::OptionBool$new(
+                "namDagostino",
+                namDagostino,
+                default=FALSE)
+            private$..greenwoodNam <- jmvcore::OptionBool$new(
+                "greenwoodNam",
+                greenwoodNam,
+                default=FALSE)
+            private$..calibrationBelt <- jmvcore::OptionBool$new(
+                "calibrationBelt",
+                calibrationBelt,
+                default=FALSE)
+            private$..calibrationDensity <- jmvcore::OptionBool$new(
+                "calibrationDensity",
+                calibrationDensity,
+                default=FALSE)
+            private$..multiClassROC <- jmvcore::OptionBool$new(
+                "multiClassROC",
+                multiClassROC,
+                default=FALSE)
+            private$..multiClassStrategy <- jmvcore::OptionList$new(
+                "multiClassStrategy",
+                multiClassStrategy,
+                options=list(
+                    "ovr",
+                    "ovo"),
+                default="ovr")
+            private$..multiClassAveraging <- jmvcore::OptionList$new(
+                "multiClassAveraging",
+                multiClassAveraging,
+                options=list(
+                    "macro",
+                    "weighted"),
+                default="macro")
+            private$..timeDependentROC <- jmvcore::OptionBool$new(
+                "timeDependentROC",
+                timeDependentROC,
+                default=FALSE)
+            private$..timePoints <- jmvcore::OptionString$new(
+                "timePoints",
+                timePoints,
+                default="12,24,36")
+            private$..tdRocMethod <- jmvcore::OptionList$new(
+                "tdRocMethod",
+                tdRocMethod,
+                options=list(
+                    "km",
+                    "nne",
+                    "cox"),
+                default="km")
+            private$..clinicalImpact <- jmvcore::OptionBool$new(
+                "clinicalImpact",
+                clinicalImpact,
+                default=FALSE)
+            private$..nntCalculation <- jmvcore::OptionBool$new(
+                "nntCalculation",
+                nntCalculation,
+                default=TRUE)
+            private$..clinicalUtilityCurve <- jmvcore::OptionBool$new(
+                "clinicalUtilityCurve",
+                clinicalUtilityCurve,
+                default=TRUE)
+            private$..decisionImpactTable <- jmvcore::OptionBool$new(
+                "decisionImpactTable",
+                decisionImpactTable,
+                default=TRUE)
+            private$..survivalROC <- jmvcore::OptionBool$new(
+                "survivalROC",
+                survivalROC,
+                default=FALSE)
+            private$..harrellCIndex <- jmvcore::OptionBool$new(
+                "harrellCIndex",
+                harrellCIndex,
+                default=FALSE)
+            private$..unoCStatistic <- jmvcore::OptionBool$new(
+                "unoCStatistic",
+                unoCStatistic,
+                default=FALSE)
+            private$..incidentDynamic <- jmvcore::OptionBool$new(
+                "incidentDynamic",
+                incidentDynamic,
+                default=FALSE)
+            private$..cumulativeDynamic <- jmvcore::OptionBool$new(
+                "cumulativeDynamic",
+                cumulativeDynamic,
+                default=FALSE)
+            private$..competingRisksConcordance <- jmvcore::OptionBool$new(
+                "competingRisksConcordance",
+                competingRisksConcordance,
+                default=FALSE)
+            private$..internalValidation <- jmvcore::OptionBool$new(
+                "internalValidation",
+                internalValidation,
+                default=FALSE)
+            private$..validationMethod <- jmvcore::OptionList$new(
+                "validationMethod",
+                validationMethod,
+                options=list(
+                    "bootstrap",
+                    "cv",
+                    "both"),
+                default="bootstrap")
+            private$..optimismCorrection <- jmvcore::OptionBool$new(
+                "optimismCorrection",
+                optimismCorrection,
+                default=TRUE)
+            private$..externalValidation <- jmvcore::OptionBool$new(
+                "externalValidation",
+                externalValidation,
+                default=FALSE)
+            private$..decisionImpactCurves <- jmvcore::OptionBool$new(
+                "decisionImpactCurves",
+                decisionImpactCurves,
+                default=FALSE)
+            private$..netBenefitRegression <- jmvcore::OptionBool$new(
+                "netBenefitRegression",
+                netBenefitRegression,
+                default=FALSE)
+            private$..modelUpdating <- jmvcore::OptionBool$new(
+                "modelUpdating",
+                modelUpdating,
+                default=FALSE)
+            private$..transportability <- jmvcore::OptionBool$new(
+                "transportability",
+                transportability,
+                default=FALSE)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..positiveClass)
@@ -302,6 +537,10 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..confidenceLevel)
             self$.addOption(private$..bootstrapSamples)
             self$.addOption(private$..useBootstrap)
+            self$.addOption(private$..bootstrapMethod)
+            self$.addOption(private$..bootstrapCutoffCI)
+            self$.addOption(private$..bootstrapPartialAUC)
+            self$.addOption(private$..stratifiedBootstrap)
             self$.addOption(private$..pairwiseComparisons)
             self$.addOption(private$..comparisonMethod)
             self$.addOption(private$..rocCurve)
@@ -312,6 +551,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..clinicalMetrics)
             self$.addOption(private$..smoothMethod)
             self$.addOption(private$..partialAuc)
+            self$.addOption(private$..partialAucType)
             self$.addOption(private$..partialRange)
             self$.addOption(private$..crocAnalysis)
             self$.addOption(private$..crocAlpha)
@@ -333,6 +573,43 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..showConfidenceBands)
             self$.addOption(private$..showMetricsDiff)
             self$.addOption(private$..statisticalComparison)
+            self$.addOption(private$..calibrationAnalysis)
+            self$.addOption(private$..calibrationPlot)
+            self$.addOption(private$..hosmerLemeshow)
+            self$.addOption(private$..hlGroups)
+            self$.addOption(private$..brierScore)
+            self$.addOption(private$..calibrationMetrics)
+            self$.addOption(private$..splineCalibration)
+            self$.addOption(private$..splineKnots)
+            self$.addOption(private$..eoRatio)
+            self$.addOption(private$..namDagostino)
+            self$.addOption(private$..greenwoodNam)
+            self$.addOption(private$..calibrationBelt)
+            self$.addOption(private$..calibrationDensity)
+            self$.addOption(private$..multiClassROC)
+            self$.addOption(private$..multiClassStrategy)
+            self$.addOption(private$..multiClassAveraging)
+            self$.addOption(private$..timeDependentROC)
+            self$.addOption(private$..timePoints)
+            self$.addOption(private$..tdRocMethod)
+            self$.addOption(private$..clinicalImpact)
+            self$.addOption(private$..nntCalculation)
+            self$.addOption(private$..clinicalUtilityCurve)
+            self$.addOption(private$..decisionImpactTable)
+            self$.addOption(private$..survivalROC)
+            self$.addOption(private$..harrellCIndex)
+            self$.addOption(private$..unoCStatistic)
+            self$.addOption(private$..incidentDynamic)
+            self$.addOption(private$..cumulativeDynamic)
+            self$.addOption(private$..competingRisksConcordance)
+            self$.addOption(private$..internalValidation)
+            self$.addOption(private$..validationMethod)
+            self$.addOption(private$..optimismCorrection)
+            self$.addOption(private$..externalValidation)
+            self$.addOption(private$..decisionImpactCurves)
+            self$.addOption(private$..netBenefitRegression)
+            self$.addOption(private$..modelUpdating)
+            self$.addOption(private$..transportability)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -347,6 +624,10 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         confidenceLevel = function() private$..confidenceLevel$value,
         bootstrapSamples = function() private$..bootstrapSamples$value,
         useBootstrap = function() private$..useBootstrap$value,
+        bootstrapMethod = function() private$..bootstrapMethod$value,
+        bootstrapCutoffCI = function() private$..bootstrapCutoffCI$value,
+        bootstrapPartialAUC = function() private$..bootstrapPartialAUC$value,
+        stratifiedBootstrap = function() private$..stratifiedBootstrap$value,
         pairwiseComparisons = function() private$..pairwiseComparisons$value,
         comparisonMethod = function() private$..comparisonMethod$value,
         rocCurve = function() private$..rocCurve$value,
@@ -357,6 +638,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         clinicalMetrics = function() private$..clinicalMetrics$value,
         smoothMethod = function() private$..smoothMethod$value,
         partialAuc = function() private$..partialAuc$value,
+        partialAucType = function() private$..partialAucType$value,
         partialRange = function() private$..partialRange$value,
         crocAnalysis = function() private$..crocAnalysis$value,
         crocAlpha = function() private$..crocAlpha$value,
@@ -377,7 +659,44 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         showCutoffPoints = function() private$..showCutoffPoints$value,
         showConfidenceBands = function() private$..showConfidenceBands$value,
         showMetricsDiff = function() private$..showMetricsDiff$value,
-        statisticalComparison = function() private$..statisticalComparison$value),
+        statisticalComparison = function() private$..statisticalComparison$value,
+        calibrationAnalysis = function() private$..calibrationAnalysis$value,
+        calibrationPlot = function() private$..calibrationPlot$value,
+        hosmerLemeshow = function() private$..hosmerLemeshow$value,
+        hlGroups = function() private$..hlGroups$value,
+        brierScore = function() private$..brierScore$value,
+        calibrationMetrics = function() private$..calibrationMetrics$value,
+        splineCalibration = function() private$..splineCalibration$value,
+        splineKnots = function() private$..splineKnots$value,
+        eoRatio = function() private$..eoRatio$value,
+        namDagostino = function() private$..namDagostino$value,
+        greenwoodNam = function() private$..greenwoodNam$value,
+        calibrationBelt = function() private$..calibrationBelt$value,
+        calibrationDensity = function() private$..calibrationDensity$value,
+        multiClassROC = function() private$..multiClassROC$value,
+        multiClassStrategy = function() private$..multiClassStrategy$value,
+        multiClassAveraging = function() private$..multiClassAveraging$value,
+        timeDependentROC = function() private$..timeDependentROC$value,
+        timePoints = function() private$..timePoints$value,
+        tdRocMethod = function() private$..tdRocMethod$value,
+        clinicalImpact = function() private$..clinicalImpact$value,
+        nntCalculation = function() private$..nntCalculation$value,
+        clinicalUtilityCurve = function() private$..clinicalUtilityCurve$value,
+        decisionImpactTable = function() private$..decisionImpactTable$value,
+        survivalROC = function() private$..survivalROC$value,
+        harrellCIndex = function() private$..harrellCIndex$value,
+        unoCStatistic = function() private$..unoCStatistic$value,
+        incidentDynamic = function() private$..incidentDynamic$value,
+        cumulativeDynamic = function() private$..cumulativeDynamic$value,
+        competingRisksConcordance = function() private$..competingRisksConcordance$value,
+        internalValidation = function() private$..internalValidation$value,
+        validationMethod = function() private$..validationMethod$value,
+        optimismCorrection = function() private$..optimismCorrection$value,
+        externalValidation = function() private$..externalValidation$value,
+        decisionImpactCurves = function() private$..decisionImpactCurves$value,
+        netBenefitRegression = function() private$..netBenefitRegression$value,
+        modelUpdating = function() private$..modelUpdating$value,
+        transportability = function() private$..transportability$value),
     private = list(
         ..outcome = NA,
         ..positiveClass = NA,
@@ -391,6 +710,10 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..confidenceLevel = NA,
         ..bootstrapSamples = NA,
         ..useBootstrap = NA,
+        ..bootstrapMethod = NA,
+        ..bootstrapCutoffCI = NA,
+        ..bootstrapPartialAUC = NA,
+        ..stratifiedBootstrap = NA,
         ..pairwiseComparisons = NA,
         ..comparisonMethod = NA,
         ..rocCurve = NA,
@@ -401,6 +724,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..clinicalMetrics = NA,
         ..smoothMethod = NA,
         ..partialAuc = NA,
+        ..partialAucType = NA,
         ..partialRange = NA,
         ..crocAnalysis = NA,
         ..crocAlpha = NA,
@@ -421,7 +745,44 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..showCutoffPoints = NA,
         ..showConfidenceBands = NA,
         ..showMetricsDiff = NA,
-        ..statisticalComparison = NA)
+        ..statisticalComparison = NA,
+        ..calibrationAnalysis = NA,
+        ..calibrationPlot = NA,
+        ..hosmerLemeshow = NA,
+        ..hlGroups = NA,
+        ..brierScore = NA,
+        ..calibrationMetrics = NA,
+        ..splineCalibration = NA,
+        ..splineKnots = NA,
+        ..eoRatio = NA,
+        ..namDagostino = NA,
+        ..greenwoodNam = NA,
+        ..calibrationBelt = NA,
+        ..calibrationDensity = NA,
+        ..multiClassROC = NA,
+        ..multiClassStrategy = NA,
+        ..multiClassAveraging = NA,
+        ..timeDependentROC = NA,
+        ..timePoints = NA,
+        ..tdRocMethod = NA,
+        ..clinicalImpact = NA,
+        ..nntCalculation = NA,
+        ..clinicalUtilityCurve = NA,
+        ..decisionImpactTable = NA,
+        ..survivalROC = NA,
+        ..harrellCIndex = NA,
+        ..unoCStatistic = NA,
+        ..incidentDynamic = NA,
+        ..cumulativeDynamic = NA,
+        ..competingRisksConcordance = NA,
+        ..internalValidation = NA,
+        ..validationMethod = NA,
+        ..optimismCorrection = NA,
+        ..externalValidation = NA,
+        ..decisionImpactCurves = NA,
+        ..netBenefitRegression = NA,
+        ..modelUpdating = NA,
+        ..transportability = NA)
 )
 
 enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -468,7 +829,19 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     youdenIndexPlot = function() private$.items[["youdenIndexPlot"]],
                     clinicalDecisionPlot = function() private$.items[["clinicalDecisionPlot"]],
                     crocCurvePlot = function() private$.items[["crocCurvePlot"]],
-                    convexHullPlot = function() private$.items[["convexHullPlot"]]),
+                    convexHullPlot = function() private$.items[["convexHullPlot"]],
+                    calibrationSummary = function() private$.items[["calibrationSummary"]],
+                    hosmerLemeshowTable = function() private$.items[["hosmerLemeshowTable"]],
+                    calibrationPlotImage = function() private$.items[["calibrationPlotImage"]],
+                    multiClassAUC = function() private$.items[["multiClassAUC"]],
+                    multiClassAverage = function() private$.items[["multiClassAverage"]],
+                    multiClassROCPlot = function() private$.items[["multiClassROCPlot"]],
+                    timeDependentAUC = function() private$.items[["timeDependentAUC"]],
+                    timeDependentROCPlot = function() private$.items[["timeDependentROCPlot"]],
+                    aucTimeCoursePlot = function() private$.items[["aucTimeCoursePlot"]],
+                    clinicalImpactTable = function() private$.items[["clinicalImpactTable"]],
+                    decisionImpactSummary = function() private$.items[["decisionImpactSummary"]],
+                    clinicalUtilityPlot = function() private$.items[["clinicalUtilityPlot"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -706,10 +1079,34 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="number", 
                                     `format`="zto"),
                                 list(
+                                    `name`="sens_ci_lower", 
+                                    `title`="Sens CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(bootstrapCutoffCI && useBootstrap)"),
+                                list(
+                                    `name`="sens_ci_upper", 
+                                    `title`="Sens CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(bootstrapCutoffCI && useBootstrap)"),
+                                list(
                                     `name`="specificity", 
                                     `title`="Specificity", 
                                     `type`="number", 
                                     `format`="zto"),
+                                list(
+                                    `name`="spec_ci_lower", 
+                                    `title`="Spec CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(bootstrapCutoffCI && useBootstrap)"),
+                                list(
+                                    `name`="spec_ci_upper", 
+                                    `title`="Spec CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(bootstrapCutoffCI && useBootstrap)"),
                                 list(
                                     `name`="accuracy", 
                                     `title`="Accuracy", 
@@ -1053,6 +1450,303 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(convexHull)",
                             renderFun=".plotConvexHull",
                             width=600,
+                            height=600))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="calibrationSummary",
+                            title="Calibration Performance Summary",
+                            visible="(calibrationAnalysis)",
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="brier_score", 
+                                    `title`="Brier Score", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="scaled_brier", 
+                                    `title`="Scaled Brier", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="calibration_slope", 
+                                    `title`="Calibration Slope", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(calibrationMetrics)"),
+                                list(
+                                    `name`="calibration_intercept", 
+                                    `title`="Calibration Intercept", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(calibrationMetrics)"),
+                                list(
+                                    `name`="calibration_in_large", 
+                                    `title`="Calibration-in-the-Large", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(calibrationMetrics)"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="hosmerLemeshowTable",
+                            title="Hosmer-Lemeshow Goodness-of-Fit Test",
+                            visible="(calibrationAnalysis && hosmerLemeshow)",
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="chi_square", 
+                                    `title`="Chi-Square", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto;pvalue"),
+                                list(
+                                    `name`="n_groups", 
+                                    `title`="Groups", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="conclusion", 
+                                    `title`="Conclusion", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="calibrationPlotImage",
+                            title="Calibration Plot",
+                            visible="(calibrationAnalysis && calibrationPlot)",
+                            renderFun=".plotCalibration",
+                            width=600,
+                            height=600))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="multiClassAUC",
+                            title="Multi-Class ROC Summary",
+                            visible="(multiClassROC)",
+                            columns=list(
+                                list(
+                                    `name`="class", 
+                                    `title`="Class", 
+                                    `type`="text"),
+                                list(
+                                    `name`="strategy", 
+                                    `title`="Strategy", 
+                                    `type`="text"),
+                                list(
+                                    `name`="auc", 
+                                    `title`="AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="auc_lower", 
+                                    `title`="AUC Lower CI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="auc_upper", 
+                                    `title`="AUC Upper CI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="n_positive", 
+                                    `title`="N Positive", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_negative", 
+                                    `title`="N Negative", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="multiClassAverage",
+                            title="Multi-Class Average AUC",
+                            visible="(multiClassROC)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="averaging_method", 
+                                    `title`="Averaging Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="macro_auc", 
+                                    `title`="Macro AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="weighted_auc", 
+                                    `title`="Weighted AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="micro_auc", 
+                                    `title`="Micro AUC", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="multiClassROCPlot",
+                            title="Multi-Class ROC Curves",
+                            visible="(multiClassROC)",
+                            renderFun=".plotMultiClassROC",
+                            width=600,
+                            height=600))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="timeDependentAUC",
+                            title="Time-Dependent AUC",
+                            visible="(timeDependentROC)",
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="time_point", 
+                                    `title`="Time Point", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="auc", 
+                                    `title`="AUC(t)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="auc_lower", 
+                                    `title`="AUC Lower CI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="auc_upper", 
+                                    `title`="AUC Upper CI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="n_events", 
+                                    `title`="N Events", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_at_risk", 
+                                    `title`="N At Risk", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="timeDependentROCPlot",
+                            title="Time-Dependent ROC Curves",
+                            visible="(timeDependentROC)",
+                            renderFun=".plotTimeDependentROC",
+                            width=600,
+                            height=600))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="aucTimeCoursePlot",
+                            title="AUC Time Course",
+                            visible="(timeDependentROC)",
+                            renderFun=".plotAUCTimeCourse",
+                            width=600,
+                            height=600))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="clinicalImpactTable",
+                            title="Clinical Impact Metrics",
+                            visible="(clinicalImpact)",
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="threshold", 
+                                    `title`="Threshold", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="nnt", 
+                                    `title`="NNT", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="nnd", 
+                                    `title`="NND", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="tested_positive", 
+                                    `title`="Tested Positive (%)", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="true_positive_rate", 
+                                    `title`="True Positive Rate", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="false_positive_rate", 
+                                    `title`="False Positive Rate", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="net_benefit_per_100", 
+                                    `title`="Net Benefit per 100", 
+                                    `type`="number", 
+                                    `format`="zto"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="decisionImpactSummary",
+                            title="Decision Impact at Key Thresholds",
+                            visible="(clinicalImpact && decisionImpactTable)",
+                            columns=list(
+                                list(
+                                    `name`="threshold", 
+                                    `title`="Risk Threshold", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="n_high_risk", 
+                                    `title`="N High Risk", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_high_risk_with_event", 
+                                    `title`="N True Positives", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_high_risk_without_event", 
+                                    `title`="N False Positives", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="ppv", 
+                                    `title`="PPV", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="npv", 
+                                    `title`="NPV", 
+                                    `type`="number", 
+                                    `format`="pc"))))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="clinicalUtilityPlot",
+                            title="Clinical Utility Curve",
+                            visible="(clinicalImpact && clinicalUtilityCurve)",
+                            renderFun=".plotClinicalUtility",
+                            width=600,
                             height=600))}))$new(options=options))}))
 
 enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1103,6 +1797,14 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bootstrapSamples Number of bootstrap samples for confidence
 #'   intervals
 #' @param useBootstrap Use bootstrap methods for confidence intervals
+#' @param bootstrapMethod Method for calculating bootstrap confidence
+#'   intervals. BCa provides better coverage but requires more computation.
+#' @param bootstrapCutoffCI Calculate bootstrap confidence intervals for
+#'   sensitivity and specificity at optimal cutoff
+#' @param bootstrapPartialAUC Calculate bootstrap confidence intervals for
+#'   partial AUC estimates
+#' @param stratifiedBootstrap Maintain outcome class proportions in bootstrap
+#'   samples (recommended for imbalanced data)
 #' @param pairwiseComparisons Perform pairwise comparisons between ROC curves
 #' @param comparisonMethod Method for comparing ROC curves
 #' @param rocCurve Display ROC curve plot
@@ -1115,7 +1817,10 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param smoothMethod Method for smoothing ROC curves
 #' @param partialAuc Calculate partial AUC for specific
 #'   sensitivity/specificity ranges
-#' @param partialRange Range for partial AUC (specificity_min,specificity_max)
+#' @param partialAucType Whether to calculate pAUC over a specificity or
+#'   sensitivity range
+#' @param partialRange Range for partial AUC (min,max) - e.g., 0.8,1.0 for
+#'   high specificity or sensitivity
 #' @param crocAnalysis Calculate Concentrated ROC curves for early retrieval
 #'   analysis
 #' @param crocAlpha Concentration parameter for CROC exponential magnifier
@@ -1147,6 +1852,66 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showMetricsDiff Display detailed differences between model metrics
 #' @param statisticalComparison Perform comprehensive statistical comparison
 #'   between models
+#' @param calibrationAnalysis Assess calibration (agreement between observed
+#'   and predicted probabilities)
+#' @param calibrationPlot Display calibration plot with loess smoothing
+#' @param hosmerLemeshow Perform Hosmer-Lemeshow goodness-of-fit test
+#' @param hlGroups Number of groups for Hosmer-Lemeshow test
+#' @param brierScore Calculate Brier score and scaled Brier score
+#' @param calibrationMetrics Calculate calibration slope, intercept, and
+#'   calibration-in-the-large
+#' @param splineCalibration Use restricted cubic splines for flexible
+#'   calibration curves
+#' @param splineKnots Number of knots for restricted cubic splines (3-7
+#'   recommended)
+#' @param eoRatio Calculate Expected/Observed ratio for overall calibration
+#'   assessment
+#' @param namDagostino Perform Nam-D'Agostino calibration test (more powerful
+#'   than H-L)
+#' @param greenwoodNam Greenwood-Nam-D'Agostino test for survival model
+#'   calibration
+#' @param calibrationBelt Display calibration belt showing uncertainty around
+#'   calibration curve
+#' @param calibrationDensity Show distribution of predicted probabilities as
+#'   density overlay
+#' @param multiClassROC Enable multi-class ROC analysis for outcomes with >2
+#'   levels
+#' @param multiClassStrategy Strategy for multi-class ROC analysis
+#' @param multiClassAveraging Method for averaging AUC across classes
+#' @param timeDependentROC Enable time-dependent ROC analysis for
+#'   survival/time-to-event outcomes
+#' @param timePoints Comma-separated time points for time-dependent ROC (e.g.,
+#'   12,24,36 months)
+#' @param tdRocMethod Method for estimating time-dependent ROC curves
+#' @param clinicalImpact Calculate clinical impact metrics (NNT, NND, clinical
+#'   utility)
+#' @param nntCalculation Calculate number needed to test and number needed to
+#'   diagnose
+#' @param clinicalUtilityCurve Display clinical utility curve showing test
+#'   consequences
+#' @param decisionImpactTable Show decision impact at various thresholds
+#' @param survivalROC Enable survival-specific ROC methods (requires
+#'   time-to-event data)
+#' @param harrellCIndex Calculate Harrell's concordance index for
+#'   time-to-event outcomes
+#' @param unoCStatistic Calculate Uno's C-statistic (more robust to censoring)
+#' @param incidentDynamic Calculate incident/dynamic AUC (sensitivity for
+#'   events at specific time)
+#' @param cumulativeDynamic Calculate cumulative/dynamic AUC (sensitivity for
+#'   events by specific time)
+#' @param competingRisksConcordance Calculate cause-specific concordance for
+#'   competing risks
+#' @param internalValidation Perform internal validation using
+#'   cross-validation or bootstrap
+#' @param validationMethod Method for internal validation
+#' @param optimismCorrection Apply optimism correction to performance metrics
+#' @param externalValidation Enable external validation reporting framework
+#' @param decisionImpactCurves Plot decision impact curves showing clinical
+#'   consequences
+#' @param netBenefitRegression Model net benefit as function of threshold
+#'   probabilities
+#' @param modelUpdating Analyze need for model recalibration or updating
+#' @param transportability Assess model transportability across populations
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -1175,6 +1940,18 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$clinicalDecisionPlot} \tab \tab \tab \tab \tab Clinical decision curves and threshold analysis \cr
 #'   \code{results$results$crocCurvePlot} \tab \tab \tab \tab \tab Concentrated ROC curve with exponential magnifier transformation \cr
 #'   \code{results$results$convexHullPlot} \tab \tab \tab \tab \tab ROC curve with convex hull overlay \cr
+#'   \code{results$results$calibrationSummary} \tab \tab \tab \tab \tab Overall calibration metrics including Brier score \cr
+#'   \code{results$results$hosmerLemeshowTable} \tab \tab \tab \tab \tab Hosmer-Lemeshow test for calibration \cr
+#'   \code{results$results$calibrationPlotImage} \tab \tab \tab \tab \tab Calibration plot showing observed vs predicted probabilities \cr
+#'   \code{results$results$multiClassAUC} \tab \tab \tab \tab \tab AUC values for each class in multi-class analysis \cr
+#'   \code{results$results$multiClassAverage} \tab \tab \tab \tab \tab Averaged AUC across all classes \cr
+#'   \code{results$results$multiClassROCPlot} \tab \tab \tab \tab \tab ROC curves for all classes \cr
+#'   \code{results$results$timeDependentAUC} \tab \tab \tab \tab \tab AUC values at different time points \cr
+#'   \code{results$results$timeDependentROCPlot} \tab \tab \tab \tab \tab ROC curves at multiple time points \cr
+#'   \code{results$results$aucTimeCoursePlot} \tab \tab \tab \tab \tab AUC evolution over time \cr
+#'   \code{results$results$clinicalImpactTable} \tab \tab \tab \tab \tab Number needed to test and clinical utility metrics \cr
+#'   \code{results$results$decisionImpactSummary} \tab \tab \tab \tab \tab Clinical consequences at various decision thresholds \cr
+#'   \code{results$results$clinicalUtilityPlot} \tab \tab \tab \tab \tab Clinical utility showing test consequences across thresholds \cr
 #' }
 #'
 #' @export
@@ -1192,6 +1969,10 @@ enhancedROC <- function(
     confidenceLevel = 95,
     bootstrapSamples = 1000,
     useBootstrap = TRUE,
+    bootstrapMethod = "bca",
+    bootstrapCutoffCI = FALSE,
+    bootstrapPartialAUC = FALSE,
+    stratifiedBootstrap = TRUE,
     pairwiseComparisons = TRUE,
     comparisonMethod = "delong",
     rocCurve = TRUE,
@@ -1202,6 +1983,7 @@ enhancedROC <- function(
     clinicalMetrics = TRUE,
     smoothMethod = "none",
     partialAuc = FALSE,
+    partialAucType = "specificity",
     partialRange = "0.8,1.0",
     crocAnalysis = FALSE,
     crocAlpha = 7,
@@ -1222,7 +2004,44 @@ enhancedROC <- function(
     showCutoffPoints = TRUE,
     showConfidenceBands = FALSE,
     showMetricsDiff = TRUE,
-    statisticalComparison = TRUE) {
+    statisticalComparison = TRUE,
+    calibrationAnalysis = FALSE,
+    calibrationPlot = TRUE,
+    hosmerLemeshow = TRUE,
+    hlGroups = 10,
+    brierScore = TRUE,
+    calibrationMetrics = TRUE,
+    splineCalibration = FALSE,
+    splineKnots = 4,
+    eoRatio = FALSE,
+    namDagostino = FALSE,
+    greenwoodNam = FALSE,
+    calibrationBelt = FALSE,
+    calibrationDensity = FALSE,
+    multiClassROC = FALSE,
+    multiClassStrategy = "ovr",
+    multiClassAveraging = "macro",
+    timeDependentROC = FALSE,
+    timePoints = "12,24,36",
+    tdRocMethod = "km",
+    clinicalImpact = FALSE,
+    nntCalculation = TRUE,
+    clinicalUtilityCurve = TRUE,
+    decisionImpactTable = TRUE,
+    survivalROC = FALSE,
+    harrellCIndex = FALSE,
+    unoCStatistic = FALSE,
+    incidentDynamic = FALSE,
+    cumulativeDynamic = FALSE,
+    competingRisksConcordance = FALSE,
+    internalValidation = FALSE,
+    validationMethod = "bootstrap",
+    optimismCorrection = TRUE,
+    externalValidation = FALSE,
+    decisionImpactCurves = FALSE,
+    netBenefitRegression = FALSE,
+    modelUpdating = FALSE,
+    transportability = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("enhancedROC requires jmvcore to be installed (restart may be required)")
@@ -1249,6 +2068,10 @@ enhancedROC <- function(
         confidenceLevel = confidenceLevel,
         bootstrapSamples = bootstrapSamples,
         useBootstrap = useBootstrap,
+        bootstrapMethod = bootstrapMethod,
+        bootstrapCutoffCI = bootstrapCutoffCI,
+        bootstrapPartialAUC = bootstrapPartialAUC,
+        stratifiedBootstrap = stratifiedBootstrap,
         pairwiseComparisons = pairwiseComparisons,
         comparisonMethod = comparisonMethod,
         rocCurve = rocCurve,
@@ -1259,6 +2082,7 @@ enhancedROC <- function(
         clinicalMetrics = clinicalMetrics,
         smoothMethod = smoothMethod,
         partialAuc = partialAuc,
+        partialAucType = partialAucType,
         partialRange = partialRange,
         crocAnalysis = crocAnalysis,
         crocAlpha = crocAlpha,
@@ -1279,7 +2103,44 @@ enhancedROC <- function(
         showCutoffPoints = showCutoffPoints,
         showConfidenceBands = showConfidenceBands,
         showMetricsDiff = showMetricsDiff,
-        statisticalComparison = statisticalComparison)
+        statisticalComparison = statisticalComparison,
+        calibrationAnalysis = calibrationAnalysis,
+        calibrationPlot = calibrationPlot,
+        hosmerLemeshow = hosmerLemeshow,
+        hlGroups = hlGroups,
+        brierScore = brierScore,
+        calibrationMetrics = calibrationMetrics,
+        splineCalibration = splineCalibration,
+        splineKnots = splineKnots,
+        eoRatio = eoRatio,
+        namDagostino = namDagostino,
+        greenwoodNam = greenwoodNam,
+        calibrationBelt = calibrationBelt,
+        calibrationDensity = calibrationDensity,
+        multiClassROC = multiClassROC,
+        multiClassStrategy = multiClassStrategy,
+        multiClassAveraging = multiClassAveraging,
+        timeDependentROC = timeDependentROC,
+        timePoints = timePoints,
+        tdRocMethod = tdRocMethod,
+        clinicalImpact = clinicalImpact,
+        nntCalculation = nntCalculation,
+        clinicalUtilityCurve = clinicalUtilityCurve,
+        decisionImpactTable = decisionImpactTable,
+        survivalROC = survivalROC,
+        harrellCIndex = harrellCIndex,
+        unoCStatistic = unoCStatistic,
+        incidentDynamic = incidentDynamic,
+        cumulativeDynamic = cumulativeDynamic,
+        competingRisksConcordance = competingRisksConcordance,
+        internalValidation = internalValidation,
+        validationMethod = validationMethod,
+        optimismCorrection = optimismCorrection,
+        externalValidation = externalValidation,
+        decisionImpactCurves = decisionImpactCurves,
+        netBenefitRegression = netBenefitRegression,
+        modelUpdating = modelUpdating,
+        transportability = transportability)
 
     analysis <- enhancedROCClass$new(
         options = options,

@@ -4,13 +4,24 @@ title: Pathology Sampling Adequacy Analysis
 jrs: '1.1'
 
 items:
+    # === WELCOME & DATA SUMMARY (Always First) ===
     - name: welcome
       title: ''
       type: Html
+      visible: (is.null(totalSamples) || is.null(firstDetection))
 
-    - name: instructions
+    # === DISPLAY OPTIONS: INSTRUCTIONS ===
+    - name: guidedInstructions
+      title: Quick Start Checklist
+      type: Html
+      visible: (showGuidedInstructions)
+
+    - name: conciseInstructions
       title: Analysis Overview
       type: Html
+      visible: (showConciseInstructions)
+
+
 
     - name: dataInfo
       title: Data Summary
@@ -26,10 +37,28 @@ items:
           title: Value
           type: text
 
+
+
+
+
+    # === DISPLAY OPTIONS: SPECIFIC TEXT OUTPUTS ===
     - name: probabilityExplanation
       title: Understanding Detection Probabilities
       type: Html
+      visible: (showProbabilityExplanation)
 
+    - name: keyResults
+      title: Key Results Summary
+      type: Html
+      visible: (showKeyResults)
+
+    # === CORE ANALYSES: CLINICAL SUMMARY ===
+    - name: clinicalSummary
+      title: Clinical Summary
+      type: Html
+      visible: (showClinicalSummary)
+
+    # === CORE ANALYSES: BINOMIAL MODEL ===
     - name: binomialText
       title: Binomial Probability Model
       type: Html
@@ -73,6 +102,7 @@ items:
           title: 'Minimum Samples Required'
           type: integer
 
+    # === CORE ANALYSES: BOOTSTRAP ===
     - name: bootstrapText
       title: Bootstrap Resampling Analysis
       type: Html
@@ -104,6 +134,7 @@ items:
           type: number
           format: 'pc'
 
+    # === CORE ANALYSES: DETECTION CURVE ===
     - name: detectionCurve
       title: Diagnostic Yield Curve
       type: Image
@@ -112,6 +143,7 @@ items:
       renderFun: .detectionCurve
       visible: (showDetectionCurve)
 
+    # === CORE ANALYSES: SENSITIVITY CI ===
     - name: sensitivityPlot
       title: Sensitivity with Confidence Intervals
       type: Image
@@ -120,6 +152,224 @@ items:
       renderFun: .sensitivityPlot
       visible: (showSensitivityCI && showBootstrap)
 
+    # === ENHANCED DETECTION: EMPIRICAL CUMULATIVE ===
+    - name: empiricalCumulativeText
+      title: Empirical Cumulative Detection Analysis
+      type: Html
+      visible: (showEmpiricalCumulative)
+
+    - name: empiricalCumulativeTable
+      title: Empirical Detection Rates by Sample Threshold
+      type: Table
+      visible: (showEmpiricalCumulative)
+      clearWith:
+        - totalSamples
+        - firstDetection
+        - positiveCount
+      columns:
+        - name: nSamples
+          title: 'Samples Examined'
+          type: integer
+        - name: cumDetection
+          title: 'Cumulative Detection'
+          type: number
+          format: 'pc'
+        - name: ciLower
+          title: '95% CI Lower'
+          type: number
+          format: 'pc'
+        - name: ciUpper
+          title: '95% CI Upper'
+          type: number
+          format: 'pc'
+        - name: incrementalYield
+          title: 'Incremental Yield'
+          type: number
+          format: 'pc'
+
+    - name: empiricalCumulativePlot
+      title: Empirical Cumulative Detection Curve
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .empiricalCumulativePlot
+      visible: (showEmpiricalCumulative)
+
+    # === ENHANCED DETECTION: INCREMENTAL YIELD ===
+    - name: incrementalYieldText
+      title: Incremental Diagnostic Yield Analysis
+      type: Html
+      visible: (showIncrementalYield)
+
+    - name: incrementalYieldTable
+      title: Marginal Benefit per Additional Sample
+      type: Table
+      visible: (showIncrementalYield)
+      clearWith:
+        - totalSamples
+        - firstDetection
+        - maxSamples
+      columns:
+        - name: fromSamples
+          title: 'From N Samples'
+          type: integer
+        - name: toSamples
+          title: 'To N+1 Samples'
+          type: integer
+        - name: incrementalDetection
+          title: 'Additional Detection Rate'
+          type: number
+          format: 'pc'
+        - name: casesDetected
+          title: 'Additional Cases per 100'
+          type: number
+        - name: costBenefit
+          title: 'Cost-Benefit Rating'
+          type: text
+
+    # === ENHANCED DETECTION: POPULATION DETECTION ===
+    - name: populationDetectionText
+      title: Population-Level Detection Rates
+      type: Html
+      visible: (showPopulationDetection)
+
+    - name: populationDetectionTable
+      title: Conditional vs Population Detection
+      type: Table
+      visible: (showPopulationDetection)
+      clearWith:
+        - totalSamples
+        - firstDetection
+        - maxSamples
+      columns:
+        - name: nSamples
+          title: 'Samples'
+          type: integer
+        - name: prevalence
+          title: 'Prevalence'
+          type: number
+          format: 'pc'
+        - name: conditional
+          title: 'Sensitivity (given present)'
+          type: number
+          format: 'pc'
+        - name: population
+          title: 'Detection Rate (overall)'
+          type: number
+          format: 'pc'
+
+    # === SPATIAL & MULTIFOCAL: SPATIAL CLUSTERING ===
+    - name: spatialClusteringText
+      title: Spatial Clustering Analysis
+      type: Html
+      visible: (showSpatialClustering)
+
+    - name: clusteringTable
+      title: Spatial Distribution Patterns
+      type: Table
+      visible: (showSpatialClustering)
+      clearWith:
+        - totalSamples
+        - positiveSamplesList
+      columns:
+        - name: pattern
+          title: 'Pattern'
+          type: text
+        - name: count
+          title: 'Cases'
+          type: integer
+        - name: percent
+          title: 'Percentage'
+          type: number
+          format: 'pc'
+        - name: meanClusterIndex
+          title: 'Mean Clustering Index'
+          type: number
+
+    # === SPATIAL & MULTIFOCAL: MULTIFOCAL ANALYSIS ===
+    - name: multifocalText
+      title: Multifocal Detection Analysis
+      type: Html
+      visible: (showMultifocalAnalysis)
+
+    - name: multifocalTable
+      title: Number of Foci Distribution
+      type: Table
+      visible: (showMultifocalAnalysis)
+      clearWith:
+        - totalSamples
+        - positiveSamplesList
+      columns:
+        - name: fociCount
+          title: 'Number of Foci'
+          type: text
+        - name: cases
+          title: 'Cases'
+          type: integer
+        - name: percent
+          title: 'Percentage'
+          type: number
+          format: 'pc'
+        - name: meanFirstDetection
+          title: 'Mean First Detection'
+          type: number
+
+    # === STRATIFIED ANALYSES: BY SAMPLE TYPE ===
+    - name: stratifiedText
+      title: Stratified Analysis by Sample Type
+      type: Html
+      visible: (showStratifiedAnalysis)
+
+    - name: prevalenceTable
+      title: Prevalence by Sample Type
+      type: Table
+      visible: (showStratifiedAnalysis)
+      clearWith:
+        - sampleType
+        - firstDetection
+      columns:
+        - name: sampleType
+          title: 'Sample Type'
+          type: text
+        - name: totalCases
+          title: 'Total Cases'
+          type: integer
+        - name: positiveCases
+          title: 'Positive Cases'
+          type: integer
+        - name: prevalence
+          title: 'Prevalence'
+          type: number
+          format: 'pc'
+        - name: qEstimate
+          title: 'q (per-sample prob)'
+          type: number
+
+    - name: stratifiedDetectionTable
+      title: Detection Probability by Sample Type and Threshold
+      type: Table
+      visible: (showStratifiedAnalysis)
+      clearWith:
+        - sampleType
+        - firstDetection
+        - maxSamples
+      columns:
+        - name: sampleType
+          title: 'Sample Type'
+          type: text
+        - name: nSamples
+          title: 'Samples'
+          type: integer
+        - name: conditionalDetection
+          title: 'P(detect | present)'
+          type: number
+          format: 'pc'
+        - name: populationDetection
+          title: 'P(detect overall)'
+          type: number
+          format: 'pc'
+
+    # === TUMOR BURDEN & STAGE MIGRATION: TUMOR BURDEN ===
     - name: tumorBurdenText
       title: Tumor Burden Analysis
       type: Html
@@ -161,6 +411,7 @@ items:
           type: number
           format: 'pc'
 
+    # === TUMOR BURDEN & STAGE MIGRATION: STAGE MIGRATION ===
     - name: stageMigrationText
       title: Stage Migration Analysis
       type: Html
@@ -189,6 +440,7 @@ items:
           type: number
           format: 'pc'
 
+    # === TUMOR BURDEN & STAGE MIGRATION: CORRELATION ===
     - name: correlationText
       title: Examined vs Positive Correlation
       type: Html
@@ -218,6 +470,7 @@ items:
       renderFun: .correlationPlot
       visible: (showCorrelation)
 
+    # === TUMOR BURDEN & STAGE MIGRATION: DISTRIBUTION PATTERN ===
     - name: distributionPatternText
       title: Distribution Pattern Analysis (Single vs Summed)
       type: Html
@@ -263,14 +516,7 @@ items:
           title: Value
           type: text
 
-    - name: recommendText
-      title: Clinical Recommendations
-      type: Html
-
-    - name: interpretText
-      title: Statistical Interpretation
-      type: Html
-
+    # === SPECIALIZED MODELS: HYPERGEOMETRIC ===
     - name: hypergeometricText
       title: Hypergeometric Probability Model
       type: Html
@@ -319,6 +565,7 @@ items:
           title: 'Expected Detections'
           type: number
 
+    # === SPECIALIZED MODELS: BETA-BINOMIAL ===
     - name: betaBinomialText
       title: Beta-Binomial Probability Model
       type: Html
@@ -365,6 +612,7 @@ items:
           title: 'Expected Detections'
           type: number
 
+    # === SPECIALIZED MODELS: LYMPH NODE ANALYSIS ===
     - name: lnAnalysisText
       title: Lymph Node Ratio and Staging Analysis
       type: Html
@@ -446,6 +694,7 @@ items:
           title: 'Adequacy Comment'
           type: text
 
+    # === SPECIALIZED MODELS: EFFECT SIZES ===
     - name: effectSizesText
       title: Effect Size Measures
       type: Html
@@ -469,231 +718,24 @@ items:
           title: 'Interpretation'
           type: text
 
+    # === SPECIALIZED MODELS: OMENTUM ANALYSIS ===
     - name: omentumText
       title: Omentum Sampling Literature
       type: Html
       visible: (showOmentumAnalysis)
 
-    - name: clinicalSummary
-      title: Clinical Summary
+    # === DISPLAY OPTIONS: INTERPRETATION & RECOMMENDATIONS ===
+    - name: recommendText
+      title: Clinical Recommendations
       type: Html
-      visible: (showClinicalSummary)
+      visible: (showRecommendText)
 
-    - name: keyResults
-      title: Key Results Summary
+    - name: interpretText
+      title: Statistical Interpretation
       type: Html
-
-    - name: empiricalCumulativeText
-      title: Empirical Cumulative Detection Analysis
-      type: Html
-      visible: (showEmpiricalCumulative)
-
-    - name: empiricalCumulativeTable
-      title: Empirical Detection Rates by Sample Threshold
-      type: Table
-      visible: (showEmpiricalCumulative)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCount
-      columns:
-        - name: nSamples
-          title: 'Samples Examined'
-          type: integer
-        - name: cumDetection
-          title: 'Cumulative Detection'
-          type: number
-          format: 'pc'
-        - name: ciLower
-          title: '95% CI Lower'
-          type: number
-          format: 'pc'
-        - name: ciUpper
-          title: '95% CI Upper'
-          type: number
-          format: 'pc'
-        - name: incrementalYield
-          title: 'Incremental Yield'
-          type: number
-          format: 'pc'
-
-    - name: empiricalCumulativePlot
-      title: Empirical Cumulative Detection Curve
-      type: Image
-      width: 600
-      height: 450
-      renderFun: .empiricalCumulativePlot
-      visible: (showEmpiricalCumulative)
-
-    - name: spatialClusteringText
-      title: Spatial Clustering Analysis
-      type: Html
-      visible: (showSpatialClustering)
-
-    - name: clusteringTable
-      title: Spatial Distribution Patterns
-      type: Table
-      visible: (showSpatialClustering)
-      clearWith:
-        - totalSamples
-        - positiveSamplesList
-      columns:
-        - name: pattern
-          title: 'Pattern'
-          type: text
-        - name: count
-          title: 'Cases'
-          type: integer
-        - name: percent
-          title: 'Percentage'
-          type: number
-          format: 'pc'
-        - name: meanClusterIndex
-          title: 'Mean Clustering Index'
-          type: number
-
-    - name: multifocalText
-      title: Multifocal Detection Analysis
-      type: Html
-      visible: (showMultifocalAnalysis)
-
-    - name: multifocalTable
-      title: Number of Foci Distribution
-      type: Table
-      visible: (showMultifocalAnalysis)
-      clearWith:
-        - totalSamples
-        - positiveSamplesList
-      columns:
-        - name: fociCount
-          title: 'Number of Foci'
-          type: text
-        - name: cases
-          title: 'Cases'
-          type: integer
-        - name: percent
-          title: 'Percentage'
-          type: number
-          format: 'pc'
-        - name: meanFirstDetection
-          title: 'Mean First Detection'
-          type: number
-
-    - name: stratifiedText
-      title: Stratified Analysis by Sample Type
-      type: Html
-      visible: (showStratifiedAnalysis)
-
-    - name: prevalenceTable
-      title: Prevalence by Sample Type
-      type: Table
-      visible: (showStratifiedAnalysis)
-      clearWith:
-        - sampleType
-        - firstDetection
-      columns:
-        - name: sampleType
-          title: 'Sample Type'
-          type: text
-        - name: totalCases
-          title: 'Total Cases'
-          type: integer
-        - name: positiveCases
-          title: 'Positive Cases'
-          type: integer
-        - name: prevalence
-          title: 'Prevalence'
-          type: number
-          format: 'pc'
-        - name: qEstimate
-          title: 'q (per-sample prob)'
-          type: number
-
-    - name: stratifiedDetectionTable
-      title: Detection Probability by Sample Type and Threshold
-      type: Table
-      visible: (showStratifiedAnalysis)
-      clearWith:
-        - sampleType
-        - firstDetection
-        - maxSamples
-      columns:
-        - name: sampleType
-          title: 'Sample Type'
-          type: text
-        - name: nSamples
-          title: 'Samples'
-          type: integer
-        - name: conditionalDetection
-          title: 'P(detect | present)'
-          type: number
-          format: 'pc'
-        - name: populationDetection
-          title: 'P(detect overall)'
-          type: number
-          format: 'pc'
-
-    - name: populationDetectionText
-      title: Population-Level Detection Rates
-      type: Html
-      visible: (showPopulationDetection)
-
-    - name: populationDetectionTable
-      title: Conditional vs Population Detection
-      type: Table
-      visible: (showPopulationDetection)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - maxSamples
-      columns:
-        - name: nSamples
-          title: 'Samples'
-          type: integer
-        - name: prevalence
-          title: 'Prevalence'
-          type: number
-          format: 'pc'
-        - name: conditional
-          title: 'Sensitivity (given present)'
-          type: number
-          format: 'pc'
-        - name: population
-          title: 'Detection Rate (overall)'
-          type: number
-          format: 'pc'
-
-    - name: incrementalYieldText
-      title: Incremental Diagnostic Yield Analysis
-      type: Html
-      visible: (showIncrementalYield)
-
-    - name: incrementalYieldTable
-      title: Marginal Benefit per Additional Sample
-      type: Table
-      visible: (showIncrementalYield)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - maxSamples
-      columns:
-        - name: fromSamples
-          title: 'From N Samples'
-          type: integer
-        - name: toSamples
-          title: 'To N+1 Samples'
-          type: integer
-        - name: incrementalDetection
-          title: 'Additional Detection Rate'
-          type: number
-          format: 'pc'
-        - name: casesDetected
-          title: 'Additional Cases per 100'
-          type: number
-        - name: costBenefit
-          title: 'Cost-Benefit Rating'
-          type: text
+      visible: (showInterpretText)
 
     - name: referencesText
       title: Statistical Methods & References
       type: Html
+      visible: (showReferencesText)

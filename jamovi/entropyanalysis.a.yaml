@@ -1,0 +1,209 @@
+---
+name: entropyanalysis
+title: Entropy and Mutual Information Analysis
+menuGroup: meddecideT
+menuSubgroup: Medical Decision Analysis
+menuTitle: Entropy Analysis
+menuSubtitle: AI uncertainty quantification and information metrics
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Entropy and Mutual Information analysis quantifies uncertainty in AI predictions
+        and measures information gain from diagnostic tests or features.
+
+        Shannon Entropy quantifies prediction uncertainty (higher = more uncertain).
+        Mutual Information measures how much knowing one variable reduces uncertainty
+        about another.
+
+        Applications: AI triage systems ("defer to pathologist" decisions), feature
+        selection, test ordering optimization, multi-class uncertainty quantification.
+
+    R:
+        dontrun: false
+        usage: |
+            # Example with AI prediction probabilities
+            data <- data.frame(
+              true_class = factor(sample(c("A", "B", "C"), 100, replace=TRUE)),
+              prob_A = runif(100),
+              prob_B = runif(100),
+              prob_C = runif(100)
+            )
+
+            entropyanalysis(
+              data = data,
+              outcome = 'true_class',
+              probability_vars = c('prob_A', 'prob_B', 'prob_C'),
+              uncertainty_threshold = 0.5
+            )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            a string naming the true outcome/class variable
+
+    - name: probability_vars
+      title: Probability Variables
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            vector of predicted probability variables (one per class)
+
+    - name: predictor_var
+      title: Single Predictor (optional)
+      type: Variable
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            optional single predictor for mutual information calculation
+
+    - name: calculate_entropy
+      title: Calculate Shannon Entropy
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate Shannon entropy for each prediction
+
+    - name: calculate_conditional_entropy
+      title: Calculate Conditional Entropy
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate conditional entropy H(Y|X)
+
+    - name: calculate_mutual_information
+      title: Calculate Mutual Information
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate mutual information I(X;Y)
+
+    - name: calculate_kl_divergence
+      title: Calculate KL Divergence
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate Kullback-Leibler divergence from uniform distribution
+
+    - name: uncertainty_threshold
+      title: High Uncertainty Threshold
+      type: Number
+      min: 0
+      max: 2
+      default: 0.5
+      description:
+          R: >
+            entropy threshold for flagging high-uncertainty predictions
+
+    - name: normalize_entropy
+      title: Normalize Entropy
+      type: Bool
+      default: true
+      description:
+          R: >
+            normalize entropy to [0,1] scale (divide by log(n_classes))
+
+    - name: binning_method
+      title: Binning Method for MI
+      type: List
+      options:
+        - name: equal_width
+          title: Equal Width
+        - name: equal_freq
+          title: Equal Frequency
+        - name: sturges
+          title: Sturges Rule
+      default: equal_width
+      description:
+          R: >
+            binning method for continuous variables in MI calculation
+
+    - name: n_bins
+      title: Number of Bins
+      type: Number
+      min: 2
+      max: 50
+      default: 10
+      description:
+          R: >
+            number of bins for discretizing continuous variables
+
+    - name: show_case_level
+      title: Show Case-Level Entropy
+      type: Bool
+      default: false
+      description:
+          R: >
+            show entropy for each individual case
+
+    - name: flag_uncertain
+      title: Flag Uncertain Cases
+      type: Bool
+      default: true
+      description:
+          R: >
+            identify cases exceeding uncertainty threshold
+
+    - name: plot_entropy_distribution
+      title: Plot Entropy Distribution
+      type: Bool
+      default: true
+      description:
+          R: >
+            plot histogram of entropy values
+
+    - name: plot_uncertainty_by_class
+      title: Plot Uncertainty by True Class
+      type: Bool
+      default: true
+      description:
+          R: >
+            plot entropy distribution for each true class
+
+    - name: plot_mi_heatmap
+      title: Plot Mutual Information Heatmap
+      type: Bool
+      default: false
+      description:
+          R: >
+            plot heatmap of pairwise mutual information (for multiple features)
+
+    - name: random_seed
+      title: Random Seed
+      type: Number
+      min: 1
+      max: 999999
+      default: 42
+      description:
+          R: >
+            random seed for reproducibility
+...

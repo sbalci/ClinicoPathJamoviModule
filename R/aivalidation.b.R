@@ -458,13 +458,32 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
             }
             
             accuracy <- mean((pred_probs >= threshold) == actual)
-            
+
+            # Calculate MCC if requested
+            mcc <- NULL
+            if (self$options$matthewsCC) {
+              # Calculate confusion matrix components
+              tp <- sum(pred_probs >= threshold & actual == 1)
+              tn <- sum(pred_probs < threshold & actual == 0)
+              fp <- sum(pred_probs >= threshold & actual == 0)
+              fn <- sum(pred_probs < threshold & actual == 1)
+
+              # Calculate MCC (Matthews Correlation Coefficient)
+              denominator <- sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+              if (denominator > 0) {
+                mcc <- (tp * tn - fp * fn) / denominator
+              } else {
+                mcc <- 0  # Handle edge case where denominator is 0
+              }
+            }
+
             fold_results[[fold_name]] <- list(
               auc = auc_val,
               sensitivity = sensitivity,
               specificity = specificity,
               accuracy = accuracy,
               youdens_j = youdens_j,
+              mcc = mcc,
               threshold = threshold,
               n_cases = sum(actual == 1),
               n_controls = sum(actual == 0),
@@ -519,13 +538,32 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
             }
             
             accuracy <- mean((pred_probs >= threshold) == actual)
-            
+
+            # Calculate MCC if requested
+            mcc <- NULL
+            if (self$options$matthewsCC) {
+              # Calculate confusion matrix components
+              tp <- sum(pred_probs >= threshold & actual == 1)
+              tn <- sum(pred_probs < threshold & actual == 0)
+              fp <- sum(pred_probs >= threshold & actual == 0)
+              fn <- sum(pred_probs < threshold & actual == 1)
+
+              # Calculate MCC (Matthews Correlation Coefficient)
+              denominator <- sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+              if (denominator > 0) {
+                mcc <- (tp * tn - fp * fn) / denominator
+              } else {
+                mcc <- 0  # Handle edge case where denominator is 0
+              }
+            }
+
             fold_results[[fold_name]] <- list(
               auc = auc_val,
               sensitivity = sensitivity,
               specificity = specificity,
               accuracy = accuracy,
               youdens_j = youdens_j,
+              mcc = mcc,
               threshold = threshold,
               n_cases = sum(actual == 1),
               n_controls = sum(actual == 0),
@@ -667,13 +705,15 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
           specificities <- sapply(fold_results, function(x) x$specificity)
           accuracies <- sapply(fold_results, function(x) x$accuracy)
           youdens_js <- sapply(fold_results, function(x) x$youdens_j)
-          
+          mccs <- sapply(fold_results, function(x) if (!is.null(x$mcc)) x$mcc else NA)
+
           # Calculate means and confidence intervals
           mean_auc <- mean(aucs, na.rm = TRUE)
           mean_sen <- mean(sensitivities, na.rm = TRUE)
           mean_spe <- mean(specificities, na.rm = TRUE)
           mean_acc <- mean(accuracies, na.rm = TRUE)
           mean_youdens <- mean(youdens_js, na.rm = TRUE)
+          mean_mcc <- if (self$options$matthewsCC && !all(is.na(mccs))) mean(mccs, na.rm = TRUE) else NULL
           
           # Bootstrap confidence intervals if requested
           if (self$options$bootstrapCI) {
@@ -700,7 +740,8 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
             spe_ci_lower = spe_ci[1],
             spe_ci_upper = spe_ci[2],
             accuracy = mean_acc,
-            youdens_j = mean_youdens
+            youdens_j = mean_youdens,
+            mcc = mean_mcc
           ))
         }
       },

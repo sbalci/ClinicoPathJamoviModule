@@ -1,0 +1,133 @@
+---
+name: timedependentdca
+title: Time-Dependent Decision Curve Analysis
+jrs: '1.1'
+
+items:
+    - name: instructionsText
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: netBenefitTable
+      title: Net Benefit at Selected Time Points
+      type: Table
+      visible: true
+      clearWith:
+        - time
+        - event
+        - predictor
+        - time_points
+      columns:
+        - name: time_point
+          title: "Time Point"
+          type: number
+          combineBelow: true
+        - name: threshold
+          title: "Threshold"
+          type: number
+          format: zto,pvalue
+        - name: net_benefit
+          title: "Net Benefit"
+          type: number
+        - name: nb_treat_all
+          title: "NB (Treat All)"
+          type: number
+          visible: (reference_strategy:both || reference_strategy:treat_all)
+        - name: nb_treat_none
+          title: "NB (Treat None)"
+          type: number
+          visible: (reference_strategy:both || reference_strategy:treat_none)
+        - name: improvement
+          title: "Improvement"
+          type: number
+
+    - name: summaryTable
+      title: Summary Statistics by Time Point
+      type: Table
+      visible: true
+      clearWith:
+        - time
+        - event
+        - predictor
+        - time_points
+      columns:
+        - name: time_point
+          title: "Time Point"
+          type: number
+        - name: n_at_risk
+          title: "N at Risk"
+          type: integer
+        - name: n_events
+          title: "N Events"
+          type: integer
+        - name: event_rate
+          title: "Event Rate"
+          type: number
+          format: zto,pvalue
+        - name: max_net_benefit
+          title: "Max Net Benefit"
+          type: number
+        - name: optimal_threshold
+          title: "Optimal Threshold"
+          type: number
+          format: zto,pvalue
+
+    - name: interventionsTable
+      title: Interventions Avoided (per 100 patients)
+      type: Table
+      visible: true
+      clearWith:
+        - time
+        - event
+        - predictor
+        - time_points
+      columns:
+        - name: time_point
+          title: "Time Point"
+          type: number
+          combineBelow: true
+        - name: threshold
+          title: "Threshold"
+          type: number
+          format: zto,pvalue
+        - name: interventions_avoided
+          title: "Interventions Avoided"
+          type: number
+        - name: events_detected
+          title: "Events Detected (%)"
+          type: number
+          format: zto,pvalue
+
+    - name: netBenefitPlot
+      title: Time-Dependent Net Benefit Curves
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .netBenefitPlot
+      visible: (plot_net_benefit)
+      clearWith:
+        - time
+        - event
+        - predictor
+        - time_points
+        - reference_strategy
+
+    - name: interventionsPlot
+      title: Interventions Avoided
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .interventionsPlot
+      visible: (plot_interventions_avoided)
+      clearWith:
+        - time
+        - event
+        - predictor
+        - time_points
+
+    - name: interpretationText
+      title: Interpretation Guide
+      type: Html
+      visible: true
+...

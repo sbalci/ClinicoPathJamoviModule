@@ -1,0 +1,334 @@
+---
+name: ordinalroc
+title: Ordinal ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: overallSummary
+      title: Overall ROC Summary
+      type: Table
+      description: Summary of ordinal ROC analysis with AUC and confidence intervals
+      visible: (calculate_auc)
+      rows: 1
+      columns:
+        - name: predictor
+          title: Predictor
+          type: text
+        - name: outcome
+          title: Ordinal Outcome
+          type: text
+        - name: n_categories
+          title: Number of Categories
+          type: integer
+        - name: n_obs
+          title: N Observations
+          type: integer
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: auc_se
+          title: AUC SE
+          type: number
+        - name: auc_ci_lower
+          title: AUC 95% CI Lower
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: AUC 95% CI Upper
+          type: number
+          format: zto
+        - name: p_value
+          title: P-value (AUC > 0.5)
+          type: number
+          format: zto,pvalue
+
+    - name: cumulativeAUC
+      title: Category-Specific AUC (Cumulative Dichotomizations)
+      type: Table
+      description: AUC for each cumulative split of ordinal categories
+      visible: (category_specific_auc)
+      columns:
+        - name: dichotomization
+          title: Dichotomization
+          type: text
+        - name: n_low
+          title: N Low
+          type: integer
+        - name: n_high
+          title: N High
+          type: integer
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: auc_se
+          title: SE
+          type: number
+        - name: auc_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: optimal_threshold
+          title: Optimal Threshold
+          type: number
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: zto
+        - name: specificity
+          title: Specificity
+          type: number
+          format: zto
+        - name: youden_j
+          title: Youden J
+          type: number
+          format: zto
+
+    - name: proportionalOddsTest
+      title: Proportional Odds Assumption Test
+      type: Table
+      description: Test of proportional odds assumption
+      visible: (test_proportional_odds && roc_method:proportional_odds)
+      rows: 1
+      columns:
+        - name: test_statistic
+          title: Test Statistic
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    - name: modelCoefficients
+      title: Proportional Odds Model Coefficients
+      type: Table
+      description: Coefficients from proportional odds logistic regression
+      visible: (show_coefficients && roc_method:proportional_odds)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: z_value
+          title: Z
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: or
+          title: Odds Ratio
+          type: number
+        - name: or_ci_lower
+          title: OR 95% CI Lower
+          type: number
+        - name: or_ci_upper
+          title: OR 95% CI Upper
+          type: number
+
+    - name: optimalThresholds
+      title: Optimal Threshold Summary
+      type: Table
+      description: Optimal predictor thresholds for each cumulative split
+      visible: (optimal_thresholds)
+      columns:
+        - name: dichotomization
+          title: Dichotomization
+          type: text
+        - name: optimal_threshold
+          title: Optimal Threshold
+          type: number
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: zto
+        - name: specificity
+          title: Specificity
+          type: number
+          format: zto
+        - name: ppv
+          title: PPV
+          type: number
+          format: zto
+        - name: npv
+          title: NPV
+          type: number
+          format: zto
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: zto
+        - name: youden_j
+          title: Youden J
+          type: number
+          format: zto
+
+    - name: predictorComparison
+      title: Multiple Predictor Comparison
+      type: Table
+      description: Comparison of AUC across multiple predictors
+      visible: (compare_predictors)
+      columns:
+        - name: predictor
+          title: Predictor
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: auc_se
+          title: SE
+          type: number
+        - name: auc_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: aucComparisonTests
+      title: Pairwise AUC Comparison Tests
+      type: Table
+      description: Statistical tests comparing AUC between predictors
+      visible: (compare_predictors && auc_comparison_test)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: auc_diff
+          title: AUC Difference
+          type: number
+        - name: se_diff
+          title: SE Difference
+          type: number
+        - name: z_statistic
+          title: Z Statistic
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    - name: stratifiedResults
+      title: Stratified Analysis Results
+      type: Table
+      description: Ordinal ROC results stratified by subgroup
+      visible: (stratified_analysis)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n_obs
+          title: N
+          type: integer
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: auc_ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+
+    - name: confusionMatrix
+      title: Confusion Matrix (Ordinal Classification)
+      type: Table
+      description: Confusion matrix using optimal thresholds to classify into ordinal categories
+      visible: (plot_confusion_matrix)
+      columns:
+        - name: true_category
+          title: True Category
+          type: text
+        - name: pred_cat_1
+          title: Predicted Category 1
+          type: integer
+        - name: pred_cat_2
+          title: Predicted Category 2
+          type: integer
+        - name: pred_cat_3
+          title: Predicted Category 3
+          type: integer
+        - name: pred_cat_4
+          title: Predicted Category 4
+          type: integer
+          visible: false
+        - name: pred_cat_5
+          title: Predicted Category 5
+          type: integer
+          visible: false
+
+    - name: ordinalROCPlot
+      title: Ordinal ROC Curve(s)
+      type: Image
+      description: Ordinal ROC curve showing discrimination across ordinal categories
+      width: 600
+      height: 500
+      renderFun: .plotOrdinalROC
+      visible: (plot_ordinal_roc)
+
+    - name: cumulativeROCPlot
+      title: Cumulative ROC Curves
+      type: Image
+      description: Separate ROC curves for each cumulative dichotomization
+      width: 600
+      height: 500
+      renderFun: .plotCumulativeROC
+      visible: (plot_all_cumulative)
+
+    - name: categoryDistPlot
+      title: Predictor Distribution by Category
+      type: Image
+      description: Distribution of predictor values stratified by ordinal outcome category
+      width: 600
+      height: 500
+      renderFun: .plotCategoryDistributions
+      visible: (plot_category_distributions)
+
+    - name: cumulativeProbPlot
+      title: Cumulative Probability Curves
+      type: Image
+      description: Cumulative probabilities as a function of predictor value
+      width: 600
+      height: 500
+      renderFun: .plotCumulativeProbabilities
+      visible: (plot_cumulative_probabilities)
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_interpretation)
+
+...

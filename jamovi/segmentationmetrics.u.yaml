@@ -1,0 +1,269 @@
+---
+name: segmentationmetrics
+title: Segmentation Metrics
+jus: '3.0'
+
+stage: 0
+
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - nominal
+      - ordinal
+      - continuous
+    children:
+      - type: TargetLayoutBox
+        label: Predicted Segmentation
+        children:
+          - type: VariablesListBox
+            name: prediction_mask
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Ground Truth Segmentation
+        children:
+          - type: VariablesListBox
+            name: ground_truth_mask
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Image Identifier
+        children:
+          - type: VariablesListBox
+            name: image_id
+            maxItemCount: 1
+            isTarget: true
+
+  - type: CollapseBox
+    name: segmentationType
+    label: Segmentation Type
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: segmentation_type
+        label: Type
+
+      - type: ComboBox
+        name: positive_class
+        label: Positive Class
+        enable: (segmentation_type:binary)
+
+  - type: CollapseBox
+    name: overlapMetrics
+    label: Overlap Metrics
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: dice_coefficient
+
+      - type: CheckBox
+        name: jaccard_index
+
+      - type: CheckBox
+        name: sensitivity_specificity
+
+      - type: CheckBox
+        name: volumetric_similarity
+
+  - type: CollapseBox
+    name: distanceMetrics
+    label: Distance & Boundary Metrics
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: hausdorff_distance
+
+      - type: CheckBox
+        name: average_hausdorff
+
+      - type: CheckBox
+        name: surface_distance
+
+      - type: CheckBox
+        name: surface_overlap
+
+      - type: TextBox
+        name: boundary_tolerance
+        label: Boundary Tolerance (pixels)
+        format: number
+
+  - type: CollapseBox
+    name: pixelCalibration
+    label: Pixel Size Calibration
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: pixel_size_provided
+
+      - type: TextBox
+        name: pixel_size_x
+        label: Pixel Size X (μm)
+        format: number
+        enable: (pixel_size_provided)
+
+      - type: TextBox
+        name: pixel_size_y
+        label: Pixel Size Y (μm)
+        format: number
+        enable: (pixel_size_provided)
+
+  - type: CollapseBox
+    name: multiclassOptions
+    label: Multi-class Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: class_specific_metrics
+
+      - type: CheckBox
+        name: macro_average
+
+      - type: CheckBox
+        name: weighted_average
+
+  - type: CollapseBox
+    name: instanceOptions
+    label: Instance Segmentation
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: object_detection_metrics
+
+      - type: TextBox
+        name: iou_threshold
+        label: IoU Threshold
+        format: number
+        enable: (object_detection_metrics)
+
+      - type: CheckBox
+        name: count_metrics
+
+  - type: CollapseBox
+    name: qualityThresholds
+    label: Quality Thresholds
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: quality_thresholds
+
+      - type: TextBox
+        name: dice_threshold_excellent
+        label: Excellent Threshold
+        format: number
+        enable: (quality_thresholds)
+
+      - type: TextBox
+        name: dice_threshold_good
+        label: Good Threshold
+        format: number
+        enable: (quality_thresholds)
+
+      - type: TextBox
+        name: dice_threshold_acceptable
+        label: Acceptable Threshold
+        format: number
+        enable: (quality_thresholds)
+
+  - type: CollapseBox
+    name: statisticalAnalysis
+    label: Statistical Analysis
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: confidence_intervals
+
+      - type: CheckBox
+        name: bootstrap_ci
+
+      - type: TextBox
+        name: bootstrap_samples
+        label: Bootstrap Samples
+        format: number
+        enable: (bootstrap_ci)
+
+      - type: TextBox
+        name: confidence_level
+        label: Confidence Level
+        format: number
+
+      - type: CheckBox
+        name: outlier_detection
+
+      - type: ComboBox
+        name: outlier_method
+        label: Outlier Method
+        enable: (outlier_detection)
+
+  - type: CollapseBox
+    name: stratification
+    label: Stratification & Comparison
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: stratified_analysis
+
+      - type: VariablesListBox
+        name: stratify_by
+        maxItemCount: 1
+        enable: (stratified_analysis)
+
+      - type: CheckBox
+        name: paired_analysis
+
+      - type: VariablesListBox
+        name: comparison_method
+        maxItemCount: 1
+        enable: (paired_analysis)
+
+  - type: CollapseBox
+    name: plotOptions
+    label: Plot Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: plot_metric_distribution
+
+      - type: CheckBox
+        name: plot_scatter_comparison
+
+      - type: CheckBox
+        name: plot_boundary_error
+
+      - type: CheckBox
+        name: plot_confusion_matrix
+
+      - type: CheckBox
+        name: plot_performance_by_class
+
+  - type: CollapseBox
+    name: clinicalContext
+    label: Clinical Context
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: application_context
+        label: Application
+
+      - type: CheckBox
+        name: show_interpretation
+
+  - type: CollapseBox
+    name: advancedOptions
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: missing_handling
+        label: Missing Data
+
+      - type: TextBox
+        name: random_seed
+        label: Random Seed
+        format: number
+
+...

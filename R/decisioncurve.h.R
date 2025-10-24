@@ -33,7 +33,20 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             weightedAUC = FALSE,
             clinicalDecisionRule = FALSE,
             decisionRuleThreshold = 0.15,
-            decisionRuleLabel = "Clinical Rule", ...) {
+            decisionRuleLabel = "Clinical Rule",
+            showClinicalImpactPlot = FALSE,
+            showNetBenefitCI = FALSE,
+            costBenefitAnalysis = FALSE,
+            testCost = 100,
+            treatmentCost = 1000,
+            benefitCorrectTreatment = 10000,
+            harmFalseTreatment = 500,
+            showStandardizedNetBenefit = FALSE,
+            multiModelComparison = TRUE,
+            comparisonMethod = "bootstrap",
+            showDecisionConsequences = TRUE,
+            resourceUtilization = FALSE,
+            showRelativeUtility = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -186,6 +199,70 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "decisionRuleLabel",
                 decisionRuleLabel,
                 default="Clinical Rule")
+            private$..showClinicalImpactPlot <- jmvcore::OptionBool$new(
+                "showClinicalImpactPlot",
+                showClinicalImpactPlot,
+                default=FALSE)
+            private$..showNetBenefitCI <- jmvcore::OptionBool$new(
+                "showNetBenefitCI",
+                showNetBenefitCI,
+                default=FALSE)
+            private$..costBenefitAnalysis <- jmvcore::OptionBool$new(
+                "costBenefitAnalysis",
+                costBenefitAnalysis,
+                default=FALSE)
+            private$..testCost <- jmvcore::OptionNumber$new(
+                "testCost",
+                testCost,
+                default=100,
+                min=0,
+                max=1000000)
+            private$..treatmentCost <- jmvcore::OptionNumber$new(
+                "treatmentCost",
+                treatmentCost,
+                default=1000,
+                min=0,
+                max=1000000)
+            private$..benefitCorrectTreatment <- jmvcore::OptionNumber$new(
+                "benefitCorrectTreatment",
+                benefitCorrectTreatment,
+                default=10000,
+                min=0,
+                max=10000000)
+            private$..harmFalseTreatment <- jmvcore::OptionNumber$new(
+                "harmFalseTreatment",
+                harmFalseTreatment,
+                default=500,
+                min=0,
+                max=1000000)
+            private$..showStandardizedNetBenefit <- jmvcore::OptionBool$new(
+                "showStandardizedNetBenefit",
+                showStandardizedNetBenefit,
+                default=FALSE)
+            private$..multiModelComparison <- jmvcore::OptionBool$new(
+                "multiModelComparison",
+                multiModelComparison,
+                default=TRUE)
+            private$..comparisonMethod <- jmvcore::OptionList$new(
+                "comparisonMethod",
+                comparisonMethod,
+                options=list(
+                    "bootstrap",
+                    "permutation",
+                    "integral"),
+                default="bootstrap")
+            private$..showDecisionConsequences <- jmvcore::OptionBool$new(
+                "showDecisionConsequences",
+                showDecisionConsequences,
+                default=TRUE)
+            private$..resourceUtilization <- jmvcore::OptionBool$new(
+                "resourceUtilization",
+                resourceUtilization,
+                default=FALSE)
+            private$..showRelativeUtility <- jmvcore::OptionBool$new(
+                "showRelativeUtility",
+                showRelativeUtility,
+                default=FALSE)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomePositive)
@@ -215,6 +292,19 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..clinicalDecisionRule)
             self$.addOption(private$..decisionRuleThreshold)
             self$.addOption(private$..decisionRuleLabel)
+            self$.addOption(private$..showClinicalImpactPlot)
+            self$.addOption(private$..showNetBenefitCI)
+            self$.addOption(private$..costBenefitAnalysis)
+            self$.addOption(private$..testCost)
+            self$.addOption(private$..treatmentCost)
+            self$.addOption(private$..benefitCorrectTreatment)
+            self$.addOption(private$..harmFalseTreatment)
+            self$.addOption(private$..showStandardizedNetBenefit)
+            self$.addOption(private$..multiModelComparison)
+            self$.addOption(private$..comparisonMethod)
+            self$.addOption(private$..showDecisionConsequences)
+            self$.addOption(private$..resourceUtilization)
+            self$.addOption(private$..showRelativeUtility)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -244,7 +334,20 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         weightedAUC = function() private$..weightedAUC$value,
         clinicalDecisionRule = function() private$..clinicalDecisionRule$value,
         decisionRuleThreshold = function() private$..decisionRuleThreshold$value,
-        decisionRuleLabel = function() private$..decisionRuleLabel$value),
+        decisionRuleLabel = function() private$..decisionRuleLabel$value,
+        showClinicalImpactPlot = function() private$..showClinicalImpactPlot$value,
+        showNetBenefitCI = function() private$..showNetBenefitCI$value,
+        costBenefitAnalysis = function() private$..costBenefitAnalysis$value,
+        testCost = function() private$..testCost$value,
+        treatmentCost = function() private$..treatmentCost$value,
+        benefitCorrectTreatment = function() private$..benefitCorrectTreatment$value,
+        harmFalseTreatment = function() private$..harmFalseTreatment$value,
+        showStandardizedNetBenefit = function() private$..showStandardizedNetBenefit$value,
+        multiModelComparison = function() private$..multiModelComparison$value,
+        comparisonMethod = function() private$..comparisonMethod$value,
+        showDecisionConsequences = function() private$..showDecisionConsequences$value,
+        resourceUtilization = function() private$..resourceUtilization$value,
+        showRelativeUtility = function() private$..showRelativeUtility$value),
     private = list(
         ..outcome = NA,
         ..outcomePositive = NA,
@@ -273,7 +376,20 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..weightedAUC = NA,
         ..clinicalDecisionRule = NA,
         ..decisionRuleThreshold = NA,
-        ..decisionRuleLabel = NA)
+        ..decisionRuleLabel = NA,
+        ..showClinicalImpactPlot = NA,
+        ..showNetBenefitCI = NA,
+        ..costBenefitAnalysis = NA,
+        ..testCost = NA,
+        ..treatmentCost = NA,
+        ..benefitCorrectTreatment = NA,
+        ..harmFalseTreatment = NA,
+        ..showStandardizedNetBenefit = NA,
+        ..multiModelComparison = NA,
+        ..comparisonMethod = NA,
+        ..showDecisionConsequences = NA,
+        ..resourceUtilization = NA,
+        ..showRelativeUtility = NA)
 )
 
 decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -290,7 +406,13 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         dcaPlot = function() private$.items[["dcaPlot"]],
         clinicalImpactPlot = function() private$.items[["clinicalImpactPlot"]],
         interventionsAvoidedPlot = function() private$.items[["interventionsAvoidedPlot"]],
-        summaryText = function() private$.items[["summaryText"]]),
+        summaryText = function() private$.items[["summaryText"]],
+        costBenefitTable = function() private$.items[["costBenefitTable"]],
+        decisionConsequencesTable = function() private$.items[["decisionConsequencesTable"]],
+        modelComparisonEnhanced = function() private$.items[["modelComparisonEnhanced"]],
+        resourceUtilizationTable = function() private$.items[["resourceUtilizationTable"]],
+        relativeUtilityPlot = function() private$.items[["relativeUtilityPlot"]],
+        standardizedNetBenefitPlot = function() private$.items[["standardizedNetBenefitPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -521,11 +643,11 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Image$new(
                 options=options,
                 name="clinicalImpactPlot",
-                title="Clinical Impact",
+                title="Clinical Impact Plot",
                 width=700,
                 height=500,
                 renderFun=".plotClinicalImpact",
-                visible="(calculateClinicalImpact && showPlot)",
+                visible="(calculateClinicalImpact && showPlot) || (showClinicalImpactPlot)",
                 clearWith=list(
                     "outcome",
                     "outcomePositive",
@@ -560,7 +682,187 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "models",
                     "thresholdRange",
                     "thresholdMin",
-                    "thresholdMax")))}))
+                    "thresholdMax")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="costBenefitTable",
+                title="Cost-Benefit Analysis",
+                visible="(costBenefitAnalysis)",
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="total_cost", 
+                        `title`="Total Cost", 
+                        `type`="number"),
+                    list(
+                        `name`="total_benefit", 
+                        `title`="Total Benefit", 
+                        `type`="number"),
+                    list(
+                        `name`="net_monetary_benefit", 
+                        `title`="Net Monetary Benefit", 
+                        `type`="number"),
+                    list(
+                        `name`="incremental_cost", 
+                        `title`="Incremental Cost", 
+                        `type`="number"),
+                    list(
+                        `name`="incremental_benefit", 
+                        `title`="Incremental Benefit", 
+                        `type`="number"),
+                    list(
+                        `name`="icer", 
+                        `title`="ICER", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="decisionConsequencesTable",
+                title="Decision Consequences",
+                visible="(showDecisionConsequences)",
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="true_positive", 
+                        `title`="True Positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="false_positive", 
+                        `title`="False Positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="true_negative", 
+                        `title`="True Negative", 
+                        `type`="integer"),
+                    list(
+                        `name`="false_negative", 
+                        `title`="False Negative", 
+                        `type`="integer"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparisonEnhanced",
+                title="Enhanced Model Comparison",
+                visible="(multiModelComparison)",
+                columns=list(
+                    list(
+                        `name`="model1", 
+                        `title`="Model 1", 
+                        `type`="text"),
+                    list(
+                        `name`="model2", 
+                        `title`="Model 2", 
+                        `type`="text"),
+                    list(
+                        `name`="nb_difference_mean", 
+                        `title`="Mean NB Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="nb_difference_median", 
+                        `title`="Median NB Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="test_statistic", 
+                        `title`="Test Statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto;pvalue"),
+                    list(
+                        `name`="conclusion", 
+                        `title`="Conclusion", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="resourceUtilizationTable",
+                title="Resource Utilization",
+                visible="(resourceUtilization)",
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="tests_per_1000", 
+                        `title`="Tests per 1000", 
+                        `type`="number"),
+                    list(
+                        `name`="treatments_per_1000", 
+                        `title`="Treatments per 1000", 
+                        `type`="number"),
+                    list(
+                        `name`="unnecessary_treatments", 
+                        `title`="Unnecessary Tx per 1000", 
+                        `type`="number"),
+                    list(
+                        `name`="missed_cases", 
+                        `title`="Missed Cases per 1000", 
+                        `type`="number"),
+                    list(
+                        `name`="reduction_vs_treat_all", 
+                        `title`="% Reduction vs Treat All", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="relativeUtilityPlot",
+                title="Relative Utility Curve",
+                visible="(showRelativeUtility)",
+                renderFun=".plotRelativeUtility",
+                width=700,
+                height=500))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="standardizedNetBenefitPlot",
+                title="Standardized Net Benefit",
+                visible="(showStandardizedNetBenefit)",
+                renderFun=".plotStandardizedNetBenefit",
+                width=700,
+                height=500))}))
 
 decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncurveBase",
@@ -570,7 +872,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncurve",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = decisioncurveResults$new(options=options),
                 data = data,
@@ -641,6 +943,31 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   rule (e.g., "screen if risk > 15\%").
 #' @param decisionRuleLabel Label for the clinical decision rule in plots and
 #'   tables.
+#' @param showClinicalImpactPlot Display clinical impact plot showing number
+#'   of true positives and false positives per population unit across threshold
+#'   probabilities.
+#' @param showNetBenefitCI Display confidence intervals around net benefit
+#'   curves in the decision curve plot.
+#' @param costBenefitAnalysis Perform cost-benefit analysis incorporating
+#'   costs of testing, treatment, and outcomes.
+#' @param testCost Cost per test or screening procedure (in currency units).
+#' @param treatmentCost Cost of treatment or intervention (in currency units).
+#' @param benefitCorrectTreatment Monetary benefit or QALY-equivalent value of
+#'   correctly treating a true positive.
+#' @param harmFalseTreatment Cost or harm of treating a false positive
+#'   (unnecessary treatment).
+#' @param showStandardizedNetBenefit Calculate and display standardized net
+#'   benefit (net benefit per 100 patients).
+#' @param multiModelComparison Perform comprehensive pairwise comparisons
+#'   between all models with statistical tests.
+#' @param comparisonMethod Statistical method for comparing decision curves
+#'   between models.
+#' @param showDecisionConsequences Show detailed table of decision
+#'   consequences (TP, FP, TN, FN) at selected thresholds.
+#' @param resourceUtilization Calculate resource utilization metrics (tests
+#'   performed, treatments administered).
+#' @param showRelativeUtility Display relative utility curve comparing each
+#'   model to default strategies.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -651,9 +978,15 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$weightedAUCTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$dcaPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab Number of true/false positives per population unit \cr
 #'   \code{results$interventionsAvoidedPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$costBenefitTable} \tab \tab \tab \tab \tab Cost-benefit analysis at selected thresholds \cr
+#'   \code{results$decisionConsequencesTable} \tab \tab \tab \tab \tab Detailed consequences at selected thresholds \cr
+#'   \code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Pairwise statistical comparison of models \cr
+#'   \code{results$resourceUtilizationTable} \tab \tab \tab \tab \tab Resource utilization at selected thresholds \cr
+#'   \code{results$relativeUtilityPlot} \tab \tab \tab \tab \tab Relative utility compared to default strategies \cr
+#'   \code{results$standardizedNetBenefitPlot} \tab \tab \tab \tab \tab Net benefit per 100 patients \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -692,7 +1025,20 @@ decisioncurve <- function(
     weightedAUC = FALSE,
     clinicalDecisionRule = FALSE,
     decisionRuleThreshold = 0.15,
-    decisionRuleLabel = "Clinical Rule") {
+    decisionRuleLabel = "Clinical Rule",
+    showClinicalImpactPlot = FALSE,
+    showNetBenefitCI = FALSE,
+    costBenefitAnalysis = FALSE,
+    testCost = 100,
+    treatmentCost = 1000,
+    benefitCorrectTreatment = 10000,
+    harmFalseTreatment = 500,
+    showStandardizedNetBenefit = FALSE,
+    multiModelComparison = TRUE,
+    comparisonMethod = "bootstrap",
+    showDecisionConsequences = TRUE,
+    resourceUtilization = FALSE,
+    showRelativeUtility = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncurve requires jmvcore to be installed (restart may be required)")
@@ -735,7 +1081,20 @@ decisioncurve <- function(
         weightedAUC = weightedAUC,
         clinicalDecisionRule = clinicalDecisionRule,
         decisionRuleThreshold = decisionRuleThreshold,
-        decisionRuleLabel = decisionRuleLabel)
+        decisionRuleLabel = decisionRuleLabel,
+        showClinicalImpactPlot = showClinicalImpactPlot,
+        showNetBenefitCI = showNetBenefitCI,
+        costBenefitAnalysis = costBenefitAnalysis,
+        testCost = testCost,
+        treatmentCost = treatmentCost,
+        benefitCorrectTreatment = benefitCorrectTreatment,
+        harmFalseTreatment = harmFalseTreatment,
+        showStandardizedNetBenefit = showStandardizedNetBenefit,
+        multiModelComparison = multiModelComparison,
+        comparisonMethod = comparisonMethod,
+        showDecisionConsequences = showDecisionConsequences,
+        resourceUtilization = resourceUtilization,
+        showRelativeUtility = showRelativeUtility)
 
     analysis <- decisioncurveClass$new(
         options = options,

@@ -1,0 +1,108 @@
+title: Time-Dependent Decision Curve Analysis
+name: timedependentdca
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Indicator (1=event, 0=censored)
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Risk Predictor (Continuous)
+        children:
+          - type: VariablesListBox
+            name: predictor
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Time Points for Evaluation
+        children:
+          - type: TextBox
+            name: time_points
+            format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Threshold Range
+        children:
+          - type: TextBox
+            name: threshold_range_min
+            format: number
+          - type: TextBox
+            name: threshold_range_max
+            format: number
+          - type: TextBox
+            name: threshold_steps
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Reference Strategy
+        children:
+          - type: ComboBox
+            name: reference_strategy
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Survival Estimation Method
+        children:
+          - type: ComboBox
+            name: estimate_survival
+          - type: CheckBox
+            name: smoothing
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Confidence Intervals
+        children:
+          - type: CheckBox
+            name: confidence_intervals
+          - type: TextBox
+            name: bootstrap_samples
+            format: number
+          - type: TextBox
+            name: confidence_level
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: plot_net_benefit
+          - type: CheckBox
+            name: plot_by_timepoint
+          - type: CheckBox
+            name: plot_interventions_avoided
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Random Seed
+        children:
+          - type: TextBox
+            name: random_seed
+            format: number

@@ -1,0 +1,295 @@
+---
+name: vusanalysis
+title: Volume Under ROC Surface (VUS) Analysis
+menuGroup: meddecideT
+menuSubgroup: Multi-Class ROC Analysis
+menuSubtitle: VUS for 3+ class diagnostic accuracy
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Volume Under ROC Surface (VUS) analysis extends the traditional Area Under the ROC Curve (AUC)
+        to diagnostic tests with three or more ordered classes. While binary ROC analysis calculates
+        the area under a 2D curve, VUS calculates the volume under a 3D surface for multi-class problems.
+        The VUS represents the probability that a randomly selected triple of observations (one from
+        each class) will be correctly ordered by the diagnostic marker. VUS ranges from 0 to 1, where
+        0.5 indicates random classification (no discrimination), and 1 indicates perfect discrimination
+        across all classes. This method is particularly valuable for tumor grading (Grade 1/2/3),
+        disease staging (Stage I/II/III/IV), severity classification (mild/moderate/severe), and any
+        diagnostic scenario where outcomes naturally fall into three or more ordered categories.
+        The analysis provides pairwise AUC comparisons between adjacent classes, overall VUS with
+        confidence intervals, and hypothesis testing against chance performance. Essential for
+        validating biomarkers, imaging features, and AI models in multi-class clinicopathological
+        applications where binary classification is insufficient.
+    R:
+        dontrun: false
+        usage: >
+            result <- vusanalysis(
+                data = tumor_data,
+                predictor = "biomarker_score",
+                multiclass_outcome = "tumor_grade",
+                outcome_order = c("Grade 1", "Grade 2", "Grade 3")
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: predictor
+      title: Predictor Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Continuous predictor variable (biomarker, risk score, imaging feature).
+            Should be numeric with higher values generally indicating higher class membership.
+
+    - name: multiclass_outcome
+      title: Multi-Class Outcome
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Outcome variable with 3 or more ordered classes. Examples: tumor grade
+            (1/2/3), disease stage (I/II/III/IV), severity (mild/moderate/severe).
+
+    - name: outcome_order
+      title: Outcome Class Order
+      type: String
+      default: ""
+      description:
+          R: >
+            Comma-separated list specifying the order of outcome classes from low to high.
+            Example: "Grade 1, Grade 2, Grade 3". If not specified, factor levels are used.
+
+    - name: vus_method
+      title: VUS Calculation Method
+      type: List
+      options:
+        - title: Mann-Whitney Based (Non-parametric)
+          name: mann_whitney
+        - title: Normal Theory (Parametric)
+          name: normal
+        - title: Bootstrap
+          name: bootstrap
+      default: mann_whitney
+      description:
+          R: >
+            Method for VUS estimation. Mann-Whitney is most robust and recommended
+            for general use. Normal theory assumes multivariate normality. Bootstrap
+            provides non-parametric confidence intervals.
+
+    - name: confidence_intervals
+      title: Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for VUS using specified method.
+
+    - name: ci_method
+      title: CI Calculation Method
+      type: List
+      options:
+        - title: Bootstrap (Percentile)
+          name: bootstrap
+        - title: Bootstrap (BCa)
+          name: bca
+        - title: Asymptotic (Normal Approximation)
+          name: asymptotic
+      default: bootstrap
+      description:
+          R: >
+            Method for confidence interval calculation. Bootstrap is recommended
+            for most applications. BCa provides bias-corrected intervals.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap resamples for confidence intervals and hypothesis testing.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for interval estimation.
+
+    - name: hypothesis_test
+      title: Hypothesis Testing
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test null hypothesis: VUS = 1/6 (random classification for 3 classes).
+            For k classes, null VUS = 1/k!
+
+    - name: test_method
+      title: Test Method
+      type: List
+      options:
+        - title: Bootstrap Test
+          name: bootstrap
+        - title: Permutation Test
+          name: permutation
+        - title: Asymptotic Z-test
+          name: asymptotic
+      default: bootstrap
+      description:
+          R: >
+            Method for hypothesis testing. Bootstrap and permutation are robust
+            to distributional assumptions.
+
+    - name: pairwise_auc
+      title: Pairwise AUC Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate AUC for all pairwise class comparisons. Helps identify
+            which class transitions are well-discriminated.
+
+    - name: pairwise_ci
+      title: Pairwise AUC Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate confidence intervals for pairwise AUC comparisons.
+
+    - name: pairwise_tests
+      title: Pairwise AUC Tests
+      type: Bool
+      default: false
+      description:
+          R: >
+            Test whether each pairwise AUC differs significantly from 0.5.
+
+    - name: min_class_size
+      title: Minimum Class Size
+      type: Integer
+      default: 10
+      min: 5
+      max: 50
+      description:
+          R: >
+            Minimum number of observations required per class for analysis.
+            Smaller classes may produce unstable estimates.
+
+    - name: covariate_adjustment
+      title: Covariate Adjustment
+      type: Bool
+      default: false
+      description:
+          R: >
+            Adjust VUS for covariates (experimental feature). Useful for
+            controlling confounding factors.
+
+    - name: covariates
+      title: Adjustment Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Covariates for adjustment (age, sex, site, etc.). Requires
+            covariate_adjustment = TRUE.
+
+    - name: stratified_analysis
+      title: Stratified VUS Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate VUS stratified by subgroups to assess consistency
+            across populations.
+
+    - name: stratify_by
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable for stratified analysis (e.g., age group, disease subtype).
+
+    - name: plot_3d_surface
+      title: 3D ROC Surface Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate 3D visualization of ROC surface (requires additional packages).
+            Warning: May be computationally intensive for large datasets.
+
+    - name: plot_pairwise_rocs
+      title: Pairwise ROC Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot ROC curves for all pairwise class comparisons.
+
+    - name: plot_class_distributions
+      title: Class Distribution Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display predictor distributions by outcome class (box plots or density plots).
+
+    - name: plot_type
+      title: Distribution Plot Type
+      type: List
+      options:
+        - title: Box Plots
+          name: boxplot
+        - title: Violin Plots
+          name: violin
+        - title: Density Plots
+          name: density
+      default: boxplot
+      description:
+          R: >
+            Type of plot for showing predictor distributions across classes.
+
+    - name: handle_ties
+      title: Tie Handling Method
+      type: List
+      options:
+        - title: Average Ranks
+          name: average
+        - title: Random Resolution
+          name: random
+        - title: Conservative (Minimum)
+          name: conservative
+      default: average
+      description:
+          R: >
+            Method for handling tied predictor values. Average ranks is standard
+            for Mann-Whitney based calculations.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 12345
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap and permutation procedures.
+
+...

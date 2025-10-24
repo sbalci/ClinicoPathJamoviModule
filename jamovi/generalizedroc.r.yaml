@@ -1,0 +1,174 @@
+---
+name: generalizedroc
+title: Generalized ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: instructionsText
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: aucTable
+      title: Generalized ROC Performance
+      type: Table
+      rows: 1
+      visible: (calculate_auc)
+      clearWith:
+        - outcome
+        - predictor
+        - assume_equal_variance
+        - transformation
+      columns:
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: "Lower CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: ci_upper
+          title: "Upper CI"
+          type: number
+          format: zto,pvalue
+          visible: (confidence_intervals)
+        - name: se
+          title: "Standard Error"
+          type: number
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: parametersTable
+      title: Distribution Parameters
+      type: Table
+      visible: (distribution_model:normal)
+      clearWith:
+        - outcome
+        - predictor
+        - transformation
+      columns:
+        - name: group
+          title: "Group"
+          type: text
+          combineBelow: true
+        - name: n
+          title: "N"
+          type: integer
+        - name: mean
+          title: "Mean"
+          type: number
+        - name: sd
+          title: "SD"
+          type: number
+        - name: variance
+          title: "Variance"
+          type: number
+        - name: skewness
+          title: "Skewness"
+          type: number
+        - name: kurtosis
+          title: "Kurtosis"
+          type: number
+
+    - name: diagnosticsTable
+      title: Distribution Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      clearWith:
+        - outcome
+        - predictor
+        - transformation
+        - variance_test
+      columns:
+        - name: test
+          title: "Test"
+          type: text
+        - name: statistic
+          title: "Statistic"
+          type: number
+        - name: p_value
+          title: "p"
+          type: number
+          format: zto,pvalue
+        - name: result
+          title: "Result"
+          type: text
+
+    - name: thresholdTable
+      title: Optimal Threshold Analysis
+      type: Table
+      rows: 1
+      visible: (optimal_threshold)
+      clearWith:
+        - outcome
+        - predictor
+        - transformation
+      columns:
+        - name: threshold
+          title: "Optimal Threshold"
+          type: number
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: zto,pvalue
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: zto,pvalue
+        - name: youden
+          title: "Youden's J"
+          type: number
+        - name: ppv
+          title: "PPV"
+          type: number
+          format: zto,pvalue
+        - name: npv
+          title: "NPV"
+          type: number
+          format: zto,pvalue
+
+    - name: rocPlot
+      title: Generalized ROC Curve
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .rocPlot
+      visible: (plot_roc)
+      clearWith:
+        - outcome
+        - predictor
+        - transformation
+        - assume_equal_variance
+
+    - name: distributionPlot
+      title: Group Distributions
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .distributionPlot
+      visible: (plot_distributions)
+      clearWith:
+        - outcome
+        - predictor
+        - transformation
+
+    - name: qqPlot
+      title: Q-Q Plots for Normality Assessment
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .qqPlot
+      visible: (plot_diagnostic)
+      clearWith:
+        - outcome
+        - predictor
+        - transformation
+
+    - name: interpretationText
+      title: Interpretation Guide
+      type: Html
+      visible: true
+...

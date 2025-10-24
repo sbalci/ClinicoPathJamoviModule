@@ -1,0 +1,358 @@
+---
+name: trichotomousroc
+title: Trichotomous (Three-way) ROC Analysis
+menuGroup: meddecideT
+menuSubgroup: ROC Analysis
+menuSubtitle: Three-category diagnostic test evaluation with indeterminate zone
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Trichotomous ROC analysis for three-category diagnostic tests with positive,
+        indeterminate (grey zone), and negative outcomes. Essential for biomarker
+        scoring systems like HER2 (0-1+/2+/3+), PD-L1 expression levels, and cytology
+        classifications with "atypical" results. Unlike binary ROC which only considers
+        positive vs negative, trichotomous ROC accounts for the clinically important
+        indeterminate zone where additional testing may be required. The analysis
+        provides 3×3 confusion matrices, category-specific sensitivities and specificities,
+        volume under the ROC surface (VUS) as a 3D extension of AUC, and optimal threshold
+        determination for each decision boundary. Particularly valuable for establishing
+        clinical cutoffs in molecular pathology where grey-zone results trigger reflex
+        testing (e.g., HER2 2+ requires FISH confirmation).
+    R:
+        dontrun: false
+        usage: >
+            result <- trichotomousroc(
+                data = her2_data,
+                predictor = "her2_score",
+                outcome = "gold_standard",
+                positive_level = "positive",
+                indeterminate_level = "indeterminate",
+                negative_level = "negative"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: predictor
+      title: Predictor Variable (Continuous Score)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Continuous predictor variable (e.g., IHC H-score, gene expression level,
+            AI probability score) used to classify cases into three categories.
+
+    - name: outcome
+      title: Gold Standard Outcome
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Three-level gold standard outcome variable defining the true classification
+            (positive/indeterminate/negative or diseased/borderline/healthy).
+
+    - name: positive_level
+      title: Positive Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Level of the outcome variable representing definite positive/diseased cases.
+
+    - name: indeterminate_level
+      title: Indeterminate Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Level of the outcome variable representing indeterminate/borderline/grey zone cases.
+
+    - name: negative_level
+      title: Negative Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Level of the outcome variable representing definite negative/non-diseased cases.
+
+    # Threshold Options
+    - name: threshold_method
+      title: Threshold Selection Method
+      type: List
+      options:
+        - title: Youden Index (Maximize Correct Classification)
+          name: youden
+        - title: Clinical Utility (Specify Misclassification Costs)
+          name: clinical
+        - title: Fixed Thresholds (User-Specified)
+          name: fixed
+        - title: Equal Interval (Tertiles)
+          name: tertile
+      default: youden
+      description:
+          R: >
+            Method for determining the two thresholds that separate the three categories.
+            Youden maximizes overall correct classification, clinical uses cost-benefit analysis,
+            fixed allows manual threshold specification, tertile divides into equal thirds.
+
+    - name: lower_threshold
+      title: Lower Threshold (Negative vs Indeterminate)
+      type: Number
+      default: 0.33
+      description:
+          R: >
+            Lower threshold value when using fixed threshold method. Values below this are
+            classified as negative. Required when threshold_method = 'fixed'.
+
+    - name: upper_threshold
+      title: Upper Threshold (Indeterminate vs Positive)
+      type: Number
+      default: 0.67
+      description:
+          R: >
+            Upper threshold value when using fixed threshold method. Values above this are
+            classified as positive. Required when threshold_method = 'fixed'.
+
+    # Clinical Utility Options
+    - name: cost_fn
+      title: Cost of False Negative
+      type: Number
+      default: 1.0
+      min: 0
+      description:
+          R: >
+            Relative cost of misclassifying a positive case as negative.
+            Higher values increase sensitivity at expense of specificity.
+
+    - name: cost_fp
+      title: Cost of False Positive
+      type: Number
+      default: 1.0
+      min: 0
+      description:
+          R: >
+            Relative cost of misclassifying a negative case as positive.
+            Higher values increase specificity at expense of sensitivity.
+
+    - name: cost_indeterminate
+      title: Cost of Indeterminate Classification
+      type: Number
+      default: 0.5
+      min: 0
+      max: 2.0
+      description:
+          R: >
+            Relative cost of classifying a case as indeterminate (requiring additional testing).
+            Typically lower than definite misclassification but higher than correct classification.
+
+    # Statistical Inference
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for intervals around VUS and performance metrics.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation.
+            More samples provide more stable estimates but increase computation time.
+
+    - name: bootstrap_method
+      title: Bootstrap Method
+      type: List
+      options:
+        - title: Percentile Method
+          name: percentile
+        - title: Bias-Corrected (BCa)
+          name: bca
+      default: bca
+      description:
+          R: >
+            Bootstrap confidence interval method. BCa provides bias-corrected intervals.
+
+    # Performance Metrics
+    - name: calculate_vus
+      title: Calculate Volume Under Surface (VUS)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate Volume Under the ROC Surface, the 3D extension of AUC for three categories.
+            VUS ranges from 0 to 1, where 0.167 represents random classification and 1 represents
+            perfect classification. Values > 0.167 indicate discriminatory ability.
+
+    - name: category_sensitivities
+      title: Category-Specific Sensitivities
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate sensitivity for each category (ability to correctly identify
+            positive, indeterminate, and negative cases respectively).
+
+    - name: pairwise_comparisons
+      title: Pairwise Binary ROC Comparisons
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform binary ROC analysis for all three pairwise comparisons:
+            positive vs negative (ignoring indeterminate), positive vs indeterminate,
+            and indeterminate vs negative.
+
+    - name: confusion_matrix_3x3
+      title: 3×3 Confusion Matrix
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display full 3×3 confusion matrix showing all possible classification outcomes.
+            Rows represent true categories, columns represent predicted categories.
+
+    # Visualization Options
+    - name: plot_3d_surface
+      title: 3D ROC Surface Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create 3D visualization of the ROC surface. The surface extends the 2D ROC curve
+            to three dimensions, showing classification performance across all threshold combinations.
+
+    - name: plot_threshold_analysis
+      title: Threshold Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot showing how classification metrics vary with different threshold combinations.
+            Helps visualize the trade-off between definite and indeterminate classifications.
+
+    - name: plot_category_distributions
+      title: Category Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display distribution of predictor scores for each outcome category with
+            threshold lines showing decision boundaries.
+
+    - name: plot_pairwise_rocs
+      title: Pairwise ROC Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show the three pairwise binary ROC curves for comparison with the trichotomous analysis.
+
+    # Clinical Interpretation
+    - name: clinical_context
+      title: Clinical Context
+      type: List
+      options:
+        - title: General Three-Category Test
+          name: general
+        - title: HER2 IHC Scoring (0-1+/2+/3+)
+          name: her2
+        - title: PD-L1 Expression Levels
+          name: pdl1
+        - title: Cytology Classification
+          name: cytology
+        - title: Tumor Grading System
+          name: grading
+      default: general
+      description:
+          R: >
+            Clinical context for interpretation assistance. Provides context-specific
+            guidance on threshold selection and clinical implications.
+
+    - name: show_clinical_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide clinical interpretation of results including recommendations
+            for threshold use and implications for patient management.
+
+    - name: indeterminate_action
+      title: Indeterminate Zone Action
+      type: List
+      options:
+        - title: Additional Testing Required
+          name: test
+        - title: Clinical Judgment
+          name: judgment
+        - title: Repeat Assay
+          name: repeat
+        - title: Default to Positive
+          name: positive
+        - title: Default to Negative
+          name: negative
+      default: test
+      description:
+          R: >
+            Specify the clinical action for cases classified as indeterminate.
+            This affects the interpretation of diagnostic performance metrics.
+
+    # Advanced Options
+    - name: stratified_analysis
+      title: Stratified Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform stratified trichotomous ROC analysis by important subgroups
+            to assess consistency across populations.
+
+    - name: stratify_by
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable defining strata for stratified analysis. Each level will
+            receive separate trichotomous ROC analysis.
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+      default: complete
+      description:
+          R: >
+            Method for handling missing data in predictor or outcome variables.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap sampling. Ensures reproducible results.
+
+...

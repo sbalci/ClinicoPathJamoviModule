@@ -1,0 +1,182 @@
+---
+name: entropyanalysis
+title: Entropy and Mutual Information Analysis
+jrs: '1.1'
+
+items:
+    - name: instructionsText
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summaryTable
+      title: Summary Statistics
+      type: Table
+      rows: 1
+      visible: true
+      clearWith:
+        - outcome
+        - probability_vars
+      columns:
+        - name: n
+          title: "N"
+          type: integer
+        - name: mean_entropy
+          title: "Mean Entropy"
+          type: number
+        - name: median_entropy
+          title: "Median Entropy"
+          type: number
+        - name: sd_entropy
+          title: "SD Entropy"
+          type: number
+        - name: high_uncertainty_n
+          title: "High Uncertainty Cases"
+          type: integer
+        - name: high_uncertainty_pct
+          title: "High Uncertainty %"
+          type: number
+          format: zto,pvalue
+
+    - name: entropyTable
+      title: Entropy by True Class
+      type: Table
+      visible: (calculate_entropy)
+      clearWith:
+        - outcome
+        - probability_vars
+        - normalize_entropy
+      columns:
+        - name: class
+          title: "True Class"
+          type: text
+        - name: n
+          title: "N"
+          type: integer
+        - name: mean_entropy
+          title: "Mean Entropy"
+          type: number
+        - name: sd_entropy
+          title: "SD Entropy"
+          type: number
+        - name: pct_high_uncertainty
+          title: "% High Uncertainty"
+          type: number
+          format: zto,pvalue
+
+    - name: mutualInfoTable
+      title: Mutual Information
+      type: Table
+      visible: (calculate_mutual_information)
+      clearWith:
+        - outcome
+        - predictor_var
+        - probability_vars
+      columns:
+        - name: variable_pair
+          title: "Variable Pair"
+          type: text
+        - name: mutual_information
+          title: "I(X;Y)"
+          type: number
+        - name: normalized_mi
+          title: "Normalized MI"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: conditionalEntropyTable
+      title: Conditional Entropy H(Y|X)
+      type: Table
+      visible: (calculate_conditional_entropy)
+      clearWith:
+        - outcome
+        - predictor_var
+      columns:
+        - name: condition
+          title: "Condition"
+          type: text
+        - name: entropy
+          title: "H(Y|X)"
+          type: number
+        - name: uncertainty_reduction
+          title: "Uncertainty Reduction"
+          type: number
+          format: zto,pvalue
+
+    - name: klDivergenceTable
+      title: KL Divergence from Uniform Distribution
+      type: Table
+      visible: (calculate_kl_divergence)
+      clearWith:
+        - outcome
+        - probability_vars
+      columns:
+        - name: case_id
+          title: "Case"
+          type: integer
+        - name: kl_divergence
+          title: "KL Divergence"
+          type: number
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: caseLevelTable
+      title: Case-Level Entropy
+      type: Table
+      visible: (show_case_level)
+      clearWith:
+        - outcome
+        - probability_vars
+        - normalize_entropy
+      columns:
+        - name: case_id
+          title: "Case ID"
+          type: integer
+        - name: true_class
+          title: "True Class"
+          type: text
+        - name: predicted_class
+          title: "Predicted Class"
+          type: text
+        - name: entropy
+          title: "Entropy"
+          type: number
+        - name: max_prob
+          title: "Max Probability"
+          type: number
+          format: zto,pvalue
+        - name: high_uncertainty
+          title: "High Uncertainty"
+          type: text
+
+    - name: entropyDistPlot
+      title: Entropy Distribution
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .entropyDistPlot
+      visible: (plot_entropy_distribution)
+      clearWith:
+        - outcome
+        - probability_vars
+
+    - name: uncertaintyByClassPlot
+      title: Uncertainty by True Class
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .uncertaintyByClassPlot
+      visible: (plot_uncertainty_by_class)
+      clearWith:
+        - outcome
+        - probability_vars
+
+    - name: interpretationText
+      title: Interpretation Guide
+      type: Html
+      visible: true
+...

@@ -1,0 +1,325 @@
+---
+name: segmentationmetrics
+title: Segmentation Metrics (Dice, IoU, Hausdorff)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: overallSummary
+      title: Overall Segmentation Performance
+      type: Table
+      visible: true
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: mean
+          title: Mean
+          type: number
+          format: zto
+        - name: sd
+          title: SD
+          type: number
+          format: zto
+        - name: median
+          title: Median
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: min
+          title: Min
+          type: number
+          format: zto
+        - name: max
+          title: Max
+          type: number
+          format: zto
+
+    - name: overlapMetricsTable
+      title: Overlap Metrics (Dice & IoU)
+      type: Table
+      visible: true
+      columns:
+        - name: image_id
+          title: Image ID
+          type: text
+        - name: dice
+          title: Dice Coefficient
+          type: number
+          format: zto
+          visible: (dice_coefficient)
+        - name: iou
+          title: IoU (Jaccard)
+          type: number
+          format: zto
+          visible: (jaccard_index)
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+          visible: (sensitivity_specificity)
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+          visible: (sensitivity_specificity)
+        - name: quality_category
+          title: Quality
+          type: text
+          visible: (quality_thresholds)
+
+    - name: distanceMetricsTable
+      title: Distance Metrics (Boundary Accuracy)
+      type: Table
+      visible: (hausdorff_distance || surface_distance)
+      columns:
+        - name: image_id
+          title: Image ID
+          type: text
+        - name: hausdorff_max
+          title: Hausdorff (max)
+          type: number
+          format: zto
+          visible: (hausdorff_distance)
+        - name: hausdorff_95
+          title: Hausdorff (95%)
+          type: number
+          format: zto
+          visible: (average_hausdorff)
+        - name: avg_surface_dist
+          title: Avg Surface Dist
+          type: number
+          format: zto
+          visible: (surface_distance)
+        - name: surface_dice
+          title: Surface Dice
+          type: number
+          format: zto
+          visible: (surface_overlap)
+        - name: units
+          title: Units
+          type: text
+
+    - name: multiclassMetricsTable
+      title: Multi-class Performance by Class
+      type: Table
+      visible: (class_specific_metrics && segmentation_type:multiclass)
+      columns:
+        - name: class
+          title: Class
+          type: text
+        - name: n_pixels
+          title: N Pixels
+          type: integer
+        - name: dice
+          title: Dice
+          type: number
+          format: zto
+        - name: iou
+          title: IoU
+          type: number
+          format: zto
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+
+    - name: instanceMetricsTable
+      title: Instance Segmentation Metrics
+      type: Table
+      visible: (object_detection_metrics && segmentation_type:instance)
+      columns:
+        - name: image_id
+          title: Image ID
+          type: text
+        - name: n_true_objects
+          title: True Objects
+          type: integer
+        - name: n_pred_objects
+          title: Pred Objects
+          type: integer
+        - name: true_positives
+          title: True Positives
+          type: integer
+        - name: false_positives
+          title: False Positives
+          type: integer
+        - name: false_negatives
+          title: False Negatives
+          type: integer
+        - name: precision
+          title: Precision
+          type: number
+          format: pc
+        - name: recall
+          title: Recall
+          type: number
+          format: pc
+        - name: f1_score
+          title: F1-Score
+          type: number
+          format: zto
+
+    - name: qualityAssessmentTable
+      title: Quality Assessment Summary
+      type: Table
+      visible: (quality_thresholds)
+      columns:
+        - name: quality_category
+          title: Quality Category
+          type: text
+        - name: n_images
+          title: N Images
+          type: integer
+        - name: percentage
+          title: Percentage
+          type: number
+          format: pc
+        - name: dice_range
+          title: Dice Range
+          type: text
+
+    - name: outlierImagesTable
+      title: Outlier Images (Poor Performance)
+      type: Table
+      visible: (outlier_detection)
+      columns:
+        - name: image_id
+          title: Image ID
+          type: text
+        - name: dice
+          title: Dice
+          type: number
+          format: zto
+        - name: iou
+          title: IoU
+          type: number
+          format: zto
+        - name: outlier_score
+          title: Outlier Score
+          type: number
+          format: zto
+        - name: reason
+          title: Reason
+          type: text
+
+    - name: stratifiedAnalysisTable
+      title: Stratified Analysis
+      type: Table
+      visible: (stratified_analysis)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n_images
+          title: N Images
+          type: integer
+        - name: mean_dice
+          title: Mean Dice
+          type: number
+          format: zto
+        - name: mean_iou
+          title: Mean IoU
+          type: number
+          format: zto
+        - name: sd_dice
+          title: SD Dice
+          type: number
+          format: zto
+
+    - name: comparisonTable
+      title: Method Comparison (Paired Analysis)
+      type: Table
+      visible: (paired_analysis)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: mean_diff_dice
+          title: Mean Diff (Dice)
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    # Plots
+    - name: metricDistributionPlot
+      title: Metric Distribution Across Images
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotMetricDistribution
+      visible: (plot_metric_distribution)
+
+    - name: scatterComparisonPlot
+      title: Dice vs IoU Scatter Plot
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plotScatterComparison
+      visible: (plot_scatter_comparison)
+
+    - name: boundaryErrorPlot
+      title: Boundary Error Analysis
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotBoundaryError
+      visible: (plot_boundary_error)
+
+    - name: confusionMatrixPlot
+      title: Pixel-wise Confusion Matrix
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plotConfusionMatrix
+      visible: (plot_confusion_matrix)
+
+    - name: performanceByClassPlot
+      title: Performance by Class
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotPerformanceByClass
+      visible: (plot_performance_by_class)
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation & Recommendations
+      type: Html
+      visible: (show_interpretation)
+
+refs:
+    - ggplot2
+    - dplyr
+    - tidyr
+    - ClinicoPathJamoviModule
+
+...

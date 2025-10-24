@@ -202,12 +202,13 @@ items:
 
     # Clinical impact plot
     - name: clinicalImpactPlot
-      title: Clinical Impact
+      title: Clinical Impact Plot
       type: Image
       width: 700
       height: 500
       renderFun: .plotClinicalImpact
-      visible: (calculateClinicalImpact && showPlot)
+      visible: (calculateClinicalImpact && showPlot) || (showClinicalImpactPlot)
+      description: Number of true/false positives per population unit
       clearWith:
         - outcome
         - outcomePositive
@@ -245,6 +246,161 @@ items:
         - thresholdRange
         - thresholdMin
         - thresholdMax
+
+    # Enhanced Decision Curve Analysis Results
+    - name: costBenefitTable
+      title: Cost-Benefit Analysis
+      type: Table
+      description: Cost-benefit analysis at selected thresholds
+      visible: (costBenefitAnalysis)
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: threshold
+          title: 'Threshold'
+          type: number
+          format: zto
+        - name: total_cost
+          title: 'Total Cost'
+          type: number
+        - name: total_benefit
+          title: 'Total Benefit'
+          type: number
+        - name: net_monetary_benefit
+          title: 'Net Monetary Benefit'
+          type: number
+        - name: incremental_cost
+          title: 'Incremental Cost'
+          type: number
+        - name: incremental_benefit
+          title: 'Incremental Benefit'
+          type: number
+        - name: icer
+          title: 'ICER'
+          type: number
+
+    - name: decisionConsequencesTable
+      title: Decision Consequences
+      type: Table
+      description: Detailed consequences at selected thresholds
+      visible: (showDecisionConsequences)
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: threshold
+          title: 'Threshold'
+          type: number
+          format: pc
+        - name: true_positive
+          title: 'True Positive'
+          type: integer
+        - name: false_positive
+          title: 'False Positive'
+          type: integer
+        - name: true_negative
+          title: 'True Negative'
+          type: integer
+        - name: false_negative
+          title: 'False Negative'
+          type: integer
+        - name: sensitivity
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: specificity
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: ppv
+          title: 'PPV'
+          type: number
+          format: pc
+        - name: npv
+          title: 'NPV'
+          type: number
+          format: pc
+
+    - name: modelComparisonEnhanced
+      title: Enhanced Model Comparison
+      type: Table
+      description: Pairwise statistical comparison of models
+      visible: (multiModelComparison)
+      columns:
+        - name: model1
+          title: 'Model 1'
+          type: text
+        - name: model2
+          title: 'Model 2'
+          type: text
+        - name: nb_difference_mean
+          title: 'Mean NB Difference'
+          type: number
+          format: zto
+        - name: nb_difference_median
+          title: 'Median NB Difference'
+          type: number
+          format: zto
+        - name: test_statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto;pvalue
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+
+    - name: resourceUtilizationTable
+      title: Resource Utilization
+      type: Table
+      description: Resource utilization at selected thresholds
+      visible: (resourceUtilization)
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: threshold
+          title: 'Threshold'
+          type: number
+          format: pc
+        - name: tests_per_1000
+          title: 'Tests per 1000'
+          type: number
+        - name: treatments_per_1000
+          title: 'Treatments per 1000'
+          type: number
+        - name: unnecessary_treatments
+          title: 'Unnecessary Tx per 1000'
+          type: number
+        - name: missed_cases
+          title: 'Missed Cases per 1000'
+          type: number
+        - name: reduction_vs_treat_all
+          title: '% Reduction vs Treat All'
+          type: number
+          format: pc
+
+    - name: relativeUtilityPlot
+      title: Relative Utility Curve
+      type: Image
+      description: Relative utility compared to default strategies
+      visible: (showRelativeUtility)
+      renderFun: .plotRelativeUtility
+      width: 700
+      height: 500
+
+    - name: standardizedNetBenefitPlot
+      title: Standardized Net Benefit
+      type: Image
+      description: Net benefit per 100 patients
+      visible: (showStandardizedNetBenefit)
+      renderFun: .plotStandardizedNetBenefit
+      width: 700
+      height: 500
 
 refs:
     - DecisionCurve

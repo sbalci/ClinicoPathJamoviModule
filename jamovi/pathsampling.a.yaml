@@ -40,6 +40,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
       description: >
         Total number of samples examined per case.
         Examples: total tumor blocks examined, total lymph nodes dissected, total omentum sections.
@@ -51,6 +52,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: NULL
       description: >
         Sample number where outcome was first detected (e.g., which block first showed VI).
         Leave as NA for negative cases. For positive cases, enter the sequential sample number (1, 2, 3, etc.).
@@ -76,16 +78,6 @@ options:
 
     - name: sampleType
       title: Compare Sample Type/Subtype (Optional)
-      type: Variable
-      suggested:
-        - nominal
-        - ordinal
-      permitted:
-        - factor
-      default: NULL
-
-    - name: groupBy
-      title: Split Analyses by Cohort (Optional)
       type: Variable
       suggested:
         - nominal
@@ -290,10 +282,21 @@ options:
       type: Bool
       default: false
 
-    - name: showGuidedChecklist
-      title: Show Guided Checklist
+    - name: showGuidedInstructions
+      title: Show Guided Instructions (Detailed Checklist)
       type: Bool
       default: false
+      description: >
+        Display detailed step-by-step checklist with examples and common use cases.
+        Best for first-time users and training.
+
+    - name: showConciseInstructions
+      title: Show Concise Instructions (Brief Overview)
+      type: Bool
+      default: false
+      description: >
+        Display brief analysis overview with required variables and methods.
+        Best for experienced users.
 
     - name: showEmpiricalCumulative
       title: Show Empirical Cumulative Detection
@@ -324,6 +327,41 @@ options:
       title: Show Multifocal Detection Analysis
       type: Bool
       default: false
+
+    - name: showProbabilityExplanation
+      title: Show Probability Explanation
+      type: Bool
+      default: false
+      description: >
+        Show detailed explanation distinguishing conditional vs population-level detection probabilities.
+
+    - name: showKeyResults
+      title: Show Key Results Summary
+      type: Bool
+      default: false
+      description: >
+        Display a concise summary of key findings at the top of results.
+
+    - name: showRecommendText
+      title: Show Clinical Recommendations
+      type: Bool
+      default: false
+      description: >
+        Display context-specific clinical recommendations based on analysis results.
+
+    - name: showInterpretText
+      title: Show Statistical Interpretation
+      type: Bool
+      default: false
+      description: >
+        Show statistical interpretation and guidance for result interpretation.
+
+    - name: showReferencesText
+      title: Show References & Methods
+      type: Bool
+      default: false
+      description: >
+        Display statistical methods documentation and literature references.
 
     - name: estimationMethod
       title: q Estimation Method

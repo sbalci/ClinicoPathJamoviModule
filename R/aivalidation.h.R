@@ -23,6 +23,11 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             calculateNRI = TRUE,
             calculateIDI = TRUE,
             youdensJ = TRUE,
+            matthewsCC = TRUE,
+            expectedCalibrationError = FALSE,
+            eceBins = 10,
+            maxCalibrationError = FALSE,
+            reliabilityDiagram = TRUE,
             bootstrapCI = TRUE,
             nBootstrap = 1000,
             showModelSelection = TRUE,
@@ -144,6 +149,28 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "youdensJ",
                 youdensJ,
                 default=TRUE)
+            private$..matthewsCC <- jmvcore::OptionBool$new(
+                "matthewsCC",
+                matthewsCC,
+                default=TRUE)
+            private$..expectedCalibrationError <- jmvcore::OptionBool$new(
+                "expectedCalibrationError",
+                expectedCalibrationError,
+                default=FALSE)
+            private$..eceBins <- jmvcore::OptionInteger$new(
+                "eceBins",
+                eceBins,
+                min=5,
+                max=20,
+                default=10)
+            private$..maxCalibrationError <- jmvcore::OptionBool$new(
+                "maxCalibrationError",
+                maxCalibrationError,
+                default=FALSE)
+            private$..reliabilityDiagram <- jmvcore::OptionBool$new(
+                "reliabilityDiagram",
+                reliabilityDiagram,
+                default=TRUE)
             private$..bootstrapCI <- jmvcore::OptionBool$new(
                 "bootstrapCI",
                 bootstrapCI,
@@ -222,6 +249,11 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..calculateNRI)
             self$.addOption(private$..calculateIDI)
             self$.addOption(private$..youdensJ)
+            self$.addOption(private$..matthewsCC)
+            self$.addOption(private$..expectedCalibrationError)
+            self$.addOption(private$..eceBins)
+            self$.addOption(private$..maxCalibrationError)
+            self$.addOption(private$..reliabilityDiagram)
             self$.addOption(private$..bootstrapCI)
             self$.addOption(private$..nBootstrap)
             self$.addOption(private$..showModelSelection)
@@ -255,6 +287,11 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         calculateNRI = function() private$..calculateNRI$value,
         calculateIDI = function() private$..calculateIDI$value,
         youdensJ = function() private$..youdensJ$value,
+        matthewsCC = function() private$..matthewsCC$value,
+        expectedCalibrationError = function() private$..expectedCalibrationError$value,
+        eceBins = function() private$..eceBins$value,
+        maxCalibrationError = function() private$..maxCalibrationError$value,
+        reliabilityDiagram = function() private$..reliabilityDiagram$value,
         bootstrapCI = function() private$..bootstrapCI$value,
         nBootstrap = function() private$..nBootstrap$value,
         showModelSelection = function() private$..showModelSelection$value,
@@ -287,6 +324,11 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..calculateNRI = NA,
         ..calculateIDI = NA,
         ..youdensJ = NA,
+        ..matthewsCC = NA,
+        ..expectedCalibrationError = NA,
+        ..eceBins = NA,
+        ..maxCalibrationError = NA,
+        ..reliabilityDiagram = NA,
         ..bootstrapCI = NA,
         ..nBootstrap = NA,
         ..showModelSelection = NA,
@@ -313,10 +355,13 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         modelComparisonTable = function() private$.items[["modelComparisonTable"]],
         nriIdiTable = function() private$.items[["nriIdiTable"]],
         calibrationTable = function() private$.items[["calibrationTable"]],
+        eceTable = function() private$.items[["eceTable"]],
+        eceBinDetails = function() private$.items[["eceBinDetails"]],
         variableImportanceTable = function() private$.items[["variableImportanceTable"]],
         cvFoldResults = function() private$.items[["cvFoldResults"]],
         rocPlot = function() private$.items[["rocPlot"]],
         calibrationPlot = function() private$.items[["calibrationPlot"]],
+        reliabilityDiagramPlot = function() private$.items[["reliabilityDiagramPlot"]],
         comparisonPlot = function() private$.items[["comparisonPlot"]],
         cvPerformancePlot = function() private$.items[["cvPerformancePlot"]],
         variableImportancePlot = function() private$.items[["variableImportancePlot"]],
@@ -416,7 +461,13 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `title`="Youden's J", 
                         `type`="number", 
                         `format`="zto", 
-                        `visible`="(youdensJ)"))))
+                        `visible`="(youdensJ)"),
+                    list(
+                        `name`="mcc", 
+                        `title`="MCC", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(matthewsCC)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSelectionTable",
@@ -593,6 +644,82 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="eceTable",
+                title="Expected Calibration Error (ECE)",
+                visible="(expectedCalibrationError)",
+                clearWith=list(
+                    "predictorVars",
+                    "outcomeVar",
+                    "eceBins"),
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="ece", 
+                        `title`="ECE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="mce", 
+                        `title`="MCE", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(maxCalibrationError)"),
+                    list(
+                        `name`="num_bins", 
+                        `title`="Number of Bins", 
+                        `type`="integer"),
+                    list(
+                        `name`="avg_confidence", 
+                        `title`="Avg Confidence", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="avg_accuracy", 
+                        `title`="Avg Accuracy", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="eceBinDetails",
+                title="ECE Bin-Level Details",
+                visible="(expectedCalibrationError)",
+                clearWith=list(
+                    "predictorVars",
+                    "outcomeVar",
+                    "eceBins"),
+                columns=list(
+                    list(
+                        `name`="bin", 
+                        `title`="Bin", 
+                        `type`="integer"),
+                    list(
+                        `name`="bin_range", 
+                        `title`="Probability Range", 
+                        `type`="text"),
+                    list(
+                        `name`="n_samples", 
+                        `title`="N Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="avg_confidence", 
+                        `title`="Avg Confidence", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="avg_accuracy", 
+                        `title`="Avg Accuracy", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="calibration_error", 
+                        `title`="Calibration Error", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="variableImportanceTable",
                 title="Variable Importance",
                 visible="(variableImportancePlot && modelSelection != 'none')",
@@ -687,6 +814,17 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "calibrationTest")))
             self$add(jmvcore::Image$new(
                 options=options,
+                name="reliabilityDiagramPlot",
+                title="Reliability Diagram",
+                visible="(reliabilityDiagram && expectedCalibrationError)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "predictorVars",
+                    "outcomeVar",
+                    "eceBins",
+                    "expectedCalibrationError")))
+            self$add(jmvcore::Image$new(
+                options=options,
                 name="comparisonPlot",
                 title="Model Comparison Forest Plot",
                 visible="(comparisonPlot && compareModels)",
@@ -745,7 +883,7 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "aivalidation",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = aivalidationResults$new(options=options),
                 data = data,
@@ -804,6 +942,27 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   confidence intervals
 #' @param youdensJ calculate Youden's J statistic for optimal cutoff
 #'   determination
+#' @param matthewsCC calculate Matthews Correlation Coefficient, a balanced
+#'   measure for binary classification that accounts for all four confusion
+#'   matrix categories. Especially useful for imbalanced datasets (e.g., rare
+#'   events like mitosis detection). MCC ranges from -1 to +1 where +1
+#'   represents perfect prediction, 0 represents random prediction, and -1
+#'   represents total disagreement
+#' @param expectedCalibrationError calculate Expected Calibration Error to
+#'   assess reliability of predicted probabilities. ECE measures the difference
+#'   between predicted probabilities and actual outcomes across probability
+#'   bins. Essential for AI models to ensure predicted probabilities are
+#'   well-calibrated. Lower ECE values indicate better calibration (perfect
+#'   calibration = 0)
+#' @param eceBins number of bins for Expected Calibration Error calculation.
+#'   Standard is 10 bins. More bins provide finer granularity but require more
+#'   data
+#' @param maxCalibrationError calculate Maximum Calibration Error (worst-case
+#'   calibration error across all bins). MCE identifies the bin with the largest
+#'   deviation between predicted and actual outcomes
+#' @param reliabilityDiagram display reliability diagram showing predicted
+#'   probabilities vs observed frequencies. Perfect calibration appears as a
+#'   diagonal line. Useful for visualizing calibration quality
 #' @param bootstrapCI use bootstrap methods for confidence interval estimation
 #' @param nBootstrap number of bootstrap iterations for confidence intervals
 #' @param showModelSelection display model selection process and variable
@@ -830,10 +989,13 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$modelComparisonTable} \tab \tab \tab \tab \tab Statistical comparison between different models \cr
 #'   \code{results$nriIdiTable} \tab \tab \tab \tab \tab Net Reclassification Index and Integrated Discrimination Index \cr
 #'   \code{results$calibrationTable} \tab \tab \tab \tab \tab Model calibration assessment including Hosmer-Lemeshow test \cr
+#'   \code{results$eceTable} \tab \tab \tab \tab \tab Calibration error metrics for probabilistic predictions \cr
+#'   \code{results$eceBinDetails} \tab \tab \tab \tab \tab Detailed calibration error for each probability bin \cr
 #'   \code{results$variableImportanceTable} \tab \tab \tab \tab \tab Importance scores for variables in selected models \cr
 #'   \code{results$cvFoldResults} \tab \tab \tab \tab \tab Performance metrics for each cross-validation fold \cr
 #'   \code{results$rocPlot} \tab \tab \tab \tab \tab ROC curves showing cross-validated performance with confidence bands \cr
 #'   \code{results$calibrationPlot} \tab \tab \tab \tab \tab Calibration plot showing observed vs predicted probabilities \cr
+#'   \code{results$reliabilityDiagramPlot} \tab \tab \tab \tab \tab Reliability diagram showing predicted probabilities vs observed frequencies with ECE visualization \cr
 #'   \code{results$comparisonPlot} \tab \tab \tab \tab \tab Forest plot comparing model performance with confidence intervals \cr
 #'   \code{results$cvPerformancePlot} \tab \tab \tab \tab \tab Box plots showing performance distribution across CV folds \cr
 #'   \code{results$variableImportancePlot} \tab \tab \tab \tab \tab Bar plot showing variable importance from model selection \cr
@@ -869,6 +1031,11 @@ aivalidation <- function(
     calculateNRI = TRUE,
     calculateIDI = TRUE,
     youdensJ = TRUE,
+    matthewsCC = TRUE,
+    expectedCalibrationError = FALSE,
+    eceBins = 10,
+    maxCalibrationError = FALSE,
+    reliabilityDiagram = TRUE,
     bootstrapCI = TRUE,
     nBootstrap = 1000,
     showModelSelection = TRUE,
@@ -917,6 +1084,11 @@ aivalidation <- function(
         calculateNRI = calculateNRI,
         calculateIDI = calculateIDI,
         youdensJ = youdensJ,
+        matthewsCC = matthewsCC,
+        expectedCalibrationError = expectedCalibrationError,
+        eceBins = eceBins,
+        maxCalibrationError = maxCalibrationError,
+        reliabilityDiagram = reliabilityDiagram,
         bootstrapCI = bootstrapCI,
         nBootstrap = nBootstrap,
         showModelSelection = showModelSelection,

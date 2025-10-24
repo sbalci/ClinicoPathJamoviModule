@@ -1,7 +1,7 @@
 ---
 name: enhancedROC
 title: Clinical ROC Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
 version: '0.0.32'
@@ -125,6 +125,37 @@ options:
       default: true
       description: 'Use bootstrap methods for confidence intervals'
 
+    - name: bootstrapMethod
+      title: 'Bootstrap Method'
+      type: List
+      options:
+          - title: 'Percentile Method'
+            name: percentile
+          - title: 'BCa (Bias-Corrected and Accelerated)'
+            name: bca
+          - title: 'Basic Bootstrap'
+            name: basic
+      default: bca
+      description: 'Method for calculating bootstrap confidence intervals. BCa provides better coverage but requires more computation.'
+
+    - name: bootstrapCutoffCI
+      title: 'Bootstrap CI for Optimal Cutoff'
+      type: Bool
+      default: false
+      description: 'Calculate bootstrap confidence intervals for sensitivity and specificity at optimal cutoff'
+
+    - name: bootstrapPartialAUC
+      title: 'Bootstrap CI for Partial AUC'
+      type: Bool
+      default: false
+      description: 'Calculate bootstrap confidence intervals for partial AUC estimates'
+
+    - name: stratifiedBootstrap
+      title: 'Stratified Bootstrap'
+      type: Bool
+      default: true
+      description: 'Maintain outcome class proportions in bootstrap samples (recommended for imbalanced data)'
+
     # Comparison Options  
     - name: pairwiseComparisons
       title: 'Pairwise Comparisons'
@@ -202,11 +233,22 @@ options:
       default: false
       description: 'Calculate partial AUC for specific sensitivity/specificity ranges'
 
+    - name: partialAucType
+      title: 'Partial AUC Type'
+      type: List
+      options:
+          - title: 'Specificity Range (for high-specificity applications)'
+            name: specificity
+          - title: 'Sensitivity Range (for high-sensitivity applications)'
+            name: sensitivity
+      default: specificity
+      description: 'Whether to calculate pAUC over a specificity or sensitivity range'
+
     - name: partialRange
       title: 'Partial AUC Range'
       type: String
       default: '0.8,1.0'
-      description: 'Range for partial AUC (specificity_min,specificity_max)'
+      description: 'Range for partial AUC (min,max) - e.g., 0.8,1.0 for high specificity or sensitivity'
 
     # CROC Options
     - name: crocAnalysis
@@ -379,6 +421,263 @@ options:
       type: Bool
       default: true
       description: 'Perform comprehensive statistical comparison between models'
+
+    # Calibration Analysis Options
+    - name: calibrationAnalysis
+      title: 'Calibration Analysis'
+      type: Bool
+      default: false
+      description: 'Assess calibration (agreement between observed and predicted probabilities)'
+
+    - name: calibrationPlot
+      title: 'Calibration Plot'
+      type: Bool
+      default: true
+      description: 'Display calibration plot with loess smoothing'
+
+    - name: hosmerLemeshow
+      title: 'Hosmer-Lemeshow Test'
+      type: Bool
+      default: true
+      description: 'Perform Hosmer-Lemeshow goodness-of-fit test'
+
+    - name: hlGroups
+      title: 'Hosmer-Lemeshow Groups'
+      type: Integer
+      default: 10
+      min: 5
+      max: 20
+      description: 'Number of groups for Hosmer-Lemeshow test'
+
+    - name: brierScore
+      title: 'Brier Score'
+      type: Bool
+      default: true
+      description: 'Calculate Brier score and scaled Brier score'
+
+    - name: calibrationMetrics
+      title: 'Calibration Metrics'
+      type: Bool
+      default: true
+      description: 'Calculate calibration slope, intercept, and calibration-in-the-large'
+
+    # Advanced Calibration Methods
+    - name: splineCalibration
+      title: 'Spline Calibration Curves'
+      type: Bool
+      default: false
+      description: 'Use restricted cubic splines for flexible calibration curves'
+
+    - name: splineKnots
+      title: 'Number of Knots'
+      type: Integer
+      default: 4
+      min: 3
+      max: 7
+      description: 'Number of knots for restricted cubic splines (3-7 recommended)'
+
+    - name: eoRatio
+      title: 'E/O Ratio'
+      type: Bool
+      default: false
+      description: 'Calculate Expected/Observed ratio for overall calibration assessment'
+
+    - name: namDagostino
+      title: "Nam-D'Agostino Test"
+      type: Bool
+      default: false
+      description: "Perform Nam-D'Agostino calibration test (more powerful than H-L)"
+
+    - name: greenwoodNam
+      title: "Greenwood-Nam-D'Agostino Test"
+      type: Bool
+      default: false
+      description: "Greenwood-Nam-D'Agostino test for survival model calibration"
+
+    - name: calibrationBelt
+      title: 'Calibration Belt'
+      type: Bool
+      default: false
+      description: 'Display calibration belt showing uncertainty around calibration curve'
+
+    - name: calibrationDensity
+      title: 'Calibration Density Plot'
+      type: Bool
+      default: false
+      description: 'Show distribution of predicted probabilities as density overlay'
+
+    # Multi-Class ROC Options
+    - name: multiClassROC
+      title: 'Multi-Class ROC Analysis'
+      type: Bool
+      default: false
+      description: 'Enable multi-class ROC analysis for outcomes with >2 levels'
+
+    - name: multiClassStrategy
+      title: 'Multi-Class Strategy'
+      type: List
+      options:
+          - title: 'One-vs-Rest (OVR)'
+            name: ovr
+          - title: 'One-vs-One (OVO)'
+            name: ovo
+      default: ovr
+      description: 'Strategy for multi-class ROC analysis'
+
+    - name: multiClassAveraging
+      title: 'Multi-Class AUC Averaging'
+      type: List
+      options:
+          - title: 'Macro Average (unweighted)'
+            name: macro
+          - title: 'Weighted Average (by prevalence)'
+            name: weighted
+      default: macro
+      description: 'Method for averaging AUC across classes'
+
+    # Time-Dependent ROC Options
+    - name: timeDependentROC
+      title: 'Time-Dependent ROC'
+      type: Bool
+      default: false
+      description: 'Enable time-dependent ROC analysis for survival/time-to-event outcomes'
+
+    - name: timePoints
+      title: 'Time Points'
+      type: String
+      default: '12,24,36'
+      description: 'Comma-separated time points for time-dependent ROC (e.g., 12,24,36 months)'
+
+    - name: tdRocMethod
+      title: 'Time-Dependent ROC Method'
+      type: List
+      options:
+          - title: 'Kaplan-Meier (KM)'
+            name: km
+          - title: 'Nearest Neighbor Estimation (NNE)'
+            name: nne
+          - title: 'Cox Model'
+            name: cox
+      default: km
+      description: 'Method for estimating time-dependent ROC curves'
+
+    # Clinical Impact Options
+    - name: clinicalImpact
+      title: 'Clinical Impact Analysis'
+      type: Bool
+      default: false
+      description: 'Calculate clinical impact metrics (NNT, NND, clinical utility)'
+
+    - name: nntCalculation
+      title: 'Number Needed to Test/Treat'
+      type: Bool
+      default: true
+      description: 'Calculate number needed to test and number needed to diagnose'
+
+    - name: clinicalUtilityCurve
+      title: 'Clinical Utility Curve'
+      type: Bool
+      default: true
+      description: 'Display clinical utility curve showing test consequences'
+
+    - name: decisionImpactTable
+      title: 'Decision Impact Table'
+      type: Bool
+      default: true
+      description: 'Show decision impact at various thresholds'
+
+    # Survival ROC Enhancements
+    - name: survivalROC
+      title: 'Survival ROC Analysis'
+      type: Bool
+      default: false
+      description: 'Enable survival-specific ROC methods (requires time-to-event data)'
+
+    - name: harrellCIndex
+      title: "Harrell's C-Index"
+      type: Bool
+      default: false
+      description: "Calculate Harrell's concordance index for time-to-event outcomes"
+
+    - name: unoCStatistic
+      title: "Uno's C-Statistic"
+      type: Bool
+      default: false
+      description: "Calculate Uno's C-statistic (more robust to censoring)"
+
+    - name: incidentDynamic
+      title: 'Incident/Dynamic AUC'
+      type: Bool
+      default: false
+      description: 'Calculate incident/dynamic AUC (sensitivity for events at specific time)'
+
+    - name: cumulativeDynamic
+      title: 'Cumulative/Dynamic AUC'
+      type: Bool
+      default: false
+      description: 'Calculate cumulative/dynamic AUC (sensitivity for events by specific time)'
+
+    - name: competingRisksConcordance
+      title: 'Competing Risks Concordance'
+      type: Bool
+      default: false
+      description: 'Calculate cause-specific concordance for competing risks'
+
+    # Clinical Prediction Model Validation
+    - name: internalValidation
+      title: 'Internal Validation'
+      type: Bool
+      default: false
+      description: 'Perform internal validation using cross-validation or bootstrap'
+
+    - name: validationMethod
+      title: 'Validation Method'
+      type: List
+      options:
+          - title: 'Bootstrap Validation'
+            name: bootstrap
+          - title: 'Cross-Validation'
+            name: cv
+          - title: 'Both Methods'
+            name: both
+      default: bootstrap
+      description: 'Method for internal validation'
+
+    - name: optimismCorrection
+      title: 'Optimism Correction'
+      type: Bool
+      default: true
+      description: 'Apply optimism correction to performance metrics'
+
+    - name: externalValidation
+      title: 'External Validation Framework'
+      type: Bool
+      default: false
+      description: 'Enable external validation reporting framework'
+
+    - name: decisionImpactCurves
+      title: 'Decision Impact Curves'
+      type: Bool
+      default: false
+      description: 'Plot decision impact curves showing clinical consequences'
+
+    - name: netBenefitRegression
+      title: 'Net Benefit Regression'
+      type: Bool
+      default: false
+      description: 'Model net benefit as function of threshold probabilities'
+
+    - name: modelUpdating
+      title: 'Model Updating Analysis'
+      type: Bool
+      default: false
+      description: 'Analyze need for model recalibration or updating'
+
+    - name: transportability
+      title: 'Transportability Analysis'
+      type: Bool
+      default: false
+      description: 'Assess model transportability across populations'
 
 # Advanced analyses removed - can be added in future versions if needed
     # - name: effectSizeAnalysis
