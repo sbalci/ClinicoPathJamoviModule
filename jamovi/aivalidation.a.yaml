@@ -1,31 +1,28 @@
 ---
 name: aivalidation
-title: AI Model Validation with Cross-Validation
-menuGroup: meddecideT
+title: AI Model Validation
+menuGroup: meddecideT2
 menuSubgroup: AI & Machine Learning
-menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
+menuSubtitle: AI Model Performance and Comparison
 version: '0.0.32'
 jas: '1.2'
 
 description:
     main: >
-        Comprehensive validation of AI models and diagnostic tests using cross-validation,
-        model selection, and advanced performance metrics. Designed for AI diagnostic research
-        including comparison of AI vs human performance with statistical significance testing.
-        
+        Simplified AI model validation tool for comparing diagnostic performance.
+        Calculates AUC, sensitivity, and specificity for predictor variables and
+        performs statistical comparison using DeLong test.
+
     R:
         dontrun: true
         usage: |
             data('medical_ai_data', package='ClinicoPath')
-            
-            aivalidation(data = medical_ai_data, 
+
+            aivalidation(data = medical_ai_data,
                         predictorVars = c('AI_score', 'human_score', 'biomarker1'),
                         outcomeVar = 'diagnosis',
                         positiveLevel = 'positive',
-                        crossValidation = '10-fold',
-                        modelSelection = 'none',
-                        compareModels = TRUE,
-                        delongTest = TRUE)
+                        compareModels = TRUE)
 
 options:
     - name: data
@@ -40,8 +37,8 @@ options:
       permitted: [numeric]
       description:
           R: >
-            a vector of strings naming the predictor variables (AI scores, human scores, 
-            biomarkers, etc.) from `data`
+            a vector of strings naming the predictor variables (AI scores, human scores,
+            biomarkers, etc.) from `data`. Limited to first 5 for pairwise comparisons.
 
     - name: outcomeVar
       title: Outcome Variable
@@ -60,49 +57,79 @@ options:
           R: >
             the level of the outcome variable which represents the positive case
 
-    - name: referencePredictor
-      title: Reference Predictor
-      type: Variable
-      suggested: [continuous]
-      permitted: [numeric]
+    - name: compareModels
+      title: Compare Models
+      type: Bool
+      default: false
       description:
           R: >
-            reference predictor for model comparisons (typically AI model or main biomarker)
+            perform statistical comparison between models using DeLong test for AUC comparison
 
-    # Cross-Validation Options
+    # Additional Performance Metrics
+    - name: youdensJ
+      title: Youden's J Statistic
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate and display Youden's J statistic (Sensitivity + Specificity - 1)
+
+    - name: matthewsCC
+      title: Matthews Correlation Coefficient
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate and display Matthews Correlation Coefficient (MCC)
+
+    # Bootstrap Resampling
+    - name: bootstrapCI
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            use bootstrap resampling for confidence intervals (more robust for small samples)
+
+    - name: nBootstrap
+      title: Bootstrap Iterations
+      type: Integer
+      min: 100
+      max: 5000
+      default: 1000
+      description:
+          R: >
+            number of bootstrap iterations (higher values are more accurate but slower)
+
+    # Visualization
+    - name: rocPlot
+      title: ROC Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            generate ROC curves for all predictor variables
+
+    # Cross-Validation
     - name: crossValidation
       title: Cross-Validation Method
       type: List
       options:
+        - name: 'none'
+          title: No Cross-Validation
         - name: '5-fold'
           title: 5-fold Cross-Validation
         - name: '10-fold'
           title: 10-fold Cross-Validation
-        - name: 'LOO'
-          title: Leave-One-Out
-        - name: 'repeated'
-          title: Repeated Cross-Validation
-        - name: 'none'
-          title: No Cross-Validation
       default: 'none'
       description:
           R: >
-            cross-validation method for model validation
-
-    - name: nRepeats
-      title: Number of Repeats
-      type: Integer
-      min: 1
-      max: 1000
-      default: 10
-      description:
-          R: >
-            number of repetitions for repeated cross-validation
+            cross-validation method for model validation (simplified to avoid resource limits)
 
     - name: stratified
-      title: Stratified Cross-Validation
+      title: Stratified Sampling
       type: Bool
-      default: false
+      default: true
       description:
           R: >
             maintain outcome variable proportions across folds
@@ -114,259 +141,16 @@ options:
       default: 42
       description:
           R: >
-            random seed for reproducible results
+            random seed for reproducible cross-validation results
 
-    # # Model Selection Options
-    - name: modelSelection
-      title: Model Selection Method
-      type: List
-      options:
-        - name: 'none'
-          title: No Model Selection
-        - name: 'AIC'
-          title: AIC Stepwise Selection
-        - name: 'BIC'
-          title: BIC Stepwise Selection
-        - name: 'forward'
-          title: Forward Selection
-        - name: 'backward'
-          title: Backward Selection
-        - name: 'lasso'
-          title: LASSO Regularization
-        - name: 'ridge'
-          title: Ridge Regression
-        - name: 'elastic'
-          title: Elastic Net
-      default: 'none'
-      description:
-          R: >
-            method for automatic model selection and variable importance
-
-    # - name: selectionDirection
-    #   title: Selection Direction
-    #   type: List
-    #   options:
-    #     - name: 'both'
-    #       title: Bidirectional
-    #     - name: 'forward'
-    #       title: Forward
-    #     - name: 'backward'
-    #       title: Backward
-    #   default: 'both'
-    #   description:
-    #       R: >
-    #         direction for stepwise model selection
-
-    # Statistical Tests
-    - name: compareModels
-      title: Compare Models
-      type: Bool
-      default: false
-      description:
-          R: >
-            perform statistical comparison between models
-
-    - name: delongTest
-      title: DeLong Test
-      type: Bool
-      default: false
-      description:
-          R: >
-            perform DeLong test for comparing AUC values
-
-    - name: mcnemarTest
-      title: McNemar's Test
-      type: Bool
-      default: false
-      description:
-          R: >
-            perform McNemar's test for paired binary predictions
-
-    - name: calibrationTest
-      title: Calibration Test
-      type: Bool
-      default: false
-      description:
-          R: >
-            perform Hosmer-Lemeshow calibration test
-
-    # Advanced Metrics
-    - name: calculateNRI
-      title: Net Reclassification Index
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Net Reclassification Index with confidence intervals
-
-    - name: calculateIDI
-      title: Integrated Discrimination Index
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Integrated Discrimination Index with confidence intervals
-
-    - name: youdensJ
-      title: Youden's J Statistic
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Youden's J statistic for optimal cutoff determination
-
-    - name: matthewsCC
-      title: Matthews Correlation Coefficient (MCC)
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Matthews Correlation Coefficient, a balanced measure for binary classification
-            that accounts for all four confusion matrix categories. Especially useful for imbalanced datasets
-            (e.g., rare events like mitosis detection). MCC ranges from -1 to +1 where +1 represents
-            perfect prediction, 0 represents random prediction, and -1 represents total disagreement
-
-    # Calibration Metrics
-    - name: expectedCalibrationError
-      title: Expected Calibration Error (ECE)
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Expected Calibration Error to assess reliability of predicted probabilities.
-            ECE measures the difference between predicted probabilities and actual outcomes across
-            probability bins. Essential for AI models to ensure predicted probabilities are well-calibrated.
-            Lower ECE values indicate better calibration (perfect calibration = 0)
-
-    - name: eceBins
-      title: Number of ECE Bins
-      type: Integer
-      min: 5
-      max: 20
-      default: 10
-      description:
-          R: >
-            number of bins for Expected Calibration Error calculation. Standard is 10 bins.
-            More bins provide finer granularity but require more data
-
-    - name: maxCalibrationError
-      title: Maximum Calibration Error (MCE)
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Maximum Calibration Error (worst-case calibration error across all bins).
-            MCE identifies the bin with the largest deviation between predicted and actual outcomes
-
-    - name: reliabilityDiagram
-      title: Reliability Diagram
-      type: Bool
-      default: false
-      description:
-          R: >
-            display reliability diagram showing predicted probabilities vs observed frequencies.
-            Perfect calibration appears as a diagonal line. Useful for visualizing calibration quality
-
-    - name: bootstrapCI
-      title: Bootstrap Confidence Intervals
-      type: Bool
-      default: false
-      description:
-          R: >
-            use bootstrap methods for confidence interval estimation
-
-    - name: nBootstrap
-      title: Bootstrap Iterations
-      type: Integer
-      min: 100
-      max: 10000
-      default: 1000
-      description:
-          R: >
-            number of bootstrap iterations for confidence intervals
-
-    # Output Options
-    - name: showModelSelection
-      title: Show Model Selection Results
-      type: Bool
-      default: false
-      description:
-          R: >
-            display model selection process and variable importance
-
-    - name: showCalibration
-      title: Show Calibration Analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            display calibration plots and statistics
-
-    - name: showCrossValidation
-      title: Show Cross-Validation Details
-      type: Bool
-      default: false
-      description:
-          R: >
-            display detailed cross-validation results
-
-    - name: showComparison
-      title: Show Model Comparison
-      type: Bool
-      default: false
-      description:
-          R: >
-            display statistical comparison between models
-
-    # Plot Options
-    - name: rocPlot
-      title: ROC Curves
-      type: Bool
-      default: false
-      description:
-          R: >
-            generate ROC curves with cross-validation confidence bands
-
-    - name: calibrationPlot
-      title: Calibration Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            generate calibration plots showing observed vs predicted probabilities
-
-    - name: comparisonPlot
-      title: Model Comparison Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            generate forest plot comparing model performance
-
-    - name: cvPerformancePlot
-      title: Cross-Validation Performance
-      type: Bool
-      default: false
-      description:
-          R: >
-            generate plots showing cross-validation performance across folds
-
-    - name: variableImportancePlot
-      title: Variable Importance Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            generate variable importance plot from model selection
-
-    # Report Options
+    # Help & Documentation
     - name: showExplanations
       title: Show Explanations
       type: Bool
       default: false
       description:
           R: >
-            show explanations for methods and interpretations
+            show detailed methodology explanations
 
     - name: showSummaries
       title: Show Summaries
@@ -374,15 +158,227 @@ options:
       default: false
       description:
           R: >
-            show summary interpretations of results
+            show interpretation summaries of results
 
-    - name: confidenceLevel
-      title: Confidence Level
-      type: Number
-      min: 0.5
-      max: 0.999
-      default: 0.95
-      description:
-          R: >
-            confidence level for confidence intervals
+
+# ============================================================================
+# ARCHIVED OPTIONS - For Future Implementation
+# ============================================================================
+#
+# The following options were removed to simplify the backend and avoid
+# resource limit errors. They can be re-added as features are re-implemented.
+#
+# REFERENCE PREDICTOR (for NRI/IDI):
+#    - name: referencePredictor
+#      title: Reference Predictor
+#      type: Variable
+#      suggested: [continuous]
+#      permitted: [numeric]
+#      description:
+#          R: reference predictor for model comparisons
+#
+# CROSS-VALIDATION:
+#    - name: crossValidation
+#      title: Cross-Validation Method
+#      type: List
+#      options:
+#        - name: '5-fold'
+#          title: 5-fold Cross-Validation
+#        - name: '10-fold'
+#          title: 10-fold Cross-Validation
+#        - name: 'LOO'
+#          title: Leave-One-Out
+#        - name: 'repeated'
+#          title: Repeated Cross-Validation
+#        - name: 'none'
+#          title: No Cross-Validation
+#      default: 'none'
+#      description:
+#          R: cross-validation method for model validation
+#
+#    - name: nRepeats
+#      title: Number of Repeats
+#      type: Integer
+#      min: 1
+#      max: 1000
+#      default: 10
+#      description:
+#          R: number of repetitions for repeated cross-validation
+#
+#    - name: stratified
+#      title: Stratified Cross-Validation
+#      type: Bool
+#      default: false
+#      description:
+#          R: maintain outcome variable proportions across folds
+#
+#    - name: randomSeed
+#      title: Random Seed
+#      type: Integer
+#      min: 1
+#      default: 42
+#      description:
+#          R: random seed for reproducible results
+#
+# MODEL SELECTION:
+#    - name: modelSelection
+#      title: Model Selection Method
+#      type: List
+#      options:
+#        - name: 'none'
+#          title: No Model Selection
+#        - name: 'AIC'
+#          title: AIC Stepwise Selection
+#        - name: 'BIC'
+#          title: BIC Stepwise Selection
+#        - name: 'forward'
+#          title: Forward Selection
+#        - name: 'backward'
+#          title: Backward Selection
+#        - name: 'lasso'
+#          title: LASSO Regularization
+#        - name: 'ridge'
+#          title: Ridge Regression
+#        - name: 'elastic'
+#          title: Elastic Net
+#      default: 'none'
+#      description:
+#          R: method for automatic model selection
+#
+# STATISTICAL TESTS:
+#    - name: delongTest
+#      title: DeLong Test
+#      type: Bool
+#      default: false
+#      description:
+#          R: perform DeLong test for comparing AUC values
+#
+#    - name: mcnemarTest
+#      title: McNemar's Test
+#      type: Bool
+#      default: false
+#      description:
+#          R: perform McNemar's test for paired binary predictions
+#
+#    - name: calibrationTest
+#      title: Calibration Test
+#      type: Bool
+#      default: false
+#      description:
+#          R: perform Hosmer-Lemeshow calibration test
+#
+# PERFORMANCE METRICS:
+#    - name: calculateNRI
+#      title: Net Reclassification Index
+#      type: Bool
+#      default: false
+#      description:
+#          R: calculate Net Reclassification Index
+#
+#    - name: calculateIDI
+#      title: Integrated Discrimination Index
+#      type: Bool
+#      default: false
+#      description:
+#          R: calculate Integrated Discrimination Index
+#
+#    - name: youdensJ
+#      title: Youden's J Statistic
+#      type: Bool
+#      default: false
+#      description:
+#          R: calculate Youden's J statistic
+#
+#    - name: matthewsCC
+#      title: Matthews Correlation Coefficient
+#      type: Bool
+#      default: false
+#      description:
+#          R: calculate Matthews Correlation Coefficient
+#
+# BOOTSTRAP:
+#    - name: bootstrapCI
+#      title: Bootstrap Confidence Intervals
+#      type: Bool
+#      default: false
+#      description:
+#          R: use bootstrap methods for confidence intervals
+#
+#    - name: nBootstrap
+#      title: Bootstrap Iterations
+#      type: Integer
+#      min: 100
+#      max: 10000
+#      default: 1000
+#      description:
+#          R: number of bootstrap iterations
+#
+#    - name: confidenceLevel
+#      title: Confidence Level
+#      type: Number
+#      min: 0.5
+#      max: 0.999
+#      default: 0.95
+#      description:
+#          R: confidence level for confidence intervals
+#
+# DISPLAY OPTIONS:
+#    - name: showModelSelection
+#      title: Show Model Selection Results
+#      type: Bool
+#      default: false
+#
+#    - name: showCalibration
+#      title: Show Calibration Analysis
+#      type: Bool
+#      default: false
+#
+#    - name: showCrossValidation
+#      title: Show Cross-Validation Details
+#      type: Bool
+#      default: false
+#
+#    - name: showComparison
+#      title: Show Model Comparison
+#      type: Bool
+#      default: false
+#
+#    - name: showExplanations
+#      title: Show Explanations
+#      type: Bool
+#      default: false
+#
+#    - name: showSummaries
+#      title: Show Summaries
+#      type: Bool
+#      default: false
+#
+# PLOT OPTIONS:
+#    - name: rocPlot
+#      title: ROC Curves
+#      type: Bool
+#      default: false
+#
+#    - name: calibrationPlot
+#      title: Calibration Plot
+#      type: Bool
+#      default: false
+#
+#    - name: comparisonPlot
+#      title: Model Comparison Plot
+#      type: Bool
+#      default: false
+#
+#    - name: cvPerformancePlot
+#      title: Cross-Validation Performance
+#      type: Bool
+#      default: false
+#
+#    - name: variableImportancePlot
+#      title: Variable Importance Plot
+#      type: Bool
+#      default: false
+#
+# See git history for full option implementations.
+# ============================================================================
 ...

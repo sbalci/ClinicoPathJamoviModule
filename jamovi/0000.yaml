@@ -3478,7 +3478,7 @@ analyses:
     name: idi
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Performance Metrics
     menuTitle: Integrated Discrimination Improvement (IDI)
     menuSubtitle: Model improvement assessment through discrimination analysis
@@ -3522,7 +3522,7 @@ analyses:
     name: netreclassification
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Performance Metrics
     menuTitle: Net Reclassification Improvement (NRI)
     menuSubtitle: Advanced model improvement assessment with reclassification analysis
@@ -4105,19 +4105,18 @@ analyses:
       assumptions. RMST represents the area under the survival curve up to time
       tau and can be compared between groups or modeled with covariates using
       regression techniques.
-  - title: AI Model Validation with Cross-Validation
+  - title: AI Model Validation
     name: aivalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: AI & Machine Learning
-    menuTitle: AI Model Validation with Cross-Validation
-    menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
+    menuTitle: AI Model Validation
+    menuSubtitle: AI Model Performance and Comparison
     description: >
-      Comprehensive validation of AI models and diagnostic tests using
-      cross-validation, model selection, and advanced performance metrics.
-      Designed for AI diagnostic research including comparison of AI vs human
-      performance with statistical significance testing.
+      Simplified AI model validation tool for comparing diagnostic performance.
+      Calculates AUC, sensitivity, and specificity for predictor variables and
+      performs statistical comparison using DeLong test.
   - title: Treatment Switching Analysis
     name: treatmentswitching
     ns: ClinicoPath
@@ -5121,7 +5120,7 @@ analyses:
     name: trichotomousroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC Analysis
     menuTitle: Trichotomous (Three-way) ROC Analysis
     menuSubtitle: Three-category diagnostic test evaluation with indeterminate zone
@@ -5167,7 +5166,7 @@ analyses:
     name: segmentationmetrics
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: AI & Machine Learning
     menuTitle: Segmentation Metrics (Dice, IoU, Hausdorff)
     menuSubtitle: Image segmentation validation for digital pathology AI
@@ -5192,7 +5191,7 @@ analyses:
     name: ordinalroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC Analysis
     menuTitle: Ordinal ROC Analysis
     menuSubtitle: ROC curves for ordered categorical outcomes (tumor grading, staging)
@@ -5263,7 +5262,7 @@ analyses:
     name: roc2d
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC Analysis
     menuTitle: Two-Dimensional ROC Analysis
     menuSubtitle: Joint ROC for dual biomarker combinations
@@ -5286,7 +5285,7 @@ analyses:
     name: rocreg
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC Analysis
     menuTitle: ROC Regression (Covariate-Adjusted ROC)
     menuSubtitle: Covariate-adjusted ROC curves for confounder control
@@ -5335,7 +5334,7 @@ analyses:
     name: vusanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Multi-Class ROC Analysis
     menuTitle: Volume Under ROC Surface (VUS) Analysis
     menuSubtitle: VUS for 3+ class diagnostic accuracy
@@ -5361,7 +5360,7 @@ analyses:
     name: entropyanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Medical Decision Analysis
     menuTitle: Entropy Analysis
     menuSubtitle: AI uncertainty quantification and information metrics
@@ -5389,7 +5388,7 @@ analyses:
     name: multiclassroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Medical Decision Analysis
     menuTitle: Multi-class ROC Analysis
     menuSubtitle: ROC curves for >2 diagnostic classes
@@ -5405,7 +5404,7 @@ analyses:
     name: prauc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC Analysis
     menuTitle: Precision-Recall Analysis
     menuSubtitle: PR curves for imbalanced datasets
@@ -5427,7 +5426,7 @@ analyses:
     name: timedependentdca
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Medical Decision Analysis
     menuTitle: Time-Dependent DCA
     menuSubtitle: Net benefit for survival and longitudinal data

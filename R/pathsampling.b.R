@@ -284,6 +284,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             targetConf <- self$options$targetConfidence
             maxSamp <- self$options$maxSamples
             nBoot <- self$options$bootstrapIterations
+            analysisContext <- if (is.null(self$options$analysisContext)) "general" else self$options$analysisContext
 
             # Prepare recommendation collector to summarize minimum samples for target confidence
             recommendations <- list()
@@ -767,10 +768,13 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Determine which estimation method to use
                 methodChoice <- self$options$estimationMethod
+                contextSupportsEmpirical <- analysisContext %in% c("general", "lymphnode", "omentum")
+                empiricalEligible <- !is.null(positiveCountData) && nDetected > 0 && contextSupportsEmpirical
+                autoEmpirical <- (methodChoice == "auto") && empiricalEligible
+                forceGeometricNote <- FALSE
 
                 # Method 1: Empirical Proportion (preferred if positiveCount available)
-                if ((methodChoice == "auto" || methodChoice == "empirical") &&
-                    !is.null(positiveCountData) && nDetected > 0) {
+                if ((methodChoice == "empirical" && !is.null(positiveCountData) && nDetected > 0) || autoEmpirical) {
 
                     # Use empirical proportion: sum of positive samples / sum of total samples (positive cases only)
                     positive_idx <- !is.na(firstDetectionData)
@@ -784,7 +788,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 # Method 2: Geometric MLE (fallback or explicit choice)
-                if ((is.na(pEstimate) || methodChoice == "geometric") && nDetected > 0) {
+                if ((is.na(pEstimate) || methodChoice == "geometric" || (!contextSupportsEmpirical && methodChoice == "auto" && !is.null(positiveCountData))) && nDetected > 0) {
 
                     # Use geometric MLE: q = 1 / mean(first detection position)
                     positive_first <- firstDetectionData[!is.na(firstDetectionData)]
@@ -793,7 +797,12 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         mean_first_detection <- mean(positive_first, na.rm = TRUE)
                         if (mean_first_detection > 0) {
                             pEstimate <- 1 / mean_first_detection
-                            estimationMethod <- "Geometric MLE (first detection only)"
+                            if (methodChoice == "auto" && !contextSupportsEmpirical && !is.null(positiveCountData)) {
+                                forceGeometricNote <- TRUE
+                                estimationMethod <- "Geometric MLE (auto: empirical disabled for dependent sampling)"
+                            } else {
+                                estimationMethod <- "Geometric MLE (first detection only)"
+                            }
                         }
                     }
                 }
@@ -811,7 +820,6 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 binomialText <- self$results$binomialText
 
                 # Context-specific warning for inappropriate use of binomial model
-                analysisContext <- self$options$analysisContext
                 binomialWarning <- ""
 
                 if (analysisContext == "tumor") {
@@ -916,6 +924,19 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ))
                 if (self$options$showBinomialModel) {
                     binomialText$setContent(html)
+                }
+
+                # Surface estimator choice in the data summary so downstream tests/users can verify the assumption used
+                dataInfo <- self$results$dataInfo
+                dataInfo$addRow(rowKey="binomial_method", values=list(
+                    measure = "Binomial estimator",
+                    value = estimationMethod
+                ))
+                if (forceGeometricNote) {
+                    dataInfo$addRow(rowKey="binomial_method_note", values=list(
+                        measure = "Binomial note",
+                        value = "Empirical estimator disabled for dependent sampling contexts"
+                    ))
                 }
 
                 # Calculate detection probabilities for different sample sizes
@@ -2464,6 +2485,54 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     successStatesData <- successStatesData[!invalidCases]
                 }
 
+                betaBinomNotes <- character()
+                betaProceed <- TRUE
+
+                betaValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
+                if (sum(betaValid) == 0) {
+                    betaBinomialText <- self$results$betaBinomialText
+                    betaBinomialTable <- self$results$betaBinomialTable
+                    betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                    if (self$options$showBetaBinomial) {
+                        betaBinomialText$setContent("<p>No valid cases were available for the beta-binomial model (missing total population or success counts).</p>")
+                    }
+                    betaBinomialTable$clearRows()
+                    betaBinomialRecommendTable$clearRows()
+                    betaProceed <- FALSE
+                } else {
+                    totalPopulationData <- totalPopulationData[betaValid]
+                    successStatesData <- successStatesData[betaValid]
+
+                    invalidBeta <- (totalPopulationData <= 0) | (successStatesData < 0) | (successStatesData > totalPopulationData)
+                    if (any(invalidBeta, na.rm = TRUE)) {
+                        removed <- sum(invalidBeta, na.rm = TRUE)
+                        betaBinomNotes <- c(betaBinomNotes, sprintf("%d cases removed (invalid population/success counts)", removed))
+                        totalPopulationData <- totalPopulationData[!invalidBeta]
+                        successStatesData <- successStatesData[!invalidBeta]
+                    }
+
+                    if (length(totalPopulationData) == 0) {
+                        betaBinomialText <- self$results$betaBinomialText
+                        betaBinomialTable <- self$results$betaBinomialTable
+                        betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                        if (self$options$showBetaBinomial) {
+                            betaBinomialText$setContent("<p>All cases were removed after validating total population and success counts.</p>")
+                        }
+                        betaBinomialTable$clearRows()
+                        betaBinomialRecommendTable$clearRows()
+                        betaProceed <- FALSE
+                    }
+                }
+
+                if (!betaProceed) {
+                    next
+                }
+
+                target <- self$options$targetDetections
+                if (is.null(target) || is.na(target) || target < 1) {
+                    target <- 1
+                }
+
                 # Estimate alpha and beta with safeguards against invalid variance patterns
                 p <- successStatesData / totalPopulationData
                 p <- p[is.finite(p)]
@@ -2473,7 +2542,6 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 alpha <- NA_real_
                 beta <- NA_real_
-                betaBinomNotes <- character()
 
                 if (length(p) < 2 || is.na(mu) || is.na(var)) {
                     betaBinomNotes <- c(betaBinomNotes, "Insufficient variability; defaulting to Beta(1,1)")
