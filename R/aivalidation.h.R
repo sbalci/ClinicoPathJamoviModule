@@ -905,6 +905,7 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('medical_ai_data', package='ClinicoPath')
 #'
 #' aivalidation(data = medical_ai_data,
@@ -915,7 +916,7 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'             modelSelection = 'AIC',
 #'             compareModels = TRUE,
 #'             delongTest = TRUE)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param predictorVars a vector of strings naming the predictor variables (AI
 #'   scores, human scores,  biomarkers, etc.) from \code{data}

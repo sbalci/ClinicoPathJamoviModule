@@ -55,23 +55,23 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
     inherit = aivalidationBase,
     
     private = list(
-      # .data = NULL,
-      # .results_cache = list(),
-      # .cv_results = NULL,
-      # .model_results = NULL,
-      
-      # .init = function() {
-      #   # Initialize results tables only
-      #   # Note: Do NOT call .setupDynamicUI() here as self$data may not be available yet
-      #   # This was causing jamovi to crash with "resource limit" errors
-      #   private$.initializeTables()
+      .data = NULL,
+      .results_cache = list(),
+      .cv_results = NULL,
+      .model_results = NULL,
 
-      #   if (private$.hasMinimalInputs()) {
-      #     self$results$todo$setVisible(FALSE)
-      #   } else {
-      #     private$.showWelcomeMessage()
-      #   }
-      # },
+      .init = function() {
+        # Initialize results tables only
+        # Note: Do NOT call .setupDynamicUI() here as self$data may not be available yet
+        # This was causing jamovi to crash with "resource limit" errors
+        private$.initializeTables()
+
+        if (private$.hasMinimalInputs()) {
+          self$results$todo$setVisible(FALSE)
+        } else {
+          private$.showWelcomeMessage()
+        }
+      },
       
       .hasMinimalInputs = function() {
         return(!is.null(self$options$outcomeVar) && 
@@ -188,66 +188,22 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
       },
       
       .run = function() {
-        # # Main analysis workflow
-        # if (!private$.hasMinimalInputs()) {
-        #   return()
-        # }
-        
-        # tryCatch({
-          # Step 1: Validate and prepare data
-          private$.validateInputs()
-          private$.data <- private$.prepareData()
-          
-          # Step 2: Perform cross-validation analysis
-          # if (self$options$crossValidation != "none") {
-          #   private$.cv_results <- private$.performCrossValidation()
-          #   private$.fillCVPerformanceTable()
-          #   private$.fillCVFoldTable()
-          # }
-          
-          # Step 3: Model selection if requested
-          # if (self$options$modelSelection != "none") {
-          #   private$.model_results <- private$.performModelSelection()
-          #   if (self$options$showModelSelection) {
-          #     private$.fillModelSelectionTable()
-          #   }
-          #   if (self$options$variableImportancePlot) {
-          #     private$.fillVariableImportanceTable()
-          #   }
-          # }
-          
-          # Step 4: Model comparison and statistical tests
-          # if (self$options$compareModels && length(self$options$predictorVars) >= 2) {
-          #   private$.performModelComparison()
-          # }
-          
-          # Step 5: Advanced metrics (NRI/IDI)
-          # if ((self$options$calculateNRI || self$options$calculateIDI) && 
-          #     !is.null(self$options$referencePredictor)) {
-          #   private$.calculateAdvancedMetrics()
-          # }
-          
-          # Step 6: Calibration analysis
-          # if (self$options$calibrationTest) {
-          #   private$.performCalibrationAnalysis()
-          # }
-          
-          # Step 7: Generate plots
-          # private$.generateAllPlots()
-          
-          # Step 8: Generate explanations and summaries
-          # if (self$options$showExplanations) {
-          #   private$.generateExplanations()
-          # }
-          # if (self$options$showSummaries) {
-          #   private$.generateSummaries()
-          # }
-          
-        # }, error = function(e) {
-        #   stop(paste("Analysis failed:", conditionMessage(e), 
-        #             "Please check your data and settings."))
-        # }
-        # )
+        # Main analysis workflow - MINIMAL VERSION FOR TESTING
+        if (!private$.hasMinimalInputs()) {
+          return()
+        }
+
+        # Minimal safe implementation - just show todo message
+        self$results$todo$setContent("
+          <h3>AI Model Validation</h3>
+          <p><strong>Function loaded successfully.</strong></p>
+          <p>This is a minimal test version to verify the module loads without crashing.</p>
+          <p>Full analysis implementation is disabled for testing purposes.</p>
+        ")
+        self$results$todo$setVisible(TRUE)
+
+        # Full implementation disabled for testing
+        # Uncomment gradually to find the problematic section
       },
       
       .validateInputs = function() {
