@@ -61,10 +61,9 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
       .model_results = NULL,
 
       .init = function() {
-        # Initialize results tables only
-        # Note: Do NOT call .setupDynamicUI() here as self$data may not be available yet
-        # This was causing jamovi to crash with "resource limit" errors
-        private$.initializeTables()
+        # Note: Do NOT call .setupDynamicUI() or .initializeTables() here 
+        # as self$data may not be available yet. 
+        # This was causing jamovi to crash with "resource limit" errors.
 
         if (private$.hasMinimalInputs()) {
           self$results$todo$setVisible(FALSE)
@@ -114,6 +113,18 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
         "
         
         self$results$todo$setContent(welcome_text)
+        self$results$todo$setVisible(TRUE)
+      },
+
+      .showModelSelectionDisabledMessage = function() {
+        message_text <- "
+        <h3>Model Selection Temporarily Disabled</h3>
+        <p>Automatic model selection methods (AIC/BIC/LASSO/Ridge) are temporarily disabled to prevent jamovi resource-limit crashes.</p>
+        <p>Please set <strong>Model Selection</strong> to <code>None</code> to run the analysis.</p>
+        <p>This safeguard only affects the development build; cross-validation, comparisons, and calibration continue to work normally.</p>
+        "
+
+        self$results$todo$setContent(message_text)
         self$results$todo$setVisible(TRUE)
       },
       
@@ -186,24 +197,164 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
           # Update reference predictor options dynamically
         }
       },
+
+      .summarizeFoldPerformance = function(actual, pred_probs) {
+        # Safely compute fold-level performance metrics
+        n_cases <- sum(actual == 1, na.rm = TRUE)
+        n_controls <- sum(actual == 0, na.rm = TRUE)
+
+        summary <- list(
+          auc = NA_real_,
+          sensitivity = NA_real_,
+          specificity = NA_real_,
+          accuracy = NA_real_,
+          youdens_j = NA_real_,
+          mcc = NA_real_,
+          threshold = NA_real_,
+          n_cases = n_cases,
+          n_controls = n_controls,
+          predictions = pred_probs,
+          actual = actual
+        )
+
+        if (!requireNamespace("pROC", quietly = TRUE)) {
+          return(summary)
+        }
+
+        if (length(actual) == 0 || length(unique(actual)) < 2) {
+          return(summary)
+        }
+
+        roc_obj <- tryCatch(
+          pROC::roc(actual, pred_probs, quiet = TRUE),
+          error = function(e) NULL
+        )
+
+        if (is.null(roc_obj)) {
+          return(summary)
+        }
+
+        summary$auc <- as.numeric(pROC::auc(roc_obj))
+
+        if (self$options$youdensJ) {
+          coords_result <- tryCatch(
+            pROC::coords(roc_obj, "best", best.method = "youden"),
+            error = function(e) NULL
+          )
+          if (!is.null(coords_result)) {
+            summary$threshold <- coords_result$threshold
+            summary$sensitivity <- coords_result$sensitivity
+            summary$specificity <- coords_result$specificity
+          }
+        }
+
+        if (is.na(summary$threshold)) {
+          summary$threshold <- 0.5
+        }
+
+        if (is.na(summary$sensitivity) && n_cases > 0) {
+          summary$sensitivity <- sum(pred_probs >= summary$threshold & actual == 1) / n_cases
+        }
+
+        if (is.na(summary$specificity) && n_controls > 0) {
+          summary$specificity <- sum(pred_probs < summary$threshold & actual == 0) / n_controls
+        }
+
+        if (!is.na(summary$sensitivity) && !is.na(summary$specificity)) {
+          summary$youdens_j <- summary$sensitivity + summary$specificity - 1
+        }
+
+        pred_class <- ifelse(pred_probs >= summary$threshold, 1, 0)
+        summary$accuracy <- mean(pred_class == actual)
+
+        if (self$options$matthewsCC) {
+          tp <- sum(pred_class == 1 & actual == 1)
+          tn <- sum(pred_class == 0 & actual == 0)
+          fp <- sum(pred_class == 1 & actual == 0)
+          fn <- sum(pred_class == 0 & actual == 1)
+          denominator <- sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+          summary$mcc <- if (denominator > 0) (tp * tn - fp * fn) / denominator else 0
+        }
+
+        return(summary)
+      },
+
+      .buildFormula = function(lhs, rhs) {
+        rhs_text <- if (is.null(rhs) || rhs == "") "1" else rhs
+        stats::as.formula(paste(lhs, "~", rhs_text))
+      },
       
       .run = function() {
-        # Main analysis workflow - MINIMAL VERSION FOR TESTING
+        # Main analysis workflow
         if (!private$.hasMinimalInputs()) {
+          private$.showWelcomeMessage()
           return()
         }
 
-        # Minimal safe implementation - just show todo message
-        self$results$todo$setContent("
-          <h3>AI Model Validation</h3>
-          <p><strong>Function loaded successfully.</strong></p>
-          <p>This is a minimal test version to verify the module loads without crashing.</p>
-          <p>Full analysis implementation is disabled for testing purposes.</p>
-        ")
-        self$results$todo$setVisible(TRUE)
+        # Initialize tables and plots
+        private$.initializeTables()
+        self$results$todo$setVisible(FALSE)
 
-        # Full implementation disabled for testing
-        # Uncomment gradually to find the problematic section
+        tryCatch({
+          # Step 1: Validate and prepare data
+          private$.validateInputs()
+          private$.data <- private$.prepareData()
+
+          if (self$options$modelSelection != "none") {
+            jmvcore::Status$add(jmvcore::Status$WARNING, 
+                                "Computationally intensive model selection is enabled. Analysis may be slow.")
+          }
+
+          # Step 2: Perform cross-validation analysis
+          if (self$options$crossValidation != "none") {
+            private$.cv_results <- private$.performCrossValidation()
+            private$.fillCVPerformanceTable()
+            private$.fillCVFoldTable()
+          }
+
+          # Step 3: Model selection if requested
+          if (self$options$modelSelection != "none") {
+            private$.model_results <- private$.performModelSelection()
+            if (self$options$showModelSelection) {
+              private$.fillModelSelectionTable()
+            }
+            if (self$options$variableImportancePlot) {
+              private$.fillVariableImportanceTable()
+            }
+          }
+
+          # Step 4: Model comparison and statistical tests
+          if (self$options$compareModels && length(self$options$predictorVars) >= 2) {
+            private$.performModelComparison()
+          }
+
+          # Step 5: Advanced metrics (NRI/IDI)
+          if ((self$options$calculateNRI || self$options$calculateIDI) && 
+              !is.null(self$options$referencePredictor) &&
+              self$options$referencePredictor != "") {
+            private$.calculateAdvancedMetrics()
+          }
+
+          # Step 6: Calibration analysis
+          if (self$options$calibrationTest) {
+            private$.performCalibrationAnalysis()
+          }
+
+          # Step 7: Generate plots
+          private$.generateAllPlots()
+
+          # Step 8: Generate explanations and summaries
+          if (self$options$showExplanations) {
+            private$.generateExplanations()
+          }
+          if (self$options$showSummaries) {
+            private$.generateSummaries()
+          }
+
+        }, error = function(e) {
+          stop(paste("Analysis failed:", conditionMessage(e), 
+                    "Please check your data and settings."))
+        })
       },
       
       .validateInputs = function() {
@@ -388,70 +539,24 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
           test_data <- data[test_idx, ]
           
           # Fit logistic regression model
-          formula_str <- paste(outcome_var, "~", predictor)
-          model <- glm(formula_str, data = train_data, family = "binomial")
+          formula_obj <- private$.buildFormula(outcome_var, predictor)
+          model <- tryCatch(
+            glm(formula_obj, data = train_data, family = stats::binomial()),
+            error = function(err) {
+              stop(sprintf(
+                "Failed to fit model for predictor '%s' in %s: %s",
+                predictor, fold_name, conditionMessage(err)
+              ))
+            }
+          )
           
           # Make predictions
           pred_probs <- predict(model, test_data, type = "response")
           
-          # Calculate performance metrics
           actual <- as.numeric(test_data[[outcome_var]]) - 1  # Convert to 0/1
-          
-          # ROC analysis
-          if (requireNamespace("pROC", quietly = TRUE)) {
-            roc_obj <- pROC::roc(actual, pred_probs, quiet = TRUE)
-            auc_val <- as.numeric(pROC::auc(roc_obj))
-            
-            # Optimal threshold using Youden's J
-            if (self$options$youdensJ) {
-              coords_result <- pROC::coords(roc_obj, "best", best.method = "youden")
-              threshold <- coords_result$threshold
-              sensitivity <- coords_result$sensitivity
-              specificity <- coords_result$specificity
-              youdens_j <- sensitivity + specificity - 1
-            } else {
-              threshold <- 0.5
-              sensitivity <- sum(pred_probs >= threshold & actual == 1) / sum(actual == 1)
-              specificity <- sum(pred_probs < threshold & actual == 0) / sum(actual == 0)
-              youdens_j <- sensitivity + specificity - 1
-            }
-            
-            accuracy <- mean((pred_probs >= threshold) == actual)
-
-            # Calculate MCC if requested
-            mcc <- NULL
-            if (self$options$matthewsCC) {
-              # Calculate confusion matrix components
-              tp <- sum(pred_probs >= threshold & actual == 1)
-              tn <- sum(pred_probs < threshold & actual == 0)
-              fp <- sum(pred_probs >= threshold & actual == 0)
-              fn <- sum(pred_probs < threshold & actual == 1)
-
-              # Calculate MCC (Matthews Correlation Coefficient)
-              denominator <- sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
-              if (denominator > 0) {
-                mcc <- (tp * tn - fp * fn) / denominator
-              } else {
-                mcc <- 0  # Handle edge case where denominator is 0
-              }
-            }
-
-            fold_results[[fold_name]] <- list(
-              auc = auc_val,
-              sensitivity = sensitivity,
-              specificity = specificity,
-              accuracy = accuracy,
-              youdens_j = youdens_j,
-              mcc = mcc,
-              threshold = threshold,
-              n_cases = sum(actual == 1),
-              n_controls = sum(actual == 0),
-              predictions = pred_probs,
-              actual = actual
-            )
-          }
+          fold_results[[fold_name]] <- private$.summarizeFoldPerformance(actual, pred_probs)
         }
-        
+
         return(fold_results)
       },
       
@@ -470,69 +575,25 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
           test_data <- data[test_idx, ]
           
           # Perform model selection on training data
-          selected_model <- private$.performModelSelectionOnFold(train_data, outcome_var, predictors)
+          selected_model <- tryCatch(
+            private$.performModelSelectionOnFold(train_data, outcome_var, predictors),
+            error = function(err) {
+              stop(sprintf(
+                "Model selection failed in %s: %s",
+                fold_name, conditionMessage(err)
+              ))
+            }
+          )
           
           # Make predictions using selected model
           pred_probs <- predict(selected_model, test_data, type = "response")
           
-          # Calculate performance metrics (same as single predictor)
           actual <- as.numeric(test_data[[outcome_var]]) - 1
-          
-          if (requireNamespace("pROC", quietly = TRUE)) {
-            roc_obj <- pROC::roc(actual, pred_probs, quiet = TRUE)
-            auc_val <- as.numeric(pROC::auc(roc_obj))
-            
-            # Calculate other metrics...
-            if (self$options$youdensJ) {
-              coords_result <- pROC::coords(roc_obj, "best", best.method = "youden")
-              threshold <- coords_result$threshold
-              sensitivity <- coords_result$sensitivity
-              specificity <- coords_result$specificity
-              youdens_j <- sensitivity + specificity - 1
-            } else {
-              threshold <- 0.5
-              sensitivity <- sum(pred_probs >= threshold & actual == 1) / sum(actual == 1)
-              specificity <- sum(pred_probs < threshold & actual == 0) / sum(actual == 0)
-              youdens_j <- sensitivity + specificity - 1
-            }
-            
-            accuracy <- mean((pred_probs >= threshold) == actual)
-
-            # Calculate MCC if requested
-            mcc <- NULL
-            if (self$options$matthewsCC) {
-              # Calculate confusion matrix components
-              tp <- sum(pred_probs >= threshold & actual == 1)
-              tn <- sum(pred_probs < threshold & actual == 0)
-              fp <- sum(pred_probs >= threshold & actual == 0)
-              fn <- sum(pred_probs < threshold & actual == 1)
-
-              # Calculate MCC (Matthews Correlation Coefficient)
-              denominator <- sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
-              if (denominator > 0) {
-                mcc <- (tp * tn - fp * fn) / denominator
-              } else {
-                mcc <- 0  # Handle edge case where denominator is 0
-              }
-            }
-
-            fold_results[[fold_name]] <- list(
-              auc = auc_val,
-              sensitivity = sensitivity,
-              specificity = specificity,
-              accuracy = accuracy,
-              youdens_j = youdens_j,
-              mcc = mcc,
-              threshold = threshold,
-              n_cases = sum(actual == 1),
-              n_controls = sum(actual == 0),
-              predictions = pred_probs,
-              actual = actual,
-              selected_vars = names(selected_model$coefficients)[-1]  # Exclude intercept
-            )
-          }
+          fold_summary <- private$.summarizeFoldPerformance(actual, pred_probs)
+          fold_summary$selected_vars <- names(selected_model$coefficients)[-1]
+          fold_results[[fold_name]] <- fold_summary
         }
-        
+
         return(fold_results)
       },
       
@@ -550,32 +611,40 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
           return(private$.performElasticNet(train_data, outcome_var, predictors))
         } else {
           # Full model
-          formula_str <- paste(outcome_var, "~", paste(predictors, collapse = " + "))
-          return(glm(formula_str, data = train_data, family = "binomial"))
+          rhs <- paste(predictors, collapse = " + ")
+          formula_obj <- private$.buildFormula(outcome_var, rhs)
+          return(glm(formula_obj, data = train_data, family = stats::binomial()))
         }
       },
       
       .performStepwiseSelection = function(train_data, outcome_var, predictors) {
         # AIC/BIC stepwise selection
-        full_formula <- paste(outcome_var, "~", paste(predictors, collapse = " + "))
-        full_model <- glm(full_formula, data = train_data, family = "binomial")
-        
-        null_formula <- paste(outcome_var, "~ 1")
-        null_model <- glm(null_formula, data = train_data, family = "binomial")
+        rhs <- paste(predictors, collapse = " + ")
+        full_formula <- private$.buildFormula(outcome_var, rhs)
+        null_formula <- private$.buildFormula(outcome_var, "1")
         
         direction <- self$options$selectionDirection
         k_value <- ifelse(self$options$modelSelection == "BIC", log(nrow(train_data)), 2)
         
-        if (requireNamespace("MASS", quietly = TRUE)) {
-          selected_model <- MASS::stepAIC(null_model, 
-                                         scope = list(lower = null_model, upper = full_model),
-                                         direction = direction, 
-                                         k = k_value, 
-                                         trace = FALSE)
-          return(selected_model)
-        } else {
-          return(full_model)  # Fallback to full model
-        }
+        # Use a local environment for model fitting
+        local_env <- new.env()
+        local_env$train_data <- train_data
+        
+        full_model <- eval(bquote(glm(full_formula, data = train_data, family = stats::binomial())), envir = local_env)
+        null_model <- eval(bquote(glm(null_formula, data = train_data, family = stats::binomial())), envir = local_env)
+        
+        # Capture output to avoid printing to console
+        capture.output({
+          selected_model <- stats::step(
+            null_model,
+            scope = list(lower = null_formula, upper = full_formula),
+            direction = direction,
+            k = k_value,
+            trace = 0
+          )
+        })
+        
+        return(selected_model)
       },
       
       .performLassoSelection = function(train_data, outcome_var, predictors) {
@@ -591,17 +660,19 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
           # Convert to glm-like object for compatibility
           selected_vars <- predictors[which(as.vector(coef(lasso_model))[-1] != 0)]
           if (length(selected_vars) > 0) {
-            formula_str <- paste(outcome_var, "~", paste(selected_vars, collapse = " + "))
-            return(glm(formula_str, data = train_data, family = "binomial"))
+            rhs <- paste(selected_vars, collapse = " + ")
+            formula_obj <- private$.buildFormula(outcome_var, rhs)
+            return(glm(formula_obj, data = train_data, family = stats::binomial()))
           } else {
             # Return null model if no variables selected
-            null_formula <- paste(outcome_var, "~ 1")
-            return(glm(null_formula, data = train_data, family = "binomial"))
+            null_formula <- private$.buildFormula(outcome_var, "1")
+            return(glm(null_formula, data = train_data, family = stats::binomial()))
           }
         } else {
           # Fallback to full model
-          formula_str <- paste(outcome_var, "~", paste(predictors, collapse = " + "))
-          return(glm(formula_str, data = train_data, family = "binomial"))
+          rhs <- paste(predictors, collapse = " + ")
+          formula_obj <- private$.buildFormula(outcome_var, rhs)
+          return(glm(formula_obj, data = train_data, family = stats::binomial()))
         }
       },
       
@@ -616,11 +687,13 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
                                        alpha = 0, lambda = cv_ridge$lambda.min)
           
           # For ridge, typically keep all variables
-          formula_str <- paste(outcome_var, "~", paste(predictors, collapse = " + "))
-          return(glm(formula_str, data = train_data, family = "binomial"))
+          rhs <- paste(predictors, collapse = " + ")
+          formula_obj <- private$.buildFormula(outcome_var, rhs)
+          return(glm(formula_obj, data = train_data, family = stats::binomial()))
         } else {
-          formula_str <- paste(outcome_var, "~", paste(predictors, collapse = " + "))
-          return(glm(formula_str, data = train_data, family = "binomial"))
+          rhs <- paste(predictors, collapse = " + ")
+          formula_obj <- private$.buildFormula(outcome_var, rhs)
+          return(glm(formula_obj, data = train_data, family = stats::binomial()))
         }
       },
       
@@ -637,15 +710,17 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
           # Select non-zero coefficients
           selected_vars <- predictors[which(as.vector(coef(elastic_model))[-1] != 0)]
           if (length(selected_vars) > 0) {
-            formula_str <- paste(outcome_var, "~", paste(selected_vars, collapse = " + "))
-            return(glm(formula_str, data = train_data, family = "binomial"))
+            rhs <- paste(selected_vars, collapse = " + ")
+            formula_obj <- private$.buildFormula(outcome_var, rhs)
+            return(glm(formula_obj, data = train_data, family = stats::binomial()))
           } else {
-            null_formula <- paste(outcome_var, "~ 1")
-            return(glm(null_formula, data = train_data, family = "binomial"))
+            null_formula <- private$.buildFormula(outcome_var, "1")
+            return(glm(null_formula, data = train_data, family = stats::binomial()))
           }
         } else {
-          formula_str <- paste(outcome_var, "~", paste(predictors, collapse = " + "))
-          return(glm(formula_str, data = train_data, family = "binomial"))
+          rhs <- paste(predictors, collapse = " + ")
+          formula_obj <- private$.buildFormula(outcome_var, rhs)
+          return(glm(formula_obj, data = train_data, family = stats::binomial()))
         }
       },
       
@@ -830,8 +905,9 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
         outcome_var <- self$options$outcomeVar
         predictors <- self$options$predictorVars
         
-        full_formula <- paste(outcome_var, "~", paste(predictors, collapse = " + "))
-        full_model <- glm(full_formula, data = data, family = "binomial")
+        rhs <- paste(predictors, collapse = " + ")
+        full_formula <- private$.buildFormula(outcome_var, rhs)
+        full_model <- glm(full_formula, data = data, family = stats::binomial())
         
         table$addRow(rowKey = "full", values = list(
           model = "Full Model",
@@ -993,11 +1069,11 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
         
         for (pred in setdiff(predictors, ref_pred)) {
           # Build models
-          ref_formula <- paste(outcome_var, "~", ref_pred)
-          new_formula <- paste(outcome_var, "~", ref_pred, "+", pred)
+          ref_formula <- private$.buildFormula(outcome_var, ref_pred)
+          new_formula <- private$.buildFormula(outcome_var, paste(ref_pred, pred, sep = " + "))
           
-          ref_model <- glm(ref_formula, data = data, family = "binomial")
-          new_model <- glm(new_formula, data = data, family = "binomial")
+          ref_model <- glm(ref_formula, data = data, family = stats::binomial())
+          new_model <- glm(new_formula, data = data, family = stats::binomial())
           
           # Get predictions
           ref_probs <- predict(ref_model, type = "response")
@@ -1068,11 +1144,11 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
         
         for (pred in setdiff(predictors, ref_pred)) {
           # Build models
-          ref_formula <- paste(outcome_var, "~", ref_pred)
-          new_formula <- paste(outcome_var, "~", ref_pred, "+", pred)
+          ref_formula <- private$.buildFormula(outcome_var, ref_pred)
+          new_formula <- private$.buildFormula(outcome_var, paste(ref_pred, pred, sep = " + "))
           
-          ref_model <- glm(ref_formula, data = data, family = "binomial")
-          new_model <- glm(new_formula, data = data, family = "binomial")
+          ref_model <- glm(ref_formula, data = data, family = stats::binomial())
+          new_model <- glm(new_formula, data = data, family = stats::binomial())
           
           # Get predictions
           ref_probs <- predict(ref_model, type = "response")
@@ -1135,8 +1211,8 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
         
         for (pred in predictors) {
           # Fit logistic model
-          formula_str <- paste(outcome_var, "~", pred)
-          model <- glm(formula_str, data = data, family = "binomial")
+          formula_obj <- private$.buildFormula(outcome_var, pred)
+          model <- glm(formula_obj, data = data, family = stats::binomial())
           
           # Get predictions
           pred_probs <- predict(model, type = "response")
@@ -1147,7 +1223,7 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
             hl_test <- ResourceSelection::hoslem.test(actual, pred_probs, g = 10)
             
             # Calibration slope and intercept
-            calib_model <- glm(actual ~ qlogis(pred_probs), family = "binomial")
+            calib_model <- glm(actual ~ qlogis(pred_probs), family = stats::binomial())
             calib_slope <- coef(calib_model)[2]
             calib_intercept <- coef(calib_model)[1]
             
@@ -1312,8 +1388,8 @@ aivalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE))
         
         for (pred in predictors) {
           # Fit model and get predictions
-          formula_str <- paste(outcome_var, "~", pred)
-          model <- glm(formula_str, data = data, family = "binomial")
+          formula_obj <- private$.buildFormula(outcome_var, pred)
+          model <- glm(formula_obj, data = data, family = stats::binomial())
           pred_probs <- predict(model, type = "response")
           
           # Create calibration groups (deciles)
