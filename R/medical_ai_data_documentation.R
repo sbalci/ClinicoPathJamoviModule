@@ -1,0 +1,57 @@
+
+#' Medical AI Validation Example Dataset
+#'
+#' A simulated dataset for demonstrating AI model validation methods.
+#' Contains AI predictions, human expert scores, clinical biomarkers,
+#' and gold-standard diagnosis for 200 patients.
+#'
+#' @format A data frame with 200 rows and 7 variables:
+#' \describe{
+#'   \item{patient_id}{Patient identifier (character)}
+#'   \item{AI_score}{AI model predicted probability (0-1)}
+#'   \item{human_score}{Human expert assessment score (0-1)}
+#'   \item{biomarker1}{Clinical biomarker 1 (standardized)}
+#'   \item{biomarker2}{Clinical biomarker 2 (standardized)}
+#'   \item{age}{Patient age in years}
+#'   \item{diagnosis}{Gold standard diagnosis (negative/positive)}
+#' }
+#'
+#' @details
+#' This dataset was generated to demonstrate AI model validation techniques
+#' including cross-validation, calibration assessment, and model comparison.
+#' The AI_score is designed to have good but imperfect discrimination,
+#' making it suitable for demonstrating various validation metrics.
+#'
+#' The outcome (diagnosis) was generated based on a logistic model with
+#' AI_score, biomarkers, and age as predictors, plus random noise to
+#' simulate real-world variability.
+#'
+#' @examples
+#' data(medical_ai_data)
+#'
+#' # Basic cross-validation
+#' \dontrun{
+#' aivalidation(
+#'   data = medical_ai_data,
+#'   predictorVars = c("AI_score", "biomarker1"),
+#'   outcomeVar = "diagnosis",
+#'   positiveLevel = "positive",
+#'   crossValidation = "10-fold",
+#'   showCrossValidation = TRUE
+#' )
+#' }
+#'
+#' # Model comparison
+#' \dontrun{
+#' aivalidation(
+#'   data = medical_ai_data,
+#'   predictorVars = c("AI_score", "human_score", "biomarker1", "biomarker2"),
+#'   outcomeVar = "diagnosis",
+#'   positiveLevel = "positive",
+#'   compareModels = TRUE,
+#'   delongTest = TRUE
+#' )
+#' }
+#'
+#' @source Simulated data generated for package demonstration
+"medical_ai_data"

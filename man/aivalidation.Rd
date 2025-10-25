@@ -2,53 +2,32 @@
 % Please edit documentation in R/aivalidation.h.R
 \name{aivalidation}
 \alias{aivalidation}
-\title{AI Model Validation with Cross-Validation}
+\title{AI Model Validation}
 \usage{
 aivalidation(
   data,
   predictorVars,
   outcomeVar,
   positiveLevel,
-  referencePredictor,
-  crossValidation = "10-fold",
-  nRepeats = 10,
+  compareModels = FALSE,
+  youdensJ = FALSE,
+  matthewsCC = FALSE,
+  bootstrapCI = FALSE,
+  nBootstrap = 1000,
+  rocPlot = FALSE,
+  crossValidation = "none",
   stratified = TRUE,
   randomSeed = 42,
-  modelSelection = "AIC",
-  selectionDirection = "both",
-  compareModels = TRUE,
-  delongTest = TRUE,
-  mcnemarTest = FALSE,
-  calibrationTest = TRUE,
-  calculateNRI = TRUE,
-  calculateIDI = TRUE,
-  youdensJ = TRUE,
-  matthewsCC = TRUE,
-  expectedCalibrationError = FALSE,
-  eceBins = 10,
-  maxCalibrationError = FALSE,
-  reliabilityDiagram = TRUE,
-  bootstrapCI = TRUE,
-  nBootstrap = 1000,
-  showModelSelection = TRUE,
-  showCalibration = TRUE,
-  showCrossValidation = TRUE,
-  showComparison = TRUE,
-  rocPlot = TRUE,
-  calibrationPlot = TRUE,
-  comparisonPlot = TRUE,
-  cvPerformancePlot = TRUE,
-  variableImportancePlot = FALSE,
-  showExplanations = TRUE,
-  showSummaries = TRUE,
-  confidenceLevel = 0.95
+  showExplanations = FALSE,
+  showSummaries = FALSE
 )
 }
 \arguments{
 \item{data}{the data as a data frame}
 
 \item{predictorVars}{a vector of strings naming the predictor variables (AI
-scores, human scores,  biomarkers, etc.) from \code{data}}
+scores, human scores, biomarkers, etc.) from \code{data}. Limited to first
+5 for pairwise comparisons.}
 
 \item{outcomeVar}{a string naming the binary outcome variable (gold
 standard) from \code{data}}
@@ -56,144 +35,65 @@ standard) from \code{data}}
 \item{positiveLevel}{the level of the outcome variable which represents the
 positive case}
 
-\item{referencePredictor}{reference predictor for model comparisons
-(typically AI model or main biomarker)}
+\item{compareModels}{perform statistical comparison between models using
+DeLong test for AUC comparison}
 
-\item{crossValidation}{cross-validation method for model validation}
+\item{youdensJ}{calculate and display Youden's J statistic (Sensitivity +
+Specificity - 1)}
 
-\item{nRepeats}{number of repetitions for repeated cross-validation}
+\item{matthewsCC}{calculate and display Matthews Correlation Coefficient
+(MCC)}
+
+\item{bootstrapCI}{use bootstrap resampling for confidence intervals (more
+robust for small samples)}
+
+\item{nBootstrap}{number of bootstrap iterations (higher values are more
+accurate but slower)}
+
+\item{rocPlot}{generate ROC curves for all predictor variables}
+
+\item{crossValidation}{cross-validation method for model validation
+(simplified to avoid resource limits)}
 
 \item{stratified}{maintain outcome variable proportions across folds}
 
-\item{randomSeed}{random seed for reproducible results}
+\item{randomSeed}{random seed for reproducible cross-validation results}
 
-\item{modelSelection}{method for automatic model selection and variable
-importance}
+\item{showExplanations}{show detailed methodology explanations}
 
-\item{selectionDirection}{direction for stepwise model selection}
-
-\item{compareModels}{perform statistical comparison between models}
-
-\item{delongTest}{perform DeLong test for comparing AUC values}
-
-\item{mcnemarTest}{perform McNemar's test for paired binary predictions}
-
-\item{calibrationTest}{perform Hosmer-Lemeshow calibration test}
-
-\item{calculateNRI}{calculate Net Reclassification Index with confidence
-intervals}
-
-\item{calculateIDI}{calculate Integrated Discrimination Index with
-confidence intervals}
-
-\item{youdensJ}{calculate Youden's J statistic for optimal cutoff
-determination}
-
-\item{matthewsCC}{calculate Matthews Correlation Coefficient, a balanced
-measure for binary classification that accounts for all four confusion
-matrix categories. Especially useful for imbalanced datasets (e.g., rare
-events like mitosis detection). MCC ranges from -1 to +1 where +1
-represents perfect prediction, 0 represents random prediction, and -1
-represents total disagreement}
-
-\item{expectedCalibrationError}{calculate Expected Calibration Error to
-assess reliability of predicted probabilities. ECE measures the difference
-between predicted probabilities and actual outcomes across probability
-bins. Essential for AI models to ensure predicted probabilities are
-well-calibrated. Lower ECE values indicate better calibration (perfect
-calibration = 0)}
-
-\item{eceBins}{number of bins for Expected Calibration Error calculation.
-Standard is 10 bins. More bins provide finer granularity but require more
-data}
-
-\item{maxCalibrationError}{calculate Maximum Calibration Error (worst-case
-calibration error across all bins). MCE identifies the bin with the largest
-deviation between predicted and actual outcomes}
-
-\item{reliabilityDiagram}{display reliability diagram showing predicted
-probabilities vs observed frequencies. Perfect calibration appears as a
-diagonal line. Useful for visualizing calibration quality}
-
-\item{bootstrapCI}{use bootstrap methods for confidence interval estimation}
-
-\item{nBootstrap}{number of bootstrap iterations for confidence intervals}
-
-\item{showModelSelection}{display model selection process and variable
-importance}
-
-\item{showCalibration}{display calibration plots and statistics}
-
-\item{showCrossValidation}{display detailed cross-validation results}
-
-\item{showComparison}{display statistical comparison between models}
-
-\item{rocPlot}{generate ROC curves with cross-validation confidence bands}
-
-\item{calibrationPlot}{generate calibration plots showing observed vs
-predicted probabilities}
-
-\item{comparisonPlot}{generate forest plot comparing model performance}
-
-\item{cvPerformancePlot}{generate plots showing cross-validation
-performance across folds}
-
-\item{variableImportancePlot}{generate variable importance plot from model
-selection}
-
-\item{showExplanations}{show explanations for methods and interpretations}
-
-\item{showSummaries}{show summary interpretations of results}
-
-\item{confidenceLevel}{confidence level for confidence intervals}
+\item{showSummaries}{show interpretation summaries of results}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$cvPerformanceTable} \tab \tab \tab \tab \tab Performance metrics calculated using cross-validation \cr
-\code{results$modelSelectionTable} \tab \tab \tab \tab \tab Results from automatic model selection process \cr
-\code{results$modelComparisonTable} \tab \tab \tab \tab \tab Statistical comparison between different models \cr
-\code{results$nriIdiTable} \tab \tab \tab \tab \tab Net Reclassification Index and Integrated Discrimination Index \cr
-\code{results$calibrationTable} \tab \tab \tab \tab \tab Model calibration assessment including Hosmer-Lemeshow test \cr
-\code{results$eceTable} \tab \tab \tab \tab \tab Calibration error metrics for probabilistic predictions \cr
-\code{results$eceBinDetails} \tab \tab \tab \tab \tab Detailed calibration error for each probability bin \cr
-\code{results$variableImportanceTable} \tab \tab \tab \tab \tab Importance scores for variables in selected models \cr
-\code{results$cvFoldResults} \tab \tab \tab \tab \tab Performance metrics for each cross-validation fold \cr
-\code{results$rocPlot} \tab \tab \tab \tab \tab ROC curves showing cross-validated performance with confidence bands \cr
-\code{results$calibrationPlot} \tab \tab \tab \tab \tab Calibration plot showing observed vs predicted probabilities \cr
-\code{results$reliabilityDiagramPlot} \tab \tab \tab \tab \tab Reliability diagram showing predicted probabilities vs observed frequencies with ECE visualization \cr
-\code{results$comparisonPlot} \tab \tab \tab \tab \tab Forest plot comparing model performance with confidence intervals \cr
-\code{results$cvPerformancePlot} \tab \tab \tab \tab \tab Box plots showing performance distribution across CV folds \cr
-\code{results$variableImportancePlot} \tab \tab \tab \tab \tab Bar plot showing variable importance from model selection \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$performanceTable} \tab \tab \tab \tab \tab Performance metrics for each predictor variable \cr
+\code{results$comparisonTable} \tab \tab \tab \tab \tab Statistical comparison between predictor models using DeLong test \cr
+\code{results$cvPerformanceTable} \tab \tab \tab \tab \tab Cross-validated performance metrics for each predictor \cr
+\code{results$rocPlot} \tab \tab \tab \tab \tab ROC curves for all predictor models \cr
 \code{results$methodologyExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$resultsInterpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$statisticalNotes} \tab \tab \tab \tab \tab a html \cr
-\code{results$recommendationsText} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$cvPerformanceTable$asDF}
+\code{results$performanceTable$asDF}
 
-\code{as.data.frame(results$cvPerformanceTable)}
+\code{as.data.frame(results$performanceTable)}
 }
 \description{
-Comprehensive validation of AI models and diagnostic tests using
-cross-validation, model selection, and advanced performance metrics.
-Designed for AI diagnostic research including comparison of AI vs human
-performance with statistical significance testing.
+Simplified AI model validation tool for comparing diagnostic performance.
+Calculates AUC, sensitivity, and specificity for predictor variables and
+performs statistical comparison using DeLong test.
 }
 \examples{
+\donttest{
 data('medical_ai_data', package='ClinicoPath')
 
 aivalidation(data = medical_ai_data,
             predictorVars = c('AI_score', 'human_score', 'biomarker1'),
             outcomeVar = 'diagnosis',
             positiveLevel = 'positive',
-            crossValidation = '10-fold',
-            modelSelection = 'AIC',
-            compareModels = TRUE,
-            delongTest = TRUE)
-
+            compareModels = TRUE)
+}
 }

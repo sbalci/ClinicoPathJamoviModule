@@ -1,7 +1,7 @@
 ---
 name: enhancedROC
 title: Clinical ROC Analysis
-menuGroup: meddecideT
+menuGroup: meddecideT2
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
 version: '0.0.32'

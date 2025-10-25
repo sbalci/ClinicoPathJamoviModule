@@ -2,45 +2,133 @@
 % Please edit documentation in R/aivalidation.b.R
 \name{aivalidationClass}
 \alias{aivalidationClass}
-\title{AI Model Validation with Cross-Validation}
-\description{
-Comprehensive validation of AI models and diagnostic tests using cross-validation,
-model selection, and advanced performance metrics. Designed for AI diagnostic research
-including comparison of AI vs human performance with statistical significance testing.
-
-This function addresses the complete workflow needed for AI diagnostic research:
+\title{AI Model Validation}
+\value{
+A results object from the \code{aivalidationClass} containing:
 \itemize{
-\item Cross-validated performance assessment
-\item Automated model selection with AIC/BIC
-\item Statistical comparison between AI and human performance
-\item Advanced metrics (NRI, IDI, calibration)
-\item Publication-ready visualizations
+\item \strong{performanceTable}: AUC, sensitivity, specificity, optimal threshold, Youden's J, MCC
+\item \strong{comparisonTable}: Pairwise model comparisons with DeLong test p-values
+\item \strong{cvPerformanceTable}: Cross-validated performance metrics (mean and SD)
+\item \strong{rocPlot}: ROC curves visualization with AUC labels
+\item \strong{methodologyExplanation}: HTML explanation of statistical methods
+\item \strong{resultsInterpretation}: HTML interpretation with clinical context
+}
+}
+\description{
+Validates AI diagnostic models by calculating performance metrics (AUC, sensitivity, specificity),
+comparing multiple models, and assessing generalization through cross-validation.
+This simplified architecture avoids resource limit errors while providing comprehensive
+diagnostic performance evaluation essential for medical AI validation.
+
+\strong{Key Features:}
+\itemize{
+\item ROC curve analysis with AUC calculation
+\item Optimal threshold selection using Youden's J statistic
+\item Advanced performance metrics (Matthews CC, Youden's J)
+\item Statistical model comparison using DeLong test
+\item K-fold cross-validation with stratified sampling
+\item Bootstrap confidence intervals for robust estimation
+\item Interactive ROC curve visualization
+\item Comprehensive methodology and interpretation guidance
+}
+
+\strong{Statistical Methods:}
+\itemize{
+\item AUC (Area Under the ROC Curve) for discrimination assessment
+\item DeLong method for AUC confidence intervals (default)
+\item Bootstrap resampling for robust CI estimation
+\item DeLong test for pairwise AUC comparisons
+\item Youden's J statistic for optimal threshold selection
+\item Matthews Correlation Coefficient for balanced performance assessment
+}
+
+\strong{Cross-Validation:}
+\itemize{
+\item 5-fold and 10-fold cross-validation
+\item Stratified sampling to maintain outcome proportions
+\item Mean and SD of performance metrics across folds
+\item Reproducible results with seed control
+}
+
+\strong{Visualization:}
+\itemize{
+\item Multi-predictor ROC curves with AUC labels
+\item Publication-ready ggplot2 graphics
+\item Limited to 10 predictors to prevent clutter
 }
 }
 \details{
-\strong{Cross-Validation Methods:}
+This analysis is specifically designed for validating AI diagnostic models in medical contexts.
+It calculates essential performance metrics and provides statistical tests for comparing
+multiple diagnostic models (AI vs human, different AI algorithms, etc.).
+
+\strong{Performance Metrics:}
 \itemize{
-\item k-fold cross-validation (5-fold, 10-fold)
-\item Leave-one-out cross-validation
-\item Repeated cross-validation with multiple iterations
-\item Stratified sampling to maintain outcome proportions
+\item \strong{AUC}: Measures overall discrimination ability (0.5 = random, 1.0 = perfect)
+\item \strong{Sensitivity}: True positive rate (crucial for screening tests)
+\item \strong{Specificity}: True negative rate (important for confirmatory tests)
+\item \strong{Optimal Threshold}: Determined by Youden's J (maximizes sens + spec - 1)
+\item \strong{Youden's J}: Overall performance measure (0-1, higher is better)
+\item \strong{Matthews CC}: Balanced metric for imbalanced datasets (-1 to +1)
 }
 
-\strong{Model Selection:}
-\itemize{
-\item AIC/BIC-based stepwise selection
-\item Forward, backward, or bidirectional selection
-\item LASSO and Ridge regularization
-\item Variable importance ranking
+\strong{Model Comparison:}
+The DeLong test accounts for correlation between ROC curves from the same dataset,
+providing appropriate statistical comparison of AUC values. Limited to first 5 predictors
+to avoid resource issues.
+
+\strong{Cross-Validation:}
+Provides robust estimates of model generalization by training on k-1 folds and testing
+on the remaining fold, repeated k times. Stratified sampling maintains outcome proportions
+in each fold, which is essential for imbalanced datasets.
+
+\strong{Bootstrap Confidence Intervals:}
+More robust than DeLong method for small samples or non-normal distributions, but requires
+more computation time. Creates multiple resampled datasets and derives CIs from the
+distribution of AUC values.
+}
+\examples{
+\dontrun{
+# Load example data
+data('medical_ai_data', package='ClinicoPath')
+
+# Basic AI validation
+aivalidation(
+  data = medical_ai_data,
+  predictorVars = c('AI_score', 'human_score', 'biomarker1'),
+  outcomeVar = 'diagnosis',
+  positiveLevel = 'positive',
+  compareModels = TRUE
+)
+
+# Advanced validation with cross-validation and bootstrap
+aivalidation(
+  data = medical_ai_data,
+  predictorVars = c('AI_score', 'human_score', 'biomarker1'),
+  outcomeVar = 'diagnosis',
+  positiveLevel = 'positive',
+  compareModels = TRUE,
+  youdensJ = TRUE,
+  matthewsCC = TRUE,
+  bootstrapCI = TRUE,
+  nBootstrap = 2000,
+  crossValidation = '5-fold',
+  stratified = TRUE,
+  rocPlot = TRUE,
+  showExplanations = TRUE,
+  showSummaries = TRUE
+)
 }
 
-\strong{Statistical Tests:}
-\itemize{
-\item DeLong test for AUC comparison
-\item McNemar's test for paired predictions
-\item Hosmer-Lemeshow calibration test
-\item Bootstrap confidence intervals
 }
+\references{
+DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L. (1988). Comparing the areas under two or more
+correlated receiver operating characteristic curves: a nonparametric approach. \emph{Biometrics}, 44(3), 837-845.
+
+Youden, W. J. (1950). Index for rating diagnostic tests. \emph{Cancer}, 3(1), 32-35.
+
+Matthews, B. W. (1975). Comparison of the predicted and observed secondary structure of T4 phage lysozyme.
+\emph{Biochimica et Biophysica Acta (BBA)-Protein Structure}, 405(2), 442-451.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::aivalidationBase} -> \code{aivalidationClass}

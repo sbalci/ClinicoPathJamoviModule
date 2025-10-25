@@ -9,39 +9,17 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             predictorVars = NULL,
             outcomeVar = NULL,
             positiveLevel = NULL,
-            referencePredictor = NULL,
-            crossValidation = "10-fold",
-            nRepeats = 10,
+            compareModels = FALSE,
+            youdensJ = FALSE,
+            matthewsCC = FALSE,
+            bootstrapCI = FALSE,
+            nBootstrap = 1000,
+            rocPlot = FALSE,
+            crossValidation = "none",
             stratified = TRUE,
             randomSeed = 42,
-            modelSelection = "AIC",
-            selectionDirection = "both",
-            compareModels = TRUE,
-            delongTest = TRUE,
-            mcnemarTest = FALSE,
-            calibrationTest = TRUE,
-            calculateNRI = TRUE,
-            calculateIDI = TRUE,
-            youdensJ = TRUE,
-            matthewsCC = TRUE,
-            expectedCalibrationError = FALSE,
-            eceBins = 10,
-            maxCalibrationError = FALSE,
-            reliabilityDiagram = TRUE,
-            bootstrapCI = TRUE,
-            nBootstrap = 1000,
-            showModelSelection = TRUE,
-            showCalibration = TRUE,
-            showCrossValidation = TRUE,
-            showComparison = TRUE,
-            rocPlot = TRUE,
-            calibrationPlot = TRUE,
-            comparisonPlot = TRUE,
-            cvPerformancePlot = TRUE,
-            variableImportancePlot = FALSE,
-            showExplanations = TRUE,
-            showSummaries = TRUE,
-            confidenceLevel = 0.95, ...) {
+            showExplanations = FALSE,
+            showSummaries = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -68,29 +46,40 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "positiveLevel",
                 positiveLevel,
                 variable="(outcomeVar)")
-            private$..referencePredictor <- jmvcore::OptionVariable$new(
-                "referencePredictor",
-                referencePredictor,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
+            private$..compareModels <- jmvcore::OptionBool$new(
+                "compareModels",
+                compareModels,
+                default=FALSE)
+            private$..youdensJ <- jmvcore::OptionBool$new(
+                "youdensJ",
+                youdensJ,
+                default=FALSE)
+            private$..matthewsCC <- jmvcore::OptionBool$new(
+                "matthewsCC",
+                matthewsCC,
+                default=FALSE)
+            private$..bootstrapCI <- jmvcore::OptionBool$new(
+                "bootstrapCI",
+                bootstrapCI,
+                default=FALSE)
+            private$..nBootstrap <- jmvcore::OptionInteger$new(
+                "nBootstrap",
+                nBootstrap,
+                min=100,
+                max=5000,
+                default=1000)
+            private$..rocPlot <- jmvcore::OptionBool$new(
+                "rocPlot",
+                rocPlot,
+                default=FALSE)
             private$..crossValidation <- jmvcore::OptionList$new(
                 "crossValidation",
                 crossValidation,
                 options=list(
+                    "none",
                     "5-fold",
-                    "10-fold",
-                    "LOO",
-                    "repeated",
-                    "none"),
-                default="10-fold")
-            private$..nRepeats <- jmvcore::OptionInteger$new(
-                "nRepeats",
-                nRepeats,
-                min=1,
-                max=1000,
-                default=10)
+                    "10-fold"),
+                default="none")
             private$..stratified <- jmvcore::OptionBool$new(
                 "stratified",
                 stratified,
@@ -100,311 +89,97 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 randomSeed,
                 min=1,
                 default=42)
-            private$..modelSelection <- jmvcore::OptionList$new(
-                "modelSelection",
-                modelSelection,
-                options=list(
-                    "none",
-                    "AIC",
-                    "BIC",
-                    "forward",
-                    "backward",
-                    "lasso",
-                    "ridge",
-                    "elastic"),
-                default="AIC")
-            private$..selectionDirection <- jmvcore::OptionList$new(
-                "selectionDirection",
-                selectionDirection,
-                options=list(
-                    "both",
-                    "forward",
-                    "backward"),
-                default="both")
-            private$..compareModels <- jmvcore::OptionBool$new(
-                "compareModels",
-                compareModels,
-                default=TRUE)
-            private$..delongTest <- jmvcore::OptionBool$new(
-                "delongTest",
-                delongTest,
-                default=TRUE)
-            private$..mcnemarTest <- jmvcore::OptionBool$new(
-                "mcnemarTest",
-                mcnemarTest,
-                default=FALSE)
-            private$..calibrationTest <- jmvcore::OptionBool$new(
-                "calibrationTest",
-                calibrationTest,
-                default=TRUE)
-            private$..calculateNRI <- jmvcore::OptionBool$new(
-                "calculateNRI",
-                calculateNRI,
-                default=TRUE)
-            private$..calculateIDI <- jmvcore::OptionBool$new(
-                "calculateIDI",
-                calculateIDI,
-                default=TRUE)
-            private$..youdensJ <- jmvcore::OptionBool$new(
-                "youdensJ",
-                youdensJ,
-                default=TRUE)
-            private$..matthewsCC <- jmvcore::OptionBool$new(
-                "matthewsCC",
-                matthewsCC,
-                default=TRUE)
-            private$..expectedCalibrationError <- jmvcore::OptionBool$new(
-                "expectedCalibrationError",
-                expectedCalibrationError,
-                default=FALSE)
-            private$..eceBins <- jmvcore::OptionInteger$new(
-                "eceBins",
-                eceBins,
-                min=5,
-                max=20,
-                default=10)
-            private$..maxCalibrationError <- jmvcore::OptionBool$new(
-                "maxCalibrationError",
-                maxCalibrationError,
-                default=FALSE)
-            private$..reliabilityDiagram <- jmvcore::OptionBool$new(
-                "reliabilityDiagram",
-                reliabilityDiagram,
-                default=TRUE)
-            private$..bootstrapCI <- jmvcore::OptionBool$new(
-                "bootstrapCI",
-                bootstrapCI,
-                default=TRUE)
-            private$..nBootstrap <- jmvcore::OptionInteger$new(
-                "nBootstrap",
-                nBootstrap,
-                min=100,
-                max=10000,
-                default=1000)
-            private$..showModelSelection <- jmvcore::OptionBool$new(
-                "showModelSelection",
-                showModelSelection,
-                default=TRUE)
-            private$..showCalibration <- jmvcore::OptionBool$new(
-                "showCalibration",
-                showCalibration,
-                default=TRUE)
-            private$..showCrossValidation <- jmvcore::OptionBool$new(
-                "showCrossValidation",
-                showCrossValidation,
-                default=TRUE)
-            private$..showComparison <- jmvcore::OptionBool$new(
-                "showComparison",
-                showComparison,
-                default=TRUE)
-            private$..rocPlot <- jmvcore::OptionBool$new(
-                "rocPlot",
-                rocPlot,
-                default=TRUE)
-            private$..calibrationPlot <- jmvcore::OptionBool$new(
-                "calibrationPlot",
-                calibrationPlot,
-                default=TRUE)
-            private$..comparisonPlot <- jmvcore::OptionBool$new(
-                "comparisonPlot",
-                comparisonPlot,
-                default=TRUE)
-            private$..cvPerformancePlot <- jmvcore::OptionBool$new(
-                "cvPerformancePlot",
-                cvPerformancePlot,
-                default=TRUE)
-            private$..variableImportancePlot <- jmvcore::OptionBool$new(
-                "variableImportancePlot",
-                variableImportancePlot,
-                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
-                default=TRUE)
+                default=FALSE)
             private$..showSummaries <- jmvcore::OptionBool$new(
                 "showSummaries",
                 showSummaries,
-                default=TRUE)
-            private$..confidenceLevel <- jmvcore::OptionNumber$new(
-                "confidenceLevel",
-                confidenceLevel,
-                min=0.5,
-                max=0.999,
-                default=0.95)
+                default=FALSE)
 
             self$.addOption(private$..predictorVars)
             self$.addOption(private$..outcomeVar)
             self$.addOption(private$..positiveLevel)
-            self$.addOption(private$..referencePredictor)
-            self$.addOption(private$..crossValidation)
-            self$.addOption(private$..nRepeats)
-            self$.addOption(private$..stratified)
-            self$.addOption(private$..randomSeed)
-            self$.addOption(private$..modelSelection)
-            self$.addOption(private$..selectionDirection)
             self$.addOption(private$..compareModels)
-            self$.addOption(private$..delongTest)
-            self$.addOption(private$..mcnemarTest)
-            self$.addOption(private$..calibrationTest)
-            self$.addOption(private$..calculateNRI)
-            self$.addOption(private$..calculateIDI)
             self$.addOption(private$..youdensJ)
             self$.addOption(private$..matthewsCC)
-            self$.addOption(private$..expectedCalibrationError)
-            self$.addOption(private$..eceBins)
-            self$.addOption(private$..maxCalibrationError)
-            self$.addOption(private$..reliabilityDiagram)
             self$.addOption(private$..bootstrapCI)
             self$.addOption(private$..nBootstrap)
-            self$.addOption(private$..showModelSelection)
-            self$.addOption(private$..showCalibration)
-            self$.addOption(private$..showCrossValidation)
-            self$.addOption(private$..showComparison)
             self$.addOption(private$..rocPlot)
-            self$.addOption(private$..calibrationPlot)
-            self$.addOption(private$..comparisonPlot)
-            self$.addOption(private$..cvPerformancePlot)
-            self$.addOption(private$..variableImportancePlot)
+            self$.addOption(private$..crossValidation)
+            self$.addOption(private$..stratified)
+            self$.addOption(private$..randomSeed)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showSummaries)
-            self$.addOption(private$..confidenceLevel)
         }),
     active = list(
         predictorVars = function() private$..predictorVars$value,
         outcomeVar = function() private$..outcomeVar$value,
         positiveLevel = function() private$..positiveLevel$value,
-        referencePredictor = function() private$..referencePredictor$value,
-        crossValidation = function() private$..crossValidation$value,
-        nRepeats = function() private$..nRepeats$value,
-        stratified = function() private$..stratified$value,
-        randomSeed = function() private$..randomSeed$value,
-        modelSelection = function() private$..modelSelection$value,
-        selectionDirection = function() private$..selectionDirection$value,
         compareModels = function() private$..compareModels$value,
-        delongTest = function() private$..delongTest$value,
-        mcnemarTest = function() private$..mcnemarTest$value,
-        calibrationTest = function() private$..calibrationTest$value,
-        calculateNRI = function() private$..calculateNRI$value,
-        calculateIDI = function() private$..calculateIDI$value,
         youdensJ = function() private$..youdensJ$value,
         matthewsCC = function() private$..matthewsCC$value,
-        expectedCalibrationError = function() private$..expectedCalibrationError$value,
-        eceBins = function() private$..eceBins$value,
-        maxCalibrationError = function() private$..maxCalibrationError$value,
-        reliabilityDiagram = function() private$..reliabilityDiagram$value,
         bootstrapCI = function() private$..bootstrapCI$value,
         nBootstrap = function() private$..nBootstrap$value,
-        showModelSelection = function() private$..showModelSelection$value,
-        showCalibration = function() private$..showCalibration$value,
-        showCrossValidation = function() private$..showCrossValidation$value,
-        showComparison = function() private$..showComparison$value,
         rocPlot = function() private$..rocPlot$value,
-        calibrationPlot = function() private$..calibrationPlot$value,
-        comparisonPlot = function() private$..comparisonPlot$value,
-        cvPerformancePlot = function() private$..cvPerformancePlot$value,
-        variableImportancePlot = function() private$..variableImportancePlot$value,
+        crossValidation = function() private$..crossValidation$value,
+        stratified = function() private$..stratified$value,
+        randomSeed = function() private$..randomSeed$value,
         showExplanations = function() private$..showExplanations$value,
-        showSummaries = function() private$..showSummaries$value,
-        confidenceLevel = function() private$..confidenceLevel$value),
+        showSummaries = function() private$..showSummaries$value),
     private = list(
         ..predictorVars = NA,
         ..outcomeVar = NA,
         ..positiveLevel = NA,
-        ..referencePredictor = NA,
-        ..crossValidation = NA,
-        ..nRepeats = NA,
-        ..stratified = NA,
-        ..randomSeed = NA,
-        ..modelSelection = NA,
-        ..selectionDirection = NA,
         ..compareModels = NA,
-        ..delongTest = NA,
-        ..mcnemarTest = NA,
-        ..calibrationTest = NA,
-        ..calculateNRI = NA,
-        ..calculateIDI = NA,
         ..youdensJ = NA,
         ..matthewsCC = NA,
-        ..expectedCalibrationError = NA,
-        ..eceBins = NA,
-        ..maxCalibrationError = NA,
-        ..reliabilityDiagram = NA,
         ..bootstrapCI = NA,
         ..nBootstrap = NA,
-        ..showModelSelection = NA,
-        ..showCalibration = NA,
-        ..showCrossValidation = NA,
-        ..showComparison = NA,
         ..rocPlot = NA,
-        ..calibrationPlot = NA,
-        ..comparisonPlot = NA,
-        ..cvPerformancePlot = NA,
-        ..variableImportancePlot = NA,
+        ..crossValidation = NA,
+        ..stratified = NA,
+        ..randomSeed = NA,
         ..showExplanations = NA,
-        ..showSummaries = NA,
-        ..confidenceLevel = NA)
+        ..showSummaries = NA)
 )
 
 aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "aivalidationResults",
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
+        instructions = function() private$.items[["instructions"]],
+        performanceTable = function() private$.items[["performanceTable"]],
+        comparisonTable = function() private$.items[["comparisonTable"]],
         cvPerformanceTable = function() private$.items[["cvPerformanceTable"]],
-        modelSelectionTable = function() private$.items[["modelSelectionTable"]],
-        modelComparisonTable = function() private$.items[["modelComparisonTable"]],
-        nriIdiTable = function() private$.items[["nriIdiTable"]],
-        calibrationTable = function() private$.items[["calibrationTable"]],
-        eceTable = function() private$.items[["eceTable"]],
-        eceBinDetails = function() private$.items[["eceBinDetails"]],
-        variableImportanceTable = function() private$.items[["variableImportanceTable"]],
-        cvFoldResults = function() private$.items[["cvFoldResults"]],
         rocPlot = function() private$.items[["rocPlot"]],
-        calibrationPlot = function() private$.items[["calibrationPlot"]],
-        reliabilityDiagramPlot = function() private$.items[["reliabilityDiagramPlot"]],
-        comparisonPlot = function() private$.items[["comparisonPlot"]],
-        cvPerformancePlot = function() private$.items[["cvPerformancePlot"]],
-        variableImportancePlot = function() private$.items[["variableImportancePlot"]],
         methodologyExplanation = function() private$.items[["methodologyExplanation"]],
-        resultsInterpretation = function() private$.items[["resultsInterpretation"]],
-        statisticalNotes = function() private$.items[["statisticalNotes"]],
-        recommendationsText = function() private$.items[["recommendationsText"]]),
+        resultsInterpretation = function() private$.items[["resultsInterpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="AI Model Validation with Cross-Validation",
-                refs=list(
-                    "ClinicoPathJamoviModule",
-                    "caret",
-                    "pROC",
-                    "MASS",
-                    "glmnet",
-                    "boot",
-                    "ResourceSelection",
-                    "scales",
-                    "reshape2"))
+                title="AI Model Validation")
             self$add(jmvcore::Html$new(
                 options=options,
-                name="todo",
-                title="Analysis Guide",
+                name="instructions",
+                title="Instructions",
                 visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="cvPerformanceTable",
-                title="Cross-Validated Performance Metrics",
-                visible="(showCrossValidation)",
+                name="performanceTable",
+                title="Model Performance Metrics",
                 clearWith=list(
                     "predictorVars",
                     "outcomeVar",
-                    "crossValidation",
-                    "modelSelection"),
+                    "positiveLevel"),
                 columns=list(
                     list(
-                        `name`="model", 
-                        `title`="Model", 
+                        `name`="predictor", 
+                        `title`="Predictor", 
                         `type`="text"),
                     list(
                         `name`="auc", 
@@ -412,12 +187,12 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="auc_ci_lower", 
+                        `name`="auc_lower", 
                         `title`="AUC 95% CI Lower", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="auc_ci_upper", 
+                        `name`="auc_upper", 
                         `title`="AUC 95% CI Upper", 
                         `type`="number", 
                         `format`="zto"),
@@ -427,35 +202,14 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="sen_ci_lower", 
-                        `title`="Sensitivity 95% CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="sen_ci_upper", 
-                        `title`="Sensitivity 95% CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
                         `name`="specificity", 
                         `title`="Specificity", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="spe_ci_lower", 
-                        `title`="Specificity 95% CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="spe_ci_upper", 
-                        `title`="Specificity 95% CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="accuracy", 
-                        `title`="Accuracy", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `name`="threshold", 
+                        `title`="Optimal Threshold", 
+                        `type`="number"),
                     list(
                         `name`="youdens_j", 
                         `title`="Youden's J", 
@@ -470,130 +224,32 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `visible`="(matthewsCC)"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="modelSelectionTable",
-                title="Model Selection Results",
-                visible="(showModelSelection && modelSelection != 'none')",
+                name="comparisonTable",
+                title="Model Comparison (DeLong Test)",
+                visible="(compareModels)",
                 clearWith=list(
                     "predictorVars",
                     "outcomeVar",
-                    "modelSelection",
-                    "selectionDirection"),
-                columns=list(
-                    list(
-                        `name`="model", 
-                        `title`="Model", 
-                        `type`="text"),
-                    list(
-                        `name`="variables", 
-                        `title`="Selected Variables", 
-                        `type`="text"),
-                    list(
-                        `name`="aic", 
-                        `title`="AIC", 
-                        `type`="number", 
-                        `format`="zto", 
-                        `visible`="(modelSelection == 'AIC' || modelSelection == 'both')"),
-                    list(
-                        `name`="bic", 
-                        `title`="BIC", 
-                        `type`="number", 
-                        `format`="zto", 
-                        `visible`="(modelSelection == 'BIC' || modelSelection == 'both')"),
-                    list(
-                        `name`="deviance", 
-                        `title`="Deviance", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="r_squared", 
-                        `title`="R\u00B2", 
-                        `type`="number", 
-                        `format`="zto"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="modelComparisonTable",
-                title="Model Comparison Statistics",
-                visible="(showComparison && compareModels)",
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "compareModels",
-                    "delongTest",
-                    "mcnemarTest"),
+                    "compareModels"),
                 columns=list(
                     list(
                         `name`="comparison", 
                         `title`="Comparison", 
                         `type`="text"),
                     list(
-                        `name`="test", 
-                        `title`="Statistical Test", 
-                        `type`="text"),
-                    list(
-                        `name`="statistic", 
-                        `title`="Test Statistic", 
+                        `name`="auc1", 
+                        `title`="AUC (Model 1)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="p_value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="effect_size", 
-                        `title`="Effect Size", 
+                        `name`="auc2", 
+                        `title`="AUC (Model 2)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="zto"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="nriIdiTable",
-                title="NRI and IDI Analysis",
-                visible="(calculateNRI || calculateIDI)",
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "referencePredictor",
-                    "calculateNRI",
-                    "calculateIDI"),
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="se", 
-                        `title`="Standard Error", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `name`="difference", 
+                        `title`="Difference", 
+                        `type`="number"),
                     list(
                         `name`="p_value", 
                         `title`="p-value", 
@@ -601,278 +257,70 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="calibrationTable",
-                title="Calibration Statistics",
-                visible="(showCalibration && calibrationTest)",
+                name="cvPerformanceTable",
+                title="Cross-Validation Performance",
+                visible="(!crossValidation:none)",
                 clearWith=list(
                     "predictorVars",
                     "outcomeVar",
-                    "calibrationTest"),
-                columns=list(
-                    list(
-                        `name`="model", 
-                        `title`="Model", 
-                        `type`="text"),
-                    list(
-                        `name`="hl_statistic", 
-                        `title`="Hosmer-Lemeshow \u03C7\u00B2", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="hl_df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="hl_p_value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="calibration_slope", 
-                        `title`="Calibration Slope", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="calibration_intercept", 
-                        `title`="Calibration Intercept", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="brier_score", 
-                        `title`="Brier Score", 
-                        `type`="number", 
-                        `format`="zto"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="eceTable",
-                title="Expected Calibration Error (ECE)",
-                visible="(expectedCalibrationError)",
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "eceBins"),
-                columns=list(
-                    list(
-                        `name`="model", 
-                        `title`="Model", 
-                        `type`="text"),
-                    list(
-                        `name`="ece", 
-                        `title`="ECE", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="mce", 
-                        `title`="MCE", 
-                        `type`="number", 
-                        `format`="zto", 
-                        `visible`="(maxCalibrationError)"),
-                    list(
-                        `name`="num_bins", 
-                        `title`="Number of Bins", 
-                        `type`="integer"),
-                    list(
-                        `name`="avg_confidence", 
-                        `title`="Avg Confidence", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="avg_accuracy", 
-                        `title`="Avg Accuracy", 
-                        `type`="number", 
-                        `format`="zto"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="eceBinDetails",
-                title="ECE Bin-Level Details",
-                visible="(expectedCalibrationError)",
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "eceBins"),
-                columns=list(
-                    list(
-                        `name`="bin", 
-                        `title`="Bin", 
-                        `type`="integer"),
-                    list(
-                        `name`="bin_range", 
-                        `title`="Probability Range", 
-                        `type`="text"),
-                    list(
-                        `name`="n_samples", 
-                        `title`="N Samples", 
-                        `type`="integer"),
-                    list(
-                        `name`="avg_confidence", 
-                        `title`="Avg Confidence", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="avg_accuracy", 
-                        `title`="Avg Accuracy", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="calibration_error", 
-                        `title`="Calibration Error", 
-                        `type`="number", 
-                        `format`="zto"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="variableImportanceTable",
-                title="Variable Importance",
-                visible="(variableImportancePlot && modelSelection != 'none')",
-                clearWith=list(
-                    "predictorVars",
-                    "modelSelection"),
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="importance", 
-                        `title`="Importance Score", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="rank", 
-                        `title`="Rank", 
-                        `type`="integer"),
-                    list(
-                        `name`="selected", 
-                        `title`="Selected in Final Model", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cvFoldResults",
-                title="Cross-Validation Fold Details",
-                visible="(showCrossValidation && crossValidation != 'none')",
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
+                    "positiveLevel",
                     "crossValidation",
-                    "nRepeats"),
+                    "stratified",
+                    "randomSeed"),
                 columns=list(
                     list(
-                        `name`="fold", 
-                        `title`="Fold", 
+                        `name`="predictor", 
+                        `title`="Predictor", 
                         `type`="text"),
                     list(
-                        `name`="model", 
-                        `title`="Model", 
-                        `type`="text"),
-                    list(
-                        `name`="auc", 
-                        `title`="AUC", 
+                        `name`="mean_auc", 
+                        `title`="Mean AUC", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="sensitivity", 
-                        `title`="Sensitivity", 
+                        `name`="sd_auc", 
+                        `title`="SD AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="mean_sensitivity", 
+                        `title`="Mean Sensitivity", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="specificity", 
-                        `title`="Specificity", 
+                        `name`="sd_sensitivity", 
+                        `title`="SD Sensitivity", 
+                        `type`="number"),
+                    list(
+                        `name`="mean_specificity", 
+                        `title`="Mean Specificity", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="accuracy", 
-                        `title`="Accuracy", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="n_cases", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="n_controls", 
-                        `title`="Controls", 
-                        `type`="integer"))))
+                        `name`="sd_specificity", 
+                        `title`="SD Specificity", 
+                        `type`="number"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="rocPlot",
-                title="ROC Curves with Cross-Validation Bands",
+                title="ROC Curves",
                 visible="(rocPlot)",
                 requiresData=TRUE,
+                width=600,
+                height=450,
+                renderFun=".plotROC",
                 clearWith=list(
                     "predictorVars",
                     "outcomeVar",
-                    "crossValidation",
-                    "confidenceLevel")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="calibrationPlot",
-                title="Calibration Plot",
-                visible="(calibrationPlot)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "calibrationTest")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="reliabilityDiagramPlot",
-                title="Reliability Diagram",
-                visible="(reliabilityDiagram && expectedCalibrationError)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "eceBins",
-                    "expectedCalibrationError")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="comparisonPlot",
-                title="Model Comparison Forest Plot",
-                visible="(comparisonPlot && compareModels)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "compareModels",
-                    "delongTest")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="cvPerformancePlot",
-                title="Cross-Validation Performance",
-                visible="(cvPerformancePlot && crossValidation != 'none')",
-                requiresData=TRUE,
-                clearWith=list(
-                    "predictorVars",
-                    "outcomeVar",
-                    "crossValidation",
-                    "nRepeats")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="variableImportancePlot",
-                title="Variable Importance Plot",
-                visible="(variableImportancePlot && modelSelection != 'none')",
-                requiresData=TRUE,
-                clearWith=list(
-                    "predictorVars",
-                    "modelSelection")))
+                    "positiveLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodologyExplanation",
-                title="Methodology Explanation",
+                title="Methodology",
                 visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="resultsInterpretation",
-                title="Results Interpretation",
-                visible="(showSummaries)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="statisticalNotes",
-                title="Statistical Notes",
-                visible="(showExplanations)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="recommendationsText",
-                title="Recommendations",
+                title="Interpretation",
                 visible="(showSummaries)"))}))
 
 aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -896,12 +344,11 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' AI Model Validation with Cross-Validation
+#' AI Model Validation
 #'
-#' Comprehensive validation of AI models and diagnostic tests using 
-#' cross-validation, model selection, and advanced performance metrics. 
-#' Designed for AI diagnostic research including comparison of AI vs human 
-#' performance with statistical significance testing.
+#' Simplified AI model validation tool for comparing diagnostic performance. 
+#' Calculates AUC, sensitivity, and specificity for predictor variables and 
+#' performs statistical comparison using DeLong test.
 #' 
 #'
 #' @examples
@@ -912,105 +359,49 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'             predictorVars = c('AI_score', 'human_score', 'biomarker1'),
 #'             outcomeVar = 'diagnosis',
 #'             positiveLevel = 'positive',
-#'             crossValidation = '10-fold',
-#'             modelSelection = 'AIC',
-#'             compareModels = TRUE,
-#'             delongTest = TRUE)
+#'             compareModels = TRUE)
 #'}
 #' @param data the data as a data frame
 #' @param predictorVars a vector of strings naming the predictor variables (AI
-#'   scores, human scores,  biomarkers, etc.) from \code{data}
+#'   scores, human scores, biomarkers, etc.) from \code{data}. Limited to first
+#'   5 for pairwise comparisons.
 #' @param outcomeVar a string naming the binary outcome variable (gold
 #'   standard) from \code{data}
 #' @param positiveLevel the level of the outcome variable which represents the
 #'   positive case
-#' @param referencePredictor reference predictor for model comparisons
-#'   (typically AI model or main biomarker)
+#' @param compareModels perform statistical comparison between models using
+#'   DeLong test for AUC comparison
+#' @param youdensJ calculate and display Youden's J statistic (Sensitivity +
+#'   Specificity - 1)
+#' @param matthewsCC calculate and display Matthews Correlation Coefficient
+#'   (MCC)
+#' @param bootstrapCI use bootstrap resampling for confidence intervals (more
+#'   robust for small samples)
+#' @param nBootstrap number of bootstrap iterations (higher values are more
+#'   accurate but slower)
+#' @param rocPlot generate ROC curves for all predictor variables
 #' @param crossValidation cross-validation method for model validation
-#' @param nRepeats number of repetitions for repeated cross-validation
+#'   (simplified to avoid resource limits)
 #' @param stratified maintain outcome variable proportions across folds
-#' @param randomSeed random seed for reproducible results
-#' @param modelSelection method for automatic model selection and variable
-#'   importance
-#' @param selectionDirection direction for stepwise model selection
-#' @param compareModels perform statistical comparison between models
-#' @param delongTest perform DeLong test for comparing AUC values
-#' @param mcnemarTest perform McNemar's test for paired binary predictions
-#' @param calibrationTest perform Hosmer-Lemeshow calibration test
-#' @param calculateNRI calculate Net Reclassification Index with confidence
-#'   intervals
-#' @param calculateIDI calculate Integrated Discrimination Index with
-#'   confidence intervals
-#' @param youdensJ calculate Youden's J statistic for optimal cutoff
-#'   determination
-#' @param matthewsCC calculate Matthews Correlation Coefficient, a balanced
-#'   measure for binary classification that accounts for all four confusion
-#'   matrix categories. Especially useful for imbalanced datasets (e.g., rare
-#'   events like mitosis detection). MCC ranges from -1 to +1 where +1
-#'   represents perfect prediction, 0 represents random prediction, and -1
-#'   represents total disagreement
-#' @param expectedCalibrationError calculate Expected Calibration Error to
-#'   assess reliability of predicted probabilities. ECE measures the difference
-#'   between predicted probabilities and actual outcomes across probability
-#'   bins. Essential for AI models to ensure predicted probabilities are
-#'   well-calibrated. Lower ECE values indicate better calibration (perfect
-#'   calibration = 0)
-#' @param eceBins number of bins for Expected Calibration Error calculation.
-#'   Standard is 10 bins. More bins provide finer granularity but require more
-#'   data
-#' @param maxCalibrationError calculate Maximum Calibration Error (worst-case
-#'   calibration error across all bins). MCE identifies the bin with the largest
-#'   deviation between predicted and actual outcomes
-#' @param reliabilityDiagram display reliability diagram showing predicted
-#'   probabilities vs observed frequencies. Perfect calibration appears as a
-#'   diagonal line. Useful for visualizing calibration quality
-#' @param bootstrapCI use bootstrap methods for confidence interval estimation
-#' @param nBootstrap number of bootstrap iterations for confidence intervals
-#' @param showModelSelection display model selection process and variable
-#'   importance
-#' @param showCalibration display calibration plots and statistics
-#' @param showCrossValidation display detailed cross-validation results
-#' @param showComparison display statistical comparison between models
-#' @param rocPlot generate ROC curves with cross-validation confidence bands
-#' @param calibrationPlot generate calibration plots showing observed vs
-#'   predicted probabilities
-#' @param comparisonPlot generate forest plot comparing model performance
-#' @param cvPerformancePlot generate plots showing cross-validation
-#'   performance across folds
-#' @param variableImportancePlot generate variable importance plot from model
-#'   selection
-#' @param showExplanations show explanations for methods and interpretations
-#' @param showSummaries show summary interpretations of results
-#' @param confidenceLevel confidence level for confidence intervals
+#' @param randomSeed random seed for reproducible cross-validation results
+#' @param showExplanations show detailed methodology explanations
+#' @param showSummaries show interpretation summaries of results
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$cvPerformanceTable} \tab \tab \tab \tab \tab Performance metrics calculated using cross-validation \cr
-#'   \code{results$modelSelectionTable} \tab \tab \tab \tab \tab Results from automatic model selection process \cr
-#'   \code{results$modelComparisonTable} \tab \tab \tab \tab \tab Statistical comparison between different models \cr
-#'   \code{results$nriIdiTable} \tab \tab \tab \tab \tab Net Reclassification Index and Integrated Discrimination Index \cr
-#'   \code{results$calibrationTable} \tab \tab \tab \tab \tab Model calibration assessment including Hosmer-Lemeshow test \cr
-#'   \code{results$eceTable} \tab \tab \tab \tab \tab Calibration error metrics for probabilistic predictions \cr
-#'   \code{results$eceBinDetails} \tab \tab \tab \tab \tab Detailed calibration error for each probability bin \cr
-#'   \code{results$variableImportanceTable} \tab \tab \tab \tab \tab Importance scores for variables in selected models \cr
-#'   \code{results$cvFoldResults} \tab \tab \tab \tab \tab Performance metrics for each cross-validation fold \cr
-#'   \code{results$rocPlot} \tab \tab \tab \tab \tab ROC curves showing cross-validated performance with confidence bands \cr
-#'   \code{results$calibrationPlot} \tab \tab \tab \tab \tab Calibration plot showing observed vs predicted probabilities \cr
-#'   \code{results$reliabilityDiagramPlot} \tab \tab \tab \tab \tab Reliability diagram showing predicted probabilities vs observed frequencies with ECE visualization \cr
-#'   \code{results$comparisonPlot} \tab \tab \tab \tab \tab Forest plot comparing model performance with confidence intervals \cr
-#'   \code{results$cvPerformancePlot} \tab \tab \tab \tab \tab Box plots showing performance distribution across CV folds \cr
-#'   \code{results$variableImportancePlot} \tab \tab \tab \tab \tab Bar plot showing variable importance from model selection \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$performanceTable} \tab \tab \tab \tab \tab Performance metrics for each predictor variable \cr
+#'   \code{results$comparisonTable} \tab \tab \tab \tab \tab Statistical comparison between predictor models using DeLong test \cr
+#'   \code{results$cvPerformanceTable} \tab \tab \tab \tab \tab Cross-validated performance metrics for each predictor \cr
+#'   \code{results$rocPlot} \tab \tab \tab \tab \tab ROC curves for all predictor models \cr
 #'   \code{results$methodologyExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$resultsInterpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$statisticalNotes} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$recommendationsText} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$cvPerformanceTable$asDF}
+#' \code{results$performanceTable$asDF}
 #'
-#' \code{as.data.frame(results$cvPerformanceTable)}
+#' \code{as.data.frame(results$performanceTable)}
 #'
 #' @export
 aivalidation <- function(
@@ -1018,52 +409,28 @@ aivalidation <- function(
     predictorVars,
     outcomeVar,
     positiveLevel,
-    referencePredictor,
-    crossValidation = "10-fold",
-    nRepeats = 10,
+    compareModels = FALSE,
+    youdensJ = FALSE,
+    matthewsCC = FALSE,
+    bootstrapCI = FALSE,
+    nBootstrap = 1000,
+    rocPlot = FALSE,
+    crossValidation = "none",
     stratified = TRUE,
     randomSeed = 42,
-    modelSelection = "AIC",
-    selectionDirection = "both",
-    compareModels = TRUE,
-    delongTest = TRUE,
-    mcnemarTest = FALSE,
-    calibrationTest = TRUE,
-    calculateNRI = TRUE,
-    calculateIDI = TRUE,
-    youdensJ = TRUE,
-    matthewsCC = TRUE,
-    expectedCalibrationError = FALSE,
-    eceBins = 10,
-    maxCalibrationError = FALSE,
-    reliabilityDiagram = TRUE,
-    bootstrapCI = TRUE,
-    nBootstrap = 1000,
-    showModelSelection = TRUE,
-    showCalibration = TRUE,
-    showCrossValidation = TRUE,
-    showComparison = TRUE,
-    rocPlot = TRUE,
-    calibrationPlot = TRUE,
-    comparisonPlot = TRUE,
-    cvPerformancePlot = TRUE,
-    variableImportancePlot = FALSE,
-    showExplanations = TRUE,
-    showSummaries = TRUE,
-    confidenceLevel = 0.95) {
+    showExplanations = FALSE,
+    showSummaries = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("aivalidation requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(predictorVars)) predictorVars <- jmvcore::resolveQuo(jmvcore::enquo(predictorVars))
     if ( ! missing(outcomeVar)) outcomeVar <- jmvcore::resolveQuo(jmvcore::enquo(outcomeVar))
-    if ( ! missing(referencePredictor)) referencePredictor <- jmvcore::resolveQuo(jmvcore::enquo(referencePredictor))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(predictorVars), predictorVars, NULL),
-            `if`( ! missing(outcomeVar), outcomeVar, NULL),
-            `if`( ! missing(referencePredictor), referencePredictor, NULL))
+            `if`( ! missing(outcomeVar), outcomeVar, NULL))
 
     for (v in outcomeVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -1071,39 +438,17 @@ aivalidation <- function(
         predictorVars = predictorVars,
         outcomeVar = outcomeVar,
         positiveLevel = positiveLevel,
-        referencePredictor = referencePredictor,
-        crossValidation = crossValidation,
-        nRepeats = nRepeats,
-        stratified = stratified,
-        randomSeed = randomSeed,
-        modelSelection = modelSelection,
-        selectionDirection = selectionDirection,
         compareModels = compareModels,
-        delongTest = delongTest,
-        mcnemarTest = mcnemarTest,
-        calibrationTest = calibrationTest,
-        calculateNRI = calculateNRI,
-        calculateIDI = calculateIDI,
         youdensJ = youdensJ,
         matthewsCC = matthewsCC,
-        expectedCalibrationError = expectedCalibrationError,
-        eceBins = eceBins,
-        maxCalibrationError = maxCalibrationError,
-        reliabilityDiagram = reliabilityDiagram,
         bootstrapCI = bootstrapCI,
         nBootstrap = nBootstrap,
-        showModelSelection = showModelSelection,
-        showCalibration = showCalibration,
-        showCrossValidation = showCrossValidation,
-        showComparison = showComparison,
         rocPlot = rocPlot,
-        calibrationPlot = calibrationPlot,
-        comparisonPlot = comparisonPlot,
-        cvPerformancePlot = cvPerformancePlot,
-        variableImportancePlot = variableImportancePlot,
+        crossValidation = crossValidation,
+        stratified = stratified,
+        randomSeed = randomSeed,
         showExplanations = showExplanations,
-        showSummaries = showSummaries,
-        confidenceLevel = confidenceLevel)
+        showSummaries = showSummaries)
 
     analysis <- aivalidationClass$new(
         options = options,

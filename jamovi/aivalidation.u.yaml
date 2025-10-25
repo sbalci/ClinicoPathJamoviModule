@@ -1,23 +1,26 @@
-title: AI Model Validation with Cross-Validation
+title: AI Model Validation
 name: aivalidation
 jus: '3.0'
 stage: 0
 compilerMode: tame
 
 children:
+  # ============================================
+  # VARIABLE SELECTION
+  # ============================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Predictor Variables
+        label: Predictor Variables (AI scores, biomarkers, etc.)
         children:
           - type: VariablesListBox
             name: predictorVars
             isTarget: true
-            
+
       - type: TargetLayoutBox
-        label: Outcome Variable (Gold Standard)
+        label: Outcome Variable (Gold Standard Diagnosis)
         children:
           - type: VariablesListBox
             name: outcomeVar
@@ -27,163 +30,222 @@ children:
             name: positiveLevel
             label: Positive Level
             enable: (outcomeVar)
-            
-      - type: TargetLayoutBox
-        label: Reference Predictor
-        children:
-          - type: VariablesListBox
-            name: referencePredictor
-            maxItemCount: 1
-            isTarget: true
-    
-  - type: CollapseBox
-    name: crossValidationOptions
-    label: Cross-Validation Options
-    collapsed: false
-    children:
-      - type: ComboBox
-        name: crossValidation
-        
-      - type: TextBox
-        name: nRepeats
-        format: number
-        enable: (crossValidation == 'repeated')
-        
-      - type: CheckBox
-        name: stratified
-        
-      - type: TextBox
-        name: randomSeed
-        format: number
 
-  - type: CollapseBox
-    name: modelSelectionOptions
-    label: Model Selection Options
-    collapsed: true
-    children:
-      - type: ComboBox
-        name: modelSelection
-        
-      - type: ComboBox
-        name: selectionDirection
-        enable: (modelSelection == 'AIC' || modelSelection == 'BIC')
-
+  # ============================================
+  # STATISTICAL COMPARISON
+  # ============================================
   - type: CollapseBox
     name: statisticalTests
-    label: Statistical Tests
+    label: Model Comparison
     collapsed: false
     children:
       - type: CheckBox
         name: compareModels
-        
-      - type: CheckBox
-        name: delongTest
-        enable: (compareModels)
-        
-      - type: CheckBox
-        name: mcnemarTest
-        enable: (compareModels)
-        
-      - type: CheckBox
-        name: calibrationTest
+        label: Compare Models (DeLong Test)
 
+      - type: Label
+        label: "Note: Compares all pairwise combinations (limited to first 5 predictors)"
+        margin: small
+
+  # ============================================
+  # PERFORMANCE METRICS
+  # ============================================
   - type: CollapseBox
-    name: advancedMetrics
-    label: Advanced Metrics
+    name: performanceMetrics
+    label: Additional Metrics
     collapsed: true
     children:
       - type: CheckBox
-        name: calculateNRI
-        
-      - type: CheckBox
-        name: calculateIDI
-        
-      - type: CheckBox
         name: youdensJ
+        label: Youden's J Statistic
 
       - type: CheckBox
         name: matthewsCC
+        label: Matthews Correlation Coefficient (MCC)
 
-      - type: Label
-        label: Calibration Metrics
-        children:
-          - type: CheckBox
-            name: expectedCalibrationError
-
-          - type: TextBox
-            name: eceBins
-            format: number
-            enable: (expectedCalibrationError)
-
-          - type: CheckBox
-            name: maxCalibrationError
-            enable: (expectedCalibrationError)
-
-          - type: CheckBox
-            name: reliabilityDiagram
-            enable: (expectedCalibrationError)
-
+  # ============================================
+  # BOOTSTRAP
+  # ============================================
+  - type: CollapseBox
+    name: bootstrapOptions
+    label: Bootstrap Resampling
+    collapsed: true
+    children:
       - type: CheckBox
         name: bootstrapCI
+        label: Use Bootstrap Confidence Intervals
 
       - type: TextBox
         name: nBootstrap
         format: number
+        label: Bootstrap Iterations
         enable: (bootstrapCI)
 
+      - type: Label
+        label: "Note: Bootstrap is slower but more robust for small samples"
+        margin: small
+
+  # ============================================
+  # CROSS-VALIDATION
+  # ============================================
   - type: CollapseBox
-    name: outputOptions
-    label: Output Options
+    name: crossValidationOptions
+    label: Cross-Validation
     collapsed: true
     children:
-      - type: CheckBox
-        name: showModelSelection
-        enable: (modelSelection != 'none')
-        
-      - type: CheckBox
-        name: showCalibration
-        
-      - type: CheckBox
-        name: showCrossValidation
-        
-      - type: CheckBox
-        name: showComparison
-        enable: (compareModels)
+      - type: ComboBox
+        name: crossValidation
+        label: Method
 
+      - type: CheckBox
+        name: stratified
+        label: Stratified Sampling
+        enable: (!crossValidation:none)
+
+      - type: TextBox
+        name: randomSeed
+        format: number
+        label: Random Seed
+        enable: (!crossValidation:none)
+
+      - type: Label
+        label: "Note: Cross-validation provides more robust performance estimates"
+        margin: small
+
+  # ============================================
+  # PLOTS
+  # ============================================
   - type: CollapseBox
     name: plotOptions
-    label: Plot Options
+    label: Plots
     collapsed: true
     children:
       - type: CheckBox
         name: rocPlot
-        
-      - type: CheckBox
-        name: calibrationPlot
-        
-      - type: CheckBox
-        name: comparisonPlot
-        enable: (compareModels)
-        
-      - type: CheckBox
-        name: cvPerformancePlot
-        
-      - type: CheckBox
-        name: variableImportancePlot
-        enable: (modelSelection != 'none')
+        label: ROC Curves
 
+  # ============================================
+  # HELP & DOCUMENTATION
+  # ============================================
   - type: CollapseBox
-    name: reportOptions
-    label: Report Options
+    name: helpOptions
+    label: Help & Documentation
     collapsed: true
     children:
       - type: CheckBox
         name: showExplanations
-        
+        label: Show Methodology
+
       - type: CheckBox
         name: showSummaries
-        
-      - type: TextBox
-        name: confidenceLevel
-        format: number
+        label: Show Interpretation
 
+
+# ============================================================================
+# ARCHIVED UI OPTIONS - For Future Implementation
+# ============================================================================
+#
+# The following UI sections were removed to match simplified backend.
+# Uncomment and re-enable as features are re-implemented.
+#
+# CROSS-VALIDATION:
+#   - type: CollapseBox
+#     name: crossValidationOptions
+#     label: Cross-Validation
+#     children:
+#       - type: ComboBox
+#         name: crossValidation
+#       - type: TextBox
+#         name: nRepeats
+#       - type: CheckBox
+#         name: stratified
+#       - type: TextBox
+#         name: randomSeed
+#
+# MODEL SELECTION:
+#   - type: CollapseBox
+#     name: modelSelectionOptions
+#     label: Model Selection
+#     children:
+#       - type: ComboBox
+#         name: modelSelection
+#
+# ADVANCED TESTS:
+#       - type: CheckBox
+#         name: delongTest
+#       - type: CheckBox
+#         name: mcnemarTest
+#       - type: CheckBox
+#         name: calibrationTest
+#
+# PERFORMANCE METRICS:
+#   - type: CollapseBox
+#     name: performanceMetrics
+#     label: Performance Metrics
+#     children:
+#       - type: CheckBox
+#         name: youdensJ
+#       - type: CheckBox
+#         name: matthewsCC
+#       - type: CheckBox
+#         name: calculateNRI
+#       - type: CheckBox
+#         name: calculateIDI
+#
+# BOOTSTRAP OPTIONS:
+#   - type: CollapseBox
+#     name: bootstrapOptions
+#     label: Bootstrap Resampling
+#     children:
+#       - type: CheckBox
+#         name: bootstrapCI
+#       - type: TextBox
+#         name: nBootstrap
+#       - type: TextBox
+#         name: confidenceLevel
+#
+# DISPLAY OPTIONS:
+#   - type: CollapseBox
+#     name: displayOptions
+#     label: Display Options
+#     children:
+#       - type: CheckBox
+#         name: showModelSelection
+#       - type: CheckBox
+#         name: showCalibration
+#       - type: CheckBox
+#         name: showCrossValidation
+#       - type: CheckBox
+#         name: showComparison
+#       - type: CheckBox
+#         name: showExplanations
+#       - type: CheckBox
+#         name: showSummaries
+#
+# PLOT OPTIONS:
+#   - type: CollapseBox
+#     name: plotOptions
+#     label: Plots
+#     children:
+#       - type: CheckBox
+#         name: rocPlot
+#       - type: CheckBox
+#         name: calibrationPlot
+#       - type: CheckBox
+#         name: comparisonPlot
+#       - type: CheckBox
+#         name: cvPerformancePlot
+#       - type: CheckBox
+#         name: variableImportancePlot
+#
+# REFERENCE PREDICTOR (for NRI/IDI):
+#       - type: TargetLayoutBox
+#         label: Reference Predictor (for NRI/IDI)
+#         children:
+#           - type: VariablesListBox
+#             name: referencePredictor
+#             maxItemCount: 1
+#             isTarget: true
+#
+# See git history for full UI implementation.
+# ============================================================================
