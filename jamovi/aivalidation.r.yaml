@@ -9,451 +9,450 @@ items:
       type: Html
       visible: false
 
-    - name: cvPerformanceTable
-      title: Cross-Validated Performance Metrics
-      type: Table
-      description: Performance metrics calculated using cross-validation
-      visible: (showCrossValidation)
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - crossValidation
-        - modelSelection
-      columns:
-        - name: model
-          title: Model
-          type: text
-        - name: auc
-          title: AUC
-          type: number
-          format: zto
-        - name: auc_ci_lower
-          title: AUC 95% CI Lower
-          type: number
-          format: zto
-        - name: auc_ci_upper
-          title: AUC 95% CI Upper
-          type: number
-          format: zto
-        - name: sensitivity
-          title: Sensitivity
-          type: number
-          format: zto
-        - name: sen_ci_lower
-          title: Sensitivity 95% CI Lower
-          type: number
-          format: zto
-        - name: sen_ci_upper
-          title: Sensitivity 95% CI Upper
-          type: number
-          format: zto
-        - name: specificity
-          title: Specificity
-          type: number
-          format: zto
-        - name: spe_ci_lower
-          title: Specificity 95% CI Lower
-          type: number
-          format: zto
-        - name: spe_ci_upper
-          title: Specificity 95% CI Upper
-          type: number
-          format: zto
-        - name: accuracy
-          title: Accuracy
-          type: number
-          format: zto
-        - name: youdens_j
-          title: "Youden's J"
-          type: number
-          format: zto
-          visible: (youdensJ)
-        - name: mcc
-          title: "MCC"
-          type: number
-          format: zto
-          visible: (matthewsCC)
+#     - name: cvPerformanceTable
+#       title: Cross-Validated Performance Metrics
+#       type: Table
+#       description: Performance metrics calculated using cross-validation
+#       visible: (showCrossValidation)
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - crossValidation
+#         - modelSelection
+#       columns:
+#         - name: model
+#           title: Model
+#           type: text
+#         - name: auc
+#           title: AUC
+#           type: number
+#           format: zto
+#         - name: auc_ci_lower
+#           title: AUC 95% CI Lower
+#           type: number
+#           format: zto
+#         - name: auc_ci_upper
+#           title: AUC 95% CI Upper
+#           type: number
+#           format: zto
+#         - name: sensitivity
+#           title: Sensitivity
+#           type: number
+#           format: zto
+#         - name: sen_ci_lower
+#           title: Sensitivity 95% CI Lower
+#           type: number
+#           format: zto
+#         - name: sen_ci_upper
+#           title: Sensitivity 95% CI Upper
+#           type: number
+#           format: zto
+#         - name: specificity
+#           title: Specificity
+#           type: number
+#           format: zto
+#         - name: spe_ci_lower
+#           title: Specificity 95% CI Lower
+#           type: number
+#           format: zto
+#         - name: spe_ci_upper
+#           title: Specificity 95% CI Upper
+#           type: number
+#           format: zto
+#         - name: accuracy
+#           title: Accuracy
+#           type: number
+#           format: zto
+#         - name: youdens_j
+#           title: "Youden's J"
+#           type: number
+#           format: zto
+#           visible: (youdensJ)
+#         - name: mcc
+#           title: "MCC"
+#           type: number
+#           format: zto
+#           visible: (matthewsCC)
 
-    - name: modelSelectionTable
-      title: Model Selection Results
-      type: Table
-      description: Results from automatic model selection process
-      visible: (showModelSelection && modelSelection != 'none')
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - modelSelection
-        - selectionDirection
-      columns:
-        - name: model
-          title: Model
-          type: text
-        - name: variables
-          title: Selected Variables
-          type: text
-        - name: aic
-          title: AIC
-          type: number
-          format: zto
-          visible: (modelSelection == 'AIC' || modelSelection == 'both')
-        - name: bic
-          title: BIC
-          type: number
-          format: zto
-          visible: (modelSelection == 'BIC' || modelSelection == 'both')
-        - name: deviance
-          title: Deviance
-          type: number
-          format: zto
-        - name: r_squared
-          title: R²
-          type: number
-          format: zto
+#     - name: modelSelectionTable
+#       title: Model Selection Results
+#       type: Table
+#       description: Results from automatic model selection process
+#       visible: (showModelSelection && modelSelection != 'none')
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - modelSelection
+#         - selectionDirection
+#       columns:
+#         - name: model
+#           title: Model
+#           type: text
+#         - name: variables
+#           title: Selected Variables
+#           type: text
+#         - name: aic
+#           title: AIC
+#           type: number
+#           format: zto
+#           visible: (modelSelection == 'AIC' || modelSelection == 'both')
+#         - name: bic
+#           title: BIC
+#           type: number
+#           format: zto
+#           visible: (modelSelection == 'BIC' || modelSelection == 'both')
+#         - name: deviance
+#           title: Deviance
+#           type: number
+#           format: zto
+#         - name: r_squared
+#           title: R²
+#           type: number
+#           format: zto
 
-    - name: modelComparisonTable
-      title: Model Comparison Statistics
-      type: Table
-      description: Statistical comparison between different models
-      visible: (showComparison && compareModels)
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - compareModels
-        - delongTest
-        - mcnemarTest
-      columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: test
-          title: Statistical Test
-          type: text
-        - name: statistic
-          title: Test Statistic
-          type: number
-          format: zto
-        - name: p_value
-          title: p-value
-          type: number
-          format: zto,pvalue
-        - name: effect_size
-          title: Effect Size
-          type: number
-          format: zto
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-          format: zto
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-          format: zto
+#     - name: modelComparisonTable
+#       title: Model Comparison Statistics
+#       type: Table
+#       description: Statistical comparison between different models
+#       visible: (showComparison && compareModels)
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - compareModels
+#         - delongTest
+#         - mcnemarTest
+#       columns:
+#         - name: comparison
+#           title: Comparison
+#           type: text
+#         - name: test
+#           title: Statistical Test
+#           type: text
+#         - name: statistic
+#           title: Test Statistic
+#           type: number
+#           format: zto
+#         - name: p_value
+#           title: p-value
+#           type: number
+#           format: zto,pvalue
+#         - name: effect_size
+#           title: Effect Size
+#           type: number
+#           format: zto
+#         - name: ci_lower
+#           title: 95% CI Lower
+#           type: number
+#           format: zto
+#         - name: ci_upper
+#           title: 95% CI Upper
+#           type: number
+#           format: zto
 
-    - name: nriIdiTable
-      title: NRI and IDI Analysis
-      type: Table
-      description: Net Reclassification Index and Integrated Discrimination Index
-      visible: (calculateNRI || calculateIDI)
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - referencePredictor
-        - calculateNRI
-        - calculateIDI
-      columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: metric
-          title: Metric
-          type: text
-        - name: estimate
-          title: Estimate
-          type: number
-          format: zto
-        - name: se
-          title: Standard Error
-          type: number
-          format: zto
-        - name: ci_lower
-          title: 95% CI Lower
-          type: number
-          format: zto
-        - name: ci_upper
-          title: 95% CI Upper
-          type: number
-          format: zto
-        - name: p_value
-          title: p-value
-          type: number
-          format: zto,pvalue
+#     - name: nriIdiTable
+#       title: NRI and IDI Analysis
+#       type: Table
+#       description: Net Reclassification Index and Integrated Discrimination Index
+#       visible: (calculateNRI || calculateIDI)
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - referencePredictor
+#         - calculateNRI
+#         - calculateIDI
+#       columns:
+#         - name: comparison
+#           title: Comparison
+#           type: text
+#         - name: metric
+#           title: Metric
+#           type: text
+#         - name: estimate
+#           title: Estimate
+#           type: number
+#           format: zto
+#         - name: se
+#           title: Standard Error
+#           type: number
+#           format: zto
+#         - name: ci_lower
+#           title: 95% CI Lower
+#           type: number
+#           format: zto
+#         - name: ci_upper
+#           title: 95% CI Upper
+#           type: number
+#           format: zto
+#         - name: p_value
+#           title: p-value
+#           type: number
+#           format: zto,pvalue
 
-    - name: calibrationTable
-      title: Calibration Statistics
-      type: Table
-      description: Model calibration assessment including Hosmer-Lemeshow test
-      visible: (showCalibration && calibrationTest)
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - calibrationTest
-      columns:
-        - name: model
-          title: Model
-          type: text
-        - name: hl_statistic
-          title: Hosmer-Lemeshow χ²
-          type: number
-          format: zto
-        - name: hl_df
-          title: df
-          type: integer
-        - name: hl_p_value
-          title: p-value
-          type: number
-          format: zto,pvalue
-        - name: calibration_slope
-          title: Calibration Slope
-          type: number
-          format: zto
-        - name: calibration_intercept
-          title: Calibration Intercept
-          type: number
-          format: zto
-        - name: brier_score
-          title: Brier Score
-          type: number
-          format: zto
+#     - name: calibrationTable
+#       title: Calibration Statistics
+#       type: Table
+#       description: Model calibration assessment including Hosmer-Lemeshow test
+#       visible: (showCalibration && calibrationTest)
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - calibrationTest
+#       columns:
+#         - name: model
+#           title: Model
+#           type: text
+#         - name: hl_statistic
+#           title: Hosmer-Lemeshow χ²
+#           type: number
+#           format: zto
+#         - name: hl_df
+#           title: df
+#           type: integer
+#         - name: hl_p_value
+#           title: p-value
+#           type: number
+#           format: zto,pvalue
+#         - name: calibration_slope
+#           title: Calibration Slope
+#           type: number
+#           format: zto
+#         - name: calibration_intercept
+#           title: Calibration Intercept
+#           type: number
+#           format: zto
+#         - name: brier_score
+#           title: Brier Score
+#           type: number
+#           format: zto
 
-    - name: eceTable
-      title: Expected Calibration Error (ECE)
-      type: Table
-      description: Calibration error metrics for probabilistic predictions
-      visible: (expectedCalibrationError)
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - eceBins
-      columns:
-        - name: model
-          title: Model
-          type: text
-        - name: ece
-          title: ECE
-          type: number
-          format: zto
-        - name: mce
-          title: MCE
-          type: number
-          format: zto
-          visible: (maxCalibrationError)
-        - name: num_bins
-          title: Number of Bins
-          type: integer
-        - name: avg_confidence
-          title: Avg Confidence
-          type: number
-          format: zto
-        - name: avg_accuracy
-          title: Avg Accuracy
-          type: number
-          format: zto
+#     - name: eceTable
+#       title: Expected Calibration Error (ECE)
+#       type: Table
+#       description: Calibration error metrics for probabilistic predictions
+#       visible: (expectedCalibrationError)
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - eceBins
+#       columns:
+#         - name: model
+#           title: Model
+#           type: text
+#         - name: ece
+#           title: ECE
+#           type: number
+#           format: zto
+#         - name: mce
+#           title: MCE
+#           type: number
+#           format: zto
+#           visible: (maxCalibrationError)
+#         - name: num_bins
+#           title: Number of Bins
+#           type: integer
+#         - name: avg_confidence
+#           title: Avg Confidence
+#           type: number
+#           format: zto
+#         - name: avg_accuracy
+#           title: Avg Accuracy
+#           type: number
+#           format: zto
 
-    - name: eceBinDetails
-      title: ECE Bin-Level Details
-      type: Table
-      description: Detailed calibration error for each probability bin
-      visible: (expectedCalibrationError)
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - eceBins
-      columns:
-        - name: bin
-          title: Bin
-          type: integer
-        - name: bin_range
-          title: Probability Range
-          type: text
-        - name: n_samples
-          title: N Samples
-          type: integer
-        - name: avg_confidence
-          title: Avg Confidence
-          type: number
-          format: zto
-        - name: avg_accuracy
-          title: Avg Accuracy
-          type: number
-          format: zto
-        - name: calibration_error
-          title: Calibration Error
-          type: number
-          format: zto
+#     - name: eceBinDetails
+#       title: ECE Bin-Level Details
+#       type: Table
+#       description: Detailed calibration error for each probability bin
+#       visible: (expectedCalibrationError)
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - eceBins
+#       columns:
+#         - name: bin
+#           title: Bin
+#           type: integer
+#         - name: bin_range
+#           title: Probability Range
+#           type: text
+#         - name: n_samples
+#           title: N Samples
+#           type: integer
+#         - name: avg_confidence
+#           title: Avg Confidence
+#           type: number
+#           format: zto
+#         - name: avg_accuracy
+#           title: Avg Accuracy
+#           type: number
+#           format: zto
+#         - name: calibration_error
+#           title: Calibration Error
+#           type: number
+#           format: zto
 
-    - name: variableImportanceTable
-      title: Variable Importance
-      type: Table
-      description: Importance scores for variables in selected models
-      visible: (variableImportancePlot && modelSelection != 'none')
-      clearWith:
-        - predictorVars
-        - modelSelection
-      columns:
-        - name: variable
-          title: Variable
-          type: text
-        - name: importance
-          title: Importance Score
-          type: number
-          format: zto
-        - name: rank
-          title: Rank
-          type: integer
-        - name: selected
-          title: Selected in Final Model
-          type: text
+#     - name: variableImportanceTable
+#       title: Variable Importance
+#       type: Table
+#       description: Importance scores for variables in selected models
+#       visible: (variableImportancePlot && modelSelection != 'none')
+#       clearWith:
+#         - predictorVars
+#         - modelSelection
+#       columns:
+#         - name: variable
+#           title: Variable
+#           type: text
+#         - name: importance
+#           title: Importance Score
+#           type: number
+#           format: zto
+#         - name: rank
+#           title: Rank
+#           type: integer
+#         - name: selected
+#           title: Selected in Final Model
+#           type: text
 
-    - name: cvFoldResults
-      title: Cross-Validation Fold Details
-      type: Table
-      description: Performance metrics for each cross-validation fold
-      visible: (showCrossValidation && crossValidation != 'none')
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - crossValidation
-        - nRepeats
-      columns:
-        - name: fold
-          title: Fold
-          type: text
-        - name: model
-          title: Model
-          type: text
-        - name: auc
-          title: AUC
-          type: number
-          format: zto
-        - name: sensitivity
-          title: Sensitivity
-          type: number
-          format: zto
-        - name: specificity
-          title: Specificity
-          type: number
-          format: zto
-        - name: accuracy
-          title: Accuracy
-          type: number
-          format: zto
-        - name: n_cases
-          title: Cases
-          type: integer
-        - name: n_controls
-          title: Controls
-          type: integer
+#     - name: cvFoldResults
+#       title: Cross-Validation Fold Details
+#       type: Table
+#       description: Performance metrics for each cross-validation fold
+#       visible: (showCrossValidation && crossValidation != 'none')
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - crossValidation
+#         - nRepeats
+#       columns:
+#         - name: fold
+#           title: Fold
+#           type: text
+#         - name: model
+#           title: Model
+#           type: text
+#         - name: auc
+#           title: AUC
+#           type: number
+#           format: zto
+#         - name: sensitivity
+#           title: Sensitivity
+#           type: number
+#           format: zto
+#         - name: specificity
+#           title: Specificity
+#           type: number
+#           format: zto
+#         - name: accuracy
+#           title: Accuracy
+#           type: number
+#           format: zto
+#         - name: n_cases
+#           title: Cases
+#           type: integer
+#         - name: n_controls
+#           title: Controls
+#           type: integer
 
-    # Plots Section
-    - name: rocPlot
-      title: ROC Curves with Cross-Validation Bands
-      type: Image
-      description: ROC curves showing cross-validated performance with confidence bands
-      visible: (rocPlot)
-      requiresData: true
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - crossValidation
-        - confidenceLevel
+#     # Plots Section
+#     - name: rocPlot
+#       title: ROC Curves with Cross-Validation Bands
+#       type: Image
+#       description: ROC curves showing cross-validated performance with confidence bands
+#       visible: (rocPlot)
+#       requiresData: true
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - crossValidation
+#         - confidenceLevel
 
-    - name: calibrationPlot
-      title: Calibration Plot
-      type: Image
-      description: Calibration plot showing observed vs predicted probabilities
-      visible: (calibrationPlot)
-      requiresData: true
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - calibrationTest
+#     - name: calibrationPlot
+#       title: Calibration Plot
+#       type: Image
+#       description: Calibration plot showing observed vs predicted probabilities
+#       visible: (calibrationPlot)
+#       requiresData: true
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - calibrationTest
 
-    - name: reliabilityDiagramPlot
-      title: Reliability Diagram
-      type: Image
-      description: Reliability diagram showing predicted probabilities vs observed frequencies with ECE visualization
-      visible: (reliabilityDiagram && expectedCalibrationError)
-      requiresData: true
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - eceBins
-        - expectedCalibrationError
+#     - name: reliabilityDiagramPlot
+#       title: Reliability Diagram
+#       type: Image
+#       description: Reliability diagram showing predicted probabilities vs observed frequencies with ECE visualization
+#       visible: (reliabilityDiagram && expectedCalibrationError)
+#       requiresData: true
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - eceBins
+#         - expectedCalibrationError
 
-    - name: comparisonPlot
-      title: Model Comparison Forest Plot
-      type: Image
-      description: Forest plot comparing model performance with confidence intervals
-      visible: (comparisonPlot && compareModels)
-      requiresData: true
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - compareModels
-        - delongTest
+#     - name: comparisonPlot
+#       title: Model Comparison Forest Plot
+#       type: Image
+#       description: Forest plot comparing model performance with confidence intervals
+#       visible: (comparisonPlot && compareModels)
+#       requiresData: true
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - compareModels
+#         - delongTest
 
-    - name: cvPerformancePlot
-      title: Cross-Validation Performance
-      type: Image
-      description: Box plots showing performance distribution across CV folds
-      visible: (cvPerformancePlot && crossValidation != 'none')
-      requiresData: true
-      clearWith:
-        - predictorVars
-        - outcomeVar
-        - crossValidation
-        - nRepeats
+#     - name: cvPerformancePlot
+#       title: Cross-Validation Performance
+#       type: Image
+#       description: Box plots showing performance distribution across CV folds
+#       visible: (cvPerformancePlot && crossValidation != 'none')
+#       requiresData: true
+#       clearWith:
+#         - predictorVars
+#         - outcomeVar
+#         - crossValidation
+#         - nRepeats
 
-    - name: variableImportancePlot
-      title: Variable Importance Plot
-      type: Image
-      description: Bar plot showing variable importance from model selection
-      visible: (variableImportancePlot && modelSelection != 'none')
-      requiresData: true
-      clearWith:
-        - predictorVars
-        - modelSelection
+#     - name: variableImportancePlot
+#       title: Variable Importance Plot
+#       type: Image
+#       description: Bar plot showing variable importance from model selection
+#       visible: (variableImportancePlot && modelSelection != 'none')
+#       requiresData: true
+#       clearWith:
+#         - predictorVars
+#         - modelSelection
 
-    # Explanations Section
-    - name: methodologyExplanation
-      title: Methodology Explanation
-      type: Html
-      visible: (showExplanations)
+#     # Explanations Section
+#     - name: methodologyExplanation
+#       title: Methodology Explanation
+#       type: Html
+#       visible: (showExplanations)
 
-    - name: resultsInterpretation
-      title: Results Interpretation
-      type: Html
-      visible: (showSummaries)
+#     - name: resultsInterpretation
+#       title: Results Interpretation
+#       type: Html
+#       visible: (showSummaries)
 
-    - name: statisticalNotes
-      title: Statistical Notes
-      type: Html
-      visible: (showExplanations)
+#     - name: statisticalNotes
+#       title: Statistical Notes
+#       type: Html
+#       visible: (showExplanations)
       
-    - name: recommendationsText
-      title: Recommendations
-      type: Html
-      visible: (showSummaries)
+#     - name: recommendationsText
+#       title: Recommendations
+#       type: Html
+#       visible: (showSummaries)
 
-refs:
-    - ClinicoPathJamoviModule
-
-    - caret
-    - pROC
-    - MASS
-    - glmnet
-    - boot
-    - ResourceSelection
-    - scales
-    - reshape2
+# refs:
+#     - ClinicoPathJamoviModule
+#     - caret
+#     - pROC
+#     - MASS
+#     - glmnet
+#     - boot
+#     - ResourceSelection
+#     - scales
+#     - reshape2
 ...
