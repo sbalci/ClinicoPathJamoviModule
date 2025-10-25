@@ -3,7 +3,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom stats qnorm quantile var sd shapiro.test qqnorm qqline
-#' @importFrom graphics plot lines legend abline hist density par
+#' @importFrom graphics plot lines legend abline hist par
 #' @export
 
 

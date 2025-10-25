@@ -1,7 +1,7 @@
 ---
 name: aivalidation
 title: AI Model Validation with Cross-Validation
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: AI & Machine Learning
 menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
 version: '0.0.32'
@@ -69,320 +69,320 @@ options:
           R: >
             reference predictor for model comparisons (typically AI model or main biomarker)
 
-    # Cross-Validation Options
-    - name: crossValidation
-      title: Cross-Validation Method
-      type: List
-      options:
-        - name: '5-fold'
-          title: 5-fold Cross-Validation
-        - name: '10-fold'
-          title: 10-fold Cross-Validation
-        - name: 'LOO'
-          title: Leave-One-Out
-        - name: 'repeated'
-          title: Repeated Cross-Validation
-        - name: 'none'
-          title: No Cross-Validation
-      default: '10-fold'
-      description:
-          R: >
-            cross-validation method for model validation
+    # # Cross-Validation Options
+    # - name: crossValidation
+    #   title: Cross-Validation Method
+    #   type: List
+    #   options:
+    #     - name: '5-fold'
+    #       title: 5-fold Cross-Validation
+    #     - name: '10-fold'
+    #       title: 10-fold Cross-Validation
+    #     - name: 'LOO'
+    #       title: Leave-One-Out
+    #     - name: 'repeated'
+    #       title: Repeated Cross-Validation
+    #     - name: 'none'
+    #       title: No Cross-Validation
+    #   default: '10-fold'
+    #   description:
+    #       R: >
+    #         cross-validation method for model validation
 
-    - name: nRepeats
-      title: Number of Repeats
-      type: Integer
-      min: 1
-      max: 1000
-      default: 10
-      description:
-          R: >
-            number of repetitions for repeated cross-validation
+    # - name: nRepeats
+    #   title: Number of Repeats
+    #   type: Integer
+    #   min: 1
+    #   max: 1000
+    #   default: 10
+    #   description:
+    #       R: >
+    #         number of repetitions for repeated cross-validation
 
-    - name: stratified
-      title: Stratified Cross-Validation
-      type: Bool
-      default: true
-      description:
-          R: >
-            maintain outcome variable proportions across folds
+    # - name: stratified
+    #   title: Stratified Cross-Validation
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         maintain outcome variable proportions across folds
 
-    - name: randomSeed
-      title: Random Seed
-      type: Integer
-      min: 1
-      default: 42
-      description:
-          R: >
-            random seed for reproducible results
+    # - name: randomSeed
+    #   title: Random Seed
+    #   type: Integer
+    #   min: 1
+    #   default: 42
+    #   description:
+    #       R: >
+    #         random seed for reproducible results
 
-    # Model Selection Options
-    - name: modelSelection
-      title: Model Selection Method
-      type: List
-      options:
-        - name: 'none'
-          title: No Model Selection
-        - name: 'AIC'
-          title: AIC Stepwise Selection
-        - name: 'BIC'
-          title: BIC Stepwise Selection
-        - name: 'forward'
-          title: Forward Selection
-        - name: 'backward'
-          title: Backward Selection
-        - name: 'lasso'
-          title: LASSO Regularization
-        - name: 'ridge'
-          title: Ridge Regression
-        - name: 'elastic'
-          title: Elastic Net
-      default: 'AIC'
-      description:
-          R: >
-            method for automatic model selection and variable importance
+    # # Model Selection Options
+    # - name: modelSelection
+    #   title: Model Selection Method
+    #   type: List
+    #   options:
+    #     - name: 'none'
+    #       title: No Model Selection
+    #     - name: 'AIC'
+    #       title: AIC Stepwise Selection
+    #     - name: 'BIC'
+    #       title: BIC Stepwise Selection
+    #     - name: 'forward'
+    #       title: Forward Selection
+    #     - name: 'backward'
+    #       title: Backward Selection
+    #     - name: 'lasso'
+    #       title: LASSO Regularization
+    #     - name: 'ridge'
+    #       title: Ridge Regression
+    #     - name: 'elastic'
+    #       title: Elastic Net
+    #   default: 'AIC'
+    #   description:
+    #       R: >
+    #         method for automatic model selection and variable importance
 
-    - name: selectionDirection
-      title: Selection Direction
-      type: List
-      options:
-        - name: 'both'
-          title: Bidirectional
-        - name: 'forward'
-          title: Forward
-        - name: 'backward'
-          title: Backward
-      default: 'both'
-      description:
-          R: >
-            direction for stepwise model selection
+    # - name: selectionDirection
+    #   title: Selection Direction
+    #   type: List
+    #   options:
+    #     - name: 'both'
+    #       title: Bidirectional
+    #     - name: 'forward'
+    #       title: Forward
+    #     - name: 'backward'
+    #       title: Backward
+    #   default: 'both'
+    #   description:
+    #       R: >
+    #         direction for stepwise model selection
 
-    # Statistical Tests
-    - name: compareModels
-      title: Compare Models
-      type: Bool
-      default: true
-      description:
-          R: >
-            perform statistical comparison between models
+    # # Statistical Tests
+    # - name: compareModels
+    #   title: Compare Models
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         perform statistical comparison between models
 
-    - name: delongTest
-      title: DeLong Test
-      type: Bool
-      default: true
-      description:
-          R: >
-            perform DeLong test for comparing AUC values
+    # - name: delongTest
+    #   title: DeLong Test
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         perform DeLong test for comparing AUC values
 
-    - name: mcnemarTest
-      title: McNemar's Test
-      type: Bool
-      default: false
-      description:
-          R: >
-            perform McNemar's test for paired binary predictions
+    # - name: mcnemarTest
+    #   title: McNemar's Test
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         perform McNemar's test for paired binary predictions
 
-    - name: calibrationTest
-      title: Calibration Test
-      type: Bool
-      default: true
-      description:
-          R: >
-            perform Hosmer-Lemeshow calibration test
+    # - name: calibrationTest
+    #   title: Calibration Test
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         perform Hosmer-Lemeshow calibration test
 
-    # Advanced Metrics
-    - name: calculateNRI
-      title: Net Reclassification Index
-      type: Bool
-      default: true
-      description:
-          R: >
-            calculate Net Reclassification Index with confidence intervals
+    # # Advanced Metrics
+    # - name: calculateNRI
+    #   title: Net Reclassification Index
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         calculate Net Reclassification Index with confidence intervals
 
-    - name: calculateIDI
-      title: Integrated Discrimination Index
-      type: Bool
-      default: true
-      description:
-          R: >
-            calculate Integrated Discrimination Index with confidence intervals
+    # - name: calculateIDI
+    #   title: Integrated Discrimination Index
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         calculate Integrated Discrimination Index with confidence intervals
 
-    - name: youdensJ
-      title: Youden's J Statistic
-      type: Bool
-      default: true
-      description:
-          R: >
-            calculate Youden's J statistic for optimal cutoff determination
+    # - name: youdensJ
+    #   title: Youden's J Statistic
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         calculate Youden's J statistic for optimal cutoff determination
 
-    - name: matthewsCC
-      title: Matthews Correlation Coefficient (MCC)
-      type: Bool
-      default: true
-      description:
-          R: >
-            calculate Matthews Correlation Coefficient, a balanced measure for binary classification
-            that accounts for all four confusion matrix categories. Especially useful for imbalanced datasets
-            (e.g., rare events like mitosis detection). MCC ranges from -1 to +1 where +1 represents
-            perfect prediction, 0 represents random prediction, and -1 represents total disagreement
+    # - name: matthewsCC
+    #   title: Matthews Correlation Coefficient (MCC)
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         calculate Matthews Correlation Coefficient, a balanced measure for binary classification
+    #         that accounts for all four confusion matrix categories. Especially useful for imbalanced datasets
+    #         (e.g., rare events like mitosis detection). MCC ranges from -1 to +1 where +1 represents
+    #         perfect prediction, 0 represents random prediction, and -1 represents total disagreement
 
-    # Calibration Metrics
-    - name: expectedCalibrationError
-      title: Expected Calibration Error (ECE)
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Expected Calibration Error to assess reliability of predicted probabilities.
-            ECE measures the difference between predicted probabilities and actual outcomes across
-            probability bins. Essential for AI models to ensure predicted probabilities are well-calibrated.
-            Lower ECE values indicate better calibration (perfect calibration = 0)
+    # # Calibration Metrics
+    # - name: expectedCalibrationError
+    #   title: Expected Calibration Error (ECE)
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         calculate Expected Calibration Error to assess reliability of predicted probabilities.
+    #         ECE measures the difference between predicted probabilities and actual outcomes across
+    #         probability bins. Essential for AI models to ensure predicted probabilities are well-calibrated.
+    #         Lower ECE values indicate better calibration (perfect calibration = 0)
 
-    - name: eceBins
-      title: Number of ECE Bins
-      type: Integer
-      min: 5
-      max: 20
-      default: 10
-      description:
-          R: >
-            number of bins for Expected Calibration Error calculation. Standard is 10 bins.
-            More bins provide finer granularity but require more data
+    # - name: eceBins
+    #   title: Number of ECE Bins
+    #   type: Integer
+    #   min: 5
+    #   max: 20
+    #   default: 10
+    #   description:
+    #       R: >
+    #         number of bins for Expected Calibration Error calculation. Standard is 10 bins.
+    #         More bins provide finer granularity but require more data
 
-    - name: maxCalibrationError
-      title: Maximum Calibration Error (MCE)
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate Maximum Calibration Error (worst-case calibration error across all bins).
-            MCE identifies the bin with the largest deviation between predicted and actual outcomes
+    # - name: maxCalibrationError
+    #   title: Maximum Calibration Error (MCE)
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         calculate Maximum Calibration Error (worst-case calibration error across all bins).
+    #         MCE identifies the bin with the largest deviation between predicted and actual outcomes
 
-    - name: reliabilityDiagram
-      title: Reliability Diagram
-      type: Bool
-      default: true
-      description:
-          R: >
-            display reliability diagram showing predicted probabilities vs observed frequencies.
-            Perfect calibration appears as a diagonal line. Useful for visualizing calibration quality
+    # - name: reliabilityDiagram
+    #   title: Reliability Diagram
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         display reliability diagram showing predicted probabilities vs observed frequencies.
+    #         Perfect calibration appears as a diagonal line. Useful for visualizing calibration quality
 
-    - name: bootstrapCI
-      title: Bootstrap Confidence Intervals
-      type: Bool
-      default: true
-      description:
-          R: >
-            use bootstrap methods for confidence interval estimation
+    # - name: bootstrapCI
+    #   title: Bootstrap Confidence Intervals
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         use bootstrap methods for confidence interval estimation
 
-    - name: nBootstrap
-      title: Bootstrap Iterations
-      type: Integer
-      min: 100
-      max: 10000
-      default: 1000
-      description:
-          R: >
-            number of bootstrap iterations for confidence intervals
+    # - name: nBootstrap
+    #   title: Bootstrap Iterations
+    #   type: Integer
+    #   min: 100
+    #   max: 10000
+    #   default: 1000
+    #   description:
+    #       R: >
+    #         number of bootstrap iterations for confidence intervals
 
-    # Output Options
-    - name: showModelSelection
-      title: Show Model Selection Results
-      type: Bool
-      default: true
-      description:
-          R: >
-            display model selection process and variable importance
+    # # Output Options
+    # - name: showModelSelection
+    #   title: Show Model Selection Results
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         display model selection process and variable importance
 
-    - name: showCalibration
-      title: Show Calibration Analysis
-      type: Bool
-      default: true
-      description:
-          R: >
-            display calibration plots and statistics
+    # - name: showCalibration
+    #   title: Show Calibration Analysis
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         display calibration plots and statistics
 
-    - name: showCrossValidation
-      title: Show Cross-Validation Details
-      type: Bool
-      default: true
-      description:
-          R: >
-            display detailed cross-validation results
+    # - name: showCrossValidation
+    #   title: Show Cross-Validation Details
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         display detailed cross-validation results
 
-    - name: showComparison
-      title: Show Model Comparison
-      type: Bool
-      default: true
-      description:
-          R: >
-            display statistical comparison between models
+    # - name: showComparison
+    #   title: Show Model Comparison
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         display statistical comparison between models
 
-    # Plot Options
-    - name: rocPlot
-      title: ROC Curves
-      type: Bool
-      default: true
-      description:
-          R: >
-            generate ROC curves with cross-validation confidence bands
+    # # Plot Options
+    # - name: rocPlot
+    #   title: ROC Curves
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         generate ROC curves with cross-validation confidence bands
 
-    - name: calibrationPlot
-      title: Calibration Plot
-      type: Bool
-      default: true
-      description:
-          R: >
-            generate calibration plots showing observed vs predicted probabilities
+    # - name: calibrationPlot
+    #   title: Calibration Plot
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         generate calibration plots showing observed vs predicted probabilities
 
-    - name: comparisonPlot
-      title: Model Comparison Plot
-      type: Bool
-      default: true
-      description:
-          R: >
-            generate forest plot comparing model performance
+    # - name: comparisonPlot
+    #   title: Model Comparison Plot
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         generate forest plot comparing model performance
 
-    - name: cvPerformancePlot
-      title: Cross-Validation Performance
-      type: Bool
-      default: true
-      description:
-          R: >
-            generate plots showing cross-validation performance across folds
+    # - name: cvPerformancePlot
+    #   title: Cross-Validation Performance
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         generate plots showing cross-validation performance across folds
 
-    - name: variableImportancePlot
-      title: Variable Importance Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            generate variable importance plot from model selection
+    # - name: variableImportancePlot
+    #   title: Variable Importance Plot
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         generate variable importance plot from model selection
 
-    # Report Options
-    - name: showExplanations
-      title: Show Explanations
-      type: Bool
-      default: true
-      description:
-          R: >
-            show explanations for methods and interpretations
+    # # Report Options
+    # - name: showExplanations
+    #   title: Show Explanations
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         show explanations for methods and interpretations
 
-    - name: showSummaries
-      title: Show Summaries
-      type: Bool
-      default: true
-      description:
-          R: >
-            show summary interpretations of results
+    # - name: showSummaries
+    #   title: Show Summaries
+    #   type: Bool
+    #   default: true
+    #   description:
+    #       R: >
+    #         show summary interpretations of results
 
-    - name: confidenceLevel
-      title: Confidence Level
-      type: Number
-      min: 0.5
-      max: 0.999
-      default: 0.95
-      description:
-          R: >
-            confidence level for confidence intervals
+    # - name: confidenceLevel
+    #   title: Confidence Level
+    #   type: Number
+    #   min: 0.5
+    #   max: 0.999
+    #   default: 0.95
+    #   description:
+    #       R: >
+    #         confidence level for confidence intervals
 ...
