@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Medical Decision Analysis
 menuTitle: Multi-class ROC Analysis
 menuSubtitle: ROC curves for >2 diagnostic classes
-version: '1.0.0'
+version: '0.0.32'
 jas: '1.2'
 
 description:

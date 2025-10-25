@@ -12,15 +12,86 @@
 #'
 #' @details The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
 #'
+#' @references
+#' Cohen, J. (1960). A coefficient of agreement for nominal scales.
+#' \emph{Educational and Psychological Measurement}, 20(1), 37-46.
+#'
+#' Cohen, J. (1968). Weighted kappa: Nominal scale agreement with provision
+#' for scaled disagreement or partial credit. \emph{Psychological Bulletin}, 70(4), 213-220.
+#'
+#' Fleiss, J. L. (1971). Measuring nominal scale agreement among many raters.
+#' \emph{Psychological Bulletin}, 76(5), 378-382.
+#'
+#' Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for
+#' categorical data. \emph{Biometrics}, 33(1), 159-174.
+#'
+#' Conger, A. J. (1980). Integration and generalization of kappas for multiple raters.
+#' \emph{Psychological Bulletin}, 88(2), 322-328.
+#'
 #'
 
 
-# See
+# See also:
 # \url{http://www.cookbook-r.com/Statistical_analysis/Inter-rater_reliability/#ordinal-data-weighted-kappa}
 
 
 agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
     inherit = agreementBase, private = list(
+
+        # Variable name escaping utility for special characters
+        .escapeVar = function(x) {
+            if (is.null(x) || length(x) == 0) return(character(0))
+            # Handle spaces, special characters, and ensure valid R names
+            vapply(x, function(v) {
+                # First make it a valid R name
+                v <- make.names(v)
+                # Replace any remaining non-alphanumeric characters with underscore
+                gsub("[^A-Za-z0-9_]+", "_", v)
+            }, character(1), USE.NAMES = FALSE)
+        },
+
+        .prepareRatingColumn = function(column, categoricalMode, numericLevels = NULL) {
+            if (is.data.frame(column)) {
+                stop("Internal error: expected a vector when preparing ratings")
+            }
+
+            if (is.character(column))
+                column <- factor(column)
+
+            if (categoricalMode) {
+                if (is.numeric(column)) {
+                    levels_sorted <- numericLevels
+                    if (is.null(levels_sorted))
+                        levels_sorted <- sort(unique(column))
+                    return(factor(column, levels = levels_sorted, ordered = TRUE))
+                }
+                return(column)
+            }
+
+            if (!is.numeric(column)) {
+                stop("Continuous agreement options (CCC/Bland-Altman) require numeric rating variables. Provide numeric columns or disable these options.")
+            }
+
+            column
+        },
+
+        .interpretKappa = function(kappa) {
+            if (is.null(kappa) || length(kappa) == 0 || is.na(kappa))
+                return("Unable to evaluate")
+
+            if (kappa < 0)
+                return("Poor agreement (worse than chance)")
+            if (kappa < 0.20)
+                return("Slight agreement")
+            if (kappa < 0.40)
+                return("Fair agreement")
+            if (kappa < 0.60)
+                return("Moderate agreement")
+            if (kappa < 0.80)
+                return("Substantial agreement")
+
+            "Almost perfect agreement"
+        },
 
         .createSummary = function(result1, result2, wght, exct) {
             # Create plain-language summary of agreement results
@@ -485,7 +556,26 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             return()
         } else {
             self$results$welcome$setVisible(FALSE)
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+            # Enhanced validation ----
+            if (is.null(self$data) || nrow(self$data) == 0) {
+                stop("Data contains no rows")
+            }
+
+            if (nrow(self$data) < 3) {
+                stop("At least 3 observations required for reliability analysis")
+            }
+
+            # Validate variable types
+            for (v in self$options$vars) {
+                if (!v %in% names(self$data)) {
+                    stop(paste0("Variable '", v, "' not found in dataset"))
+                }
+                var_data <- self$data[[v]]
+                if (!is.factor(var_data) && !is.numeric(var_data) && !is.ordered(var_data)) {
+                    stop(paste0("Variable '", v, "' must be categorical (factor), ordinal, or numeric"))
+                }
+            }
 
             # Data preparation ----
             exct <- self$options$exct
@@ -499,6 +589,23 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             if (!is.data.frame(ratings)) {
                 ratings <- as.data.frame(ratings)
             }
+
+            needsNumeric <- any(c(self$options$ccc, self$options$blandAltman,
+                                  self$options$blandAltmanPlot, self$options$proportionalBias))
+            categoricalMode <- !needsNumeric
+
+            numericLevels <- NULL
+            if (categoricalMode) {
+                numeric_values <- unique(unlist(lapply(ratings, function(col) {
+                    if (is.numeric(col)) return(as.numeric(stats::na.omit(col)))
+                    NULL
+                })))
+                if (length(numeric_values) > 0)
+                    numericLevels <- sort(numeric_values)
+            }
+
+            ratings[] <- lapply(ratings, function(col)
+                private$.prepareRatingColumn(col, categoricalMode, numericLevels))
 
             # Preserve jamovi attributes if they exist
             if (!is.null(attr(mydata, "jmv-desc"))) {
@@ -528,10 +635,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # 2 raters: Cohen's kappa ----
             if (length(self$options$vars) == 2) {
-                xorder <- unlist(lapply(ratings, is.ordered))
+                if (wght %in% c("equal", "squared")) {
+                    for (col_name in names(ratings)) {
+                        column <- ratings[[col_name]]
 
-                if (wght %in% c("equal", "squared") && !all(xorder == TRUE)) {
-                    stop("Weighted kappa requires ordinal variables. Please select ordinal data or choose 'Unweighted'.")
+                        if (!is.ordered(column)) {
+                            stop("Weighted kappa requires ordinal (ordered factor) or numeric variables. Please adjust the data or choose 'Unweighted'.")
+                        }
+                    }
                 }
 
                 if (exct == TRUE) {
@@ -733,8 +844,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
         # Consensus Score Derivation (if requested) ----
         if (self$options$consensusVar) {
+            if (!categoricalMode) {
+                stop("Consensus scoring requires categorical ratings. Disable continuous agreement options to create consensus variables.")
+            }
             tryCatch({
                 ratings <- self$data[, self$options$vars, drop = FALSE]
+                ratings[] <- lapply(ratings, function(col) private$.prepareRatingColumn(col, TRUE, numericLevels))
                 n_raters <- length(self$options$vars)
 
                 # Calculate modal category for each row
@@ -821,7 +936,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         if (!is.null(self$options$referenceRater)) {
             tryCatch({
                 reference_var <- self$options$referenceRater
-                reference_data <- self$data[[reference_var]]
+                reference_data <- private$.prepareRatingColumn(self$data[[reference_var]], categoricalMode, numericLevels)
 
                 rater_results <- list()
 
@@ -830,7 +945,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                     private$.checkpoint()  # Allow UI responsiveness
 
-                    rater_data <- self$data[[rater_var]]
+                    rater_data <- private$.prepareRatingColumn(self$data[[rater_var]], categoricalMode, numericLevels)
 
                     # Create pairwise data frame
                     pair_data <- data.frame(reference_data, rater_data)
@@ -844,15 +959,37 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         ci_upper <- NA
                     } else {
                         # Calculate Cohen's kappa with specified weights
+                        if (self$options$wght %in% c("equal", "squared")) {
+                            for (col_idx in seq_along(pair_data)) {
+                                column <- pair_data[[col_idx]]
+
+                                if (is.numeric(column)) {
+                                    pair_data[[col_idx]] <- factor(column,
+                                                                  levels = sort(unique(column)),
+                                                                  ordered = TRUE)
+                                } else if (!is.ordered(column)) {
+                                    stop("Weighted kappa requires ordinal (ordered factor) or numeric variables. Adjust the reference or rater column selection or choose 'Unweighted'.")
+                                }
+                            }
+                        }
+
                         kappa_result <- irr::kappa2(pair_data, weight = self$options$wght)
                         kappa_val <- kappa_result$value
 
-                        # Compute CI from z-statistic
-                        z_stat <- kappa_result$statistic
-                        if (!is.null(z_stat) && !is.na(z_stat) && z_stat != 0) {
-                            se_kappa <- abs(kappa_val / z_stat)
-                            ci_lower <- kappa_val - 1.96 * se_kappa
-                            ci_upper <- kappa_val + 1.96 * se_kappa
+                        # Compute CI from reported variance when available
+                        if (!is.null(kappa_result$var) && !is.na(kappa_result$var) && kappa_result$var >= 0) {
+                            se_kappa <- sqrt(kappa_result$var)
+                        } else if (!is.null(kappa_result$statistic) &&
+                                   !is.na(kappa_result$statistic) &&
+                                   kappa_result$statistic != 0) {
+                            se_kappa <- abs(kappa_val / kappa_result$statistic)
+                        } else {
+                            se_kappa <- NA
+                        }
+
+                        if (!is.na(se_kappa)) {
+                            ci_lower <- max(-1, kappa_val - 1.96 * se_kappa)
+                            ci_upper <- min(1, kappa_val + 1.96 * se_kappa)
                         } else {
                             ci_lower <- NA
                             ci_upper <- NA
@@ -879,17 +1016,21 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 # Populate table
                 pairwiseTable <- self$results$pairwiseKappaTable
+
                 for (i in seq_along(rater_results)) {
                     res <- rater_results[[i]]
-                    pairwiseTable$setRow(rowNo = i, values = list(
-                        rank = if (self$options$rankRaters) i else NA,
-                        rater = res$rater,
-                        n_cases = res$n_cases,
-                        kappa = res$kappa,
-                        ci_lower = res$ci_lower,
-                        ci_upper = res$ci_upper,
-                        interpretation = res$interpretation
-                    ))
+                    pairwiseTable$addRow(
+                        rowKey = res$rater,
+                        values = list(
+                            rank = if (self$options$rankRaters) i else NA,
+                            rater = res$rater,
+                            n_cases = res$n_cases,
+                            kappa = res$kappa,
+                            ci_lower = res$ci_lower,
+                            ci_upper = res$ci_upper,
+                            interpretation = res$interpretation
+                        )
+                    )
                 }
 
             }, error = function(e) {
@@ -900,41 +1041,58 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
         # Level of Agreement (LoA) Categorization ----
         if (self$options$loaVariable) {
+            if (!categoricalMode) {
+                stop("Level of agreement categories are available only for categorical ratings. Disable continuous agreement options to use this feature.")
+            }
             tryCatch({
                 ratings <- self$data[, self$options$vars, drop = FALSE]
                 n_raters <- length(self$options$vars)
 
-                # Calculate agreement count for each row
-                agreement_counts <- apply(ratings, 1, function(row) {
-                    row <- row[!is.na(row)]
-                    if (length(row) == 0) return(0)
+                ratings[] <- lapply(ratings, function(col) private$.prepareRatingColumn(col, TRUE, numericLevels))
 
-                    # Get modal category count
+                # Calculate agreement count and available raters for each row
+                agreement_stats <- t(apply(ratings, 1, function(row) {
+                    row <- row[!is.na(row)]
+                    if (length(row) == 0) return(c(count = 0, total = 0))
+
                     freq_table <- table(row)
                     max_count <- max(freq_table)
-                    return(max_count)
-                })
+                    c(count = max_count, total = length(row))
+                }))
 
-                # Calculate percent agreement
-                pct_agreement <- (agreement_counts / n_raters) * 100
+                if (is.null(dim(agreement_stats))) {
+                    agreement_stats <- matrix(agreement_stats, ncol = 2, byrow = TRUE)
+                }
+
+                agreement_stats <- as.data.frame(agreement_stats)
+                if (!all(c("count", "total") %in% names(agreement_stats))) {
+                    names(agreement_stats) <- c("count", "total")
+                }
+
+                agreement_counts <- agreement_stats$count
+                available_raters <- agreement_stats$total
+
+                pct_agreement <- ifelse(available_raters > 0,
+                                        (agreement_counts / available_raters) * 100,
+                                        NA)
 
                 # Categorize based on thresholds
                 if (self$options$loaThresholds == "custom") {
                     high_thresh <- self$options$loaHighThreshold
                     low_thresh <- self$options$loaLowThreshold
 
-                    loa_category <- ifelse(agreement_counts == n_raters, "Absolute",
+                    loa_category <- ifelse(available_raters == n_raters & agreement_counts == available_raters, "Absolute",
                                     ifelse(pct_agreement >= high_thresh, "High",
                                     ifelse(pct_agreement >= low_thresh, "Low", "Poor")))
                 } else if (self$options$loaThresholds == "quartiles") {
                     quartiles <- quantile(pct_agreement, probs = c(0.25, 0.50, 0.75), na.rm = TRUE)
-                    loa_category <- ifelse(agreement_counts == n_raters, "Absolute",
+                    loa_category <- ifelse(available_raters == n_raters & agreement_counts == available_raters, "Absolute",
                                     ifelse(pct_agreement >= quartiles[3], "High",
                                     ifelse(pct_agreement >= quartiles[2], "Moderate",
                                     ifelse(pct_agreement >= quartiles[1], "Low", "Poor"))))
                 } else if (self$options$loaThresholds == "tertiles") {
                     tertiles <- quantile(pct_agreement, probs = c(0.33, 0.67), na.rm = TRUE)
-                    loa_category <- ifelse(agreement_counts == n_raters, "Absolute",
+                    loa_category <- ifelse(available_raters == n_raters & agreement_counts == available_raters, "Absolute",
                                     ifelse(pct_agreement >= tertiles[2], "High",
                                     ifelse(pct_agreement >= tertiles[1], "Moderate", "Low")))
                 } else {
@@ -943,15 +1101,20 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
 
                 # Populate summary table
-                loa_table <- table(loa_category)
+                loa_table <- table(loa_category, useNA = "no")
                 loaTable <- self$results$loaTable
 
+                total_cases <- sum(loa_table)
+
                 for (i in seq_along(loa_table)) {
-                    loaTable$setRow(rowNo = i, values = list(
-                        category = names(loa_table)[i],
-                        n = as.numeric(loa_table[i]),
-                        percent = round(100 * loa_table[i] / sum(loa_table), 1)
-                    ))
+                    loaTable$addRow(
+                        rowKey = names(loa_table)[i],
+                        values = list(
+                            category = names(loa_table)[i],
+                            n = as.numeric(loa_table[i]),
+                            percent = if (total_cases > 0) round(100 * loa_table[i] / total_cases, 1) else NA
+                        )
+                    )
                 }
 
                 # Note: In full jamovi implementation, would add computed column here
@@ -1840,10 +2003,20 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             kappa_val <- kappa_result$value
 
                             # Approximate CI from standard error if available
-                            if (!is.null(kappa_result$statistic)) {
-                                se <- abs(kappa_val / kappa_result$statistic) * sqrt(n_cases)
-                                ci_lower <- max(0, kappa_val - 1.96 * se)
-                                ci_upper <- min(1, kappa_val + 1.96 * se)
+                            if (!is.null(kappa_result$var) && !is.na(kappa_result$var) && kappa_result$var >= 0) {
+                                se <- sqrt(kappa_result$var)
+                            } else if (!is.null(kappa_result$statistic) &&
+                                       !is.na(kappa_result$statistic) &&
+                                       kappa_result$statistic != 0) {
+                                se <- abs(kappa_val / kappa_result$statistic)
+                            } else {
+                                se <- NA
+                            }
+
+                            if (!is.na(se)) {
+                                margin <- 1.96 * se
+                                ci_lower <- max(-1, kappa_val - margin)
+                                ci_upper <- min(1, kappa_val + margin)
                             } else {
                                 ci_lower <- NA
                                 ci_upper <- NA
@@ -1860,10 +2033,20 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             kappa_val <- kappa_result$value
 
                             # Approximate CI
-                            if (!is.null(kappa_result$statistic)) {
-                                se <- abs(kappa_val / kappa_result$statistic) * sqrt(n_cases)
-                                ci_lower <- max(0, kappa_val - 1.96 * se)
-                                ci_upper <- min(1, kappa_val + 1.96 * se)
+                            if (!is.null(kappa_result$var) && !is.na(kappa_result$var) && kappa_result$var >= 0) {
+                                se <- sqrt(kappa_result$var)
+                            } else if (!is.null(kappa_result$statistic) &&
+                                       !is.na(kappa_result$statistic) &&
+                                       kappa_result$statistic != 0) {
+                                se <- abs(kappa_val / kappa_result$statistic)
+                            } else {
+                                se <- NA
+                            }
+
+                            if (!is.na(se)) {
+                                margin <- 1.96 * se
+                                ci_lower <- max(-1, kappa_val - margin)
+                                ci_upper <- min(1, kappa_val + margin)
                             } else {
                                 ci_lower <- NA
                                 ci_upper <- NA

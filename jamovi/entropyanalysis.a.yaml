@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Medical Decision Analysis
 menuTitle: Entropy Analysis
 menuSubtitle: AI uncertainty quantification and information metrics
-version: '1.0.0'
+version: '0.0.32'
 jas: '1.2'
 
 description:

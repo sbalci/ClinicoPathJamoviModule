@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.10
+version: 0.0.32.11
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-10-24'
+date: '2025-10-25'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1421,7 +1421,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -4109,7 +4109,7 @@ analyses:
     name: aivalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: AI & Machine Learning
     menuTitle: AI Model Validation with Cross-Validation
     menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
@@ -4620,7 +4620,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -5142,7 +5142,7 @@ analyses:
     name: greyzoneroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC Analysis
     menuTitle: Grey-zone (Fuzzy) ROC Analysis
     menuSubtitle: ROC analysis with uncertainty zones and deferred decisions
@@ -5240,7 +5240,7 @@ analyses:
     name: concordanceindex
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Survival Model Validation
     menuTitle: Concordance Index (Harrell's C-index)
     menuSubtitle: Rank-based discrimination for time-to-event predictions
@@ -5310,7 +5310,7 @@ analyses:
     name: costeffectiveness
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Economic Evaluation
     menuTitle: Cost-Effectiveness Analysis
     menuSubtitle: ICER and cost-utility analysis for diagnostic tests
@@ -5374,7 +5374,7 @@ analyses:
     name: generalizedroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Medical Decision Analysis
     menuTitle: Generalized ROC Analysis
     menuSubtitle: ROC for continuous outcomes with unequal variance

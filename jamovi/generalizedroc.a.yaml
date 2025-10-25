@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Medical Decision Analysis
 menuTitle: Generalized ROC Analysis
 menuSubtitle: ROC for continuous outcomes with unequal variance
-version: '1.0.0'
+version: '0.0.32'
 jas: '1.2'
 
 description:
