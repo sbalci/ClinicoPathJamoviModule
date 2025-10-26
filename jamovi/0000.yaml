@@ -235,6 +235,24 @@ analyses:
       research, epidemiological studies, and advanced statistical analysis.
     ribbon: analyses
     category: analyses
+  - title: Generalized Estimating Equations
+    name: geemodel
+    ns: ClinicoPath
+    menuGroup: OncoPathT
+    menuSubgroup: Correlated Data Analysis
+    menuTitle: GEE Model
+    menuSubtitle: Analyze repeated measures and clustered data
+    description: >-
+      Generalized Estimating Equations for analyzing correlated/clustered data.
+
+      Handles repeated measures, longitudinal data, multi-site studies with
+
+      marginal model approach. Essential for pathology studies with multiple
+
+      samples per subject (e.g., bilateral organs, multiple biopsies per
+      patient).
+    ribbon: analyses
+    category: analyses
   - title: Automated Exploratory Data Analysis
     name: autoeda
     ns: ClinicoPath
@@ -1239,7 +1257,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -1248,7 +1266,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1421,7 +1439,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -3478,7 +3496,7 @@ analyses:
     name: idi
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Performance Metrics
     menuTitle: Integrated Discrimination Improvement (IDI)
     menuSubtitle: Model improvement assessment through discrimination analysis
@@ -3522,7 +3540,7 @@ analyses:
     name: netreclassification
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Performance Metrics
     menuTitle: Net Reclassification Improvement (NRI)
     menuSubtitle: Advanced model improvement assessment with reclassification analysis
@@ -4109,7 +4127,7 @@ analyses:
     name: aivalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: AI & Machine Learning
     menuTitle: AI Model Validation
     menuSubtitle: AI Model Performance and Comparison
@@ -4619,7 +4637,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -5120,7 +5138,7 @@ analyses:
     name: trichotomousroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC Analysis
     menuTitle: Trichotomous (Three-way) ROC Analysis
     menuSubtitle: Three-category diagnostic test evaluation with indeterminate zone
@@ -5141,7 +5159,7 @@ analyses:
     name: greyzoneroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC Analysis
     menuTitle: Grey-zone (Fuzzy) ROC Analysis
     menuSubtitle: ROC analysis with uncertainty zones and deferred decisions
@@ -5166,7 +5184,7 @@ analyses:
     name: segmentationmetrics
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: AI & Machine Learning
     menuTitle: Segmentation Metrics (Dice, IoU, Hausdorff)
     menuSubtitle: Image segmentation validation for digital pathology AI
@@ -5191,7 +5209,7 @@ analyses:
     name: ordinalroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC Analysis
     menuTitle: Ordinal ROC Analysis
     menuSubtitle: ROC curves for ordered categorical outcomes (tumor grading, staging)
@@ -5215,7 +5233,7 @@ analyses:
     name: brierscore
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Survival Model Validation
     menuTitle: Brier Score & Integrated Brier Score
     menuSubtitle: Calibration accuracy for time-to-event predictions
@@ -5239,7 +5257,7 @@ analyses:
     name: concordanceindex
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Survival Model Validation
     menuTitle: Concordance Index (Harrell's C-index)
     menuSubtitle: Rank-based discrimination for time-to-event predictions
@@ -5262,7 +5280,7 @@ analyses:
     name: roc2d
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC Analysis
     menuTitle: Two-Dimensional ROC Analysis
     menuSubtitle: Joint ROC for dual biomarker combinations
@@ -5285,7 +5303,7 @@ analyses:
     name: rocreg
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC Analysis
     menuTitle: ROC Regression (Covariate-Adjusted ROC)
     menuSubtitle: Covariate-adjusted ROC curves for confounder control
@@ -5309,7 +5327,7 @@ analyses:
     name: costeffectiveness
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Economic Evaluation
     menuTitle: Cost-Effectiveness Analysis
     menuSubtitle: ICER and cost-utility analysis for diagnostic tests
@@ -5334,7 +5352,7 @@ analyses:
     name: vusanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Multi-Class ROC Analysis
     menuTitle: Volume Under ROC Surface (VUS) Analysis
     menuSubtitle: VUS for 3+ class diagnostic accuracy
@@ -5360,7 +5378,7 @@ analyses:
     name: entropyanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Medical Decision Analysis
     menuTitle: Entropy Analysis
     menuSubtitle: AI uncertainty quantification and information metrics
@@ -5373,7 +5391,7 @@ analyses:
     name: generalizedroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Medical Decision Analysis
     menuTitle: Generalized ROC Analysis
     menuSubtitle: ROC for continuous outcomes with unequal variance
@@ -5388,7 +5406,7 @@ analyses:
     name: multiclassroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Medical Decision Analysis
     menuTitle: Multi-class ROC Analysis
     menuSubtitle: ROC curves for >2 diagnostic classes
@@ -5404,7 +5422,7 @@ analyses:
     name: prauc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: ROC Analysis
     menuTitle: Precision-Recall Analysis
     menuSubtitle: PR curves for imbalanced datasets
@@ -5426,7 +5444,7 @@ analyses:
     name: timedependentdca
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Medical Decision Analysis
     menuTitle: Time-Dependent DCA
     menuSubtitle: Net benefit for survival and longitudinal data

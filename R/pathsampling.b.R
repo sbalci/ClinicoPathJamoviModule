@@ -2524,67 +2524,65 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }
                 }
 
-                if (!betaProceed) {
-                    next
-                }
+                if (betaProceed) {
 
-                target <- self$options$targetDetections
-                if (is.null(target) || is.na(target) || target < 1) {
-                    target <- 1
-                }
-
-                # Estimate alpha and beta with safeguards against invalid variance patterns
-                p <- successStatesData / totalPopulationData
-                p <- p[is.finite(p)]
-
-                mu <- mean(p, na.rm = TRUE)
-                var <- var(p, na.rm = TRUE)
-
-                alpha <- NA_real_
-                beta <- NA_real_
-
-                if (length(p) < 2 || is.na(mu) || is.na(var)) {
-                    betaBinomNotes <- c(betaBinomNotes, "Insufficient variability; defaulting to Beta(1,1)")
-                    alpha <- 1
-                    beta <- 1
-                } else {
-                    theoreticalMaxVar <- mu * (1 - mu)
-
-                    if (var <= 0 || var >= theoreticalMaxVar) {
-                        # Overdispersion beyond beta-binomial support or zero variance
-                        epsilon <- 1e-6
-                        if (var <= 0) {
-                            betaBinomNotes <- c(betaBinomNotes, "Zero variance in detection rates; defaulting to Beta(1,1)")
-                            alpha <- 1
-                            beta <- 1
-                        } else {
-                            betaBinomNotes <- c(betaBinomNotes,
-                                "Observed variance exceeds binomial limit; applying ridge adjustment")
-                            varAdj <- min(var, theoreticalMaxVar - epsilon)
-                            term <- (mu * (1 - mu) / varAdj) - 1
-                            alpha <- max(mu * term, epsilon)
-                            beta <- max((1 - mu) * term, epsilon)
-                        }
-                    } else {
-                        term <- (mu * (1 - mu) / var) - 1
-                        alpha <- mu * term
-                        beta <- (1 - mu) * term
+                    target <- self$options$targetDetections
+                    if (is.null(target) || is.na(target) || target < 1) {
+                        target <- 1
                     }
-                }
 
-                if (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0) {
-                    betaBinomNotes <- c(betaBinomNotes, "Fallback to Beta(1,1) due to invalid parameter estimates")
-                    alpha <- 1
-                    beta <- 1
-                }
+                    # Estimate alpha and beta with safeguards against invalid variance patterns
+                    p <- successStatesData / totalPopulationData
+                    p <- p[is.finite(p)]
 
-                # Beta-Binomial Text
-                betaBinomialText <- self$results$betaBinomialText
-                extraText <- if (length(betaBinomNotes) > 0) {
-                    sprintf("<p><b>Estimation notes:</b> %s.</p>", paste(betaBinomNotes, collapse = "; "))
-                } else ""
+                    mu <- mean(p, na.rm = TRUE)
+                    var <- var(p, na.rm = TRUE)
 
-                html <- sprintf("<h4>Beta-Binomial Probability Model</h4>
+                    alpha <- NA_real_
+                    beta <- NA_real_
+
+                    if (length(p) < 2 || is.na(mu) || is.na(var)) {
+                        betaBinomNotes <- c(betaBinomNotes, "Insufficient variability; defaulting to Beta(1,1)")
+                        alpha <- 1
+                        beta <- 1
+                    } else {
+                        theoreticalMaxVar <- mu * (1 - mu)
+
+                        if (var <= 0 || var >= theoreticalMaxVar) {
+                            # Overdispersion beyond beta-binomial support or zero variance
+                            epsilon <- 1e-6
+                            if (var <= 0) {
+                                betaBinomNotes <- c(betaBinomNotes, "Zero variance in detection rates; defaulting to Beta(1,1)")
+                                alpha <- 1
+                                beta <- 1
+                            } else {
+                                betaBinomNotes <- c(betaBinomNotes,
+                                    "Observed variance exceeds binomial limit; applying ridge adjustment")
+                                varAdj <- min(var, theoreticalMaxVar - epsilon)
+                                term <- (mu * (1 - mu) / varAdj) - 1
+                                alpha <- max(mu * term, epsilon)
+                                beta <- max((1 - mu) * term, epsilon)
+                            }
+                        } else {
+                            term <- (mu * (1 - mu) / var) - 1
+                            alpha <- mu * term
+                            beta <- (1 - mu) * term
+                        }
+                    }
+
+                    if (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0) {
+                        betaBinomNotes <- c(betaBinomNotes, "Fallback to Beta(1,1) due to invalid parameter estimates")
+                        alpha <- 1
+                        beta <- 1
+                    }
+
+                    # Beta-Binomial Text
+                    betaBinomialText <- self$results$betaBinomialText
+                    extraText <- if (length(betaBinomNotes) > 0) {
+                        sprintf("<p><b>Estimation notes:</b> %s.</p>", paste(betaBinomNotes, collapse = "; "))
+                    } else ""
+
+                    html <- sprintf("<h4>Beta-Binomial Probability Model</h4>
                 <p>For <b>finite population sampling with overdispersion</b> (e.g., lymph node dissection where positivity varies between cases).</p>
                 <p>This model is more robust than the hypergeometric model when there is case-by-case variability in the number of positive items.</p>
                 <p><b>Model parameters (estimated from data):</b></p>
@@ -2595,83 +2593,84 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 %s
                 <p><b>Reference:</b> Zhou J, et al. Beta-binomial model for lymph node yield. <i>Front Oncol.</i> 2022;12:872527.</p>",
                 alpha, beta, extraText)
-                if (self$options$showBetaBinomial) {
-                    betaBinomialText$setContent(html)
-                }
-
-                # Calculate beta-binomial probabilities
-                betaBinomialTable <- self$results$betaBinomialTable
-
-                betaCumProb <- rep(NA_real_, maxSamp)
-                prevProb <- 0
-                for (n in 1:maxSamp) {
-                    # P(detect ≥ 1) using beta-binomial distribution
-                    # We need a function for the beta-binomial PMF
-                    dbetabinom_pmf <- function(k, n, alpha, beta) {
-                        exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
+                    if (self$options$showBetaBinomial) {
+                        betaBinomialText$setContent(html)
                     }
 
-                    # P(X < 1) = P(X=0)
-                    prob_zero <- dbetabinom_pmf(0, n, alpha, beta)
-                    cumProb <- 1 - prob_zero
+                    # Calculate beta-binomial probabilities
+                    betaBinomialTable <- self$results$betaBinomialTable
 
-                    marginal <- cumProb - prevProb
+                    betaCumProb <- rep(NA_real_, maxSamp)
+                    prevProb <- 0
+                    for (n in 1:maxSamp) {
+                        # P(detect ≥ 1) using beta-binomial distribution
+                        # We need a function for the beta-binomial PMF
+                        dbetabinom_pmf <- function(k, n, alpha, beta) {
+                            exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
+                        }
 
-                    betaBinomialTable$addRow(rowKey=paste0("n_", n), values=list(
-                        nSamples = n,
-                        cumProb = cumProb,
-                        marginalGain = marginal
-                    ))
+                        # P(X < 1) = P(X=0)
+                        prob_zero <- dbetabinom_pmf(0, n, alpha, beta)
+                        cumProb <- 1 - prob_zero
 
-                    prevProb <- cumProb
-                    betaCumProb[n] <- cumProb
-                }
+                        marginal <- cumProb - prevProb
 
-                # Minimum samples for target confidence levels
-                betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                        betaBinomialTable$addRow(rowKey=paste0("n_", n), values=list(
+                            nSamples = n,
+                            cumProb = cumProb,
+                            marginalGain = marginal
+                        ))
 
-                addRecommendation(
-                    method = "Beta-binomial",
-                    probVec = betaCumProb,
-                    priority = 2,
-                    description = "Overdispersed finite population model",
-                    detail = if (length(betaBinomNotes) > 0) paste(betaBinomNotes, collapse = "; ") else ""
-                )
+                        prevProb <- cumProb
+                        betaCumProb[n] <- cumProb
+                    }
 
-                maxFeasible <- floor(max(totalPopulationData, na.rm = TRUE))
-                maxFeasible <- min(maxFeasible, maxSamp)
+                    # Minimum samples for target confidence levels
+                    betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
 
-                confLevels <- c(0.80, 0.90, 0.95, 0.99)
-                for (i in seq_along(confLevels)) {
-                    conf <- confLevels[i]
+                    addRecommendation(
+                        method = "Beta-binomial",
+                        probVec = betaCumProb,
+                        priority = 2,
+                        description = "Overdispersed finite population model",
+                        detail = if (length(betaBinomNotes) > 0) paste(betaBinomNotes, collapse = "; ") else ""
+                    )
 
-                    minSamples <- NA
-                    expectedYield <- NA
+                    maxFeasible <- floor(max(totalPopulationData, na.rm = TRUE))
+                    maxFeasible <- min(maxFeasible, maxSamp)
 
-                    if (maxFeasible > 0) {
-                        for (n in 1:maxFeasible) {
-                            dbetabinom_pmf <- function(k, n, alpha, beta) {
-                                exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
-                            }
-                            prob_zero <- dbetabinom_pmf(0, n, alpha, beta)
-                            cumProb <- 1 - prob_zero
+                    confLevels <- c(0.80, 0.90, 0.95, 0.99)
+                    for (i in seq_along(confLevels)) {
+                        conf <- confLevels[i]
 
-                            if (cumProb >= conf) {
-                                minSamples <- n
-                                expectedYield <- n * alpha / (alpha + beta)
-                                if (!is.null(target) && !is.na(target)) {
-                                    expectedYield <- min(expectedYield, target)
+                        minSamples <- NA
+                        expectedYield <- NA
+
+                        if (maxFeasible > 0) {
+                            for (n in 1:maxFeasible) {
+                                dbetabinom_pmf <- function(k, n, alpha, beta) {
+                                    exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
                                 }
-                                break
+                                prob_zero <- dbetabinom_pmf(0, n, alpha, beta)
+                                cumProb <- 1 - prob_zero
+
+                                if (cumProb >= conf) {
+                                    minSamples <- n
+                                    expectedYield <- n * alpha / (alpha + beta)
+                                    if (!is.null(target) && !is.na(target)) {
+                                        expectedYield <- min(expectedYield, target)
+                                    }
+                                    break
+                                }
                             }
                         }
-                    }
 
-                    betaBinomialRecommendTable$addRow(rowKey=paste0("conf_", i), values=list(
-                        confidence = conf,
-                        minSamples = minSamples,
-                        expectedYield = expectedYield
-                    ))
+                        betaBinomialRecommendTable$addRow(rowKey=paste0("conf_", i), values=list(
+                            confidence = conf,
+                            minSamples = minSamples,
+                            expectedYield = expectedYield
+                        ))
+                    }
                 }
             }
 

@@ -1,0 +1,159 @@
+---
+name:  geemodel
+title: Generalized Estimating Equations
+jrs:   '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: False
+
+    - name: modelInfo
+      title: Model Information
+      type: Table
+      rows: 6
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - family
+        - corstr
+      columns:
+        - name: info
+          title: ''
+          type: text
+        - name: value
+          title: ''
+          type: text
+
+    - name: coefficientsTable
+      title: Model Coefficients
+      type: Table
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - family
+        - corstr
+        - robust_se
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: wald
+          title: Wald
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+
+    - name: qicTable
+      title: Model Selection Criterion
+      type: Table
+      visible: (qic)
+      rows: 1
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - family
+        - corstr
+      columns:
+        - name: qic
+          title: QIC
+          type: number
+        - name: qicu
+          title: QICu
+          type: number
+        - name: aic
+          title: Quasi AIC
+          type: number
+
+    - name: posthocTable
+      title: Post-hoc Pairwise Comparisons
+      type: Table
+      visible: (posthoc)
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - family
+        - corstr
+        - posthoc
+        - posthoc_adjust
+      columns:
+        - name: contrast
+          title: Contrast
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: z
+          title: z-ratio
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: diagnosticsTable
+      title: Model Diagnostics
+      type: Table
+      visible: (diagnostics)
+      rows: 5
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+      columns:
+        - name: diagnostic
+          title: ''
+          type: text
+        - name: value
+          title: ''
+          type: text
+
+    - name: correlationPlot
+      title: Estimated Within-Cluster Correlation
+      type: Image
+      visible: (correlation_plot)
+      requiresData: true
+      width: 500
+      height: 400
+      renderFun: .plotCorrelation
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - corstr
+
+    - name: methodologyNote
+      title: Methodology Notes
+      type: Html
+      visible: True
+
+    - name: interpretationNote
+      title: Interpretation Guide
+      type: Html
+      visible: True
+...

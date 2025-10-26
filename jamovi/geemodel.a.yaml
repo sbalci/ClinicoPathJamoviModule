@@ -1,0 +1,196 @@
+---
+name: geemodel
+title: Generalized Estimating Equations
+menuGroup: OncoPathT2
+menuSubgroup: Correlated Data Analysis
+menuTitle: GEE Model
+menuSubtitle: Analyze repeated measures and clustered data
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Generalized Estimating Equations for analyzing correlated/clustered data.
+        Handles repeated measures, longitudinal data, multi-site studies with
+        marginal model approach. Essential for pathology studies with multiple
+        samples per subject (e.g., bilateral organs, multiple biopsies per patient).
+
+        **Key Features:**
+        - Handles binary, continuous, and count outcomes
+        - Multiple correlation structures (exchangeable, AR-1, unstructured)
+        - Robust standard errors (sandwich estimator)
+        - Post-hoc pairwise comparisons
+        - Model selection with QIC
+
+        **Clinical Applications:**
+        - Multiple samples per patient
+        - Bilateral organs (eyes, kidneys)
+        - Repeated measures over time
+        - Multi-site studies
+        - Clustered randomized trials
+
+    R:
+        dontrun: false
+        usage: |
+            # Example: Multiple liver samples per dog
+            geemodel(
+              data = liver_data,
+              outcome = 'diagnosis',
+              predictors = c('sample_method', 'fibrosis_score'),
+              cluster_id = 'dog_id',
+              family = 'binomial',
+              corstr = 'exchangeable',
+              robust_se = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            outcome variable (dependent variable); can be continuous, binary, or count
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            predictor variables (independent variables) for the model
+
+    - name: cluster_id
+      title: Cluster/Subject ID
+      type: Variable
+      required: true
+      permitted: [id, factor]
+      description:
+          R: >
+            variable identifying clusters (e.g., patient ID, dog ID).
+            Observations with the same ID are treated as correlated.
+
+    - name: time_var
+      title: Time/Sequence Variable (Optional)
+      type: Variable
+      permitted: [numeric, factor]
+      description:
+          R: >
+            for longitudinal data, specifies time ordering within clusters.
+            Used with AR(1) correlation structure.
+
+    - name: family
+      title: Family/Link Function
+      type: List
+      options:
+        - name: gaussian
+          title: Gaussian (Continuous outcomes, Identity link)
+        - name: binomial
+          title: Binomial (Binary outcomes, Logit link)
+        - name: poisson
+          title: Poisson (Count outcomes, Log link)
+        - name: gamma
+          title: Gamma (Positive continuous, Log link)
+      default: gaussian
+      description:
+          R: >
+            distribution family and link function for the outcome variable.
+            Gaussian for continuous, Binomial for binary, Poisson for counts.
+
+    - name: corstr
+      title: Working Correlation Structure
+      type: List
+      options:
+        - name: independence
+          title: Independence (no correlation)
+        - name: exchangeable
+          title: Exchangeable (compound symmetry)
+        - name: ar1
+          title: AR(1) - Autoregressive order 1
+        - name: unstructured
+          title: Unstructured (estimate all correlations)
+      default: exchangeable
+      description:
+          R: |
+            Working correlation structure within clusters:
+            - Exchangeable: constant correlation between all pairs (recommended starting point)
+            - AR(1): correlation decays with time lag (for longitudinal data)
+            - Unstructured: estimates all pairwise correlations (requires many observations)
+            - Independence: no correlation (equivalent to GLM)
+
+    - name: robust_se
+      title: Use Robust Standard Errors
+      type: Bool
+      default: true
+      description:
+          R: >
+            sandwich estimator for standard errors (recommended).
+            Provides valid inference even if correlation structure is misspecified.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            confidence level for confidence intervals (default 95%)
+
+    - name: qic
+      title: Show QIC (Model Selection Criterion)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Quasi-likelihood under Independence Model Criterion.
+            Lower QIC indicates better model fit. Use for comparing models.
+
+    - name: posthoc
+      title: Post-hoc Pairwise Comparisons
+      type: Bool
+      default: false
+      description:
+          R: >
+            compare levels of categorical predictors using estimated marginal means
+
+    - name: posthoc_adjust
+      title: Post-hoc Adjustment Method
+      type: List
+      options:
+        - name: bonferroni
+          title: Bonferroni
+        - name: holm
+          title: Holm (Sequential Bonferroni)
+        - name: bh
+          title: Benjamini-Hochberg (FDR)
+        - name: none
+          title: None
+      default: holm
+      description:
+          R: >
+            multiple testing correction for post-hoc comparisons
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            display model diagnostics including number of clusters, observations per cluster
+
+    - name: correlation_plot
+      title: Show Estimated Correlation Matrix
+      type: Bool
+      default: false
+      description:
+          R: >
+            visualize the estimated within-cluster correlation structure
+...
