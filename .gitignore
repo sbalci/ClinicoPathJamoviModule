@@ -41,7 +41,7 @@ build
 ClinicoPath.code-workspace
 # docs
 pdfs
-temp
+temp*
 temp2
 temp3
 _tododata

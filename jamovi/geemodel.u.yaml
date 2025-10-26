@@ -1,0 +1,103 @@
+title: Generalized Estimating Equations
+name: geemodel
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Cluster/Subject ID
+        children:
+          - type: VariablesListBox
+            name: cluster_id
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Time/Sequence Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Specification
+        children:
+          - type: ComboBox
+            name: family
+            label: Outcome Distribution
+
+      - type: Label
+        label: Correlation Structure
+        children:
+          - type: ComboBox
+            name: corstr
+
+  - type: CollapseBox
+    label: Model Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: robust_se
+
+          - type: TextBox
+            name: conf_level
+            label: Confidence Level
+            suffix: '%'
+            format: number
+
+  - type: CollapseBox
+    label: Post-hoc Tests
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: posthoc
+
+          - type: ComboBox
+            name: posthoc_adjust
+            enable: (posthoc)
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: qic
+
+          - type: CheckBox
+            name: diagnostics
+
+          - type: CheckBox
+            name: correlation_plot
+...
