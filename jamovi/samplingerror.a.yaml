@@ -1,0 +1,138 @@
+---
+name: samplingerror
+title: Sampling Error & Efficiency Calculator
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Sampling Error Calculator
+menuSubtitle: Calculate sampling efficiency and error rates (Kayser 2009)
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: detectionSensitivity
+      title: Detection Sensitivity (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 95
+      description: >
+        Probability of correctly detecting/identifying an event (e.g., tumor cell).
+        100% means perfect detection, 95% means 5% false negative rate.
+
+    - name: biologicalVarianceCV
+      title: Biological Variance (CV%)
+      type: Number
+      min: 0
+      max: 100
+      default: 15
+      description: >
+        Coefficient of variation representing tissue heterogeneity.
+        Low (5-10%) = homogeneous tissue, Medium (15-25%) = moderate heterogeneity,
+        High (>30%) = highly heterogeneous tissue.
+
+    - name: sampleSize
+      title: Number of Samples (N)
+      type: Integer
+      min: 1
+      max: 1000
+      default: 10
+      description: >
+        Number of samples/sections/areas examined.
+
+    - name: eventFrequency
+      title: Event Frequency in Sample (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 5
+      description: >
+        Proportion of sample containing the event of interest
+        (e.g., % of tissue with tumor, % positive cells).
+
+    - name: referenceVolume
+      title: Reference Volume (arbitrary units)
+      type: Number
+      min: 0.01
+      default: 100
+      description: >
+        Total reference space being sampled (e.g., organ volume, total tissue area).
+
+    - name: sampleVolume
+      title: Sample Volume (same units)
+      type: Number
+      min: 0.01
+      default: 10
+      description: >
+        Volume/area of each sample examined (same units as reference volume).
+
+    - name: calculationMode
+      title: Calculation Mode
+      type: List
+      options:
+        - name: theoretical
+          title: Theoretical (from parameters)
+        - name: empirical
+          title: Empirical (from data)
+      default: theoretical
+      description: >
+        Theoretical: Calculate error from theoretical parameters.
+        Empirical: Estimate error components from actual data.
+
+    - name: sampleData
+      title: Sample Measurements (Empirical)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default: NULL
+      description: >
+        Actual measurements from samples (for empirical calculation).
+
+    - name: targetError
+      title: Target Sampling Error (%)
+      type: Number
+      min: 1
+      max: 50
+      default: 10
+      description: >
+        Desired maximum total sampling error. Used for sample size recommendations.
+
+    - name: showErrorComponents
+      title: Show Error Components
+      type: Bool
+      default: true
+      description: >
+        Display breakdown of the three error components: E(Ne), E(B(n)), E(Ne/sv).
+
+    - name: showOptimization
+      title: Show Sample Size Optimization
+      type: Bool
+      default: true
+      description: >
+        Calculate optimal sample sizes for different target error rates.
+
+    - name: showVisualization
+      title: Show Error Visualization
+      type: Bool
+      default: true
+
+    - name: showMethodology
+      title: Show Methodology
+      type: Bool
+      default: true
+
+    - name: showReferences
+      title: Show References
+      type: Bool
+      default: false
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95

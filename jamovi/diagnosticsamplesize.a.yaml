@@ -1,0 +1,94 @@
+---
+name: diagnosticsamplesize
+title: Diagnostic Test Sample Size Calculator
+menuGroup: meddecide
+menuSubgroup: Sample Size Planning
+menuTitle: Diagnostic Sample Size (CI Width)
+menuSubtitle: Clopper-Pearson precision-based planning (Bujang 2023)
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: study_purpose
+      title: Study Purpose
+      type: List
+      options:
+        - name: diagnostic
+          title: Diagnostic (high Sens AND Spec)
+        - name: screening_sens
+          title: Screening (emphasize Sensitivity)
+        - name: screening_spec
+          title: Screening (emphasize Specificity)
+      default: diagnostic
+
+    - name: target_sensitivity
+      title: Target Sensitivity
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.90
+
+    - name: target_specificity
+      title: Target Specificity
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.90
+
+    - name: prevalence
+      title: Disease Prevalence
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.10
+
+    - name: ci_width
+      title: Desired 95% CI Width
+      type: Number
+      min: 0.05
+      max: 0.30
+      default: 0.10
+
+    - name: alpha
+      title: Significance Level
+      type: Number
+      min: 0.01
+      max: 0.10
+      default: 0.05
+
+    - name: nonresponse_rate
+      title: Non-Response Rate (%)
+      type: Number
+      min: 0
+      max: 50
+      default: 0
+
+    - name: show_statement
+      title: Generate Sample Size Statement
+      type: Bool
+      default: true
+
+    - name: show_methodology
+      title: Show Methodology
+      type: Bool
+      default: true
+
+    - name: show_references
+      title: Show References
+      type: Bool
+      default: false
+
+    - name: show_comparison_table
+      title: Show Prevalence Sensitivity Table
+      type: Bool
+      default: false
+
+    - name: comparison_prevalences
+      title: Prevalence Values for Comparison
+      type: String
+      default: "0.05, 0.10, 0.20, 0.30, 0.50"
+
+    - name: show_method_comparison
+      title: Show CI Method Comparison
+      type: Bool
+      default: false

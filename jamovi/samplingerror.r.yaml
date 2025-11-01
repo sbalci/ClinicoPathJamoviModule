@@ -1,0 +1,75 @@
+---
+name: samplingerror
+title: Sampling Error & Efficiency Calculator
+jrs: '1.1'
+
+items:
+    - name: errorSummary
+      title: Total Sampling Error
+      type: Table
+      rows: 1
+      columns:
+        - name: total_error
+          title: E(p) Total Error (%)
+          type: number
+        - name: n_samples
+          title: Sample Size (N)
+          type: integer
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: errorComponents
+      title: Error Components Breakdown
+      type: Table
+      visible: (showErrorComponents)
+      rows: 3
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: formula
+          title: Formula
+          type: text
+        - name: value
+          title: Error (%)
+          type: number
+        - name: contribution
+          title: Contribution
+          type: number
+        - name: description
+          title: Description
+          type: text
+
+    - name: optimization
+      title: Sample Size Optimization
+      type: Table
+      visible: (showOptimization)
+      rows: 0
+      columns:
+        - name: target_error
+          title: Target Error (%)
+          type: number
+        - name: required_n
+          title: Required N
+          type: integer
+        - name: improvement
+          title: Improvement vs Current
+          type: text
+
+    - name: plot
+      title: Sampling Error Analysis
+      type: Image
+      visible: (showVisualization)
+      renderFun: .plot
+      requiresData: false
+
+    - name: methodology
+      title: Methodology & Interpretation
+      type: Html
+      visible: (showMethodology)
+
+    - name: references
+      title: References
+      type: Html
+      visible: (showReferences)

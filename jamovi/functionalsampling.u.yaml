@@ -1,0 +1,69 @@
+name: functionalsampling
+title: Functional Sampling - Rare Event Analysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - continuous
+      - nominal
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Spatial Coordinates
+        children:
+          - type: VariablesListBox
+            name: x_coord
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: y_coord
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: event_type
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Rare Event Definition
+        children:
+          - type: TextBox
+            name: rare_event
+            format: string
+          - type: TextBox
+            name: frequency_threshold
+            format: number
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: calculate_nnd
+      - type: CheckBox
+        name: test_randomness
+      - type: CheckBox
+        name: analyze_neighborhoods
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: show_summary
+      - type: CheckBox
+        name: show_plot
+      - type: CheckBox
+        name: show_methodology
+      - type: CheckBox
+        name: show_references
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: significance_level
+        format: number

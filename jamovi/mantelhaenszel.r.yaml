@@ -1,0 +1,115 @@
+---
+name: mantelhaenszel
+title: Mantel-Haenszel Stratified Analysis
+jrs: '1.1'
+
+items:
+    - name: mh_summary
+      title: Mantel-Haenszel Summary
+      type: Table
+      rows: 1
+      columns:
+        - name: estimate
+          title: Common Effect
+          type: number
+        - name: lower_ci
+          title: Lower 95% CI
+          type: number
+        - name: upper_ci
+          title: Upper 95% CI
+          type: number
+        - name: chisq
+          title: MH Chi-Square
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: crude_analysis
+      title: Crude (Unadjusted) Analysis
+      type: Table
+      visible: (show_crude_analysis)
+      rows: 1
+      columns:
+        - name: crude_estimate
+          title: Crude Effect
+          type: number
+        - name: crude_lower
+          title: Lower 95% CI
+          type: number
+        - name: crude_upper
+          title: Upper 95% CI
+          type: number
+        - name: confounding
+          title: Confounding Present
+          type: text
+
+    - name: homogeneity_tests
+      title: Tests of Homogeneity Across Strata
+      type: Table
+      visible: (show_homogeneity_tests)
+      rows: 0
+      columns:
+        - name: test_name
+          title: Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: stratum_specific
+      title: Stratum-Specific Analysis
+      type: Table
+      visible: (show_stratum_tables)
+      rows: 0
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n_total
+          title: Total N
+          type: integer
+        - name: estimate
+          title: Effect
+          type: number
+        - name: lower_ci
+          title: Lower 95% CI
+          type: number
+        - name: upper_ci
+          title: Upper 95% CI
+          type: number
+        - name: chisq
+          title: Chi-Square
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+
+    - name: methodology
+      title: Methodology
+      type: Html
+      visible: (show_methodology)
+
+    - name: references
+      title: References
+      type: Html
+      visible: (show_references)

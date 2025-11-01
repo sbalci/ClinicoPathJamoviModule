@@ -1,0 +1,213 @@
+---
+name: mixedmodelanova
+title: Mixed Model ANOVA
+jrs: '1.1'
+
+items:
+    - name: model_info
+      title: Model Information
+      type: Table
+      rows: 1
+      columns:
+        - name: formula
+          title: Model Formula
+          type: text
+        - name: estimation
+          title: Estimation Method
+          type: text
+        - name: n_obs
+          title: Observations
+          type: integer
+        - name: n_groups
+          title: Number of Groups
+          type: integer
+
+    - name: fixed_effects
+      title: Fixed Effects
+      type: Table
+      visible: (show_fixed_effects)
+      rows: 0
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: df
+          title: df
+          type: number
+        - name: t_value
+          title: t
+          type: number
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: anova_table
+      title: Type III ANOVA Table
+      type: Table
+      visible: (show_fixed_effects)
+      rows: 0
+      columns:
+        - name: term
+          title: Effect
+          type: text
+        - name: sumsq
+          title: Sum Sq
+          type: number
+        - name: meansq
+          title: Mean Sq
+          type: number
+        - name: numdf
+          title: NumDF
+          type: number
+        - name: dendf
+          title: DenDF
+          type: number
+        - name: f_value
+          title: F
+          type: number
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: random_effects
+      title: Random Effects
+      type: Table
+      visible: (show_random_effects)
+      rows: 0
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: variance
+          title: Variance
+          type: number
+        - name: std_dev
+          title: Std. Dev
+          type: number
+
+    - name: model_fit
+      title: Model Fit Statistics
+      type: Table
+      visible: (show_model_fit)
+      rows: 1
+      columns:
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: loglik
+          title: Log-Likelihood
+          type: number
+        - name: deviance
+          title: Deviance
+          type: number
+
+    - name: icc_table
+      title: Intraclass Correlation Coefficients
+      type: Table
+      visible: (show_icc)
+      rows: 0
+      columns:
+        - name: group
+          title: Grouping Variable
+          type: text
+        - name: icc
+          title: ICC
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: effect_sizes
+      title: Effect Sizes (Partial η²)
+      type: Table
+      visible: (show_effect_sizes)
+      rows: 0
+      columns:
+        - name: term
+          title: Effect
+          type: text
+        - name: partial_eta_sq
+          title: Partial η²
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: posthoc
+      title: Post Hoc Comparisons
+      type: Table
+      visible: (show_posthoc)
+      rows: 0
+      columns:
+        - name: contrast
+          title: Contrast
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: df
+          title: df
+          type: number
+        - name: t_ratio
+          title: t ratio
+          type: number
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: assumptions
+      title: Assumption Checks
+      type: Table
+      visible: (show_assumptions)
+      rows: 0
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: result
+          title: Result
+          type: text
+
+    - name: diagnostic_plots
+      title: Diagnostic Plots
+      type: Image
+      visible: (show_plots)
+      width: 600
+      height: 600
+      renderFun: .diagnosticPlots
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+
+    - name: methodology
+      title: Methodology
+      type: Html
+      visible: (show_methodology)
+
+    - name: references
+      title: References
+      type: Html
+      visible: (show_references)

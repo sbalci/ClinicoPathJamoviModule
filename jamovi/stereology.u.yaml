@@ -1,0 +1,149 @@
+---
+name: stereology
+title: Stereology Analysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - continuous
+      - nominal
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Measurement Variables
+        children:
+          - type: VariablesListBox
+            name: intersections
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: totalPoints
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: referenceArea
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: gridSpacing
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Optional Variables
+        children:
+          - type: VariablesListBox
+            name: boundaryIntersections
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: objectCount
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: groupVar
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: ComboBox
+                name: tissueType
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 1
+            children:
+              - type: TextBox
+                name: sectionThickness
+                format: number
+
+  - type: CollapseBox
+    label: Stereological Parameters
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: calculateAa
+          - type: CheckBox
+            name: calculateVv
+          - type: CheckBox
+            name: calculateBa
+          - type: CheckBox
+            name: calculateNa
+          - type: CheckBox
+            name: calculateSv
+
+  - type: CollapseBox
+    label: Statistical Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showConfidenceIntervals
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 1
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Bootstrap Iterations
+                margin: small
+                children:
+                  - type: TextBox
+                    name: bootstrapIterations
+                    format: number
+                    enable: (showConfidenceIntervals)
+
+  - type: CollapseBox
+    label: Group Comparison
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showGroupComparison
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showDescriptives
+          - type: CheckBox
+            name: showPlot
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 2
+            children:
+              - type: ComboBox
+                name: plotType
+                enable: (showPlot)
+          - type: CheckBox
+            name: showMethodology
+          - type: CheckBox
+            name: showReferences

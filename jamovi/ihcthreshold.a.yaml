@@ -1,0 +1,190 @@
+---
+name: ihcthreshold
+title: IHC Threshold Determination
+menuGroup: OncoPathT
+menuSubgroup: Image Analysis
+menuTitle: IHC Threshold
+menuSubtitle: Automated threshold for positive/negative classification
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: sampleArea
+      title: Sample Area ID
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description: >
+        Identifier for each sample area examined (e.g., field1, field2, etc.).
+        Multiple areas should be randomly selected across the tissue.
+
+    - name: threshold
+      title: Threshold Level
+      type: Variable
+      suggested:
+        - ordinal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description: >
+        Threshold level tested (e.g., 1, 2, 3 or actual intensity values like 100, 150, 200).
+        Multiple thresholds should be tested to find optimal discrimination.
+
+    - name: positiveCells
+      title: Positive Cell Count
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        Number of cells classified as positive at this threshold level.
+
+    - name: negativeCells
+      title: Negative Cell Count
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        Number of cells classified as negative at this threshold level.
+
+    - name: totalCells
+      title: Total Cell Count (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default: NULL
+      description: >
+        Total number of cells counted. If not provided, calculated as positive + negative.
+
+    - name: stainType
+      title: Stain/Marker Type
+      type: List
+      options:
+        - name: ki67
+          title: Ki-67 (Proliferation)
+        - name: her2
+          title: HER2
+        - name: er
+          title: ER (Estrogen Receptor)
+        - name: pr
+          title: PR (Progesterone Receptor)
+        - name: pdl1
+          title: PD-L1
+        - name: cd
+          title: CD Markers (CD3, CD8, etc.)
+        - name: custom
+          title: Custom Marker
+      default: ki67
+      description: >
+        Type of immunohistochemical stain being analyzed.
+
+    - name: tissueType
+      title: Tissue Type
+      type: List
+      options:
+        - name: breast
+          title: Breast
+        - name: lung
+          title: Lung
+        - name: colon
+          title: Colon
+        - name: prostate
+          title: Prostate
+        - name: other
+          title: Other
+      default: other
+
+    - name: optimizationMethod
+      title: Optimization Method
+      type: List
+      options:
+        - name: cv
+          title: Coefficient of Variation (CV)
+        - name: variance
+          title: Minimum Variance
+        - name: consistency
+          title: Consistency Score
+      default: cv
+      description: >
+        Method for selecting optimal threshold:
+        - CV: Choose threshold with lowest coefficient of variation across samples
+        - Variance: Choose threshold with minimum variance in positive ratio
+        - Consistency: Choose threshold where positive/negative ratio is most consistent
+
+    - name: showSummaryTable
+      title: Show Summary Statistics
+      type: Bool
+      default: true
+
+    - name: showThresholdComparison
+      title: Show Threshold Comparison
+      type: Bool
+      default: true
+      description: >
+        Compare positive ratios across thresholds and sample areas.
+
+    - name: showOptimalThreshold
+      title: Show Optimal Threshold Analysis
+      type: Bool
+      default: true
+      description: >
+        Display detailed analysis of optimal threshold selection.
+
+    - name: showPlot
+      title: Show Threshold Plot
+      type: Bool
+      default: true
+      description: >
+        Visualize positive ratios across thresholds and sample areas.
+
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - name: line
+          title: Line Plot with Error Bars
+        - name: box
+          title: Box Plot by Threshold
+        - name: heatmap
+          title: Heatmap (Area × Threshold)
+      default: line
+
+    - name: showMethodology
+      title: Show Methodology
+      type: Bool
+      default: true
+
+    - name: showReferences
+      title: Show References
+      type: Bool
+      default: false
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+
+    - name: minSampleAreas
+      title: Minimum Sample Areas Required
+      type: Integer
+      min: 3
+      max: 20
+      default: 5
+      description: >
+        Minimum number of sample areas needed for reliable threshold determination.
+        Kayser et al. (2009) recommend at least 5 areas.

@@ -115,7 +115,8 @@
       "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives/vignettes/)",
       "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/jjstatsplot/vignettes/)",
       "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/meddecide/vignettes/)",
-      "Read(//Users/serdarbalci/Desktop/omentum/**)"
+      "Read(//Users/serdarbalci/Desktop/omentum/**)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": [],

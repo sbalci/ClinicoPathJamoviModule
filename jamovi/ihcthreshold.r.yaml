@@ -1,0 +1,94 @@
+---
+name: ihcthreshold
+title: IHC Threshold Determination
+jrs: '1.1'
+
+items:
+    - name: summaryTable
+      title: Summary Statistics
+      type: Table
+      visible: (showSummaryTable)
+      rows: 1
+      columns:
+        - name: n_areas
+          title: Sample Areas
+          type: integer
+        - name: n_thresholds
+          title: Thresholds Tested
+          type: integer
+        - name: total_cells_mean
+          title: Mean Cells/Area
+          type: number
+        - name: positive_range
+          title: Positive % Range
+          type: text
+
+    - name: thresholdComparison
+      title: Threshold Comparison Table
+      type: Table
+      visible: (showThresholdComparison)
+      rows: 0
+      columns:
+        - name: threshold
+          title: Threshold
+          type: text
+        - name: mean_positive_ratio
+          title: Mean Positive %
+          type: number
+        - name: sd_positive_ratio
+          title: SD
+          type: number
+        - name: cv
+          title: CV
+          type: number
+        - name: min_ratio
+          title: Min %
+          type: number
+        - name: max_ratio
+          title: Max %
+          type: number
+        - name: consistency_score
+          title: Consistency
+          type: number
+
+    - name: optimalThreshold
+      title: Optimal Threshold Analysis
+      type: Table
+      visible: (showOptimalThreshold)
+      rows: 1
+      columns:
+        - name: optimal_threshold
+          title: Recommended Threshold
+          type: text
+        - name: optimization_value
+          title: Optimization Value
+          type: number
+        - name: mean_positive_pct
+          title: Mean Positive %
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: plot
+      title: Threshold Analysis Plot
+      type: Image
+      visible: (showPlot)
+      renderFun: .plot
+      requiresData: true
+
+    - name: methodology
+      title: Methodology & Clinical Interpretation
+      type: Html
+      visible: (showMethodology)
+
+    - name: references
+      title: References
+      type: Html
+      visible: (showReferences)

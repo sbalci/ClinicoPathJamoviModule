@@ -1,0 +1,85 @@
+---
+name: diagnosticsamplesize
+title: Diagnostic Test Sample Size Calculator
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Study Design
+        children:
+          - type: ComboBox
+            name: study_purpose
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Target Diagnostic Accuracy
+        children:
+          - type: TextBox
+            name: target_sensitivity
+            format: number
+            suffix: (0.50-0.99)
+          - type: TextBox
+            name: target_specificity
+            format: number
+            suffix: (0.50-0.99)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Study Parameters
+        children:
+          - type: TextBox
+            name: prevalence
+            format: number
+            suffix: (disease prevalence)
+          - type: TextBox
+            name: ci_width
+            format: number
+            suffix: (desired CI width)
+          - type: TextBox
+            name: alpha
+            format: number
+            suffix: (significance level)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Adjustments
+        children:
+          - type: TextBox
+            name: nonresponse_rate
+            format: number
+            suffix: (% non-response)
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: show_statement
+      - type: CheckBox
+        name: show_methodology
+      - type: CheckBox
+        name: show_references
+
+  - type: CollapseBox
+    label: Comparison Table Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: show_comparison_table
+      - type: TextBox
+        name: comparison_prevalences
+        format: string
+        enable: (show_comparison_table)
+      - type: CheckBox
+        name: show_method_comparison

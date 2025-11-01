@@ -1,0 +1,108 @@
+---
+name: functionalsampling
+title: Functional Sampling - Rare Event Analysis
+menuGroup: OncoPathT
+menuSubgroup: Spatial Analysis
+menuTitle: Functional Sampling
+menuSubtitle: Identify rare cells with catalyst function (Kayser 2009)
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: x_coord
+      title: X Coordinate
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        X spatial coordinate of events/cells.
+
+    - name: y_coord
+      title: Y Coordinate
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        Y spatial coordinate of events/cells.
+
+    - name: event_type
+      title: Event Type/Cell Type
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description: >
+        Type of event or cell. Used to identify rare events vs majority population.
+
+    - name: rare_event
+      title: Rare Event Label
+      type: String
+      default: "Rare"
+      description: >
+        Label identifying the rare event/cell type in the event_type variable.
+
+    - name: frequency_threshold
+      title: Rare Event Threshold (%)
+      type: Number
+      min: 0.1
+      max: 50
+      default: 5
+      description: >
+        Maximum frequency to consider an event as "rare" (default 5%).
+
+    - name: calculate_nnd
+      title: Calculate Nearest Neighbor Distances
+      type: Bool
+      default: true
+      description: >
+        Calculate distances between each rare event and its nearest neighbor.
+
+    - name: test_randomness
+      title: Test Spatial Randomness
+      type: Bool
+      default: true
+      description: >
+        Test if rare events are randomly distributed (Clark-Evans test).
+
+    - name: analyze_neighborhoods
+      title: Analyze Neighborhood Consistency
+      type: Bool
+      default: true
+      description: >
+        Test if rare events have consistent distances to neighboring cells
+        (catalyst function indicator).
+
+    - name: show_summary
+      title: Show Summary Statistics
+      type: Bool
+      default: true
+
+    - name: show_plot
+      title: Show Spatial Plot
+      type: Bool
+      default: true
+
+    - name: show_methodology
+      title: Show Methodology
+      type: Bool
+      default: true
+
+    - name: show_references
+      title: Show References
+      type: Bool
+      default: false
+
+    - name: significance_level
+      title: Significance Level
+      type: Number
+      min: 0.01
+      max: 0.10
+      default: 0.05

@@ -1,0 +1,7 @@
+"scenario","population","prevalence","target_sensitivity","target_specificity","ci_width","study_purpose","expected_n_sens","expected_n_spec","final_n","notes","nonresponse_rate","final_n_adjusted"
+"Colorectal Cancer Blood Test","High-risk patients (age >50, family history)",0.1,0.95,0.95,0.1,"diagnostic",940,105,940,"Need excellent Sens AND Spec for diagnostic replacement",20,1175
+"COVID-19 Rapid Antigen Test","General population (asymptomatic screening)",0.05,0.95,0.5,0.1,"screening_sens",1880,424,1880,"Emphasize sensitivity to avoid missing cases",15,2212
+"AI-Based Diabetic Retinopathy Detection","Diabetic patients",0.3,0.9,0.9,0.2,"diagnostic",147,116,147,"Moderate precision sufficient for screening tool",10,164
+"Rare Disease Biomarker (e.g., Fabry Disease)","Suspected patients referred to genetics clinic",0.02,0.9,0.9,0.1,"diagnostic",7900,176,7900,"Low prevalence drives large sample size for sensitivity",25,10534
+"Lung Cancer LDCT Screening","Heavy smokers (>30 pack-years)",0.15,0.5,0.95,0.1,"screening_spec",4020,176,4020,"Emphasize specificity to avoid unnecessary follow-up procedures",20,5025
+"Digital Mammography Screening","Women age 50-70",0.5,0.9,0.9,0.2,"diagnostic",88,88,88,"Moderate prevalence balanced sample size requirements",15,104

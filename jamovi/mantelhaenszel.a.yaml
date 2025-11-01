@@ -1,0 +1,89 @@
+---
+name: mantelhaenszel
+title: Mantel-Haenszel Stratified Analysis
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Mantel-Haenszel Test
+menuSubtitle: Stratified analysis controlling for confounding
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: rows
+      title: Rows (Exposure)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+
+    - name: cols
+      title: Columns (Outcome)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+
+    - name: strata
+      title: Stratifying Variable (Confounder)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+
+    - name: measure
+      title: Effect Measure
+      type: List
+      options:
+        - name: or
+          title: Odds Ratio
+        - name: rr
+          title: Risk Ratio (Cohort)
+        - name: rd
+          title: Risk Difference
+      default: or
+
+    - name: alpha
+      title: Significance Level
+      type: Number
+      min: 0.01
+      max: 0.10
+      default: 0.05
+
+    - name: show_stratum_tables
+      title: Show Stratum-Specific Tables
+      type: Bool
+      default: true
+
+    - name: show_homogeneity_tests
+      title: Show Homogeneity Tests
+      type: Bool
+      default: true
+
+    - name: show_crude_analysis
+      title: Show Crude (Unadjusted) Analysis
+      type: Bool
+      default: true
+
+    - name: continuity_correction
+      title: Use Continuity Correction
+      type: Bool
+      default: true
+
+    - name: show_methodology
+      title: Show Methodology
+      type: Bool
+      default: false
+
+    - name: show_references
+      title: Show References
+      type: Bool
+      default: false

@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 **Methods:** The ClinicoPathJamoviModule integrates a robust and comprehensive suite of analytical tools designed to address the typical workflow of clinicopathological data analysis. The module is built upon the R statistical language and provides a graphical user interface within jamovi for a wide range of functions. Key features include:
 
-*   **Descriptive Statistics:** Generation of publication-ready summary tables (`Table 1`).
+*   **Descriptive Statistics:** Generation of publication-ready summary tables (`Table 1`), advanced stratified analysis (Mantel-Haenszel), and mixed model ANOVA for repeated measures and nested designs.
 *   **Survival Analysis:** A comprehensive framework including:
     *   **Core Methods:** Kaplan-Meier, Nelson-Aalen, and Turnbull NPMLE for interval-censored data.
     *   **Advanced Modeling:** Cox PH, time-varying effects, AFT models, and frailty models.
@@ -38,6 +38,7 @@ knitr::opts_chunk$set(
 *   **Diagnostic & Prognostic Accuracy:**
     *   **Test Evaluation:** ROC analysis, decision curve analysis (DCA), and screening test calculators.
     *   **Model Validation:** Time-dependent ROC, prediction error curves, C-statistics, and calibration plots.
+    *   **Sample Size Planning:** Precision-based diagnostic test sample size calculation with Clopper-Pearson exact CI, automated justification statements, and multi-method CI comparison (Wilson, Agresti-Coull, Wald).
 *   **Agreement and Reliability:** 
     *   **Inter-rater Statistics:** Cohen's Kappa, Fleiss' Kappa, Krippendorff's Alpha, and ICC
     *   **Consensus Scoring:** Automated consensus determination with majority rule, super-majority, and unanimous methods

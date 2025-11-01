@@ -1,0 +1,102 @@
+---
+name: functionalsampling
+title: Functional Sampling - Rare Event Analysis
+jrs: '1.1'
+
+items:
+    - name: summary
+      title: Rare Event Summary
+      type: Table
+      visible: (show_summary)
+      rows: 1
+      columns:
+        - name: total_events
+          title: Total Events
+          type: integer
+        - name: rare_events
+          title: Rare Events (N)
+          type: integer
+        - name: rare_frequency
+          title: Frequency (%)
+          type: number
+        - name: interpretation
+          title: Classification
+          type: text
+
+    - name: nnd_table
+      title: Nearest Neighbor Distance Analysis
+      type: Table
+      visible: (calculate_nnd)
+      rows: 1
+      columns:
+        - name: mean_nnd
+          title: Mean NND
+          type: number
+        - name: sd_nnd
+          title: SD
+          type: number
+        - name: cv_nnd
+          title: CV (%)
+          type: number
+        - name: consistency
+          title: Consistency
+          type: text
+
+    - name: randomness_test
+      title: Spatial Randomness Test (Clark-Evans)
+      type: Table
+      visible: (test_randomness)
+      rows: 1
+      columns:
+        - name: R
+          title: R Statistic
+          type: number
+        - name: expected_R
+          title: Expected R
+          type: number
+        - name: z_score
+          title: Z Score
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: pattern
+          title: Spatial Pattern
+          type: text
+
+    - name: functional_assessment
+      title: Functional/"Catalyst" Cell Assessment
+      type: Table
+      visible: (analyze_neighborhoods)
+      rows: 1
+      columns:
+        - name: criterion_1
+          title: Rarity (<5%)
+          type: text
+        - name: criterion_2
+          title: Random Distribution
+          type: text
+        - name: criterion_3
+          title: Regular Neighborhoods
+          type: text
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    - name: plot
+      title: Spatial Distribution Plot
+      type: Image
+      visible: (show_plot)
+      renderFun: .plot
+      requiresData: true
+
+    - name: methodology
+      title: Methodology
+      type: Html
+      visible: (show_methodology)
+
+    - name: references
+      title: References
+      type: Html
+      visible: (show_references)

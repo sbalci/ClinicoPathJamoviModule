@@ -238,7 +238,7 @@ analyses:
   - title: Generalized Estimating Equations
     name: geemodel
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Correlated Data Analysis
     menuTitle: GEE Model
     menuSubtitle: Analyze repeated measures and clustered data
@@ -251,6 +251,83 @@ analyses:
 
       samples per subject (e.g., bilateral organs, multiple biopsies per
       patient).
+    ribbon: analyses
+    category: analyses
+  - title: Stereology Analysis
+    name: stereology
+    ns: ClinicoPath
+    menuGroup: OncoPathT
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Stereology
+    menuSubtitle: Quantitative 3D estimation from 2D sections
+    description: >-
+      Stereology methods for estimating three-dimensional tissue parameters from
+      two-dimensional histological sections. Calculates area density (Aa),
+      volume density (Vv), numerical density (Na), boundary density (Ba), and
+      surface density (Sv) using systematic grid-based sampling.
+
+      Essential for quantitative pathology: vessel density quantification,
+      fibrosis assessment, nuclear morphometry, and inflammation quantification.
+      Based on sampling theory from Kayser et al. (2009) and stereological
+      methods from Gundersen et al. (1985, 1986).
+    ribbon: analyses
+    category: analyses
+  - title: IHC Threshold Determination
+    name: ihcthreshold
+    ns: ClinicoPath
+    menuGroup: OncoPathT
+    menuSubgroup: Image Analysis
+    menuTitle: IHC Threshold
+    menuSubtitle: Automated threshold for positive/negative classification
+    description: >-
+      Active sampling for optimal IHC threshold determination. Tests multiple
+      intensity thresholds across sample areas and selects the threshold with
+      most consistent positive/negative ratios. Based on Kayser et al. (2009).
+    ribbon: analyses
+    category: analyses
+  - title: Sampling Error & Efficiency Calculator
+    name: samplingerror
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Sampling Error Calculator
+    menuSubtitle: Calculate sampling efficiency and error rates (Kayser 2009)
+    description: >-
+      Kayser et al. (2009) sampling error formula. Calculates E(p) from
+      detection error, biological variance, and frequency estimation. Provides
+      optimization.
+    ribbon: analyses
+    category: analyses
+  - title: Functional Sampling - Rare Event Analysis
+    name: functionalsampling
+    ns: ClinicoPath
+    menuGroup: OncoPathT
+    menuSubgroup: Spatial Analysis
+    menuTitle: Functional Sampling
+    menuSubtitle: Identify rare cells with catalyst function (Kayser 2009)
+    description: >-
+      Functional sampling for rare event analysis. Identifies rare cells with
+      disproportionate functional importance (catalyst function) using spatial
+      distribution patterns. Tests three criteria: rarity, random distribution
+      (Clark-Evans test), and regular neighborhoods (NND analysis). Based on
+      Kayser et al. (2009) lines 392-479.
+    ribbon: analyses
+    category: analyses
+  - title: Diagnostic Test Sample Size Calculator
+    name: diagnosticsamplesize
+    ns: ClinicoPath
+    menuGroup: meddecide
+    menuSubgroup: Sample Size Planning
+    menuTitle: Diagnostic Sample Size (CI Width)
+    menuSubtitle: Clopper-Pearson precision-based planning (Bujang 2023)
+    description: >-
+      Sample size calculator for diagnostic test accuracy studies using
+      Clopper-Pearson exact binomial confidence intervals. Precision-based
+      planning with specified CI width for sensitivity and specificity.
+      Differentiates diagnostic (high Sens AND Spec) from screening (high Sens
+      OR Spec) purposes. Includes prevalence stratification, non-response
+      adjustment, and publication-ready sample size statements. Based on Bujang
+      (2023) Diagnostics 13(8):1390.
     ribbon: analyses
     category: analyses
   - title: Automated Exploratory Data Analysis
@@ -747,6 +824,22 @@ analyses:
     menuTitle: Paired Samples
     menuSubtitle: McNemar test
     description: McNemar test
+    ribbon: analyses
+    category: analyses
+  - title: Mantel-Haenszel Stratified Analysis
+    name: mantelhaenszel
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Mantel-Haenszel Test
+    menuSubtitle: Stratified analysis controlling for confounding
+    description: >-
+      Mantel-Haenszel stratified analysis for 2×2 tables controlling for
+      confounding. Calculates common odds ratio, risk ratio, or risk difference
+      across strata. Includes homogeneity tests (Woolf, Breslow-Day),
+      confounding assessment, and stratum-specific analysis. Essential for
+      epidemiological studies examining association between exposure and outcome
+      while controlling for third variables.
     ribbon: analyses
     category: analyses
   - title: Publication-Ready Tables with gtsummary
@@ -2485,6 +2578,22 @@ analyses:
       Advanced ANOVA analysis with comprehensive post hoc testing, 
       effect sizes, and assumption checking. Addresses the critical issue 
       where 68% of pathology studies fail proper multiple comparisons.
+  - title: Mixed Model ANOVA
+    name: mixedmodelanova
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Mixed Model ANOVA
+    menuSubtitle: Linear mixed effects models with repeated measures
+    description: >-
+      Linear mixed effects models for repeated measures and nested designs.
+      Implements random intercepts, random slopes, and nested models using
+      lme4/lmerTest. Provides comprehensive output including fixed effects,
+      random effects, ICC, effect sizes, post hoc comparisons with emmeans, and
+      assumption checking. Essential for analyzing correlated data with multiple
+      levels of variation.
+    ribbon: analyses
+    category: analyses
   - title: Hierarchical Mixed-Effects Models
     name: hierarchicalpathology
     ns: ClinicoPath
@@ -5453,6 +5562,14 @@ analyses:
 
       evaluate the clinical utility of prognostic models with time-to-event
       outcomes.
+  - title: Sampling Error & Efficiency Calculator
+    name: samplingerror
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Sampling Error Calculator
+    menuSubtitle: Calculate sampling efficiency and error rates (Kayser 2009)
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

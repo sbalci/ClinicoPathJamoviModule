@@ -1,0 +1,145 @@
+---
+name: mixedmodelanova
+title: Mixed Model ANOVA
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Mixed Model ANOVA
+menuSubtitle: Linear mixed effects models with repeated measures
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dependent
+      title: Dependent Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: fixed_factors
+      title: Fixed Factors
+      type: Variables
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+
+    - name: random_factors
+      title: Random Factors (Grouping Variables)
+      type: Variables
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: model_type
+      title: Model Structure
+      type: List
+      options:
+        - name: random_intercept
+          title: Random Intercept Only
+        - name: random_slope
+          title: Random Intercept and Slope
+        - name: nested
+          title: Nested Design
+      default: random_intercept
+
+    - name: interaction_terms
+      title: Include Interaction Terms
+      type: Bool
+      default: false
+
+    - name: estimation_method
+      title: Estimation Method
+      type: List
+      options:
+        - name: reml
+          title: REML (Restricted Maximum Likelihood)
+        - name: ml
+          title: ML (Maximum Likelihood)
+      default: reml
+
+    - name: show_fixed_effects
+      title: Show Fixed Effects Table
+      type: Bool
+      default: true
+
+    - name: show_random_effects
+      title: Show Random Effects Table
+      type: Bool
+      default: true
+
+    - name: show_model_fit
+      title: Show Model Fit Statistics
+      type: Bool
+      default: true
+
+    - name: show_assumptions
+      title: Check Assumptions
+      type: Bool
+      default: true
+
+    - name: show_posthoc
+      title: Post Hoc Comparisons
+      type: Bool
+      default: false
+
+    - name: posthoc_method
+      title: Post Hoc Adjustment
+      type: List
+      options:
+        - name: tukey
+          title: Tukey
+        - name: bonferroni
+          title: Bonferroni
+        - name: holm
+          title: Holm
+        - name: none
+          title: None
+      default: tukey
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+
+    - name: show_effect_sizes
+      title: Show Effect Sizes
+      type: Bool
+      default: true
+
+    - name: show_icc
+      title: Show Intraclass Correlation (ICC)
+      type: Bool
+      default: true
+
+    - name: show_plots
+      title: Generate Diagnostic Plots
+      type: Bool
+      default: true
+
+    - name: show_methodology
+      title: Show Methodology
+      type: Bool
+      default: false
+
+    - name: show_references
+      title: Show References
+      type: Bool
+      default: false

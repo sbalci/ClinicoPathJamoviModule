@@ -1,0 +1,144 @@
+---
+name: stereology
+title: Stereology Analysis
+jrs: '1.1'
+
+items:
+    - name: descriptives
+      title: Descriptive Statistics
+      type: Table
+      visible: (showDescriptives)
+      rows: 1
+      columns:
+        - name: n
+          title: N
+          type: integer
+        - name: mean_intersections
+          title: Mean Intersections
+          type: number
+        - name: mean_total_points
+          title: Mean Total Points
+          type: number
+        - name: mean_ref_area
+          title: Mean Reference Area (μm²)
+          type: number
+
+    - name: stereologyTable
+      title: Stereological Parameters
+      type: Table
+      rows: 1
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+          visible: (showConfidenceIntervals)
+        - name: lower
+          title: 95% CI Lower
+          type: number
+          visible: (showConfidenceIntervals)
+        - name: upper
+          title: 95% CI Upper
+          type: number
+          visible: (showConfidenceIntervals)
+        - name: unit
+          title: Unit
+          type: text
+
+    - name: groupComparison
+      title: Group Comparison
+      type: Table
+      visible: (showGroupComparison && groupVar)
+      rows: 0
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: aa_mean
+          title: Aa (Mean)
+          type: number
+          visible: (calculateAa)
+        - name: aa_sd
+          title: Aa (SD)
+          type: number
+          visible: (calculateAa)
+        - name: vv_mean
+          title: Vv (Mean)
+          type: number
+          visible: (calculateVv)
+        - name: vv_sd
+          title: Vv (SD)
+          type: number
+          visible: (calculateVv)
+        - name: ba_mean
+          title: Ba (Mean)
+          type: number
+          visible: (calculateBa)
+        - name: ba_sd
+          title: Ba (SD)
+          type: number
+          visible: (calculateBa)
+        - name: na_mean
+          title: Na (Mean)
+          type: number
+          visible: (calculateNa)
+        - name: na_sd
+          title: Na (SD)
+          type: number
+          visible: (calculateNa)
+        - name: sv_mean
+          title: Sv (Mean)
+          type: number
+          visible: (calculateSv)
+        - name: sv_sd
+          title: Sv (SD)
+          type: number
+          visible: (calculateSv)
+
+    - name: groupTests
+      title: Statistical Tests (Between Groups)
+      type: Table
+      visible: (showGroupComparison && groupVar)
+      rows: 0
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: test_stat
+          title: Test Statistic
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: plot
+      title: Stereological Parameters
+      type: Image
+      visible: (showPlot)
+      renderFun: .plot
+      requiresData: true
+
+    - name: methodology
+      title: Methodology & Interpretation
+      type: Html
+      visible: (showMethodology)
+
+    - name: references
+      title: References
+      type: Html
+      visible: (showReferences)

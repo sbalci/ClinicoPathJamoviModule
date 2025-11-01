@@ -1,0 +1,228 @@
+---
+name: stereology
+title: Stereology Analysis
+menuGroup: OncoPathT
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Stereology
+menuSubtitle: Quantitative 3D estimation from 2D sections
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: intersections
+      title: Intersection Counts
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        Number of grid intersections (hits) with the structure of interest
+        (e.g., vessels, nuclei, fibrosis areas).
+
+    - name: totalPoints
+      title: Total Grid Points
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        Total number of grid points or test lines used in the measurement.
+
+    - name: boundaryIntersections
+      title: Boundary Intersections (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default: NULL
+      description: >
+        Number of grid line intersections with object boundaries
+        (for boundary density calculation).
+
+    - name: objectCount
+      title: Object Count (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default: NULL
+      description: >
+        Number of discrete objects counted (for numerical density calculation).
+
+    - name: referenceArea
+      title: Reference Area (μm²)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        Total reference area examined (in square micrometers).
+        Typically calculated as: image width × height.
+
+    - name: sectionThickness
+      title: Section Thickness (μm) (Optional)
+      type: Number
+      min: 0.1
+      max: 100
+      default: 5
+      description: >
+        Histological section thickness in micrometers.
+        Required for volume density calculations. Default: 5 μm.
+
+    - name: gridSpacing
+      title: Grid Spacing (μm)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description: >
+        Distance between grid lines in micrometers.
+        Used for length calculations in boundary/surface density.
+
+    - name: tissueType
+      title: Tissue/Structure Type
+      type: List
+      options:
+        - name: vessels
+          title: Blood Vessels
+        - name: nuclei
+          title: Cell Nuclei
+        - name: fibrosis
+          title: Fibrosis/Stroma
+        - name: inflammation
+          title: Inflammatory Cells
+        - name: tumor
+          title: Tumor Cells/Areas
+        - name: custom
+          title: Custom Structure
+      default: vessels
+      description: >
+        Type of tissue structure being quantified.
+        This helps provide context-specific interpretation.
+
+    - name: groupVar
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      default: NULL
+      description: >
+        Optional grouping variable to compare stereology parameters
+        across groups (e.g., diagnosis, treatment, grade).
+
+    - name: calculateAa
+      title: Calculate Area Density (Aa)
+      type: Bool
+      default: true
+      description: >
+        Area density: proportion of reference area occupied by structure.
+        Formula: Aa = intersection count / total points.
+
+    - name: calculateVv
+      title: Calculate Volume Density (Vv)
+      type: Bool
+      default: true
+      description: >
+        Volume density: proportion of reference volume occupied by structure.
+        In isotropic sections, Vv = Aa.
+
+    - name: calculateBa
+      title: Calculate Boundary Density (Ba)
+      type: Bool
+      default: false
+      description: >
+        Boundary density: boundary length per unit area.
+        Requires boundary intersection data.
+
+    - name: calculateNa
+      title: Calculate Numerical Density (Na)
+      type: Bool
+      default: false
+      description: >
+        Numerical density: number of objects per unit area.
+        Requires object count data.
+
+    - name: calculateSv
+      title: Calculate Surface Density (Sv)
+      type: Bool
+      default: false
+      description: >
+        Surface density: surface area per unit volume.
+        Formula: Sv = 2 × Ba (for isotropic sections).
+
+    - name: showConfidenceIntervals
+      title: Show Confidence Intervals
+      type: Bool
+      default: true
+      description: >
+        Calculate and display 95% confidence intervals for
+        stereological estimates using bootstrap methods.
+
+    - name: bootstrapIterations
+      title: Bootstrap Iterations
+      type: Integer
+      min: 100
+      max: 100000
+      default: 1000
+      description: >
+        Number of bootstrap iterations for confidence interval estimation.
+
+    - name: showGroupComparison
+      title: Show Group Comparison
+      type: Bool
+      default: false
+      description: >
+        Compare stereological parameters across groups
+        (requires grouping variable).
+
+    - name: showDescriptives
+      title: Show Descriptive Statistics
+      type: Bool
+      default: true
+
+    - name: showPlot
+      title: Show Visualization
+      type: Bool
+      default: true
+      description: >
+        Display bar chart of stereological parameters
+        with confidence intervals.
+
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - name: bars
+          title: Bar Chart with Error Bars
+        - name: boxplot
+          title: Box Plot
+        - name: violin
+          title: Violin Plot
+      default: bars
+
+    - name: showMethodology
+      title: Show Methodology & Interpretation
+      type: Bool
+      default: true
+      description: >
+        Display detailed explanation of stereological methods,
+        formulas, and interpretation guidelines.
+
+    - name: showReferences
+      title: Show References
+      type: Bool
+      default: false
+      description: >
+        Display literature references for stereological methods.

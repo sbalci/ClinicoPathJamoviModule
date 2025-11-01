@@ -25,29 +25,64 @@ the R statistical language and provides a graphical user interface
 within jamovi for a wide range of functions. Key features include:
 
 - **Descriptive Statistics:** Generation of publication-ready summary
-  tables (`Table 1`).
-- **Survival Analysis:** Tools for Kaplan-Meier estimation, log-rank
-  tests, and Cox proportional hazards models for single, comparison, and
-  multiple variable analyses.
-- **Diagnostic Accuracy:** Evaluation of diagnostic tests using Receiver
-  Operating Characteristic (ROC) curve analysis, decision curve analysis
-  (DCA), and screening test calculators.
-- **Agreement and Reliability:** Assessment of inter-rater reliability
-  using statistics such as Cohen’s Kappa and the Intraclass Correlation
-  Coefficient (ICC).
-- **Laboratory Quality Control:** Statistical
-  process control with Shewhart, CUSUM, and EWMA control charts, Six
-  Sigma metrics, method validation protocols, reference interval
-  establishment, and measurement uncertainty estimation.
-- **Spatial Statistics & Digital Pathology:** Comprehensive spatial
-  analysis tools including Ripley’s K-function, spatial autocorrelation
-  (Moran’s I, Geary’s C), LISA analysis, and Haralick texture analysis
-  for digital pathology applications.
-- **Data Visualization:** A collection of advanced plotting tools,
-  including waterfall plots, swimmer plots, raincloud plots, and
-  advanced bar plots for intuitive data exploration and presentation.
-- **Data Preprocessing:** Utilities for data quality checking,
-  management of missing data, and date corrections.
+  tables (`Table 1`), advanced stratified analysis (Mantel-Haenszel),
+  and mixed model ANOVA for repeated measures and nested designs.
+- **Survival Analysis:** A comprehensive framework including:
+  - **Core Methods:** Kaplan-Meier, Nelson-Aalen, and Turnbull NPMLE for
+    interval-censored data.
+  - **Advanced Modeling:** Cox PH, time-varying effects, AFT models, and
+    frailty models.
+  - **Specialized Applications:** Competing risks, multi-state models,
+    recurrent event analysis, and cure models.
+  - **Machine Learning Integration:** Survival trees, random forests,
+    gradient boosting, and regularized regression (LASSO, Ridge).
+  - **Oncological Analysis:** Specialized methods for Progression-Free
+    Survival (PFS), treatment switching (IPCW), and tumor growth
+    kinetics.
+- **Clinical Trial Design & Evaluation:**
+  - **Modern Designs:** Group sequential, adaptive, platform, and master
+    (umbrella, basket) protocols.
+  - **Epidemiological Tools:** Population-based survival analysis,
+    case-cohort designs, and attributable risk calculation.
+- **Diagnostic & Prognostic Accuracy:**
+  - **Test Evaluation:** ROC analysis, decision curve analysis (DCA),
+    and screening test calculators.
+  - **Model Validation:** Time-dependent ROC, prediction error curves,
+    C-statistics, and calibration plots.
+  - **Sample Size Planning:** Precision-based diagnostic test sample
+    size calculation with Clopper-Pearson exact CI, automated
+    justification statements, and multi-method CI comparison (Wilson,
+    Agresti-Coull, Wald).
+- **Agreement and Reliability:**
+  - **Inter-rater Statistics:** Cohen’s Kappa, Fleiss’ Kappa,
+    Krippendorff’s Alpha, and ICC
+  - **Consensus Scoring:** Automated consensus determination with
+    majority rule, super-majority, and unanimous methods
+  - **Digital Pathology Validation:** Modality comparison for glass
+    slides vs digital images with HER2-specific analysis
+  - **Method Comparison:** Bland-Altman plots and Deming Regression
+- **Evidence-Based Decision Support:** A suite of tools for:
+  - **Clinical Monitoring:** Alert systems and patient monitoring
+    dashboards.
+  - **Treatment Planning:** Optimization frameworks and differential
+    diagnosis assistance.
+  - **Results Interpretation:** Laboratory and imaging findings
+    correlation.
+- **Laboratory Quality Control:** Statistical process control, including
+  Shewhart/CUSUM charts, Six Sigma metrics, and measurement uncertainty.
+- **Spatial Statistics & Digital Pathology:**
+  - **Spatial Analysis:** Spatial point pattern analysis (Ripley’s
+    K-function), spatial autocorrelation (Moran’s I)
+  - **Texture Analysis:** Haralick texture features for quantitative
+    pathology
+  - **Validation Studies:** Glass slide vs digital image comparison with
+    discordance pattern analysis
+  - **HER2 Scoring:** Specialized tools for HER2-low/null distinction
+    and ADC therapy eligibility
+- **Data Visualization:** Advanced plotting tools such as waterfall
+  plots, swimmer plots, and raincloud plots.
+- **Data Preprocessing:** Utilities for data quality checking, missing
+  data management, and date corrections.
 
 **Conclusion:** The ClinicoPathJamoviModule provides a powerful,
 accessible, and free-to-use toolkit that empowers medical researchers to
@@ -103,10 +138,11 @@ library.
 
 Submodules are:
 
-- ClinicoPathDescriptives  
-- jsurvival  
-- meddecide  
+- ClinicoPathDescriptives
+- jsurvival
+- meddecide
 - jjstatsplot
+- OncoPath
 
 <img src="man/figures/jamovi-library.png" align="center" width = 75% />
 
@@ -253,6 +289,22 @@ remotes::install_github("sbalci/meddecide")
 
 <!--        - macos  -->
 
+##### OncoPath
+
+OncoPath functions are specialized for oncological and pathological
+research under OncoPath menu
+
+OncoPath module can be downloaded inside jamovi (click Modules and
+jamovi library)
+
+<https://github.com/sbalci/OncoPath>
+
+<https://github.com/sbalci/OncoPath/releases/>
+
+``` r
+remotes::install_github("sbalci/OncoPath")
+```
+
 <!-- #### c: For stable version    -->
 
 <!-- - windows: https://library.jamovi.org/win64/R3.6.3/ClinicoPath-0.0.2.jmo -->
@@ -335,10 +387,6 @@ remotes::install_github("sbalci/meddecide")
 
 (Enhanced summary statistics for continuous and date variables)
 
-##### [Swimmer Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/swimmerplot_documentation.html)
-
-(Comprehensive swimmer plots for visualizing patient timelines)
-
 ##### [Table One](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone_documentation.html)
 
 <img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
@@ -366,12 +414,8 @@ remotes::install_github("sbalci/meddecide")
 
 ##### [Variable Tree](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/vartree_documentation.html)
 
-<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />  
+<img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />
 <img src="man/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width = 75% />
-
-##### [Waterfall Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/waterfall_documentation.html)
-
-(Treatment response analysis)
 
 ------------------------------------------------------------------------
 
@@ -465,6 +509,24 @@ remotes::install_github("sbalci/meddecide")
 
 ------------------------------------------------------------------------
 
+### OncoPath
+
+#### Patient Follow-Up Plots
+
+##### [Swimmer Plot](https://www.serdarbalci.com/OncoPath/articles/swimmerplot_documentation.html)
+
+<img src="man/figures/jamovi-OncoPath-swimmerplot.gif" align="center" width = 75% />
+(Comprehensive swimmer plots for visualizing patient timelines, clinical
+events, and treatment responses)
+
+##### [Waterfall Plot](https://www.serdarbalci.com/OncoPath/articles/waterfall_documentation.html)
+
+<img src="man/figures/jamovi-OncoPath-waterfall.gif" align="center" width = 75% />
+(Treatment response analysis with RECIST criteria, waterfall plots, and
+spider plots)
+
+------------------------------------------------------------------------
+
 ### Survival
 
 #### jsurvival
@@ -502,9 +564,18 @@ remotes::install_github("sbalci/meddecide")
 
 (Cut-off & Univariate Survival Analysis)
 
-##### [Survival Analysis Power & Sample Size](https://www.serdarbalci.com/jsurvival/articles/survivalpower_documentation.html)
+##### [Comprehensive Survival Power Analysis](https://www.serdarbalci.com/jsurvival/articles/jsurvival-02-comprehensive-survival-power-analysis.html)
 
-(Power Analysis for Survival Studies)
+**Enhanced Unified Power Analysis Platform** - **Seven Method
+Categories:** Standard methods, competing risks, advanced methods,
+genetic analysis, cure models, sequential analysis, and epidemiological
+studies - **Advanced Statistical Methods:** NPHMC mixture cure models,
+powerSurvEpi epidemiological methods, survSNP genetic associations,
+survivalpwr Cox regression, and rpact sequential designs -
+**Comprehensive Calculations:** Sample size, power, and effect size
+calculations across all methodologies - **Modern Interface:** Organized
+CollapseBox layout with conditional parameter visibility for streamlined
+analysis workflow
 
 ##### [Time-Dependent ROC Analysis](https://www.serdarbalci.com/jsurvival/articles/timeroc_documentation.html)
 
@@ -693,7 +764,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--08--24-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2025--10--27-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -773,7 +844,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--08--24-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2025--10--27-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

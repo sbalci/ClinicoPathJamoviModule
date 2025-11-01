@@ -1,0 +1,79 @@
+---
+name: diagnosticsamplesize
+title: Diagnostic Test Sample Size Calculator
+jrs: '1.1'
+
+items:
+    - name: sample_size_summary
+      title: Sample Size Calculation Results
+      type: Table
+      rows: 0
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: target_value
+          title: Target Value
+          type: number
+        - name: n_cases
+          title: N (Cases/Controls)
+          type: integer
+        - name: n_total
+          title: Total N Required
+          type: integer
+
+    - name: sample_size_statement
+      title: Sample Size Justification Statement
+      type: Html
+      visible: (show_statement)
+
+    - name: prevalence_table
+      title: Sample Size Across Prevalence Levels
+      type: Table
+      visible: (show_comparison_table)
+      rows: 0
+      columns:
+        - name: prevalence
+          title: Prevalence
+          type: number
+        - name: n_sens_total
+          title: N for Sensitivity
+          type: integer
+        - name: n_spec_total
+          title: N for Specificity
+          type: integer
+        - name: n_required
+          title: Required N (Max)
+          type: integer
+
+    - name: method_comparison
+      title: CI Method Comparison
+      type: Table
+      visible: (show_method_comparison)
+      rows: 0
+      columns:
+        - name: method
+          title: CI Method
+          type: text
+        - name: n_sensitivity
+          title: N for Sensitivity
+          type: integer
+        - name: n_specificity
+          title: N for Specificity
+          type: integer
+        - name: n_total
+          title: Total N Required
+          type: integer
+        - name: relative_efficiency
+          title: Relative Efficiency (%)
+          type: number
+
+    - name: methodology
+      title: Methodology
+      type: Html
+      visible: (show_methodology)
+
+    - name: references
+      title: References
+      type: Html
+      visible: (show_references)

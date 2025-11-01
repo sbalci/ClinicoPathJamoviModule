@@ -1,0 +1,102 @@
+---
+name: mixedmodelanova
+title: Mixed Model ANOVA
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - continuous
+      - nominal
+      - ordinal
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables
+        children:
+          - type: VariablesListBox
+            name: dependent
+            maxItemCount: 1
+            isTarget: true
+            label: Dependent Variable
+          - type: VariablesListBox
+            name: fixed_factors
+            isTarget: true
+            label: Fixed Factors
+          - type: VariablesListBox
+            name: random_factors
+            isTarget: true
+            label: Random Factors (Grouping)
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            label: Covariates
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Structure
+        children:
+          - type: ComboBox
+            name: model_type
+      - type: CheckBox
+        name: interaction_terms
+      - type: Label
+        label: Estimation Method
+        children:
+          - type: ComboBox
+            name: estimation_method
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: show_fixed_effects
+      - type: CheckBox
+        name: show_random_effects
+      - type: CheckBox
+        name: show_model_fit
+      - type: CheckBox
+        name: show_effect_sizes
+      - type: CheckBox
+        name: show_icc
+      - type: CheckBox
+        name: show_assumptions
+      - type: CheckBox
+        name: show_plots
+
+  - type: CollapseBox
+    label: Post Hoc Comparisons
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: show_posthoc
+      - type: Label
+        label: Adjustment Method
+        children:
+          - type: ComboBox
+            name: posthoc_method
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+        suffix: (confidence level)
+
+  - type: CollapseBox
+    label: Documentation
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: show_methodology
+      - type: CheckBox
+        name: show_references
