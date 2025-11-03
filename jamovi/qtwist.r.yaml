@@ -1,0 +1,515 @@
+---
+name: qtwist
+title: Q-TWiST Analysis
+jrs: '1.1'
+
+items:
+    # ========================================
+    # Welcome & Instructions
+    # ========================================
+    - name: welcomeMessage
+      title: Q-TWiST Analysis Overview
+      type: Html
+      clearWith:
+          - time_os
+          - event_os
+          - time_pfs
+          - event_pfs
+          - treatment
+
+    # ========================================
+    # Methodology Explanation
+    # ========================================
+    - name: methodologyExplanation
+      title: Understanding Q-TWiST Methodology
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - showExplanations
+
+    # ========================================
+    # Descriptive Statistics
+    # ========================================
+    - name: descriptiveStats
+      title: Descriptive Statistics by Treatment
+      type: Table
+      visible: (show_descriptive_stats)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+      columns:
+          - name: Treatment
+            title: "Treatment"
+            type: text
+          - name: N
+            title: "N"
+            type: integer
+          - name: Median_OS
+            title: "Median OS"
+            type: number
+            format: zto
+          - name: OS_Events
+            title: "OS Events"
+            type: integer
+          - name: OS_EventRate
+            title: "OS Event %"
+            type: number
+            format: zto,pc
+          - name: Median_PFS
+            title: "Median PFS"
+            type: number
+            format: zto
+          - name: PFS_Events
+            title: "PFS Events"
+            type: integer
+          - name: PFS_EventRate
+            title: "PFS Event %"
+            type: number
+            format: zto,pc
+
+    # ========================================
+    # RMST Components (underlying calculations)
+    # ========================================
+    - name: rmstComponents
+      title: Restricted Mean Survival Time Components
+      type: Table
+      visible: (show_rmst_components)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - tau
+      columns:
+          - name: Treatment
+            title: "Treatment"
+            type: text
+          - name: RMST_OS
+            title: "RMST(OS)"
+            type: number
+            format: zto
+          - name: RMST_OS_SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: RMST_PFS
+            title: "RMST(PFS)"
+            type: number
+            format: zto
+          - name: RMST_PFS_SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: Tau
+            title: "τ (months)"
+            type: number
+            format: zto
+
+    # ========================================
+    # State Partition Table
+    # ========================================
+    - name: statePartition
+      title: Health State Partition (months)
+      type: Table
+      visible: (show_state_partition)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - toxicity_method
+          - toxicity_window
+          - toxicity_duration_var
+          - tau
+      columns:
+          - name: Treatment
+            title: "Treatment"
+            type: text
+          - name: N
+            title: "N"
+            type: integer
+          - name: E_TOX
+            title: "E[TOX]"
+            type: number
+            format: zto
+            superTitle: "Mean Time (months)"
+          - name: E_TWIST
+            title: "E[TWiST]"
+            type: number
+            format: zto
+            superTitle: "Mean Time (months)"
+          - name: E_REL
+            title: "E[REL]"
+            type: number
+            format: zto
+            superTitle: "Mean Time (months)"
+          - name: Total_RMST
+            title: "Total"
+            type: number
+            format: zto
+            superTitle: "Mean Time (months)"
+          - name: TOX_Percent
+            title: "TOX %"
+            type: number
+            format: zto,pc
+            superTitle: "Proportion of Survival"
+          - name: TWIST_Percent
+            title: "TWiST %"
+            type: number
+            format: zto,pc
+            superTitle: "Proportion of Survival"
+          - name: REL_Percent
+            title: "REL %"
+            type: number
+            format: zto,pc
+            superTitle: "Proportion of Survival"
+
+    # ========================================
+    # Q-TWiST Scores Table
+    # ========================================
+    - name: qtwistScores
+      title: Quality-Adjusted Survival (Q-TWiST) Scores
+      type: Table
+      visible: (show_qtwist_scores)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - utility_tox
+          - utility_twist
+          - utility_rel
+          - tau
+      columns:
+          - name: Treatment
+            title: "Treatment"
+            type: text
+          - name: QTWIST
+            title: "Q-TWiST"
+            type: number
+            format: zto
+            superTitle: "Quality-Adjusted Months"
+          - name: QTWIST_SE
+            title: "SE"
+            type: number
+            format: zto
+            superTitle: "Quality-Adjusted Months"
+          - name: QTWIST_CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+            superTitle: "Quality-Adjusted Months"
+          - name: QTWIST_CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+            superTitle: "Quality-Adjusted Months"
+          - name: Utility_TOX
+            title: "μ_TOX"
+            type: number
+            format: zto
+            superTitle: "Utilities Used"
+          - name: Utility_TWIST
+            title: "μ_TWiST"
+            type: number
+            format: zto
+            superTitle: "Utilities Used"
+          - name: Utility_REL
+            title: "μ_REL"
+            type: number
+            format: zto
+            superTitle: "Utilities Used"
+
+    # ========================================
+    # Treatment Difference
+    # ========================================
+    - name: treatmentDifference
+      title: Q-TWiST Treatment Difference
+      type: Table
+      visible: (show_treatment_difference)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - utility_tox
+          - utility_twist
+          - utility_rel
+          - bootstrap_ci
+      columns:
+          - name: Comparison
+            title: "Comparison"
+            type: text
+          - name: Delta_QTWIST
+            title: "Δ Q-TWiST"
+            type: number
+            format: zto
+            superTitle: "Difference (months)"
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+            superTitle: "Difference (months)"
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+            superTitle: "Difference (months)"
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+            superTitle: "Difference (months)"
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Favors
+            title: "Favors"
+            type: text
+          - name: ClinicalSignificance
+            title: "Clinical Significance"
+            type: text
+
+    # ========================================
+    # State-Specific Treatment Differences
+    # ========================================
+    - name: stateDifferences
+      title: Treatment Differences by Health State
+      type: Table
+      visible: (show_treatment_difference)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+      columns:
+          - name: HealthState
+            title: "Health State"
+            type: text
+          - name: Difference
+            title: "Difference (months)"
+            type: number
+            format: zto
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # ========================================
+    # Sensitivity Analysis Table
+    # ========================================
+    - name: sensitivityTable
+      title: Sensitivity Analysis - Varying Utility Weights
+      type: Table
+      visible: (show_sensitivity_table && sensitivity_analysis)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - utility_range_tox
+          - utility_range_rel
+          - sensitivity_analysis
+      columns:
+          - name: Utility_TOX
+            title: "μ_TOX"
+            type: number
+            format: zto
+          - name: Utility_REL
+            title: "μ_REL"
+            type: number
+            format: zto
+          - name: QTWIST_Arm1
+            title: "Arm 1"
+            type: number
+            format: zto
+            superTitle: "Q-TWiST (months)"
+          - name: QTWIST_Arm2
+            title: "Arm 2"
+            type: number
+            format: zto
+            superTitle: "Q-TWiST (months)"
+          - name: Delta_QTWIST
+            title: "Difference"
+            type: number
+            format: zto
+            superTitle: "Q-TWiST (months)"
+          - name: Favors
+            title: "Favors"
+            type: text
+          - name: ClinicallySignificant
+            title: "Clinically Significant"
+            type: text
+
+    # ========================================
+    # Threshold Analysis
+    # ========================================
+    - name: thresholdAnalysis
+      title: Threshold Utility Analysis
+      type: Table
+      visible: (threshold_analysis && sensitivity_analysis)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - sensitivity_analysis
+          - threshold_analysis
+      columns:
+          - name: Parameter
+            title: "Parameter"
+            type: text
+          - name: ThresholdValue
+            title: "Threshold Value"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # ========================================
+    # Clinical Interpretation
+    # ========================================
+    - name: clinicalInterpretation
+      title: Clinical Interpretation of Q-TWiST Results
+      type: Html
+      visible: (showClinicalGuidance)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - showClinicalGuidance
+
+    # ========================================
+    # Statistical Formulas
+    # ========================================
+    - name: statisticalFormulas
+      title: Q-TWiST Statistical Formulas
+      type: Html
+      visible: (showFormulas)
+      clearWith:
+          - showFormulas
+
+    # ========================================
+    # Key References
+    # ========================================
+    - name: keyReferences
+      title: Key References for Q-TWiST Analysis
+      type: Html
+      visible: (showReferences)
+      clearWith:
+          - showReferences
+
+    # ========================================
+    # Plots Section
+    # ========================================
+
+    # Partitioned Survival Plot
+    - name: partitionedSurvivalPlot
+      title: Partitioned Survival by Health State
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .plotPartitionedSurvival
+      visible: (plot_partitioned_survival)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - toxicity_method
+          - tau
+          - plot_partitioned_survival
+          - plot_color_scheme
+
+    # Q-TWiST Comparison Plot
+    - name: qtwistComparisonPlot
+      title: Q-TWiST Component Comparison by Treatment
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotQTWISTComparison
+      visible: (plot_qtwist_comparison)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - utility_tox
+          - utility_twist
+          - utility_rel
+          - plot_qtwist_comparison
+          - plot_color_scheme
+
+    # Sensitivity Analysis Plot
+    - name: sensitivityPlot
+      title: Sensitivity Analysis - Q-TWiST Difference Across Utilities
+      type: Image
+      width: 800
+      height: 700
+      renderFun: .plotSensitivity
+      visible: (plot_sensitivity && sensitivity_analysis)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - utility_range_tox
+          - utility_range_rel
+          - sensitivity_analysis
+          - plot_sensitivity
+
+    # Kaplan-Meier Reference Curves
+    - name: kmCurvesPlot
+      title: Kaplan-Meier Survival Curves (OS and PFS)
+      type: Image
+      width: 900
+      height: 500
+      renderFun: .plotKMCurves
+      visible: (plot_km_curves)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - plot_km_curves
+
+    # Forest Plot for Multiple Comparisons
+    - name: forestPlot
+      title: Q-TWiST Differences Across Strata
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotForest
+      visible: (!is.null(stratify_by) && length(stratify_by) > 0)
+      clearWith:
+          - time_os
+          - time_pfs
+          - treatment
+          - stratify_by
+
+refs:
+    - ClinicoPathJamoviModule
+    - gelber1986
+    - glasziou1990
+    - cole2004
+    - revicki2006
+    - survival
+    - survRM2
+    - ggplot2
+
+...

@@ -374,3 +374,84 @@ options:
         - name: empirical
           title: Empirical Proportion (requires positive count)
       default: auto
+
+    - name: showHeterogeneityTest
+      title: Show Heterogeneity Test
+      type: Bool
+      default: false
+      description: >
+        Test if detection probability varies significantly across sample types.
+        Only available when Sample Type variable is specified. Uses likelihood ratio test.
+
+    - name: useGeometricCI
+      title: Use Geometric CI When Needed
+      type: Bool
+      default: true
+      description: >
+        Use theoretical geometric model confidence intervals when bootstrap
+        shows ceiling effect (100% bounds). Provides more realistic uncertainty estimates.
+
+    - name: ciMethod
+      title: Confidence Interval Method
+      type: List
+      options:
+        - name: auto
+          title: Auto (choose best method)
+        - name: bootstrap
+          title: Bootstrap only
+        - name: geometric
+          title: Geometric model only
+        - name: both
+          title: Both (for comparison)
+      default: auto
+      description: >
+        Method for calculating confidence intervals. Auto selects geometric when bootstrap
+        shows ceiling effect, otherwise uses bootstrap.
+
+    - name: showModelFit
+      title: Show Model Fit Assessment
+      type: Bool
+      default: false
+      description: >
+        Perform goodness-of-fit test comparing observed vs predicted detection distribution.
+        Validates geometric/binomial model assumptions.
+
+    - name: showObsPred
+      title: Show Observed vs Predicted Table
+      type: Bool
+      default: false
+      description: >
+        Compare observed detection rates with model predictions at each sample number.
+        Visual model validation tool.
+
+    - name: showMarginalInterpretation
+      title: Interpret Marginal Benefits
+      type: Bool
+      default: true
+      description: >
+        Add cost-benefit interpretation to marginal gain analysis. Auto-enabled when
+        Show Binomial Model is checked.
+
+    - name: appendVariables
+      title: Append Calculated Variables to Data
+      type: Bool
+      default: false
+      description: >
+        Add new columns to dataset with calculated detection probabilities and classifications.
+        Variables include cumulative probabilities, recommended sample counts, and detection categories.
+
+    - name: appendPrefix
+      title: Variable Name Prefix
+      type: String
+      default: "ps_"
+      description: >
+        Prefix for appended variable names (e.g., 'ps_' creates 'ps_cumulative_prob_5').
+        Only used when Append Variables is enabled.
+
+    - name: autoDetectHeterogeneity
+      title: Auto-Detect Population Heterogeneity
+      type: Bool
+      default: true
+      description: >
+        Automatically analyze and report if sample types have significantly different
+        detection probabilities. Requires Sample Type variable. Warns if CV > 30%.

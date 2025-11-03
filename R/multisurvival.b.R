@@ -1551,9 +1551,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           private$.calculate_nomogram()
         }
 
-        if (self$options$use_tree) {
-          private$.calculate_survivaldecisiontree()
-        }
+        # EXPERIMENTAL:         if (self$options$use_tree) {
+        # EXPERIMENTAL:           private$.calculate_survivaldecisiontree()
+        # EXPERIMENTAL:         }
 
         # Return success indicator
         return(TRUE)
@@ -1670,87 +1670,87 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         all_labels <- labelled::var_label(mydata_labelled)
 
         # Handle Time-Dependent Covariates
-        if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
-
-          # Get time-dependent variable names
-          time_dep_vars <- names(all_labels)[match(self$options$time_dep_vars, all_labels)]
-
-          if (self$options$td_format == "wide") {
-            # Handle wide format data - convert to long format
-            mydata <- private$.convertWideToLong(mydata, time_dep_vars, all_labels)
-
-            # Update formula for time-dependent covariates (long format)
-            td_predictors <- c(formula_parts, time_dep_vars)
-            coxformula <- .buildSurvivalFormula(
-              time_var = "tstart",
-              outcome_var = myoutcome,
-              predictors = td_predictors,
-              survival_type = "counting",
-              start_var = "tstart",
-              stop_var = "tstop"
-            )
-
-          } else if (self$options$td_format == "long") {
-            # Handle long format data
-            if (!is.null(self$options$start_time_var) && !is.null(self$options$stop_time_var)) {
-              start_time_var <- names(all_labels)[all_labels == self$options$start_time_var]
-              stop_time_var <- names(all_labels)[all_labels == self$options$stop_time_var]
-
-              # Update formula for time-dependent covariates
-              long_predictors <- c(formula_parts, time_dep_vars)
-              coxformula <- .buildSurvivalFormula(
-                time_var = start_time_var,
-                outcome_var = myoutcome,
-                predictors = long_predictors,
-                survival_type = "counting",
-                start_var = start_time_var,
-                stop_var = stop_time_var
-              )
-            }
-          }
-        }
-
-        # Handle Frailty Models
-        if (self$options$use_frailty && !is.null(self$options$frailty_var)) {
-          frailty_var <- names(all_labels)[all_labels == self$options$frailty_var]
-
-          # Add frailty term based on distribution
-          frailty_term <- switch(self$options$frailty_distribution,
-            "gamma" = paste0("frailty(", frailty_var, ", distribution='gamma')"),
-            "gaussian" = paste0("frailty(", frailty_var, ", distribution='gaussian')"),
-            "logt" = paste0("frailty(", frailty_var, ", distribution='logt')")
-          )
-
-          formula_parts <- c(formula_parts, frailty_term)
-          RHT <- paste(formula_parts, collapse = " + ")
-          coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
-        }
-
-        # Handle Splines for Non-Proportional Hazards
-        if (self$options$use_splines && !is.null(self$options$spline_vars)) {
-          spline_vars <- names(all_labels)[match(self$options$spline_vars, all_labels)]
-
-          # Create spline terms
-          for (var in spline_vars) {
-            spline_term <- switch(self$options$spline_type,
-              "pspline" = paste0("pspline(", var, ", df=", self$options$spline_df, ")"),
-              "ns" = paste0("ns(", var, ", df=", self$options$spline_df, ")"),
-              "bs" = paste0("bs(", var, ", df=", self$options$spline_df, ")")
-            )
-
-            # Replace the linear term with spline term
-            formula_parts <- formula_parts[formula_parts != var]
-            formula_parts <- c(formula_parts, spline_term)
-          }
-
-          RHT <- paste(formula_parts, collapse = " + ")
-          coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
-
-          # Load splines package if needed
-          if (self$options$spline_type %in% c("ns", "bs")) {
-            requireNamespace("splines", quietly = TRUE)
-          }
-        }
+        # EXPERIMENTAL:         if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Get time-dependent variable names
+        # EXPERIMENTAL:           time_dep_vars <- names(all_labels)[match(self$options$time_dep_vars, all_labels)]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           if (self$options$td_format == "wide") {
+        # EXPERIMENTAL:             # Handle wide format data - convert to long format
+        # EXPERIMENTAL:             mydata <- private$.convertWideToLong(mydata, time_dep_vars, all_labels)
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:             # Update formula for time-dependent covariates (long format)
+        # EXPERIMENTAL:             td_predictors <- c(formula_parts, time_dep_vars)
+        # EXPERIMENTAL:             coxformula <- .buildSurvivalFormula(
+        # EXPERIMENTAL:               time_var = "tstart",
+        # EXPERIMENTAL:               outcome_var = myoutcome,
+        # EXPERIMENTAL:               predictors = td_predictors,
+        # EXPERIMENTAL:               survival_type = "counting",
+        # EXPERIMENTAL:               start_var = "tstart",
+        # EXPERIMENTAL:               stop_var = "tstop"
+        # EXPERIMENTAL:             )
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           } else if (self$options$td_format == "long") {
+        # EXPERIMENTAL:             # Handle long format data
+        # EXPERIMENTAL:             if (!is.null(self$options$start_time_var) && !is.null(self$options$stop_time_var)) {
+        # EXPERIMENTAL:               start_time_var <- names(all_labels)[all_labels == self$options$start_time_var]
+        # EXPERIMENTAL:               stop_time_var <- names(all_labels)[all_labels == self$options$stop_time_var]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:               # Update formula for time-dependent covariates
+        # EXPERIMENTAL:               long_predictors <- c(formula_parts, time_dep_vars)
+        # EXPERIMENTAL:               coxformula <- .buildSurvivalFormula(
+        # EXPERIMENTAL:                 time_var = start_time_var,
+        # EXPERIMENTAL:                 outcome_var = myoutcome,
+        # EXPERIMENTAL:                 predictors = long_predictors,
+        # EXPERIMENTAL:                 survival_type = "counting",
+        # EXPERIMENTAL:                 start_var = start_time_var,
+        # EXPERIMENTAL:                 stop_var = stop_time_var
+        # EXPERIMENTAL:               )
+        # EXPERIMENTAL:             }
+        # EXPERIMENTAL:           }
+        # EXPERIMENTAL:         }
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:         # Handle Frailty Models
+        # EXPERIMENTAL:         if (self$options$use_frailty && !is.null(self$options$frailty_var)) {
+        # EXPERIMENTAL:           frailty_var <- names(all_labels)[all_labels == self$options$frailty_var]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Add frailty term based on distribution
+        # EXPERIMENTAL:           frailty_term <- switch(self$options$frailty_distribution,
+        # EXPERIMENTAL:             "gamma" = paste0("frailty(", frailty_var, ", distribution='gamma')"),
+        # EXPERIMENTAL:             "gaussian" = paste0("frailty(", frailty_var, ", distribution='gaussian')"),
+        # EXPERIMENTAL:             "logt" = paste0("frailty(", frailty_var, ", distribution='logt')")
+        # EXPERIMENTAL:           )
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           formula_parts <- c(formula_parts, frailty_term)
+        # EXPERIMENTAL:           RHT <- paste(formula_parts, collapse = " + ")
+        # EXPERIMENTAL:           coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+        # EXPERIMENTAL:         }
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:         # Handle Splines for Non-Proportional Hazards
+        # EXPERIMENTAL:         if (self$options$use_splines && !is.null(self$options$spline_vars)) {
+        # EXPERIMENTAL:           spline_vars <- names(all_labels)[match(self$options$spline_vars, all_labels)]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Create spline terms
+        # EXPERIMENTAL:           for (var in spline_vars) {
+        # EXPERIMENTAL:             spline_term <- switch(self$options$spline_type,
+        # EXPERIMENTAL:               "pspline" = paste0("pspline(", var, ", df=", self$options$spline_df, ")"),
+        # EXPERIMENTAL:               "ns" = paste0("ns(", var, ", df=", self$options$spline_df, ")"),
+        # EXPERIMENTAL:               "bs" = paste0("bs(", var, ", df=", self$options$spline_df, ")")
+        # EXPERIMENTAL:             )
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:             # Replace the linear term with spline term
+        # EXPERIMENTAL:             formula_parts <- formula_parts[formula_parts != var]
+        # EXPERIMENTAL:             formula_parts <- c(formula_parts, spline_term)
+        # EXPERIMENTAL:           }
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           RHT <- paste(formula_parts, collapse = " + ")
+        # EXPERIMENTAL:           coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Load splines package if needed
+        # EXPERIMENTAL:           if (self$options$spline_type %in% c("ns", "bs")) {
+        # EXPERIMENTAL:             requireNamespace("splines", quietly = TRUE)
+        # EXPERIMENTAL:           }
+        # EXPERIMENTAL:         }
 
         cox_model <- survival::coxph(coxformula, data = mydata)
 

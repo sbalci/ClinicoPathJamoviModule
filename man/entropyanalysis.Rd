@@ -48,7 +48,7 @@ uniform distribution}
 \item{uncertainty_threshold}{entropy threshold for flagging
 high-uncertainty predictions}
 
-\item{normalize_entropy}{normalize entropy to \link{0,1} scale (divide by
+\item{normalize_entropy}{normalize entropy to (0 to 1) scale (divide by
 log(n_classes))}
 
 \item{binning_method}{binning method for continuous variables in MI

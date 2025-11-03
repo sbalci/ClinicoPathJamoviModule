@@ -48,37 +48,8 @@ multisurvival(
   person_time = FALSE,
   time_intervals = "12, 36, 60",
   rate_multiplier = 100,
-  use_tree = FALSE,
-  min_node = 20,
-  complexity = 0.01,
-  max_depth = 5,
-  show_terminal_nodes = FALSE,
-  use_time_dependent = FALSE,
-  td_format = "wide",
-  time_dep_vars = NULL,
-  change_times = "6, 12, 18",
-  td_suffix_pattern = "_t{time}",
-  start_time_var = NULL,
-  stop_time_var = NULL,
-  use_frailty = FALSE,
-  frailty_var = NULL,
-  frailty_distribution = "gamma",
-  use_splines = FALSE,
-  spline_vars = NULL,
-  spline_df = 3,
-  spline_type = "pspline",
   showExplanations = FALSE,
-  showSummaries = FALSE,
-  ml_method = "none",
-  ml_validation = "cv",
-  ml_cv_folds = 5,
-  ml_feature_selection = FALSE,
-  ml_importance = FALSE,
-  ml_calibration = FALSE,
-  ml_performance = FALSE,
-  ml_shap = FALSE,
-  ml_hyperparameter_tuning = FALSE,
-  ml_ensemble_weights = "equal"
+  showSummaries = FALSE
 )
 }
 \arguments{
@@ -226,80 +197,6 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
 
-\item{use_tree}{If true, fits a survival decision tree to identify
-subgroups with different survival outcomes. Decision trees provide an
-intuitive alternative to Cox regression for identifying risk factors.}
-
-\item{min_node}{The minimum number of observations required in a terminal
-node. Larger values create simpler trees that may be more generalizable but
-potentially miss important subgroups.}
-
-\item{complexity}{The complexity parameter for tree pruning. Higher values
-result in smaller trees. This parameter controls the trade-off between tree
-size and goodness of fit.}
-
-\item{max_depth}{The maximum depth of the decision tree. Limits the
-complexity of the tree to avoid overfitting.}
-
-\item{show_terminal_nodes}{If true, displays Kaplan-Meier survival curves
-for each terminal node of the decision tree.}
-
-\item{use_time_dependent}{Enable time-dependent covariates for Cox
-regression. This allows modeling variables that change values at specific
-time points during follow-up (e.g., treatment changes, biomarker
-measurements, disease progression).}
-
-\item{td_format}{Specify whether your data is in wide format (one row per
-subject with time points as separate variables) or long format (multiple
-rows per subject with time intervals).}
-
-\item{time_dep_vars}{Variables that change values over time. In wide
-format, these are baseline variables that will be updated at change points.
-In long format, these are the time-varying variables.}
-
-\item{change_times}{Time points (in same units as survival time) when
-time-dependent variables change. For wide format data, specify
-comma-separated time points (e.g., "6, 12, 18"). The function will create
-intervals and update covariate values at these times.}
-
-\item{td_suffix_pattern}{For wide format: Pattern for time-specific
-variable names. Use {time} as placeholder. Example: if baseline variable is
-'treatment' and pattern is '_t{time}',  the function looks for
-'treatment_t6', 'treatment_t12', etc.}
-
-\item{start_time_var}{For long format only: Variable indicating the start
-time of each interval. Leave empty for wide format data.}
-
-\item{stop_time_var}{For long format only: Variable indicating the stop
-time of each interval. Leave empty for wide format data.}
-
-\item{use_frailty}{Add a frailty term to account for unobserved
-heterogeneity or clustering in the data. Frailty models add random effects
-to the Cox model.}
-
-\item{frailty_var}{Clustering variable for the frailty term (e.g.,
-hospital, family, or study center). Each level represents a cluster with
-shared frailty.}
-
-\item{frailty_distribution}{Distribution of the frailty term. Gamma is most
-commonly used and assumes multiplicative effect on the hazard. Gaussian
-assumes additive effect on log-hazard.}
-
-\item{use_splines}{Use penalized splines to model time-varying effects
-(non-proportional hazards). This is an alternative to stratification for
-handling PH violations.}
-
-\item{spline_vars}{Variables to model with time-varying coefficients using
-splines. These are variables that violate the proportional hazards
-assumption.}
-
-\item{spline_df}{Degrees of freedom for the spline functions. Higher values
-allow more flexible time-varying effects but may lead to overfitting.}
-
-\item{spline_type}{Type of spline basis to use. Penalized splines provide
-smooth functions with automatic smoothness selection. Natural splines are
-constrained to be linear at the boundaries.}
-
 \item{showExplanations}{Display detailed explanations for each analysis
 component to help interpret the statistical methods and results.}
 
@@ -307,26 +204,6 @@ component to help interpret the statistical methods and results.}
 and plots. These summaries provide plain-language interpretations of the
 statistical results. Turn off to reduce visual clutter when summaries are
 not needed.}
-
-\item{ml_method}{Machine learning survival analysis method}
-
-\item{ml_validation}{Model validation approach}
-
-\item{ml_cv_folds}{CV fold count}
-
-\item{ml_feature_selection}{Enable feature selection}
-
-\item{ml_importance}{Show variable importance}
-
-\item{ml_calibration}{Generate calibration plot}
-
-\item{ml_performance}{Show performance metrics}
-
-\item{ml_shap}{Compute SHAP values}
-
-\item{ml_hyperparameter_tuning}{Enable hyperparameter tuning}
-
-\item{ml_ensemble_weights}{Ensemble model weights}
 }
 \value{
 A results object containing:
@@ -369,12 +246,6 @@ A results object containing:
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogramSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$mydataview_survivaldecisiontree} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$survivalTreeHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$treeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
-\code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
 \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$multivariableCoxHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -384,12 +255,6 @@ A results object containing:
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$ml_variable_importance} \tab \tab \tab \tab \tab a table \cr
-\code{results$ml_performance_metrics} \tab \tab \tab \tab \tab a html \cr
-\code{results$ml_feature_selection_results} \tab \tab \tab \tab \tab a table \cr
-\code{results$ml_ensemble_summary} \tab \tab \tab \tab \tab a html \cr
-\code{results$ml_prediction_intervals} \tab \tab \tab \tab \tab a table \cr
-\code{results$ml_cross_validation_summary} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

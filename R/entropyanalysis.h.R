@@ -469,7 +469,7 @@ entropyanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   uniform distribution
 #' @param uncertainty_threshold entropy threshold for flagging
 #'   high-uncertainty predictions
-#' @param normalize_entropy normalize entropy to [0,1] scale (divide by
+#' @param normalize_entropy normalize entropy to (0 to 1) scale (divide by
 #'   log(n_classes))
 #' @param binning_method binning method for continuous variables in MI
 #'   calculation

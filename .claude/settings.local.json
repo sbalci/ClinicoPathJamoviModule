@@ -116,7 +116,15 @@
       "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/jjstatsplot/vignettes/)",
       "Bash(do cp \"$file\" /Users/serdarbalci/Documents/GitHub/meddecide/vignettes/)",
       "Read(//Users/serdarbalci/Desktop/omentum/**)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(do echo \"=== $ref ===\")",
+      "Bash(do echo \"=== Line $line_num ===\")",
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/multisurvival.u.yaml)",
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/multisurvival.u.yaml.backup)",
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/multisurvival.r.yaml.backup)",
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/multisurvival.r.yaml)",
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/multisurvival.b.R.backup)",
+      "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/multisurvival.b.R)"
     ],
     "deny": [],
     "ask": [],

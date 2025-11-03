@@ -65,7 +65,7 @@ options:
       description:
           R: >
             Number of principal components to test for significance (1 to 20).
-            Testing will be performed for PC1 through PC[ncomp].
+            Testing will be performed for PC1 through the specified number of components.
 
     - name: nperm
       title: Number of Permutations

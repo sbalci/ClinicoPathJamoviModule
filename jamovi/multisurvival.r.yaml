@@ -682,70 +682,70 @@ items:
           - explanatory
           - outcome
 
-# Survival Decision Tree ----
-
-
-    - name:  mydataview_survivaldecisiontree
-      title: mydataview_survivaldecisiontree
-      type:  Preformatted
-      visible: (FALSE)
-
-    - name:  survivalTreeHeading
-      title: Survival Decision Tree
-      type:  Preformatted
-      visible: (use_tree)
-      
-
-    # Survival Decision Tree Summary (right after tree analysis)
-    - name: treeSummaryHeading
-      title: 'Decision Tree Natural Language Summary'
-      type: Preformatted
-      visible: (use_tree && showSummaries)
-
-    - name: tree_summary
-      title: ''
-      type: Html
-      visible: (use_tree && showSummaries)
-      clearWith:
-          - use_tree
-          - min_node
-          - complexity
-          - max_depth
-          - outcome
-          - outcomeLevel
-          - elapsedtime
-          - explanatory
-          - contexpl
-
-    - name: tree_plot
-      title: 'Survival Decision Tree'
-      type: Image
-      width: 800
-      height: 600
-      renderFun: .plotTree
-      requiresData: true
-      visible: (use_tree)
-      clearWith:
-          - use_tree
-          - min_node
-          - complexity
-          - max_depth
-          - outcome
-          - outcomeLevel
-          - elapsedtime
-          - explanatory
-          - contexpl
-
-    - name: node_survival_plots
-      title: 'Survival Curves for Terminal Nodes'
-      type: Image
-      width: 800
-      height: 600
-      renderFun: .plotNodeSurvival
-      requiresData: true
-      visible: (use_tree && show_terminal_nodes)
-      clearWith:
-          - use_tree
+    # # Survival Decision Tree ----
+    # 
+    # 
+    #     - name:  mydataview_survivaldecisiontree
+    #       title: mydataview_survivaldecisiontree
+    #       type:  Preformatted
+    #       visible: (FALSE)
+    # 
+    #     - name:  survivalTreeHeading
+    #       title: Survival Decision Tree
+    #       type:  Preformatted
+    #       visible: (use_tree)
+    #       
+    # 
+    #     # Survival Decision Tree Summary (right after tree analysis)
+    #     - name: treeSummaryHeading
+    #       title: 'Decision Tree Natural Language Summary'
+    #       type: Preformatted
+    #       visible: (use_tree && showSummaries)
+    # 
+    #     - name: tree_summary
+    #       title: ''
+    #       type: Html
+    #       visible: (use_tree && showSummaries)
+    #       clearWith:
+    #           - use_tree
+    #           - min_node
+    #           - complexity
+    #           - max_depth
+    #           - outcome
+    #           - outcomeLevel
+    #           - elapsedtime
+    #           - explanatory
+    #           - contexpl
+    # 
+    #     - name: tree_plot
+    #       title: 'Survival Decision Tree'
+    #       type: Image
+    #       width: 800
+    #       height: 600
+    #       renderFun: .plotTree
+    #       requiresData: true
+    #       visible: (use_tree)
+    #       clearWith:
+    #           - use_tree
+    #           - min_node
+    #           - complexity
+    #           - max_depth
+    #           - outcome
+    #           - outcomeLevel
+    #           - elapsedtime
+    #           - explanatory
+    #           - contexpl
+    # 
+    #     - name: node_survival_plots
+    #       title: 'Survival Curves for Terminal Nodes'
+    #       type: Image
+    #       width: 800
+    #       height: 600
+    #       renderFun: .plotNodeSurvival
+    #       requiresData: true
+    #       visible: (use_tree && show_terminal_nodes)
+    #       clearWith:
+    #           - use_tree
           - min_node
           - complexity
           - max_depth
@@ -1251,104 +1251,104 @@ items:
           - hr
           - outcome
 
-    # Machine Learning Results Section
-    - name: ml_variable_importance
-      title: 'Variable Importance (Machine Learning)'
-      type: Table
-      visible: (ml_method != 'cox')
-      rows: 0
-      columns:
-          - name: variable
-            title: 'Variable'
-            type: text
-          - name: importance
-            title: 'Importance'
-            type: number
-          - name: rank
-            title: 'Rank'
-            type: integer
-      clearWith:
-          - ml_method
-          - explanatory
-          - contexpl
-          - outcome
-
-    - name: ml_performance_metrics
-      title: 'Machine Learning Model Performance'
-      type: Html
-      visible: (ml_method != 'cox')
-      clearWith:
-          - ml_method
-          - ml_validation
-          - ml_cv_folds
-          - outcome
-
-    - name: ml_feature_selection_results
-      title: 'Feature Selection Results'
-      type: Table
-      visible: (ml_feature_selection)
-      rows: 0
-      columns:
-          - name: variable
-            title: 'Variable'
-            type: text
-          - name: selected
-            title: 'Selected'
-            type: text
-          - name: selection_frequency
-            title: 'Selection Frequency'
-            type: number
-          - name: importance_score
-            title: 'Importance Score'
-            type: number
-      clearWith:
-          - ml_feature_selection
-          - ml_method
-          - explanatory
-          - contexpl
-
-    - name: ml_ensemble_summary
-      title: 'Ensemble Model Summary'
-      type: Html
-      visible: (ml_method == 'ensemble' && showSummaries)
-      clearWith:
-          - ml_method
-          - ml_ensemble_weights
-          - outcome
-
-    - name: ml_prediction_intervals
-      title: 'Prediction Intervals (Machine Learning)'
-      type: Table
-      visible: (ml_method != 'cox')
-      rows: 0
-      columns:
-          - name: observation
-            title: 'Observation'
-            type: integer
-          - name: prediction
-            title: 'Predicted Risk'
-            type: number
-          - name: lower_ci
-            title: 'Lower 95% CI'
-            type: number
-          - name: upper_ci
-            title: 'Upper 95% CI'
-            type: number
-          - name: risk_group
-            title: 'Risk Group'
-            type: text
-      clearWith:
-          - ml_method
-          - outcome
-
-    - name: ml_cross_validation_summary
-      title: 'Cross-Validation Performance'
-      type: Html
-      visible: (ml_method != 'cox' && ml_validation == 'cv')
-      clearWith:
-          - ml_method
-          - ml_validation
-          - ml_cv_folds
+    #     # Machine Learning Results Section
+    #     - name: ml_variable_importance
+    #       title: 'Variable Importance (Machine Learning)'
+    #       type: Table
+    #       visible: (ml_method != 'cox')
+    #       rows: 0
+    #       columns:
+    #           - name: variable
+    #             title: 'Variable'
+    #             type: text
+    #           - name: importance
+    #             title: 'Importance'
+    #             type: number
+    #           - name: rank
+    #             title: 'Rank'
+    #             type: integer
+    #       clearWith:
+    #           - ml_method
+    #           - explanatory
+    #           - contexpl
+    #           - outcome
+    # 
+    #     - name: ml_performance_metrics
+    #       title: 'Machine Learning Model Performance'
+    #       type: Html
+    #       visible: (ml_method != 'cox')
+    #       clearWith:
+    #           - ml_method
+    #           - ml_validation
+    #           - ml_cv_folds
+    #           - outcome
+    # 
+    #     - name: ml_feature_selection_results
+    #       title: 'Feature Selection Results'
+    #       type: Table
+    #       visible: (ml_feature_selection)
+    #       rows: 0
+    #       columns:
+    #           - name: variable
+    #             title: 'Variable'
+    #             type: text
+    #           - name: selected
+    #             title: 'Selected'
+    #             type: text
+    #           - name: selection_frequency
+    #             title: 'Selection Frequency'
+    #             type: number
+    #           - name: importance_score
+    #             title: 'Importance Score'
+    #             type: number
+    #       clearWith:
+    #           - ml_feature_selection
+    #           - ml_method
+    #           - explanatory
+    #           - contexpl
+    # 
+    #     - name: ml_ensemble_summary
+    #       title: 'Ensemble Model Summary'
+    #       type: Html
+    #       visible: (ml_method == 'ensemble' && showSummaries)
+    #       clearWith:
+    #           - ml_method
+    #           - ml_ensemble_weights
+    #           - outcome
+    # 
+    #     - name: ml_prediction_intervals
+    #       title: 'Prediction Intervals (Machine Learning)'
+    #       type: Table
+    #       visible: (ml_method != 'cox')
+    #       rows: 0
+    #       columns:
+    #           - name: observation
+    #             title: 'Observation'
+    #             type: integer
+    #           - name: prediction
+    #             title: 'Predicted Risk'
+    #             type: number
+    #           - name: lower_ci
+    #             title: 'Lower 95% CI'
+    #             type: number
+    #           - name: upper_ci
+    #             title: 'Upper 95% CI'
+    #             type: number
+    #           - name: risk_group
+    #             title: 'Risk Group'
+    #             type: text
+    #       clearWith:
+    #           - ml_method
+    #           - outcome
+    # 
+    #     - name: ml_cross_validation_summary
+    #       title: 'Cross-Validation Performance'
+    #       type: Html
+    #       visible: (ml_method != 'cox' && ml_validation == 'cv')
+    #       clearWith:
+    #           - ml_method
+    #           - ml_validation
+    #           - ml_cv_folds
           - outcome
 
 refs:

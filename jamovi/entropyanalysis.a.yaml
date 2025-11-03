@@ -130,7 +130,7 @@ options:
       default: true
       description:
           R: >
-            normalize entropy to [0,1] scale (divide by log(n_classes))
+            normalize entropy to (0 to 1) scale (divide by log(n_classes))
 
     - name: binning_method
       title: Binning Method for MI

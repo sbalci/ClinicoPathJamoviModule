@@ -24,6 +24,17 @@
         `pages`="816-820", 
         `doi`="10.1016/j.eururo.2009.07.022", 
         `url`="https://pubmed.ncbi.nlm.nih.gov/19647360/"), 
+    `simon1984`=list(
+        `type`="article", 
+        `author`="Simon R, Makuch RW", 
+        `year`=1984, 
+        `title`="A non-parametric graphical representation of the relationship between survival and the occurrence of an event: application to responder versus non-responder bias", 
+        `publisher`="Statistics in Medicine", 
+        `volume`=3, 
+        `issue`=1, 
+        `pages`="35-44", 
+        `doi`="10.1002/sim.4780030106", 
+        `url`="https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.4780030106"), 
     `tnmstaging2017`=list(
         `type`="article", 
         `author`="Brierley, J. D., Gospodarowicz, M. K., & Wittekind, C.", 
@@ -437,6 +448,16 @@
         `pages`="127-141", 
         `doi`="10.1002/sim.2331", 
         `url`="https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.2331"), 
+    `timereg`=list(
+        `type`="article", 
+        `author`="Scheike T, Zhang M", 
+        `year`=2011, 
+        `title`="\u201CAnalyzing Competing Risk Data Using the R timereg Package.\u201D https://www.jstatsoft.org/v38/i02/", 
+        `publisher`="Journal of Statistical Software", 
+        `volume`="38(2)", 
+        `pages`="1-15", 
+        `doi`="10.18637/jss.v038.i02", 
+        `url`="https://CRAN.R-project.org/package=timereg"), 
     `tangram`=list(
         `type`="software", 
         `author`="Garbett, S.", 
@@ -703,13 +724,6 @@
         `title`="moments: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=moments", 
         `url`="https://CRAN.R-project.org/package=moments"), 
-    `timereg`=list(
-        `type`="software", 
-        `author`=NULL, 
-        `year`=NULL, 
-        `title`="timereg: R package", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=timereg", 
-        `url`="https://CRAN.R-project.org/package=timereg"), 
     `glmnet`=list(
         `type`="software", 
         `author`=NULL, 
@@ -1006,9 +1020,9 @@
         `url`="https://CRAN.R-project.org/package=tidyheatmaps"), 
     `rms`=list(
         `type`="software", 
-        `author`=NULL, 
-        `year`=NULL, 
-        `title`="rms: R package", 
+        `author`="Frank E Harrell Jr", 
+        `year`=2023, 
+        `title`="rms: Regression Modeling Strategies", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=rms", 
         `url`="https://CRAN.R-project.org/package=rms"), 
     `mice`=list(
@@ -1181,9 +1195,9 @@
         `url`="https://CRAN.R-project.org/package=anytime"), 
     `lubridate`=list(
         `type`="software", 
-        `author`=NULL, 
-        `year`=NULL, 
-        `title`="lubridate: R package", 
+        `author`="Garrett Grolemund and Hadley Wickham", 
+        `year`=2011, 
+        `title`="lubridate: Make Dealing with Dates a Little Easier", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=lubridate", 
         `url`="https://CRAN.R-project.org/package=lubridate"), 
     `forcats`=list(

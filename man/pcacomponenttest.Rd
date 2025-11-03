@@ -27,7 +27,8 @@ pcacomponenttest(
 Analysis. Select at least 3 numeric variables.}
 
 \item{ncomp}{Number of principal components to test for significance (1 to
-20). Testing will be performed for PC1 through PC\link{ncomp}.}
+20). Testing will be performed for PC1 through the specified number of
+components.}
 
 \item{nperm}{Number of permutations to generate null distribution
 (100-10000). Higher values provide more accurate p-values but take longer.

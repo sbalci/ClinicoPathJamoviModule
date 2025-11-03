@@ -296,7 +296,8 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param vars Continuous variables to include in Principal Component
 #'   Analysis. Select at least 3 numeric variables.
 #' @param ncomp Number of principal components to test for significance (1 to
-#'   20). Testing will be performed for PC1 through PC[ncomp].
+#'   20). Testing will be performed for PC1 through the specified number of
+#'   components.
 #' @param nperm Number of permutations to generate null distribution
 #'   (100-10000). Higher values provide more accurate p-values but take longer.
 #'   Minimum p-value = 1/(nperm+1). For p<0.001, use nperm>=1000.

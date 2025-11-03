@@ -1,7 +1,7 @@
 ---
 name: stereology
 title: Stereology Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPathT2
 menuSubgroup: ClinicoPath Descriptives
 menuTitle: Stereology
 menuSubtitle: Quantitative 3D estimation from 2D sections

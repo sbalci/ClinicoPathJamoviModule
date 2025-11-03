@@ -1,10 +1,10 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: SurvivalT2
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -815,211 +815,211 @@ options:
         Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
         1000 for rates per 1000 person-years).
 
-# Decision Tree Options ----
-    - name: use_tree
-      title: Use Survival Decision Tree
-      type: Bool
-      default: false
-      description:
-        R: >
-          If true, fits a survival decision tree to identify subgroups with different survival outcomes.
-          Decision trees provide an intuitive alternative to Cox regression for identifying risk factors.
+# Decision Tree Options ---- (EXPERIMENTAL - will be implemented later)
+    # - name: use_tree
+    #   title: Use Survival Decision Tree
+    #   type: Bool
+    #   default: false
+    #   description:
+    #     R: >
+    #       If true, fits a survival decision tree to identify subgroups with different survival outcomes.
+    #       Decision trees provide an intuitive alternative to Cox regression for identifying risk factors.
 
-    - name: min_node
-      title: Minimum Node Size
-      type: Integer
-      min: 5
-      max: 100
-      default: 20
-      description:
-        R: >
-          The minimum number of observations required in a terminal node. Larger values create
-          simpler trees that may be more generalizable but potentially miss important subgroups.
+    # - name: min_node
+    #   title: Minimum Node Size
+    #   type: Integer
+    #   min: 5
+    #   max: 100
+    #   default: 20
+    #   description:
+    #     R: >
+    #       The minimum number of observations required in a terminal node. Larger values create
+    #       simpler trees that may be more generalizable but potentially miss important subgroups.
 
-    - name: complexity
-      title: Complexity Parameter
-      type: Number
-      min: 0.001
-      max: 0.1
-      default: 0.01
-      description:
-        R: >
-          The complexity parameter for tree pruning. Higher values result in smaller trees.
-          This parameter controls the trade-off between tree size and goodness of fit.
+    # - name: complexity
+    #   title: Complexity Parameter
+    #   type: Number
+    #   min: 0.001
+    #   max: 0.1
+    #   default: 0.01
+    #   description:
+    #     R: >
+    #       The complexity parameter for tree pruning. Higher values result in smaller trees.
+    #       This parameter controls the trade-off between tree size and goodness of fit.
 
-    - name: max_depth
-      title: Maximum Tree Depth
-      type: Integer
-      min: 1
-      max: 10
-      default: 5
-      description:
-        R: >
-          The maximum depth of the decision tree. Limits the complexity of the tree to avoid overfitting.
+    # - name: max_depth
+    #   title: Maximum Tree Depth
+    #   type: Integer
+    #   min: 1
+    #   max: 10
+    #   default: 5
+    #   description:
+    #     R: >
+    #       The maximum depth of the decision tree. Limits the complexity of the tree to avoid overfitting.
 
-    - name: show_terminal_nodes
-      title: Show Survival Curves for Terminal Nodes
-      type: Bool
-      default: false
-      description:
-        R: >
-          If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
+    # - name: show_terminal_nodes
+    #   title: Show Survival Curves for Terminal Nodes
+    #   type: Bool
+    #   default: false
+    #   description:
+    #     R: >
+    #       If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
 
-# Time-Dependent Covariates ----
-    - name: use_time_dependent
-      title: Use Time-Dependent Covariates
-      type: Bool
-      default: false
-      description:
-        R: >
-          Enable time-dependent covariates for Cox regression. This allows modeling variables
-          that change values at specific time points during follow-up (e.g., treatment changes,
-          biomarker measurements, disease progression).
+# Time-Dependent Covariates ---- (EXPERIMENTAL - will be implemented later)
+    # - name: use_time_dependent
+    #   title: Use Time-Dependent Covariates
+    #   type: Bool
+    #   default: false
+    #   description:
+    #     R: >
+    #       Enable time-dependent covariates for Cox regression. This allows modeling variables
+    #       that change values at specific time points during follow-up (e.g., treatment changes,
+    #       biomarker measurements, disease progression).
 
-    - name: td_format
-      title: Data Format
-      type: List
-      options:
-        - title: Wide Format (one row per subject)
-          name: wide
-        - title: Long Format (multiple rows per subject)
-          name: long
-      default: wide
-      description:
-        R: >
-          Specify whether your data is in wide format (one row per subject with time points
-          as separate variables) or long format (multiple rows per subject with time intervals).
+    # - name: td_format
+    #   title: Data Format
+    #   type: List
+    #   options:
+    #     - title: Wide Format (one row per subject)
+    #       name: wide
+    #     - title: Long Format (multiple rows per subject)
+    #       name: long
+    #   default: wide
+    #   description:
+    #     R: >
+    #       Specify whether your data is in wide format (one row per subject with time points
+    #       as separate variables) or long format (multiple rows per subject with time intervals).
 
-    - name: time_dep_vars
-      title: Time-Dependent Variables
-      type: Variables
-      default: NULL
-      description:
-        R: >
-          Variables that change values over time. In wide format, these are baseline variables
-          that will be updated at change points. In long format, these are the time-varying variables.
+    # - name: time_dep_vars
+    #   title: Time-Dependent Variables
+    #   type: Variables
+    #   default: NULL
+    #   description:
+    #     R: >
+    #       Variables that change values over time. In wide format, these are baseline variables
+    #       that will be updated at change points. In long format, these are the time-varying variables.
 
-    - name: change_times
-      title: Change Time Points
-      type: String
-      default: '6, 12, 18'
-      description:
-        R: >
-          Time points (in same units as survival time) when time-dependent variables change.
-          For wide format data, specify comma-separated time points (e.g., "6, 12, 18").
-          The function will create intervals and update covariate values at these times.
+    # - name: change_times
+    #   title: Change Time Points
+    #   type: String
+    #   default: '6, 12, 18'
+    #   description:
+    #     R: >
+    #       Time points (in same units as survival time) when time-dependent variables change.
+    #       For wide format data, specify comma-separated time points (e.g., "6, 12, 18").
+    #       The function will create intervals and update covariate values at these times.
 
-    - name: td_suffix_pattern
-      title: Variable Suffix Pattern
-      type: String
-      default: '_t{time}'
-      description:
-        R: >
-          For wide format: Pattern for time-specific variable names. Use {time} as placeholder.
-          Example: if baseline variable is 'treatment' and pattern is '_t{time}', 
-          the function looks for 'treatment_t6', 'treatment_t12', etc.
+    # - name: td_suffix_pattern
+    #   title: Variable Suffix Pattern
+    #   type: String
+    #   default: '_t{time}'
+    #   description:
+    #     R: >
+    #       For wide format: Pattern for time-specific variable names. Use {time} as placeholder.
+    #       Example: if baseline variable is 'treatment' and pattern is '_t{time}',
+    #       the function looks for 'treatment_t6', 'treatment_t12', etc.
 
-    - name: start_time_var
-      title: Start Time Variable
-      type: Variable
-      default: NULL
-      description:
-        R: >
-          For long format only: Variable indicating the start time of each interval.
-          Leave empty for wide format data.
+    # - name: start_time_var
+    #   title: Start Time Variable
+    #   type: Variable
+    #   default: NULL
+    #   description:
+    #     R: >
+    #       For long format only: Variable indicating the start time of each interval.
+    #       Leave empty for wide format data.
 
-    - name: stop_time_var
-      title: Stop Time Variable  
-      type: Variable
-      default: NULL
-      description:
-        R: >
-          For long format only: Variable indicating the stop time of each interval.
-          Leave empty for wide format data.
+    # - name: stop_time_var
+    #   title: Stop Time Variable
+    #   type: Variable
+    #   default: NULL
+    #   description:
+    #     R: >
+    #       For long format only: Variable indicating the stop time of each interval.
+    #       Leave empty for wide format data.
 
-# Frailty Models ----
-    - name: use_frailty
-      title: Use Frailty Model
-      type: Bool
-      default: false
-      description:
-        R: >
-          Add a frailty term to account for unobserved heterogeneity or clustering in the data.
-          Frailty models add random effects to the Cox model.
+# Frailty Models ---- (EXPERIMENTAL - will be implemented later)
+    # - name: use_frailty
+    #   title: Use Frailty Model
+    #   type: Bool
+    #   default: false
+    #   description:
+    #     R: >
+    #       Add a frailty term to account for unobserved heterogeneity or clustering in the data.
+    #       Frailty models add random effects to the Cox model.
 
-    - name: frailty_var
-      title: Frailty Variable
-      type: Variable
-      suggested: [ nominal, ordinal ]
-      permitted: [ factor ]
-      default: NULL
-      description:
-        R: >
-          Clustering variable for the frailty term (e.g., hospital, family, or study center).
-          Each level represents a cluster with shared frailty.
+    # - name: frailty_var
+    #   title: Frailty Variable
+    #   type: Variable
+    #   suggested: [ nominal, ordinal ]
+    #   permitted: [ factor ]
+    #   default: NULL
+    #   description:
+    #     R: >
+    #       Clustering variable for the frailty term (e.g., hospital, family, or study center).
+    #       Each level represents a cluster with shared frailty.
 
-    - name: frailty_distribution
-      title: Frailty Distribution
-      type: List
-      options:
-        - title: Gamma
-          name: gamma
-        - title: Gaussian
-          name: gaussian
-        - title: Log-t
-          name: logt
-      default: gamma
-      description:
-        R: >
-          Distribution of the frailty term. Gamma is most commonly used and assumes multiplicative
-          effect on the hazard. Gaussian assumes additive effect on log-hazard.
+    # - name: frailty_distribution
+    #   title: Frailty Distribution
+    #   type: List
+    #   options:
+    #     - title: Gamma
+    #       name: gamma
+    #     - title: Gaussian
+    #       name: gaussian
+    #     - title: Log-t
+    #       name: logt
+    #   default: gamma
+    #   description:
+    #     R: >
+    #       Distribution of the frailty term. Gamma is most commonly used and assumes multiplicative
+    #       effect on the hazard. Gaussian assumes additive effect on log-hazard.
 
-# Spline Options for Non-Proportional Hazards ----
-    - name: use_splines
-      title: Use Splines for Time-Varying Effects
-      type: Bool
-      default: false
-      description:
-        R: >
-          Use penalized splines to model time-varying effects (non-proportional hazards).
-          This is an alternative to stratification for handling PH violations.
+# Spline Options for Non-Proportional Hazards ---- (EXPERIMENTAL - will be implemented later)
+    # - name: use_splines
+    #   title: Use Splines for Time-Varying Effects
+    #   type: Bool
+    #   default: false
+    #   description:
+    #     R: >
+    #       Use penalized splines to model time-varying effects (non-proportional hazards).
+    #       This is an alternative to stratification for handling PH violations.
 
-    - name: spline_vars
-      title: Variables with Time-Varying Effects
-      type: Variables
-      default: NULL
-      description:
-        R: >
-          Variables to model with time-varying coefficients using splines. These are variables
-          that violate the proportional hazards assumption.
+    # - name: spline_vars
+    #   title: Variables with Time-Varying Effects
+    #   type: Variables
+    #   default: NULL
+    #   description:
+    #     R: >
+    #       Variables to model with time-varying coefficients using splines. These are variables
+    #       that violate the proportional hazards assumption.
 
-    - name: spline_df
-      title: Spline Degrees of Freedom
-      type: Integer
-      min: 1
-      max: 10
-      default: 3
-      description:
-        R: >
-          Degrees of freedom for the spline functions. Higher values allow more flexible
-          time-varying effects but may lead to overfitting.
+    # - name: spline_df
+    #   title: Spline Degrees of Freedom
+    #   type: Integer
+    #   min: 1
+    #   max: 10
+    #   default: 3
+    #   description:
+    #     R: >
+    #       Degrees of freedom for the spline functions. Higher values allow more flexible
+    #       time-varying effects but may lead to overfitting.
 
-    - name: spline_type
-      title: Spline Type
-      type: List
-      options:
-        - title: Penalized Smoothing Splines
-          name: pspline
-        - title: Natural Splines
-          name: ns
-        - title: B-Splines
-          name: bs
-      default: pspline
-      description:
-        R: >
-          Type of spline basis to use. Penalized splines provide smooth functions with
-          automatic smoothness selection. Natural splines are constrained to be linear
-          at the boundaries.
+    # - name: spline_type
+    #   title: Spline Type
+    #   type: List
+    #   options:
+    #     - title: Penalized Smoothing Splines
+    #       name: pspline
+    #     - title: Natural Splines
+    #       name: ns
+    #     - title: B-Splines
+    #       name: bs
+    #   default: pspline
+    #   description:
+    #     R: >
+    #       Type of spline basis to use. Penalized splines provide smooth functions with
+    #       automatic smoothness selection. Natural splines are constrained to be linear
+    #       at the boundaries.
 
     - name: showExplanations
       title: "Show Analysis Explanations"
@@ -1039,129 +1039,130 @@ options:
         results. Turn off to reduce visual clutter when summaries are not needed.
 
     # Machine Learning Survival Methods
-    - name: ml_method
-      title: 'Machine Learning Method'
-      type: List
-      options:
-        - title: None (Cox Only)
-          name: none
-        - title: Random Survival Forest
-          name: rsf
-        - title: Gradient Boosting (XGBoost)
-          name: xgboost
-        - title: Elastic Net Cox
-          name: glmnet
-        - title: Support Vector Survival
-          name: svm
-        - title: Deep Survival (Neural Network)
-          name: deepsurv
-        - title: Ensemble (Multiple Methods)
-          name: ensemble
-      default: none
-      description:
-          ui: >
-            Advanced machine learning methods for survival analysis
-          R: >
-            Machine learning survival analysis method
+    # Machine Learning Options ---- (EXPERIMENTAL - will be implemented later)
+    # - name: ml_method
+    #   title: 'Machine Learning Method'
+    #   type: List
+    #   options:
+    #     - title: None (Cox Only)
+    #       name: none
+    #     - title: Random Survival Forest
+    #       name: rsf
+    #     - title: Gradient Boosting (XGBoost)
+    #       name: xgboost
+    #     - title: Elastic Net Cox
+    #       name: glmnet
+    #     - title: Support Vector Survival
+    #       name: svm
+    #     - title: Deep Survival (Neural Network)
+    #       name: deepsurv
+    #     - title: Ensemble (Multiple Methods)
+    #       name: ensemble
+    #   default: none
+    #   description:
+    #       ui: >
+    #         Advanced machine learning methods for survival analysis
+    #       R: >
+    #         Machine learning survival analysis method
 
-    - name: ml_validation
-      title: 'Validation Method'
-      type: List
-      options:
-        - title: Cross-Validation
-          name: cv
-        - title: Bootstrap
-          name: bootstrap
-        - title: Train-Test Split
-          name: split
-      default: cv
-      description:
-          ui: >
-            Validation method for machine learning models
-          R: >
-            Model validation approach
+    # - name: ml_validation
+    #   title: 'Validation Method'
+    #   type: List
+    #   options:
+    #     - title: Cross-Validation
+    #       name: cv
+    #     - title: Bootstrap
+    #       name: bootstrap
+    #     - title: Train-Test Split
+    #       name: split
+    #   default: cv
+    #   description:
+    #       ui: >
+    #         Validation method for machine learning models
+    #       R: >
+    #         Model validation approach
 
-    - name: ml_cv_folds
-      title: 'Cross-Validation Folds'
-      type: Integer
-      default: 5
-      min: 3
-      max: 20
-      description:
-          ui: >
-            Number of folds for cross-validation
-          R: >
-            CV fold count
+    # - name: ml_cv_folds
+    #   title: 'Cross-Validation Folds'
+    #   type: Integer
+    #   default: 5
+    #   min: 3
+    #   max: 20
+    #   description:
+    #       ui: >
+    #         Number of folds for cross-validation
+    #       R: >
+    #         CV fold count
 
-    - name: ml_feature_selection
-      title: 'Feature Selection'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Perform automatic feature selection
-          R: >
-            Enable feature selection
+    # - name: ml_feature_selection
+    #   title: 'Feature Selection'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       ui: >
+    #         Perform automatic feature selection
+    #       R: >
+    #         Enable feature selection
 
-    - name: ml_importance
-      title: 'Variable Importance'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Calculate and display variable importance scores
-          R: >
-            Show variable importance
+    # - name: ml_importance
+    #   title: 'Variable Importance'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       ui: >
+    #         Calculate and display variable importance scores
+    #       R: >
+    #         Show variable importance
 
-    - name: ml_calibration
-      title: 'Calibration Plot'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Display calibration plot for predictions
-          R: >
-            Generate calibration plot
+    # - name: ml_calibration
+    #   title: 'Calibration Plot'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       ui: >
+    #         Display calibration plot for predictions
+    #       R: >
+    #         Generate calibration plot
 
-    - name: ml_performance
-      title: 'Performance Metrics'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Calculate C-index, IBS, and other performance metrics
-          R: >
-            Show performance metrics
+    # - name: ml_performance
+    #   title: 'Performance Metrics'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       ui: >
+    #         Calculate C-index, IBS, and other performance metrics
+    #       R: >
+    #         Show performance metrics
 
-    - name: ml_shap
-      title: 'SHAP Values'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Calculate SHAP values for model interpretability
-          R: >
-            Compute SHAP values
+    # - name: ml_shap
+    #   title: 'SHAP Values'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       ui: >
+    #         Calculate SHAP values for model interpretability
+    #       R: >
+    #         Compute SHAP values
 
-    - name: ml_hyperparameter_tuning
-      title: 'Hyperparameter Tuning'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Perform automatic hyperparameter optimization
-          R: >
-            Enable hyperparameter tuning
+    # - name: ml_hyperparameter_tuning
+    #   title: 'Hyperparameter Tuning'
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       ui: >
+    #         Perform automatic hyperparameter optimization
+    #       R: >
+    #         Enable hyperparameter tuning
 
-    - name: ml_ensemble_weights
-      title: 'Ensemble Weights'
-      type: String
-      default: "equal"
-      description:
-          ui: >
-            Weights for ensemble methods (equal, optimized, or comma-separated values)
-          R: >
-            Ensemble model weights
+    # - name: ml_ensemble_weights
+    #   title: 'Ensemble Weights'
+    #   type: String
+    #   default: "equal"
+    #   description:
+    #       ui: >
+    #         Weights for ensemble methods (equal, optimized, or comma-separated values)
+    #       R: >
+    #         Ensemble model weights
 
 
 

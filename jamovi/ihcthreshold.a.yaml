@@ -1,7 +1,7 @@
 ---
 name: ihcthreshold
 title: IHC Threshold Determination
-menuGroup: OncoPathT
+menuGroup: OncoPathT2
 menuSubgroup: Image Analysis
 menuTitle: IHC Threshold
 menuSubtitle: Automated threshold for positive/negative classification

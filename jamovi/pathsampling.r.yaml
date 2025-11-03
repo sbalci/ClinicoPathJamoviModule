@@ -152,6 +152,100 @@ items:
       renderFun: .sensitivityPlot
       visible: (showSensitivityCI && showBootstrap)
 
+    # === MODEL VALIDATION & ENHANCEMENTS ===
+    - name: heterogeneityText
+      title: Heterogeneity Analysis
+      type: Html
+      visible: (showHeterogeneityTest)
+
+    - name: heterogeneityTest
+      title: Heterogeneity Test Results
+      type: Table
+      visible: (showHeterogeneityTest)
+      clearWith:
+        - sampleType
+        - firstDetection
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'χ² Statistic'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: pValue
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: modelFitText
+      title: Model Fit Assessment
+      type: Html
+      visible: (showModelFit)
+
+    - name: modelFitTable
+      title: Goodness of Fit Test
+      type: Table
+      visible: (showModelFit)
+      clearWith:
+        - totalSamples
+        - firstDetection
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: chiSquare
+          title: 'χ²'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: pValue
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: fitQuality
+          title: 'Model Fit'
+          type: text
+
+    - name: obsPredText
+      title: Observed vs Predicted Detection
+      type: Html
+      visible: (showObsPred)
+
+    - name: obsPredTable
+      title: Observed vs Predicted Comparison
+      type: Table
+      visible: (showObsPred)
+      clearWith:
+        - totalSamples
+        - firstDetection
+        - maxSamples
+      columns:
+        - name: nSamples
+          title: 'Samples'
+          type: integer
+        - name: observed
+          title: 'Observed'
+          type: number
+          format: 'pc'
+        - name: predicted
+          title: 'Predicted'
+          type: number
+          format: 'pc'
+        - name: difference
+          title: 'Difference'
+          type: number
+          format: 'pc'
+        - name: assessment
+          title: 'Assessment'
+          type: text
+
     # === ENHANCED DETECTION: EMPIRICAL CUMULATIVE ===
     - name: empiricalCumulativeText
       title: Empirical Cumulative Detection Analysis

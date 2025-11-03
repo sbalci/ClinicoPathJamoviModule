@@ -4,78 +4,83 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # Data Input Section
+  # Main Variable Selection - ALL variables in ONE supplier
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
+      # Core Survival Variables
       - type: TargetLayoutBox
-        label: Core Survival Variables
+        label: Survival Time
         children:
           - type: VariablesListBox
             name: survivalTime
             maxItemCount: 1
             isTarget: true
-            label: Survival Time
+      - type: TargetLayoutBox
+        label: Event Indicator
+        children:
           - type: VariablesListBox
             name: event
             maxItemCount: 1
             isTarget: true
-            label: Event Indicator
           - type: LevelSelector
             name: eventLevel
             enable: (event)
-            label: Event Level
 
-  # Time-Dependent Variables Configuration
-  - type: CollapseBox
-    label: Time-Dependent Variables
-    collapsed: false
-    stretchFactor: 1
-    children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
+      # Time-Dependent Variable Configuration
+      - type: TargetLayoutBox
+        label: Time-Dependent Variable
         children:
-          - type: TargetLayoutBox
-            label: Primary Time-Dependent Variable
-            children:
-              - type: VariablesListBox
-                name: timeDepVariable
-                maxItemCount: 1
-                isTarget: true
-                label: Variable Name
-              - type: VariablesListBox
-                name: timeDepTime
-                maxItemCount: 1
-                isTarget: true
-                label: Change Time
-              - type: VariablesListBox
-                name: timeDepStatus
-                maxItemCount: 1
-                isTarget: true
-                label: Status Variable
-              - type: LevelSelector
-                name: exposedLevel
-                enable: (timeDepStatus)
-                label: Exposed Level
-      - type: LayoutBox
-        margin: large
+          - type: VariablesListBox
+            name: timeDepVariable
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time of Change
         children:
-          - type: CheckBox
-            name: enableMultipleTimeDep
-            label: Enable Multiple Time-Dependent Variables
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
+          - type: VariablesListBox
+            name: timeDepTime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Exposure Status
         children:
-          - type: TargetLayoutBox
-            label: Additional Time-Dependent Variables
-            children:
-              - type: VariablesListBox
-                name: additionalTimeDepVars
-                isTarget: true
-                enable: (enableMultipleTimeDep)
+          - type: VariablesListBox
+            name: timeDepStatus
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: exposedLevel
+            enable: (timeDepStatus)
+
+      # Additional Time-Dependent Variables
+      - type: TargetLayoutBox
+        label: Additional Time-Dependent Variables
+        children:
+          - type: VariablesListBox
+            name: additionalTimeDepVars
+            isTarget: true
+            enable: (enableMultipleTimeDep)
+
+      # Additional Covariates for Cox Regression
+      - type: TargetLayoutBox
+        label: Additional Covariates (for Cox)
+        children:
+          - type: VariablesListBox
+            name: timeDependentCovariates
+            isTarget: true
+            enable: (performTimeDependentCox)
+
+      # Cluster Variable
+      - type: TargetLayoutBox
+        label: Cluster Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: clusterVariable
+            maxItemCount: 1
+            isTarget: true
+            enable: (robustVariance)
 
   # Analysis Configuration
   - type: CollapseBox
@@ -97,6 +102,12 @@ children:
                 format: number
                 label: Confidence Level
                 suffix: (0.80-0.99)
+          - type: Label
+            label: Multiple Variables
+            children:
+              - type: CheckBox
+                name: enableMultipleTimeDep
+                label: Enable Multiple Time-Dependent Variables
 
   # Landmark Analysis Options
   - type: CollapseBox
@@ -139,17 +150,6 @@ children:
             name: testTimeVaryingEffect
             enable: (performTimeDependentCox)
             label: Test Time-Varying Effects
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Additional Covariates
-            children:
-              - type: VariablesListBox
-                name: timeDependentCovariates
-                isTarget: true
-                enable: (performTimeDependentCox)
 
   # Bias Assessment & Advanced Methods
   - type: CollapseBox
@@ -178,18 +178,6 @@ children:
               - type: ComboBox
                 name: handleTieBreaking
                 label: Tie-Breaking Method
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Cluster Variable (Optional)
-            children:
-              - type: VariablesListBox
-                name: clusterVariable
-                maxItemCount: 1
-                isTarget: true
-                enable: (robustVariance)
 
   # Statistical Testing
   - type: CollapseBox

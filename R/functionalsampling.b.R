@@ -1,9 +1,7 @@
 
 functionalsamplingClass <- R6::R6Class(
     "functionalsamplingClass",
-    inherit = functionalsampl
-
-ingBase,
+    inherit = functionalsamplingBase,
     private = list(
         .data = NULL,
         .results_cache = NULL,

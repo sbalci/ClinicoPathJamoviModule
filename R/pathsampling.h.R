@@ -55,7 +55,16 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             showRecommendText = FALSE,
             showInterpretText = FALSE,
             showReferencesText = FALSE,
-            estimationMethod = "auto", ...) {
+            estimationMethod = "auto",
+            showHeterogeneityTest = FALSE,
+            useGeometricCI = TRUE,
+            ciMethod = "auto",
+            showModelFit = FALSE,
+            showObsPred = FALSE,
+            showMarginalInterpretation = TRUE,
+            appendVariables = FALSE,
+            appendPrefix = "ps_",
+            autoDetectHeterogeneity = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -338,6 +347,47 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "geometric",
                     "empirical"),
                 default="auto")
+            private$..showHeterogeneityTest <- jmvcore::OptionBool$new(
+                "showHeterogeneityTest",
+                showHeterogeneityTest,
+                default=FALSE)
+            private$..useGeometricCI <- jmvcore::OptionBool$new(
+                "useGeometricCI",
+                useGeometricCI,
+                default=TRUE)
+            private$..ciMethod <- jmvcore::OptionList$new(
+                "ciMethod",
+                ciMethod,
+                options=list(
+                    "auto",
+                    "bootstrap",
+                    "geometric",
+                    "both"),
+                default="auto")
+            private$..showModelFit <- jmvcore::OptionBool$new(
+                "showModelFit",
+                showModelFit,
+                default=FALSE)
+            private$..showObsPred <- jmvcore::OptionBool$new(
+                "showObsPred",
+                showObsPred,
+                default=FALSE)
+            private$..showMarginalInterpretation <- jmvcore::OptionBool$new(
+                "showMarginalInterpretation",
+                showMarginalInterpretation,
+                default=TRUE)
+            private$..appendVariables <- jmvcore::OptionBool$new(
+                "appendVariables",
+                appendVariables,
+                default=FALSE)
+            private$..appendPrefix <- jmvcore::OptionString$new(
+                "appendPrefix",
+                appendPrefix,
+                default="ps_")
+            private$..autoDetectHeterogeneity <- jmvcore::OptionBool$new(
+                "autoDetectHeterogeneity",
+                autoDetectHeterogeneity,
+                default=TRUE)
 
             self$.addOption(private$..analysisContext)
             self$.addOption(private$..totalSamples)
@@ -389,6 +439,15 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..showInterpretText)
             self$.addOption(private$..showReferencesText)
             self$.addOption(private$..estimationMethod)
+            self$.addOption(private$..showHeterogeneityTest)
+            self$.addOption(private$..useGeometricCI)
+            self$.addOption(private$..ciMethod)
+            self$.addOption(private$..showModelFit)
+            self$.addOption(private$..showObsPred)
+            self$.addOption(private$..showMarginalInterpretation)
+            self$.addOption(private$..appendVariables)
+            self$.addOption(private$..appendPrefix)
+            self$.addOption(private$..autoDetectHeterogeneity)
         }),
     active = list(
         analysisContext = function() private$..analysisContext$value,
@@ -440,7 +499,16 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         showRecommendText = function() private$..showRecommendText$value,
         showInterpretText = function() private$..showInterpretText$value,
         showReferencesText = function() private$..showReferencesText$value,
-        estimationMethod = function() private$..estimationMethod$value),
+        estimationMethod = function() private$..estimationMethod$value,
+        showHeterogeneityTest = function() private$..showHeterogeneityTest$value,
+        useGeometricCI = function() private$..useGeometricCI$value,
+        ciMethod = function() private$..ciMethod$value,
+        showModelFit = function() private$..showModelFit$value,
+        showObsPred = function() private$..showObsPred$value,
+        showMarginalInterpretation = function() private$..showMarginalInterpretation$value,
+        appendVariables = function() private$..appendVariables$value,
+        appendPrefix = function() private$..appendPrefix$value,
+        autoDetectHeterogeneity = function() private$..autoDetectHeterogeneity$value),
     private = list(
         ..analysisContext = NA,
         ..totalSamples = NA,
@@ -491,7 +559,16 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..showRecommendText = NA,
         ..showInterpretText = NA,
         ..showReferencesText = NA,
-        ..estimationMethod = NA)
+        ..estimationMethod = NA,
+        ..showHeterogeneityTest = NA,
+        ..useGeometricCI = NA,
+        ..ciMethod = NA,
+        ..showModelFit = NA,
+        ..showObsPred = NA,
+        ..showMarginalInterpretation = NA,
+        ..appendVariables = NA,
+        ..appendPrefix = NA,
+        ..autoDetectHeterogeneity = NA)
 )
 
 pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -512,6 +589,12 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         bootstrapTable = function() private$.items[["bootstrapTable"]],
         detectionCurve = function() private$.items[["detectionCurve"]],
         sensitivityPlot = function() private$.items[["sensitivityPlot"]],
+        heterogeneityText = function() private$.items[["heterogeneityText"]],
+        heterogeneityTest = function() private$.items[["heterogeneityTest"]],
+        modelFitText = function() private$.items[["modelFitText"]],
+        modelFitTable = function() private$.items[["modelFitTable"]],
+        obsPredText = function() private$.items[["obsPredText"]],
+        obsPredTable = function() private$.items[["obsPredTable"]],
         empiricalCumulativeText = function() private$.items[["empiricalCumulativeText"]],
         empiricalCumulativeTable = function() private$.items[["empiricalCumulativeTable"]],
         empiricalCumulativePlot = function() private$.items[["empiricalCumulativePlot"]],
@@ -705,6 +788,114 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 height=450,
                 renderFun=".sensitivityPlot",
                 visible="(showSensitivityCI && showBootstrap)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="heterogeneityText",
+                title="Heterogeneity Analysis",
+                visible="(showHeterogeneityTest)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="heterogeneityTest",
+                title="Heterogeneity Test Results",
+                visible="(showHeterogeneityTest)",
+                clearWith=list(
+                    "sampleType",
+                    "firstDetection"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="\u03C7\u00B2 Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="pValue", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="modelFitText",
+                title="Model Fit Assessment",
+                visible="(showModelFit)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelFitTable",
+                title="Goodness of Fit Test",
+                visible="(showModelFit)",
+                clearWith=list(
+                    "totalSamples",
+                    "firstDetection"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="chiSquare", 
+                        `title`="\u03C7\u00B2", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="pValue", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="fitQuality", 
+                        `title`="Model Fit", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="obsPredText",
+                title="Observed vs Predicted Detection",
+                visible="(showObsPred)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="obsPredTable",
+                title="Observed vs Predicted Comparison",
+                visible="(showObsPred)",
+                clearWith=list(
+                    "totalSamples",
+                    "firstDetection",
+                    "maxSamples"),
+                columns=list(
+                    list(
+                        `name`="nSamples", 
+                        `title`="Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="observed", 
+                        `title`="Observed", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="predicted", 
+                        `title`="Predicted", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="difference", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="assessment", 
+                        `title`="Assessment", 
+                        `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="empiricalCumulativeText",
@@ -1445,6 +1636,29 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showReferencesText Display statistical methods documentation and
 #'   literature references.
 #' @param estimationMethod .
+#' @param showHeterogeneityTest Test if detection probability varies
+#'   significantly across sample types. Only available when Sample Type variable
+#'   is specified. Uses likelihood ratio test.
+#' @param useGeometricCI Use theoretical geometric model confidence intervals
+#'   when bootstrap shows ceiling effect (100\% bounds). Provides more realistic
+#'   uncertainty estimates.
+#' @param ciMethod Method for calculating confidence intervals. Auto selects
+#'   geometric when bootstrap shows ceiling effect, otherwise uses bootstrap.
+#' @param showModelFit Perform goodness-of-fit test comparing observed vs
+#'   predicted detection distribution. Validates geometric/binomial model
+#'   assumptions.
+#' @param showObsPred Compare observed detection rates with model predictions
+#'   at each sample number. Visual model validation tool.
+#' @param showMarginalInterpretation Add cost-benefit interpretation to
+#'   marginal gain analysis. Auto-enabled when Show Binomial Model is checked.
+#' @param appendVariables Add new columns to dataset with calculated detection
+#'   probabilities and classifications. Variables include cumulative
+#'   probabilities, recommended sample counts, and detection categories.
+#' @param appendPrefix Prefix for appended variable names (e.g., 'ps_' creates
+#'   'ps_cumulative_prob_5'). Only used when Append Variables is enabled.
+#' @param autoDetectHeterogeneity Automatically analyze and report if sample
+#'   types have significantly different detection probabilities. Requires Sample
+#'   Type variable. Warns if CV > 30\%.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -1461,6 +1675,12 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detectionCurve} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$sensitivityPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$heterogeneityText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$heterogeneityTest} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelFitText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$modelFitTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$obsPredText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$obsPredTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$empiricalCumulativeText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$empiricalCumulativeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$empiricalCumulativePlot} \tab \tab \tab \tab \tab an image \cr
@@ -1562,7 +1782,16 @@ pathsampling <- function(
     showRecommendText = FALSE,
     showInterpretText = FALSE,
     showReferencesText = FALSE,
-    estimationMethod = "auto") {
+    estimationMethod = "auto",
+    showHeterogeneityTest = FALSE,
+    useGeometricCI = TRUE,
+    ciMethod = "auto",
+    showModelFit = FALSE,
+    showObsPred = FALSE,
+    showMarginalInterpretation = TRUE,
+    appendVariables = FALSE,
+    appendPrefix = "ps_",
+    autoDetectHeterogeneity = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pathsampling requires jmvcore to be installed (restart may be required)")
@@ -1645,7 +1874,16 @@ pathsampling <- function(
         showRecommendText = showRecommendText,
         showInterpretText = showInterpretText,
         showReferencesText = showReferencesText,
-        estimationMethod = estimationMethod)
+        estimationMethod = estimationMethod,
+        showHeterogeneityTest = showHeterogeneityTest,
+        useGeometricCI = useGeometricCI,
+        ciMethod = ciMethod,
+        showModelFit = showModelFit,
+        showObsPred = showObsPred,
+        showMarginalInterpretation = showMarginalInterpretation,
+        appendVariables = appendVariables,
+        appendPrefix = appendPrefix,
+        autoDetectHeterogeneity = autoDetectHeterogeneity)
 
     analysis <- pathsamplingClass$new(
         options = options,

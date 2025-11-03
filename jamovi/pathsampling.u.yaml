@@ -297,6 +297,45 @@ children:
               - type: CheckBox
                 name: showOmentumAnalysis
   - type: CollapseBox
+    label: Model Validation & Enhancements
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Confidence Interval Method"
+            children:
+              - type: ComboBox
+                name: ciMethod
+              - type: CheckBox
+                name: useGeometricCI
+          - type: Label
+            label: "Model Assessment"
+            children:
+              - type: CheckBox
+                name: showModelFit
+              - type: CheckBox
+                name: showObsPred
+              - type: CheckBox
+                name: showMarginalInterpretation
+          - type: Label
+            label: "Heterogeneity Analysis"
+            children:
+              - type: CheckBox
+                name: autoDetectHeterogeneity
+              - type: CheckBox
+                name: showHeterogeneityTest
+          - type: Label
+            label: "Data Export Options"
+            children:
+              - type: CheckBox
+                name: appendVariables
+              - type: TextBox
+                name: appendPrefix
+                format: string
+                enable: (appendVariables)
+  - type: CollapseBox
     label: Display Options
     collapsed: false
     children:

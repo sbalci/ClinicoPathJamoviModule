@@ -55,7 +55,16 @@ pathsampling(
   showRecommendText = FALSE,
   showInterpretText = FALSE,
   showReferencesText = FALSE,
-  estimationMethod = "auto"
+  estimationMethod = "auto",
+  showHeterogeneityTest = FALSE,
+  useGeometricCI = TRUE,
+  ciMethod = "auto",
+  showModelFit = FALSE,
+  showObsPred = FALSE,
+  showMarginalInterpretation = TRUE,
+  appendVariables = FALSE,
+  appendPrefix = "ps_",
+  autoDetectHeterogeneity = TRUE
 )
 }
 \arguments{
@@ -175,6 +184,38 @@ result interpretation.}
 literature references.}
 
 \item{estimationMethod}{.}
+
+\item{showHeterogeneityTest}{Test if detection probability varies
+significantly across sample types. Only available when Sample Type variable
+is specified. Uses likelihood ratio test.}
+
+\item{useGeometricCI}{Use theoretical geometric model confidence intervals
+when bootstrap shows ceiling effect (100\\% bounds). Provides more realistic
+uncertainty estimates.}
+
+\item{ciMethod}{Method for calculating confidence intervals. Auto selects
+geometric when bootstrap shows ceiling effect, otherwise uses bootstrap.}
+
+\item{showModelFit}{Perform goodness-of-fit test comparing observed vs
+predicted detection distribution. Validates geometric/binomial model
+assumptions.}
+
+\item{showObsPred}{Compare observed detection rates with model predictions
+at each sample number. Visual model validation tool.}
+
+\item{showMarginalInterpretation}{Add cost-benefit interpretation to
+marginal gain analysis. Auto-enabled when Show Binomial Model is checked.}
+
+\item{appendVariables}{Add new columns to dataset with calculated detection
+probabilities and classifications. Variables include cumulative
+probabilities, recommended sample counts, and detection categories.}
+
+\item{appendPrefix}{Prefix for appended variable names (e.g., 'ps_' creates
+'ps_cumulative_prob_5'). Only used when Append Variables is enabled.}
+
+\item{autoDetectHeterogeneity}{Automatically analyze and report if sample
+types have significantly different detection probabilities. Requires Sample
+Type variable. Warns if CV > 30\\%.}
 }
 \value{
 A results object containing:
@@ -193,6 +234,12 @@ A results object containing:
 \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$detectionCurve} \tab \tab \tab \tab \tab an image \cr
 \code{results$sensitivityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$heterogeneityText} \tab \tab \tab \tab \tab a html \cr
+\code{results$heterogeneityTest} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelFitText} \tab \tab \tab \tab \tab a html \cr
+\code{results$modelFitTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$obsPredText} \tab \tab \tab \tab \tab a html \cr
+\code{results$obsPredTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$empiricalCumulativeText} \tab \tab \tab \tab \tab a html \cr
 \code{results$empiricalCumulativeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$empiricalCumulativePlot} \tab \tab \tab \tab \tab an image \cr
