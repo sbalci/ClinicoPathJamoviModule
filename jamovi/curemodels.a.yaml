@@ -1,7 +1,7 @@
 ---
 name: curemodels
 title: Cure Models for Long-term Survivors
-menuGroup: ClinicoPathD
+menuGroup: OncoPathT
 menuSubgroup: Survival Analysis
 menuSubtitle: 'Mixture and Non-mixture Cure Models'
 version: '1.0.0'
@@ -66,18 +66,22 @@ options:
       title: 'Cure Model Type'
       type: List
       options:
-        - title: Mixture Cure Model
+        - title: Mixture Cure Model (smcure)
           name: mixture
-        - title: Non-mixture Cure Model
+        - title: Non-mixture Cure Model (flexsurvcure)
           name: nonmixture
-        - title: Both Models
-          name: both
+        - title: cuRe Model (with background mortality)
+          name: cure
+        - title: Nonparametric Cure Model (npcure)
+          name: npcure
+        - title: Compare All Models
+          name: all
       default: mixture
       description:
           ui: >
-            Type of cure model to fit
+            Type of cure model to fit. cuRe allows background mortality; npcure is nonparametric.
           R: >
-            Type of cure model: mixture, non-mixture, or both
+            Type of cure model: mixture (smcure), non-mixture (flexsurvcure), cuRe, npcure, or all
 
     - name: cure_link
       title: 'Link Function for Cure Probability'
@@ -187,5 +191,91 @@ options:
             Perform sensitivity analysis for cure threshold
           R: >
             Conduct sensitivity analysis
+
+    # cuRe Package Options (Background Mortality)
+    - name: use_background_mortality
+      title: 'Use Background Mortality (cuRe)'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Incorporate general population mortality rates (requires cuRe package)
+          R: >
+            Enable background mortality integration using cuRe package
+
+    - name: background_hazard_var
+      title: 'Background Hazard Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variable containing background hazard rates (e.g., from life tables)
+          R: >
+            Background hazard variable for cuRe models
+
+    - name: cure_expected_rate
+      title: 'Expected Cure Rate Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variable with expected cure rates from general population
+          R: >
+            Expected cure rate variable for relative cure models
+
+    # npcure Package Options (Nonparametric)
+    - name: use_nonparametric
+      title: 'Use Nonparametric Estimation (npcure)'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Use nonparametric cure probability estimation (no distribution assumption)
+          R: >
+            Enable nonparametric cure estimation using npcure package
+
+    - name: npcure_covariate
+      title: 'Covariate for Nonparametric Model'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Single continuous covariate for nonparametric cure estimation
+          R: >
+            Continuous covariate for npcure model (limited to one variable)
+
+    - name: npcure_bandwidth
+      title: 'Bandwidth for Nonparametric Estimation'
+      type: List
+      options:
+        - title: Automatic (cross-validation)
+          name: auto
+        - title: Small (0.1)
+          name: small
+        - title: Medium (0.3)
+          name: medium
+        - title: Large (0.5)
+          name: large
+      default: auto
+      description:
+          ui: >
+            Bandwidth for kernel smoothing in nonparametric estimation
+          R: >
+            Bandwidth parameter for npcure kernel smoothing
+
+    - name: npcure_time_points
+      title: 'Number of Time Points'
+      type: Integer
+      default: 100
+      min: 50
+      max: 500
+      description:
+          ui: >
+            Number of time points for cure probability estimation
+          R: >
+            Number of time points for testimate in npcure
 
 ...

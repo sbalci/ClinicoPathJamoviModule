@@ -120,6 +120,61 @@ children:
                 name: calculatedtime
                 enable: (tint)
   - type: CollapseBox
+    label: AFT Model Options (Accelerated Failure Time)
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: AFT Model Type
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: use_aft
+                label: Use AFT Model (instead of Cox PH)
+              - type: ComboBox
+                name: aft_distribution
+                label: Distribution
+                enable: (use_aft)
+              - type: CheckBox
+                name: aft_show_hr_equivalent
+                label: Show Hazard Ratio Equivalents (Weibull only)
+                enable: (use_aft)
+              - type: CheckBox
+                name: aft_show_interpretation
+                label: Show Interpretation Column
+                enable: (use_aft)
+  - type: CollapseBox
+    label: Model Performance Metrics (SurvMetrics)
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Enhanced Metrics
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_survmetrics
+                label: Show Model Performance Metrics
+              - type: TextBox
+                name: survmetrics_timepoints
+                format: string
+                label: Time Points for Brier Score
+                suffix: (comma-separated)
+                enable: (show_survmetrics)
+              - type: TextBox
+                name: survmetrics_ibs_points
+                format: number
+                label: Points for Integrated Brier Score
+                enable: (show_survmetrics)
+              - type: CheckBox
+                name: survmetrics_show_plots
+                label: Show Performance Plots
+                enable: (show_survmetrics)
+  - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
     children:

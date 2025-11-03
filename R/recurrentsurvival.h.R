@@ -32,7 +32,14 @@ recurrentsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             prediction_times = "12,24,36,60",
             bootstrap_samples = 200,
             convergence_tolerance = 0.0001,
-            max_iterations = 500, ...) {
+            max_iterations = 500,
+            use_reReg = FALSE,
+            reReg_model = "cox_LWYY",
+            reReg_se = "bootstrap",
+            reReg_B = 200,
+            show_event_plot = TRUE,
+            show_mcf_plot = TRUE,
+            event_plot_subjects = 20, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -221,6 +228,48 @@ recurrentsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 default=500,
                 min=50,
                 max=2000)
+            private$..use_reReg <- jmvcore::OptionBool$new(
+                "use_reReg",
+                use_reReg,
+                default=FALSE)
+            private$..reReg_model <- jmvcore::OptionList$new(
+                "reReg_model",
+                reReg_model,
+                options=list(
+                    "cox_LWYY",
+                    "cox_GL",
+                    "am_GL",
+                    "am_LWYY",
+                    "sc_XCYH"),
+                default="cox_LWYY")
+            private$..reReg_se <- jmvcore::OptionList$new(
+                "reReg_se",
+                reReg_se,
+                options=list(
+                    "bootstrap",
+                    "sandwich",
+                    "model_based"),
+                default="bootstrap")
+            private$..reReg_B <- jmvcore::OptionInteger$new(
+                "reReg_B",
+                reReg_B,
+                default=200,
+                min=50,
+                max=500)
+            private$..show_event_plot <- jmvcore::OptionBool$new(
+                "show_event_plot",
+                show_event_plot,
+                default=TRUE)
+            private$..show_mcf_plot <- jmvcore::OptionBool$new(
+                "show_mcf_plot",
+                show_mcf_plot,
+                default=TRUE)
+            private$..event_plot_subjects <- jmvcore::OptionInteger$new(
+                "event_plot_subjects",
+                event_plot_subjects,
+                default=20,
+                min=5,
+                max=100)
 
             self$.addOption(private$..subject_id)
             self$.addOption(private$..event_time)
@@ -249,6 +298,13 @@ recurrentsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..bootstrap_samples)
             self$.addOption(private$..convergence_tolerance)
             self$.addOption(private$..max_iterations)
+            self$.addOption(private$..use_reReg)
+            self$.addOption(private$..reReg_model)
+            self$.addOption(private$..reReg_se)
+            self$.addOption(private$..reReg_B)
+            self$.addOption(private$..show_event_plot)
+            self$.addOption(private$..show_mcf_plot)
+            self$.addOption(private$..event_plot_subjects)
         }),
     active = list(
         subject_id = function() private$..subject_id$value,
@@ -277,7 +333,14 @@ recurrentsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         prediction_times = function() private$..prediction_times$value,
         bootstrap_samples = function() private$..bootstrap_samples$value,
         convergence_tolerance = function() private$..convergence_tolerance$value,
-        max_iterations = function() private$..max_iterations$value),
+        max_iterations = function() private$..max_iterations$value,
+        use_reReg = function() private$..use_reReg$value,
+        reReg_model = function() private$..reReg_model$value,
+        reReg_se = function() private$..reReg_se$value,
+        reReg_B = function() private$..reReg_B$value,
+        show_event_plot = function() private$..show_event_plot$value,
+        show_mcf_plot = function() private$..show_mcf_plot$value,
+        event_plot_subjects = function() private$..event_plot_subjects$value),
     private = list(
         ..subject_id = NA,
         ..event_time = NA,
@@ -305,7 +368,14 @@ recurrentsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..prediction_times = NA,
         ..bootstrap_samples = NA,
         ..convergence_tolerance = NA,
-        ..max_iterations = NA)
+        ..max_iterations = NA,
+        ..use_reReg = NA,
+        ..reReg_model = NA,
+        ..reReg_se = NA,
+        ..reReg_B = NA,
+        ..show_event_plot = NA,
+        ..show_mcf_plot = NA,
+        ..event_plot_subjects = NA)
 )
 
 recurrentsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -565,6 +635,13 @@ recurrentsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param bootstrap_samples Number of bootstrap resamples
 #' @param convergence_tolerance Convergence criterion for iterative algorithms
 #' @param max_iterations Maximum number of algorithm iterations
+#' @param use_reReg Whether to use reReg package for analysis
+#' @param reReg_model Model specification for reReg package
+#' @param reReg_se Standard error estimation method for reReg
+#' @param reReg_B Bootstrap samples for reReg variance estimation
+#' @param show_event_plot Whether to show event plot from reReg
+#' @param show_mcf_plot Whether to show MCF plot from reReg
+#' @param event_plot_subjects Number of subjects to display in event plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -616,7 +693,14 @@ recurrentsurvival <- function(
     prediction_times = "12,24,36,60",
     bootstrap_samples = 200,
     convergence_tolerance = 0.0001,
-    max_iterations = 500) {
+    max_iterations = 500,
+    use_reReg = FALSE,
+    reReg_model = "cox_LWYY",
+    reReg_se = "bootstrap",
+    reReg_B = 200,
+    show_event_plot = TRUE,
+    show_mcf_plot = TRUE,
+    event_plot_subjects = 20) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("recurrentsurvival requires jmvcore to be installed (restart may be required)")
@@ -658,7 +742,14 @@ recurrentsurvival <- function(
         prediction_times = prediction_times,
         bootstrap_samples = bootstrap_samples,
         convergence_tolerance = convergence_tolerance,
-        max_iterations = max_iterations)
+        max_iterations = max_iterations,
+        use_reReg = use_reReg,
+        reReg_model = reReg_model,
+        reReg_se = reReg_se,
+        reReg_B = reReg_B,
+        show_event_plot = show_event_plot,
+        show_mcf_plot = show_mcf_plot,
+        event_plot_subjects = event_plot_subjects)
 
     analysis <- recurrentsurvivalClass$new(
         options = options,

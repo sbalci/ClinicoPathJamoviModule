@@ -155,3 +155,37 @@ children:
       - type: TextBox
         name: max_iterations
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: use_reReg
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: reReg_model
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: reReg_se
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: reReg_B
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_event_plot
+      - type: CheckBox
+        name: show_mcf_plot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: event_plot_subjects
+        format: number

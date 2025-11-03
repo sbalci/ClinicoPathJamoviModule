@@ -123,16 +123,24 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
 
             # Fit cure models based on type
-            if (model_type == "mixture" || model_type == "both") {
+            if (model_type == "mixture" || model_type == "all") {
                 private$.fitMixtureCureModel(clean_data, time_var, status_var, predictors)
             }
 
-            if (model_type == "nonmixture" || model_type == "both") {
+            if (model_type == "nonmixture" || model_type == "all") {
                 private$.fitNonMixtureCureModel(clean_data, time_var, status_var, predictors)
             }
 
-            # Compare models if both were fitted
-            if (model_type == "both") {
+            if (model_type == "cure" || model_type == "all") {
+                private$.fitCuReModel(clean_data, time_var, status_var, predictors)
+            }
+
+            if (model_type == "npcure" || model_type == "all") {
+                private$.fitNpCureModel(clean_data, time_var, status_var, predictors)
+            }
+
+            # Compare models if all were fitted
+            if (model_type == "all") {
                 private$.compareModels()
             }
 
@@ -308,6 +316,179 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
 
+        .fitCuReModel = function(data, time_var, status_var, predictors) {
+
+            tryCatch({
+                # Check for cuRe package
+                if (!requireNamespace('cuRe', quietly = TRUE)) {
+                    stop("cuRe package is required for background mortality cure models. Install using: install.packages('cuRe')")
+                }
+
+                # Prepare formula
+                if (length(predictors) > 0) {
+                    # Validate predictor names
+                    invalid_chars <- grepl("[^A-Za-z0-9_\\.]", predictors)
+                    if (any(invalid_chars)) {
+                        stop("Invalid characters in predictor variable names: ", paste(predictors[invalid_chars], collapse = ", "))
+                    }
+
+                    surv_response <- paste0("Surv(", time_var, ", ", status_var, ")")
+                    surv_formula <- reformulate(predictors, response = surv_response)
+                } else {
+                    surv_response <- paste0("Surv(", time_var, ", ", status_var, ")")
+                    surv_formula <- as.formula(paste(surv_response, "~ 1"))
+                }
+
+                # Get cuRe-specific options
+                use_background <- self$options$use_background_mortality %||% FALSE
+                background_var <- self$options$background_hazard_var
+                surv_dist <- self$options$survival_dist %||% "weibull"
+
+                # Fit cuRe model
+                if (use_background && !is.null(background_var)) {
+                    # Model with background mortality
+                    cure_model <- cuRe::fit.cure.model(
+                        formula = surv_formula,
+                        data = data,
+                        bhazard = background_var,  # Background hazard variable
+                        dist = surv_dist,
+                        link = self$options$cure_link %||% "logit"
+                    )
+                } else {
+                    # Model without background mortality (standard cure model)
+                    cure_model <- cuRe::fit.cure.model(
+                        formula = surv_formula,
+                        data = data,
+                        dist = surv_dist,
+                        link = self$options$cure_link %||% "logit"
+                    )
+                }
+
+                # Format and store results
+                private$.formatCuReResults(cure_model)
+
+                # Store model for plotting
+                private$cure_cure_model <- cure_model
+
+            }, error = function(e) {
+                error_msg <- e$message
+
+                if (grepl("convergence", error_msg, ignore.case = TRUE)) {
+                    detailed_msg <- paste(
+                        "cuRe model convergence failed:", error_msg,
+                        "\n\nSuggestions:",
+                        "• Try different starting values",
+                        "• Check background hazard variable",
+                        "• Ensure adequate follow-up time",
+                        "• Verify data quality"
+                    )
+                } else if (grepl("bhazard|background", error_msg, ignore.case = TRUE)) {
+                    detailed_msg <- paste(
+                        "Background mortality variable error:", error_msg,
+                        "\n\nSuggestions:",
+                        "• Verify background hazard variable exists",
+                        "• Check that values are non-negative",
+                        "• Ensure variable is numeric"
+                    )
+                } else {
+                    detailed_msg <- paste("cuRe model fitting failed:", error_msg)
+                }
+
+                self$results$warnings$setContent(paste(
+                    self$results$warnings$content, "<br/><strong>cuRe Model Error:</strong><br/>", detailed_msg
+                ))
+            })
+        },
+
+        .fitNpCureModel = function(data, time_var, status_var, predictors) {
+
+            tryCatch({
+                # Check for npcure package
+                if (!requireNamespace('npcure', quietly = TRUE)) {
+                    stop("npcure package is required for nonparametric cure models. Install using: install.packages('npcure')")
+                }
+
+                # npcure works with single continuous covariate
+                covariate <- self$options$npcure_covariate
+
+                if (is.null(covariate) || length(covariate) == 0) {
+                    stop("npcure requires a single continuous covariate. Please select a covariate in the npcure options.")
+                }
+
+                # Get npcure-specific options
+                bandwidth_option <- self$options$npcure_bandwidth %||% "auto"
+                n_time_points <- self$options$npcure_time_points %||% 100
+
+                # Convert bandwidth option to numeric
+                bandwidth <- switch(bandwidth_option,
+                    "auto" = NULL,  # Let npcure choose automatically
+                    "small" = 0.1,
+                    "medium" = 0.3,
+                    "large" = 0.5,
+                    NULL
+                )
+
+                # Generate time points for estimation
+                time_seq <- seq(0, max(data[[time_var]], na.rm = TRUE), length.out = n_time_points)
+
+                # Fit nonparametric cure model
+                if (is.null(bandwidth)) {
+                    # Automatic bandwidth selection via cross-validation
+                    np_cure_model <- npcure::probcure(
+                        time = data[[time_var]],
+                        status = data[[status_var]],
+                        x = data[[covariate]],
+                        testimate = time_seq,
+                        conflevel = 0.95
+                    )
+                } else {
+                    # User-specified bandwidth
+                    np_cure_model <- npcure::probcure(
+                        time = data[[time_var]],
+                        status = data[[status_var]],
+                        x = data[[covariate]],
+                        h = bandwidth,
+                        testimate = time_seq,
+                        conflevel = 0.95
+                    )
+                }
+
+                # Format and store results
+                private$.formatNpCureResults(np_cure_model, covariate)
+
+                # Store model for plotting
+                private$npcure_model <- np_cure_model
+
+            }, error = function(e) {
+                error_msg <- e$message
+
+                if (grepl("bandwidth|h =", error_msg, ignore.case = TRUE)) {
+                    detailed_msg <- paste(
+                        "Bandwidth selection failed:", error_msg,
+                        "\n\nSuggestions:",
+                        "• Try 'auto' bandwidth",
+                        "• Adjust bandwidth manually (small/medium/large)",
+                        "• Check covariate distribution",
+                        "• Ensure sufficient sample size"
+                    )
+                } else if (grepl("covariate", error_msg, ignore.case = TRUE)) {
+                    detailed_msg <- paste(
+                        "Covariate error:", error_msg,
+                        "\n\nSuggestions:",
+                        "• Select a continuous numeric covariate",
+                        "• Check for missing values",
+                        "• Ensure adequate variation in covariate"
+                    )
+                } else {
+                    detailed_msg <- paste("Nonparametric cure model fitting failed:", error_msg)
+                }
+
+                self$results$warnings$setContent(paste(
+                    self$results$warnings$content, "<br/><strong>npcure Model Error:</strong><br/>", detailed_msg
+                ))
+            })
+        },
+
         .formatMixtureCureResults = function(model) {
 
             # Create results table
@@ -432,6 +613,128 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <h4>Model Description:</h4>
                 <p>Non-mixture cure models assume the entire population follows the same
                 survival distribution with cure as a limiting probability as time approaches infinity.</p>"
+            )
+
+            self$results$summary$setContent(summary_html)
+        },
+
+        .formatCuReResults = function(model) {
+
+            # Extract model summary
+            model_summary <- summary(model)
+
+            # Create results table
+            results_table <- self$results$modelTable
+
+            # Add coefficient results
+            if (!is.null(model_summary$coef)) {
+                coef_matrix <- model_summary$coef
+
+                for (i in 1:nrow(coef_matrix)) {
+                    results_table$addRow(rowKey = paste0("cure_", i), values = list(
+                        parameter = rownames(coef_matrix)[i],
+                        estimate = round(coef_matrix[i, "Estimate"], 4),
+                        se = round(coef_matrix[i, "Std. Error"], 4),
+                        ci_lower = round(coef_matrix[i, "Estimate"] - 1.96 * coef_matrix[i, "Std. Error"], 4),
+                        ci_upper = round(coef_matrix[i, "Estimate"] + 1.96 * coef_matrix[i, "Std. Error"], 4),
+                        p_value = round(coef_matrix[i, "Pr(>|z|)"], 4)
+                    ))
+                }
+            }
+
+            # Extract cure fraction estimate if available
+            cure_fraction <- if (!is.null(model$cure_fraction)) {
+                round(model$cure_fraction, 3)
+            } else {
+                "See model coefficients"
+            }
+
+            # Generate summary with background mortality info
+            background_note <- if (self$options$use_background_mortality && !is.null(self$options$background_hazard_var)) {
+                paste0("<p><b>Background Mortality:</b> Included (variable: ", self$options$background_hazard_var, ")</p>")
+            } else {
+                "<p><b>Background Mortality:</b> Not included</p>"
+            }
+
+            summary_html <- glue::glue(
+                "<h3>cuRe Model Results</h3>
+                <p><b>Distribution:</b> {self$options$survival_dist %||% 'weibull'}</p>
+                <p><b>Link Function:</b> {self$options$cure_link %||% 'logit'}</p>
+                {background_note}
+                <p><b>Estimated Cure Fraction:</b> {cure_fraction}</p>
+
+                <h4>Model Description:</h4>
+                <p>The cuRe model allows incorporation of background mortality rates from the general population.
+                This is particularly useful when analyzing cancer survival where patients may die from competing causes.</p>
+
+                <h4>Key Features:</h4>
+                <ul>
+                <li>Accounts for background population mortality</li>
+                <li>Separates excess hazard due to disease from background risk</li>
+                <li>Provides more accurate cure fraction estimates in aging populations</li>
+                </ul>"
+            )
+
+            self$results$summary$setContent(summary_html)
+        },
+
+        .formatNpCureResults = function(model, covariate_name) {
+
+            # Create summary table for npcure results
+            results_table <- self$results$modelTable
+
+            # npcure provides cure probability estimates across covariate values
+            if (!is.null(model$x)) {
+                # Extract cure probability estimates
+                cure_probs <- model$curerate
+                covariate_vals <- model$x
+
+                # Add representative estimates to table
+                n_points <- min(10, length(cure_probs))  # Show up to 10 representative points
+                indices <- round(seq(1, length(cure_probs), length.out = n_points))
+
+                for (i in seq_along(indices)) {
+                    idx <- indices[i]
+                    results_table$addRow(rowKey = paste0("npcure_", i), values = list(
+                        parameter = paste0(covariate_name, " = ", round(covariate_vals[idx], 2)),
+                        estimate = round(cure_probs[idx], 4),
+                        se = NA,
+                        ci_lower = if (!is.null(model$lower)) round(model$lower[idx], 4) else NA,
+                        ci_upper = if (!is.null(model$upper)) round(model$upper[idx], 4) else NA,
+                        p_value = NA
+                    ))
+                }
+            }
+
+            # Get bandwidth info
+            bandwidth_info <- if (!is.null(model$h)) {
+                paste0("Bandwidth: ", round(model$h, 4))
+            } else {
+                "Bandwidth: Automatic selection"
+            }
+
+            # Generate summary
+            summary_html <- glue::glue(
+                "<h3>Nonparametric Cure Model Results (npcure)</h3>
+                <p><b>Covariate:</b> {covariate_name}</p>
+                <p><b>{bandwidth_info}</b></p>
+                <p><b>Number of Time Points:</b> {self$options$npcure_time_points %||% 100}</p>
+
+                <h4>Model Description:</h4>
+                <p>The nonparametric cure model estimates cure probability as a smooth function
+                of a continuous covariate without assuming a parametric form.</p>
+
+                <h4>Key Features:</h4>
+                <ul>
+                <li>No parametric assumptions about cure probability</li>
+                <li>Flexible estimation of cure rate across covariate values</li>
+                <li>Useful for exploratory analysis and model validation</li>
+                <li>Provides visual assessment of cure probability trends</li>
+                </ul>
+
+                <h4>Interpretation:</h4>
+                <p>The table shows estimated cure probabilities at representative values of the covariate.
+                Higher cure probabilities indicate greater likelihood of being in the 'cured' group at that covariate value.</p>"
             )
 
             self$results$summary$setContent(summary_html)

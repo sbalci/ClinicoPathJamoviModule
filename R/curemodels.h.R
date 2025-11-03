@@ -18,7 +18,14 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plot_cure_fraction = TRUE,
             plot_survival = TRUE,
             goodness_of_fit = TRUE,
-            sensitivity_analysis = FALSE, ...) {
+            sensitivity_analysis = FALSE,
+            use_background_mortality = FALSE,
+            background_hazard_var = NULL,
+            cure_expected_rate = NULL,
+            use_nonparametric = FALSE,
+            npcure_covariate = NULL,
+            npcure_bandwidth = "auto",
+            npcure_time_points = 100, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -58,7 +65,9 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "mixture",
                     "nonmixture",
-                    "both"),
+                    "cure",
+                    "npcure",
+                    "all"),
                 default="mixture")
             private$..cure_link <- jmvcore::OptionList$new(
                 "cure_link",
@@ -108,6 +117,50 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "sensitivity_analysis",
                 sensitivity_analysis,
                 default=FALSE)
+            private$..use_background_mortality <- jmvcore::OptionBool$new(
+                "use_background_mortality",
+                use_background_mortality,
+                default=FALSE)
+            private$..background_hazard_var <- jmvcore::OptionVariable$new(
+                "background_hazard_var",
+                background_hazard_var,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..cure_expected_rate <- jmvcore::OptionVariable$new(
+                "cure_expected_rate",
+                cure_expected_rate,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..use_nonparametric <- jmvcore::OptionBool$new(
+                "use_nonparametric",
+                use_nonparametric,
+                default=FALSE)
+            private$..npcure_covariate <- jmvcore::OptionVariable$new(
+                "npcure_covariate",
+                npcure_covariate,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..npcure_bandwidth <- jmvcore::OptionList$new(
+                "npcure_bandwidth",
+                npcure_bandwidth,
+                options=list(
+                    "auto",
+                    "small",
+                    "medium",
+                    "large"),
+                default="auto")
+            private$..npcure_time_points <- jmvcore::OptionInteger$new(
+                "npcure_time_points",
+                npcure_time_points,
+                default=100,
+                min=50,
+                max=500)
 
             self$.addOption(private$..time)
             self$.addOption(private$..status)
@@ -122,6 +175,13 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plot_survival)
             self$.addOption(private$..goodness_of_fit)
             self$.addOption(private$..sensitivity_analysis)
+            self$.addOption(private$..use_background_mortality)
+            self$.addOption(private$..background_hazard_var)
+            self$.addOption(private$..cure_expected_rate)
+            self$.addOption(private$..use_nonparametric)
+            self$.addOption(private$..npcure_covariate)
+            self$.addOption(private$..npcure_bandwidth)
+            self$.addOption(private$..npcure_time_points)
         }),
     active = list(
         time = function() private$..time$value,
@@ -136,7 +196,14 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot_cure_fraction = function() private$..plot_cure_fraction$value,
         plot_survival = function() private$..plot_survival$value,
         goodness_of_fit = function() private$..goodness_of_fit$value,
-        sensitivity_analysis = function() private$..sensitivity_analysis$value),
+        sensitivity_analysis = function() private$..sensitivity_analysis$value,
+        use_background_mortality = function() private$..use_background_mortality$value,
+        background_hazard_var = function() private$..background_hazard_var$value,
+        cure_expected_rate = function() private$..cure_expected_rate$value,
+        use_nonparametric = function() private$..use_nonparametric$value,
+        npcure_covariate = function() private$..npcure_covariate$value,
+        npcure_bandwidth = function() private$..npcure_bandwidth$value,
+        npcure_time_points = function() private$..npcure_time_points$value),
     private = list(
         ..time = NA,
         ..status = NA,
@@ -150,7 +217,14 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plot_cure_fraction = NA,
         ..plot_survival = NA,
         ..goodness_of_fit = NA,
-        ..sensitivity_analysis = NA)
+        ..sensitivity_analysis = NA,
+        ..use_background_mortality = NA,
+        ..background_hazard_var = NA,
+        ..cure_expected_rate = NA,
+        ..use_nonparametric = NA,
+        ..npcure_covariate = NA,
+        ..npcure_bandwidth = NA,
+        ..npcure_time_points = NA)
 )
 
 curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -399,7 +473,8 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param time Follow-up time variable
 #' @param status Event status variable
 #' @param predictors Predictor variables for the model
-#' @param model_type Type of cure model: mixture, non-mixture, or both
+#' @param model_type Type of cure model: mixture (smcure), non-mixture
+#'   (flexsurvcure), cuRe, npcure, or all
 #' @param cure_link Link function for the cure probability model
 #' @param survival_dist Distribution for modeling survival of uncured patients
 #' @param bootstrap_ci Use bootstrap for confidence interval estimation
@@ -409,6 +484,17 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plot_survival Generate survival curve plots
 #' @param goodness_of_fit Conduct goodness of fit assessment
 #' @param sensitivity_analysis Conduct sensitivity analysis
+#' @param use_background_mortality Enable background mortality integration
+#'   using cuRe package
+#' @param background_hazard_var Background hazard variable for cuRe models
+#' @param cure_expected_rate Expected cure rate variable for relative cure
+#'   models
+#' @param use_nonparametric Enable nonparametric cure estimation using npcure
+#'   package
+#' @param npcure_covariate Continuous covariate for npcure model (limited to
+#'   one variable)
+#' @param npcure_bandwidth Bandwidth parameter for npcure kernel smoothing
+#' @param npcure_time_points Number of time points for testimate in npcure
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -445,7 +531,14 @@ curemodels <- function(
     plot_cure_fraction = TRUE,
     plot_survival = TRUE,
     goodness_of_fit = TRUE,
-    sensitivity_analysis = FALSE) {
+    sensitivity_analysis = FALSE,
+    use_background_mortality = FALSE,
+    background_hazard_var,
+    cure_expected_rate,
+    use_nonparametric = FALSE,
+    npcure_covariate,
+    npcure_bandwidth = "auto",
+    npcure_time_points = 100) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("curemodels requires jmvcore to be installed (restart may be required)")
@@ -453,12 +546,18 @@ curemodels <- function(
     if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
     if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
+    if ( ! missing(background_hazard_var)) background_hazard_var <- jmvcore::resolveQuo(jmvcore::enquo(background_hazard_var))
+    if ( ! missing(cure_expected_rate)) cure_expected_rate <- jmvcore::resolveQuo(jmvcore::enquo(cure_expected_rate))
+    if ( ! missing(npcure_covariate)) npcure_covariate <- jmvcore::resolveQuo(jmvcore::enquo(npcure_covariate))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(time), time, NULL),
             `if`( ! missing(status), status, NULL),
-            `if`( ! missing(predictors), predictors, NULL))
+            `if`( ! missing(predictors), predictors, NULL),
+            `if`( ! missing(background_hazard_var), background_hazard_var, NULL),
+            `if`( ! missing(cure_expected_rate), cure_expected_rate, NULL),
+            `if`( ! missing(npcure_covariate), npcure_covariate, NULL))
 
 
     options <- curemodelsOptions$new(
@@ -474,7 +573,14 @@ curemodels <- function(
         plot_cure_fraction = plot_cure_fraction,
         plot_survival = plot_survival,
         goodness_of_fit = goodness_of_fit,
-        sensitivity_analysis = sensitivity_analysis)
+        sensitivity_analysis = sensitivity_analysis,
+        use_background_mortality = use_background_mortality,
+        background_hazard_var = background_hazard_var,
+        cure_expected_rate = cure_expected_rate,
+        use_nonparametric = use_nonparametric,
+        npcure_covariate = npcure_covariate,
+        npcure_bandwidth = npcure_bandwidth,
+        npcure_time_points = npcure_time_points)
 
     analysis <- curemodelsClass$new(
         options = options,

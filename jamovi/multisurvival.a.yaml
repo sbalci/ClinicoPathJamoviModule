@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.32'
@@ -786,7 +786,74 @@ options:
   #                       isTarget: true
   #                       fitToGrid: true
   #                       stretchFactor: 1
+# AFT Models (Accelerated Failure Time) ----
+# Alternative to Cox PH when proportional hazards assumption violated
 
+    - name: use_aft
+      title: 'Use AFT Model'
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, fits an Accelerated Failure Time (AFT) model instead of Cox Proportional Hazards.
+          AFT models provide intuitive "Time Ratios" (TR) showing how covariates accelerate or
+          decelerate survival time. Useful when PH assumption is violated or for more
+          interpretable results (e.g., "treatment makes patients live 1.5x longer").
+        ui: >
+          Use Accelerated Failure Time (AFT) model as an alternative to Cox PH.
+          AFT provides intuitive Time Ratios instead of Hazard Ratios.
+          Use when proportional hazards assumption is violated or you want
+          more interpretable results.
+
+    - name: aft_distribution
+      title: 'AFT Distribution'
+      type: List
+      options:
+        - title: Weibull (most flexible, allows PH interpretation)
+          name: weibull
+        - title: Exponential (constant hazard)
+          name: exponential
+        - title: Log-normal (non-monotonic hazard)
+          name: lognormal
+        - title: Log-logistic (non-monotonic hazard)
+          name: loglogistic
+        - title: Gaussian (rarely used)
+          name: gaussian
+      default: weibull
+      description:
+        R: >
+          Distribution family for survival times in AFT model.
+          Weibull is most flexible and can represent both PH and AFT frameworks.
+          Log-normal and log-logistic allow non-monotonic hazards.
+          Choice should be guided by Kaplan-Meier curve shape and diagnostic plots.
+        ui: >
+          Select the distribution for survival times.
+          Weibull (default) is most flexible. Log-normal/log-logistic
+          allow hazards that increase then decrease over time.
+
+    - name: aft_show_hr_equivalent
+      title: 'Show Hazard Ratio Equivalents'
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true (and using Weibull distribution), shows equivalent Hazard Ratios
+          alongside Time Ratios for comparison with Cox model results.
+        ui: >
+          Show equivalent Hazard Ratios for comparison
+          (only for Weibull distribution).
+
+    - name: aft_show_interpretation
+      title: 'Show Interpretation Column'
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, adds a column to the AFT results table with natural language
+          interpretation of Time Ratios (e.g., "Associated with 50% longer survival time").
+        ui: >
+          Add an interpretation column to the AFT results table with
+          plain language explanations of the Time Ratios.
 
 
     - name: person_time
@@ -814,6 +881,54 @@ options:
       description: >-
         Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
         1000 for rates per 1000 person-years).
+
+# SurvMetrics - Enhanced Model Performance Metrics ----
+    - name: show_survmetrics
+      title: "Show Model Performance Metrics (SurvMetrics)"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Calculate comprehensive survival model performance metrics using the SurvMetrics package.
+          Includes Concordance Index, Brier Score, Integrated Brier Score, and prediction accuracy metrics.
+        ui: >
+          Enable advanced model performance metrics including C-index, Brier scores,
+          and prediction accuracy measures.
+
+    - name: survmetrics_timepoints
+      title: "Time Points for Brier Score"
+      type: String
+      default: '12, 24, 36, 60'
+      description:
+        R: >
+          Comma-separated time points at which to calculate Brier Score.
+          Should correspond to clinically meaningful follow-up times.
+        ui: >
+          Specify time points (comma-separated) for time-dependent Brier Score calculation.
+          Example: '12, 24, 36, 60' for 1, 2, 3, and 5 years.
+
+    - name: survmetrics_ibs_points
+      title: "Number of Points for Integrated Brier Score"
+      type: Integer
+      default: 100
+      min: 50
+      max: 500
+      description:
+        R: >
+          Number of time points to use for calculating Integrated Brier Score.
+          More points provide smoother estimates but increase computation time.
+        ui: >
+          Number of time points for Integrated Brier Score calculation (50-500).
+
+    - name: survmetrics_show_plots
+      title: "Show Performance Plots"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Generate plots of model performance metrics over time (Brier Score, calibration).
+        ui: >
+          Display plots showing how model performance varies over follow-up time.
 
 # Decision Tree Options ---- (EXPERIMENTAL - will be implemented later)
     # - name: use_tree

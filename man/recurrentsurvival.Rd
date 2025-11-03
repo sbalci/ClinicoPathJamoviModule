@@ -31,7 +31,14 @@ recurrentsurvival(
   prediction_times = "12,24,36,60",
   bootstrap_samples = 200,
   convergence_tolerance = 1e-04,
-  max_iterations = 500
+  max_iterations = 500,
+  use_reReg = FALSE,
+  reReg_model = "cox_LWYY",
+  reReg_se = "bootstrap",
+  reReg_B = 200,
+  show_event_plot = TRUE,
+  show_mcf_plot = TRUE,
+  event_plot_subjects = 20
 )
 }
 \arguments{
@@ -90,6 +97,20 @@ function}
 \item{convergence_tolerance}{Convergence criterion for iterative algorithms}
 
 \item{max_iterations}{Maximum number of algorithm iterations}
+
+\item{use_reReg}{Whether to use reReg package for analysis}
+
+\item{reReg_model}{Model specification for reReg package}
+
+\item{reReg_se}{Standard error estimation method for reReg}
+
+\item{reReg_B}{Bootstrap samples for reReg variance estimation}
+
+\item{show_event_plot}{Whether to show event plot from reReg}
+
+\item{show_mcf_plot}{Whether to show MCF plot from reReg}
+
+\item{event_plot_subjects}{Number of subjects to display in event plot}
 }
 \value{
 A results object containing:

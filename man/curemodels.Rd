@@ -18,7 +18,14 @@ curemodels(
   plot_cure_fraction = TRUE,
   plot_survival = TRUE,
   goodness_of_fit = TRUE,
-  sensitivity_analysis = FALSE
+  sensitivity_analysis = FALSE,
+  use_background_mortality = FALSE,
+  background_hazard_var,
+  cure_expected_rate,
+  use_nonparametric = FALSE,
+  npcure_covariate,
+  npcure_bandwidth = "auto",
+  npcure_time_points = 100
 )
 }
 \arguments{
@@ -30,7 +37,8 @@ curemodels(
 
 \item{predictors}{Predictor variables for the model}
 
-\item{model_type}{Type of cure model: mixture, non-mixture, or both}
+\item{model_type}{Type of cure model: mixture (smcure), non-mixture
+(flexsurvcure), cuRe, npcure, or all}
 
 \item{cure_link}{Link function for the cure probability model}
 
@@ -49,6 +57,24 @@ curemodels(
 \item{goodness_of_fit}{Conduct goodness of fit assessment}
 
 \item{sensitivity_analysis}{Conduct sensitivity analysis}
+
+\item{use_background_mortality}{Enable background mortality integration
+using cuRe package}
+
+\item{background_hazard_var}{Background hazard variable for cuRe models}
+
+\item{cure_expected_rate}{Expected cure rate variable for relative cure
+models}
+
+\item{use_nonparametric}{Enable nonparametric cure estimation using npcure
+package}
+
+\item{npcure_covariate}{Continuous covariate for npcure model (limited to
+one variable)}
+
+\item{npcure_bandwidth}{Bandwidth parameter for npcure kernel smoothing}
+
+\item{npcure_time_points}{Number of time points for testimate in npcure}
 }
 \value{
 A results object containing:

@@ -203,11 +203,18 @@ recurrentsurvivalClass <- R6::R6Class(
 
             model_type <- self$options$model_type
             time_scale <- self$options$time_scale
+            use_reReg <- self$options$use_reReg %||% FALSE
 
             tryCatch({
 
                 # Generate data summary first
                 private$.generateDataSummary(analysis_data, subject_id, event_time)
+
+                # If reReg is enabled, use reReg package analysis
+                if (use_reReg) {
+                    private$.fitReRegModel(analysis_data, subject_id, event_time, covariates)
+                    return()
+                }
 
                 # Transform data based on time scale and model type
                 transformed_data <- private$.transformRecurrentData(analysis_data, time_scale, model_type)
@@ -633,8 +640,251 @@ recurrentsurvivalClass <- R6::R6Class(
             self$results$goodness_of_fit_results$setContent(html)
         },
 
+        # reReg Package Integration ----
+        .fitReRegModel = function(analysis_data, subject_id, event_time, covariates) {
+
+            tryCatch({
+                # Check for reReg package
+                if (!requireNamespace('reReg', quietly = TRUE)) {
+                    stop("reReg package is required but not installed. Install using: install.packages('reReg')")
+                }
+
+                # Get reReg-specific options
+                reReg_model <- self$options$reReg_model %||% "cox_LWYY"
+                reReg_se <- self$options$reReg_se
+                reReg_B <- self$options$reReg_B %||% 200
+                terminal_event <- self$options$terminal_event
+                terminal_status <- self$options$terminal_status
+
+                # Prepare data for reReg
+                # reReg expects: id, time, event, terminal_time, terminal_status
+                rereg_data <- analysis_data
+
+                # Create reSurv object
+                if (!is.null(terminal_event) && !is.null(terminal_status)) {
+                    # With terminal event
+                    reData <- reReg::reSurv(
+                        time1 = rereg_data[[event_time]],
+                        event = rereg_data$event_status,
+                        terminal = rereg_data[[terminal_event]],
+                        id = rereg_data[[subject_id]],
+                        status = rereg_data[[terminal_status]]
+                    )
+                } else {
+                    # Without terminal event
+                    reData <- reReg::reSurv(
+                        time1 = rereg_data[[event_time]],
+                        event = rereg_data$event_status,
+                        id = rereg_data[[subject_id]]
+                    )
+                }
+
+                # Build formula
+                if (length(covariates) > 0) {
+                    formula_str <- paste("reData ~", paste(covariates, collapse = " + "))
+                } else {
+                    formula_str <- "reData ~ 1"
+                }
+
+                # Convert reReg_model name to function name
+                model_func <- gsub("_", ".", reReg_model)  # cox_LWYY -> cox.LWYY
+
+                # Set up standard error method
+                se_method <- if (reReg_se == "model_based") NULL else reReg_se
+
+                # Fit reReg model
+                if (reReg_se == "bootstrap" && !is.null(se_method)) {
+                    rereg_fit <- reReg::reReg(
+                        formula = as.formula(formula_str),
+                        data = rereg_data,
+                        model = model_func,
+                        se = se_method,
+                        B = reReg_B
+                    )
+                } else {
+                    rereg_fit <- reReg::reReg(
+                        formula = as.formula(formula_str),
+                        data = rereg_data,
+                        model = model_func,
+                        se = se_method
+                    )
+                }
+
+                # Format and display results
+                private$.formatReRegResults(rereg_fit, reReg_model)
+
+                # Store model for plotting
+                private$..rereg_model <- rereg_fit
+                private$..rereg_data <- reData
+
+                # Generate visualizations
+                if (self$options$show_event_plot || self$options$show_mcf_plot) {
+                    private$.generateReRegPlots(rereg_fit, reData)
+                }
+
+            }, error = function(e) {
+                error_msg <- e$message
+
+                if (grepl("not installed|namespace", error_msg, ignore.case = TRUE)) {
+                    detailed_msg <- paste(
+                        "reReg package not available:", error_msg,
+                        "\n\nInstall reReg package using: install.packages('reReg')"
+                    )
+                } else if (grepl("reSurv|terminal", error_msg, ignore.case = TRUE)) {
+                    detailed_msg <- paste(
+                        "Data preparation error:", error_msg,
+                        "\n\nSuggestions:",
+                        "• Verify subject_id variable uniquely identifies subjects",
+                        "• Ensure event times are numeric and non-negative",
+                        "• Check terminal event and status variables if provided"
+                    )
+                } else if (grepl("convergence|iteration", error_msg, ignore.case = TRUE)) {
+                    detailed_msg <- paste(
+                        "Model convergence failed:", error_msg,
+                        "\n\nSuggestions:",
+                        "• Try different model type",
+                        "• Reduce number of covariates",
+                        "• Check for data quality issues",
+                        "• Increase max_iterations"
+                    )
+                } else {
+                    detailed_msg <- paste("reReg model fitting failed:", error_msg)
+                }
+
+                self$results$model_results$setContent(paste0(
+                    "<h3>reReg Analysis Error</h3><p>", detailed_msg, "</p>"
+                ))
+            })
+        },
+
+        .formatReRegResults = function(rereg_fit, model_type) {
+
+            # Create results HTML
+            html <- "<h3>reReg Analysis Results</h3>"
+            html <- paste0(html, "<p><b>Model Type:</b> ", gsub("_", " ", model_type), "</p>")
+
+            # Get model summary
+            model_summary <- summary(rereg_fit)
+
+            # Extract coefficients
+            if (!is.null(rereg_fit$coef)) {
+                coef_matrix <- model_summary$coefficients
+
+                html <- paste0(html, "<h4>Parameter Estimates</h4>")
+                html <- paste0(html, "<table class='jamovi-table' style='width:100%'>")
+                html <- paste0(html, "<thead><tr>")
+                html <- paste0(html, "<th>Variable</th>")
+                html <- paste0(html, "<th>Estimate</th>")
+                html <- paste0(html, "<th>SE</th>")
+                html <- paste0(html, "<th>z-value</th>")
+                html <- paste0(html, "<th>p-value</th>")
+                html <- paste0(html, "</tr></thead><tbody>")
+
+                for (i in 1:nrow(coef_matrix)) {
+                    html <- paste0(html, "<tr>")
+                    html <- paste0(html, "<td>", rownames(coef_matrix)[i], "</td>")
+                    html <- paste0(html, "<td>", round(coef_matrix[i, "Estimate"], 4), "</td>")
+                    html <- paste0(html, "<td>", round(coef_matrix[i, "SE"], 4), "</td>")
+                    html <- paste0(html, "<td>", round(coef_matrix[i, "z"], 3), "</td>")
+                    html <- paste0(html, "<td>",
+                                 ifelse(coef_matrix[i, "Pr(>|z|)"] < 0.001, "< 0.001",
+                                       round(coef_matrix[i, "Pr(>|z|)"], 4)), "</td>")
+                    html <- paste0(html, "</tr>")
+                }
+
+                html <- paste0(html, "</tbody></table>")
+            }
+
+            # Add model fit information
+            html <- paste0(html, "<h4>Model Fit</h4>")
+            html <- paste0(html, "<table class='jamovi-table'>")
+
+            if (!is.null(rereg_fit$logLik)) {
+                html <- paste0(html, "<tr><td><b>Log-likelihood:</b></td><td>",
+                             round(rereg_fit$logLik, 2), "</td></tr>")
+            }
+
+            if (!is.null(model_summary$n)) {
+                html <- paste0(html, "<tr><td><b>Number of Subjects:</b></td><td>",
+                             model_summary$n, "</td></tr>")
+            }
+
+            if (!is.null(model_summary$events)) {
+                html <- paste0(html, "<tr><td><b>Total Events:</b></td><td>",
+                             model_summary$events, "</td></tr>")
+            }
+
+            html <- paste0(html, "</table>")
+
+            # Add interpretation
+            html <- paste0(html, "<h4>Model Information</h4>")
+            html <- paste0(html, "<p><b>About reReg Models:</b></p>")
+            html <- paste0(html, "<ul>")
+
+            if (grepl("cox", model_type, ignore.case = TRUE)) {
+                html <- paste0(html, "<li>Cox-type models estimate rate functions for recurrent events</li>")
+                html <- paste0(html, "<li>Positive coefficients indicate increased recurrence rate</li>")
+
+                if (grepl("LWYY", model_type)) {
+                    html <- paste0(html, "<li>LWYY model uses shared frailty for within-subject correlation</li>")
+                } else if (grepl("GL", model_type)) {
+                    html <- paste0(html, "<li>Ghosh-Lin model accounts for terminal event as competing risk</li>")
+                }
+            } else if (grepl("am", model_type, ignore.case = TRUE)) {
+                html <- paste0(html, "<li>Accelerated Mean models estimate mean cumulative function</li>")
+                html <- paste0(html, "<li>Coefficients represent effects on mean number of events</li>")
+            } else if (grepl("sc", model_type, ignore.case = TRUE)) {
+                html <- paste0(html, "<li>Scale-change models allow time-varying effects</li>")
+                html <- paste0(html, "<li>Models how covariate effects change over time</li>")
+            }
+
+            html <- paste0(html, "<li>Standard errors account for within-subject correlation</li>")
+            html <- paste0(html, "</ul>")
+
+            self$results$model_results$setContent(html)
+        },
+
+        .generateReRegPlots = function(rereg_fit, reData) {
+
+            # Event Plot
+            if (self$options$show_event_plot) {
+                n_subjects <- self$options$event_plot_subjects %||% 20
+
+                tryCatch({
+                    event_plot <- reReg::plotEvents(
+                        reData,
+                        id = seq_len(min(n_subjects, length(unique(reData$id))))
+                    )
+
+                    # Store plot for display
+                    image <- self$results$event_plot_image
+                    image$setState(list(plot = event_plot))
+
+                }, error = function(e) {
+                    # Silently skip if plot fails
+                })
+            }
+
+            # MCF Plot
+            if (self$options$show_mcf_plot) {
+                tryCatch({
+                    # Generate MCF plot from reReg model
+                    mcf_plot <- plot(rereg_fit, mcf = TRUE)
+
+                    # Store plot for display
+                    image <- self$results$mcf_plot_image
+                    image$setState(list(plot = mcf_plot))
+
+                }, error = function(e) {
+                    # Silently skip if plot fails
+                })
+            }
+        },
+
         # Private variables
-        ..current_model = NULL
+        ..current_model = NULL,
+        ..rereg_model = NULL,
+        ..rereg_data = NULL
     ),
 
     active = list(

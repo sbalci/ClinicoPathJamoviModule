@@ -87,8 +87,166 @@ items:
           - dxdate
           - tint
           - multievent
-      
 
+
+    # AFT Model Results (Accelerated Failure Time)
+    - name: aftModelHeading
+      title: 'AFT Model Results (Accelerated Failure Time)'
+      type: Preformatted
+      visible: (use_aft)
+
+    - name: aftModelTable
+      title: 'AFT Regression Coefficients'
+      type: Table
+      visible: (use_aft)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+          format: zto,pvalue
+        - name: time_ratio
+          title: "Time Ratio"
+          superTitle: "(TR)"
+          type: number
+          format: zto
+        - name: tr_lower
+          title: "Lower"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: tr_upper
+          title: "Upper"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: se
+          title: "Std Error"
+          type: number
+          format: zto
+        - name: z_stat
+          title: "Z"
+          type: number
+          format: zto
+        - name: p_value
+          title: "p"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+          visible: (aft_show_interpretation)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - explanatory
+        - contexpl
+        - use_aft
+        - aft_distribution
+
+    - name: aftSummaryHeading
+      title: 'AFT Model Natural Language Summary'
+      type: Preformatted
+      visible: (use_aft && showSummaries)
+
+    - name: aftSummary
+      title: ''
+      type: Html
+      visible: (use_aft && showSummaries)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - explanatory
+        - contexpl
+        - use_aft
+        - aft_distribution
+
+    - name: aftModelInfo
+      title: 'AFT Model Information'
+      type: Html
+      visible: (use_aft)
+      clearWith:
+        - use_aft
+        - aft_distribution
+        - aft_show_hr_equivalent
+
+
+    # SurvMetrics - Model Performance Metrics
+    - name: survMetricsHeading
+      title: 'Model Performance Metrics (SurvMetrics)'
+      type: Preformatted
+      visible: (show_survmetrics)
+
+    - name: survMetricsTable
+      title: 'Survival Model Performance Metrics'
+      type: Table
+      visible: (show_survmetrics)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "Upper"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - explanatory
+        - contexpl
+        - show_survmetrics
+
+    - name: survMetricsSummaryHeading
+      title: 'Model Performance Summary'
+      type: Preformatted
+      visible: (show_survmetrics && showSummaries)
+
+    - name: survMetricsSummary
+      title: ''
+      type: Html
+      visible: (show_survmetrics && showSummaries)
+      clearWith:
+        - outcome
+        - explanatory
+        - contexpl
+        - show_survmetrics
+
+    - name: survMetricsPlot
+      title: 'Brier Score Over Time'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotSurvMetrics
+      requiresData: true
+      visible: (show_survmetrics && survmetrics_show_plots)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - explanatory
+        - contexpl
+        - show_survmetrics
+        - survmetrics_show_plots
 
 
 

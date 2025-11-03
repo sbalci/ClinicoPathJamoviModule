@@ -45,9 +45,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showNomogram = FALSE,
             use_stratify = FALSE,
             stratvar = NULL,
+            use_aft = FALSE,
+            aft_distribution = "weibull",
+            aft_show_hr_equivalent = FALSE,
+            aft_show_interpretation = FALSE,
             person_time = FALSE,
             time_intervals = "12, 36, 60",
             rate_multiplier = 100,
+            show_survmetrics = FALSE,
+            survmetrics_timepoints = "12, 24, 36, 60",
+            survmetrics_ibs_points = 100,
+            survmetrics_show_plots = FALSE,
             showExplanations = FALSE,
             showSummaries = FALSE, ...) {
 
@@ -301,6 +309,28 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..use_aft <- jmvcore::OptionBool$new(
+                "use_aft",
+                use_aft,
+                default=FALSE)
+            private$..aft_distribution <- jmvcore::OptionList$new(
+                "aft_distribution",
+                aft_distribution,
+                options=list(
+                    "weibull",
+                    "exponential",
+                    "lognormal",
+                    "loglogistic",
+                    "gaussian"),
+                default="weibull")
+            private$..aft_show_hr_equivalent <- jmvcore::OptionBool$new(
+                "aft_show_hr_equivalent",
+                aft_show_hr_equivalent,
+                default=FALSE)
+            private$..aft_show_interpretation <- jmvcore::OptionBool$new(
+                "aft_show_interpretation",
+                aft_show_interpretation,
+                default=FALSE)
             private$..person_time <- jmvcore::OptionBool$new(
                 "person_time",
                 person_time,
@@ -313,6 +343,24 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "rate_multiplier",
                 rate_multiplier,
                 default=100)
+            private$..show_survmetrics <- jmvcore::OptionBool$new(
+                "show_survmetrics",
+                show_survmetrics,
+                default=FALSE)
+            private$..survmetrics_timepoints <- jmvcore::OptionString$new(
+                "survmetrics_timepoints",
+                survmetrics_timepoints,
+                default="12, 24, 36, 60")
+            private$..survmetrics_ibs_points <- jmvcore::OptionInteger$new(
+                "survmetrics_ibs_points",
+                survmetrics_ibs_points,
+                default=100,
+                min=50,
+                max=500)
+            private$..survmetrics_show_plots <- jmvcore::OptionBool$new(
+                "survmetrics_show_plots",
+                survmetrics_show_plots,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -365,9 +413,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showNomogram)
             self$.addOption(private$..use_stratify)
             self$.addOption(private$..stratvar)
+            self$.addOption(private$..use_aft)
+            self$.addOption(private$..aft_distribution)
+            self$.addOption(private$..aft_show_hr_equivalent)
+            self$.addOption(private$..aft_show_interpretation)
             self$.addOption(private$..person_time)
             self$.addOption(private$..time_intervals)
             self$.addOption(private$..rate_multiplier)
+            self$.addOption(private$..show_survmetrics)
+            self$.addOption(private$..survmetrics_timepoints)
+            self$.addOption(private$..survmetrics_ibs_points)
+            self$.addOption(private$..survmetrics_show_plots)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showSummaries)
         }),
@@ -415,9 +471,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showNomogram = function() private$..showNomogram$value,
         use_stratify = function() private$..use_stratify$value,
         stratvar = function() private$..stratvar$value,
+        use_aft = function() private$..use_aft$value,
+        aft_distribution = function() private$..aft_distribution$value,
+        aft_show_hr_equivalent = function() private$..aft_show_hr_equivalent$value,
+        aft_show_interpretation = function() private$..aft_show_interpretation$value,
         person_time = function() private$..person_time$value,
         time_intervals = function() private$..time_intervals$value,
         rate_multiplier = function() private$..rate_multiplier$value,
+        show_survmetrics = function() private$..show_survmetrics$value,
+        survmetrics_timepoints = function() private$..survmetrics_timepoints$value,
+        survmetrics_ibs_points = function() private$..survmetrics_ibs_points$value,
+        survmetrics_show_plots = function() private$..survmetrics_show_plots$value,
         showExplanations = function() private$..showExplanations$value,
         showSummaries = function() private$..showSummaries$value),
     private = list(
@@ -464,9 +528,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showNomogram = NA,
         ..use_stratify = NA,
         ..stratvar = NA,
+        ..use_aft = NA,
+        ..aft_distribution = NA,
+        ..aft_show_hr_equivalent = NA,
+        ..aft_show_interpretation = NA,
         ..person_time = NA,
         ..time_intervals = NA,
         ..rate_multiplier = NA,
+        ..show_survmetrics = NA,
+        ..survmetrics_timepoints = NA,
+        ..survmetrics_ibs_points = NA,
+        ..survmetrics_show_plots = NA,
         ..showExplanations = NA,
         ..showSummaries = NA)
 )
@@ -481,6 +553,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         text2 = function() private$.items[["text2"]],
         multivariableCoxSummaryHeading = function() private$.items[["multivariableCoxSummaryHeading"]],
         multivariableCoxSummary = function() private$.items[["multivariableCoxSummary"]],
+        aftModelHeading = function() private$.items[["aftModelHeading"]],
+        aftModelTable = function() private$.items[["aftModelTable"]],
+        aftSummaryHeading = function() private$.items[["aftSummaryHeading"]],
+        aftSummary = function() private$.items[["aftSummary"]],
+        aftModelInfo = function() private$.items[["aftModelInfo"]],
+        survMetricsHeading = function() private$.items[["survMetricsHeading"]],
+        survMetricsTable = function() private$.items[["survMetricsTable"]],
+        survMetricsSummaryHeading = function() private$.items[["survMetricsSummaryHeading"]],
+        survMetricsSummary = function() private$.items[["survMetricsSummary"]],
+        survMetricsPlot = function() private$.items[["survMetricsPlot"]],
         personTimeHeading = function() private$.items[["personTimeHeading"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
         personTimeSummaryHeading = function() private$.items[["personTimeSummaryHeading"]],
@@ -607,6 +689,176 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="aftModelHeading",
+                title="AFT Model Results (Accelerated Failure Time)",
+                visible="(use_aft)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="aftModelTable",
+                title="AFT Regression Coefficients",
+                visible="(use_aft)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="coefficient", 
+                        `title`="Coefficient", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="time_ratio", 
+                        `title`="Time Ratio", 
+                        `superTitle`="(TR)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="tr_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="tr_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="se", 
+                        `title`="Std Error", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="z_stat", 
+                        `title`="Z", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text", 
+                        `visible`="(aft_show_interpretation)")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "use_aft",
+                    "aft_distribution")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="aftSummaryHeading",
+                title="AFT Model Natural Language Summary",
+                visible="(use_aft && showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aftSummary",
+                title="",
+                visible="(use_aft && showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "use_aft",
+                    "aft_distribution")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aftModelInfo",
+                title="AFT Model Information",
+                visible="(use_aft)",
+                clearWith=list(
+                    "use_aft",
+                    "aft_distribution",
+                    "aft_show_hr_equivalent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survMetricsHeading",
+                title="Model Performance Metrics (SurvMetrics)",
+                visible="(show_survmetrics)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="survMetricsTable",
+                title="Survival Model Performance Metrics",
+                visible="(show_survmetrics)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "show_survmetrics")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survMetricsSummaryHeading",
+                title="Model Performance Summary",
+                visible="(show_survmetrics && showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survMetricsSummary",
+                title="",
+                visible="(show_survmetrics && showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "explanatory",
+                    "contexpl",
+                    "show_survmetrics")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="survMetricsPlot",
+                title="Brier Score Over Time",
+                width=600,
+                height=450,
+                renderFun=".plotSurvMetrics",
+                requiresData=TRUE,
+                visible="(show_survmetrics && survmetrics_show_plots)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "show_survmetrics",
+                    "survmetrics_show_plots")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="personTimeHeading",
@@ -1357,6 +1609,21 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param stratvar Variables used for stratification. When proportional
 #'   hazards are not met, stratification can adjust the model to better fit the
 #'   data by allowing different baseline hazards.
+#' @param use_aft If true, fits an Accelerated Failure Time (AFT) model
+#'   instead of Cox Proportional Hazards. AFT models provide intuitive "Time
+#'   Ratios" (TR) showing how covariates accelerate or decelerate survival time.
+#'   Useful when PH assumption is violated or for more interpretable results
+#'   (e.g., "treatment makes patients live 1.5x longer").
+#' @param aft_distribution Distribution family for survival times in AFT
+#'   model. Weibull is most flexible and can represent both PH and AFT
+#'   frameworks. Log-normal and log-logistic allow non-monotonic hazards. Choice
+#'   should be guided by Kaplan-Meier curve shape and diagnostic plots.
+#' @param aft_show_hr_equivalent If true (and using Weibull distribution),
+#'   shows equivalent Hazard Ratios alongside Time Ratios for comparison with
+#'   Cox model results.
+#' @param aft_show_interpretation If true, adds a column to the AFT results
+#'   table with natural language interpretation of Time Ratios (e.g.,
+#'   "Associated with 50\% longer survival time").
 #' @param person_time Enable this option to calculate and display person-time
 #'   metrics, including total follow-up time and incidence rates. These metrics
 #'   help quantify the rate of events per unit of time in your study population.
@@ -1366,6 +1633,17 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   60+.
 #' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
 #'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param show_survmetrics Calculate comprehensive survival model performance
+#'   metrics using the SurvMetrics package. Includes Concordance Index, Brier
+#'   Score, Integrated Brier Score, and prediction accuracy metrics.
+#' @param survmetrics_timepoints Comma-separated time points at which to
+#'   calculate Brier Score. Should correspond to clinically meaningful follow-up
+#'   times.
+#' @param survmetrics_ibs_points Number of time points to use for calculating
+#'   Integrated Brier Score. More points provide smoother estimates but increase
+#'   computation time.
+#' @param survmetrics_show_plots Generate plots of model performance metrics
+#'   over time (Brier Score, calibration).
 #' @param showExplanations Display detailed explanations for each analysis
 #'   component to help interpret the statistical methods and results.
 #' @param showSummaries Display natural language summaries alongside tables
@@ -1380,6 +1658,16 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aftModelHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$aftModelTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$aftSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$aftSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aftModelInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survMetricsHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survMetricsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survMetricsSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survMetricsSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survMetricsPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1425,9 +1713,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$personTimeTable$asDF}
+#' \code{results$aftModelTable$asDF}
 #'
-#' \code{as.data.frame(results$personTimeTable)}
+#' \code{as.data.frame(results$aftModelTable)}
 #'
 #' @export
 multisurvival <- function(
@@ -1471,9 +1759,17 @@ multisurvival <- function(
     showNomogram = FALSE,
     use_stratify = FALSE,
     stratvar = NULL,
+    use_aft = FALSE,
+    aft_distribution = "weibull",
+    aft_show_hr_equivalent = FALSE,
+    aft_show_interpretation = FALSE,
     person_time = FALSE,
     time_intervals = "12, 36, 60",
     rate_multiplier = 100,
+    show_survmetrics = FALSE,
+    survmetrics_timepoints = "12, 24, 36, 60",
+    survmetrics_ibs_points = 100,
+    survmetrics_show_plots = FALSE,
     showExplanations = FALSE,
     showSummaries = FALSE) {
 
@@ -1544,9 +1840,17 @@ multisurvival <- function(
         showNomogram = showNomogram,
         use_stratify = use_stratify,
         stratvar = stratvar,
+        use_aft = use_aft,
+        aft_distribution = aft_distribution,
+        aft_show_hr_equivalent = aft_show_hr_equivalent,
+        aft_show_interpretation = aft_show_interpretation,
         person_time = person_time,
         time_intervals = time_intervals,
         rate_multiplier = rate_multiplier,
+        show_survmetrics = show_survmetrics,
+        survmetrics_timepoints = survmetrics_timepoints,
+        survmetrics_ibs_points = survmetrics_ibs_points,
+        survmetrics_show_plots = survmetrics_show_plots,
         showExplanations = showExplanations,
         showSummaries = showSummaries)
 

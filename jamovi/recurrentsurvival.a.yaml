@@ -1,6 +1,6 @@
 name: recurrentsurvival
 title: Recurrent Event Survival Analysis
-menuGroup: ClinicoPathD
+menuGroup: OncoPathT
 menuSubgroup: Survival Analysis
 version: '0.0.1'
 jas: '1.2'
@@ -326,3 +326,89 @@ options:
           ui: Maximum iterations for estimation algorithms
           R: |
               Maximum number of algorithm iterations
+
+    # reReg Package Integration ----
+    - name: use_reReg
+      title: Use reReg Package
+      type: Bool
+      default: false
+      description:
+          ui: Use reReg package for advanced recurrent event models
+          R: |
+              Whether to use reReg package for analysis
+
+    - name: reReg_model
+      title: reReg Model Type
+      type: List
+      options:
+          - name: cox_LWYY
+            title: Cox Model (LWYY shared frailty)
+          - name: cox_GL
+            title: Cox Model (Ghosh-Lin)
+          - name: am_GL
+            title: Accelerated Mean (Ghosh-Lin)
+          - name: am_LWYY
+            title: Accelerated Mean (LWYY)
+          - name: sc_XCYH
+            title: Scale-Change (Xu-Chiou-Yan-Huang)
+      default: cox_LWYY
+      description:
+          ui: Statistical model for reReg analysis
+          R: |
+              Model specification for reReg package
+
+    - name: reReg_se
+      title: Standard Error Method
+      type: List
+      options:
+          - name: bootstrap
+            title: Bootstrap
+          - name: sandwich
+            title: Sandwich Estimator
+          - name: model_based
+            title: Model-Based
+      default: bootstrap
+      description:
+          ui: Method for standard error estimation
+          R: |
+              Standard error estimation method for reReg
+
+    - name: reReg_B
+      title: Bootstrap Samples (reReg)
+      type: Integer
+      default: 200
+      min: 50
+      max: 500
+      description:
+          ui: Number of bootstrap samples for reReg
+          R: |
+              Bootstrap samples for reReg variance estimation
+
+    - name: show_event_plot
+      title: Show Event Plot
+      type: Bool
+      default: true
+      description:
+          ui: Generate event plot showing recurrent events over time
+          R: |
+              Whether to show event plot from reReg
+
+    - name: show_mcf_plot
+      title: Show MCF Plot
+      type: Bool
+      default: true
+      description:
+          ui: Generate Mean Cumulative Function plot
+          R: |
+              Whether to show MCF plot from reReg
+
+    - name: event_plot_subjects
+      title: Subjects to Display (Event Plot)
+      type: Integer
+      default: 20
+      min: 5
+      max: 100
+      description:
+          ui: Number of subjects to show in event plot
+          R: |
+              Number of subjects to display in event plot
