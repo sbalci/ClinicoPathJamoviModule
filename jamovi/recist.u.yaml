@@ -1,0 +1,193 @@
+---
+name: recist
+title: RECIST 1.1 Multi-Lesion Aggregation
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    name: variableSupplier
+    suggested:
+      - continuous
+      - nominal
+      - ordinal
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: patientId
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: assessmentTime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: lesionId
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: lesionType
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: lesionDiameter
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: nonTargetStatus
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: organ
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: groupVar
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: CollapseBox
+    label: RECIST 1.1 Criteria
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Target Lesion Selection
+            children:
+              - type: TextBox
+                name: maxTargetLesions
+                format: number
+              - type: TextBox
+                name: maxPerOrgan
+                format: number
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Response Thresholds
+            children:
+              - type: TextBox
+                name: prThreshold
+                format: number
+                suffix: '%'
+              - type: TextBox
+                name: pdThreshold
+                format: number
+                suffix: '%'
+              - type: TextBox
+                name: pdAbsolute
+                format: number
+                suffix: 'mm'
+
+  - type: CollapseBox
+    label: Response Confirmation
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: requireConfirmation
+          - type: TextBox
+            name: confirmationWindow
+            format: number
+            suffix: 'weeks'
+            enable: (requireConfirmation)
+          - type: CheckBox
+            name: nadirReference
+
+  - type: CollapseBox
+    label: Output Tables
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showLesionTable
+          - type: CheckBox
+            name: showTargetSumTable
+          - type: CheckBox
+            name: showResponseTable
+          - type: CheckBox
+            name: showBestResponse
+
+  - type: CollapseBox
+    label: Visualization Options
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showLesionPlot
+          - type: CheckBox
+            name: showSumPlot
+          - type: CheckBox
+            name: showWaterfallPlot
+
+  - type: CollapseBox
+    label: Stratified Analysis
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: stratifiedAnalysis
+            enable: (groupVar)
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showReference
+          - type: CheckBox
+            name: exportLesionData
+
+...

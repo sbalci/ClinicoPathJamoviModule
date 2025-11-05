@@ -5697,6 +5697,45 @@ analyses:
       Fine-Gray subdistribution hazard regression for competing risks data.
       Models the cumulative incidence function (CIF) while accounting for
       competing events. Provides sub-hazard ratios (sHR) for covariate effects.
+  - title: iRECIST Analysis
+    name: irecist
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Response Evaluation
+    menuTitle: iRECIST Analysis
+    menuSubtitle: Immune-related Response Criteria
+    description: >
+      Immune-related Response Evaluation Criteria in Solid Tumors (iRECIST)
+      analysis for assessing tumor response in immunotherapy trials. Implements
+      Seymour et al. (2017) guidelines including pseudoprogression detection and
+      confirmation requirements.
+  - title: RECIST 1.1 Multi-Lesion Aggregation
+    name: recist
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Response Evaluation
+    menuTitle: RECIST 1.1 Multi-Lesion Aggregation
+    menuSubtitle: Automated Best Overall Response
+    description: >
+      Multi-lesion RECIST 1.1 aggregation for automated calculation of target
+      lesion sums and best overall response. Processes individual lesion
+      measurements and applies RECIST 1.1 criteria (Eisenhauer et al., 2009) for
+      response classification.
+  - title: Survival Endpoint Derivation
+    name: survivalendpoints
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalT
+    menuSubgroup: Survival Analysis
+    menuTitle: Survival Endpoint Derivation
+    menuSubtitle: Derive PFS, OS, TTP, DOR from Timeline Data
+    description: >
+      Derives common survival endpoints (PFS, OS, TTP, DOR) from clinical trial
+      timeline data. Automatically calculates time-to-event and event status
+      variables for use in survival analysis. Designed for seamless integration
+      with swimmer/waterfall plot data.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

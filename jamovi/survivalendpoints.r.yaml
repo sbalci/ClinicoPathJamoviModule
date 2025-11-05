@@ -1,0 +1,203 @@
+---
+name: survivalendpoints
+title: Survival Endpoint Derivation
+jrs: '1.1'
+
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: dataInfo
+    title: Data Summary
+    type: Table
+    rows: 0
+    clearWith:
+      - patientId
+      - startDate
+      - lastFollowup
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value
+        type: text
+
+  - name: derivedEndpoints
+    title: Derived Survival Endpoints
+    type: Table
+    visible: (showDerivedData)
+    clearWith:
+      - patientId
+      - startDate
+      - lastFollowup
+      - deathEvent
+      - progressionEvent
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: pfs_time
+        title: PFS Time
+        type: number
+        format: dp:2
+        visible: (calculatePFS)
+      - name: pfs_event
+        title: PFS Event
+        type: integer
+        visible: (calculatePFS)
+      - name: os_time
+        title: OS Time
+        type: number
+        format: dp:2
+        visible: (calculateOS)
+      - name: os_event
+        title: OS Event
+        type: integer
+        visible: (calculateOS)
+      - name: ttp_time
+        title: TTP Time
+        type: number
+        format: dp:2
+        visible: (calculateTTP)
+      - name: ttp_event
+        title: TTP Event
+        type: integer
+        visible: (calculateTTP)
+      - name: dor_time
+        title: DOR Time
+        type: number
+        format: dp:2
+        visible: (calculateDOR)
+      - name: dor_event
+        title: DOR Event
+        type: integer
+        visible: (calculateDOR)
+      - name: tot_time
+        title: Time on Treatment
+        type: number
+        format: dp:2
+        visible: (calculateTOT)
+
+  - name: summaryStats
+    title: Summary Statistics by Endpoint
+    type: Table
+    visible: (showSummaryStats)
+    clearWith:
+      - calculatePFS
+      - calculateOS
+      - calculateTTP
+      - calculateDOR
+    rows: 0
+    columns:
+      - name: endpoint
+        title: Endpoint
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: events
+        title: Events
+        type: integer
+      - name: censored
+        title: Censored
+        type: integer
+      - name: median_time
+        title: Median Time
+        type: number
+        format: dp:2
+      - name: ci_lower
+        title: 95% CI Lower
+        type: number
+        format: dp:2
+      - name: ci_upper
+        title: 95% CI Upper
+        type: number
+        format: dp:2
+
+  - name: eventRates
+    title: Event Rates and Censoring
+    type: Table
+    visible: (showEventRates)
+    clearWith:
+      - calculatePFS
+      - calculateOS
+    rows: 0
+    columns:
+      - name: endpoint
+        title: Endpoint
+        type: text
+      - name: total
+        title: Total Patients
+        type: integer
+      - name: events
+        title: Events
+        type: integer
+      - name: event_rate
+        title: Event Rate (%)
+        type: number
+        format: dp:1
+      - name: censoring_rate
+        title: Censoring Rate (%)
+        type: number
+        format: dp:1
+
+  - name: milestoneTable
+    title: Milestone Survival Analysis
+    type: Table
+    visible: (showMilestones)
+    clearWith:
+      - milestones
+      - calculatePFS
+      - calculateOS
+    rows: 0
+    columns:
+      - name: endpoint
+        title: Endpoint
+        type: text
+      - name: milestone
+        title: Milestone Time
+        type: number
+        format: dp:1
+      - name: survival_prob
+        title: Survival Probability
+        type: number
+        format: dp:3
+      - name: ci_lower
+        title: 95% CI Lower
+        type: number
+        format: dp:3
+      - name: ci_upper
+        title: 95% CI Upper
+        type: number
+        format: dp:3
+      - name: n_at_risk
+        title: N at Risk
+        type: integer
+
+  - name: kmPlot
+    title: Kaplan-Meier Curves
+    type: Image
+    visible: (showKMPlot)
+    renderFun: .kmPlot
+    clearWith:
+      - calculatePFS
+      - calculateOS
+      - calculateTTP
+    width: 700
+    height: 500
+
+  - name: usageGuide
+    title: Usage Guide for Survival Analysis
+    type: Html
+    visible: (showUsageGuide)
+
+  - name: exportMessage
+    title: Export Information
+    type: Html
+    visible: (exportEndpoints)
+
+...

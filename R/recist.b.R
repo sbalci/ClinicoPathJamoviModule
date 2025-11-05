@@ -1,0 +1,778 @@
+#' @title RECIST 1.1 Multi-Lesion Aggregation
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @import ggplot2
+#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag row_number slice
+#' @importFrom tidyr pivot_wider
+#' @importFrom stats binom.test
+#' @export
+
+recistClass <- R6::R6Class(
+    "recistClass",
+    inherit = recistBase,
+    private = list(
+        # Data storage
+        .rawData = NULL,
+        .lesionData = NULL,
+        .targetSumData = NULL,
+        .responseData = NULL,
+        .bestResponseData = NULL,
+        .baselineData = NULL,
+
+        # ---- Initialization ----
+        .init = function() {
+
+            if (is.null(self$options$patientId) ||
+                is.null(self$options$assessmentTime) ||
+                is.null(self$options$lesionId) ||
+                is.null(self$options$lesionType)) {
+
+                self$results$instructions$setContent(
+                    "<h3>Welcome to RECIST 1.1 Multi-Lesion Aggregation</h3>
+                    <p>This module automates the aggregation of individual lesion measurements into
+                    patient-level response assessments per <b>RECIST 1.1</b> criteria.</p>
+
+                    <p><b>Key Features:</b></p>
+                    <ul>
+                    <li><b>Automated Target Lesion Selection:</b> Applies max 5 lesions, max 2 per organ rule</li>
+                    <li><b>Target Lesion Sum Calculation:</b> Automatic aggregation by assessment</li>
+                    <li><b>RECIST Response Classification:</b> CR, PR, SD, PD based on target, non-target, and new lesions</li>
+                    <li><b>Best Overall Response:</b> Automatic BOR calculation with confirmation requirements</li>
+                    <li><b>Lesion Trajectories:</b> Individual lesion plots showing tumor dynamics</li>
+                    <li><b>Waterfall Plot:</b> Best percent change visualization</li>
+                    <li><b>Efficacy Metrics:</b> ORR (CR + PR), DCR (CR + PR + SD)</li>
+                    </ul>
+
+                    <p><b>Required Variables:</b></p>
+                    <ul>
+                    <li><b>Patient ID:</b> Unique patient identifier</li>
+                    <li><b>Assessment Time:</b> Time from baseline</li>
+                    <li><b>Lesion ID:</b> Unique lesion identifier (e.g., L1, L2, Liver_1)</li>
+                    <li><b>Lesion Type:</b> target, non-target, or new</li>
+                    <li><b>Lesion Diameter:</b> Diameter in mm (for target lesions)</li>
+                    </ul>
+
+                    <p><b>Optional Variables:</b></p>
+                    <ul>
+                    <li><b>Non-Target Status:</b> present, absent, or unequivocal PD</li>
+                    <li><b>Organ:</b> Anatomic site (enforces max 2 per organ)</li>
+                    <li><b>Grouping Variable:</b> For stratified analysis</li>
+                    </ul>
+
+                    <p><b>Data Format:</b> Long format with one row per lesion per assessment</p>
+
+                    <p><b>RECIST 1.1 Criteria:</b></p>
+                    <ul>
+                    <li><b>CR:</b> All target lesions disappear</li>
+                    <li><b>PR:</b> ≥30% decrease in target lesion sum from baseline</li>
+                    <li><b>PD:</b> ≥20% increase in sum from nadir + 5mm absolute</li>
+                    <li><b>SD:</b> Neither PR nor PD criteria met</li>
+                    <li><b>Confirmation:</b> CR/PR requires confirmation on ≥2 consecutive scans</li>
+                    </ul>
+
+                    <p><b>Reference:</b> Eisenhauer EA, et al. New response evaluation criteria in solid tumours:
+                    revised RECIST guideline (version 1.1). Eur J Cancer. 2009;45(2):228-247.</p>
+
+                    <p>Select variables to begin analysis.</p>"
+                )
+                return()
+            }
+
+            self$results$lesionTable$setVisible(self$options$showLesionTable)
+            self$results$targetSumTable$setVisible(self$options$showTargetSumTable)
+            self$results$responseTable$setVisible(self$options$showResponseTable)
+            self$results$bestResponseTable$setVisible(self$options$showBestResponse)
+            self$results$lesionPlot$setVisible(self$options$showLesionPlot)
+            self$results$sumPlot$setVisible(self$options$showSumPlot)
+            self$results$waterfallPlot$setVisible(self$options$showWaterfallPlot)
+            self$results$stratifiedTable$setVisible(
+                self$options$stratifiedAnalysis && !is.null(self$options$groupVar)
+            )
+        },
+
+        # ---- Main Analysis ----
+        .run = function() {
+
+            if (is.null(self$options$patientId) ||
+                is.null(self$options$assessmentTime) ||
+                is.null(self$options$lesionId) ||
+                is.null(self$options$lesionType)) {
+                return()
+            }
+
+            tryCatch({
+                private$.prepareData()
+                private$.selectTargetLesions()
+                private$.calculateTargetSums()
+                private$.classifyResponses()
+                private$.calculateBestResponse()
+
+                # Populate results
+                private$.populateDataInfo()
+
+                if (self$options$showLesionTable) {
+                    private$.populateLesionTable()
+                }
+
+                if (self$options$showTargetSumTable) {
+                    private$.populateTargetSumTable()
+                }
+
+                if (self$options$showResponseTable) {
+                    private$.populateResponseTable()
+                }
+
+                if (self$options$showBestResponse) {
+                    private$.populateBestResponseTable()
+                    private$.populateSummaryStats()
+                    private$.populateEfficacyMetrics()
+                }
+
+                private$.populateClinicalInterpretation()
+
+                if (self$options$showReference) {
+                    private$.populateReferenceInfo()
+                }
+
+            }, error = function(e) {
+                self$results$instructions$setContent(
+                    paste0("<div class='error'>",
+                           "<h4>Error in Analysis</h4>",
+                           "<p>", e$message, "</p>",
+                           "<p><b>Common issues:</b></p>",
+                           "<ul>",
+                           "<li>Ensure data is in long format (one row per lesion per assessment)</li>",
+                           "<li>Check lesion type values (should be: target, non-target, new)</li>",
+                           "<li>Verify diameter is numeric for target lesions</li>",
+                           "<li>Ensure each patient has baseline assessment (earliest time)</li>",
+                           "</ul></div>")
+                )
+                stop(e)
+            })
+        },
+
+        # ---- Data Preparation ----
+        .prepareData = function() {
+
+            mydata <- self$data
+
+            patientId <- jmvcore::toB64(self$options$patientId)
+            assessmentTime <- jmvcore::toB64(self$options$assessmentTime)
+            lesionId <- jmvcore::toB64(self$options$lesionId)
+            lesionType <- jmvcore::toB64(self$options$lesionType)
+
+            data <- data.frame(
+                patientId = mydata[[patientId]],
+                assessmentTime = as.numeric(mydata[[assessmentTime]]),
+                lesionId = as.character(mydata[[lesionId]]),
+                lesionType = tolower(as.character(mydata[[lesionType]])),
+                stringsAsFactors = FALSE
+            )
+
+            # Add diameter if provided
+            if (!is.null(self$options$lesionDiameter)) {
+                lesionDiameter <- jmvcore::toB64(self$options$lesionDiameter)
+                data$diameter <- as.numeric(mydata[[lesionDiameter]])
+            } else {
+                data$diameter <- NA
+            }
+
+            # Add organ if provided
+            if (!is.null(self$options$organ)) {
+                organ <- jmvcore::toB64(self$options$organ)
+                data$organ <- as.character(mydata[[organ]])
+            } else {
+                data$organ <- "unknown"
+            }
+
+            # Add non-target status if provided
+            if (!is.null(self$options$nonTargetStatus)) {
+                nonTarget <- jmvcore::toB64(self$options$nonTargetStatus)
+                data$nonTargetStatus <- tolower(as.character(mydata[[nonTarget]]))
+            } else {
+                data$nonTargetStatus <- NA
+            }
+
+            # Sort by patient, time, lesion
+            data <- data[order(data$patientId, data$assessmentTime, data$lesionId), ]
+
+            private$.rawData <- data
+        },
+
+        # ---- Target Lesion Selection ----
+        .selectTargetLesions = function() {
+
+            data <- private$.rawData
+
+            # Mark target lesions for inclusion
+            data$includedInSum <- FALSE
+
+            # Get baseline (first assessment per patient)
+            baseline <- data %>%
+                group_by(patientId) %>%
+                filter(assessmentTime == min(assessmentTime))
+
+            # For each patient at baseline, select target lesions
+            for (pid in unique(baseline$patientId)) {
+                patient_baseline <- baseline %>%
+                    filter(patientId == pid, lesionType == "target") %>%
+                    arrange(desc(diameter))
+
+                if (nrow(patient_baseline) == 0) next
+
+                selected <- character(0)
+                organs_count <- table(character(0))
+
+                for (i in 1:nrow(patient_baseline)) {
+                    lesion <- patient_baseline$lesionId[i]
+                    organ <- patient_baseline$organ[i]
+
+                    # Check rules
+                    if (length(selected) >= self$options$maxTargetLesions) break
+                    if (organs_count[organ] >= self$options$maxPerOrgan) next
+
+                    selected <- c(selected, lesion)
+                    organs_count[organ] <- (organs_count[organ] %||% 0) + 1
+                }
+
+                # Mark these lesions as included across all assessments
+                data$includedInSum[data$patientId == pid & data$lesionId %in% selected] <- TRUE
+            }
+
+            private$.lesionData <- data
+        },
+
+        # ---- Calculate Target Sums ----
+        .calculateTargetSums = function() {
+
+            data <- private$.lesionData
+
+            # Calculate target sum per patient per assessment
+            targetSums <- data %>%
+                filter(includedInSum == TRUE) %>%
+                group_by(patientId, assessmentTime) %>%
+                summarise(
+                    targetSum = sum(diameter, na.rm = TRUE),
+                    numTargetLesions = n(),
+                    .groups = "drop"
+                )
+
+            # Count non-target lesions
+            nonTargetCounts <- data %>%
+                filter(lesionType == "non-target") %>%
+                group_by(patientId, assessmentTime) %>%
+                summarise(numNonTarget = n(), .groups = "drop")
+
+            # Detect new lesions
+            newLesionFlags <- data %>%
+                filter(lesionType == "new") %>%
+                group_by(patientId, assessmentTime) %>%
+                summarise(newLesions = "Yes", .groups = "drop")
+
+            # Merge
+            targetSums <- targetSums %>%
+                left_join(nonTargetCounts, by = c("patientId", "assessmentTime")) %>%
+                left_join(newLesionFlags, by = c("patientId", "assessmentTime")) %>%
+                mutate(
+                    numNonTarget = ifelse(is.na(numNonTarget), 0, numNonTarget),
+                    newLesions = ifelse(is.na(newLesions), "No", newLesions)
+                )
+
+            # Calculate baseline for each patient
+            baseline <- targetSums %>%
+                group_by(patientId) %>%
+                arrange(assessmentTime) %>%
+                filter(row_number() == 1) %>%
+                select(patientId, baselineSum = targetSum, baselineTime = assessmentTime)
+
+            targetSums <- targetSums %>%
+                left_join(baseline, by = "patientId") %>%
+                mutate(changeFromBaseline = ((targetSum - baselineSum) / baselineSum) * 100)
+
+            # Calculate nadir if requested
+            if (self$options$nadirReference) {
+                targetSums <- targetSums %>%
+                    group_by(patientId) %>%
+                    arrange(assessmentTime) %>%
+                    mutate(
+                        nadirSum = cummin(targetSum),
+                        nadirSum = ifelse(assessmentTime == baselineTime, baselineSum, nadirSum),
+                        changeFromNadir = ((targetSum - nadirSum) / nadirSum) * 100,
+                        absoluteChange = targetSum - nadirSum
+                    ) %>%
+                    ungroup()
+            }
+
+            private$.targetSumData <- targetSums
+            private$.baselineData <- baseline
+        },
+
+        # ---- Classify Responses ----
+        .classifyResponses = function() {
+
+            data <- private$.targetSumData
+            lesionData <- private$.lesionData
+
+            prThreshold <- -self$options$prThreshold
+            pdThreshold <- self$options$pdThreshold
+            pdAbsolute <- self$options$pdAbsolute
+
+            # Classify target lesion response
+            data <- data %>%
+                mutate(
+                    targetResponse = case_when(
+                        targetSum == 0 ~ "CR",
+                        changeFromBaseline <= prThreshold ~ "PR",
+                        !is.na(changeFromNadir) & changeFromNadir >= pdThreshold & absoluteChange >= pdAbsolute ~ "PD",
+                        is.na(changeFromNadir) & changeFromBaseline >= pdThreshold & (targetSum - baselineSum) >= pdAbsolute ~ "PD",
+                        TRUE ~ "SD"
+                    )
+                )
+
+            # Classify non-target response
+            nonTargetResponses <- lesionData %>%
+                filter(lesionType == "non-target") %>%
+                group_by(patientId, assessmentTime) %>%
+                summarise(
+                    nonTargetResponse = {
+                        statuses <- tolower(nonTargetStatus)
+                        if (all(statuses %in% c("absent", "disappeared"))) {
+                            "CR"
+                        } else if (any(grepl("pd|progression|unequivocal", statuses))) {
+                            "PD"
+                        } else {
+                            "non-CR/non-PD"
+                        }
+                    },
+                    .groups = "drop"
+                )
+
+            data <- data %>%
+                left_join(nonTargetResponses, by = c("patientId", "assessmentTime")) %>%
+                mutate(
+                    nonTargetResponse = ifelse(is.na(nonTargetResponse), "N/A", nonTargetResponse)
+                )
+
+            # Overall response combining target, non-target, and new lesions
+            data <- data %>%
+                mutate(
+                    overallResponse = case_when(
+                        # New lesions = PD
+                        newLesions == "Yes" ~ "PD",
+
+                        # Non-target PD = PD
+                        nonTargetResponse == "PD" ~ "PD",
+
+                        # Target CR + Non-target CR = CR
+                        targetResponse == "CR" & nonTargetResponse %in% c("CR", "N/A") ~ "CR",
+
+                        # Target PR + Non-target non-PD = PR
+                        targetResponse == "PR" & nonTargetResponse %in% c("CR", "non-CR/non-PD", "N/A") ~ "PR",
+
+                        # Target SD or PR + Non-target non-CR/non-PD = SD
+                        targetResponse %in% c("SD", "PR") & nonTargetResponse == "non-CR/non-PD" ~ "SD",
+
+                        # Target PD = PD
+                        targetResponse == "PD" ~ "PD",
+
+                        # Default SD
+                        TRUE ~ "SD"
+                    ),
+
+                    confirmed = "No"
+                )
+
+            # Apply confirmation logic if required
+            if (self$options$requireConfirmation) {
+                data <- private$.applyConfirmation(data)
+            }
+
+            private$.responseData <- data
+        },
+
+        # ---- Confirmation Logic ----
+        .applyConfirmation = function(data) {
+
+            confirmWindow <- self$options$confirmationWindow
+
+            data <- data %>%
+                group_by(patientId) %>%
+                arrange(assessmentTime) %>%
+                mutate(
+                    nextTime = lead(assessmentTime),
+                    nextResponse = lead(overallResponse),
+                    timeDiff = nextTime - assessmentTime,
+
+                    confirmed = case_when(
+                        overallResponse %in% c("CR", "PR") &
+                            !is.na(nextResponse) &
+                            nextResponse == overallResponse &
+                            timeDiff >= confirmWindow ~ "Yes",
+
+                        overallResponse %in% c("CR", "PR") ~ "Pending",
+
+                        TRUE ~ "-"
+                    )
+                ) %>%
+                ungroup()
+
+            return(data)
+        },
+
+        # ---- Best Overall Response ----
+        .calculateBestResponse = function() {
+
+            data <- private$.responseData
+
+            # Response hierarchy: CR > PR > SD > PD
+            bestResponse <- data %>%
+                group_by(patientId) %>%
+                arrange(assessmentTime) %>%
+                summarise(
+                    bestResponse = {
+                        responses <- overallResponse
+                        if (self$options$requireConfirmation) {
+                            # Only count confirmed CR/PR
+                            responses_confirmed <- overallResponse[confirmed == "Yes" | !overallResponse %in% c("CR", "PR")]
+                        } else {
+                            responses_confirmed <- responses
+                        }
+
+                        if ("CR" %in% responses_confirmed) {
+                            "CR"
+                        } else if ("PR" %in% responses_confirmed) {
+                            "PR"
+                        } else if ("SD" %in% responses_confirmed) {
+                            "SD"
+                        } else {
+                            "PD"
+                        }
+                    },
+
+                    timeToResponse = {
+                        idx <- which(overallResponse %in% c("CR", "PR"))
+                        if (length(idx) > 0) assessmentTime[idx[1]] else NA
+                    },
+
+                    confirmed = {
+                        if (bestResponse %in% c("CR", "PR") && self$options$requireConfirmation) {
+                            if (any(confirmed == "Yes" & overallResponse == bestResponse)) "Yes" else "No"
+                        } else {
+                            "-"
+                        }
+                    },
+
+                    nadirSum = min(targetSum),
+                    bestPercentChange = min(changeFromBaseline),
+
+                    .groups = "drop"
+                )
+
+            private$.bestResponseData <- bestResponse
+        },
+
+        # ---- Populate Results ----
+        .populateDataInfo = function() {
+
+            table <- self$results$dataInfo
+            data <- private$.rawData
+
+            nPatients <- length(unique(data$patientId))
+            nLesions <- length(unique(data$lesionId))
+            nAssessments <- length(unique(data$assessmentTime))
+
+            targetLesions <- sum(private$.lesionData$includedInSum & private$.lesionData$lesionType == "target")
+            targetLesionsUnique <- length(unique(private$.lesionData$lesionId[private$.lesionData$includedInSum == TRUE]))
+
+            rows <- list(
+                list(metric = "Total Patients", value = as.character(nPatients)),
+                list(metric = "Total Lesions", value = as.character(nLesions)),
+                list(metric = "Target Lesions Selected", value = as.character(targetLesionsUnique)),
+                list(metric = "Number of Assessments", value = as.character(nAssessments))
+            )
+
+            for (row in rows) {
+                table$addRow(rowKey = row$metric, values = row)
+            }
+        },
+
+        .populateLesionTable = function() {
+
+            table <- self$results$lesionTable
+            data <- private$.lesionData
+
+            for (i in 1:min(500, nrow(data))) {  # Limit to 500 rows
+                row <- list(
+                    patientId = as.character(data$patientId[i]),
+                    assessmentTime = data$assessmentTime[i],
+                    lesionId = data$lesionId[i],
+                    lesionType = data$lesionType[i],
+                    diameter = if (!is.na(data$diameter[i])) data$diameter[i] else NA,
+                    organ = data$organ[i],
+                    included = if (data$includedInSum[i]) "Yes" else "No"
+                )
+
+                table$addRow(rowKey = i, values = row)
+            }
+        },
+
+        .populateTargetSumTable = function() {
+
+            table <- self$results$targetSumTable
+            data <- private$.targetSumData
+
+            for (i in 1:nrow(data)) {
+                row <- list(
+                    patientId = as.character(data$patientId[i]),
+                    assessmentTime = data$assessmentTime[i],
+                    targetSum = data$targetSum[i],
+                    changeFromBaseline = data$changeFromBaseline[i],
+                    changeFromNadir = if (!is.na(data$changeFromNadir[i])) data$changeFromNadir[i] else NA,
+                    numTargetLesions = as.integer(data$numTargetLesions[i]),
+                    numNonTarget = as.integer(data$numNonTarget[i]),
+                    newLesions = data$newLesions[i]
+                )
+
+                table$addRow(rowKey = i, values = row)
+            }
+        },
+
+        .populateResponseTable = function() {
+
+            table <- self$results$responseTable
+            data <- private$.responseData
+
+            for (i in 1:nrow(data)) {
+                row <- list(
+                    patientId = as.character(data$patientId[i]),
+                    assessmentTime = data$assessmentTime[i],
+                    targetResponse = data$targetResponse[i],
+                    nonTargetResponse = data$nonTargetResponse[i],
+                    newLesions = data$newLesions[i],
+                    overallResponse = data$overallResponse[i],
+                    confirmed = data$confirmed[i]
+                )
+
+                table$addRow(rowKey = i, values = row)
+            }
+        },
+
+        .populateBestResponseTable = function() {
+
+            table <- self$results$bestResponseTable
+            data <- private$.bestResponseData
+
+            for (i in 1:nrow(data)) {
+                row <- list(
+                    patientId = as.character(data$patientId[i]),
+                    bestResponse = data$bestResponse[i],
+                    timeToResponse = if (!is.na(data$timeToResponse[i])) data$timeToResponse[i] else NA,
+                    confirmed = data$confirmed[i],
+                    nadirSum = data$nadirSum[i],
+                    bestPercentChange = data$bestPercentChange[i]
+                )
+
+                table$addRow(rowKey = i, values = row)
+            }
+        },
+
+        .populateSummaryStats = function() {
+
+            table <- self$results$summaryStats
+            data <- private$.bestResponseData
+
+            responseCounts <- table(data$bestResponse)
+            total <- nrow(data)
+
+            for (category in names(responseCounts)) {
+                n <- responseCounts[category]
+                percent <- (n / total) * 100
+                ci <- binom.test(n, total)$conf.int
+
+                row <- list(
+                    category = category,
+                    n = as.integer(n),
+                    percent = percent,
+                    ci_lower = ci[1] * 100,
+                    ci_upper = ci[2] * 100
+                )
+
+                table$addRow(rowKey = category, values = row)
+            }
+        },
+
+        .populateEfficacyMetrics = function() {
+
+            table <- self$results$efficacyMetrics
+            data <- private$.bestResponseData
+
+            total <- nrow(data)
+
+            # ORR
+            n_orr <- sum(data$bestResponse %in% c("CR", "PR"))
+            orr <- (n_orr / total) * 100
+            ci_orr <- binom.test(n_orr, total)$conf.int
+
+            table$addRow(rowKey = "ORR", values = list(
+                metric = "Objective Response Rate (ORR)",
+                value = orr,
+                n = as.integer(n_orr),
+                total = as.integer(total),
+                ci_lower = ci_orr[1] * 100,
+                ci_upper = ci_orr[2] * 100
+            ))
+
+            # DCR
+            n_dcr <- sum(data$bestResponse %in% c("CR", "PR", "SD"))
+            dcr <- (n_dcr / total) * 100
+            ci_dcr <- binom.test(n_dcr, total)$conf.int
+
+            table$addRow(rowKey = "DCR", values = list(
+                metric = "Disease Control Rate (DCR)",
+                value = dcr,
+                n = as.integer(n_dcr),
+                total = as.integer(total),
+                ci_lower = ci_dcr[1] * 100,
+                ci_upper = ci_dcr[2] * 100
+            ))
+        },
+
+        .populateClinicalInterpretation = function() {
+
+            data <- private$.bestResponseData
+
+            if (is.null(data) || nrow(data) == 0) return()
+
+            total <- nrow(data)
+            n_orr <- sum(data$bestResponse %in% c("CR", "PR"))
+            n_dcr <- sum(data$bestResponse %in% c("CR", "PR", "SD"))
+
+            orr <- round((n_orr / total) * 100, 1)
+            dcr <- round((n_dcr / total) * 100, 1)
+
+            html <- paste0(
+                "<h4>Clinical Interpretation</h4>",
+                "<p><b>Efficacy Summary:</b></p>",
+                "<ul>",
+                "<li><b>Objective Response Rate (ORR):</b> ", orr, "% (", n_orr, "/", total, " patients)</li>",
+                "<li><b>Disease Control Rate (DCR):</b> ", dcr, "% (", n_dcr, "/", total, " patients)</li>",
+                "</ul>",
+
+                "<p><b>RECIST 1.1 Response Definitions:</b></p>",
+                "<ul>",
+                "<li><b>CR (Complete Response):</b> Disappearance of all target lesions + all non-target lesions</li>",
+                "<li><b>PR (Partial Response):</b> ≥30% decrease in target lesion sum from baseline</li>",
+                "<li><b>SD (Stable Disease):</b> Neither PR nor PD criteria met</li>",
+                "<li><b>PD (Progressive Disease):</b> ≥20% increase in sum from nadir + 5mm, OR new lesions, OR unequivocal non-target PD</li>",
+                "</ul>"
+            )
+
+            self$results$clinicalInterpretation$setContent(html)
+        },
+
+        .populateReferenceInfo = function() {
+
+            html <- paste0(
+                "<h4>RECIST 1.1 Guidelines Reference</h4>",
+                "<p><b>Citation:</b> Eisenhauer EA, Therasse P, Bogaerts J, et al. ",
+                "New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1). ",
+                "<i>Eur J Cancer</i>. 2009;45(2):228-247.</p>",
+
+                "<p><b>Target Lesion Selection Rules:</b></p>",
+                "<ul>",
+                "<li>Maximum ", self$options$maxTargetLesions, " target lesions total</li>",
+                "<li>Maximum ", self$options$maxPerOrgan, " target lesions per organ</li>",
+                "<li>Select largest measurable lesions at baseline</li>",
+                "<li>Must be ≥10mm by CT (≥20mm by chest X-ray)</li>",
+                "</ul>",
+
+                "<p><b>Response Thresholds:</b></p>",
+                "<ul>",
+                "<li><b>PR:</b> ", self$options$prThreshold, "% decrease from baseline</li>",
+                "<li><b>PD:</b> ", self$options$pdThreshold, "% increase from nadir + ",
+                self$options$pdAbsolute, "mm absolute</li>",
+                "<li><b>Confirmation:</b> CR/PR requires ≥", self$options$confirmationWindow, " weeks between assessments</li>",
+                "</ul>"
+            )
+
+            self$results$referenceInfo$setContent(html)
+        },
+
+        # ---- Plotting Functions ----
+        .lesionPlot = function(image, ggtheme, theme, ...) {
+
+            if (is.null(private$.lesionData)) return()
+
+            data <- private$.lesionData %>%
+                filter(includedInSum == TRUE, lesionType == "target")
+
+            if (nrow(data) == 0) return()
+
+            p <- ggplot(data, aes(x = assessmentTime, y = diameter, group = lesionId, color = patientId)) +
+                geom_line(alpha = 0.6) +
+                geom_point(alpha = 0.6, size = 2) +
+                labs(
+                    title = "Individual Target Lesion Trajectories",
+                    x = "Time from Baseline",
+                    y = "Lesion Diameter (mm)"
+                ) +
+                theme_minimal() +
+                theme(legend.position = "none")
+
+            print(p)
+            TRUE
+        },
+
+        .sumPlot = function(image, ggtheme, theme, ...) {
+
+            if (is.null(private$.targetSumData)) return()
+
+            data <- private$.targetSumData
+
+            p <- ggplot(data, aes(x = assessmentTime, y = targetSum, group = patientId)) +
+                geom_line(alpha = 0.6, color = "steelblue") +
+                geom_point(alpha = 0.6, size = 2) +
+                labs(
+                    title = "Target Lesion Sum Over Time",
+                    x = "Time from Baseline",
+                    y = "Target Lesion Sum (mm)"
+                ) +
+                theme_minimal()
+
+            print(p)
+            TRUE
+        },
+
+        .waterfallPlot = function(image, ggtheme, theme, ...) {
+
+            if (is.null(private$.bestResponseData)) return()
+
+            data <- private$.bestResponseData %>%
+                arrange(bestPercentChange) %>%
+                mutate(patientOrder = row_number())
+
+            colors <- c("CR" = "#00AA00", "PR" = "#66BB66", "SD" = "#FFDD00", "PD" = "#DD0000")
+
+            p <- ggplot(data, aes(x = patientOrder, y = bestPercentChange, fill = bestResponse)) +
+                geom_bar(stat = "identity", width = 0.8) +
+                geom_hline(yintercept = 0, linetype = "solid", color = "black") +
+                geom_hline(yintercept = -30, linetype = "dashed", color = "blue", alpha = 0.5) +
+                geom_hline(yintercept = 20, linetype = "dashed", color = "red", alpha = 0.5) +
+                scale_fill_manual(values = colors, name = "Best Response") +
+                labs(
+                    title = "Waterfall Plot - Best Percent Change from Baseline",
+                    x = "Patients (ordered by response)",
+                    y = "Best % Change from Baseline"
+                ) +
+                theme_minimal() +
+                theme(
+                    axis.text.x = element_blank(),
+                    axis.ticks.x = element_blank(),
+                    legend.position = "right"
+                )
+
+            print(p)
+            TRUE
+        }
+    )
+)

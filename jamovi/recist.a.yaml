@@ -1,0 +1,296 @@
+---
+name: recist
+title: RECIST 1.1 Multi-Lesion Aggregation
+menuGroup: OncoPathT
+menuSubgroup: Response Evaluation
+menuSubtitle: Automated Best Overall Response
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Multi-lesion RECIST 1.1 aggregation for automated calculation of target
+        lesion sums and best overall response. Processes individual lesion measurements
+        and applies RECIST 1.1 criteria (Eisenhauer et al., 2009) for response classification.
+    R:
+        dontrun: false
+        usage: |
+            data <- data.frame(
+                patient = rep(c("P01", "P02"), each = 6),
+                time = rep(c(0, 8, 16), 4),
+                lesion = rep(c("L1", "L2"), each = 3, times = 2),
+                lesion_type = "target",
+                diameter = c(25, 15, 12, 20, 10, 8, 30, 35, 40, 22, 20, 18)
+            )
+
+            recist(
+                data = data,
+                patientId = "patient",
+                assessmentTime = "time",
+                lesionId = "lesion",
+                lesionType = "lesion_type",
+                lesionDiameter = "diameter"
+            )
+
+completeWhenFilled: false
+
+formula:
+  patientId:
+    from: lhs
+    required: true
+  assessmentTime:
+    from: rhs
+    subset: 1
+  lesionId:
+    from: rhs
+    subset: 2
+  lesionType:
+    from: rhs
+    subset: 3
+  lesionDiameter:
+    from: rhs
+    subset: 4
+
+options:
+  - name: data
+    type: Data
+    description:
+      R: the data as a data frame
+
+  # Core Variables
+  - name: patientId
+    title: Patient ID
+    type: Variable
+    required: true
+    description:
+      R: >
+        Patient identifier variable
+
+  - name: assessmentTime
+    title: Assessment Time
+    type: Variable
+    required: true
+    suggested:
+      - continuous
+    description:
+      R: >
+        Time from baseline (weeks or months)
+
+  - name: lesionId
+    title: Lesion ID
+    type: Variable
+    required: true
+    description:
+      R: >
+        Unique lesion identifier
+
+  - name: lesionType
+    title: Lesion Type
+    type: Variable
+    required: true
+    suggested:
+      - nominal
+    description:
+      R: >
+        Lesion type (target, non-target, new)
+
+  - name: lesionDiameter
+    title: Lesion Diameter (mm)
+    type: Variable
+    suggested:
+      - continuous
+    description:
+      R: >
+        Lesion diameter in millimeters (for target lesions)
+
+  - name: nonTargetStatus
+    title: Non-Target Status
+    type: Variable
+    suggested:
+      - nominal
+    description:
+      R: >
+        Non-target lesion status (present, absent, unequivocal PD)
+
+  # Optional Variables
+  - name: organ
+    title: Organ Site
+    type: Variable
+    suggested:
+      - nominal
+    description:
+      R: >
+        Organ location (for max 2 per organ rule)
+
+  # RECIST Configuration
+  - name: maxTargetLesions
+    title: Maximum Target Lesions
+    type: Number
+    min: 1
+    max: 10
+    default: 5
+    description:
+      R: >
+        Maximum number of target lesions (default: 5 per RECIST 1.1)
+
+  - name: maxPerOrgan
+    title: Maximum Per Organ
+    type: Number
+    min: 1
+    max: 5
+    default: 2
+    description:
+      R: >
+        Maximum target lesions per organ (default: 2 per RECIST 1.1)
+
+  - name: prThreshold
+    title: PR Threshold (%)
+    type: Number
+    min: 0
+    max: 100
+    default: 30
+    description:
+      R: >
+        Percent decrease for partial response (default: 30%)
+
+  - name: pdThreshold
+    title: PD Threshold (%)
+    type: Number
+    min: 0
+    max: 100
+    default: 20
+    description:
+      R: >
+        Percent increase for progressive disease (default: 20%)
+
+  - name: pdAbsolute
+    title: PD Absolute Increase (mm)
+    type: Number
+    min: 0
+    max: 20
+    default: 5
+    description:
+      R: >
+        Absolute increase required for PD (default: 5mm)
+
+  # Analysis Options
+  - name: requireConfirmation
+    title: Require Response Confirmation
+    type: Bool
+    default: true
+    description:
+      R: >
+        Require 2 consecutive assessments for CR/PR
+
+  - name: confirmationWindow
+    title: Min Confirmation Interval (weeks)
+    type: Number
+    min: 2
+    max: 12
+    default: 4
+    description:
+      R: >
+        Minimum weeks between confirmation assessments
+
+  - name: nadirReference
+    title: Use Nadir for PD
+    type: Bool
+    default: true
+    description:
+      R: >
+        Use nadir (lowest) sum as reference for PD calculation
+
+  # Output Options
+  - name: showLesionTable
+    title: Lesion-Level Data
+    type: Bool
+    default: true
+    description:
+      R: >
+        Show individual lesion measurements
+
+  - name: showTargetSumTable
+    title: Target Lesion Sum Table
+    type: Bool
+    default: true
+    description:
+      R: >
+        Show aggregated target lesion sums by assessment
+
+  - name: showResponseTable
+    title: Response Classification Table
+    type: Bool
+    default: true
+    description:
+      R: >
+        Show RECIST response categories per assessment
+
+  - name: showBestResponse
+    title: Best Overall Response
+    type: Bool
+    default: true
+    description:
+      R: >
+        Calculate best overall response per patient
+
+  - name: showLesionPlot
+    title: Lesion Trajectory Plot
+    type: Bool
+    default: true
+    description:
+      R: >
+        Plot individual lesion sizes over time
+
+  - name: showSumPlot
+    title: Target Sum Plot
+    type: Bool
+    default: true
+    description:
+      R: >
+        Plot target lesion sum over time
+
+  - name: showWaterfallPlot
+    title: Waterfall Plot
+    type: Bool
+    default: true
+    description:
+      R: >
+        Waterfall plot of best percent change
+
+  # Grouping
+  - name: groupVar
+    title: Grouping Variable
+    type: Variable
+    suggested:
+      - nominal
+      - ordinal
+    description:
+      R: >
+        Grouping variable for stratified analysis
+
+  - name: stratifiedAnalysis
+    title: Stratified Analysis
+    type: Bool
+    default: false
+    description:
+      R: >
+        Perform stratified analysis by group
+
+  # Advanced Options
+  - name: exportLesionData
+    title: Export Lesion Data
+    type: Bool
+    default: false
+    description:
+      R: >
+        Export processed lesion-level data to CSV
+
+  - name: showReference
+    title: Show RECIST Reference
+    type: Bool
+    default: true
+    description:
+      R: >
+        Display RECIST 1.1 guidelines reference
+
+...

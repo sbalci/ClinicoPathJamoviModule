@@ -1,0 +1,314 @@
+---
+name: irecist
+title: iRECIST Analysis
+jrs: '1.0'
+
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: dataInfo
+    title: Data Summary
+    type: Table
+    rows: 0
+    clearWith:
+      - patientId
+      - assessmentTime
+      - targetLesionSum
+      - newLesions
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value
+        type: text
+
+  - name: responseTable
+    title: iRECIST Response Classifications
+    type: Table
+    visible: (showResponseTable)
+    clearWith:
+      - patientId
+      - assessmentTime
+      - targetLesionSum
+      - newLesions
+      - nonTargetStatus
+      - confirmationWindow
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: assessmentTime
+        title: Assessment Time
+        type: number
+        format: dp:1
+      - name: targetSum
+        title: Target Sum (mm)
+        type: number
+        format: dp:1
+      - name: changeFromBaseline
+        title: Change from Baseline (%)
+        type: number
+        format: dp:1
+      - name: changeFromNadir
+        title: Change from Nadir (%)
+        type: number
+        format: dp:1
+      - name: newLesions
+        title: New Lesions
+        type: text
+      - name: irecistCategory
+        title: iRECIST Category
+        type: text
+      - name: confirmed
+        title: Confirmed
+        type: text
+      - name: notes
+        title: Notes
+        type: text
+
+  - name: bestResponseTable
+    title: Best Overall Response by Patient
+    type: Table
+    visible: (showBestResponse)
+    clearWith:
+      - patientId
+      - assessmentTime
+      - targetLesionSum
+      - newLesions
+      - nonTargetStatus
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: bestResponse
+        title: Best Overall Response
+        type: text
+      - name: timeToResponse
+        title: Time to Response
+        type: number
+        format: dp:1
+      - name: confirmed
+        title: Confirmed
+        type: text
+      - name: hadPseudoprogression
+        title: Pseudoprogression
+        type: text
+      - name: timeToCPD
+        title: Time to iCPD
+        type: number
+        format: dp:1
+
+  - name: summaryStats
+    title: Summary Statistics
+    type: Table
+    rows: 0
+    clearWith:
+      - patientId
+      - assessmentTime
+      - targetLesionSum
+      - newLesions
+      - showBestResponse
+    columns:
+      - name: category
+        title: Response Category
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: percent
+        title: Percent
+        type: number
+        format: dp:1
+      - name: ci_lower
+        title: 95% CI Lower
+        type: number
+        format: dp:1
+      - name: ci_upper
+        title: 95% CI Upper
+        type: number
+        format: dp:1
+
+  - name: efficacyMetrics
+    title: Efficacy Metrics
+    type: Table
+    visible: (calculateORR)
+    rows: 0
+    clearWith:
+      - patientId
+      - calculateORR
+      - calculateDCR
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value
+        type: number
+        format: dp:1
+      - name: n
+        title: N
+        type: integer
+      - name: total
+        title: Total
+        type: integer
+      - name: ci_lower
+        title: 95% CI Lower
+        type: number
+        format: dp:1
+      - name: ci_upper
+        title: 95% CI Upper
+        type: number
+        format: dp:1
+
+  - name: pseudoprogressionTable
+    title: Pseudoprogression Analysis
+    type: Table
+    visible: (trackPseudoprogression && showPseudoprogressionRate)
+    clearWith:
+      - patientId
+      - trackPseudoprogression
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: iupdTime
+        title: iUPD Time
+        type: number
+        format: dp:1
+      - name: confirmationTime
+        title: Confirmation Time
+        type: number
+        format: dp:1
+      - name: outcome
+        title: Outcome
+        type: text
+      - name: subsequentResponse
+        title: Subsequent Response
+        type: text
+
+  - name: waterfallPlot
+    title: Waterfall Plot (Best Response)
+    type: Image
+    visible: (showWaterfallPlot)
+    renderFun: .waterfallPlot
+    clearWith:
+      - patientId
+      - targetLesionSum
+      - showWaterfallPlot
+      - groupVar
+    width: 600
+    height: 500
+
+  - name: swimmerPlot
+    title: Swimmer Plot (Treatment Duration & Response)
+    type: Image
+    visible: (showSwimmerPlot)
+    renderFun: .swimmerPlot
+    clearWith:
+      - patientId
+      - assessmentTime
+      - showSwimmerPlot
+      - trackPseudoprogression
+    width: 800
+    height: 600
+
+  - name: spiderPlot
+    title: Spider Plot (Tumor Size Over Time)
+    type: Image
+    visible: (showSpiderPlot)
+    renderFun: .spiderPlot
+    clearWith:
+      - patientId
+      - assessmentTime
+      - targetLesionSum
+      - showSpiderPlot
+    width: 700
+    height: 500
+
+  - name: timeToCPDPlot
+    title: Time to Confirmed Progressive Disease (iCPD)
+    type: Image
+    visible: (showTimeToCPD)
+    renderFun: .timeToCPDPlot
+    clearWith:
+      - patientId
+      - assessmentTime
+      - showTimeToCPD
+      - groupVar
+    width: 700
+    height: 500
+
+  - name: timelinePlot
+    title: Detailed Response Timeline
+    type: Image
+    visible: (showDetailedTimeline)
+    renderFun: .timelinePlot
+    clearWith:
+      - patientId
+      - assessmentTime
+      - showDetailedTimeline
+    width: 900
+    height: 600
+
+  - name: stratifiedTable
+    title: Stratified Analysis by Group
+    type: Table
+    visible: (stratifiedAnalysis && groupVar)
+    clearWith:
+      - groupVar
+      - stratifiedAnalysis
+    rows: 0
+    columns:
+      - name: group
+        title: Group
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: iCR
+        title: iCR (%)
+        type: number
+        format: dp:1
+      - name: iPR
+        title: iPR (%)
+        type: number
+        format: dp:1
+      - name: iSD
+        title: iSD (%)
+        type: number
+        format: dp:1
+      - name: iCPD
+        title: iCPD (%)
+        type: number
+        format: dp:1
+      - name: orr
+        title: ORR (%)
+        type: number
+        format: dp:1
+      - name: dcr
+        title: DCR (%)
+        type: number
+        format: dp:1
+      - name: pseudoprogression_rate
+        title: Pseudoprogression Rate (%)
+        type: number
+        format: dp:1
+
+  - name: clinicalInterpretation
+    title: Clinical Interpretation
+    type: Html
+    visible: true
+
+  - name: referenceInfo
+    title: Reference Information
+    type: Html
+    visible: (showReference)
+
+...

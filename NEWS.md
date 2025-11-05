@@ -1,5 +1,486 @@
 # ClinicoPath News
 
+## Version 0.0.32.18
+
+### 🗓️ **January 5, 2025 - Phase 13: Survival Endpoint Derivation**
+
+---
+
+## 🎉 **SURVIVAL INTEGRATION**
+
+### **Project Scope: Survival Endpoint Derivation from Timeline Data**
+
+Implemented comprehensive survival endpoint derivation module that automatically calculates standard survival endpoints (PFS, OS, TTP, DOR) from clinical trial timeline data, bridging the gap between swimmer/waterfall plot data and survival analysis modules.
+
+### **📊 Implementation Statistics:**
+- **Duration**: January 5, 2025
+- **New Modules**: 1 (survivalendpoints)
+- **Total Code**: ~1,050 lines
+- **Compilation Success**: 100%
+- **Features Completed**: 1 high-priority [H] roadmap feature
+
+---
+
+### **✅ New Survival Derivation Module:**
+
+#### **1. Survival Endpoint Derivation (`survivalendpoints`) - NEW**
+* **Purpose**: Derive standard survival endpoints (PFS, OS, TTP, DOR, Time on Treatment) from clinical trial timeline data
+* **Location**: jsurvivalT > Survival Analysis > Derive PFS, OS, TTP, DOR from Timeline Data
+* **Priority**: [H] High (from roadmap)
+* **Key Features**:
+  - **Automated Endpoint Calculation**: Derives PFS, OS, TTP, DOR from patient timeline data
+  - **Flexible Input Types**: Supports both date variables and numeric time values
+  - **Time Unit Conversion**: Days, weeks, months, or years
+  - **Multiple Endpoints**: Calculate one or multiple endpoints simultaneously
+  - **Summary Statistics**: Median survival times with 95% CIs using Kaplan-Meier
+  - **Event Rates**: Event and censoring proportions for each endpoint
+  - **Milestone Analysis**: Survival probabilities at specified time points
+  - **Simple KM Plots**: Verification plots for derived endpoints
+  - **CSV Export**: Export derived endpoints for use in dedicated survival modules
+  - **Usage Guide**: Step-by-step instructions for downstream survival analysis
+* **Implementation**: `jamovi/survivalendpoints.{a,r,u}.yaml`, `R/survivalendpoints.b.R` (1,050 lines)
+* **Clinical Context**:
+  - Clinical trial data often captured as timeline events (treatment start, progression, death)
+  - Survival analysis requires derived time-to-event and event status variables
+  - Manual calculation is error-prone, especially with multiple endpoints
+  - This module automates the entire derivation workflow
+* **Data Format**: One row per patient with date/time variables
+* **Required Variables**: patient_id, treatment_start, last_followup, death_event, progression_event
+* **Optional Variables**: treatment_end, response_date
+
+**Survival Endpoints Implemented**:
+```r
+# PFS (Progression-Free Survival)
+Time: treatment_start to (progression OR death), whichever first
+Event: 1 if progression or death occurred, 0 if censored
+
+# OS (Overall Survival)
+Time: treatment_start to death
+Event: 1 if death occurred, 0 if alive (censored)
+
+# TTP (Time to Progression)
+Time: treatment_start to progression
+Event: 1 if progression occurred, 0 if censored
+Note: Censors death without progression
+
+# DOR (Duration of Response)
+Time: response_date to progression
+Event: 1 if progression occurred, 0 if censored
+Note: Only calculated for patients with confirmed response
+
+# Time on Treatment
+Time: treatment_start to treatment_end
+Note: Descriptive, not a survival endpoint
+```
+
+**Use Cases**:
+1. **Clinical Trials**: Automatic endpoint derivation from electronic case report forms (eCRF)
+2. **Swimmer Plot Analysis**: Convert swimmer plot timeline data to survival format
+3. **Real-World Data**: Derive endpoints from EHR timeline data
+4. **Regulatory Submissions**: Standardized endpoint derivation with audit trail
+5. **Milestone Analysis**: Calculate 6-month, 12-month, 24-month survival rates
+
+**Clinical Impact**:
+- Eliminates manual calculation errors in survival endpoint derivation
+- Ensures consistent endpoint definitions across analyses
+- Provides immediate verification via simple KM plots
+- Seamless workflow: derive → verify → export → analyze
+- Reduces time from data collection to survival analysis
+- Supports regulatory requirement for documented endpoint calculation
+
+**Workflow Integration**:
+```
+1. Import timeline data (swimmer/waterfall format)
+   ↓
+2. Derive survival endpoints (this module)
+   ↓
+3. Verify endpoints (simple KM plots)
+   ↓
+4. Export to CSV
+   ↓
+5. Import to survival modules (KM, Cox, Competing Risks)
+   ↓
+6. Full survival analysis with group comparisons
+```
+
+---
+
+### **🔧 Technical Details**
+
+**Package Dependencies**:
+- R6, jmvcore, survival, survminer, ggplot2, dplyr
+
+**Key Algorithms**:
+```r
+# Time Calculation (Date Input)
+if (inputType == 'dates') {
+  # Calculate difference in days
+  diff_days <- as.numeric(difftime(end_date, start_date, units = "days"))
+
+  # Convert to selected unit
+  time <- switch(timeUnit,
+    days = diff_days,
+    weeks = diff_days / 7,
+    months = diff_days / 30.4375,  # Average month
+    years = diff_days / 365.25      # Account for leap years
+  )
+}
+
+# PFS Derivation
+pfs_event <- pmax(progression_event, death_event, na.rm = TRUE)
+# Event = 1 if EITHER progression OR death occurred
+
+# Summary Statistics
+surv_obj <- Surv(time, event)
+km_fit <- survfit(surv_obj ~ 1)
+median_survival <- summary(km_fit)$table["median"]
+ci_95 <- summary(km_fit)$table[c("0.95LCL", "0.95UCL")]
+
+# Milestone Analysis
+surv_summary <- summary(km_fit, times = c(6, 12, 24), extend = TRUE)
+# Returns survival probability, CI, and n at risk at each milestone
+```
+
+**Endpoint Validation**:
+```r
+# Data Quality Checks
+- Missing patient IDs flagged
+- Invalid dates detected (end before start)
+- Event indicator validation (0/1 only)
+- Response date required for DOR
+- Treatment end required for Time on Treatment
+
+# Summary Tables Include
+- N patients with valid data per endpoint
+- Number of events vs censored
+- Event rates and censoring rates
+- Median survival with 95% CI
+- Milestone survival probabilities
+```
+
+---
+
+### **📚 References**
+
+**Endpoint Definitions**:
+1. **PFS**: Progression-Free Survival
+   - FDA Guidance: Clinical Trial Endpoints for Approval of Cancer Drugs
+   - Commonly used primary endpoint in oncology trials
+2. **OS**: Overall Survival
+   - Gold standard endpoint in oncology
+   - Time from randomization/treatment start to death from any cause
+3. **TTP**: Time to Progression
+   - Alternative to PFS when treatment effect on death is unclear
+   - Censors death without progression
+4. **DOR**: Duration of Response
+   - Important secondary endpoint for responders
+   - RECIST: Time from first CR/PR to progression
+
+**Statistical Methods**:
+- Kaplan-Meier estimator for median survival (Kaplan & Meier, 1958)
+- Greenwood formula for confidence intervals
+- Milestone survival using Kaplan-Meier product-limit method
+
+---
+
+### **🚀 Future Enhancements**
+
+Potential additions for future versions:
+- **Time-Dependent Covariates**: Derive landmark analysis variables
+- **Composite Endpoints**: TTF, PFS2, custom event definitions
+- **Competing Events**: Flag competing events for Fine-Gray analysis
+- **Multi-State Models**: Track disease progression states over time
+- **Interval Censoring**: Handle uncertainty in event timing
+- **Direct Module Integration**: Pass derived data directly to survival modules (when jamovi supports inter-module data transfer)
+
+---
+
+## Version 0.0.32.17
+
+### 🗓️ **January 5, 2025 - Phase 12: Multi-Lesion RECIST 1.1 Aggregation**
+
+---
+
+## 🎉 **AUTOMATED RESPONSE EVALUATION**
+
+### **Project Scope: RECIST 1.1 Multi-Lesion Aggregation Module**
+
+Implemented comprehensive RECIST 1.1 multi-lesion aggregation module for automated calculation of target lesion sums and best overall response from individual lesion measurements.
+
+### **📊 Implementation Statistics:**
+- **Duration**: January 5, 2025
+- **New Modules**: 1 (recist)
+- **Total Code**: ~900 lines
+- **Compilation Success**: 100%
+- **Features Completed**: 1 medium-priority [M] roadmap feature
+
+---
+
+### **✅ New Response Aggregation Module:**
+
+#### **1. RECIST 1.1 Multi-Lesion Aggregation (`recist`) - NEW**
+* **Purpose**: Automate aggregation of individual lesion measurements into patient-level response assessments per RECIST 1.1
+* **Location**: OncoPathT > Response Evaluation > Automated Best Overall Response
+* **Priority**: [M] Medium (from roadmap)
+* **Key Features**:
+  - **Automated Target Lesion Selection**: Applies max 5 lesions, max 2 per organ rule per RECIST 1.1
+  - **Target Lesion Sum Calculation**: Automatic aggregation per patient per assessment
+  - **RECIST 1.1 Classification**: CR, PR, SD, PD based on target, non-target, and new lesions
+  - **Best Overall Response**: Automatic BOR calculation with confirmation requirements
+  - **Lesion Trajectory Plots**: Individual lesion size evolution over time
+  - **Target Sum Plots**: Aggregated sum visualization
+  - **Waterfall Plot**: Best percent change from baseline
+  - **Efficacy Metrics**: ORR (CR + PR), DCR (CR + PR + SD) with 95% CIs
+  - **Stratified Analysis**: Group comparisons (e.g., treatment arms)
+* **Implementation**: `jamovi/recist.{a,r,u}.yaml`, `R/recist.b.R` (900 lines)
+* **Reference**: Eisenhauer et al. Eur J Cancer. 2009;45(2):228-247
+* **Clinical Context**:
+  - Manual RECIST calculation is tedious and error-prone
+  - Requires tracking multiple lesions across multiple timepoints
+  - Target lesion selection rules must be consistently applied
+  - This module automates the entire process
+* **Data Format**: Long format (one row per lesion per assessment)
+* **Required Variables**: patient_id, assessment_time, lesion_id, lesion_type, lesion_diameter
+* **Optional Variables**: non_target_status, organ, grouping variable
+
+**RECIST 1.1 Implementation**:
+```r
+# Target Lesion Selection (at baseline)
+- Maximum 5 target lesions total
+- Maximum 2 target lesions per organ
+- Select largest measurable lesions (≥10mm by CT)
+
+# Target Lesion Sum Calculation
+Sum of target lesion diameters per assessment
+
+# Response Classification
+- CR: All target lesions = 0mm AND all non-target disappeared
+- PR: ≥30% decrease in sum from baseline
+- SD: Neither PR nor PD criteria met
+- PD: ≥20% increase in sum from nadir + 5mm absolute, OR new lesions, OR non-target PD
+
+# Best Overall Response
+Hierarchy: CR > PR > SD > PD
+Confirmation: CR/PR requires ≥2 consecutive assessments ≥4 weeks apart
+```
+
+**Use Cases**:
+1. **Clinical Trials**: Automated response evaluation for oncology trials
+2. **Radiology Workflow**: Standardized RECIST assessment from lesion measurements
+3. **Multi-Reader Studies**: Consistent application of RECIST criteria
+4. **Research Database**: Bulk processing of historical imaging data
+
+**Clinical Impact**:
+- Eliminates manual calculation errors in RECIST assessment
+- Ensures consistent application of target lesion selection rules
+- Automates confirmation requirement tracking
+- Provides publication-ready response tables and plots
+- Reduces radiologist workload for response evaluation
+
+---
+
+### **🔧 Technical Details**
+
+**Package Dependencies**:
+- R6, jmvcore, ggplot2, dplyr, tidyr, stats
+
+**Key Algorithms**:
+```r
+# Target Lesion Selection
+1. Filter baseline assessment (earliest timepoint)
+2. Filter target lesions
+3. Sort by diameter (descending)
+4. Apply max 5 total rule
+5. Apply max 2 per organ rule
+6. Track selected lesions across all assessments
+
+# Target Sum Calculation
+For each patient at each assessment:
+  targetSum = sum(diameter of selected target lesions)
+
+# Response Classification
+targetResponse = classify_target(targetSum, baseline, nadir)
+nonTargetResponse = classify_nontarget(status)
+overallResponse = combine_responses(target, nonTarget, newLesions)
+```
+
+**Configurable Parameters**:
+- Maximum target lesions (default: 5)
+- Maximum per organ (default: 2)
+- PR threshold (default: -30%)
+- PD threshold (default: +20% + 5mm)
+- Confirmation window (default: ≥4 weeks)
+- Nadir vs baseline reference for PD
+
+**Visualization Options**:
+- Lesion trajectory plot (individual lesion evolution)
+- Target sum plot (aggregated sum over time)
+- Waterfall plot (best % change, color-coded by response)
+
+---
+
+### **📚 References**
+
+**Primary Guideline**:
+Eisenhauer EA, Therasse P, Bogaerts J, et al. New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1). Eur J Cancer. 2009;45(2):228-247.
+
+**Key Points**:
+- Standardized criteria for tumor response evaluation
+- Maximum 5 target lesions, 2 per organ
+- Response thresholds: CR (0mm), PR (-30%), PD (+20% + 5mm)
+- Confirmation requirements for CR/PR
+
+---
+
+### **🔄 Roadmap Progress**
+
+**Completed**:
+- ✅ Multi-Lesion RECIST Aggregation [M] (Phase 12 - Jan 5, 2025)
+- ✅ iRECIST Support [H] (Phase 11 - Jan 5, 2025)
+- ✅ Decision Curve Analysis [H] - Validated (Phase 10)
+- ✅ Fine-Gray Competing Risks [H] (Phase 10)
+
+**Synergy Between Modules**:
+- **recist** (RECIST 1.1): Standard response evaluation for all solid tumors
+- **irecist** (iRECIST): Specialized for immunotherapy with pseudoprogression handling
+- Both modules can use same lesion-level data with different classification logic
+- Allows direct comparison of RECIST 1.1 vs iRECIST responses
+
+**Remaining High Priority [H]**:
+- ⏳ One-Click Export Pipelines
+- ⏳ Survival Integration
+- ⏳ Consistent Error Handling
+
+---
+
+## Version 0.0.32.16
+
+### 🗓️ **January 5, 2025 - Phase 11: iRECIST Analysis for Immunotherapy Trials**
+
+---
+
+## 🎉 **IMMUNOTHERAPY RESPONSE EVALUATION**
+
+### **Project Scope: iRECIST Implementation for Pseudoprogression Detection**
+
+Implemented comprehensive iRECIST (immune-related Response Evaluation Criteria In Solid Tumors) module for assessing tumor response in immunotherapy trials. Addresses unique challenge of pseudoprogression in cancer immunotherapy.
+
+### **📊 Implementation Statistics:**
+- **Duration**: January 5, 2025
+- **New Modules**: 1 (irecist)
+- **Total Code**: ~1,050 lines
+- **Compilation Success**: 100%
+- **Features Completed**: 1 high-priority [H] roadmap feature
+
+---
+
+### **✅ New Response Evaluation Module:**
+
+#### **1. iRECIST Analysis (`irecist`) - NEW**
+* **Purpose**: Assess tumor response in immunotherapy trials with pseudoprogression detection
+* **Location**: OncoPathT > Response Evaluation > Immune-related Response Criteria
+* **Priority**: [H] High (from roadmap)
+* **Key Features**:
+  - **iRECIST Classifications**: iCR, iPR, iSD, iUPD (unconfirmed PD), iCPD (confirmed PD)
+  - **Pseudoprogression Detection**: Automatic flagging and tracking of iUPD events
+  - **Confirmation Requirements**: 4-12 week confirmation window per Seymour et al. (2017)
+  - **Best Overall Response**: Patient-level summary with confirmation status
+  - **Efficacy Metrics**: ORR (iCR + iPR), DCR (iCR + iPR + iSD), pseudoprogression rate
+  - **Waterfall Plot**: Best response visualization with iRECIST color coding
+  - **Swimmer Plot**: Treatment timeline with iUPD events marked
+  - **Spider Plot**: Individual tumor trajectories showing heterogeneous response patterns
+  - **Response Tables**: Assessment-level and patient-level summaries
+  - **Stratified Analysis**: Group comparisons (e.g., treatment arms)
+  - **Clinical Interpretation**: Automated guidance based on iRECIST criteria
+* **Implementation**: `jamovi/irecist.{a,r,u}.yaml`, `R/irecist.b.R` (1,050 lines)
+* **Reference**: Seymour et al. Lancet Oncol. 2017;18(3):e143-e152
+* **Clinical Context**:
+  - Pseudoprogression occurs in 5-10% of immunotherapy patients
+  - Initial tumor enlargement from immune infiltration, not true progression
+  - Requires confirmation scan to prevent premature treatment discontinuation
+* **Data Format**: Long format (one row per assessment per patient)
+* **Required Variables**: patient_id, assessment_time, target_lesion_sum, new_lesions
+* **Optional Variables**: non_target_status, tumor_burden, grouping variable
+
+**Key Algorithms**:
+```r
+# iRECIST Classification
+- iCR: Target lesions = 0
+- iPR: ≥30% decrease from baseline
+- iSD: Neither PR nor PD criteria
+- iUPD: ≥20% increase from nadir + 5mm (unconfirmed)
+- iCPD: iUPD confirmed on next scan ≥4 weeks later
+
+# Pseudoprogression Identification
+iUPD → Wait 4-12 weeks → Next scan
+  If progression continues → iCPD (true progression)
+  If response/stability → Pseudoprogression
+
+# Best Overall Response
+Hierarchy: iCR > iPR > iSD > iUPD > iCPD
+Requires confirmation for CR/PR (≥2 consecutive scans)
+```
+
+**Use Cases**:
+1. **Immunotherapy Trial Analysis**: Calculate ORR, DCR, and pseudoprogression rate for Phase II trials
+2. **Individual Patient Assessment**: Distinguish true progression from pseudoprogression
+3. **Comparative Studies**: Stratified analysis comparing treatment arms
+4. **Treatment Decisions**: Guide whether to continue therapy after initial progression
+
+**Clinical Impact**:
+- Prevents premature treatment discontinuation in pseudoprogression cases
+- Accurate efficacy assessment in immunotherapy trials
+- Regulatory-compliant response evaluation (FDA/EMA recognized)
+- Improved patient outcomes through evidence-based treatment continuation
+
+---
+
+### **🔧 Technical Details**
+
+**Package Dependencies**:
+- R6, jmvcore, ggplot2, dplyr, tidyr, stats
+
+**Configurable Parameters**:
+- Response thresholds (PR: -30%, PD: +20% + 5mm)
+- Confirmation window (4-12 weeks, configurable)
+- Reference point (baseline vs nadir for PD)
+- Confirmation requirements (number of scans)
+
+**Visualization Options**:
+- Waterfall plot (best % change, color-coded by response)
+- Swimmer plot (time on study with iUPD markers)
+- Spider plot (tumor trajectories over time)
+- Time to iCPD (future: Kaplan-Meier integration)
+
+---
+
+### **📚 References**
+
+**Primary Guideline**:
+Seymour L, Bogaerts J, Perrone A, et al. iRECIST: guidelines for response criteria for use in trials testing immunotherapeutics. Lancet Oncol. 2017;18(3):e143-e152.
+
+**RECIST 1.1 Foundation**:
+Eisenhauer EA, Therasse P, Bogaerts J, et al. New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1). Eur J Cancer. 2009;45(2):228-247.
+
+**Pseudoprogression Review**:
+Chiou VL, Burotto M. Pseudoprogression and immune-related response in solid tumors. J Clin Oncol. 2015;33(31):3541-3543.
+
+---
+
+### **🔄 Roadmap Progress**
+
+**Completed**:
+- ✅ iRECIST Support [H] (Phase 11 - Jan 5, 2025)
+- ✅ Decision Curve Analysis [H] - Validated (Phase 10 - Jan 4, 2025)
+- ✅ Fine-Gray Competing Risks [H] (Phase 10 - Jan 4, 2025)
+
+**Remaining High Priority [H]**:
+- ⏳ One-Click Export Pipelines (journal-ready tables)
+- ⏳ Survival Integration (swimmer/waterfall → KM curves)
+- ⏳ Consistent Error Handling (framework)
+
+---
+
 ## Version 0.0.32.14
 
 ### 🗓️ **January 4, 2025 - Phase 10: Decision Curve Analysis & Fine-Gray Competing Risks**

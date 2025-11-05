@@ -1,0 +1,335 @@
+---
+name: irecist
+title: iRECIST Analysis
+menuGroup: OncoPathT
+menuSubgroup: Response Evaluation
+menuSubtitle: Immune-related Response Criteria
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Immune-related Response Evaluation Criteria in Solid Tumors (iRECIST) analysis
+        for assessing tumor response in immunotherapy trials. Implements Seymour et al.
+        (2017) guidelines including pseudoprogression detection and confirmation requirements.
+    R:
+        dontrun: false
+        usage: |
+            data <- data.frame(
+                patient = c("P01", "P01", "P01", "P02", "P02"),
+                time = c(0, 8, 16, 0, 8),
+                target_sum = c(45, 52, 48, 50, 35),
+                new_lesions = c(0, 0, 0, 0, 0)
+            )
+
+            irecist(
+                data = data,
+                patientId = "patient",
+                assessmentTime = "time",
+                targetLesionSum = "target_sum",
+                newLesions = "new_lesions"
+            )
+
+completeWhenFilled: false
+
+formula:
+  patientId:
+    from: lhs
+    required: true
+  assessmentTime:
+    from: rhs
+    subset: 1
+  targetLesionSum:
+    from: rhs
+    subset: 2
+  newLesions:
+    from: rhs
+    subset: 3
+  nonTargetStatus:
+    from: rhs
+    subset: 4
+
+options:
+  - name: data
+    type: Data
+    description:
+      R: the data as a data frame
+
+  # Core Variables
+  - name: patientId
+    title: Patient ID
+    type: Variable
+    required: true
+    description:
+      R: >
+        Patient identifier variable
+
+  - name: assessmentTime
+    title: Assessment Time
+    type: Variable
+    required: true
+    suggested:
+      - continuous
+    description:
+      R: >
+        Time from baseline (weeks or months)
+
+  - name: targetLesionSum
+    title: Target Lesion Sum
+    type: Variable
+    required: true
+    suggested:
+      - continuous
+    description:
+      R: >
+        Sum of target lesion diameters (mm)
+
+  - name: newLesions
+    title: New Lesions
+    type: Variable
+    required: true
+    suggested:
+      - nominal
+      - ordinal
+    description:
+      R: >
+        Binary indicator for new lesions (0=no, 1=yes)
+
+  - name: nonTargetStatus
+    title: Non-Target Status
+    type: Variable
+    suggested:
+      - nominal
+    description:
+      R: >
+        Non-target lesion status (CR, non-CR/non-PD, PD)
+
+  # Optional Variables
+  - name: tumorBurden
+    title: Tumor Burden
+    type: Variable
+    suggested:
+      - continuous
+    description:
+      R: >
+        Total tumor burden measure (optional)
+
+  # iRECIST Configuration
+  - name: confirmationWindow
+    title: Confirmation Window (weeks)
+    type: Number
+    min: 2
+    max: 16
+    default: 4
+    description:
+      R: >
+        Minimum time window for iUPD confirmation (default: 4 weeks per iRECIST guidelines)
+
+  - name: confirmationWindowMax
+    title: Maximum Confirmation Window (weeks)
+    type: Number
+    min: 4
+    max: 24
+    default: 12
+    description:
+      R: >
+        Maximum time window for iUPD confirmation (default: 12 weeks)
+
+  - name: baselineReference
+    title: Baseline Reference
+    type: List
+    options:
+      - name: baseline
+        title: First assessment
+      - name: pretreatment
+        title: Pre-treatment scan
+    default: baseline
+    description:
+      R: >
+        Reference point for baseline measurements
+
+  # Response Criteria
+  - name: prThreshold
+    title: PR Threshold (%)
+    type: Number
+    min: 0
+    max: 100
+    default: 30
+    description:
+      R: >
+        Percent decrease for partial response (default: 30% per RECIST)
+
+  - name: pdThreshold
+    title: PD Threshold (%)
+    type: Number
+    min: 0
+    max: 100
+    default: 20
+    description:
+      R: >
+        Percent increase for progressive disease (default: 20% per RECIST)
+
+  - name: pdAbsolute
+    title: PD Absolute Increase (mm)
+    type: Number
+    min: 0
+    max: 20
+    default: 5
+    description:
+      R: >
+        Absolute increase required for PD (default: 5mm per RECIST)
+
+  # Analysis Options
+  - name: trackPseudoprogression
+    title: Track Pseudoprogression
+    type: Bool
+    default: true
+    description:
+      R: >
+        Flag and track iUPD (unconfirmed progression) cases
+
+  - name: requireConfirmation
+    title: Require Confirmation
+    type: Bool
+    default: true
+    description:
+      R: >
+        Require confirmation scan for response calls
+
+  - name: confirmationScans
+    title: Confirmation Scans Required
+    type: Number
+    min: 1
+    max: 3
+    default: 1
+    description:
+      R: >
+        Number of confirmation scans required for CR/PR
+
+  # Output Options
+  - name: showResponseTable
+    title: Response Table
+    type: Bool
+    default: true
+    description:
+      R: >
+        Show detailed response category table
+
+  - name: showBestResponse
+    title: Best Overall Response
+    type: Bool
+    default: true
+    description:
+      R: >
+        Calculate and show best overall response per patient
+
+  - name: showWaterfallPlot
+    title: Waterfall Plot
+    type: Bool
+    default: true
+    description:
+      R: >
+        Generate waterfall plot with iRECIST colors
+
+  - name: showSwimmerPlot
+    title: Swimmer Plot
+    type: Bool
+    default: true
+    description:
+      R: >
+        Generate swimmer plot with iUPD events marked
+
+  - name: showSpiderPlot
+    title: Spider Plot
+    type: Bool
+    default: false
+    description:
+      R: >
+        Generate spider plot showing individual lesion trajectories
+
+  - name: showTimeToCPD
+    title: Time to Confirmed PD
+    type: Bool
+    default: true
+    description:
+      R: >
+        Calculate time to confirmed progressive disease (iCPD)
+
+  # Subgroup Analysis
+  - name: groupVar
+    title: Grouping Variable
+    type: Variable
+    suggested:
+      - nominal
+      - ordinal
+    description:
+      R: >
+        Grouping variable for stratified analysis (e.g., treatment arm)
+
+  - name: stratifiedAnalysis
+    title: Stratified Analysis
+    type: Bool
+    default: false
+    description:
+      R: >
+        Perform analysis stratified by grouping variable
+
+  # Advanced Options
+  - name: nadirReference
+    title: Use Nadir Reference
+    type: Bool
+    default: true
+    description:
+      R: >
+        Use nadir (lowest) value as reference for PD calculation
+
+  - name: exportResults
+    title: Export Results
+    type: Bool
+    default: false
+    description:
+      R: >
+        Export results to CSV file
+
+  - name: showDetailedTimeline
+    title: Detailed Timeline
+    type: Bool
+    default: false
+    description:
+      R: >
+        Show detailed timeline of response assessments and transitions
+
+  - name: calculateORR
+    title: Objective Response Rate
+    type: Bool
+    default: true
+    description:
+      R: >
+        Calculate ORR (iCR + iPR)
+
+  - name: calculateDCR
+    title: Disease Control Rate
+    type: Bool
+    default: true
+    description:
+      R: >
+        Calculate DCR (iCR + iPR + iSD)
+
+  - name: showPseudoprogressionRate
+    title: Pseudoprogression Rate
+    type: Bool
+    default: true
+    description:
+      R: >
+        Calculate rate of pseudoprogression (iUPD → non-iCPD)
+
+  # Reference Information
+  - name: showReference
+    title: Show References
+    type: Bool
+    default: true
+    description:
+      R: >
+        Display iRECIST guidelines reference (Seymour et al. 2017)
+
+...

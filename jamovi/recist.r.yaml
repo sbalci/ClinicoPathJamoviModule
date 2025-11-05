@@ -1,0 +1,308 @@
+---
+name: recist
+title: RECIST 1.1 Multi-Lesion Aggregation
+jrs: '1.1'
+
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: dataInfo
+    title: Data Summary
+    type: Table
+    rows: 0
+    clearWith:
+      - patientId
+      - lesionId
+      - assessmentTime
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value
+        type: text
+
+  - name: lesionTable
+    title: Individual Lesion Measurements
+    type: Table
+    visible: (showLesionTable)
+    clearWith:
+      - patientId
+      - lesionId
+      - lesionDiameter
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: assessmentTime
+        title: Assessment
+        type: number
+        format: dp:1
+      - name: lesionId
+        title: Lesion ID
+        type: text
+      - name: lesionType
+        title: Type
+        type: text
+      - name: diameter
+        title: Diameter (mm)
+        type: number
+        format: dp:1
+      - name: organ
+        title: Organ
+        type: text
+      - name: included
+        title: Included in Target Sum
+        type: text
+
+  - name: targetSumTable
+    title: Target Lesion Sum by Assessment
+    type: Table
+    visible: (showTargetSumTable)
+    clearWith:
+      - patientId
+      - assessmentTime
+      - lesionDiameter
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: assessmentTime
+        title: Assessment Time
+        type: number
+        format: dp:1
+      - name: targetSum
+        title: Target Sum (mm)
+        type: number
+        format: dp:1
+      - name: changeFromBaseline
+        title: Change from Baseline (%)
+        type: number
+        format: dp:1
+      - name: changeFromNadir
+        title: Change from Nadir (%)
+        type: number
+        format: dp:1
+      - name: numTargetLesions
+        title: N Target Lesions
+        type: integer
+      - name: numNonTarget
+        title: N Non-Target
+        type: integer
+      - name: newLesions
+        title: New Lesions
+        type: text
+
+  - name: responseTable
+    title: RECIST Response Classification
+    type: Table
+    visible: (showResponseTable)
+    clearWith:
+      - patientId
+      - assessmentTime
+      - lesionDiameter
+      - requireConfirmation
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: assessmentTime
+        title: Assessment Time
+        type: number
+        format: dp:1
+      - name: targetResponse
+        title: Target Response
+        type: text
+      - name: nonTargetResponse
+        title: Non-Target Response
+        type: text
+      - name: newLesions
+        title: New Lesions
+        type: text
+      - name: overallResponse
+        title: Overall Response
+        type: text
+      - name: confirmed
+        title: Confirmed
+        type: text
+
+  - name: bestResponseTable
+    title: Best Overall Response by Patient
+    type: Table
+    visible: (showBestResponse)
+    clearWith:
+      - patientId
+      - requireConfirmation
+    rows: 0
+    columns:
+      - name: patientId
+        title: Patient ID
+        type: text
+      - name: bestResponse
+        title: Best Overall Response
+        type: text
+      - name: timeToResponse
+        title: Time to Response
+        type: number
+        format: dp:1
+      - name: confirmed
+        title: Confirmed
+        type: text
+      - name: nadirSum
+        title: Nadir Sum (mm)
+        type: number
+        format: dp:1
+      - name: bestPercentChange
+        title: Best % Change
+        type: number
+        format: dp:1
+
+  - name: summaryStats
+    title: Response Distribution
+    type: Table
+    visible: (showBestResponse)
+    clearWith:
+      - patientId
+    rows: 0
+    columns:
+      - name: category
+        title: Response Category
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: percent
+        title: Percent
+        type: number
+        format: dp:1
+      - name: ci_lower
+        title: 95% CI Lower
+        type: number
+        format: dp:1
+      - name: ci_upper
+        title: 95% CI Upper
+        type: number
+        format: dp:1
+
+  - name: efficacyMetrics
+    title: Efficacy Metrics
+    type: Table
+    visible: (showBestResponse)
+    rows: 0
+    clearWith:
+      - patientId
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value (%)
+        type: number
+        format: dp:1
+      - name: n
+        title: N
+        type: integer
+      - name: total
+        title: Total
+        type: integer
+      - name: ci_lower
+        title: 95% CI Lower
+        type: number
+        format: dp:1
+      - name: ci_upper
+        title: 95% CI Upper
+        type: number
+        format: dp:1
+
+  - name: lesionPlot
+    title: Individual Lesion Trajectories
+    type: Image
+    visible: (showLesionPlot)
+    renderFun: .lesionPlot
+    clearWith:
+      - patientId
+      - lesionId
+      - lesionDiameter
+    width: 700
+    height: 500
+
+  - name: sumPlot
+    title: Target Lesion Sum Over Time
+    type: Image
+    visible: (showSumPlot)
+    renderFun: .sumPlot
+    clearWith:
+      - patientId
+      - assessmentTime
+      - lesionDiameter
+    width: 700
+    height: 500
+
+  - name: waterfallPlot
+    title: Waterfall Plot (Best % Change)
+    type: Image
+    visible: (showWaterfallPlot)
+    renderFun: .waterfallPlot
+    clearWith:
+      - patientId
+      - lesionDiameter
+    width: 600
+    height: 500
+
+  - name: stratifiedTable
+    title: Stratified Response Analysis
+    type: Table
+    visible: (stratifiedAnalysis && groupVar)
+    clearWith:
+      - groupVar
+      - stratifiedAnalysis
+    rows: 0
+    columns:
+      - name: group
+        title: Group
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: CR
+        title: CR (%)
+        type: number
+        format: dp:1
+      - name: PR
+        title: PR (%)
+        type: number
+        format: dp:1
+      - name: SD
+        title: SD (%)
+        type: number
+        format: dp:1
+      - name: PD
+        title: PD (%)
+        type: number
+        format: dp:1
+      - name: ORR
+        title: ORR (%)
+        type: number
+        format: dp:1
+      - name: DCR
+        title: DCR (%)
+        type: number
+        format: dp:1
+
+  - name: clinicalInterpretation
+    title: Clinical Interpretation
+    type: Html
+    visible: true
+
+  - name: referenceInfo
+    title: RECIST 1.1 Reference
+    type: Html
+    visible: (showReference)
+
+...

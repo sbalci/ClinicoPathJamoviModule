@@ -207,20 +207,24 @@ Expected Data Format (one row per patient):
 
 ---
 
-#### **[H] 🔄 PARTIALLY COMPLETED - Enhanced Markov Models**
+#### **[H] ✅ COMPLETED - Enhanced Markov Models**
 
 *Multi-cycle decision modeling for chronic diseases*
 
-**✅ Completed Features (2025-01-04):**
-- ✅ Separate discount rates for costs vs utilities (QALYs)
+**Status**: ✅ Completed (PSA verified 2025-01-05)
+**Files**: `jamovi/decisiongraph.{a,u}.yaml`, `R/decisiongraph.b.R`
+
+**✅ Completed Features:**
+- ✅ Separate discount rates for costs vs utilities (QALYs) - 2025-01-04
 - ✅ Checkbox to enable/disable separate rates
 - ✅ Default: 3% for costs, 1.5% for utilities
-- Files: `jamovi/decisiongraph.{a,u}.yaml`, `R/decisiongraph.b.R`
-
-**⏳ Remaining Features:**
-- ⏳ Probabilistic Sensitivity Analysis (PSA) - Complex, requires Monte Carlo simulation
-- ⏳ heemod/dampack package integration
-- ⏳ Enhanced cohort trace visualization
+- ✅ Probabilistic Sensitivity Analysis (PSA) with Monte Carlo simulation
+- ✅ Multiple processing modes (standard, parallel, chunked for large simulations)
+- ✅ Parameter distributions and correlation handling
+- ✅ CEAC (Cost-Effectiveness Acceptability Curve) generation
+- ✅ EVPI (Expected Value of Perfect Information) calculation
+- ✅ Bootstrap validation with 10,000 iterations
+- ✅ Performance optimization for memory efficiency
 
 **Jamovi Data Structure**:
 
@@ -402,7 +406,7 @@ Expected Data Format (one row per patient per strategy):
 
 ### **Phase 4: Advanced Features (Sprint 7+)**
 
-#### **[M] Time-to-Event Decision Analysis**
+#### **[M] ✅ COMPLETED - Time-to-Event Decision Analysis**
 
 *Survival-based ROC and decision metrics*
 
@@ -1526,9 +1530,13 @@ Required Variables:
 
 ### **Phase 1: Response Evaluation (Sprints 1-2)**
 
-#### **[H] iRECIST Support**
+#### **[H] ✅ COMPLETED - iRECIST Support**
 
 *Immune-related response criteria*
+
+**Status**: ✅ Completed 2025-01-05 (Phase 11)
+**Files**: `jamovi/irecist.{a,r,u}.yaml`, `R/irecist.b.R`
+**Implementation**: See `IMPLEMENTATION_SUMMARY_2025-01-05_Phase11.md`
 
 **Jamovi Data Structure**:
 
@@ -1575,9 +1583,13 @@ Expected Data Format (one row per assessment per patient):
 
 ---
 
-#### **[M] Multi-Lesion RECIST Aggregation**
+#### **[M] ✅ COMPLETED - Multi-Lesion RECIST Aggregation**
 
 *Automated best overall response*
+
+**Status**: ✅ Completed 2025-01-05 (Phase 12)
+**Files**: `jamovi/recist.{a,r,u}.yaml`, `R/recist.b.R`
+**Implementation**: See `IMPLEMENTATION_SUMMARY_2025-01-05_Phase12.md`
 
 **Jamovi Data Structure**:
 
@@ -1630,7 +1642,7 @@ Expected Data Format (long format):
 
 ### **Phase 2: Timeline Integration (Sprint 3)**
 
-#### **[H] Survival Integration**
+#### **[H] ✅ COMPLETED - Survival Integration**
 
 *One-click KM from swimmer/waterfall data*
 
