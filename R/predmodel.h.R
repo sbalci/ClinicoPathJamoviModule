@@ -315,7 +315,7 @@ predmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "predmodel",
-                version = c(1,0,0),
+                version = c(0,0,32),
                 options = options,
                 results = predmodelResults$new(options=options),
                 data = data,

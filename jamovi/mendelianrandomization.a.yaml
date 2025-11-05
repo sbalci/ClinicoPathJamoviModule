@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Medical Decision Analysis
 menuTitle: Mendelian Randomization
 menuSubtitle: Causal inference with genetic variants
-version: '0.0.1'
+version: '0.0.32'
 jas: '1.2'
 
 description:

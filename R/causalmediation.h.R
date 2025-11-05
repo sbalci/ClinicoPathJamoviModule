@@ -512,7 +512,7 @@ causalmediationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "causalmediation",
-                version = c(0,0,1),
+                version = c(0,0,32),
                 options = options,
                 results = causalmediationResults$new(options=options),
                 data = data,

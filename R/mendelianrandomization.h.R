@@ -575,7 +575,7 @@ mendelianrandomizationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             super$initialize(
                 package = "ClinicoPath",
                 name = "mendelianrandomization",
-                version = c(0,0,1),
+                version = c(0,0,32),
                 options = options,
                 results = mendelianrandomizationResults$new(options=options),
                 data = data,

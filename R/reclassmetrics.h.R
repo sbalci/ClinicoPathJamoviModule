@@ -407,7 +407,7 @@ reclassmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "reclassmetrics",
-                version = c(1,0,0),
+                version = c(0,0,32),
                 options = options,
                 results = reclassmetricsResults$new(options=options),
                 data = data,

@@ -3,7 +3,7 @@ name:  reclassmetrics
 title: Model Reclassification Metrics (NRI & IDI)
 menuGroup: meddecideT
 menuSubgroup: Prediction Models
-version: '1.0.0'
+version: '0.0.32'
 jas: '1.2'
 
 description:

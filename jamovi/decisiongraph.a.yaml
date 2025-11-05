@@ -4,7 +4,7 @@ title: Decision Tree Graph
 menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Cost-Effectiveness Decision Tree Visualization
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

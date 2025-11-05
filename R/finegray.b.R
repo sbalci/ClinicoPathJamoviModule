@@ -65,7 +65,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 }
 
                 if (self$options$causeSpecificComparison) {
-                    private$.compareToC causeSpecific(data)
+                    private$.compareToCauseSpecific(data)
                 }
 
                 if (self$options$showPredictionTable) {
