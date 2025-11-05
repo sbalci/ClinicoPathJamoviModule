@@ -1,0 +1,173 @@
+---
+name: causalmediation
+title: Causal Mediation Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: tierInfo
+      title: Mediation Tier Information
+      type: Preformatted
+      visible: true
+
+    # Effect Estimates ----
+    - name: effectsTable
+      title: Mediation Effect Estimates
+      type: Table
+      rows: 0
+      visible: (show_decomposition)
+      columns:
+        - name: effect
+          title: Effect Type
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower
+          superTitle: 95% CI
+          type: number
+        - name: ci_upper
+          title: Upper
+          superTitle: 95% CI
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: proportionMediated
+      title: Proportion Mediated
+      type: Table
+      rows: 0
+      visible: (show_prop_mediated)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ci_lower
+          title: Lower
+          superTitle: 95% CI
+          type: number
+        - name: ci_upper
+          title: Upper
+          superTitle: 95% CI
+          type: number
+
+    # HIGH-DIMENSIONAL Results ----
+    - name: hdMediatorsTable
+      title: Significant Mediators (High-Dimensional)
+      type: Table
+      rows: 0
+      visible: (mediation_tier:hd)
+      columns:
+        - name: mediator
+          title: Mediator
+          type: text
+        - name: alpha
+          title: α (X→M)
+          type: number
+        - name: beta
+          title: β (M→Y)
+          type: number
+        - name: indirect_effect
+          title: Indirect Effect
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: fdr
+          title: FDR
+          type: number
+
+    - name: hdSummary
+      title: HD Mediation Summary
+      type: Html
+      visible: (mediation_tier:hd)
+
+    # CMAverse Results ----
+    - name: cmaResults
+      title: CMAverse Analysis Results
+      type: Html
+      visible: (mediation_tier:comprehensive)
+
+    - name: dagPlot
+      title: Directed Acyclic Graph (DAG)
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotDAG
+      visible: (show_dag)
+
+    # Sensitivity Analysis ----
+    - name: sensitivityTable
+      title: Sensitivity Analysis
+      type: Table
+      rows: 0
+      visible: (sensitivity_analysis)
+      columns:
+        - name: rho
+          title: ρ
+          type: number
+        - name: acme_lower
+          title: ACME Lower
+          type: number
+        - name: acme_upper
+          title: ACME Upper
+          type: number
+
+    - name: sensitivityPlot
+      title: Sensitivity Analysis Plot
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotSensitivity
+      visible: (sensitivity_analysis)
+
+    # Visualization ----
+    - name: effectsPlot
+      title: Mediation Effects
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotEffects
+      visible: (plot_effects)
+
+    - name: manhattanPlot
+      title: Manhattan Plot (HD Mediators)
+      type: Image
+      width: 800
+      height: 450
+      renderFun: .plotManhattan
+      visible: (plot_hd_manhattan)
+
+    - name: volcanoPlot
+      title: Volcano Plot (HD Mediators)
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotVolcano
+      visible: (plot_hd_volcano)
+
+    # Model Information ----
+    - name: modelInfo
+      title: Model Information
+      type: Html
+      visible: true
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: true
+...

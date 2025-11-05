@@ -79,7 +79,7 @@ items:
       type:  Image
       width:  700
       height: 450
-      renderFun: .plotCureFraction
+      renderFun: .renderCureFractionPlot
       visible: (plot_cure_fraction)
       clearWith:
           - time

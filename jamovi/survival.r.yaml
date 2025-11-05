@@ -231,7 +231,20 @@ items:
           - multievent
           - contexpl
 
-
+    - name: phInterpretation
+      title: 'Proportional Hazards Assessment & Recommendations'
+      type: Html
+      visible: (ph_cox)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - contexpl
 
     - name: plot8
       title: '`Proportional Hazards Assumption - ${explanatory}`'

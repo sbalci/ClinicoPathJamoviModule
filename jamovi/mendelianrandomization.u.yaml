@@ -1,0 +1,148 @@
+name: mendelianrandomization
+title: Mendelian Randomization
+jus: '2.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    name: variablesupplier
+    suggested:
+      - continuous
+      - nominal
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: snp_column
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: beta_exposure
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: se_exposure
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: beta_outcome
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: se_outcome
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: pval_exposure
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: pval_outcome
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: MR Methods
+        children:
+          - type: ComboBox
+            name: mr_methods
+          - type: ComboBox
+            name: ivw_model
+      - type: CollapseBox
+        label: SNP Selection
+        collapsed: true
+        children:
+          - type: TextBox
+            name: pval_threshold
+            format: number
+          - type: TextBox
+            name: clump_r2
+            format: number
+          - type: TextBox
+            name: clump_kb
+            format: number
+          - type: TextBox
+            name: min_snps
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: egger_bootstrap
+      - type: CollapseBox
+        label: Sensitivity Analysis
+        collapsed: true
+        children:
+          - type: CheckBox
+            name: heterogeneity_test
+          - type: CheckBox
+            name: pleiotropy_test
+          - type: CheckBox
+            name: leave_one_out
+          - type: CheckBox
+            name: mr_presso
+          - type: TextBox
+            name: presso_threshold
+            format: number
+      - type: CollapseBox
+        label: Visualization
+        collapsed: true
+        children:
+          - type: CheckBox
+            name: plot_forest
+          - type: CheckBox
+            name: plot_funnel
+          - type: CheckBox
+            name: plot_scatter
+          - type: CheckBox
+            name: plot_loo
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: single_snp_analysis
+      - type: CollapseBox
+        label: Advanced Options
+        collapsed: true
+        children:
+          - type: CheckBox
+            name: harmonize_alleles
+          - type: CheckBox
+            name: remove_palindromic
+          - type: CheckBox
+            name: steiger_filtering
+          - type: TextBox
+            name: random_seed
+            format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Effect Allele Frequency Column
+        children:
+          - type: VariablesListBox
+            name: eaf_column
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: conf_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: use_same_dataset

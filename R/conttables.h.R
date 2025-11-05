@@ -19,6 +19,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             logOdds = FALSE,
             odds = FALSE,
             relRisk = FALSE,
+            riskDiff = FALSE,
+            nnt = FALSE,
             ci = TRUE,
             ciWidth = 95,
             gamma = FALSE,
@@ -103,6 +105,14 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "relRisk",
                 relRisk,
                 default=FALSE)
+            private$..riskDiff <- jmvcore::OptionBool$new(
+                "riskDiff",
+                riskDiff,
+                default=FALSE)
+            private$..nnt <- jmvcore::OptionBool$new(
+                "nnt",
+                nnt,
+                default=FALSE)
             private$..ci <- jmvcore::OptionBool$new(
                 "ci",
                 ci,
@@ -167,6 +177,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..logOdds)
             self$.addOption(private$..odds)
             self$.addOption(private$..relRisk)
+            self$.addOption(private$..riskDiff)
+            self$.addOption(private$..nnt)
             self$.addOption(private$..ci)
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..gamma)
@@ -193,6 +205,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         logOdds = function() private$..logOdds$value,
         odds = function() private$..odds$value,
         relRisk = function() private$..relRisk$value,
+        riskDiff = function() private$..riskDiff$value,
+        nnt = function() private$..nnt$value,
         ci = function() private$..ci$value,
         ciWidth = function() private$..ciWidth$value,
         gamma = function() private$..gamma$value,
@@ -218,6 +232,8 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..logOdds = NA,
         ..odds = NA,
         ..relRisk = NA,
+        ..riskDiff = NA,
+        ..nnt = NA,
         ..ci = NA,
         ..ciWidth = NA,
         ..gamma = NA,
@@ -368,7 +384,7 @@ contTablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="odds",
                 title="Comparative Measures",
-                visible="(logOdds || odds || relRisk)",
+                visible="(logOdds || odds || relRisk || riskDiff || nnt)",
                 clearWith=list(
                     "rows",
                     "cols",
@@ -436,7 +452,47 @@ contTablesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="ciu[rr]", 
                         `title`="Upper", 
                         `superTitle`="Confidence Intervals", 
-                        `visible`="(relRisk && ci)"))))
+                        `visible`="(relRisk && ci)"),
+                    list(
+                        `name`="t[rd]", 
+                        `title`="", 
+                        `type`="text", 
+                        `content`="Risk difference", 
+                        `visible`="(riskDiff)"),
+                    list(
+                        `name`="v[rd]", 
+                        `title`="Value", 
+                        `visible`="(riskDiff)"),
+                    list(
+                        `name`="cil[rd]", 
+                        `title`="Lower", 
+                        `superTitle`="Confidence Intervals", 
+                        `visible`="(riskDiff && ci)"),
+                    list(
+                        `name`="ciu[rd]", 
+                        `title`="Upper", 
+                        `superTitle`="Confidence Intervals", 
+                        `visible`="(riskDiff && ci)"),
+                    list(
+                        `name`="t[nnt]", 
+                        `title`="", 
+                        `type`="text", 
+                        `content`="Number needed to treat", 
+                        `visible`="(nnt)"),
+                    list(
+                        `name`="v[nnt]", 
+                        `title`="Value", 
+                        `visible`="(nnt)"),
+                    list(
+                        `name`="cil[nnt]", 
+                        `title`="Lower", 
+                        `superTitle`="Confidence Intervals", 
+                        `visible`="(nnt && ci)"),
+                    list(
+                        `name`="ciu[nnt]", 
+                        `title`="Upper", 
+                        `superTitle`="Confidence Intervals", 
+                        `visible`="(nnt && ci)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nom",
@@ -639,6 +695,10 @@ contTablesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (only available for 2x2 tables)
 #' @param relRisk \code{TRUE} or \code{FALSE} (default), provide the relative
 #'   risk (only available for 2x2 tables)
+#' @param riskDiff \code{TRUE} or \code{FALSE} (default), provide the risk
+#'   difference (only available for 2x2 tables)
+#' @param nnt \code{TRUE} or \code{FALSE} (default), provide the number needed
+#'   to treat (only available for 2x2 tables)
 #' @param ci \code{TRUE} or \code{FALSE} (default), provide confidence
 #'   intervals for the comparative measures
 #' @param ciWidth a number between 50 and 99.9 (default: 95), width of the
@@ -692,6 +752,8 @@ contTables <- function(
     logOdds = FALSE,
     odds = FALSE,
     relRisk = FALSE,
+    riskDiff = FALSE,
+    nnt = FALSE,
     ci = TRUE,
     ciWidth = 95,
     gamma = FALSE,
@@ -769,6 +831,8 @@ contTables <- function(
         logOdds = logOdds,
         odds = odds,
         relRisk = relRisk,
+        riskDiff = riskDiff,
+        nnt = nnt,
         ci = ci,
         ciWidth = ciWidth,
         gamma = gamma,

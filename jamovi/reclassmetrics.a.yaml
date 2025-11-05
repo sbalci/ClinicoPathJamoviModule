@@ -1,0 +1,175 @@
+---
+name:  reclassmetrics
+title: Model Reclassification Metrics (NRI & IDI)
+menuGroup: meddecideT
+menuSubgroup: Prediction Models
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+      Calculate reclassification metrics to compare predictive performance between
+      two models. Provides Net Reclassification Improvement (NRI), Integrated
+      Discrimination Improvement (IDI), and related metrics for both binary and
+      survival outcomes. Essential for demonstrating incremental value of new
+      biomarkers or predictors.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage - Binary outcome:
+            # ClinicoPath::reclassmetrics(
+            #   data = data,
+            #   outcome = "disease",
+            #   oldModelProb = "old_risk",
+            #   newModelProb = "new_risk",
+            #   outcomeType = "binary",
+            #   riskCategories = "0.0,0.1,0.2,1.0"
+            # )
+            #
+            # Example usage - Survival outcome:
+            # ClinicoPath::reclassmetrics(
+            #   data = data,
+            #   outcome = "death",
+            #   survivalTime = "months",
+            #   oldModelProb = "old_surv",
+            #   newModelProb = "new_surv",
+            #   outcomeType = "survival",
+            #   timePoint = 60
+            # )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description: >
+        Binary outcome (for binary analysis) or event indicator (for survival).
+
+    - name: outcomeType
+      title: Outcome Type
+      type: List
+      options:
+        - title: Binary (Disease/No Disease)
+          name: binary
+        - title: Survival (Time-to-Event)
+          name: survival
+      default: binary
+      description: >
+        Type of outcome variable.
+
+    - name: survivalTime
+      title: Survival Time (for Survival Outcome)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Time to event or censoring (in months) for survival analysis.
+
+    - name: timePoint
+      title: Time Point for Survival (months)
+      type: Number
+      default: 60
+      min: 1
+      description: >
+        Time point (in months) at which to evaluate survival predictions.
+
+    - name: oldModelProb
+      title: Old Model Predictions
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Predicted probabilities or survival probabilities from the baseline model.
+
+    - name: newModelProb
+      title: New Model Predictions
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Predicted probabilities or survival probabilities from the enhanced model.
+
+    - name: riskCategories
+      title: Risk Category Cutoffs
+      type: String
+      default: "0.0,0.1,0.2,1.0"
+      description: >
+        Comma-separated risk thresholds for categorical NRI (e.g., "0.0,0.1,0.2,1.0"
+        for low/medium/high risk groups).
+
+    - name: nriType
+      title: NRI Type
+      type: List
+      options:
+        - title: Categorical NRI (with risk groups)
+          name: categorical
+        - title: Continuous NRI (no categories)
+          name: continuous
+        - title: Both
+          name: both
+      default: both
+      description: >
+        Type of NRI calculation.
+
+    - name: ciLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description: >
+        Confidence level for intervals (0.80-0.99).
+
+    - name: bootstrapCI
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: true
+      description: >
+        Use bootstrap resampling for confidence intervals (recommended).
+
+    - name: nBootstrap
+      title: Number of Bootstrap Samples
+      type: Integer
+      default: 500
+      min: 100
+      max: 2000
+      description: >
+        Number of bootstrap samples for confidence intervals.
+
+    - name: showReclassTable
+      title: Show Reclassification Table
+      type: Bool
+      default: true
+      description: >
+        Display cross-tabulation of risk category changes.
+
+    - name: showEventNonEvent
+      title: Separate Event/Non-Event NRI
+      type: Bool
+      default: true
+      description: >
+        Display NRI components separately for events and non-events.
+
+    - name: showIDIComponents
+      title: Show IDI Components
+      type: Bool
+      default: true
+      description: >
+        Display integrated sensitivity and 1-specificity improvements.
+
+    - name: showCalibrationComparison
+      title: Compare Model Calibration
+      type: Bool
+      default: true
+      description: >
+        Compare calibration between old and new models.
+
+...

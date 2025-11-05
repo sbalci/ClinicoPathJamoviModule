@@ -1,0 +1,142 @@
+title: Coefficient Forest Plot
+name: jjcoefstats
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Input Mode
+        children:
+          - type: ComboBox
+            name: inputMode
+            label: Data Input Mode
+
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Pre-computed Coefficients
+        children:
+          - type: VariablesListBox
+            name: term
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:precomputed)
+          - type: VariablesListBox
+            name: estimate
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:precomputed)
+          - type: VariablesListBox
+            name: stdError
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:precomputed)
+          - type: VariablesListBox
+            name: confLow
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:precomputed)
+          - type: VariablesListBox
+            name: confHigh
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:precomputed)
+          - type: VariablesListBox
+            name: pValue
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:precomputed)
+
+      - type: TargetLayoutBox
+        label: Model Fitting (Automatic)
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:fitmodel)
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+            enable: (inputMode:fitmodel)
+
+      - type: TargetLayoutBox
+        label: Survival Variables (Cox Model)
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:fitmodel && modelType:cox)
+          - type: VariablesListBox
+            name: eventStatus
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:fitmodel && modelType:cox)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Settings
+        children:
+          - type: ComboBox
+            name: modelType
+            label: Model Type
+            enable: (inputMode:fitmodel)
+          - type: TextBox
+            name: ciLevel
+            label: Confidence Level
+            format: number
+          - type: CheckBox
+            name: exponentiate
+            label: Exponentiate (OR/HR)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Plot Options
+        children:
+          - type: CheckBox
+            name: sortCoefs
+            label: Sort Coefficients by Magnitude
+          - type: CheckBox
+            name: excludeIntercept
+            label: Exclude Intercept
+          - type: CheckBox
+            name: showPValues
+            label: Show P-Values
+          - type: CheckBox
+            name: pSymbols
+            label: Use P-Value Symbols
+          - type: TextBox
+            name: referenceValue
+            label: Reference Value
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Appearance
+        children:
+          - type: ComboBox
+            name: colorScheme
+            label: Color Scheme
+          - type: ComboBox
+            name: plotTheme
+            label: Plot Theme
+          - type: TextBox
+            name: plotWidth
+            label: Plot Width (pixels)
+            format: number
+          - type: TextBox
+            name: plotHeight
+            label: Plot Height (pixels)
+            format: number

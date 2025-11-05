@@ -1,0 +1,144 @@
+---
+name:  predmodel
+title: Clinical Prediction Model
+jrs:   '1.1'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+
+    - name: coefficients
+      title: Model Coefficients
+      type: Table
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Coefficient
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+        - name: z
+          title: z
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: or
+          title: Odds Ratio
+          type: number
+        - name: ciLower
+          title: Lower CI
+          type: number
+        - name: ciUpper
+          title: Upper CI
+          type: number
+
+    - name: discriminationMetrics
+      title: Discrimination Metrics
+      type: Table
+      visible: (showDiscrimination)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ciLower
+          title: Lower CI
+          type: number
+        - name: ciUpper
+          title: Upper CI
+          type: number
+
+    - name: calibrationMetrics
+      title: Calibration Metrics
+      type: Table
+      visible: (showCalibration)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: riskStratification
+      title: Risk Stratification
+      type: Table
+      visible: (showRiskGroups)
+      columns:
+        - name: riskGroup
+          title: Risk Group
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: percent
+          title: '%'
+          type: number
+        - name: events
+          title: Events
+          type: integer
+        - name: eventRate
+          title: Event Rate
+          type: number
+          format: pc
+
+    - name: validationMetrics
+      title: Validation Performance
+      type: Table
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: apparent
+          title: Apparent
+          type: number
+        - name: optimism
+          title: Optimism
+          type: number
+        - name: corrected
+          title: Corrected
+          type: number
+
+    - name: rocPlot
+      title: ROC Curve
+      type: Image
+      width: 500
+      height: 500
+      renderFun: .rocPlot
+      visible: (showDiscrimination)
+      requiresData: true
+
+    - name: calibrationPlot
+      title: Calibration Plot
+      type: Image
+      width: 500
+      height: 500
+      renderFun: .calibrationPlot
+      visible: (showCalibration)
+      requiresData: true
+
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+
+refs:
+    - ClinicoPathJamoviModule
+    - rms
+    - pROC
+...

@@ -102,7 +102,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
@@ -805,7 +805,7 @@ analyses:
   - title: Contingency Tables
     name: contTables
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: Frequencies Contingency Tables
     menuTitle: Independent Samples
     menuSubtitle: χ² test of association
@@ -1010,7 +1010,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -1568,7 +1568,7 @@ analyses:
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Decision Tree Graph
     menuSubgroup: Decision
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization
@@ -5532,7 +5532,7 @@ analyses:
     name: generalizedroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Medical Decision Analysis
     menuTitle: Generalized ROC Analysis
     menuSubtitle: ROC for continuous outcomes with unequal variance
@@ -5602,6 +5602,101 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Sampling Error Calculator
     menuSubtitle: Calculate sampling efficiency and error rates (Kayser 2009)
+  - title: Causal Mediation Analysis
+    name: causalmediation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Medical Decision Analysis
+    menuTitle: Causal Mediation Analysis
+    menuSubtitle: Mediation with DAGs and high-dimensional mediators
+    description: |-
+      Causal Mediation Analysis examines the mechanisms through which an
+      exposure affects an outcome. This module provides three tiers:
+  - title: Mendelian Randomization
+    name: mendelianrandomization
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Medical Decision Analysis
+    menuTitle: Mendelian Randomization
+    menuSubtitle: Causal inference with genetic variants
+    description: |-
+      Mendelian Randomization (MR) uses genetic variants as instrumental
+      variables to infer causal relationships between exposures and outcomes.
+  - title: Clinical Prediction Model
+    name: predmodel
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Prediction Models
+    menuTitle: Clinical Prediction Model
+    description: >
+      Build and validate clinical prediction models with integrated calibration
+      and discrimination metrics. Supports logistic regression with
+      stepwise/LASSO selection, ROC analysis, calibration plots, and bootstrap
+      validation.
+  - title: Model Validation Dashboard
+    name: modelval
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Prediction Models
+    menuTitle: Model Validation Dashboard
+    description: >
+      Comprehensive validation dashboard for clinical prediction models. Assess
+      calibration, discrimination, and clinical utility using predicted
+      probabilities from existing models. Supports external validation, temporal
+      validation, and subgroup analysis.
+  - title: Time-Dependent Survival Calibration
+    name: survivalcalibration
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalT
+    menuSubgroup: Model Validation
+    menuTitle: Time-Dependent Survival Calibration
+    description: >
+      Evaluate survival model performance with time-dependent calibration
+      metrics. Assess calibration, discrimination, and predictive accuracy at
+      specific time points using bootstrap validation and cross-validation.
+      TRIPOD-compliant reporting.
+  - title: Coefficient Forest Plot (ggcoefstats)
+    name: jjcoefstats
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jjstatsplotT
+    menuSubgroup: Regression Plots
+    menuTitle: Coefficient Forest Plot (ggcoefstats)
+    description: >
+      Create publication-ready forest plots for regression coefficients and
+      meta-analysis results. Supports both pre-computed coefficients and
+      automatic model fitting from raw data. Uses ggstatsplot's ggcoefstats()
+      for professional visualization.
+  - title: Model Reclassification Metrics (NRI & IDI)
+    name: reclassmetrics
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Prediction Models
+    menuTitle: Model Reclassification Metrics (NRI & IDI)
+    description: >
+      Calculate reclassification metrics to compare predictive performance
+      between two models. Provides Net Reclassification Improvement (NRI),
+      Integrated Discrimination Improvement (IDI), and related metrics for both
+      binary and survival outcomes. Essential for demonstrating incremental
+      value of new biomarkers or predictors.
+  - title: Fine-Gray Competing Risks Regression
+    name: finegray
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalT2
+    menuSubgroup: Competing Risks
+    menuTitle: Fine-Gray Competing Risks Regression
+    menuSubtitle: Subdistribution Hazard Regression
+    description: >
+      Fine-Gray subdistribution hazard regression for competing risks data.
+      Models the cumulative incidence function (CIF) while accounting for
+      competing events. Provides sub-hazard ratios (sHR) for covariate effects.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

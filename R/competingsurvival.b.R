@@ -1059,22 +1059,25 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
         
         .plotCompetingRisks = function(image, ggtheme, theme, ...) {
             if (!self$options$analysistype == "compete") return()
-            
+
             plotData <- image$state
             if (is.null(plotData)) return()
-            
+
+            # Get color scheme option
+            color_scheme <- self$options$cifColors %||% "default"
+
             # Create competing risks plot using ggplot2
             tryCatch({
                 cuminc_data <- plotData$cuminc
                 if (!is.null(cuminc_data)) {
                     # Convert cuminc result to plottable format
                     plot_df <- data.frame()
-                    
+
                     for (i in seq_along(cuminc_data)) {
                         group_name <- names(cuminc_data)[i]
                         times <- cuminc_data[[i]]$time
                         est <- cuminc_data[[i]]$est
-                        
+
                         temp_df <- data.frame(
                             time = times,
                             estimate = est,
@@ -1083,11 +1086,19 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                         )
                         plot_df <- rbind(plot_df, temp_df)
                     }
-                    
+
+                    # Select color palette based on option
+                    color_values <- switch(color_scheme,
+                        "colorblind" = c("#E69F00", "#56B4E9", "#009E73", "#F0E442"),
+                        "grayscale" = c("#000000", "#404040", "#808080", "#C0C0C0"),
+                        c("#D55E00", "#0072B2", "#CC79A7", "#009E73")  # default
+                    )
+
                     # Create the plot
                     plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = time, y = estimate, color = group)) +
                         ggplot2::geom_step(size = 1) +
                         ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                        ggplot2::scale_color_manual(values = color_values) +
                         ggplot2::labs(
                             title = "Cumulative Incidence Function",
                             x = "Time (months)",
@@ -1095,19 +1106,218 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                             color = "Event Type"
                         ) +
                         ggtheme
-                    
+
                     print(plot)
                 }
             }, error = function(e) {
                 # If plotting fails, create a simple message
                 plot <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                    label = "Competing risks plot\navailable after analysis", 
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                    label = "Competing risks plot\navailable after analysis",
                                     size = 6) +
                     ggplot2::theme_void()
                 print(plot)
             })
-            
+
+            TRUE
+        },
+
+        .stackedPlot = function(image, ggtheme, theme, ...) {
+            if (!self$options$analysistype == "compete") return()
+            if (!self$options$showStackedPlot) return()
+
+            plotData <- image$state
+            if (is.null(plotData)) return()
+
+            # Get color scheme option
+            color_scheme <- self$options$cifColors %||% "default"
+
+            tryCatch({
+                cuminc_data <- plotData$cuminc
+                if (!is.null(cuminc_data) && length(cuminc_data) >= 2) {
+                    # Extract CIF1 (disease death) and CIF2 (competing death)
+                    # Assume first two groups are the two event types
+                    group_names <- names(cuminc_data)[!names(cuminc_data) %in% c("Tests")]
+
+                    if (length(group_names) >= 2) {
+                        cif1_data <- cuminc_data[[group_names[1]]]
+                        cif2_data <- cuminc_data[[group_names[2]]]
+
+                        # Get times (use times from CIF1)
+                        times <- cif1_data$time
+                        cif1_est <- cif1_data$est
+
+                        # Match CIF2 estimates to same time points
+                        cif2_est <- approx(cif2_data$time, cif2_data$est, xout = times,
+                                          method = "constant", rule = 2)$y
+
+                        # Calculate survival probability: S(t) = 1 - CIF1(t) - CIF2(t)
+                        survival_prob <- pmax(0, 1 - cif1_est - cif2_est)
+
+                        # Create data frame for stacked area plot
+                        plot_df <- data.frame(
+                            time = rep(times, 3),
+                            probability = c(cif1_est, cif2_est, survival_prob),
+                            event_type = rep(c("CIF Disease Death", "CIF Competing Death", "Survival"),
+                                           each = length(times)),
+                            stringsAsFactors = FALSE
+                        )
+
+                        # Set factor levels for proper stacking order
+                        plot_df$event_type <- factor(plot_df$event_type,
+                                                     levels = c("Survival", "CIF Competing Death", "CIF Disease Death"))
+
+                        # Select color palette
+                        fill_values <- switch(color_scheme,
+                            "colorblind" = c("#56B4E9", "#E69F00", "#D55E00"),
+                            "grayscale" = c("#C0C0C0", "#808080", "#404040"),
+                            c("#0072B2", "#CC79A7", "#D55E00")  # default
+                        )
+
+                        # Create stacked area plot
+                        plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = time, y = probability, fill = event_type)) +
+                            ggplot2::geom_area(alpha = 0.7) +
+                            ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                            ggplot2::scale_fill_manual(values = fill_values) +
+                            ggplot2::labs(
+                                title = "Stacked Probability Plot: CIF1 + CIF2 + Survival",
+                                subtitle = "Total probability sums to 100% at each time point",
+                                x = "Time (months)",
+                                y = "Cumulative Probability",
+                                fill = "Event"
+                            ) +
+                            ggtheme
+
+                        print(plot)
+                        return(TRUE)
+                    }
+                }
+
+                # If data not available, show message
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                    label = "Stacked plot requires\ncompeting risks analysis",
+                                    size = 6) +
+                    ggplot2::theme_void()
+                print(plot)
+
+            }, error = function(e) {
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                    label = paste("Error creating plot:\n", e$message),
+                                    size = 5) +
+                    ggplot2::theme_void()
+                print(plot)
+            })
+
+            TRUE
+        },
+
+        .kmvscifPlot = function(image, ggtheme, theme, ...) {
+            if (!self$options$analysistype == "compete") return()
+            if (!self$options$showKMvsCIF) return()
+
+            plotData <- image$state
+            if (is.null(plotData)) return()
+
+            # Get color scheme option
+            color_scheme <- self$options$cifColors %||% "default"
+
+            tryCatch({
+                # Get the stored data
+                mydata <- plotData$data
+                time_var <- plotData$time_var
+                status_var <- plotData$status_var
+                cuminc_data <- plotData$cuminc
+
+                if (!is.null(mydata) && !is.null(time_var) && !is.null(status_var) && !is.null(cuminc_data)) {
+                    # Calculate naive 1-KM estimate (treating competing risks as censored)
+                    # For KM, we treat disease death (status=1) as event, all others as censored
+                    time_vec <- mydata[[time_var]]
+                    status_vec <- mydata[[status_var]]
+
+                    # Create binary status: 1 = disease death, 0 = censored/competing
+                    km_status <- ifelse(status_vec == 1, 1, 0)
+
+                    # Fit Kaplan-Meier
+                    km_fit <- survival::survfit(survival::Surv(time_vec, km_status) ~ 1)
+
+                    # Calculate 1-KM (naive cumulative incidence)
+                    km_times <- km_fit$time
+                    km_surv <- km_fit$surv
+                    naive_cif <- 1 - km_surv
+
+                    # Get proper CIF for disease death (first event type)
+                    group_names <- names(cuminc_data)[!names(cuminc_data) %in% c("Tests")]
+                    if (length(group_names) >= 1) {
+                        cif_data <- cuminc_data[[group_names[1]]]
+                        cif_times <- cif_data$time
+                        cif_est <- cif_data$est
+
+                        # Create comparison data frame
+                        # Combine time points
+                        all_times <- sort(unique(c(km_times, cif_times)))
+
+                        # Interpolate both curves to same time points
+                        naive_interp <- approx(km_times, naive_cif, xout = all_times,
+                                              method = "constant", rule = 2, f = 0)$y
+                        cif_interp <- approx(cif_times, cif_est, xout = all_times,
+                                            method = "constant", rule = 2, f = 0)$y
+
+                        plot_df <- data.frame(
+                            time = rep(all_times, 2),
+                            estimate = c(naive_interp, cif_interp),
+                            method = rep(c("Naive 1-KM (Biased)", "Proper CIF (Unbiased)"),
+                                        each = length(all_times)),
+                            stringsAsFactors = FALSE
+                        )
+
+                        # Select color palette
+                        color_values <- switch(color_scheme,
+                            "colorblind" = c("#E69F00", "#009E73"),
+                            "grayscale" = c("#808080", "#000000"),
+                            c("#CC79A7", "#D55E00")  # default
+                        )
+
+                        # Create comparison plot
+                        plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = time, y = estimate, color = method, linetype = method)) +
+                            ggplot2::geom_step(size = 1) +
+                            ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                            ggplot2::scale_color_manual(values = color_values) +
+                            ggplot2::scale_linetype_manual(values = c("dashed", "solid")) +
+                            ggplot2::labs(
+                                title = "Comparison: Naive 1-KM vs. Proper CIF",
+                                subtitle = "Naive 1-KM overestimates cumulative incidence when competing risks are present",
+                                x = "Time (months)",
+                                y = "Cumulative Incidence of Disease Death",
+                                color = "Method",
+                                linetype = "Method"
+                            ) +
+                            ggtheme +
+                            ggplot2::theme(legend.position = "bottom")
+
+                        print(plot)
+                        return(TRUE)
+                    }
+                }
+
+                # If data not available, show message
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                    label = "KM vs CIF comparison requires\ncompeting risks analysis",
+                                    size = 6) +
+                    ggplot2::theme_void()
+                print(plot)
+
+            }, error = function(e) {
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                    label = paste("Error creating plot:\n", e$message),
+                                    size = 5) +
+                    ggplot2::theme_void()
+                print(plot)
+            })
+
             TRUE
         }
     )

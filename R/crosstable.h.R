@@ -14,7 +14,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pcat = "chisq",
             stratify = NULL,
             mantel_haenszel = FALSE,
-            breslow_day = FALSE, ...) {
+            breslow_day = FALSE,
+            p_adjust = "none", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -79,6 +80,16 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "breslow_day",
                 breslow_day,
                 default=FALSE)
+            private$..p_adjust <- jmvcore::OptionList$new(
+                "p_adjust",
+                p_adjust,
+                options=list(
+                    "none",
+                    "bonferroni",
+                    "holm",
+                    "BH",
+                    "BY"),
+                default="none")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
@@ -89,6 +100,7 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..stratify)
             self$.addOption(private$..mantel_haenszel)
             self$.addOption(private$..breslow_day)
+            self$.addOption(private$..p_adjust)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -99,7 +111,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pcat = function() private$..pcat$value,
         stratify = function() private$..stratify$value,
         mantel_haenszel = function() private$..mantel_haenszel$value,
-        breslow_day = function() private$..breslow_day$value),
+        breslow_day = function() private$..breslow_day$value,
+        p_adjust = function() private$..p_adjust$value),
     private = list(
         ..vars = NA,
         ..group = NA,
@@ -109,7 +122,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pcat = NA,
         ..stratify = NA,
         ..mantel_haenszel = NA,
-        ..breslow_day = NA)
+        ..breslow_day = NA,
+        ..p_adjust = NA)
 )
 
 crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -288,6 +302,8 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   strata.
 #' @param breslow_day Test whether odds ratios are homogeneous across strata.
 #'   Only applicable when Mantel-Haenszel test is enabled.
+#' @param p_adjust Method for adjusting p-values for multiple comparisons
+#'   across variables
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -313,7 +329,8 @@ crosstable <- function(
     pcat = "chisq",
     stratify = NULL,
     mantel_haenszel = FALSE,
-    breslow_day = FALSE) {
+    breslow_day = FALSE,
+    p_adjust = "none") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("crosstable requires jmvcore to be installed (restart may be required)")
@@ -340,7 +357,8 @@ crosstable <- function(
         pcat = pcat,
         stratify = stratify,
         mantel_haenszel = mantel_haenszel,
-        breslow_day = breslow_day)
+        breslow_day = breslow_day,
+        p_adjust = p_adjust)
 
     analysis <- crosstableClass$new(
         options = options,

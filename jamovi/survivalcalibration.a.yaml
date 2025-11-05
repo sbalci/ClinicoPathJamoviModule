@@ -1,0 +1,183 @@
+---
+name:  survivalcalibration
+title: Time-Dependent Survival Calibration
+menuGroup: jsurvivalT
+menuSubgroup: Model Validation
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+      Evaluate survival model performance with time-dependent calibration metrics.
+      Assess calibration, discrimination, and predictive accuracy at specific time points
+      using bootstrap validation and cross-validation. TRIPOD-compliant reporting.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage:
+            # data <- your_data
+            # ClinicoPath::survivalcalibration(
+            #   data = data,
+            #   time = "survival_time",
+            #   event = "status",
+            #   predicted = "pred_5yr_surv",
+            #   calibrationTime = 60,
+            #   validationMethod = "bootstrap"
+            # )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Survival Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Time to event or censoring (in months).
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description: >
+        Event indicator (0 = censored, 1 = event).
+
+    - name: predicted
+      title: Predicted Survival Probability
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Predicted survival probability at calibration time (0-1 scale).
+
+    - name: linearPredictor
+      title: Linear Predictor (Optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Linear predictor from Cox model (alternative to predicted probability).
+
+    - name: validationSet
+      title: Validation Set (Optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description: >
+        Grouping variable for training/validation/external sets.
+
+    - name: calibrationTime
+      title: Calibration Time Point
+      type: Number
+      default: 60
+      min: 1
+      description: >
+        Time point (in months) for calibration assessment (e.g., 60 = 5 years).
+
+    - name: calibrationTimes
+      title: Multiple Time Points
+      type: String
+      default: "12,36,60"
+      description: >
+        Comma-separated time points (in months) for calibration curves.
+
+    - name: nGroups
+      title: Number of Risk Groups
+      type: Integer
+      default: 10
+      min: 5
+      max: 20
+      description: >
+        Number of groups (deciles) for grouped calibration curves.
+
+    - name: validationMethod
+      title: Validation Method
+      type: List
+      options:
+        - title: None (apparent performance)
+          name: none
+        - title: Bootstrap (optimism correction)
+          name: bootstrap
+        - title: K-fold cross-validation
+          name: kfold
+      default: bootstrap
+      description: >
+        Internal validation method to assess model performance.
+
+    - name: nBootstrap
+      title: Number of Bootstrap Samples
+      type: Integer
+      default: 100
+      min: 50
+      max: 500
+      description: >
+        Number of bootstrap samples for optimism correction.
+
+    - name: nFolds
+      title: Number of Folds
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description: >
+        Number of folds for cross-validation.
+
+    - name: showCalibrationPlot
+      title: Show Calibration Plot
+      type: Bool
+      default: true
+      description: >
+        Display calibration plot (observed vs predicted survival).
+
+    - name: showCindexPlot
+      title: Show Time-Dependent C-Index
+      type: Bool
+      default: true
+      description: >
+        Display C-index over time with confidence intervals.
+
+    - name: showBrierPlot
+      title: Show Brier Score Plot
+      type: Bool
+      default: true
+      description: >
+        Display Brier score over time (prediction error).
+
+    - name: showGroupedCalibration
+      title: Show Grouped Calibration
+      type: Bool
+      default: true
+      description: >
+        Display calibration curves stratified by risk groups.
+
+    - name: smoothCalibration
+      title: Smooth Calibration Curve
+      type: Bool
+      default: true
+      description: >
+        Use loess smoothing for calibration curves.
+
+    - name: ciLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description: >
+        Confidence level for intervals (0.80-0.99).
+
+    - name: tripodReport
+      title: TRIPOD-Compliant Report
+      type: Bool
+      default: true
+      description: >
+        Generate TRIPOD-compliant validation report.
+
+...

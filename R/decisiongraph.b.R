@@ -2527,7 +2527,16 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 transitionProbs <- self$options$transitionProbs
                 cycleLength <- self$options$cycleLength
                 timeHorizon <- self$options$timeHorizon
-                discountRate <- self$options$discountRate
+
+                # Get discount rates (separate or combined)
+                if (self$options$separateDiscountRates) {
+                    discountRateCost <- self$options$discountRateCost
+                    discountRateUtility <- self$options$discountRateUtility
+                } else {
+                    discountRateCost <- self$options$discountRate
+                    discountRateUtility <- self$options$discountRate
+                }
+
                 halfCycleCorrection <- private$DECISIONGRAPH_DEFAULTS$half_cycle_correction
 
                 if (is.null(healthStates) || is.null(transitionProbs)) {
@@ -2585,10 +2594,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         cycleUtilities <- (cycleUtilities + sum(cohortTrace[cycle - 1, ] * utilities)) / 2
                     }
 
-                    # Apply discounting
-                    discountFactor <- 1 / ((1 + discountRate) ^ ((cycle - 1) * cycleLength))
-                    discountedCosts[cycle] <- cycleCosts * discountFactor
-                    discountedUtilities[cycle] <- cycleUtilities * discountFactor
+                    # Apply discounting with separate rates for costs and utilities
+                    discountFactorCost <- 1 / ((1 + discountRateCost) ^ ((cycle - 1) * cycleLength))
+                    discountFactorUtility <- 1 / ((1 + discountRateUtility) ^ ((cycle - 1) * cycleLength))
+                    discountedCosts[cycle] <- cycleCosts * discountFactorCost
+                    discountedUtilities[cycle] <- cycleUtilities * discountFactorUtility
 
                     # Cumulative values
                     cumulativeCosts[cycle] <- sum(discountedCosts[1:cycle])
@@ -2766,6 +2776,15 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 cycleLength <- self$options$cycleLength
                 timeHorizon <- self$options$timeHorizon
 
+                # Get discount rates (separate or combined)
+                if (self$options$separateDiscountRates) {
+                    discountRateCost <- self$options$discountRateCost
+                    discountRateUtility <- self$options$discountRateUtility
+                } else {
+                    discountRateCost <- self$options$discountRate
+                    discountRateUtility <- self$options$discountRate
+                }
+
                 if (is.null(healthStates) || length(healthStates) == 0) {
                     return(NULL)
                 }
@@ -2864,11 +2883,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     cycleCost <- sum(cohortTrace[cycle, ] * stateCosts) * cycleLength
                     cycleUtility <- sum(cohortTrace[cycle, ] * stateUtilities) * cycleLength
 
-                    # Apply discounting
-                    discountFactor <- (1 + self$options$discountRate)^(-(cycle - 1) * cycleLength)
+                    # Apply discounting with separate rates for costs and utilities
+                    discountFactorCost <- (1 + discountRateCost)^(-(cycle - 1) * cycleLength)
+                    discountFactorUtility <- (1 + discountRateUtility)^(-(cycle - 1) * cycleLength)
 
-                    cumulativeCosts[cycle] <- cumulativeCosts[cycle - 1] + cycleCost * discountFactor
-                    cumulativeUtilities[cycle] <- cumulativeUtilities[cycle - 1] + cycleUtility * discountFactor
+                    cumulativeCosts[cycle] <- cumulativeCosts[cycle - 1] + cycleCost * discountFactorCost
+                    cumulativeUtilities[cycle] <- cumulativeUtilities[cycle - 1] + cycleUtility * discountFactorUtility
                 }
 
                 # Use local variable instead of private storage

@@ -1,0 +1,81 @@
+name: predmodel
+title: Clinical Prediction Model
+jus: '2.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    name: variablesupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+            height: large
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Building
+        children:
+          - type: ComboBox
+            name: modelSelection
+            label: Variable Selection Method
+          - type: TextBox
+            name: ciLevel
+            format: number
+            label: Confidence Level (0.80-0.99)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Validation
+        children:
+          - type: ComboBox
+            name: validationMethod
+            label: Validation Method
+          - type: TextBox
+            name: nBootstrap
+            format: number
+            label: Bootstrap Samples
+            enable: (validationMethod:bootstrap)
+          - type: TextBox
+            name: nFolds
+            format: number
+            label: Number of Folds
+            enable: (validationMethod:kfold)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        children:
+          - type: CheckBox
+            name: showCalibration
+            label: Show Calibration Analysis
+          - type: CheckBox
+            name: showDiscrimination
+            label: Show Discrimination Analysis
+          - type: CheckBox
+            name: showRiskGroups
+            label: Show Risk Stratification
+          - type: TextBox
+            name: riskCutoffs
+            format: string
+            label: Risk Cutoffs (comma-separated)
+            enable: (showRiskGroups)

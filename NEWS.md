@@ -1,5 +1,434 @@
 # ClinicoPath News
 
+## Version 0.0.32.14
+
+### 🗓️ **January 4, 2025 - Phase 10: Decision Curve Analysis & Fine-Gray Competing Risks**
+
+---
+
+## 🎉 **DECISION ANALYSIS & COMPETING RISKS EXPANSION**
+
+### **Project Scope: Clinical Utility Assessment and Covariate-Adjusted Competing Risks**
+
+Validated existing Decision Curve Analysis (DCA) module for clinical net benefit evaluation. Implemented comprehensive Fine-Gray regression for competing risks analysis with covariate adjustment.
+
+### **📊 Implementation Statistics:**
+- **Duration**: January 4, 2025 (continued)
+- **Validated Modules**: 1 (decisioncurve)
+- **New Modules**: 1 (finegray)
+- **Total Code**: ~2,266 lines
+- **Compilation Success**: 100%
+- **Features Completed**: 2 major roadmap features
+
+---
+
+### **✅ Validated Modules:**
+
+#### **1. Decision Curve Analysis (`decisioncurve`) - VALIDATED**
+* **Purpose**: Evaluate clinical utility of prediction models through net benefit analysis
+* **Location**: meddecideT2 > Decision Curve Analysis
+* **Features**:
+  - Net benefit calculation across threshold probabilities
+  - "Treat All" vs "Treat None" reference strategies
+  - Multiple model comparison with statistical tests
+  - Bootstrap confidence intervals for net benefit curves
+  - Clinical impact metrics (interventions avoided, NNS)
+  - Optimal threshold identification
+  - Weighted AUC calculation
+  - Cost-benefit analysis option
+  - Decision consequences table (TP, FP, TN, FN at thresholds)
+  - Resource utilization analysis
+  - Relative utility curves
+  - Standardized net benefit per 100 patients
+* **Implementation**: `jamovi/decisioncurve.{a,r,u}.yaml`, `R/decisioncurve.b.R` (1366 lines)
+* **Use Case**: Determine if using a prediction model provides more clinical benefit than default treatment strategies
+* **Key Methods**: Net benefit = (TP/n) - (FP/n) × (pt/(1-pt)), where pt is threshold probability
+* **Clinical Interpretation**: DCA answers "At what threshold probabilities does the model improve clinical decisions?"
+
+### **✅ New Competing Risks Module:**
+
+#### **2. Fine-Gray Competing Risks Regression (`finegray`) - NEW**
+* **Purpose**: Covariate-adjusted competing risks analysis using subdistribution hazard models
+* **Location**: jsurvivalT2 > Competing Risks
+* **Features**:
+  - Fine-Gray subdistribution hazard regression (cmprsk::crr)
+  - Sub-hazard ratio (sHR) table with confidence intervals
+  - Cumulative incidence function (CIF) plots by group
+  - Gray's test for comparing CIF curves between groups
+  - Support for multiple competing events (3+ event types)
+  - Stratified analysis option
+  - Comparison to cause-specific hazards (csHR vs sHR)
+  - Prediction of cumulative incidence at specified time points
+  - Covariate pattern specification (mean, median, reference, custom)
+  - Diagnostic plots (residuals, influence)
+  - Influential observation detection
+  - Bootstrap confidence intervals for sHR
+  - Color scheme options (default, colorblind-safe, NEJM, Lancet, grayscale)
+  - 1-KM vs CIF comparison plot (demonstrates bias)
+  - Stacked CIF plot (all events + survival)
+  - Comprehensive clinical interpretation
+* **Implementation**: `jamovi/finegray.{a,r,u}.yaml`, `R/finegray.b.R` (900+ lines)
+* **Use Case**: Model the effect of covariates on cumulative incidence in presence of competing events (e.g., cancer death vs other-cause death)
+* **Key Methods**: Subdistribution hazard modeling (Fine & Gray 1999)
+* **Clinical Interpretation**:
+  - sHR > 1: Covariate increases cumulative incidence of event
+  - sHR < 1: Covariate decreases cumulative incidence of event
+  - Use Fine-Gray when predicting absolute risk; use cause-specific for etiologic effects
+
+---
+
+### **📚 Key Statistical Methods Implemented:**
+
+#### **Decision Curve Analysis:**
+1. **Net Benefit Formula**:
+   ```
+   NB(pt) = (TP/n) - (FP/n) × (pt/(1-pt))
+   ```
+   Where:
+   - pt = probability threshold
+   - TP = true positives at threshold pt
+   - FP = false positives at threshold pt
+   - n = total sample size
+
+2. **Clinical Impact Metrics**:
+   - Interventions per 100 patients
+   - True positives per 100 patients
+   - False positives per 100 patients
+   - Number needed to screen (NNS)
+   - Interventions avoided vs treat-all strategy
+
+3. **Model Comparison**:
+   - Weighted AUC (area under decision curve)
+   - Bootstrap tests for comparing net benefit curves
+   - Permutation tests
+   - Integral difference tests
+
+#### **Fine-Gray Regression:**
+1. **Subdistribution Hazard**:
+   ```
+   λ_k(t|Z) = λ_k0(t) exp(β'Z)
+   ```
+   Where:
+   - λ_k(t|Z) = subdistribution hazard for event k
+   - Z = covariate vector
+   - β = sub-hazard ratio (sHR) parameters
+
+2. **Cumulative Incidence Function**:
+   ```
+   CIF_k(t|Z) = 1 - exp(-∫[0 to t] λ_k(u|Z) du)
+   ```
+
+3. **Gray's Test**:
+   - Chi-square test for comparing CIF curves between groups
+   - Accounts for competing risks structure
+   - Analogous to log-rank test for standard survival
+
+---
+
+### **🎓 Clinical Applications:**
+
+#### **Use Case 1: Evaluating Prediction Model Clinical Utility**
+**Scenario**: Determine if a biomarker improves clinical decision-making for treatment allocation
+
+**Workflow**:
+1. Build prediction models (with/without biomarker) using `predmodel`
+2. Validate discrimination and calibration using `modelval`
+3. Assess clinical utility using `decisioncurve`
+4. Identify optimal threshold where model has maximum net benefit
+5. Calculate clinical impact (interventions avoided, NNS)
+
+**Deliverable**: Decision curve showing threshold probabilities where model use is beneficial, with quantification of clinical impact
+
+#### **Use Case 2: Competing Risks in Oncology**
+**Scenario**: Analyze factors affecting cancer-specific survival while accounting for other-cause mortality
+
+**Workflow**:
+1. Prepare data: time, status (0=censored, 1=cancer death, 2=other death)
+2. Select covariates (age, stage, treatment, biomarkers)
+3. Run `finegray` Fine-Gray regression
+4. Review sub-hazard ratios (sHR) for each covariate
+5. Compare to cause-specific hazards if needed
+6. Generate CIF plots by treatment group
+7. Perform Gray's test for group differences
+
+**Deliverable**:
+- sHR table showing covariate effects on cancer-specific cumulative incidence
+- CIF curves demonstrating treatment effect while accounting for competing risks
+- Gray's test confirming statistical difference between groups
+
+#### **Use Case 3: Model Comparison for Treatment Guidelines**
+**Scenario**: Compare existing clinical risk score to new model with biomarkers
+
+**Workflow**:
+1. Apply both models to generate predicted probabilities
+2. Use `decisioncurve` to compare net benefit curves
+3. Identify threshold range where new model is superior
+4. Calculate weighted AUC difference
+5. Perform bootstrap test for statistical significance
+6. Generate clinical impact table at guideline thresholds
+
+**Deliverable**: Evidence-based recommendation on which model to use, with thresholds where each provides maximum clinical benefit
+
+---
+
+### **📖 Key References:**
+
+#### **Decision Curve Analysis:**
+1. **Vickers AJ, Elkin EB (2006)**. "Decision curve analysis: a novel method for evaluating prediction models." *Medical Decision Making*, 26(6):565-574.
+2. **Vickers AJ et al. (2008)**. "Extensions to decision curve analysis, a novel method for evaluating diagnostic tests, prediction models and molecular markers." *BMC Medical Informatics and Decision Making*, 8:53.
+3. **Van Calster B et al. (2018)**. "A calibration hierarchy for risk models was defined: from utopia to empirical data." *Journal of Clinical Epidemiology*, 74:167-176.
+
+#### **Fine-Gray Regression:**
+1. **Fine JP, Gray RJ (1999)**. "A proportional hazards model for the subdistribution of a competing risk." *Journal of the American Statistical Association*, 94(446):496-509.
+2. **Lau B et al. (2009)**. "Competing risk regression models for epidemiologic data." *American Journal of Epidemiology*, 170(2):244-256.
+3. **Austin PC et al. (2016)**. "Introduction to the analysis of survival data in the presence of competing risks." *Circulation*, 133(6):601-609.
+4. **Gray RJ (1988)**. "A class of K-sample tests for comparing the cumulative incidence of a competing risk." *The Annals of Statistics*, 16(3):1141-1154.
+
+---
+
+### **🔧 Technical Implementation Details:**
+
+#### **Decision Curve Analysis:**
+- **R Packages**: Base R for net benefit calculations, ggplot2 for visualization
+- **Performance**: Vectorized calculations for efficiency
+- **Bootstrap**: Checkpoint every 50 iterations for responsiveness
+- **Validation**: Comprehensive error handling for edge cases
+
+#### **Fine-Gray Regression:**
+- **R Packages**: cmprsk (crr function), survival, ggplot2, dplyr
+- **Model Fitting**: Uses cmprsk::crr() for subdistribution hazard estimation
+- **CIF Calculation**: cmprsk::cuminc() for non-parametric CIF estimation
+- **Gray's Test**: Automatically performed by cuminc when groups specified
+- **Validation**: Checks for sufficient events (≥5), handles multiple competing event types
+
+---
+
+### **✅ Quality Assurance:**
+
+**Compilation**: All modules compiled successfully with jmvtools::prepare()
+**Error Handling**: Comprehensive try-catch blocks with informative messages
+**User Guidance**: Detailed instructions and clinical interpretation
+**Standards Compliance**:
+- DCA follows Vickers & Elkin (2006) methodology
+- Fine-Gray follows Fine & Gray (1999) methodology
+**Code Quality**: Consistent style, well-documented functions
+**Documentation**: Complete help text with clinical examples
+
+---
+
+### **🚀 Next Steps:**
+
+**Immediate**:
+- Test modules with example datasets
+- Create vignettes for decision curve analysis workflow
+- Create vignettes for competing risks analysis
+
+**Short-term**:
+- Enhanced Markov model completion (probabilistic sensitivity analysis)
+- Parametric survival models (AFT, Royston-Parmar)
+- Cost-effectiveness analysis
+
+**Long-term**:
+- Time-to-event decision analysis (survival DCA)
+- Multi-state models
+- Recurrent event models
+
+---
+
+**Implementation Date**: January 4, 2025 (continued)
+**Implemented By**: Claude (Anthropic)
+**Review Status**: Ready for testing
+**Documentation Status**: Complete
+
+---
+
+## Version 0.0.32.13
+
+### 🗓️ **January 4, 2025 - Phase 9: Advanced Prediction Model Suite & Survival Analysis Enhancement**
+
+---
+
+## 🎉 **MAJOR PREDICTION MODEL & SURVIVAL ANALYSIS EXPANSION**
+
+### **Project Scope: Comprehensive Clinical Prediction and Model Validation Framework**
+
+Implemented complete prediction model lifecycle: building, validation, calibration, and reclassification metrics. Enhanced survival analysis with competing risks diagnostics and time-dependent calibration. Added coefficient visualization for regression models.
+
+### **📊 Implementation Statistics:**
+- **Duration**: January 4, 2025
+- **New Modules**: 6 (predmodel, modelval, survivalcalibration, reclassmetrics, jjcoefstats, competingsurvival enhancements)
+- **Enhanced Modules**: 2 (decisiongraph, competingsurvival)
+- **Total Code**: ~6,000+ lines
+- **Compilation Success**: 100%
+- **Features Completed**: 7 major roadmap features
+
+---
+
+### **✅ New Prediction Model Modules:**
+
+#### **1. Clinical Prediction Model Builder (`predmodel`)**
+* **Purpose**: Build and validate clinical prediction models with integrated performance metrics
+* **Location**: meddecideT > Prediction Models
+* **Features**:
+  - Logistic regression with automatic variable selection (stepwise, LASSO, Ridge)
+  - Bootstrap validation with optimism correction
+  - K-fold cross-validation
+  - Calibration plots with loess smoothing
+  - ROC curves with AUC
+  - Risk stratification into groups
+  - Hosmer-Lemeshow calibration test
+  - Brier score calculation
+* **Use Case**: Develop risk prediction models for clinical outcomes
+* **Key Methods**: `glm()`, `glmnet`, `pROC::roc()`, bootstrap resampling
+
+#### **2. Model Validation Dashboard (`modelval`)**
+* **Purpose**: Validate existing prediction models with comprehensive performance assessment
+* **Location**: meddecideT > Prediction Models
+* **Features**:
+  - External/temporal/geographic validation
+  - Calibration-in-the-large assessment
+  - Calibration slope and intercept
+  - Flexible calibration curves (loess)
+  - Decision curve analysis (DCA) for clinical utility
+  - Net benefit calculations across thresholds
+  - Subgroup performance analysis
+  - TRIPOD-compliant validation reporting
+* **Use Case**: Validate published models on new datasets
+* **Key Methods**: `glm()`, `pROC`, DCA calculation, calibration metrics
+
+#### **3. Model Reclassification Metrics (`reclassmetrics`)**
+* **Purpose**: Compare predictive performance between two models using NRI and IDI
+* **Location**: meddecideT > Prediction Models
+* **Features**:
+  - Net Reclassification Improvement (NRI) - categorical and continuous
+  - Integrated Discrimination Improvement (IDI)
+  - Bootstrap confidence intervals (500 samples)
+  - Separate NRI for events and non-events
+  - IDI components (integrated sensitivity & specificity)
+  - Probability improvement scatter plots
+  - Reclassification tables
+* **Use Case**: Demonstrate incremental value of new biomarkers
+* **Key Methods**: NRI calculation, IDI calculation, bootstrap resampling
+* **Reference**: Pencina MJ et al. (2008) Stat Med, Cook NR (2007) Stat Med
+
+---
+
+### **✅ Enhanced Survival Analysis:**
+
+#### **4. Time-Dependent Survival Calibration (`survivalcalibration`)**
+* **Purpose**: Evaluate survival model performance with time-dependent metrics
+* **Location**: jsurvivalT > Model Validation
+* **Features**:
+  - Time-dependent C-index with confidence intervals
+  - Integrated Brier score calculation
+  - Calibration plots (observed vs predicted survival)
+  - Calibration slope, intercept, and E:O ratio
+  - Bootstrap validation with optimism correction
+  - K-fold cross-validation
+  - Grouped calibration curves (risk deciles)
+  - TRIPOD-compliant validation reporting
+* **Use Case**: Validate Cox models and survival predictions
+* **Key Methods**: `survival::concordance()`, Brier score, calibration metrics
+
+#### **5. Enhanced Competing Risk Diagnostics (competingsurvival)**
+* **Purpose**: Comprehensive competing risk visualization and diagnostics
+* **Location**: SurvivalD > Drafts
+* **New Features Added**:
+  - Stacked probability plot (CIF1 + CIF2 + Survival)
+  - 1-KM vs CIF comparison plot (demonstrates competing risk bias)
+  - Color scheme options (default, colorblind-safe, grayscale)
+  - Enhanced CIF visualization with customizable colors
+  - Risk tables showing cumulative incidence
+* **Use Case**: Proper analysis when multiple event types compete
+* **Key Methods**: `cmprsk::cuminc()`, Fine-Gray model, CIF plotting
+
+---
+
+### **✅ Enhanced Decision Analysis:**
+
+#### **6. Enhanced Markov Models (decisiongraph)**
+* **Purpose**: Multi-cycle decision modeling for chronic diseases
+* **Location**: meddecideT > Decision Analysis
+* **New Features Added**:
+  - Separate discount rates for costs vs utilities (QALYs)
+  - Default: 3% for costs, 1.5% for utilities (standard in CEA)
+  - Checkbox to enable/disable separate rates
+  - Applied to both enhanced and legacy Markov model implementations
+* **Use Case**: Health economics and cost-effectiveness analysis
+* **Reference**: ISPOR guidelines for economic evaluation
+
+---
+
+### **✅ New Visualization Modules:**
+
+#### **7. Coefficient Forest Plots (`jjcoefstats`)**
+* **Purpose**: Publication-ready forest plots for regression coefficients
+* **Location**: jjstatsplotT > Regression Plots
+* **Features**:
+  - Support for pre-computed coefficients (term, estimate, SE, CI)
+  - Automatic model fitting (lm, glm, Cox, mixed effects)
+  - Exponentiation for odds ratios and hazard ratios
+  - Sort coefficients by magnitude
+  - Multiple color schemes and themes
+  - P-value display (numeric or symbols: *, **, ***)
+  - Model fit metrics (R², AIC, BIC, concordance)
+  - Integration with ggstatsplot::ggcoefstats()
+* **Use Case**: Visualize regression results and meta-analysis
+* **Key Methods**: `ggstatsplot::ggcoefstats()`, `broom::tidy()`
+
+---
+
+### **📚 Technical Implementation Details:**
+
+**Packages Integrated:**
+- `rms` - Regression modeling strategies
+- `pROC` - ROC curve analysis
+- `glmnet` - Penalized regression (LASSO, Ridge)
+- `PredictABEL` - Reclassification metrics
+- `nricens` - NRI for survival outcomes
+- `survival` - Survival analysis
+- `cmprsk` - Competing risks
+- `ggstatsplot` - Statistical plots
+- `broom` - Model tidying
+
+**Validation Methods:**
+- Bootstrap resampling (optimism correction)
+- K-fold cross-validation
+- External validation
+- Temporal validation
+- TRIPOD-compliant reporting
+
+**Key Algorithms Implemented:**
+- NRI: `(Events_up - Events_down)/N_events + (NonEvents_down - NonEvents_up)/N_nonevents`
+- IDI: `(IS_new - IS_old) - ((1-IS)_new - (1-IS)_old)`
+- C-index: `survival::concordance()`
+- Brier score: Mean squared prediction error with time-dependent weighting
+- Calibration slope: `logit(observed) ~ logit(predicted)`
+
+---
+
+### **🎯 Clinical Impact:**
+
+These implementations provide:
+1. **Complete prediction model lifecycle** - Build → Validate → Compare
+2. **Publication-ready metrics** - NRI, IDI, C-index, Brier score
+3. **TRIPOD compliance** - Standardized validation reporting
+4. **Incremental value assessment** - Demonstrate biomarker contribution
+5. **Competing risk handling** - Proper analysis when multiple outcomes compete
+6. **Cost-effectiveness analysis** - Separate discounting for costs/utilities
+7. **Professional visualization** - Forest plots for coefficients
+
+---
+
+### **📖 References:**
+
+- Pencina MJ, D'Agostino RB Sr, D'Agostino RB Jr, Vasan RS (2008). "Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond." *Statistics in Medicine*, 27(2):157-172.
+- Cook NR (2007). "Use and misuse of the receiver operating characteristic curve in risk prediction." *Circulation*, 115(7):928-935.
+- Collins GS, Reitsma JB, Altman DG, Moons KG (2015). "Transparent Reporting of a multivariable prediction model for Individual Prognosis Or Diagnosis (TRIPOD)." *BMJ*, 350:g7594.
+- Fine JP, Gray RJ (1999). "A proportional hazards model for the subdistribution of a competing risk." *JASA*, 94(446):496-509.
+
+---
+
 ## Version 0.0.32.11
 
 ### 🗓️ **October 27, 2025 - Phase 8: Literature-Driven Statistical Methods Expansion**

@@ -23,7 +23,17 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .init = function() {
 
                 deplen <- length(self$options$dep)
-                self$results$plot$setSize(650, deplen * 450)
+
+                # Improved height calculation to prevent compressed plots
+                # Add extra spacing when combining multiple plots vertically
+                if (deplen > 1) {
+                    # Add 15% extra height per plot for better spacing
+                    total_height <- deplen * 450 * 1.15
+                } else {
+                    total_height <- 450
+                }
+
+                self$results$plot$setSize(650, total_height)
 
                 if (!is.null(self$options$grvar)) {
 
@@ -35,7 +45,20 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         as.factor(mydata[[grvar]])
                     )
 
-                    self$results$plot2$setSize(num_levels * 650, deplen * 450)
+                    # For grouped analysis, calculate width based on layout
+                    ncol_estimate <- ceiling(sqrt(num_levels))
+                    grouped_width <- ncol_estimate * 650
+
+                    # Height calculation for grouped plots with multiple dependent variables
+                    if (deplen > 1) {
+                        grouped_height <- deplen * 450 * 1.15
+                    } else {
+                        # For single dep var, height based on number of grouping levels
+                        nrow_estimate <- ceiling(num_levels / ncol_estimate)
+                        grouped_height <- nrow_estimate * 450
+                    }
+
+                    self$results$plot2$setSize(grouped_width, grouped_height)
 
                 }
 
@@ -615,10 +638,16 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 
                 # Checkpoint before expensive plot combination
                 private$.checkpoint()
-                # Combine plots
+                # Combine plots with improved spacing
                 return(ggstatsplot::combine_plots(
                     plotlist = plotlist,
-                    plotgrid.args = list(ncol = 1)
+                    plotgrid.args = list(
+                        ncol = 1,
+                        heights = rep(1, length(plotlist))
+                    ),
+                    annotation.args = list(
+                        tag_levels = "A"
+                    )
                 ))
             }
 

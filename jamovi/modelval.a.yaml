@@ -1,0 +1,142 @@
+---
+name:  modelval
+title: Model Validation Dashboard
+menuGroup: meddecideT
+menuSubgroup: Prediction Models
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+      Comprehensive validation dashboard for clinical prediction models.
+      Assess calibration, discrimination, and clinical utility using
+      predicted probabilities from existing models. Supports external
+      validation, temporal validation, and subgroup analysis.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage:
+            # data <- your_data
+            # ClinicoPath::modelval(
+            #   data = data,
+            #   outcome = "disease",
+            #   predicted = "risk_score",
+            #   validationType = "external",
+            #   subgroup = "hospital"
+            # )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description: >
+        Binary outcome variable (observed events: yes/no).
+
+    - name: predicted
+      title: Predicted Probability
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Predicted probabilities from the existing model (0-1 scale).
+
+    - name: validationType
+      title: Validation Type
+      type: List
+      options:
+        - title: External validation
+          name: external
+        - title: Temporal validation
+          name: temporal
+        - title: Geographic validation
+          name: geographic
+        - title: General validation
+          name: general
+      default: general
+      description: >
+        Type of validation being performed.
+
+    - name: subgroup
+      title: Subgroup Variable (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description: >
+        Variable for subgroup analysis (e.g., hospital, time period, sex).
+
+    - name: showCalibrationLarge
+      title: Calibration-in-the-Large
+      type: Bool
+      default: true
+      description: >
+        Test if predicted probabilities are systematically too high or low.
+
+    - name: showCalibrationSlope
+      title: Calibration Slope
+      type: Bool
+      default: true
+      description: >
+        Assess if model predictions are too extreme (slope ≠ 1).
+
+    - name: showFlexibleCalibration
+      title: Flexible Calibration Curve
+      type: Bool
+      default: true
+      description: >
+        Display smooth calibration curve using loess/splines.
+
+    - name: calibrationGroups
+      title: Number of Calibration Groups
+      type: Integer
+      default: 10
+      min: 5
+      max: 20
+      description: >
+        Number of groups for calibration plot (typically 10).
+
+    - name: showDiscrimination
+      title: Show Discrimination Metrics
+      type: Bool
+      default: true
+      description: >
+        Display AUC, Brier score, and scaled Brier score.
+
+    - name: showNetBenefit
+      title: Show Net Benefit (DCA)
+      type: Bool
+      default: true
+      description: >
+        Perform decision curve analysis for clinical utility.
+
+    - name: thresholdRange
+      title: Threshold Range for DCA
+      type: String
+      default: "0.01, 0.99"
+      description: >
+        Min and max threshold probabilities (comma-separated).
+
+    - name: showSubgroupAnalysis
+      title: Show Subgroup Performance
+      type: Bool
+      default: false
+      description: >
+        Compare model performance across subgroups.
+
+    - name: ciLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description: >
+        Confidence level for intervals (0.80-0.99).
+...

@@ -1,0 +1,197 @@
+---
+name: mendelianrandomization
+title: Mendelian Randomization
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: Data Information
+      type: Preformatted
+      visible: true
+
+    # SNP Selection Results ----
+    - name: snpSelection
+      title: SNP Selection Summary
+      type: Html
+      visible: true
+
+    - name: selectedSNPs
+      title: Selected Instrumental Variables
+      type: Table
+      rows: 0
+      columns:
+        - name: snp
+          title: SNP
+          type: text
+        - name: beta_exp
+          title: β (Exposure)
+          type: number
+        - name: se_exp
+          title: SE (Exposure)
+          type: number
+        - name: pval_exp
+          title: P-value (Exp)
+          type: number
+          format: zto,pvalue
+        - name: beta_out
+          title: β (Outcome)
+          type: number
+        - name: se_out
+          title: SE (Outcome)
+          type: number
+        - name: pval_out
+          title: P-value (Out)
+          type: number
+          format: zto,pvalue
+
+    # MR Results ----
+    - name: mrResults
+      title: Mendelian Randomization Estimates
+      type: Table
+      rows: 0
+      columns:
+        - name: method
+          title: Method
+          type: text
+        - name: n_snps
+          title: N SNPs
+          type: integer
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower
+          superTitle: 95% CI
+          type: number
+        - name: ci_upper
+          title: Upper
+          superTitle: 95% CI
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+
+    # Heterogeneity Tests ----
+    - name: heterogeneityTable
+      title: Heterogeneity Statistics
+      type: Table
+      rows: 0
+      visible: (heterogeneity_test)
+      columns:
+        - name: method
+          title: Method
+          type: text
+        - name: q_statistic
+          title: Q Statistic
+          type: number
+        - name: q_df
+          title: df
+          type: integer
+        - name: q_pval
+          title: Q P-value
+          type: number
+          format: zto,pvalue
+        - name: i2
+          title: I² (%)
+          type: number
+
+    # Pleiotropy Test ----
+    - name: pleiotropyTable
+      title: Horizontal Pleiotropy Test (MR-Egger Intercept)
+      type: Table
+      rows: 0
+      visible: (pleiotropy_test)
+      columns:
+        - name: intercept
+          title: Intercept
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    # Leave-One-Out Analysis ----
+    - name: looTable
+      title: Leave-One-Out Analysis
+      type: Table
+      rows: 0
+      visible: (leave_one_out)
+      columns:
+        - name: snp_removed
+          title: SNP Removed
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+
+    # MR-PRESSO Results ----
+    - name: pressoResults
+      title: MR-PRESSO Outlier Analysis
+      type: Html
+      visible: (mr_presso)
+
+    # Plots ----
+    - name: forestPlot
+      title: Forest Plot - MR Estimates
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotForest
+      visible: (plot_forest)
+
+    - name: funnelPlot
+      title: Funnel Plot - Asymmetry Assessment
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotFunnel
+      visible: (plot_funnel)
+
+    - name: scatterPlot
+      title: Scatter Plot - SNP Effects
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotScatter
+      visible: (plot_scatter)
+
+    - name: looPlot
+      title: Leave-One-Out Plot
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotLeaveOneOut
+      visible: (plot_loo)
+
+    # Interpretation ----
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: true
+
+    - name: assumptions
+      title: MR Assumptions Check
+      type: Html
+      visible: true
+...

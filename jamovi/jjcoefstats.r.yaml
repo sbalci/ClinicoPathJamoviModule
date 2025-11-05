@@ -1,0 +1,92 @@
+---
+name:  jjcoefstats
+title: Coefficient Forest Plot
+jrs:   '1.1'
+
+items:
+
+    - name:  instructions
+      title: Instructions
+      type:  Html
+      visible: true
+
+    - name:  coefPlot
+      title: Coefficient Forest Plot
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .coefPlot
+      requiresData: true
+      clearWith:
+          - term
+          - estimate
+          - stdError
+          - outcome
+          - predictors
+          - modelType
+          - sortCoefs
+          - excludeIntercept
+          - exponentiate
+          - referenceValue
+
+    - name:  modelSummary
+      title: Model Summary
+      type:  Html
+      visible: true
+
+    - name:  coefficientTable
+      title: Coefficients Table
+      type:  Table
+      visible: true
+      rows: 0
+      columns:
+          - name: term
+            title: 'Term'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: std_error
+            title: 'Std. Error'
+            type: number
+          - name: statistic
+            title: 'Statistic'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: conf_low
+            title: 'CI Lower'
+            type: number
+          - name: conf_high
+            title: 'CI Upper'
+            type: number
+
+    - name:  modelMetrics
+      title: Model Fit Metrics
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: text
+
+
+refs:
+    - ClinicoPathJamoviModule
+
+    - janitor
+    - labelled
+    - glue
+    - ggstatsplot
+    - ggplot2
+    - broom
+    - survival
+    - lme4
+
+...

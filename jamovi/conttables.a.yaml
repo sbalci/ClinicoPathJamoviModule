@@ -1,7 +1,7 @@
 ---
 name: contTables
 title: Contingency Tables
-menuGroup: ExplorationD
+menuGroup: ExplorationT
 menuSubgroup:  Frequencies Contingency Tables
 menuTitle: Independent Samples
 menuSubtitle: χ² test of association
@@ -201,6 +201,24 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide the relative risk (only available
+            for 2x2 tables)
+
+    - name: riskDiff
+      title: Risk difference
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the risk difference (only available
+            for 2x2 tables)
+
+    - name: nnt
+      title: Number needed to treat (NNT)
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the number needed to treat (only available
             for 2x2 tables)
 
     - name: ci

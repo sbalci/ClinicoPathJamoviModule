@@ -577,6 +577,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         coxRegressionHeading3 = function() private$.items[["coxRegressionHeading3"]],
         coxRegressionExplanation = function() private$.items[["coxRegressionExplanation"]],
         cox_ph = function() private$.items[["cox_ph"]],
+        phInterpretation = function() private$.items[["phInterpretation"]],
         plot8 = function() private$.items[["plot8"]],
         survivalTablesHeading = function() private$.items[["survivalTablesHeading"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
@@ -814,6 +815,21 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="cox_ph",
                 title="Proportional Hazards Assumption",
+                visible="(ph_cox)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "contexpl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="phInterpretation",
+                title="Proportional Hazards Assessment & Recommendations",
                 visible="(ph_cox)",
                 clearWith=list(
                     "explanatory",
@@ -1756,6 +1772,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survivalTablesHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr

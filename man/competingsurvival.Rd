@@ -18,7 +18,10 @@ competingsurvival(
   subdistribution = TRUE,
   timepoints = "12,24,36,60",
   confidencelevel = 0.95,
-  showrisksets = TRUE
+  showrisksets = TRUE,
+  showStackedPlot = FALSE,
+  showKMvsCIF = FALSE,
+  cifColors = "default"
 )
 }
 \arguments{
@@ -54,6 +57,14 @@ intervals}
 
 \item{showrisksets}{Display number at risk table below cumulative incidence
 plot}
+
+\item{showStackedPlot}{Display stacked probability plot with all competing
+events}
+
+\item{showKMvsCIF}{Plot comparison between 1-KM and CIF to show competing
+risk bias}
+
+\item{cifColors}{Color scheme for CIF plots}
 }
 \value{
 A results object containing:
@@ -63,6 +74,8 @@ A results object containing:
 \code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$cuminc} \tab \tab \tab \tab \tab a table \cr
 \code{results$comprisksPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$stackedPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$kmvscifPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 

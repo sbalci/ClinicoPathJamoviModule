@@ -1,0 +1,329 @@
+---
+name: mendelianrandomization
+title: Mendelian Randomization
+menuGroup: meddecideT
+menuSubgroup: Medical Decision Analysis
+menuTitle: Mendelian Randomization
+menuSubtitle: Causal inference with genetic variants
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: |
+        Mendelian Randomization (MR) uses genetic variants as instrumental
+        variables to infer causal relationships between exposures and outcomes.
+
+        This module supports GWAS summary statistics (NOT individual-level data)
+        and provides multiple MR methods with comprehensive sensitivity analysis.
+
+        Applications: Genetic epidemiology, drug target validation, causal
+        inference in observational studies.
+
+    R:
+        dontrun: false
+        usage: |
+            # Example: Analyze effect of BMI on coronary disease
+            mendelianrandomization(
+                exposure_data = bmi_gwas,
+                outcome_data = cad_gwas,
+                snp_column = 'rsID',
+                beta_exposure = 'beta_bmi',
+                se_exposure = 'se_bmi',
+                beta_outcome = 'beta_cad',
+                se_outcome = 'se_cad',
+                mr_methods = c('IVW', 'MR-Egger', 'Weighted Median')
+            )
+
+completeWhenFilled: false
+
+options:
+    # Data Input ----
+    - name: exposure_data
+      title: Exposure GWAS Data
+      type: Data
+      description:
+          R: GWAS summary statistics for exposure variable
+
+    - name: outcome_data
+      title: Outcome GWAS Data
+      type: Data
+      description:
+          R: GWAS summary statistics for outcome variable (optional if same dataset)
+
+    - name: use_same_dataset
+      title: Use Same Dataset for Both
+      type: Bool
+      default: true
+      description:
+          R: Whether exposure and outcome are in the same dataset
+
+    # Column Mapping ----
+    - name: snp_column
+      title: SNP ID Column
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, id]
+      description:
+          R: Column containing SNP identifiers (e.g., rsID)
+
+    - name: beta_exposure
+      title: Exposure Beta Column
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Effect size (beta) for exposure
+
+    - name: se_exposure
+      title: Exposure SE Column
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Standard error for exposure beta
+
+    - name: pval_exposure
+      title: Exposure P-value Column
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          R: P-value for exposure association
+
+    - name: beta_outcome
+      title: Outcome Beta Column
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Effect size (beta) for outcome
+
+    - name: se_outcome
+      title: Outcome SE Column
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Standard error for outcome beta
+
+    - name: pval_outcome
+      title: Outcome P-value Column
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          R: P-value for outcome association
+
+    - name: eaf_column
+      title: Effect Allele Frequency Column
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          R: Effect allele frequency (optional)
+
+    # SNP Selection ----
+    - name: pval_threshold
+      title: P-value Threshold for SNP Selection
+      type: Number
+      default: 0.00000005
+      min: 0.000000001
+      max: 0.01
+      description:
+          R: Genome-wide significance threshold (default 5e-8)
+
+    - name: clump_r2
+      title: LD Clumping R² Threshold
+      type: Number
+      default: 0.001
+      min: 0.0001
+      max: 0.1
+      description:
+          R: R² threshold for LD clumping
+
+    - name: clump_kb
+      title: LD Clumping Window (kb)
+      type: Integer
+      default: 10000
+      min: 250
+      max: 10000
+      description:
+          R: Distance window for LD clumping in kilobases
+
+    # MR Methods ----
+    - name: mr_methods
+      title: MR Methods to Perform
+      type: List
+      options:
+        - name: all
+          title: All Methods
+        - name: ivw
+          title: IVW Only
+        - name: egger
+          title: MR-Egger Only
+        - name: weighted_median
+          title: Weighted Median Only
+        - name: ivw_egger
+          title: IVW + MR-Egger
+        - name: main_three
+          title: IVW + Egger + Weighted Median
+      default: main_three
+      description:
+          R: Which MR methods to perform
+
+    - name: ivw_model
+      title: IVW Model Type
+      type: List
+      options:
+        - name: fixed
+          title: Fixed Effects
+        - name: random
+          title: Random Effects (DerSimonian-Laird)
+        - name: multiplicative
+          title: Multiplicative Random Effects
+      default: random
+      description:
+          R: Model specification for IVW method
+
+    - name: egger_bootstrap
+      title: MR-Egger Bootstrap
+      type: Bool
+      default: false
+      description:
+          R: Use bootstrap for MR-Egger confidence intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: Number of bootstrap samples
+
+    # Sensitivity Analysis ----
+    - name: heterogeneity_test
+      title: Heterogeneity Test
+      type: Bool
+      default: true
+      description:
+          R: Perform Cochran Q heterogeneity test
+
+    - name: pleiotropy_test
+      title: Horizontal Pleiotropy Test
+      type: Bool
+      default: true
+      description:
+          R: Test for horizontal pleiotropy (MR-Egger intercept)
+
+    - name: leave_one_out
+      title: Leave-One-Out Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform leave-one-out sensitivity analysis
+
+    - name: single_snp_analysis
+      title: Single SNP Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze each SNP individually
+
+    - name: mr_presso
+      title: MR-PRESSO Outlier Detection
+      type: Bool
+      default: false
+      description:
+          R: Detect and correct for outliers using MR-PRESSO
+
+    - name: presso_threshold
+      title: MR-PRESSO Outlier Threshold
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.1
+      description:
+          R: P-value threshold for MR-PRESSO outlier detection
+
+    # Visualization ----
+    - name: plot_forest
+      title: Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate forest plot of MR estimates
+
+    - name: plot_funnel
+      title: Funnel Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate funnel plot for asymmetry assessment
+
+    - name: plot_scatter
+      title: Scatter Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate scatter plot with method lines
+
+    - name: plot_loo
+      title: Leave-One-Out Plot
+      type: Bool
+      default: true
+      description:
+          R: Plot leave-one-out analysis results
+
+    # Advanced Options ----
+    - name: harmonize_alleles
+      title: Harmonize Alleles
+      type: Bool
+      default: true
+      description:
+          R: Harmonize exposure and outcome effect alleles
+
+    - name: remove_palindromic
+      title: Remove Palindromic SNPs
+      type: Bool
+      default: true
+      description:
+          R: Remove palindromic SNPs with ambiguous strand
+
+    - name: steiger_filtering
+      title: Steiger Filtering
+      type: Bool
+      default: false
+      description:
+          R: Filter SNPs using Steiger test for directionality
+
+    - name: min_snps
+      title: Minimum SNPs Required
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+      description:
+          R: Minimum number of SNPs required for analysis
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          R: Confidence level for intervals
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+      description:
+          R: Random seed for reproducibility
+...

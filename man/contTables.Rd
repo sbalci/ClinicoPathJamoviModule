@@ -19,6 +19,8 @@ contTables(
   logOdds = FALSE,
   odds = FALSE,
   relRisk = FALSE,
+  riskDiff = FALSE,
+  nnt = FALSE,
   ci = TRUE,
   ciWidth = 95,
   gamma = FALSE,
@@ -73,6 +75,12 @@ ratio (only available for 2x2 tables)}
 
 \item{relRisk}{\code{TRUE} or \code{FALSE} (default), provide the relative
 risk (only available for 2x2 tables)}
+
+\item{riskDiff}{\code{TRUE} or \code{FALSE} (default), provide the risk
+difference (only available for 2x2 tables)}
+
+\item{nnt}{\code{TRUE} or \code{FALSE} (default), provide the number needed
+to treat (only available for 2x2 tables)}
 
 \item{ci}{\code{TRUE} or \code{FALSE} (default), provide confidence
 intervals for the comparative measures}

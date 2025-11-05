@@ -157,9 +157,22 @@ This roadmap outlines planned enhancements for the ClinicoPath jamovi module eco
 
 ### **Phase 1: Core Decision Analysis (Sprints 1-2)**
 
-#### **[H] Decision Curve Analysis (DCA)**
+#### **[H] ✅ COMPLETED - Decision Curve Analysis (DCA)**
 
 *Clinical net benefit evaluation for prediction models*
+
+**✅ Implementation Status (Completed):**
+- ✅ Net benefit calculation across threshold range
+- ✅ "Treat All" vs "Treat None" reference strategies
+- ✅ Multiple model comparison
+- ✅ Bootstrap confidence intervals
+- ✅ Clinical impact metrics (interventions avoided, NNS)
+- ✅ Optimal threshold identification
+- ✅ Weighted AUC calculation
+- ✅ Cost-benefit analysis option
+- ✅ Decision consequences table (TP, FP, TN, FN)
+- ✅ Comprehensive visualization (decision curves, impact plots)
+- ✅ Files: `jamovi/decisioncurve.{a,r,u}.yaml`, `R/decisioncurve.b.R` (1366 lines)
 
 **Jamovi Data Structure**:
 
@@ -194,9 +207,20 @@ Expected Data Format (one row per patient):
 
 ---
 
-#### **[H] Enhanced Markov Models**
+#### **[H] 🔄 PARTIALLY COMPLETED - Enhanced Markov Models**
 
 *Multi-cycle decision modeling for chronic diseases*
+
+**✅ Completed Features (2025-01-04):**
+- ✅ Separate discount rates for costs vs utilities (QALYs)
+- ✅ Checkbox to enable/disable separate rates
+- ✅ Default: 3% for costs, 1.5% for utilities
+- Files: `jamovi/decisiongraph.{a,u}.yaml`, `R/decisiongraph.b.R`
+
+**⏳ Remaining Features:**
+- ⏳ Probabilistic Sensitivity Analysis (PSA) - Complex, requires Monte Carlo simulation
+- ⏳ heemod/dampack package integration
+- ⏳ Enhanced cohort trace visualization
 
 **Jamovi Data Structure**:
 
@@ -237,9 +261,23 @@ Expected Data Format (one row per transition):
 
 ### **Phase 2: Prediction Models (Sprints 3-4)**
 
-#### **[H] Clinical Prediction Model Builder**
+#### **[H] ✅ COMPLETED - Clinical Prediction Model Builder**
 
 *Logistic regression with integrated calibration and validation*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ Logistic regression model fitting
+- ✅ Coefficient table with odds ratios and CIs
+- ✅ AUC (C-statistic) with confidence intervals
+- ✅ Brier score calculation
+- ✅ Hosmer-Lemeshow calibration test
+- ✅ Calibration slope
+- ✅ Bootstrap validation with optimism correction
+- ✅ ROC curve plot
+- ✅ Calibration plot with loess smooth
+- ✅ Risk stratification into groups
+- ✅ Clinical interpretation guidance
+- Files: `jamovi/predmodel.{a,r,u}.yaml`, `R/predmodel.b.R`
 
 **Jamovi Data Structure**:
 
@@ -278,9 +316,21 @@ Expected Data Format (one row per patient):
 
 ---
 
-#### **[M] Model Calibration & Validation Dashboard**
+#### **[M] ✅ COMPLETED - Model Calibration & Validation Dashboard**
 
 *Comprehensive performance metrics panel*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ Calibration-in-the-large assessment
+- ✅ Calibration slope and intercept
+- ✅ Flexible calibration curves (loess/splines)
+- ✅ AUC, Brier score, scaled Brier score
+- ✅ Decision curve analysis (DCA) with net benefit
+- ✅ Subgroup performance analysis
+- ✅ Validation type selection (external/temporal/geographic)
+- ✅ ROC plot, calibration plot, DCA plot
+- ✅ Evidence-based recommendations for recalibration
+- Files: `jamovi/modelval.{a,r,u}.yaml`, `R/modelval.b.R`
 
 **Jamovi Data Structure**:
 
@@ -403,9 +453,24 @@ Expected Data Format (one row per patient):
 
 ### **Phase 1: Competing Risks (Sprints 1-2)**
 
-#### **[H] Fine-Gray Regression (CRR)**
+#### **[H] ✅ COMPLETED - Fine-Gray Regression (CRR)**
 
 *Covariate-adjusted competing risks analysis*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ Fine-Gray subdistribution hazard regression
+- ✅ Sub-hazard ratio (sHR) table with confidence intervals
+- ✅ Cumulative incidence function (CIF) plots
+- ✅ Gray's test for group comparisons
+- ✅ Support for multiple competing events
+- ✅ Stratified analysis option
+- ✅ Comparison to cause-specific hazards
+- ✅ Prediction at specified time points
+- ✅ Diagnostic plots and influence statistics
+- ✅ Bootstrap confidence intervals
+- ✅ Color scheme options (default, colorblind, NEJM, Lancet)
+- ✅ Comprehensive clinical interpretation
+- ✅ Files: `jamovi/finegray.{a,r,u}.yaml`, `R/finegray.b.R` (900+ lines)
 
 **Jamovi Data Structure**:
 
@@ -452,9 +517,17 @@ Expected Data Format (one row per patient):
 
 ---
 
-#### **[H] Enhanced Competing Risk Diagnostics**
+#### **[H] ✅ COMPLETED - Enhanced Competing Risk Diagnostics**
 
 *Comprehensive competing risk visualization*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ Stacked probability plot (CIF1 + CIF2 + Survival)
+- ✅ 1-KM vs CIF comparison plot (demonstrates competing risk bias)
+- ✅ Color scheme options (default, colorblind-safe, grayscale)
+- ✅ Enhanced CIF visualization with customizable colors
+- ✅ UI controls for new plots
+- Files: `jamovi/competingsurvival.{a,r,u}.yaml`, `R/competingsurvival.b.R`
 
 **Jamovi Data Structure**:
 
@@ -478,9 +551,20 @@ Required Variables:
 
 ### **Phase 2: Model Validation (Sprints 3-4)**
 
-#### **[H] Time-Dependent Calibration**
+#### **[H] ✅ COMPLETED - Time-Dependent Calibration**
 
 *Survival model performance evaluation*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ New module: `survivalcalibration`
+- ✅ Time-dependent C-index with confidence intervals
+- ✅ Integrated Brier score calculation
+- ✅ Calibration plot (observed vs predicted survival)
+- ✅ Calibration slope, intercept, and E:O ratio
+- ✅ Bootstrap validation with optimism correction
+- ✅ K-fold cross-validation
+- ✅ TRIPOD-compliant validation reporting
+- Files: `jamovi/survivalcalibration.{a,r,u}.yaml`, `R/survivalcalibration.b.R`
 
 **Jamovi Data Structure**:
 
@@ -522,9 +606,20 @@ Expected Data Format (one row per patient):
 
 ---
 
-#### **[M] Predictive Performance Metrics**
+#### **[M] ✅ COMPLETED - Predictive Performance Metrics**
 
 *Comprehensive discrimination and calibration*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ New module: `reclassmetrics`
+- ✅ Net Reclassification Improvement (NRI) - categorical and continuous
+- ✅ Integrated Discrimination Improvement (IDI)
+- ✅ Bootstrap confidence intervals for all metrics
+- ✅ Separate NRI for events and non-events
+- ✅ IDI components (integrated sensitivity and specificity)
+- ✅ Probability improvement scatter plot
+- ✅ Model comparison visualization
+- Files: `jamovi/reclassmetrics.{a,r,u}.yaml`, `R/reclassmetrics.b.R`
 
 **Jamovi Data Structure**:
 
@@ -743,9 +838,20 @@ Expected Data Format (one row per patient):
 
 ### **Phase 5: Non-PH Handling (Sprint 8)**
 
-#### **[M] Enhanced Non-PH Diagnostics & Solutions**
+#### **[M] ✅ COMPLETED - Enhanced Non-PH Diagnostics & Solutions**
 
 *Automated proportional hazards violation handling*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ Automatic PH violation detection (p < 0.05 flagging)
+- ✅ Color-coded status indicators (warning/success)
+- ✅ Educational content explaining Schoenfeld residuals test
+- ✅ Actionable recommendations when PH violated:
+  - Stratified Cox model (with R code example)
+  - Time-dependent coefficients (with R code example)
+  - Alternative approaches (RMST, AFT, landmark analysis)
+- ✅ HTML-formatted interpretation output
+- Files: `jamovi/survival.r.yaml`, `R/survival.b.R`
 
 **Jamovi Data Structure**:
 
@@ -781,9 +887,18 @@ Required Variables:
 
 ### **Phase 1: Bug Fixes & Polish (Sprint 1)**
 
-#### **[H] UI/Rendering Fixes**
+#### **[H] ✅ COMPLETED - UI/Rendering Fixes**
 
 *Resolve critical display issues*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ Fixed compressed plots in multi-group comparisons (15% extra height)
+- ✅ Improved grouped plot sizing (dynamic width/height calculation)
+- ✅ Enhanced plot combination with equal spacing
+- ✅ Added subplot annotations (tag_levels = "A")
+- ✅ Optimal grid layout for grouped analyses
+- ✅ Pairwise comparison parameters correctly forwarded
+- Files: `R/jjbetweenstats.b.R`, `R/jjbarstats.b.R`, `R/jjhistostats.b.R`
 
 **Jamovi Data Structure**: No changes (existing analyses)
 
@@ -810,9 +925,21 @@ Required Variables:
 
 ### **Phase 2: Feature Parity (Sprints 2-3)**
 
-#### **[M] Model Coefficient Plots**
+#### **[M] ✅ COMPLETED - Model Coefficient Plots**
 
 *Regression and meta-analysis forest plots*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ New module: `jjcoefstats`
+- ✅ Forest plots using ggstatsplot's ggcoefstats()
+- ✅ Support for pre-computed coefficients (term, estimate, SE, CI)
+- ✅ Automatic model fitting (lm, glm, Cox, mixed effects)
+- ✅ Exponentiation for odds ratios and hazard ratios
+- ✅ Sort coefficients by magnitude
+- ✅ Multiple color schemes and themes
+- ✅ P-value display (numeric or symbols)
+- ✅ Model fit metrics (R², AIC, concordance)
+- Files: `jamovi/jjcoefstats.{a,r,u}.yaml`, `R/jjcoefstats.b.R`
 
 **Jamovi Data Structure**:
 
@@ -853,9 +980,22 @@ Expected Data Format (pre-computed):
 
 ---
 
-#### **[M] Enhanced Customization**
+#### **[M] 🔄 PARTIALLY COMPLETED - Enhanced Customization**
 
 *User-controlled plot aesthetics*
+
+**✅ Currently Implemented (Existing):**
+- ✅ Basic theme toggle (originaltheme)
+- ✅ Colorblind-safe palettes (colorblindSafe)
+- ✅ Journal-style palettes (jco, npg, lancet, jama, nejm, aaas)
+- ✅ Present in most JJStatsPlot modules
+
+**⏳ Enhancement Opportunities (Future):**
+- ⏳ P-value symbol conversion (asterisks vs numeric)
+- ⏳ Font size controls (axis, title, annotation sliders)
+- ⏳ Font family selector (Arial, Times, Helvetica)
+- ⏳ Legend position controls (top, bottom, left, right, none)
+- ⏳ Centralized appearance configuration
 
 **Jamovi Data Structure**: No changes (applies to all existing plots)
 
@@ -964,9 +1104,17 @@ Required Variables:
 
 ### **Phase 1: Effect Sizes & Statistical Rigor (Sprints 1-2)**
 
-#### **[H] Comprehensive Effect Sizes**
+#### **[H] ✅ COMPLETED - Comprehensive Effect Sizes**
 
 *Standardized effect measures with confidence intervals*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ Risk Difference (RD) with 95% CI for 2×2 tables
+- ✅ Number Needed to Treat (NNT) with 95% CI
+- ✅ Proper CI inversion for NNT (from RD CIs)
+- ✅ Edge case handling (RD = 0, CI crosses zero)
+- ✅ Integrated into conttables module
+- Files: `jamovi/conttables.{a,r,u}.yaml`, `R/conttables.b.R`
 
 **Jamovi Data Structure**:
 
@@ -1016,9 +1164,17 @@ Required Variables:
 
 ---
 
-#### **[M] Multiple Comparison Control**
+#### **[M] ✅ COMPLETED - Multiple Comparison Control**
 
 *FDR and familywise error rate correction*
+
+**✅ Implementation Status (Completed 2025-01-04):**
+- ✅ 5 adjustment methods: None, Bonferroni, Holm, BH (FDR), BY
+- ✅ Conditional adjusted p-value column (q-values)
+- ✅ Method-specific educational content
+- ✅ Dynamic table headers based on method
+- ✅ Integrated into crosstable module with gtsummary
+- Files: `jamovi/crosstable.a.yaml`, `R/crosstable.b.R`
 
 **Jamovi Data Structure**:
 

@@ -14,7 +14,8 @@ crosstable(
   pcat = "chisq",
   stratify = NULL,
   mantel_haenszel = FALSE,
-  breslow_day = FALSE
+  breslow_day = FALSE,
+  p_adjust = "none"
 )
 }
 \arguments{
@@ -43,6 +44,9 @@ strata.}
 
 \item{breslow_day}{Test whether odds ratios are homogeneous across strata.
 Only applicable when Mantel-Haenszel test is enabled.}
+
+\item{p_adjust}{Method for adjusting p-values for multiple comparisons
+across variables}
 }
 \value{
 A results object containing:

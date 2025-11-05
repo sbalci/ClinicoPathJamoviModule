@@ -1,0 +1,231 @@
+title: Fine-Gray Competing Risks Regression
+name: finegray
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Survival Time
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Status
+        children:
+          - type: VariablesListBox
+            name: status
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: eventOfInterest
+            label: Event of Interest
+            enable: (status)
+          - type: LevelSelector
+            name: censorLevel
+            label: Censored Level
+            enable: (status)
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: strata
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable for Plots (optional)
+        children:
+          - type: VariablesListBox
+            name: groupVar
+            maxItemCount: 1
+            isTarget: true
+
+  - type: CollapseBox
+    label: Model Options
+    margin: normal
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Coefficient Table
+            children:
+              - type: CheckBox
+                name: showCoefficientTable
+                label: Show coefficient table
+              - type: CheckBox
+                name: exponentiate
+                label: Report sub-hazard ratios (sHR)
+                enable: (showCoefficientTable)
+              - type: TextBox
+                name: confLevel
+                format: number
+                label: Confidence level
+                enable: (showCoefficientTable)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Model Fit
+            children:
+              - type: CheckBox
+                name: showModelFit
+                label: Model fit statistics
+              - type: CheckBox
+                name: causeSpecificComparison
+                label: Compare to cause-specific hazards
+
+  - type: CollapseBox
+    label: Group Comparison
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showGrayTest
+            label: Gray's test for group differences
+
+  - type: CollapseBox
+    label: Plots
+    margin: normal
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Cumulative Incidence Function
+            children:
+              - type: CheckBox
+                name: showCIFPlot
+                label: Show CIF plot
+              - type: ComboBox
+                name: cifPlotBy
+                label: Plot by
+                enable: (showCIFPlot)
+              - type: CheckBox
+                name: showRiskTable
+                label: Show numbers at risk
+                enable: (showCIFPlot)
+              - type: CheckBox
+                name: cifConfInt
+                label: Show confidence bands
+                enable: (showCIFPlot)
+              - type: TextBox
+                name: cifConfLevel
+                format: number
+                label: Confidence level
+                enable: (cifConfInt)
+              - type: TextBox
+                name: cifPlotTimes
+                format: string
+                label: Risk table time points (optional)
+                enable: (showRiskTable)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Additional Plots
+            children:
+              - type: CheckBox
+                name: showStackedCIF
+                label: Stacked CIF plot (all events)
+              - type: CheckBox
+                name: show1KMvsCIF
+                label: 1-KM vs CIF comparison
+              - type: CheckBox
+                name: showCauseSpecific
+                label: Cause-specific hazard functions
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Plot Appearance
+            children:
+              - type: ComboBox
+                name: colorScheme
+                label: Color scheme
+
+  - type: CollapseBox
+    label: Predictions
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showPredictionTable
+            label: Show prediction table
+          - type: TextBox
+            name: predictAt
+            format: string
+            label: Predict at time points
+            enable: (showPredictionTable)
+          - type: ComboBox
+            name: predictCovariatePattern
+            label: Covariate pattern
+            enable: (showPredictionTable)
+          - type: TextBox
+            name: customCovariateValues
+            format: string
+            label: Custom covariate values
+            enable: (predictCovariatePattern:custom)
+
+  - type: CollapseBox
+    label: Diagnostics
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: diagnosticPlots
+            label: Diagnostic plots
+          - type: CheckBox
+            name: showInfluence
+            label: Influence diagnostics
+          - type: CheckBox
+            name: compareToKM
+            label: Compare to Kaplan-Meier approach
+
+  - type: CollapseBox
+    label: Advanced Options
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Bootstrap
+            children:
+              - type: CheckBox
+                name: bootstrapCI
+                label: Bootstrap confidence intervals
+              - type: TextBox
+                name: nBootstrap
+                format: number
+                label: Bootstrap samples
+                enable: (bootstrapCI)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showInterpretation
+            label: Show clinical interpretation

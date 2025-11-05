@@ -102,3 +102,12 @@ children:
           - type: CheckBox
             name: showrisksets
             label: Show Number at Risk
+          - type: CheckBox
+            name: showStackedPlot
+            label: Show Stacked Probability Plot
+          - type: CheckBox
+            name: showKMvsCIF
+            label: Show 1-KM vs CIF Comparison
+          - type: ComboBox
+            name: cifColors
+            label: CIF Color Scheme

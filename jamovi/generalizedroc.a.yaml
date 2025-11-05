@@ -1,7 +1,7 @@
 ---
 name: generalizedroc
 title: Generalized ROC Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Medical Decision Analysis
 menuTitle: Generalized ROC Analysis
 menuSubtitle: ROC for continuous outcomes with unequal variance
@@ -223,4 +223,97 @@ options:
       description:
           R: >
             random seed for reproducible bootstrap sampling
+
+    # tram Package - Covariate-Adjusted ROC ----
+    - name: use_tram
+      title: Use Covariate-Adjusted ROC (tram)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use tram package for covariate-adjusted transformation models
+
+    - name: covariates
+      title: Covariates for Adjustment
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          R: >
+            Covariates to include in transformation model
+
+    - name: tram_model
+      title: Transformation Model Type
+      type: List
+      options:
+        - name: Colr
+          title: Continuous Outcome Linear Regression
+        - name: BoxCox
+          title: Box-Cox Transformation
+        - name: Lehmann
+          title: Lehmann Alternative
+        - name: Polr
+          title: Proportional Odds Logistic Regression
+      default: Colr
+      description:
+          R: >
+            Type of transformation model from tram package
+
+    - name: covariate_values
+      title: Covariate Values for ROC
+      type: String
+      default: "0, 0.5, 1"
+      description:
+          R: >
+            Comma-separated covariate values for ROC evaluation
+
+    - name: plot_covariate_roc
+      title: Plot ROC Across Covariate Values
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot ROC curves as function of covariate values
+
+    - name: plot_auc_vs_covariate
+      title: Plot AUC vs Covariate
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot how AUC changes across covariate values
+
+    - name: n_covariate_points
+      title: Number of Covariate Points
+      type: Integer
+      default: 50
+      min: 10
+      max: 200
+      description:
+          R: >
+            Number of points to evaluate across covariate range
+
+    - name: tram_constraints
+      title: Model Constraints
+      type: List
+      options:
+        - name: none
+          title: No Constraints
+        - name: increasing
+          title: Increasing
+        - name: decreasing
+          title: Decreasing
+      default: none
+      description:
+          R: >
+            Constraints on transformation function
+
+    - name: censoring_aware
+      title: Handle Censored Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use censoring-aware transformation models
 ...

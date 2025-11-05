@@ -76,6 +76,30 @@ items:
           - overalltime
           - analysistype
 
+    - name:  stackedPlot
+      title: Stacked Probability Plot
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .stackedPlot
+      visible: (showStackedPlot && analysistype:compete)
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+
+    - name:  kmvscifPlot
+      title: 1-KM vs CIF Comparison
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .kmvscifPlot
+      visible: (showKMvsCIF && analysistype:compete)
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+
     - name:  interpretation
       title: Clinical Interpretation
       type:  Html

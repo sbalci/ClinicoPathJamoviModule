@@ -494,50 +494,90 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Select only the analysis variables and grouping variable
                 analysis_vars <- c(myvars, mygroup)
                 mydata_subset <- mydata[, analysis_vars, drop = FALSE]
-                
-                 tablegtsummary <-
-  mydata_subset %>%
-  tbl_summary(
-    by = mygroup,
-    statistic = list(
-      all_continuous()  ~ "{mean} ({sd})",
-      all_categorical() ~ "{n}/{N} ({p}%)"
-    ),
-    digits       = all_continuous() ~ 2,
-    missing_text = "(Missing)"
-  ) %>%
-  add_n() %>%
-  add_overall() %>%
-  add_p(
-    # compute p‐values for all variables using gtsummary defaults
-    pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
-  ) %>%
-  add_q(
-    # compute q‐values (Benjamini–Hochberg by default)
-    method = "fdr", 
-    pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
-  ) %>%
-  modify_header(
-    # re‐apply your group‐level header
-    all_stat_cols() ~ "**{level}**\nN = {n} ({style_percent(p)})",
-    # explicitly give p.value and q.value nice titles
-    p.value      ~ "**p-value**",
-    q.value      ~ "**q-value**"
-  ) %>%
-  bold_labels()
+
+                # Get p-value adjustment method
+                p_adjust_method <- self$options$p_adjust
+
+                # Map option names to gtsummary method names
+                method_mapping <- c(
+                    "none" = "none",
+                    "bonferroni" = "bonferroni",
+                    "holm" = "holm",
+                    "BH" = "fdr",  # Benjamini-Hochberg = FDR
+                    "BY" = "BY"    # Benjamini-Yekutieli
+                )
+
+                gtsummary_method <- method_mapping[p_adjust_method]
+
+                tablegtsummary <-
+                  mydata_subset %>%
+                  tbl_summary(
+                    by = mygroup,
+                    statistic = list(
+                      all_continuous()  ~ "{mean} ({sd})",
+                      all_categorical() ~ "{n}/{N} ({p}%)"
+                    ),
+                    digits       = all_continuous() ~ 2,
+                    missing_text = "(Missing)"
+                  ) %>%
+                  add_n() %>%
+                  add_overall() %>%
+                  add_p(
+                    # compute p‐values for all variables using gtsummary defaults
+                    pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
+                  )
+
+                # Add q-values only if adjustment method is not "none"
+                if (p_adjust_method != "none") {
+                    tablegtsummary <- tablegtsummary %>%
+                      add_q(
+                        method = gtsummary_method,
+                        pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
+                      ) %>%
+                      modify_header(
+                        all_stat_cols() ~ "**{level}**\nN = {n} ({style_percent(p)})",
+                        p.value      ~ "**p-value**",
+                        q.value      ~ "**adjusted p**"
+                      )
+                } else {
+                    tablegtsummary <- tablegtsummary %>%
+                      modify_header(
+                        all_stat_cols() ~ "**{level}**\nN = {n} ({style_percent(p)})",
+                        p.value      ~ "**p-value**"
+                      )
+                }
+
+                tablegtsummary <- tablegtsummary %>%
+                  bold_labels()
 
                 tablegtsummary <-
                     gtsummary::as_kable_extra(tablegtsummary)
 
                 self$results$tablestyle3$setContent(tablegtsummary)
-                
-                # Add q-value explanation
-                qvalue_explanation <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
-                    "<h4 style='margin-top: 0;'>Understanding Q-values (False Discovery Rate)</h4>",
-                    "<p><strong>What is a q-value?</strong><br>",
-                    "The q-value is the False Discovery Rate (FDR) adjusted p-value. It estimates the proportion of false positives ",
-                    "among all significant results when conducting multiple comparisons.</p>",
+
+                # Add adjustment explanation (only if adjustment is applied)
+                if (p_adjust_method != "none") {
+                    method_names <- list(
+                        "bonferroni" = "Bonferroni",
+                        "holm" = "Holm",
+                        "BH" = "Benjamini-Hochberg (FDR)",
+                        "BY" = "Benjamini-Yekutieli"
+                    )
+
+                    method_descriptions <- list(
+                        "bonferroni" = "Conservative family-wise error rate (FWER) control. Multiplies each p-value by the number of tests.",
+                        "holm" = "Step-down FWER control. Less conservative than Bonferroni while maintaining strong FWER control.",
+                        "BH" = "False Discovery Rate (FDR) control. Estimates the proportion of false positives among significant results.",
+                        "BY" = "FDR control with additional correction for dependent tests. More conservative than Benjamini-Hochberg."
+                    )
+
+                    qvalue_explanation <- paste0(
+                        "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
+                        "<h4 style='margin-top: 0;'>Multiple Testing Correction: ", method_names[[p_adjust_method]], "</h4>",
+                        "<p><strong>Method:</strong> ", method_descriptions[[p_adjust_method]], "</p>",
+                        "<p><strong>What is an adjusted p-value?</strong><br>",
+                        "When testing multiple hypotheses simultaneously, the chance of finding at least one false positive increases. ",
+                        "Adjusted p-values control for this inflation by accounting for the number of tests performed.</p>",
                     
                     "<p><strong>How to interpret:</strong></p>",
                     "<ul>",
@@ -555,17 +595,20 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     
                     "<p><strong>Important limitations:</strong></p>",
                     "<ul>",
-                    "<li>⚠️ Q-values assume all tests are independent (may not be true for correlated variables)</li>",
-                    "<li>⚠️ FDR control doesn't guarantee control of Type I error for individual tests</li>",
-                    "<li>⚠️ With few tests (<10), q-values may be overly conservative</li>",
+                    "<li>⚠️ Adjusted p-values assume tests are independent (may not be true for correlated variables)</li>",
+                    "<li>⚠️ With few tests (<10), corrections may be overly conservative</li>",
                     "<li>⚠️ Should not replace careful hypothesis planning and clinical judgment</li>",
                     "</ul>",
-                    
-                    "<p><small><em>Method: Benjamini-Hochberg FDR correction as implemented in gtsummary::add_q()</em></small></p>",
+
+                    "<p><small><em>Correction applied using ", method_names[[p_adjust_method]], " method via gtsummary::add_q()</em></small></p>",
                     "</div>"
-                )
-                
-                self$results$qvalueExplanation$setContent(qvalue_explanation)
+                    )
+
+                    self$results$qvalueExplanation$setContent(qvalue_explanation)
+                } else {
+                    # No adjustment - clear the explanation
+                    self$results$qvalueExplanation$setContent("")
+                }
                 
                 # Show q-value focused test information automatically
                 private$.showTestInformation()

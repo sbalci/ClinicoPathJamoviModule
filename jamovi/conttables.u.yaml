@@ -82,6 +82,10 @@ children:
                       - type: CheckBox
                         name: relRisk
                       - type: CheckBox
+                        name: riskDiff
+                      - type: CheckBox
+                        name: nnt
+                      - type: CheckBox
                         name: ci
                         children:
                           - type: TextBox

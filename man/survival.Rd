@@ -258,6 +258,7 @@ A results object containing:
 \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$survivalTablesHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr

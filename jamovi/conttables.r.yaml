@@ -120,7 +120,7 @@ items:
       title: Comparative Measures
       type: Table
       description: a table of comparative measures
-      visible: (logOdds || odds || relRisk)
+      visible: (logOdds || odds || relRisk || riskDiff || nnt)
 
       clearWith:
         - rows
@@ -190,6 +190,46 @@ items:
           title: Upper
           superTitle: Confidence Intervals
           visible: (relRisk && ci)
+
+        - name: t[rd]
+          title: ''
+          type: text
+          content: Risk difference
+          visible: (riskDiff)
+
+        - name: v[rd]
+          title: Value
+          visible: (riskDiff)
+
+        - name: cil[rd]
+          title: Lower
+          superTitle: Confidence Intervals
+          visible: (riskDiff && ci)
+
+        - name: ciu[rd]
+          title: Upper
+          superTitle: Confidence Intervals
+          visible: (riskDiff && ci)
+
+        - name: t[nnt]
+          title: ''
+          type: text
+          content: Number needed to treat
+          visible: (nnt)
+
+        - name: v[nnt]
+          title: Value
+          visible: (nnt)
+
+        - name: cil[nnt]
+          title: Lower
+          superTitle: Confidence Intervals
+          visible: (nnt && ci)
+
+        - name: ciu[nnt]
+          title: Upper
+          superTitle: Confidence Intervals
+          visible: (nnt && ci)
 
     - name: nom
       title: Nominal

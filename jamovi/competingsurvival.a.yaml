@@ -1,7 +1,7 @@
 ---
 name:  competingsurvival
 title: Overall, Cause Specific, and Competing Survival
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: Drafts
 menuSubtitle: 'Survival for Different Outcomes'
 version: '0.0.3'
@@ -130,6 +130,43 @@ options:
             Display number at risk table below cumulative incidence plot
           R: >
             Display number at risk table below cumulative incidence plot
+
+    - name: showStackedPlot
+      title: 'Show Stacked Probability Plot'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display stacked area plot showing CIF1 + CIF2 + Survival probability
+          R: >
+            Display stacked probability plot with all competing events
+
+    - name: showKMvsCIF
+      title: 'Show 1-KM vs CIF Comparison'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Compare naive 1-KM estimate with proper cumulative incidence
+          R: >
+            Plot comparison between 1-KM and CIF to show competing risk bias
+
+    - name: cifColors
+      title: 'CIF Color Scheme'
+      type: List
+      options:
+        - title: Default (Red/Blue)
+          name: default
+        - title: Colorblind-safe
+          name: colorblind
+        - title: Grayscale
+          name: grayscale
+      default: default
+      description:
+          ui: >
+            Color palette for cumulative incidence curves
+          R: >
+            Color scheme for CIF plots
 
 
 ...

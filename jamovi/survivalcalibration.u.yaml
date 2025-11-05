@@ -1,0 +1,117 @@
+title: Survival Model Calibration
+name: survivalcalibration
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Survival Time
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Event Indicator
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Predicted Survival Probability
+        children:
+          - type: VariablesListBox
+            name: predicted
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Linear Predictor (Optional)
+        children:
+          - type: VariablesListBox
+            name: linearPredictor
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Validation Set (Optional)
+        children:
+          - type: VariablesListBox
+            name: validationSet
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Calibration Settings
+        children:
+          - type: TextBox
+            name: calibrationTime
+            label: Primary Calibration Time (months)
+            format: number
+          - type: TextBox
+            name: calibrationTimes
+            label: Multiple Time Points (comma-separated)
+            format: string
+          - type: TextBox
+            name: nGroups
+            label: Number of Risk Groups
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Validation Options
+        children:
+          - type: ComboBox
+            name: validationMethod
+            label: Validation Method
+          - type: TextBox
+            name: nBootstrap
+            label: Bootstrap Samples
+            format: number
+            enable: (validationMethod:bootstrap)
+          - type: TextBox
+            name: nFolds
+            label: Number of Folds
+            format: number
+            enable: (validationMethod:kfold)
+          - type: TextBox
+            name: ciLevel
+            label: Confidence Level
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        children:
+          - type: CheckBox
+            name: showCalibrationPlot
+            label: Show Calibration Plot
+          - type: CheckBox
+            name: showGroupedCalibration
+            label: Show Grouped Calibration
+          - type: CheckBox
+            name: showCindexPlot
+            label: Show Time-Dependent C-Index
+          - type: CheckBox
+            name: showBrierPlot
+            label: Show Brier Score Plot
+          - type: CheckBox
+            name: smoothCalibration
+            label: Smooth Calibration Curves
+          - type: CheckBox
+            name: tripodReport
+            label: Generate TRIPOD Report

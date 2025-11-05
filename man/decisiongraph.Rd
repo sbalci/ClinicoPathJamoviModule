@@ -26,6 +26,9 @@ decisiongraph(
   willingnessToPay = 50000,
   sensitivityAnalysis = FALSE,
   discountRate = 0.03,
+  separateDiscountRates = FALSE,
+  discountRateCost = 0.03,
+  discountRateUtility = 0.015,
   timeHorizon = 10,
   nodeLabels = TRUE,
   branchLabels = TRUE,
@@ -110,7 +113,15 @@ NMB calculations.}
 \item{sensitivityAnalysis}{Perform one-way sensitivity analysis on key
 parameters.}
 
-\item{discountRate}{Annual discount rate for future costs and benefits.}
+\item{discountRate}{Annual discount rate for future costs and benefits when
+same rate for both.}
+
+\item{separateDiscountRates}{Use separate discount rates for costs and
+utilities.}
+
+\item{discountRateCost}{Annual discount rate for costs.}
+
+\item{discountRateUtility}{Annual discount rate for utilities and QALYs.}
 
 \item{timeHorizon}{Time horizon for the analysis in years.}
 

@@ -300,6 +300,8 @@ contTablesClass <- R6::R6Class(
                         fish <- stats::fisher.test(mat, conf.level=ciWidth)
                         lor <- vcd::loddsratio(mat)
                         rr <- private$.relativeRisk(mat)
+                        rd <- private$.riskDifference(mat)
+                        nnt_result <- private$.nnt(mat)
                     }
 
                 }) # suppressWarnings
@@ -470,16 +472,26 @@ contTablesClass <- R6::R6Class(
                         `ciu[o]`=exp(ci[2]),
                         `v[rr]`=rr$rr,
                         `cil[rr]`=rr$lower,
-                        `ciu[rr]`=rr$upper))
+                        `ciu[rr]`=rr$upper,
+                        `v[rd]`=rd$rd,
+                        `cil[rd]`=rd$lower,
+                        `ciu[rd]`=rd$upper,
+                        `v[nnt]`=nnt_result$nnt,
+                        `cil[nnt]`=nnt_result$lower,
+                        `ciu[nnt]`=nnt_result$upper))
 
                 } else {
                     odds$setRow(rowNo=othRowNo, list(
                         `v[lo]`=NaN, `cil[lo]`='', `ciu[lo]`='',
                         `v[o]`=NaN, `cil[o]`='', `ciu[o]`='',
-                        `v[rr]`=NaN, `cil[rr]`='', `ciu[rr]`=''))
+                        `v[rr]`=NaN, `cil[rr]`='', `ciu[rr]`='',
+                        `v[rd]`=NaN, `cil[rd]`='', `ciu[rd]`='',
+                        `v[nnt]`=NaN, `cil[nnt]`='', `ciu[nnt]`=''))
                     odds$addFootnote(rowNo=othRowNo, 'v[lo]', 'Available for 2x2 tables only')
                     odds$addFootnote(rowNo=othRowNo, 'v[o]', 'Available for 2x2 tables only')
                     odds$addFootnote(rowNo=othRowNo, 'v[rr]', 'Available for 2x2 tables only')
+                    odds$addFootnote(rowNo=othRowNo, 'v[rd]', 'Available for 2x2 tables only')
+                    odds$addFootnote(rowNo=othRowNo, 'v[nnt]', 'Available for 2x2 tables only')
                 }
 
                 othRowNo <- othRowNo + 1
@@ -626,6 +638,85 @@ contTablesClass <- R6::R6Class(
             return(list(rr=rr, lower=lower, upper=upper))
 
         },
+
+        .riskDifference = function(mat) {
+
+            # Risk Difference (RD) = p1 - p2
+            # CI using Newcombe-Wilson method (without continuity correction)
+
+            dims <- dim(mat)
+
+            if (dims[1] > 2 || dims[2] > 2)
+                return(NULL)
+
+            ciWidth <- self$options$ciWidth
+            alpha <- (100 - ciWidth) / 100
+            z <- qnorm(1 - alpha/2)
+
+            a <- mat[1,1]
+            b <- mat[1,2]
+            c <- mat[2,1]
+            d <- mat[2,2]
+
+            n1 <- a + b
+            n2 <- c + d
+
+            p1 <- a / n1
+            p2 <- c / n2
+
+            rd <- p1 - p2
+
+            # Standard error for risk difference
+            se <- sqrt((p1 * (1 - p1) / n1) + (p2 * (1 - p2) / n2))
+            lower <- rd - z * se
+            upper <- rd + z * se
+
+            return(list(rd=rd, lower=lower, upper=upper))
+        },
+
+        .nnt = function(mat) {
+
+            # Number Needed to Treat (NNT) = 1 / abs(RD)
+            # CI is inverted from RD CI
+
+            rd_result <- private$.riskDifference(mat)
+
+            if (is.null(rd_result))
+                return(NULL)
+
+            rd <- rd_result$rd
+
+            if (abs(rd) < 1e-10) {
+                # RD too close to zero, NNT undefined
+                return(list(nnt=Inf, lower=Inf, upper=Inf))
+            }
+
+            nnt <- 1 / abs(rd)
+
+            # For CI: When RD CI crosses zero, NNT CI is not defined
+            # Otherwise, invert the RD CI bounds (swap if negative)
+            if (sign(rd_result$lower) != sign(rd_result$upper)) {
+                # CI crosses zero - NNT not well-defined
+                lower <- NA
+                upper <- NA
+            } else {
+                # Both CI bounds have same sign - can invert
+                if (abs(rd_result$lower) < 1e-10) {
+                    lower <- Inf
+                } else {
+                    lower <- 1 / abs(rd_result$upper)  # Note: swap upper/lower
+                }
+
+                if (abs(rd_result$upper) < 1e-10) {
+                    upper <- Inf
+                } else {
+                    upper <- 1 / abs(rd_result$lower)  # Note: swap upper/lower
+                }
+            }
+
+            return(list(nnt=nnt, lower=lower, upper=upper))
+        },
+
         .sourcifyOption = function(option) {
             if (option$name %in% c('rows', 'cols', 'counts'))
                 return('')

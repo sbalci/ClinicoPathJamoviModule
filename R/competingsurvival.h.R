@@ -18,7 +18,10 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             subdistribution = TRUE,
             timepoints = "12,24,36,60",
             confidencelevel = 0.95,
-            showrisksets = TRUE, ...) {
+            showrisksets = TRUE,
+            showStackedPlot = FALSE,
+            showKMvsCIF = FALSE,
+            cifColors = "default", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -99,6 +102,22 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "showrisksets",
                 showrisksets,
                 default=TRUE)
+            private$..showStackedPlot <- jmvcore::OptionBool$new(
+                "showStackedPlot",
+                showStackedPlot,
+                default=FALSE)
+            private$..showKMvsCIF <- jmvcore::OptionBool$new(
+                "showKMvsCIF",
+                showKMvsCIF,
+                default=FALSE)
+            private$..cifColors <- jmvcore::OptionList$new(
+                "cifColors",
+                cifColors,
+                options=list(
+                    "default",
+                    "colorblind",
+                    "grayscale"),
+                default="default")
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
@@ -113,6 +132,9 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..timepoints)
             self$.addOption(private$..confidencelevel)
             self$.addOption(private$..showrisksets)
+            self$.addOption(private$..showStackedPlot)
+            self$.addOption(private$..showKMvsCIF)
+            self$.addOption(private$..cifColors)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
@@ -127,7 +149,10 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         subdistribution = function() private$..subdistribution$value,
         timepoints = function() private$..timepoints$value,
         confidencelevel = function() private$..confidencelevel$value,
-        showrisksets = function() private$..showrisksets$value),
+        showrisksets = function() private$..showrisksets$value,
+        showStackedPlot = function() private$..showStackedPlot$value,
+        showKMvsCIF = function() private$..showKMvsCIF$value,
+        cifColors = function() private$..cifColors$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
@@ -141,7 +166,10 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..subdistribution = NA,
         ..timepoints = NA,
         ..confidencelevel = NA,
-        ..showrisksets = NA)
+        ..showrisksets = NA,
+        ..showStackedPlot = NA,
+        ..showKMvsCIF = NA,
+        ..cifColors = NA)
 )
 
 competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -153,6 +181,8 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         survivalTable = function() private$.items[["survivalTable"]],
         cuminc = function() private$.items[["cuminc"]],
         comprisksPlot = function() private$.items[["comprisksPlot"]],
+        stackedPlot = function() private$.items[["stackedPlot"]],
+        kmvscifPlot = function() private$.items[["kmvscifPlot"]],
         interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
@@ -251,6 +281,30 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "outcome",
                     "overalltime",
                     "analysistype")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="stackedPlot",
+                title="Stacked Probability Plot",
+                width=700,
+                height=500,
+                renderFun=".stackedPlot",
+                visible="(showStackedPlot && analysistype:compete)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="kmvscifPlot",
+                title="1-KM vs CIF Comparison",
+                width=700,
+                height=500,
+                renderFun=".kmvscifPlot",
+                visible="(showKMvsCIF && analysistype:compete)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -305,6 +359,11 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   intervals
 #' @param showrisksets Display number at risk table below cumulative incidence
 #'   plot
+#' @param showStackedPlot Display stacked probability plot with all competing
+#'   events
+#' @param showKMvsCIF Plot comparison between 1-KM and CIF to show competing
+#'   risk bias
+#' @param cifColors Color scheme for CIF plots
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -312,6 +371,8 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cuminc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$comprisksPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$stackedPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$kmvscifPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -336,7 +397,10 @@ competingsurvival <- function(
     subdistribution = TRUE,
     timepoints = "12,24,36,60",
     confidencelevel = 0.95,
-    showrisksets = TRUE) {
+    showrisksets = TRUE,
+    showStackedPlot = FALSE,
+    showKMvsCIF = FALSE,
+    cifColors = "default") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("competingsurvival requires jmvcore to be installed (restart may be required)")
@@ -367,7 +431,10 @@ competingsurvival <- function(
         subdistribution = subdistribution,
         timepoints = timepoints,
         confidencelevel = confidencelevel,
-        showrisksets = showrisksets)
+        showrisksets = showrisksets,
+        showStackedPlot = showStackedPlot,
+        showKMvsCIF = showKMvsCIF,
+        cifColors = cifColors)
 
     analysis <- competingsurvivalClass$new(
         options = options,

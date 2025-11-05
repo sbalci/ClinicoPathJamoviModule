@@ -25,12 +25,21 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .init = function() {
 
                 deplen <- length(self$options$dep)
-                
+
                 # Use configurable plot dimensions
                 plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 600
                 plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
 
-                self$results$plot$setSize(plotwidth, deplen * plotheight)
+                # Improved height calculation to prevent compressed plots
+                # Add extra spacing when combining multiple plots vertically
+                if (deplen > 1) {
+                    # Add 15% extra height per plot for better spacing
+                    total_height <- deplen * plotheight * 1.15
+                } else {
+                    total_height <- plotheight
+                }
+
+                self$results$plot$setSize(plotwidth, total_height)
 
 
                 if (!is.null(self$options$grvar)) {
@@ -43,7 +52,20 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     as.factor(mydata[[grvar]])
                 )
 
-                self$results$plot2$setSize(num_levels * plotwidth, deplen * plotheight)
+                # For grouped analysis, calculate width based on layout
+                ncol_estimate <- ceiling(sqrt(num_levels))
+                grouped_width <- ncol_estimate * plotwidth
+
+                # Height calculation for grouped plots with multiple dependent variables
+                if (deplen > 1) {
+                    grouped_height <- deplen * plotheight * 1.15
+                } else {
+                    # For single dep var, height based on number of grouping levels
+                    nrow_estimate <- ceiling(num_levels / ncol_estimate)
+                    grouped_height <- nrow_estimate * plotheight
+                }
+
+                self$results$plot2$setSize(grouped_width, grouped_height)
 
                 }
 
@@ -649,10 +671,16 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     # Checkpoint before expensive plot combination
                     private$.checkpoint(flush = FALSE)
-                    
+
                     plot <- ggstatsplot::combine_plots(
                         plotlist = plotlist,
-                        plotgrid.args = list(ncol = 1)
+                        plotgrid.args = list(
+                            ncol = 1,
+                            heights = rep(1, length(plotlist))
+                        ),
+                        annotation.args = list(
+                            tag_levels = "A"
+                        )
                     )
                 }
 
@@ -734,7 +762,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     plot2 <- ggstatsplot::combine_plots(
                         plotlist = plotlist,
-                        plotgrid.args = list(ncol = 1)
+                        plotgrid.args = list(
+                            ncol = 1,
+                            heights = rep(1, length(plotlist))
+                        ),
+                        annotation.args = list(
+                            tag_levels = "A"
+                        )
                     )
                 }
 

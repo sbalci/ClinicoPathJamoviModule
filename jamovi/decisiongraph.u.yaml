@@ -132,11 +132,25 @@ children:
             format: number
             label: "Time Horizon (years)"
             enable: (treeType:markov)
+          - type: CheckBox
+            name: separateDiscountRates
+            label: "Use Separate Discount Rates"
+            enable: (treeType:markov)
           - type: TextBox
             name: discountRate
             format: number
-            label: "Annual Discount Rate (0-0.2)"
-            enable: (treeType:markov)
+            label: "Discount Rate (Combined, 0-0.2)"
+            enable: (treeType:markov && !separateDiscountRates)
+          - type: TextBox
+            name: discountRateCost
+            format: number
+            label: "Discount Rate for Costs (0-0.2)"
+            enable: (treeType:markov && separateDiscountRates)
+          - type: TextBox
+            name: discountRateUtility
+            format: number
+            label: "Discount Rate for QALYs (0-0.2)"
+            enable: (treeType:markov && separateDiscountRates)
       - type: LayoutBox
         margin: large
         children:

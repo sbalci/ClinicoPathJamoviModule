@@ -1,0 +1,161 @@
+---
+name:  survivalcalibration
+title: Time-Dependent Survival Calibration
+jrs:   '1.1'
+
+items:
+
+    - name:  instructions
+      title: Instructions
+      type:  Html
+      clearWith:
+          - time
+          - event
+          - predicted
+
+    - name:  performanceMetrics
+      title: Performance Metrics
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  calibrationMetrics
+      title: Calibration Metrics
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time Point (months)'
+            type: number
+          - name: cal_slope
+            title: 'Calibration Slope'
+            type: number
+          - name: cal_intercept
+            title: 'Calibration Intercept'
+            type: number
+          - name: eo_ratio
+            title: 'E:O Ratio'
+            type: number
+          - name: interpretation
+            title: 'Status'
+            type: text
+
+    - name:  discriminationMetrics
+      title: Discrimination Metrics
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: apparent
+            title: 'Apparent'
+            type: number
+          - name: validated
+            title: 'Validated'
+            type: number
+          - name: optimism
+            title: 'Optimism'
+            type: number
+          - name: interpretation
+            title: 'Performance'
+            type: text
+
+    - name:  validationSummary
+      title: Validation Summary
+      type:  Html
+      visible: true
+
+    - name:  calibrationPlot
+      title: Calibration Plot
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .calibrationPlot
+      visible: (showCalibrationPlot)
+      clearWith:
+          - time
+          - event
+          - predicted
+          - calibrationTime
+          - nGroups
+
+    - name:  groupedCalibrationPlot
+      title: Grouped Calibration Curves
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .groupedCalibrationPlot
+      visible: (showGroupedCalibration)
+      clearWith:
+          - time
+          - event
+          - predicted
+          - calibrationTimes
+
+    - name:  cindexPlot
+      title: Time-Dependent C-Index
+      type:  Image
+      width:  700
+      height: 400
+      renderFun: .cindexPlot
+      visible: (showCindexPlot)
+      clearWith:
+          - time
+          - event
+          - predicted
+
+    - name:  brierPlot
+      title: Brier Score Over Time
+      type:  Image
+      width:  700
+      height: 400
+      renderFun: .brierPlot
+      visible: (showBrierPlot)
+      clearWith:
+          - time
+          - event
+          - predicted
+
+    - name:  tripodReport
+      title: TRIPOD Validation Report
+      type:  Html
+      visible: (tripodReport)
+
+    - name:  clinicalInterpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+
+refs:
+    - ClinicoPathJamoviModule
+
+    - janitor
+    - labelled
+    - glue
+    - survival
+    - rms
+    - pec
+    - riskRegression
+    - scales
+
+...

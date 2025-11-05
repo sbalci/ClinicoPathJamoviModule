@@ -66,7 +66,9 @@ children:
         margin: large
         children:
           - type: Label
-            label: "Mantel-Haenszel test controls for confounding when comparing binary variables across strata."
+            label: >-
+              Mantel-Haenszel test controls for confounding when comparing
+              binary variables across strata.
             margin: large
             children: []
       - type: LayoutBox
@@ -80,3 +82,8 @@ children:
           - type: CheckBox
             name: breslow_day
             enable: (mantel_haenszel)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: p_adjust

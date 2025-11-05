@@ -1,0 +1,340 @@
+---
+name: causalmediation
+title: Causal Mediation Analysis
+menuGroup: meddecideT
+menuSubgroup: Medical Decision Analysis
+menuTitle: Causal Mediation Analysis
+menuSubtitle: Mediation with DAGs and high-dimensional mediators
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: |
+        Causal Mediation Analysis examines the mechanisms through which an
+        exposure affects an outcome. This module provides three tiers:
+
+        1. **Basic Mediation**: Traditional mediation analysis (mediation package)
+        2. **Comprehensive Mediation**: Multiple mediators with DAGs (CMAverse)
+        3. **HIGH-DIMENSIONAL Mediation**: Omics-scale mediators (hdmax2)
+
+        Applications: Understanding pathways in cancer biology, clinical trials,
+        epidemiology, and precision medicine research.
+
+    R:
+        dontrun: false
+        usage: |
+            # Example: Basic mediation
+            causalmediation(
+                data = mydata,
+                outcome = 'survival_time',
+                treatment = 'drug_exposure',
+                mediator = 'biomarker_level',
+                covariates = c('age', 'stage'),
+                mediation_tier = 'basic'
+            )
+
+            # Example: High-dimensional mediation with omics
+            causalmediation(
+                data = omics_data,
+                outcome = 'disease_status',
+                treatment = 'environmental_exposure',
+                mediators = methylation_probes,  # 50,000 probes
+                mediation_tier = 'hd',
+                hd_method = 'hdmax2'
+            )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Core Variables ----
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: |
+            Outcome variable (Y)
+
+    - name: treatment
+      title: Treatment/Exposure Variable
+      type: Variable
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: |
+            Treatment or exposure variable (X)
+
+    - name: mediator
+      title: Single Mediator
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          R: |
+            Mediator variable for basic/comprehensive mediation (M)
+
+    - name: mediators
+      title: Multiple Mediators (HD)
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          R: |
+            Multiple mediators for high-dimensional analysis
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          R: |
+            Confounding variables (Z)
+
+    # Mediation Tier Selection ----
+    - name: mediation_tier
+      title: Mediation Analysis Tier
+      type: List
+      options:
+        - name: basic
+          title: Tier 1 - Basic Mediation (mediation)
+        - name: comprehensive
+          title: Tier 2 - Comprehensive (CMAverse)
+        - name: hd
+          title: Tier 3 - High-Dimensional (hdmax2)
+      default: basic
+      description:
+          R: |
+            Tier of mediation analysis to perform
+
+    # Basic Mediation Options (mediation package) ----
+    - name: boot_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: |
+            Number of bootstrap samples for confidence intervals
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          R: |
+            Confidence level for intervals
+
+    - name: mediator_model
+      title: Mediator Model Type
+      type: List
+      options:
+        - name: lm
+          title: Linear Model
+        - name: glm_logit
+          title: Logistic Regression
+        - name: glm_poisson
+          title: Poisson Regression
+      default: lm
+      description:
+          R: |
+            Model type for mediator regression
+
+    - name: outcome_model
+      title: Outcome Model Type
+      type: List
+      options:
+        - name: lm
+          title: Linear Model
+        - name: glm_logit
+          title: Logistic Regression
+        - name: survival
+          title: Survival Model
+      default: lm
+      description:
+          R: |
+            Model type for outcome regression
+
+    # CMAverse Options ----
+    - name: multiple_mediators
+      title: Multiple Mediators (CMAverse)
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          R: |
+            Multiple mediators for CMAverse analysis
+
+    - name: show_dag
+      title: Show DAG Visualization
+      type: Bool
+      default: true
+      description:
+          R: |
+            Display directed acyclic graph
+
+    - name: cma_estimation
+      title: CMA Estimation Method
+      type: List
+      options:
+        - name: rb
+          title: Regression-based
+        - name: iorw
+          title: Inverse odds ratio weighting
+        - name: msm
+          title: Marginal structural model
+      default: rb
+      description:
+          R: |
+            Estimation method for CMAverse
+
+    # HIGH-DIMENSIONAL Mediation Options (hdmax2) ----
+    - name: hd_method
+      title: HD Mediation Method
+      type: List
+      options:
+        - name: hdmax2
+          title: HDMAX2 (Joint Significance + Sobel)
+        - name: hima
+          title: HIMA (High-dimensional Mediation Analysis)
+        - name: bslmm
+          title: BSLMM (Bayesian Sparse Linear Mixed Model)
+      default: hdmax2
+      description:
+          R: |
+            Method for high-dimensional mediation
+
+    - name: hd_fdr_threshold
+      title: FDR Threshold
+      type: Number
+      default: 0.1
+      min: 0.01
+      max: 0.25
+      description:
+          R: |
+            False discovery rate threshold for HD mediation
+
+    - name: hd_top_mediators
+      title: Top Mediators to Report
+      type: Integer
+      default: 20
+      min: 5
+      max: 100
+      description:
+          R: |
+            Number of top mediators to display
+
+    - name: hd_penalty
+      title: Penalty Method
+      type: List
+      options:
+        - name: lasso
+          title: LASSO
+        - name: ridge
+          title: Ridge
+        - name: elastic_net
+          title: Elastic Net
+      default: lasso
+      description:
+          R: |
+            Penalization method for variable selection
+
+    - name: hd_parallel
+      title: Use Parallel Computing
+      type: Bool
+      default: true
+      description:
+          R: |
+            Enable parallel computing for HD analysis
+
+    # Effect Decomposition ----
+    - name: show_decomposition
+      title: Show Effect Decomposition
+      type: Bool
+      default: true
+      description:
+          R: |
+            Display total, direct, and indirect effects
+
+    - name: show_prop_mediated
+      title: Show Proportion Mediated
+      type: Bool
+      default: true
+      description:
+          R: |
+            Calculate proportion of effect mediated
+
+    # Sensitivity Analysis ----
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: |
+            Perform sensitivity analysis for unmeasured confounding
+
+    - name: rho_values
+      title: Sensitivity Rho Values
+      type: String
+      default: "0, 0.1, 0.2, 0.3"
+      description:
+          R: |
+            Correlation values for sensitivity analysis
+
+    # Visualization Options ----
+    - name: plot_effects
+      title: Plot Effect Estimates
+      type: Bool
+      default: true
+      description:
+          R: |
+            Generate forest plot of effects
+
+    - name: plot_hd_manhattan
+      title: Manhattan Plot (HD)
+      type: Bool
+      default: true
+      description:
+          R: |
+            Generate Manhattan plot for HD mediation
+
+    - name: plot_hd_volcano
+      title: Volcano Plot (HD)
+      type: Bool
+      default: true
+      description:
+          R: |
+            Generate volcano plot for HD mediation
+
+    # Advanced Options ----
+    - name: interaction_term
+      title: Include Treatment-Mediator Interaction
+      type: Bool
+      default: false
+      description:
+          R: |
+            Model treatment-mediator interaction
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+      description:
+          R: |
+            Random seed for reproducibility
+...

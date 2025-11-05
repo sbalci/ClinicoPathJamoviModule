@@ -1,7 +1,7 @@
 ---
 name: decisiongraph
 title: Decision Tree Graph
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Cost-Effectiveness Decision Tree Visualization
 version: '0.0.31'
@@ -255,16 +255,50 @@ options:
             Perform one-way sensitivity analysis on key parameters.
 
     - name: discountRate
-      title: Discount Rate
+      title: Discount Rate (Combined)
       type: Number
       default: 0.03
       min: 0
       max: 0.20
       description:
           ui: >
-            Annual discount rate for future costs and benefits (0-20%).
+            Annual discount rate for future costs and benefits (0-20%). Use when same rate applies to both.
           R: >
-            Annual discount rate for future costs and benefits.
+            Annual discount rate for future costs and benefits when same rate for both.
+
+    - name: separateDiscountRates
+      title: Use Separate Discount Rates
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Enable different discount rates for costs versus health outcomes (QALYs).
+          R: >
+            Use separate discount rates for costs and utilities.
+
+    - name: discountRateCost
+      title: Discount Rate for Costs
+      type: Number
+      default: 0.03
+      min: 0
+      max: 0.20
+      description:
+          ui: >
+            Annual discount rate specifically for costs (0-20%). Only used when separate rates enabled.
+          R: >
+            Annual discount rate for costs.
+
+    - name: discountRateUtility
+      title: Discount Rate for Utilities (QALYs)
+      type: Number
+      default: 0.015
+      min: 0
+      max: 0.20
+      description:
+          ui: >
+            Annual discount rate specifically for health utilities/QALYs (0-20%). Often set lower than cost rate. Only used when separate rates enabled.
+          R: >
+            Annual discount rate for utilities and QALYs.
 
     - name: timeHorizon
       title: Time Horizon (years)

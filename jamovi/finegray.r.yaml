@@ -1,0 +1,288 @@
+---
+name: finegray
+title: Fine-Gray Competing Risks Regression
+jrs: '1.1'
+
+items:
+    # Instructions
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    # Procedure notes
+    - name: procedureNotes
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    # Model information
+    - name: modelInfo
+      title: Model Information
+      type: Table
+      visible: true
+      rows: 0
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    # Sub-hazard ratio table
+    - name: shrTable
+      title: Sub-Hazard Ratios (sHR)
+      type: Table
+      visible: (showCoefficientTable)
+      rows: 0
+      columns:
+        - name: term
+          title: 'Covariate'
+          type: text
+        - name: estimate
+          title: 'sHR'
+          type: number
+          format: zto
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 'Lower CI'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 'Upper CI'
+          type: number
+          format: zto
+        - name: z_value
+          title: 'z'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'p'
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - survivalTime
+        - status
+        - eventOfInterest
+        - censorLevel
+        - covariates
+        - strata
+        - confLevel
+
+    # Gray's test results
+    - name: grayTestTable
+      title: Gray's Test for Group Differences
+      type: Table
+      visible: (showGrayTest)
+      rows: 0
+      columns:
+        - name: event_type
+          title: 'Event Type'
+          type: text
+        - name: chisq
+          title: 'Chi-square'
+          type: number
+          format: zto
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - survivalTime
+        - status
+        - eventOfInterest
+        - groupVar
+
+    # Model fit statistics
+    - name: modelFitTable
+      title: Model Fit Statistics
+      type: Table
+      visible: (showModelFit)
+      rows: 0
+      columns:
+        - name: statistic
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+
+    # Cause-specific comparison table
+    - name: comparisonTable
+      title: Subdistribution vs Cause-Specific Hazard Ratios
+      type: Table
+      visible: (causeSpecificComparison)
+      rows: 0
+      columns:
+        - name: term
+          title: 'Covariate'
+          type: text
+        - name: shr
+          title: 'sHR'
+          type: number
+          format: zto
+        - name: shr_ci
+          title: '95% CI'
+          type: text
+        - name: cshr
+          title: 'csHR'
+          type: number
+          format: zto
+        - name: cshr_ci
+          title: '95% CI'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    # Prediction table
+    - name: predictionTable
+      title: Predicted Cumulative Incidence
+      type: Table
+      visible: (showPredictionTable)
+      rows: 0
+      columns:
+        - name: time
+          title: 'Time'
+          type: number
+          format: zto
+        - name: cif
+          title: 'CIF'
+          type: number
+          format: pc
+        - name: ci_lower
+          title: 'Lower CI'
+          type: number
+          format: pc
+        - name: ci_upper
+          title: 'Upper CI'
+          type: number
+          format: pc
+      clearWith:
+        - survivalTime
+        - status
+        - covariates
+        - predictAt
+        - predictCovariatePattern
+
+    # CIF plot
+    - name: cifPlot
+      title: Cumulative Incidence Function
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotCIF
+      visible: (showCIFPlot)
+      clearWith:
+        - survivalTime
+        - status
+        - eventOfInterest
+        - groupVar
+        - colorScheme
+        - cifConfInt
+
+    # Stacked CIF plot
+    - name: stackedCIFPlot
+      title: Stacked Cumulative Incidence (All Events)
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotStackedCIF
+      visible: (showStackedCIF)
+      clearWith:
+        - survivalTime
+        - status
+        - groupVar
+        - colorScheme
+
+    # 1-KM vs CIF comparison
+    - name: kmvscifPlot
+      title: 1-KM vs CIF Comparison
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotKMvsCIF
+      visible: (show1KMvsCIF)
+      description: Demonstrates bias in using 1-KM for competing risks
+      clearWith:
+        - survivalTime
+        - status
+        - eventOfInterest
+        - groupVar
+
+    # Cause-specific hazard plot
+    - name: causeSpecificPlot
+      title: Cause-Specific Hazard Functions
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotCauseSpecific
+      visible: (showCauseSpecific)
+      clearWith:
+        - survivalTime
+        - status
+        - groupVar
+        - colorScheme
+
+    # Diagnostic plots
+    - name: diagnosticPlots
+      title: Diagnostic Plots
+      type: Image
+      width: 700
+      height: 900
+      renderFun: .plotDiagnostics
+      visible: (diagnosticPlots)
+      clearWith:
+        - survivalTime
+        - status
+        - covariates
+
+    # Influence diagnostics
+    - name: influenceTable
+      title: Influential Observations
+      type: Table
+      visible: (showInfluence)
+      rows: 0
+      columns:
+        - name: observation
+          title: 'Observation'
+          type: integer
+        - name: dfbetas
+          title: 'DFBETAs'
+          type: number
+          format: zto
+        - name: influence
+          title: 'Influence'
+          type: number
+          format: zto
+        - name: flag
+          title: 'Flag'
+          type: text
+
+    # Clinical interpretation
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (showInterpretation)
+      clearWith:
+        - survivalTime
+        - status
+        - covariates
+
+refs:
+    - cmprsk
+    - riskRegression
+    - tidycmprsk
+    - survival
+    - ggplot2
+    - dplyr
+    - ClinicoPathJamoviModule
+...

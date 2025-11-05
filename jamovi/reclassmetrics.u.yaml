@@ -1,0 +1,105 @@
+title: Model Reclassification Metrics
+name: reclassmetrics
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Outcome Type
+        children:
+          - type: ComboBox
+            name: outcomeType
+            label: Outcome Type
+
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Survival Time (for Survival Outcome)
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+            enable: (outcomeType:survival)
+
+      - type: TargetLayoutBox
+        label: Model Predictions
+        children:
+          - type: VariablesListBox
+            name: oldModelProb
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: newModelProb
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Reclassification Settings
+        children:
+          - type: ComboBox
+            name: nriType
+            label: NRI Type
+          - type: TextBox
+            name: riskCategories
+            label: Risk Category Cutoffs
+            format: string
+          - type: TextBox
+            name: timePoint
+            label: Time Point (months)
+            format: number
+            enable: (outcomeType:survival)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Bootstrap Settings
+        children:
+          - type: CheckBox
+            name: bootstrapCI
+            label: Bootstrap Confidence Intervals
+          - type: TextBox
+            name: nBootstrap
+            label: Number of Bootstrap Samples
+            format: number
+            enable: (bootstrapCI)
+          - type: TextBox
+            name: ciLevel
+            label: Confidence Level
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        children:
+          - type: CheckBox
+            name: showReclassTable
+            label: Show Reclassification Table
+          - type: CheckBox
+            name: showEventNonEvent
+            label: Separate Event/Non-Event NRI
+          - type: CheckBox
+            name: showIDIComponents
+            label: Show IDI Components
+          - type: CheckBox
+            name: showCalibrationComparison
+            label: Compare Model Calibration

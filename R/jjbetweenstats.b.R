@@ -20,20 +20,44 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # init ----
         .init = function() {
             deplen <- length(self$options$dep)
-            
+
             # Use configurable plot dimensions
             plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 650
             plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
-            
-            self$results$plot$setSize(plotwidth, deplen * plotheight)
+
+            # Improved height calculation to prevent compressed plots
+            # Add extra spacing when combining multiple plots vertically
+            if (deplen > 1) {
+                # Add 15% extra height per plot for better spacing
+                total_height <- deplen * plotheight * 1.15
+            } else {
+                total_height <- plotheight
+            }
+
+            self$results$plot$setSize(plotwidth, total_height)
 
             if (!is.null(self$options$grvar)) {
                 mydata <- self$data
                 grvar <- self$options$grvar
-                
+
                 if (!is.null(mydata[[grvar]])) {
                     num_levels <- nlevels(as.factor(mydata[[grvar]]))
-                    self$results$plot2$setSize(num_levels * plotwidth, deplen * plotheight)
+                    # For grouped analysis, calculate width based on layout
+                    # grouped_ggbetweenstats arranges plots in a grid
+                    # Estimate grid dimensions: use ceiling(sqrt(num_levels)) for balanced layout
+                    ncol_estimate <- ceiling(sqrt(num_levels))
+                    grouped_width <- ncol_estimate * plotwidth
+
+                    # Height calculation for grouped plots with multiple dependent variables
+                    if (deplen > 1) {
+                        grouped_height <- deplen * plotheight * 1.15
+                    } else {
+                        # For single dep var, height based on number of grouping levels
+                        nrow_estimate <- ceiling(num_levels / ncol_estimate)
+                        grouped_height <- nrow_estimate * plotheight
+                    }
+
+                    self$results$plot2$setSize(grouped_width, grouped_height)
                 }
             }
         },
@@ -521,7 +545,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.checkpoint(flush = FALSE)
                 plot <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
-                    plotgrid.args = list(ncol = 1)
+                    plotgrid.args = list(
+                        ncol = 1,
+                        heights = rep(1, length(plotlist))
+                    ),
+                    annotation.args = list(
+                        tag_levels = "A"
+                    )
                 )
                 
                 # Generate clinical interpretation for multiple variables
@@ -557,6 +587,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 selected_theme <- if (!opts$originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
 
+                # Calculate optimal grid layout for grouped plots
+                if (!is.null(mydata[[grvar]])) {
+                    num_levels <- nlevels(as.factor(mydata[[grvar]]))
+                    ncol_layout <- ceiling(sqrt(num_levels))
+                } else {
+                    ncol_layout <- 2  # default fallback
+                }
+
                 # Build argument list for grouped analysis
                 grouped_args <- list(
                     data = mydata,
@@ -576,7 +614,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     results.subtitle = opts$resultssubtitle,
                     centrality.plotting = if (!is.null(opts$centrality.plotting)) opts$centrality.plotting else FALSE,
                     centrality.type = if (!is.null(opts$centrality.type)) opts$centrality.type else NULL,
-                    ggtheme = selected_theme
+                    ggtheme = selected_theme,
+                    plotgrid.args = list(
+                        ncol = ncol_layout
+                    ),
+                    annotation.args = list(
+                        tag_levels = "A"
+                    )
                 )
                 
                 # Add violin.args and boxplot.args if they exist
@@ -593,8 +637,16 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Multiple dependent variables grouped analysis ----
             if (length(dep) > 1) {
                 private$.checkpoint()
-                
+
                 selected_theme <- if (!opts$originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
+
+                # Calculate optimal grid layout for grouped plots
+                if (!is.null(mydata[[grvar]])) {
+                    num_levels <- nlevels(as.factor(mydata[[grvar]]))
+                    ncol_layout <- ceiling(sqrt(num_levels))
+                } else {
+                    ncol_layout <- 2  # default fallback
+                }
 
                 dep2 <- as.list(dep)
                 dep2_symbols <- purrr::map(dep2, rlang::sym)
@@ -627,7 +679,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             results.subtitle = opts$resultssubtitle,
                             centrality.plotting = if (!is.null(opts$centrality.plotting)) opts$centrality.plotting else FALSE,
                             centrality.type = if (!is.null(opts$centrality.type)) opts$centrality.type else NULL,
-                            ggtheme = selected_theme
+                            ggtheme = selected_theme,
+                            plotgrid.args = list(
+                                ncol = ncol_layout
+                            ),
+                            annotation.args = list(
+                                tag_levels = "A"
+                            )
                         )
                         
                         # Add violin.args and boxplot.args if they exist
@@ -646,7 +704,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.checkpoint(flush = FALSE)
                 plot2 <- ggstatsplot::combine_plots(
                     plotlist = plotlist,
-                    plotgrid.args = list(ncol = 1)
+                    plotgrid.args = list(
+                        ncol = 1,
+                        heights = rep(1, length(plotlist))
+                    ),
+                    annotation.args = list(
+                        tag_levels = "A"
+                    )
                 )
             }
 

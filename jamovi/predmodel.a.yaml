@@ -1,0 +1,133 @@
+---
+name:  predmodel
+title: Clinical Prediction Model
+menuGroup: meddecideT
+menuSubgroup: Prediction Models
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+      Build and validate clinical prediction models with integrated calibration
+      and discrimination metrics. Supports logistic regression with stepwise/LASSO
+      selection, ROC analysis, calibration plots, and bootstrap validation.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage:
+            # data <- your_data
+            # ClinicoPath::predmodel(
+            #   data = data,
+            #   outcome = "disease",
+            #   predictors = vars(age, biomarker, stage),
+            #   validation = "bootstrap",
+            #   calibration = TRUE
+            # )
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description: >
+        Binary outcome variable (disease/event vs. no disease/no event).
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      description: >
+        Continuous or categorical predictor variables for the model.
+
+    - name: modelSelection
+      title: Variable Selection Method
+      type: List
+      options:
+        - title: All variables (no selection)
+          name: none
+        - title: Stepwise (AIC)
+          name: stepwise
+        - title: LASSO
+          name: lasso
+        - title: Ridge
+          name: ridge
+      default: none
+      description: >
+        Method for variable selection.
+
+    - name: validationMethod
+      title: Validation Method
+      type: List
+      options:
+        - title: None (apparent performance)
+          name: none
+        - title: Bootstrap (optimism correction)
+          name: bootstrap
+        - title: K-fold cross-validation
+          name: kfold
+      default: bootstrap
+      description: >
+        Internal validation method to assess model performance.
+
+    - name: nBootstrap
+      title: Number of Bootstrap Samples
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+      description: >
+        Number of bootstrap samples for optimism correction.
+
+    - name: nFolds
+      title: Number of Folds
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description: >
+        Number of folds for cross-validation.
+
+    - name: showCalibration
+      title: Show Calibration Analysis
+      type: Bool
+      default: true
+      description: >
+        Display calibration plot and Hosmer-Lemeshow test.
+
+    - name: showDiscrimination
+      title: Show Discrimination Analysis
+      type: Bool
+      default: true
+      description: >
+        Display ROC curve, AUC, and Brier score.
+
+    - name: showRiskGroups
+      title: Show Risk Stratification
+      type: Bool
+      default: true
+      description: >
+        Stratify patients into risk groups (low/medium/high).
+
+    - name: riskCutoffs
+      title: Risk Group Cutoffs
+      type: String
+      default: "0.33, 0.67"
+      description: >
+        Comma-separated risk probability cutoffs (e.g., "0.25, 0.75").
+
+    - name: ciLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description: >
+        Confidence level for intervals (0.80-0.99).
+...

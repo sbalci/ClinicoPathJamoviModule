@@ -26,6 +26,9 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             willingnessToPay = 50000,
             sensitivityAnalysis = FALSE,
             discountRate = 0.03,
+            separateDiscountRates = FALSE,
+            discountRateCost = 0.03,
+            discountRateUtility = 0.015,
             timeHorizon = 10,
             nodeLabels = TRUE,
             branchLabels = TRUE,
@@ -186,6 +189,22 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "discountRate",
                 discountRate,
                 default=0.03,
+                min=0,
+                max=0.2)
+            private$..separateDiscountRates <- jmvcore::OptionBool$new(
+                "separateDiscountRates",
+                separateDiscountRates,
+                default=FALSE)
+            private$..discountRateCost <- jmvcore::OptionNumber$new(
+                "discountRateCost",
+                discountRateCost,
+                default=0.03,
+                min=0,
+                max=0.2)
+            private$..discountRateUtility <- jmvcore::OptionNumber$new(
+                "discountRateUtility",
+                discountRateUtility,
+                default=0.015,
                 min=0,
                 max=0.2)
             private$..timeHorizon <- jmvcore::OptionNumber$new(
@@ -386,6 +405,9 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..willingnessToPay)
             self$.addOption(private$..sensitivityAnalysis)
             self$.addOption(private$..discountRate)
+            self$.addOption(private$..separateDiscountRates)
+            self$.addOption(private$..discountRateCost)
+            self$.addOption(private$..discountRateUtility)
             self$.addOption(private$..timeHorizon)
             self$.addOption(private$..nodeLabels)
             self$.addOption(private$..branchLabels)
@@ -442,6 +464,9 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         willingnessToPay = function() private$..willingnessToPay$value,
         sensitivityAnalysis = function() private$..sensitivityAnalysis$value,
         discountRate = function() private$..discountRate$value,
+        separateDiscountRates = function() private$..separateDiscountRates$value,
+        discountRateCost = function() private$..discountRateCost$value,
+        discountRateUtility = function() private$..discountRateUtility$value,
         timeHorizon = function() private$..timeHorizon$value,
         nodeLabels = function() private$..nodeLabels$value,
         branchLabels = function() private$..branchLabels$value,
@@ -497,6 +522,9 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..willingnessToPay = NA,
         ..sensitivityAnalysis = NA,
         ..discountRate = NA,
+        ..separateDiscountRates = NA,
+        ..discountRateCost = NA,
+        ..discountRateUtility = NA,
         ..timeHorizon = NA,
         ..nodeLabels = NA,
         ..branchLabels = NA,
@@ -966,7 +994,12 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   NMB calculations.
 #' @param sensitivityAnalysis Perform one-way sensitivity analysis on key
 #'   parameters.
-#' @param discountRate Annual discount rate for future costs and benefits.
+#' @param discountRate Annual discount rate for future costs and benefits when
+#'   same rate for both.
+#' @param separateDiscountRates Use separate discount rates for costs and
+#'   utilities.
+#' @param discountRateCost Annual discount rate for costs.
+#' @param discountRateUtility Annual discount rate for utilities and QALYs.
 #' @param timeHorizon Time horizon for the analysis in years.
 #' @param nodeLabels Display descriptive labels for nodes.
 #' @param branchLabels Display labels on tree branches.
@@ -1077,6 +1110,9 @@ decisiongraph <- function(
     willingnessToPay = 50000,
     sensitivityAnalysis = FALSE,
     discountRate = 0.03,
+    separateDiscountRates = FALSE,
+    discountRateCost = 0.03,
+    discountRateUtility = 0.015,
     timeHorizon = 10,
     nodeLabels = TRUE,
     branchLabels = TRUE,
@@ -1167,6 +1203,9 @@ decisiongraph <- function(
         willingnessToPay = willingnessToPay,
         sensitivityAnalysis = sensitivityAnalysis,
         discountRate = discountRate,
+        separateDiscountRates = separateDiscountRates,
+        discountRateCost = discountRateCost,
+        discountRateUtility = discountRateUtility,
         timeHorizon = timeHorizon,
         nodeLabels = nodeLabels,
         branchLabels = branchLabels,

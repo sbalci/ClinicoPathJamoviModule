@@ -1702,6 +1702,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     self$results$cox_ph$setContent(print(zph))
 
+                    # Generate enhanced PH interpretation
+                    ph_interpretation <- private$.generatePHInterpretation(zph, myfactor)
+                    self$results$phInterpretation$setContent(ph_interpretation)
+
                     image8 <- self$results$plot8
                     image8$setState(zph)
                     
@@ -1766,7 +1770,97 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(NULL)
                 })
             }
-            
+
+            # Generate PH Interpretation Function ----
+            ,
+            .generatePHInterpretation = function(zph, covariate_name) {
+                tryCatch({
+                    # Extract test results
+                    zph_table <- zph$table
+                    p_value <- zph_table[nrow(zph_table), "p"]  # GLOBAL p-value
+
+                    # Determine if PH assumption is violated
+                    ph_violated <- p_value < 0.05
+
+                    # Build HTML interpretation
+                    html <- paste0(
+                        "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #2c3e50;'>Proportional Hazards Assessment</h4>"
+                    )
+
+                    # Status indicator
+                    if (ph_violated) {
+                        html <- paste0(html,
+                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
+                            "<strong style='color: #856404;'>⚠️ WARNING: Proportional Hazards Assumption May Be Violated</strong><br/>",
+                            sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p < 0.05 suggests violation)</p>", p_value),
+                            "</div>"
+                        )
+                    } else {
+                        html <- paste0(html,
+                            "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
+                            "<strong style='color: #155724;'>✓ Proportional Hazards Assumption Appears Satisfied</strong><br/>",
+                            sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p ≥ 0.05)</p>", p_value),
+                            "</div>"
+                        )
+                    }
+
+                    # Educational content
+                    html <- paste0(html,
+                        "<div style='margin: 20px 0;'>",
+                        "<h5 style='color: #2c3e50; margin-bottom: 10px;'>Understanding the Test:</h5>",
+                        "<ul style='line-height: 1.8;'>",
+                        "<li><strong>Null Hypothesis:</strong> The hazard ratio remains constant over time (PH assumption holds)</li>",
+                        "<li><strong>Test Method:</strong> Schoenfeld residuals correlation with time</li>",
+                        "<li><strong>Interpretation:</strong> p < 0.05 suggests the effect of '", covariate_name, "' changes over time</li>",
+                        "</ul>",
+                        "</div>"
+                    )
+
+                    # Recommendations if violated
+                    if (ph_violated) {
+                        html <- paste0(html,
+                            "<div style='background-color: #e7f3ff; padding: 15px; border-radius: 4px; margin: 15px 0;'>",
+                            "<h5 style='color: #0056b3; margin-top: 0;'>📋 Recommended Solutions:</h5>",
+                            "<ol style='line-height: 1.8; margin: 10px 0;'>",
+                            "<li><strong>Stratified Cox Model:</strong> Stratify by '", covariate_name, "' if it has few categories",
+                            "<pre style='background: #fff; padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3;'>",
+                            "survival::coxph(Surv(time, status) ~ other_vars + strata(", covariate_name, "))",
+                            "</pre></li>",
+                            "<li><strong>Time-Dependent Coefficients:</strong> Add interaction with time",
+                            "<pre style='background: #fff; padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3;'>",
+                            "survival::coxph(Surv(time, status) ~ ", covariate_name, " + tt(", covariate_name, "), tt = function(x, t, ...) x * t)",
+                            "</pre></li>",
+                            "<li><strong>Alternative Approaches:</strong>",
+                            "<ul style='margin: 5px 0;'>",
+                            "<li>Restricted Mean Survival Time (RMST) analysis - does not assume proportional hazards</li>",
+                            "<li>Accelerated failure time (AFT) models - different parametric assumption</li>",
+                            "<li>Landmark analysis - analyze survival from specific time points</li>",
+                            "</ul></li>",
+                            "</ol>",
+                            "</div>"
+                        )
+                    } else {
+                        html <- paste0(html,
+                            "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 4px; margin: 15px 0;'>",
+                            "<h5 style='color: #2e7d32; margin-top: 0;'>✓ Next Steps:</h5>",
+                            "<p style='margin: 5px 0;'>The Cox proportional hazards model appears appropriate for your data. ",
+                            "You can proceed with confidence in interpreting the hazard ratios as constant effects over time.</p>",
+                            "<p style='margin: 10px 0 0 0;'><em>Note: Also examine the Schoenfeld residual plot above for visual confirmation.</em></p>",
+                            "</div>"
+                        )
+                    }
+
+                    # Close main div
+                    html <- paste0(html, "</div>")
+
+                    return(html)
+
+                }, error = function(e) {
+                    return(paste0("<p>Error generating PH interpretation: ", e$message, "</p>"))
+                })
+            }
+
             # Export Survival Data Function ----
             ,
             .exportSurvivalData = function(results) {

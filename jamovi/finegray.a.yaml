@@ -1,0 +1,336 @@
+---
+name: finegray
+title: Fine-Gray Competing Risks Regression
+menuGroup: jsurvivalT
+menuSubgroup: Competing Risks
+menuSubtitle: Subdistribution Hazard Regression
+version: '0.0.32'
+jas: '1.2'
+
+description:
+    main: >
+        Fine-Gray subdistribution hazard regression for competing risks data.
+        Models the cumulative incidence function (CIF) while accounting for
+        competing events. Provides sub-hazard ratios (sHR) for covariate effects.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: survivalTime
+      title: Survival Time
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Time to event or censoring. Must be numeric and positive.
+
+    - name: status
+      title: Event Status
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Event status with multiple levels: 0 or first level = censored,
+            1 or second level = event of interest, 2+ = competing events.
+
+    - name: eventOfInterest
+      title: Event of Interest Level
+      type: Level
+      variable: (status)
+      description:
+          R: >
+            Which level of status represents the event of interest.
+            Other non-censored levels are treated as competing events.
+
+    - name: censorLevel
+      title: Censored Level
+      type: Level
+      variable: (status)
+      description:
+          R: >
+            Which level of status represents censoring.
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Predictor variables for the regression model.
+            Can include continuous and categorical variables.
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional stratification variable for stratified Fine-Gray models.
+
+    - name: groupVar
+      title: Grouping Variable (for CIF plots)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            Optional grouping variable for cumulative incidence plots.
+
+    - name: showCoefficientTable
+      title: Show Coefficient Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display table of sub-hazard ratios with confidence intervals.
+
+    - name: exponentiate
+      title: Exponentiate Coefficients (sHR)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Report exponentiated coefficients as sub-hazard ratios (sHR).
+            If false, reports log sub-hazard ratios.
+
+    - name: confLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals.
+
+    - name: showGrayTest
+      title: Gray's Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Gray's test for comparing cumulative incidence functions
+            between groups (requires grouping variable).
+
+    - name: showModelFit
+      title: Model Fit Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model fit statistics (pseudo-R², AIC, BIC).
+
+    - name: showCIFPlot
+      title: Show CIF Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display cumulative incidence function plot.
+
+    - name: cifPlotBy
+      title: CIF Plot By
+      type: List
+      options:
+        - name: group
+          title: By group variable
+        - name: covariate
+          title: By covariate (median/mean)
+        - name: overall
+          title: Overall (no grouping)
+      default: group
+      description:
+          R: >
+            How to display the CIF plot.
+
+    - name: cifPlotTimes
+      title: CIF Plot Time Points
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated time points for CIF plot risk table.
+            If empty, automatically determined.
+
+    - name: showStackedCIF
+      title: Show Stacked CIF Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display stacked cumulative incidence plot showing all competing events.
+
+    - name: show1KMvsCIF
+      title: Show 1-KM vs CIF Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show comparison plot demonstrating bias in 1-KM approach.
+
+    - name: showCauseSpecific
+      title: Show Cause-Specific Hazards
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display cause-specific hazard ratios alongside subdistribution HRs.
+
+    - name: causeSpecificComparison
+      title: Subdistribution vs Cause-Specific Table
+      type: Bool
+      default: false
+      description:
+          R: >
+            Side-by-side comparison table of sHR and csHR.
+
+    - name: showRiskTable
+      title: Show Risk Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display numbers at risk below CIF plot.
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - name: default
+          title: Default
+        - name: colorblind
+          title: Colorblind-safe
+        - name: grayscale
+          title: Grayscale
+        - name: nejm
+          title: NEJM journal style
+        - name: lancet
+          title: Lancet journal style
+      default: default
+      description:
+          R: >
+            Color palette for plots.
+
+    - name: cifConfInt
+      title: CIF Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display confidence bands around CIF curves.
+
+    - name: cifConfLevel
+      title: CIF Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for CIF confidence bands.
+
+    - name: predictAt
+      title: Predict at Time Points
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated time points for predictions.
+            Calculates predicted CIF at these times for covariate patterns.
+
+    - name: predictCovariatePattern
+      title: Covariate Pattern for Prediction
+      type: List
+      options:
+        - name: mean
+          title: Mean/mode of covariates
+        - name: median
+          title: Median of covariates
+        - name: reference
+          title: Reference levels
+        - name: custom
+          title: Custom values
+      default: mean
+      description:
+          R: >
+            Covariate pattern for predictions.
+
+    - name: customCovariateValues
+      title: Custom Covariate Values
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom covariate values for predictions (comma-separated).
+            Format: "age=65,stage=III,treatment=chemo"
+
+    - name: showPredictionTable
+      title: Show Prediction Table
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display table of predicted cumulative incidence at specified times.
+
+    - name: diagnosticPlots
+      title: Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display diagnostic plots (residuals, influence).
+
+    - name: showInfluence
+      title: Influence Diagnostics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Identify influential observations.
+
+    - name: bootstrapCI
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for sHR.
+
+    - name: nBootstrap
+      title: Bootstrap Samples
+      type: Number
+      default: 500
+      min: 100
+      max: 2000
+      description:
+          R: >
+            Number of bootstrap samples for confidence intervals.
+
+    - name: showInterpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display interpretation guidance for Fine-Gray results.
+
+    - name: compareToKM
+      title: Compare to Kaplan-Meier
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show why 1-KM overestimates cumulative incidence.
+
+...

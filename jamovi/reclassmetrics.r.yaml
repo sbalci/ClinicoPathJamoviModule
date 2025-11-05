@@ -1,0 +1,192 @@
+---
+name:  reclassmetrics
+title: Model Reclassification Metrics
+jrs:   '1.1'
+
+items:
+
+    - name:  instructions
+      title: Instructions
+      type:  Html
+      visible: true
+
+    - name:  nriResults
+      title: Net Reclassification Improvement (NRI)
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  idiResults
+      title: Integrated Discrimination Improvement (IDI)
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  reclassTable
+      title: Reclassification Table
+      type:  Table
+      visible: (showReclassTable)
+      rows: 0
+      columns:
+          - name: old_category
+            title: 'Old Model Risk'
+            type: text
+          - name: new_low
+            title: 'New: Low'
+            type: integer
+          - name: new_medium
+            title: 'New: Medium'
+            type: integer
+          - name: new_high
+            title: 'New: High'
+            type: integer
+          - name: total
+            title: 'Total'
+            type: integer
+
+    - name:  eventNonEventNRI
+      title: NRI by Event Status
+      type:  Table
+      visible: (showEventNonEvent)
+      rows: 1
+      columns:
+          - name: group
+            title: 'Group'
+            type: text
+          - name: nri_estimate
+            title: 'NRI Component'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: n_improved
+            title: 'N Improved'
+            type: integer
+          - name: n_worsened
+            title: 'N Worsened'
+            type: integer
+
+    - name:  idiComponents
+      title: IDI Components
+      type:  Table
+      visible: (showIDIComponents)
+      rows: 1
+      columns:
+          - name: component
+            title: 'Component'
+            type: text
+          - name: old_model
+            title: 'Old Model'
+            type: number
+          - name: new_model
+            title: 'New Model'
+            type: number
+          - name: improvement
+            title: 'Improvement'
+            type: number
+
+    - name:  calibrationComparison
+      title: Calibration Comparison
+      type:  Table
+      visible: (showCalibrationComparison)
+      rows: 1
+      columns:
+          - name: model
+            title: 'Model'
+            type: text
+          - name: cal_slope
+            title: 'Calibration Slope'
+            type: number
+          - name: cal_intercept
+            title: 'Calibration Intercept'
+            type: number
+          - name: brier_score
+            title: 'Brier Score'
+            type: number
+
+    - name:  reclassPlot
+      title: Risk Reclassification Plot
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .reclassPlot
+      visible: true
+      clearWith:
+          - oldModelProb
+          - newModelProb
+          - riskCategories
+
+    - name:  improvementPlot
+      title: Probability Improvement Plot
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .improvementPlot
+      visible: true
+      clearWith:
+          - oldModelProb
+          - newModelProb
+          - outcome
+
+    - name:  summary
+      title: Summary & Interpretation
+      type:  Html
+      visible: true
+
+
+refs:
+    - ClinicoPathJamoviModule
+
+    - janitor
+    - labelled
+    - glue
+    - survival
+    - PredictABEL
+    - nricens
+    - pROC
+    - scales
+
+...

@@ -344,7 +344,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Cure Fraction Plot",
                 width=700,
                 height=450,
-                renderFun=".plotCureFraction",
+                renderFun=".renderCureFractionPlot",
                 visible="(plot_cure_fraction)",
                 clearWith=list(
                     "time",

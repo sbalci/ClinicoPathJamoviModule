@@ -1,0 +1,139 @@
+---
+name:  modelval
+title: Model Validation Dashboard
+jrs:   '1.1'
+
+items:
+    - name: validationSummary
+      title: Validation Summary
+      type: Html
+
+    - name: calibrationMetrics
+      title: Calibration Metrics
+      type: Table
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ciLower
+          title: Lower CI
+          type: number
+        - name: ciUpper
+          title: Upper CI
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: discriminationMetrics
+      title: Discrimination Metrics
+      type: Table
+      visible: (showDiscrimination)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ciLower
+          title: Lower CI
+          type: number
+        - name: ciUpper
+          title: Upper CI
+          type: number
+
+    - name: netBenefitSummary
+      title: Net Benefit Summary
+      type: Table
+      visible: (showNetBenefit)
+      columns:
+        - name: threshold
+          title: Threshold
+          type: number
+          format: pc
+        - name: netBenefit
+          title: Net Benefit
+          type: number
+        - name: treatAll
+          title: Treat All
+          type: number
+        - name: treatNone
+          title: Treat None
+          type: number
+
+    - name: subgroupPerformance
+      title: Subgroup Performance
+      type: Table
+      visible: (showSubgroupAnalysis && subgroup)
+      columns:
+        - name: subgroup
+          title: Subgroup
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: auc
+          title: AUC
+          type: number
+        - name: brier
+          title: Brier
+          type: number
+        - name: calSlope
+          title: Cal. Slope
+          type: number
+
+    - name: calibrationPlot
+      title: Calibration Plot
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .calibrationPlot
+      requiresData: true
+
+    - name: rocPlot
+      title: ROC Curve
+      type: Image
+      width: 500
+      height: 500
+      renderFun: .rocPlot
+      visible: (showDiscrimination)
+      requiresData: true
+
+    - name: dcaPlot
+      title: Decision Curve Analysis
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .dcaPlot
+      visible: (showNetBenefit)
+      requiresData: true
+
+    - name: subgroupCalibrationPlot
+      title: Calibration by Subgroup
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .subgroupCalibrationPlot
+      visible: (showSubgroupAnalysis && subgroup)
+      requiresData: true
+
+    - name: recommendations
+      title: Validation Recommendations
+      type: Html
+
+refs:
+    - ClinicoPathJamoviModule
+    - pROC
+    - rms
+    - dcurves
+...

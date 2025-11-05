@@ -1,0 +1,252 @@
+---
+name:  jjcoefstats
+title: Coefficient Forest Plot (ggcoefstats)
+menuGroup: JJStatsPlotT
+menuSubgroup: Regression Plots
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+      Create publication-ready forest plots for regression coefficients and meta-analysis results.
+      Supports both pre-computed coefficients and automatic model fitting from raw data.
+      Uses ggstatsplot's ggcoefstats() for professional visualization.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage:
+            # For pre-computed coefficients:
+            # ClinicoPath::jjcoefstats(
+            #   data = model_results,
+            #   term = "term",
+            #   estimate = "estimate",
+            #   std_error = "std_error"
+            # )
+            #
+            # For automatic fitting:
+            # ClinicoPath::jjcoefstats(
+            #   data = mydata,
+            #   outcome = "weight",
+            #   predictors = vars(height, age, sex),
+            #   modelType = "lm"
+            # )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: inputMode
+      title: Input Mode
+      type: List
+      options:
+        - title: Pre-computed Coefficients
+          name: precomputed
+        - title: Fit Model from Data
+          name: fitmodel
+      default: precomputed
+      description: >
+        Whether to use pre-computed coefficients or fit a model from raw data.
+
+    # Pre-computed coefficients mode
+    - name: term
+      title: Term/Variable Names
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description: >
+        Variable containing coefficient names (for pre-computed mode).
+
+    - name: estimate
+      title: Estimate
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Coefficient estimates or log-odds ratios.
+
+    - name: stdError
+      title: Standard Error
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Standard errors of estimates.
+
+    - name: confLow
+      title: CI Lower Bound
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Lower confidence interval bounds.
+
+    - name: confHigh
+      title: CI Upper Bound
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Upper confidence interval bounds.
+
+    - name: pValue
+      title: P-Value (Optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        P-values for each coefficient.
+
+    # Fit model mode
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description: >
+        Outcome variable for model fitting.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      description: >
+        Predictor variables for model fitting.
+
+    - name: modelType
+      title: Model Type
+      type: List
+      options:
+        - title: Linear Model (lm)
+          name: lm
+        - title: Logistic Regression (glm binomial)
+          name: glm
+        - title: Cox Proportional Hazards
+          name: cox
+        - title: Mixed Effects (lmer/glmer)
+          name: mixed
+      default: lm
+      description: >
+        Type of regression model to fit.
+
+    - name: survivalTime
+      title: Survival Time (for Cox)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >
+        Time variable for Cox proportional hazards model.
+
+    - name: eventStatus
+      title: Event Status (for Cox)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description: >
+        Event indicator for Cox model (0=censored, 1=event).
+
+    # Plot customization
+    - name: sortCoefs
+      title: Sort Coefficients
+      type: Bool
+      default: false
+      description: >
+        Sort coefficients by estimate magnitude.
+
+    - name: excludeIntercept
+      title: Exclude Intercept
+      type: Bool
+      default: true
+      description: >
+        Exclude intercept from the plot.
+
+    - name: showPValues
+      title: Show P-Values
+      type: Bool
+      default: true
+      description: >
+        Display p-values alongside coefficients.
+
+    - name: pSymbols
+      title: Use P-Value Symbols
+      type: Bool
+      default: false
+      description: >
+        Use symbols (*, **, ***) instead of numeric p-values.
+
+    - name: ciLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description: >
+        Confidence level for intervals.
+
+    - name: exponentiate
+      title: Exponentiate Coefficients
+      type: Bool
+      default: false
+      description: >
+        Exponentiate coefficients (for odds ratios or hazard ratios).
+
+    - name: referenceValue
+      title: Reference Value
+      type: Number
+      default: 0
+      description: >
+        Reference value for plotting (0 for differences, 1 for ratios).
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Colorblind Safe
+          name: colorblind
+        - title: Viridis
+          name: viridis
+        - title: Grayscale
+          name: grayscale
+      default: default
+      description: >
+        Color palette for the plot.
+
+    - name: plotTheme
+      title: Plot Theme
+      type: List
+      options:
+        - title: Default ggstatsplot
+          name: default
+        - title: Classic
+          name: classic
+        - title: Minimal
+          name: minimal
+        - title: Light
+          name: light
+      default: default
+      description: >
+        ggplot2 theme for the plot.
+
+    - name: plotWidth
+      title: Plot Width
+      type: Integer
+      default: 700
+      min: 400
+      max: 2000
+      description: >
+        Plot width in pixels.
+
+    - name: plotHeight
+      title: Plot Height
+      type: Integer
+      default: 500
+      min: 300
+      max: 2000
+      description: >
+        Plot height in pixels.
+
+...

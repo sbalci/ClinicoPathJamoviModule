@@ -22,7 +22,16 @@ generalizedroc(
   plot_roc = TRUE,
   plot_distributions = TRUE,
   plot_diagnostic = FALSE,
-  random_seed = 42
+  random_seed = 42,
+  use_tram = FALSE,
+  covariates = NULL,
+  tram_model = "Colr",
+  covariate_values = "0, 0.5, 1",
+  plot_covariate_roc = TRUE,
+  plot_auc_vs_covariate = TRUE,
+  n_covariate_points = 50,
+  tram_constraints = "none",
+  censoring_aware = FALSE
 )
 }
 \arguments{
@@ -66,6 +75,26 @@ group}
 \item{plot_diagnostic}{plot Q-Q plots for normality assessment}
 
 \item{random_seed}{random seed for reproducible bootstrap sampling}
+
+\item{use_tram}{Use tram package for covariate-adjusted transformation
+models}
+
+\item{covariates}{Covariates to include in transformation model}
+
+\item{tram_model}{Type of transformation model from tram package}
+
+\item{covariate_values}{Comma-separated covariate values for ROC evaluation}
+
+\item{plot_covariate_roc}{Plot ROC curves as function of covariate values}
+
+\item{plot_auc_vs_covariate}{Plot how AUC changes across covariate values}
+
+\item{n_covariate_points}{Number of points to evaluate across covariate
+range}
+
+\item{tram_constraints}{Constraints on transformation function}
+
+\item{censoring_aware}{Use censoring-aware transformation models}
 }
 \value{
 A results object containing:

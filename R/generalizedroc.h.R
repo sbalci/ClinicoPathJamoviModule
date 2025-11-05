@@ -22,7 +22,16 @@ generalizedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             plot_roc = TRUE,
             plot_distributions = TRUE,
             plot_diagnostic = FALSE,
-            random_seed = 42, ...) {
+            random_seed = 42,
+            use_tram = FALSE,
+            covariates = NULL,
+            tram_model = "Colr",
+            covariate_values = "0, 0.5, 1",
+            plot_covariate_roc = TRUE,
+            plot_auc_vs_covariate = TRUE,
+            n_covariate_points = 50,
+            tram_constraints = "none",
+            censoring_aware = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -127,6 +136,59 @@ generalizedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 min=1,
                 max=999999,
                 default=42)
+            private$..use_tram <- jmvcore::OptionBool$new(
+                "use_tram",
+                use_tram,
+                default=FALSE)
+            private$..covariates <- jmvcore::OptionVariables$new(
+                "covariates",
+                covariates,
+                suggested=list(
+                    "continuous",
+                    "nominal"),
+                permitted=list(
+                    "numeric",
+                    "factor"),
+                default=NULL)
+            private$..tram_model <- jmvcore::OptionList$new(
+                "tram_model",
+                tram_model,
+                options=list(
+                    "Colr",
+                    "BoxCox",
+                    "Lehmann",
+                    "Polr"),
+                default="Colr")
+            private$..covariate_values <- jmvcore::OptionString$new(
+                "covariate_values",
+                covariate_values,
+                default="0, 0.5, 1")
+            private$..plot_covariate_roc <- jmvcore::OptionBool$new(
+                "plot_covariate_roc",
+                plot_covariate_roc,
+                default=TRUE)
+            private$..plot_auc_vs_covariate <- jmvcore::OptionBool$new(
+                "plot_auc_vs_covariate",
+                plot_auc_vs_covariate,
+                default=TRUE)
+            private$..n_covariate_points <- jmvcore::OptionInteger$new(
+                "n_covariate_points",
+                n_covariate_points,
+                default=50,
+                min=10,
+                max=200)
+            private$..tram_constraints <- jmvcore::OptionList$new(
+                "tram_constraints",
+                tram_constraints,
+                options=list(
+                    "none",
+                    "increasing",
+                    "decreasing"),
+                default="none")
+            private$..censoring_aware <- jmvcore::OptionBool$new(
+                "censoring_aware",
+                censoring_aware,
+                default=FALSE)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..predictor)
@@ -145,6 +207,15 @@ generalizedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..plot_distributions)
             self$.addOption(private$..plot_diagnostic)
             self$.addOption(private$..random_seed)
+            self$.addOption(private$..use_tram)
+            self$.addOption(private$..covariates)
+            self$.addOption(private$..tram_model)
+            self$.addOption(private$..covariate_values)
+            self$.addOption(private$..plot_covariate_roc)
+            self$.addOption(private$..plot_auc_vs_covariate)
+            self$.addOption(private$..n_covariate_points)
+            self$.addOption(private$..tram_constraints)
+            self$.addOption(private$..censoring_aware)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -163,7 +234,16 @@ generalizedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         plot_roc = function() private$..plot_roc$value,
         plot_distributions = function() private$..plot_distributions$value,
         plot_diagnostic = function() private$..plot_diagnostic$value,
-        random_seed = function() private$..random_seed$value),
+        random_seed = function() private$..random_seed$value,
+        use_tram = function() private$..use_tram$value,
+        covariates = function() private$..covariates$value,
+        tram_model = function() private$..tram_model$value,
+        covariate_values = function() private$..covariate_values$value,
+        plot_covariate_roc = function() private$..plot_covariate_roc$value,
+        plot_auc_vs_covariate = function() private$..plot_auc_vs_covariate$value,
+        n_covariate_points = function() private$..n_covariate_points$value,
+        tram_constraints = function() private$..tram_constraints$value,
+        censoring_aware = function() private$..censoring_aware$value),
     private = list(
         ..outcome = NA,
         ..predictor = NA,
@@ -181,7 +261,16 @@ generalizedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..plot_roc = NA,
         ..plot_distributions = NA,
         ..plot_diagnostic = NA,
-        ..random_seed = NA)
+        ..random_seed = NA,
+        ..use_tram = NA,
+        ..covariates = NA,
+        ..tram_model = NA,
+        ..covariate_values = NA,
+        ..plot_covariate_roc = NA,
+        ..plot_auc_vs_covariate = NA,
+        ..n_covariate_points = NA,
+        ..tram_constraints = NA,
+        ..censoring_aware = NA)
 )
 
 generalizedrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -468,6 +557,17 @@ generalizedrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   group
 #' @param plot_diagnostic plot Q-Q plots for normality assessment
 #' @param random_seed random seed for reproducible bootstrap sampling
+#' @param use_tram Use tram package for covariate-adjusted transformation
+#'   models
+#' @param covariates Covariates to include in transformation model
+#' @param tram_model Type of transformation model from tram package
+#' @param covariate_values Comma-separated covariate values for ROC evaluation
+#' @param plot_covariate_roc Plot ROC curves as function of covariate values
+#' @param plot_auc_vs_covariate Plot how AUC changes across covariate values
+#' @param n_covariate_points Number of points to evaluate across covariate
+#'   range
+#' @param tram_constraints Constraints on transformation function
+#' @param censoring_aware Use censoring-aware transformation models
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructionsText} \tab \tab \tab \tab \tab a html \cr
@@ -506,18 +606,29 @@ generalizedroc <- function(
     plot_roc = TRUE,
     plot_distributions = TRUE,
     plot_diagnostic = FALSE,
-    random_seed = 42) {
+    random_seed = 42,
+    use_tram = FALSE,
+    covariates = NULL,
+    tram_model = "Colr",
+    covariate_values = "0, 0.5, 1",
+    plot_covariate_roc = TRUE,
+    plot_auc_vs_covariate = TRUE,
+    n_covariate_points = 50,
+    tram_constraints = "none",
+    censoring_aware = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("generalizedroc requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(predictor)) predictor <- jmvcore::resolveQuo(jmvcore::enquo(predictor))
+    if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(outcome), outcome, NULL),
-            `if`( ! missing(predictor), predictor, NULL))
+            `if`( ! missing(predictor), predictor, NULL),
+            `if`( ! missing(covariates), covariates, NULL))
 
     for (v in outcome) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -538,7 +649,16 @@ generalizedroc <- function(
         plot_roc = plot_roc,
         plot_distributions = plot_distributions,
         plot_diagnostic = plot_diagnostic,
-        random_seed = random_seed)
+        random_seed = random_seed,
+        use_tram = use_tram,
+        covariates = covariates,
+        tram_model = tram_model,
+        covariate_values = covariate_values,
+        plot_covariate_roc = plot_covariate_roc,
+        plot_auc_vs_covariate = plot_auc_vs_covariate,
+        n_covariate_points = n_covariate_points,
+        tram_constraints = tram_constraints,
+        censoring_aware = censoring_aware)
 
     analysis <- generalizedrocClass$new(
         options = options,

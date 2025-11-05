@@ -1,0 +1,95 @@
+name: modelval
+title: Model Validation Dashboard
+jus: '2.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    name: variablesupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Predicted Probability
+        children:
+          - type: VariablesListBox
+            name: predicted
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Subgroup Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: subgroup
+            isTarget: true
+            maxItemCount: 1
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Validation Settings
+        children:
+          - type: ComboBox
+            name: validationType
+            label: Validation Type
+          - type: TextBox
+            name: ciLevel
+            format: number
+            label: Confidence Level (0.80-0.99)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Calibration Analysis
+        children:
+          - type: CheckBox
+            name: showCalibrationLarge
+            label: Calibration-in-the-Large
+          - type: CheckBox
+            name: showCalibrationSlope
+            label: Calibration Slope
+          - type: CheckBox
+            name: showFlexibleCalibration
+            label: Flexible Calibration Curve
+          - type: TextBox
+            name: calibrationGroups
+            format: number
+            label: Number of Calibration Groups
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Performance Metrics
+        children:
+          - type: CheckBox
+            name: showDiscrimination
+            label: Show Discrimination Metrics
+          - type: CheckBox
+            name: showNetBenefit
+            label: Show Net Benefit (DCA)
+          - type: TextBox
+            name: thresholdRange
+            format: string
+            label: Threshold Range (min, max)
+            enable: (showNetBenefit)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Subgroup Analysis
+        children:
+          - type: CheckBox
+            name: showSubgroupAnalysis
+            label: Show Subgroup Performance
