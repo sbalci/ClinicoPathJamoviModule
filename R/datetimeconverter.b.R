@@ -27,6 +27,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "datetimeconverterClass",
     inherit = datetimeconverterBase,
     private = list(
+        .rOutputRequests = NULL,
+
+        # Track R-specific output requests
+        .isOutputRequested = function(name) {
+            if (is.null(private$.rOutputRequests))
+                return(FALSE)
+            isTRUE(private$.rOutputRequests[[name]])
+        },
 
         # ===================================================================
         # DATETIME FORMAT DETECTION
@@ -38,18 +46,20 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # @return Character string indicating detected format (e.g., "ymd", "dmy_hms")
         # @details Tests formats in order of likelihood. Falls back to "ymd" if no format achieves >80% success rate
         .detectDatetimeFormat = function(datetime_vector) {
-            # Automatic datetime format detection
-
-            # Remove missing values for format detection
+            format_warnings <- character()
             sample_dates <- datetime_vector[!is.na(datetime_vector)]
             if (length(sample_dates) == 0) {
-                stop("No valid datetime values found for format detection")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noValidDates',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No valid datetime values found for format detection.\n• All values in the selected variable are missing (NA).\n• Select a different variable or check your data source.')
+                self$results$insert(1, notice)
+                return(list(format = "ymd", warnings = 'Defaulted to YYYY-MM-DD (YMD) because no valid values were available.'))
             }
 
-            # Take a sample for format detection
             sample_dates <- head(sample_dates, min(20, length(sample_dates)))
-
-            # Test common formats in order of likelihood
             formats_to_try <- c(
                 "ymd_hms", "dmy_hms", "mdy_hms",
                 "ymd_hm", "dmy_hm", "mdy_hm",
@@ -57,24 +67,105 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ydm", "myd", "dym"
             )
 
-            for (fmt in formats_to_try) {
-                parser <- private$.getParser(fmt)
+            eval_results <- setNames(vector("list", length(formats_to_try)), formats_to_try)
+            for (fmt in formats_to_try)
+                eval_results[[fmt]] <- private$.evaluateFormat(sample_dates, fmt)
 
-                tryCatch({
-                    parsed_dates <- parser(sample_dates)
-                    # If most dates parse successfully, use this format
-                    success_rate <- sum(!is.na(parsed_dates)) / length(sample_dates)
-                    if (success_rate > 0.8) {
-                        return(fmt)
-                    }
-                }, error = function(e) {
-                    # Continue to next format
-                })
+            for (fmt in formats_to_try) {
+                info <- eval_results[[fmt]]
+                if (info$success_rate > 0.8) {
+                    ambiguity <- private$.warnAmbiguousFormat(fmt, eval_results)
+                    if (length(ambiguity) > 0)
+                        format_warnings <- c(format_warnings, ambiguity)
+                    return(list(format = fmt, warnings = format_warnings))
+                }
             }
 
-            # If no format works well, default to ymd
-            warning("Could not reliably detect datetime format. Using YMD format. Please specify format manually if incorrect.")
-            return("ymd")
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'formatDetectionFailed',
+                type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent('Could not reliably detect datetime format.\n• Defaulting to YYYY-MM-DD (YMD).\n• If results look incorrect, manually specify the format.\n• Review the preview table to verify parsing accuracy.')
+            self$results$insert(2, notice)
+
+            return(list(format = "ymd", warnings = c(format_warnings, 'Auto-detection failed and defaulted to YYYY-MM-DD (YMD).')))
+        },
+
+        .evaluateFormat = function(sample_dates, fmt) {
+            parser <- private$.getParser(fmt)
+            tryCatch({
+                parsed_dates <- parser(sample_dates)
+                list(
+                    success_rate = sum(!is.na(parsed_dates)) / length(sample_dates),
+                    parsed = parsed_dates
+                )
+            }, error = function(e) {
+                list(
+                    success_rate = 0,
+                    parsed = rep(as.POSIXct(NA), length(sample_dates))
+                )
+            })
+        },
+
+        .warnAmbiguousFormat = function(primary_fmt, eval_results) {
+            ambiguity_pairs <- list(
+                dmy = "mdy",
+                mdy = "dmy",
+                dmy_hms = "mdy_hms",
+                mdy_hms = "dmy_hms",
+                dmy_hm = "mdy_hm",
+                mdy_hm = "dmy_hm"
+            )
+
+            alt_fmt <- ambiguity_pairs[[primary_fmt]]
+            if (is.null(alt_fmt) || is.null(eval_results[[alt_fmt]]))
+                return(character())
+
+            primary <- eval_results[[primary_fmt]]
+            alternate <- eval_results[[alt_fmt]]
+            if (alternate$success_rate <= 0.8)
+                return(character())
+
+            disagree <- any(!is.na(primary$parsed) & !is.na(alternate$parsed) & primary$parsed != alternate$parsed)
+            if (!disagree)
+                return(character())
+
+            msg <- sprintf(
+                'Ambiguous day/month order detected: both %s and %s parsed most values but produced different dates. Applied %s – verify the preview before continuing.',
+                private$.formatLabel(primary_fmt),
+                private$.formatLabel(alt_fmt),
+                private$.formatLabel(primary_fmt))
+
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'ambiguousFormatDetected',
+                type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent(msg)
+            self$results$insert(1, notice)
+
+            return(msg)
+        },
+
+        .formatLabel = function(fmt) {
+            labels <- list(
+                ymd = "YYYY-MM-DD",
+                dmy = "DD-MM-YYYY",
+                mdy = "MM-DD-YYYY",
+                ymd_hms = "YYYY-MM-DD HH:MM:SS",
+                dmy_hms = "DD-MM-YYYY HH:MM:SS",
+                mdy_hms = "MM-DD-YYYY HH:MM:SS",
+                ymd_hm = "YYYY-MM-DD HH:MM",
+                dmy_hm = "DD-MM-YYYY HH:MM",
+                mdy_hm = "MM-DD-YYYY HH:MM",
+                ydm = "YYYY-DD-MM",
+                myd = "MM-YYYY-DD",
+                dym = "DD-YYYY-MM",
+                excel_serial = "Excel serial",
+                unix_epoch = "Unix epoch"
+            )
+            return(labels[[fmt]] %||% toupper(fmt))
         },
 
         # Get lubridate parser function for format
@@ -114,14 +205,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             parsed_dates <- NULL
             already_parsed <- FALSE
 
-            # Keep a copy for quality metrics before coercion
             quality_vector <- vector
 
-            if (inherits(vector, c("POSIXct", "POSIXt"))) {
+            if (inherits(vector, c('POSIXct', 'POSIXt'))) {
                 parsed_dates <- lubridate::as_datetime(vector)
                 original_display <- format(vector, usetz = TRUE)
-                notes <- c(notes, "Detected POSIXct/POSIXt input; using supplied datetimes directly.")
-                format_hint <- "posixct"
+                notes <- c(notes, 'Detected POSIXct/POSIXt input; using supplied datetimes directly.')
+                format_hint <- 'posixct'
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -133,11 +223,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
-            if (inherits(vector, "Date")) {
+            if (inherits(vector, 'Date')) {
                 parsed_dates <- as.POSIXct(vector)
                 original_display <- format(vector)
-                notes <- c(notes, "Detected Date input; converted to POSIXct at midnight.")
-                format_hint <- "date"
+                notes <- c(notes, 'Detected Date input; converted to POSIXct at midnight.')
+                format_hint <- 'date'
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -152,84 +242,37 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.factor(vector)) {
                 vector <- as.character(vector)
                 quality_vector <- vector
-                notes <- c(notes, "Converted factor input to character.")
+                notes <- c(notes, 'Converted factor input to character.')
             }
 
-            if (is.numeric(vector) && !inherits(vector, "Date")) {
-                non_missing <- vector[!is.na(vector)]
-
-                if (length(non_missing) == 0) {
-                    char_vals <- rep(NA_character_, length(vector))
-                    return(list(
-                        original_display = char_vals,
-                        parsing_vector = char_vals,
-                        quality_vector = vector,
-                        parsed_dates = NULL,
-                        already_parsed = FALSE,
-                        format_hint = NULL,
-                        notes = c(notes, "Numeric column contained only missing values.")
-                    ))
-                }
-
-                excel_like <- all(non_missing >= 0 & non_missing <= 600000)
-                unix_like <- all(non_missing >= 1e9 & non_missing <= 4e9)
-
-                if (excel_like) {
-                    parsed_dates <- as.POSIXct(vector, origin = "1899-12-30", tz = "UTC")
-                    original_display <- format(vector, trim = TRUE, scientific = FALSE)
-                    original_display[is.na(vector)] <- NA_character_
-                    notes <- c(notes, "Detected Excel serial numbers; converted using origin 1899-12-30 (UTC).")
-                    format_hint <- "excel_serial"
-                    return(list(
-                        original_display = original_display,
-                        parsing_vector = parsed_dates,
-                        quality_vector = vector,
-                        parsed_dates = parsed_dates,
-                        already_parsed = TRUE,
-                        format_hint = format_hint,
-                        notes = notes
-                    ))
-                }
-
-                if (unix_like) {
-                    parsed_dates <- as.POSIXct(vector, origin = "1970-01-01", tz = "UTC")
-                    original_display <- format(vector, trim = TRUE, scientific = FALSE)
-                    original_display[is.na(vector)] <- NA_character_
-                    notes <- c(notes, "Detected Unix epoch seconds; converted using origin 1970-01-01 (UTC).")
-                    format_hint <- "unix_epoch"
-                    return(list(
-                        original_display = original_display,
-                        parsing_vector = parsed_dates,
-                        quality_vector = vector,
-                        parsed_dates = parsed_dates,
-                        already_parsed = TRUE,
-                        format_hint = format_hint,
-                        notes = notes
-                    ))
-                }
-
-                char_vals <- format(vector, trim = TRUE, scientific = FALSE)
-                char_vals <- trimws(char_vals)
-                char_vals[char_vals == ""] <- NA_character_
-                char_vals[is.na(vector)] <- NA_character_
-                notes <- c(notes, "Treated numeric values as formatted strings for parsing.")
-                return(list(
-                    original_display = char_vals,
-                    parsing_vector = char_vals,
-                    quality_vector = char_vals,
-                    parsed_dates = NULL,
-                    already_parsed = FALSE,
-                    format_hint = NULL,
-                    notes = notes
+            if (is.numeric(vector) && !inherits(vector, 'Date')) {
+                return(private$.processNumericVector(
+                    numeric_vector = vector,
+                    notes = notes,
+                    quality_vector = quality_vector
                 ))
             }
 
             char_vals <- as.character(vector)
             char_vals <- trimws(char_vals)
-            blank_idx <- which(char_vals == "")
+            blank_idx <- which(char_vals == '')
             if (length(blank_idx) > 0) {
                 char_vals[blank_idx] <- NA_character_
-                notes <- c(notes, paste0("Converted ", length(blank_idx), " blank entries to missing."))
+                notes <- c(notes, paste0('Converted ', length(blank_idx), ' blank entries to missing.'))
+            }
+
+            non_blank <- !is.na(char_vals)
+            numeric_guess <- suppressWarnings(as.numeric(char_vals))
+            numeric_guess[!non_blank] <- NA_real_
+            numeric_ratio <- if (sum(non_blank) == 0) 0 else sum(!is.na(numeric_guess[non_blank])) / sum(non_blank)
+            if (numeric_ratio >= 0.8) {
+                notes <- c(notes, 'Detected numeric serial values stored as text; automatically converted before parsing.')
+                return(private$.processNumericVector(
+                    numeric_vector = numeric_guess,
+                    notes = notes,
+                    quality_vector = char_vals,
+                    original_display = char_vals
+                ))
             }
 
             return(list(
@@ -243,6 +286,76 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
+        .processNumericVector = function(numeric_vector, notes, quality_vector, original_display = NULL) {
+            quality_vector <- quality_vector %||% numeric_vector
+            if (is.null(original_display)) {
+                original_display <- format(numeric_vector, trim = TRUE, scientific = FALSE)
+                original_display[is.na(numeric_vector)] <- NA_character_
+            }
+
+            non_missing <- numeric_vector[!is.na(numeric_vector)]
+            if (length(non_missing) == 0) {
+                empty_vals <- rep(NA_character_, length(numeric_vector))
+                return(list(
+                    original_display = original_display,
+                    parsing_vector = empty_vals,
+                    quality_vector = quality_vector,
+                    parsed_dates = NULL,
+                    already_parsed = FALSE,
+                    format_hint = NULL,
+                    notes = c(notes, 'Numeric column contained only missing values.')
+                ))
+            }
+
+            excel_like <- all(non_missing >= 0 & non_missing <= 600000)
+            unix_like <- all(non_missing >= 1e9 & non_missing <= 4e9)
+
+            if (excel_like) {
+                parsed_dates <- as.POSIXct(numeric_vector, origin = '1899-12-30', tz = 'UTC')
+                notes <- c(notes, 'Detected Excel serial numbers; converted using origin 1899-12-30 (UTC).')
+                return(list(
+                    original_display = original_display,
+                    parsing_vector = parsed_dates,
+                    quality_vector = quality_vector,
+                    parsed_dates = parsed_dates,
+                    already_parsed = TRUE,
+                    format_hint = 'excel_serial',
+                    notes = notes
+                ))
+            }
+
+            if (unix_like) {
+                parsed_dates <- as.POSIXct(numeric_vector, origin = '1970-01-01', tz = 'UTC')
+                notes <- c(notes, 'Detected Unix epoch seconds; converted using origin 1970-01-01 (UTC).')
+                return(list(
+                    original_display = original_display,
+                    parsing_vector = parsed_dates,
+                    quality_vector = quality_vector,
+                    parsed_dates = parsed_dates,
+                    already_parsed = TRUE,
+                    format_hint = 'unix_epoch',
+                    notes = notes
+                ))
+            }
+
+            char_vals <- if (!is.null(original_display)) original_display else {
+                tmp <- format(numeric_vector, trim = TRUE, scientific = FALSE)
+                tmp[is.na(numeric_vector)] <- NA_character_
+                tmp
+            }
+            char_vals <- trimws(char_vals)
+            char_vals[char_vals == ''] <- NA_character_
+            notes <- c(notes, 'Treated numeric values as formatted strings for parsing.')
+            return(list(
+                original_display = char_vals,
+                parsing_vector = char_vals,
+                quality_vector = quality_vector,
+                parsed_dates = NULL,
+                already_parsed = FALSE,
+                format_hint = NULL,
+                notes = notes
+            ))
+        },
         # ===================================================================
         # CHARACTER CONVERSION UTILITY
         # ===================================================================
@@ -288,8 +401,69 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 parsed_dates <- parser(datetime_vector, tz = tz)
                 return(parsed_dates)
             }, error = function(e) {
-                stop(paste("Error parsing datetimes with format", format, ":", e$message))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'parsingError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf(
+                    'Error parsing datetimes with format "%s".\n• Parser error: %s\n• Try selecting a different format.\n• Check that your data matches the selected format.',
+                    format, e$message
+                ))
+                self$results$insert(1, notice)
+                # Return NA vector to allow analysis to continue
+                return(rep(as.POSIXct(NA), length(datetime_vector)))
             })
+        },
+
+        .resolveTimezone = function() {
+            tz_option <- self$options$timezone
+            tz_option <- if (is.null(tz_option)) "system" else trimws(tz_option)
+            tz_lower <- tolower(tz_option)
+            system_label <- Sys.timezone()
+            if (is.null(system_label) || is.na(system_label))
+                system_label <- "system default"
+
+            if (tz_lower == "" || tz_lower == "system") {
+                return(list(
+                    tz = "",
+                    note = paste0("String-to-datetime conversions use the system default timezone (", system_label, ")."),
+                    summary = system_label
+                ))
+            }
+
+            if (tz_lower == "utc") {
+                return(list(
+                    tz = "UTC",
+                    note = "String-to-datetime conversions use UTC.",
+                    summary = "UTC"
+                ))
+            }
+
+            if (! tz_option %in% OlsonNames()) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'invalidTimezone',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf(
+                    "Timezone '%s' is not a recognised Olson timezone. Falling back to system default (%s).",
+                    tz_option,
+                    system_label
+                ))
+                self$results$insert(2, notice)
+                return(list(
+                    tz = "",
+                    note = sprintf("Requested timezone '%s' was invalid; reverted to system default (%s).", tz_option, system_label),
+                    summary = system_label
+                ))
+            }
+
+            return(list(
+                tz = tz_option,
+                note = sprintf("String-to-datetime conversions use the '%s' timezone.", tz_option),
+                summary = tz_option
+            ))
         },
 
         # ===================================================================
@@ -700,7 +874,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$qualityAssessment$setContent(quality_html)
         },
 
-        .populateNaturalLanguageSummary = function(datetime_var, detected_format, quality, components) {
+        .populateNaturalLanguageSummary = function(datetime_var, detected_format, quality, components, timezone_label = NULL) {
             # Populate natural-language summary (controlled by checkbox)
             if (!self$options$show_summary) {
                 return()
@@ -726,7 +900,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "none (preview only)"
             }
 
-            tz_display <- if (self$options$timezone == "utc") "UTC" else Sys.timezone()
+            tz_display <- timezone_label %||% if (self$options$timezone == "utc") "UTC" else Sys.timezone()
+            if (is.null(tz_display) || is.na(tz_display) || tz_display == "")
+                tz_display <- "System default"
 
             summary_html <- glue::glue("
                 <div style='background-color: #f0f7ff; padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px;'>
@@ -978,25 +1154,89 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get data
             data <- self$data
             datetime_var <- self$options$datetime_var
+            if (length(datetime_var) > 1)
+                datetime_var <- datetime_var[1]
 
             private$.updateOutputTitles(datetime_var)
 
+            # Validate datetime variable is selected
+            if (is.null(datetime_var) || length(datetime_var) == 0 || datetime_var == "") {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noVariableSelected',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No datetime variable selected.\n• Please select a variable containing datetime information from the left panel.\n• Use the "DateTime Variable" dropdown to choose a column.')
+                self$results$insert(1, notice)
+                return()
+            }
+
+            # Validate datetime variable exists in dataset
+            if (!datetime_var %in% names(data)) {
+                available_vars <- names(data)
+                available_preview <- if (length(available_vars) > 10) {
+                    paste(paste(head(available_vars, 10), collapse = ", "), "...")
+                } else {
+                    paste(available_vars, collapse = ", ")
+                }
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'variableNotFound',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf(
+                    'Selected variable "%s" not found in dataset.\n• The column may have been renamed or removed.\n• Please select a different variable from the left panel.\n\nAvailable variables: %s',
+                    datetime_var,
+                    available_preview
+                ))
+                self$results$insert(1, notice)
+                return()
+            }
+
             if (nrow(data) == 0) {
-                stop("Dataset is empty")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'emptyDataset',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Dataset contains no rows.\n• Please ensure your dataset has at least one observation.\n• Check for data loading or filtering issues.')
+                self$results$insert(1, notice)
+                return()
+            }
+
+            if (! datetime_var %in% names(data)) {
+                stop(sprintf("The selected datetime variable '%s' was not found in the dataset.", datetime_var), call. = FALSE)
             }
 
             # Prepare datetime values for parsing
             datetime_vector <- data[[datetime_var]]
+            if (all(is.na(datetime_vector))) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'allValuesMissing',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf(
+                    "All values in '%s' are missing (NA).\n• Please select a column with valid datetime entries before proceeding.",
+                    datetime_var
+                ))
+                self$results$insert(1, notice)
+                return()
+            }
+
             prepared <- private$.prepareDatetimeInput(datetime_vector)
 
             original_display <- prepared$original_display
             parsing_vector <- prepared$parsing_vector
             quality_vector <- prepared$quality_vector
             preprocessing_notes <- prepared$notes
+            format_warnings <- character()
 
             # Detect or use specified format
             # Determine timezone to use
-            tz_to_use <- if (self$options$timezone == "utc") "UTC" else ""
+            tz_info <- private$.resolveTimezone()
+            tz_to_use <- tz_info$tz
 
             if (prepared$already_parsed) {
                 parsed_dates <- prepared$parsed_dates
@@ -1012,7 +1252,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             } else {
                 if (self$options$datetime_format == "auto") {
-                    detected_format <- private$.detectDatetimeFormat(parsing_vector)
+                    detection <- private$.detectDatetimeFormat(parsing_vector)
+                    detected_format <- detection$format
+                    format_warnings <- c(format_warnings, detection$warnings %||% character())
                 } else {
                     detected_format <- self$options$datetime_format
                 }
@@ -1021,6 +1263,53 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Assess quality
             quality <- private$.assessQuality(quality_vector, parsed_dates)
+
+            # Add quality threshold notices
+            if (!is.na(quality$success_rate) && quality$success_rate < 85) {
+                severity <- if (quality$success_rate < 70) {
+                    jmvcore::NoticeType$STRONG_WARNING
+                } else {
+                    jmvcore::NoticeType$WARNING
+                }
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'lowSuccessRate',
+                    type = severity
+                )
+
+                if (quality$success_rate < 70) {
+                    notice$setContent(sprintf(
+                        'Low datetime parsing success rate: %.1f%%\n• Only %d of %d non-missing values were successfully parsed.\n• This may indicate incorrect format selection or data quality issues.\n\nRecommendations:\n• Try a different datetime format\n• Review failed samples in Quality Assessment\n• Check data source for systematic errors\n• Clinical analysis may be unreliable with <70%% success rate',
+                        quality$success_rate,
+                        quality$successfully_parsed,
+                        (quality$total_observations - quality$original_missing)
+                    ))
+                } else {
+                    notice$setContent(sprintf(
+                        'Moderate datetime parsing success rate: %.1f%%\n• %d of %d non-missing values were successfully parsed.\n• Review failed samples in Quality Assessment panel.\n• Consider manually specifying format if auto-detection is incorrect.',
+                        quality$success_rate,
+                        quality$successfully_parsed,
+                        (quality$total_observations - quality$original_missing)
+                    ))
+                }
+                self$results$insert(2, notice)
+            }
+
+            # Add misuse warnings as INFO notices
+            misuse_warnings <- private$.detectMisuse(parsed_dates)
+            if (length(misuse_warnings) > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'misuseWarnings',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(paste0(
+                    'Potential data quality issues detected:\n• ',
+                    paste(misuse_warnings, collapse = '\n• ')
+                ))
+                self$results$insert(3, notice)
+            }
 
             # Generate format info
             format_display <- switch(detected_format,
@@ -1047,24 +1336,23 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$options$datetime_format, "</code>.</em></p>")
             }
 
-            # Add time zone note
-            tz_note <- ""
+            tz_summary <- tz_info$summary
+            note_lines <- preprocessing_notes
+            timezone_lines <- character()
             if (detected_format %in% c("excel_serial", "unix_epoch")) {
-                tz_note <- "<li>Conversions from numeric formats (Excel, Unix) always use UTC time zone.</li>"
-            } else if (!prepared$already_parsed) {
-                if (self$options$timezone == "utc") {
-                    tz_note <- "<li>String-to-datetime conversions use UTC time zone.</li>"
-                } else {
-                    tz_note <- paste0("<li>String-to-datetime conversions use the system's local time zone (", Sys.timezone(), ").</li>")
-                }
+                timezone_lines <- "Conversions from numeric formats (Excel/Unix) always use UTC regardless of the timezone option."
+                tz_summary <- "UTC (numeric conversion)"
+            } else if (!prepared$already_parsed && nzchar(tz_info$note)) {
+                timezone_lines <- tz_info$note
             }
+            note_lines <- c(note_lines, timezone_lines, format_warnings)
+            note_lines <- note_lines[nzchar(note_lines)]
 
             notes_html <- ""
-            if (length(preprocessing_notes) > 0 || nzchar(tz_note)) {
+            if (length(note_lines) > 0) {
                 notes_html <- paste0(
                     "<ul style='margin-top: 10px;'>",
-                    paste0("<li>", preprocessing_notes, "</li>", collapse = ""),
-                    tz_note,
+                    paste0("<li>", note_lines, "</li>", collapse = ""),
                     "</ul>"
                 )
             }
@@ -1149,7 +1437,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use isNotFilled() to prevent duplicate writes
 
             # Add corrected datetime as character
-            if (self$options$corrected_datetime_char && self$results$corrected_datetime_char$isNotFilled()) {
+            if ((self$options$corrected_datetime_char || private$.isOutputRequested('corrected_datetime_char')) &&
+                self$results$corrected_datetime_char$isNotFilled()) {
                 self$results$corrected_datetime_char$setRowNums(rownames(data))
                 self$results$corrected_datetime_char$setValues(
                     private$.safeCharacterConversion(parsed_dates)
@@ -1157,88 +1446,106 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add corrected datetime as numeric
-            if (self$options$corrected_datetime_numeric && self$results$corrected_datetime_numeric$isNotFilled()) {
+            if ((self$options$corrected_datetime_numeric || private$.isOutputRequested('corrected_datetime_numeric')) &&
+                self$results$corrected_datetime_numeric$isNotFilled()) {
                 self$results$corrected_datetime_numeric$setRowNums(rownames(data))
                 corrected_numeric <- as.numeric(parsed_dates)
                 self$results$corrected_datetime_numeric$setValues(corrected_numeric)
             }
 
             # Add component outputs
-            if (self$options$year_out && self$results$year_out$isNotFilled()) {
+            if ((self$options$year_out || private$.isOutputRequested('year_out')) && self$results$year_out$isNotFilled()) {
                 self$results$year_out$setRowNums(rownames(data))
                 self$results$year_out$setValues(as.numeric(components$year))
             }
 
-            if (self$options$month_out && self$results$month_out$isNotFilled()) {
+            if ((self$options$month_out || private$.isOutputRequested('month_out')) && self$results$month_out$isNotFilled()) {
                 self$results$month_out$setRowNums(rownames(data))
                 self$results$month_out$setValues(as.numeric(components$month))
             }
 
-
-                # # Add Calculated Time to Data
-                # if (self$options$tint && self$options$calculatedtime && 
-                #     self$results$calculatedtime$isNotFilled()) {
-                #     self$results$calculatedtime$setRowNums(results$cleanData$row_names)
-                #     self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
-                # }
-
-
-
-
-
-            if (self$options$monthname_out && self$results$monthname_out$isNotFilled()) {
+            if ((self$options$monthname_out || private$.isOutputRequested('monthname_out')) &&
+                self$results$monthname_out$isNotFilled()) {
                 self$results$monthname_out$setRowNums(rownames(data))
                 self$results$monthname_out$setValues(
                     private$.safeCharacterConversion(components$monthname)
                 )
             }
 
-            if (self$options$day_out && self$results$day_out$isNotFilled()) {
+            if ((self$options$day_out || private$.isOutputRequested('day_out')) && self$results$day_out$isNotFilled()) {
                 self$results$day_out$setRowNums(rownames(data))
                 self$results$day_out$setValues(as.numeric(components$day))
             }
 
-            if (self$options$hour_out && self$results$hour_out$isNotFilled()) {
+            if ((self$options$hour_out || private$.isOutputRequested('hour_out')) && self$results$hour_out$isNotFilled()) {
                 self$results$hour_out$setRowNums(rownames(data))
                 self$results$hour_out$setValues(as.numeric(components$hour))
             }
 
-            if (self$options$minute_out && self$results$minute_out$isNotFilled()) {
+            if ((self$options$minute_out || private$.isOutputRequested('minute_out')) && self$results$minute_out$isNotFilled()) {
                 self$results$minute_out$setRowNums(rownames(data))
                 self$results$minute_out$setValues(as.numeric(components$minute))
             }
 
-            if (self$options$second_out && self$results$second_out$isNotFilled()) {
+            if ((self$options$second_out || private$.isOutputRequested('second_out')) && self$results$second_out$isNotFilled()) {
                 self$results$second_out$setRowNums(rownames(data))
                 self$results$second_out$setValues(as.numeric(components$second))
             }
 
-            if (self$options$dayname_out && self$results$dayname_out$isNotFilled()) {
+            if ((self$options$dayname_out || private$.isOutputRequested('dayname_out')) &&
+                self$results$dayname_out$isNotFilled()) {
                 self$results$dayname_out$setRowNums(rownames(data))
                 self$results$dayname_out$setValues(
                     private$.safeCharacterConversion(components$dayname)
                 )
             }
 
-            if (self$options$weeknum_out && self$results$weeknum_out$isNotFilled()) {
+            if ((self$options$weeknum_out || private$.isOutputRequested('weeknum_out')) &&
+                self$results$weeknum_out$isNotFilled()) {
                 self$results$weeknum_out$setRowNums(rownames(data))
                 self$results$weeknum_out$setValues(as.numeric(components$weeknum))
             }
 
-            if (self$options$quarter_out && self$results$quarter_out$isNotFilled()) {
+            if ((self$options$quarter_out || private$.isOutputRequested('quarter_out')) &&
+                self$results$quarter_out$isNotFilled()) {
                 self$results$quarter_out$setRowNums(rownames(data))
                 self$results$quarter_out$setValues(as.numeric(components$quarter))
             }
 
-            if (self$options$dayofyear_out && self$results$dayofyear_out$isNotFilled()) {
+            if ((self$options$dayofyear_out || private$.isOutputRequested('dayofyear_out')) &&
+                self$results$dayofyear_out$isNotFilled()) {
                 self$results$dayofyear_out$setRowNums(rownames(data))
                 self$results$dayofyear_out$setValues(as.numeric(components$dayofyear))
+            }
+
+            # Add completion notice
+            if (quality$successfully_parsed > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+
+                components_added <- sum(c(
+                    self$options$year_out, self$options$month_out, self$options$monthname_out,
+                    self$options$day_out, self$options$hour_out, self$options$minute_out,
+                    self$options$second_out, self$options$dayname_out, self$options$weeknum_out,
+                    self$options$quarter_out, self$options$dayofyear_out
+                ))
+
+                notice$setContent(sprintf(
+                    'DateTime conversion completed.\n• Processed %d observations from variable "%s".\n• Successfully parsed %d datetimes (%.1f%%).\n• Added %d component column(s) to dataset.\n• Review preview tables before proceeding with analysis.',
+                    quality$total_observations, datetime_var,
+                    quality$successfully_parsed, quality$success_rate,
+                    components_added
+                ))
+                self$results$insert(999, notice)
             }
 
             # Populate new clinician-friendly panels
             private$.populateQualityAssessment(quality, parsed_dates)
             private$.populateNaturalLanguageSummary(datetime_var, detected_format,
-                                                     quality, components)
+                                                     quality, components, tz_summary)
             private$.populateExplanatoryPanels()
             private$.populateGlossary()
         }

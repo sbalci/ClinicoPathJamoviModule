@@ -1,7 +1,7 @@
 ---
 name:  classification
 title: Clinical Classification
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Predictions
 menuSubtitle: Classification Analysis
 version: '0.0.3'
@@ -100,16 +100,6 @@ options:
       title: Max. surrogate
       type: Number
       default: 5
-
-    - name: unsurrogate
-      title: Unsorrogate
-      type: Number
-      default: 2
-
-    - name: noCrossValidations
-      title: No. cross-validations
-      type: Number
-      default: 10
 
     - name: maxDepth
       title: Max. depth
@@ -272,7 +262,7 @@ options:
     - name: reportClinicalMetrics
       title: Clinical Performance Metrics
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Report sensitivity, specificity, PPV, NPV, and likelihood ratios.
@@ -280,7 +270,7 @@ options:
     - name: reportConfidenceIntervals
       title: Report Confidence Intervals
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Include 95% confidence intervals for clinical metrics.
@@ -288,11 +278,22 @@ options:
     - name: reportMCC
       title: Matthews Correlation Coefficient
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Calculate Matthews Correlation Coefficient (MCC), a balanced metric
             for imbalanced datasets. MCC ranges from -1 (perfect disagreement) to
             +1 (perfect agreement), with 0 indicating random prediction.
+
+    - name: positiveClass
+      title: Positive Class Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Specify which class should be considered "positive" for clinical metrics
+            (sensitivity, specificity, PPV, NPV, likelihood ratios). If left empty,
+            the second factor level will be used as positive. This is critical for
+            ensuring correct interpretation of diagnostic performance metrics.
 
 ...

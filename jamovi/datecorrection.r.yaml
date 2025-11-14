@@ -8,8 +8,44 @@ items:
       title: Instructions
       type: Html
 
+    - name: corrected_data
+      title: Corrected Date Data
+      type: Table
+      visible: true
+      rows: 0
+      columns:
+        - name: row_num
+          title: Row
+          type: integer
+        - name: variable
+          title: Variable
+          type: text
+        - name: original
+          title: Original Value
+          type: text
+        - name: corrected
+          title: Corrected Date
+          type: text
+        - name: status
+          title: Status
+          type: text
+        - name: method
+          title: Method
+          type: text
+        - name: errors
+          title: Errors/Warnings
+          type: text
+      clearWith:
+        - date_vars
+        - correction_method
+        - date_format
+        - day_impute
+        - month_impute
+        - handle_excel
+        - timezone
+
     - name: correction_table
-      title: Date Correction Results
+      title: Date Correction Results Summary
       type: Html
       visible: (show_correction_table)
       clearWith:

@@ -126,7 +126,9 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        dataWarning = function() private$.items[["dataWarning"]],
         plot = function() private$.items[["plot"]],
+        condensationWarning = function() private$.items[["condensationWarning"]],
         plot2 = function() private$.items[["plot2"]]),
     private = list(),
     public=list(
@@ -142,6 +144,13 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do",
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataWarning",
+                title="Data Validation",
+                visible=TRUE,
                 clearWith=list(
                     "vars")))
             self$add(jmvcore::Image$new(
@@ -163,6 +172,14 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "usetitle",
                     "mytitle",
                     "maxvars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="condensationWarning",
+                title="Condensation Plot Information",
+                visible="(condensationvar)",
+                clearWith=list(
+                    "vars",
+                    "condensationvar")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="`Condensation Plot ${condensationvar}`",
@@ -218,7 +235,9 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

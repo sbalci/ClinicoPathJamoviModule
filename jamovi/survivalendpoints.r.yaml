@@ -9,6 +9,17 @@ items:
     type: Html
     visible: true
 
+  - name: dataWarning
+    title: Data Validation
+    type: Html
+    visible: true
+    clearWith:
+      - patientId
+      - startDate
+      - lastFollowup
+      - deathEvent
+      - progressionEvent
+
   - name: dataInfo
     title: Data Summary
     type: Table

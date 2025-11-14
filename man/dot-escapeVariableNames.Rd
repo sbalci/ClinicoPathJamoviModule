@@ -120,8 +120,7 @@ Options include: "arsenal", "finalfit", "gtsummary", "nejm", "lancet", "hmisc".}
 \item{medianline}{Type of median survival line: "none", "h", "v", "hv"}
 }
 \value{
-The function produces an HTML table output, and if requested, an additional
-downloadable CSV export.
+The function produces an HTML table output in the selected style.
 
 A comprehensive results object containing survival analysis outputs
 
@@ -132,8 +131,7 @@ This function generates cross tables comparing a dependent variable (rows)
 with a grouping variable (columns) and automatically selects hypothesis tests
 appropriate for clinical research. The output tables are rendered in various
 styles (e.g., arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc) and are intended
-for pathologists and oncologists. In addition to visualizing associations,
-this function now optionally provides an exportable CSV version of the cross table.
+for pathologists and oncologists.
 
 Performs comprehensive univariate and stratified survival analysis comparing survival between groups.
 This analysis calculates person-time follow-up for each group and uses this to derive accurate
@@ -184,8 +182,22 @@ and enhanced theming options for publication-ready figures.
 \details{
 The function cleans variable names and applies original labels. It then builds
 a formula based on the cleaned data and performs the appropriate statistical
-test (e.g. chi-square or Fisher’s exact test). Detailed user guidance is provided
-via HTML to-do messages.
+test (e.g. chi-square or Fisher's exact test). Detailed user guidance is provided
+via HTML messages.
+
+Currently implemented features:
+\itemize{
+\item Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
+\item Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+\item Stratified analysis (Mantel-Haenszel, Breslow-Day for 2x2 tables)
+\item Multiple testing correction (Bonferroni, Holm, BH, BY)
+\item Variable name safety (handles spaces and special characters)
+\item Data quality validation warnings
+}
+
+Note: Advanced features including pairwise comparisons, effect size measures,
+residual analysis, correspondence analysis, and mosaic plots are planned but
+not currently implemented.
 
 \strong{Analysis Types:}
 \itemize{

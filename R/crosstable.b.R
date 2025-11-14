@@ -5,14 +5,27 @@
 #' with a grouping variable (columns) and automatically selects hypothesis tests
 #' appropriate for clinical research. The output tables are rendered in various
 #' styles (e.g., arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc) and are intended
-#' for pathologists and oncologists. In addition to visualizing associations,
-#' this function now optionally provides an exportable CSV version of the cross table.
+#' for pathologists and oncologists.
 #'
 #' @details
 #' The function cleans variable names and applies original labels. It then builds
 #' a formula based on the cleaned data and performs the appropriate statistical
-#' test (e.g. chi-square or Fisher’s exact test). Detailed user guidance is provided
-#' via HTML to-do messages.
+#' test (e.g. chi-square or Fisher's exact test). Detailed user guidance is provided
+#' via HTML messages.
+#'
+#' Currently implemented features:
+#' \itemize{
+#'   \item Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
+#'   \item Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+#'   \item Stratified analysis (Mantel-Haenszel, Breslow-Day for 2x2 tables)
+#'   \item Multiple testing correction (Bonferroni, Holm, BH, BY)
+#'   \item Variable name safety (handles spaces and special characters)
+#'   \item Data quality validation warnings
+#' }
+#'
+#' Note: Advanced features including pairwise comparisons, effect size measures,
+#' residual analysis, correspondence analysis, and mosaic plots are planned but
+#' not currently implemented.
 #'
 #' @param data A data frame containing the study data.
 #' @param vars A set of variables used as the dependent variables (rows).
@@ -23,8 +36,7 @@
 #' @param cont A string ("mean" or "median") to specify the central tendency metric.
 #' @param pcat A string ("chisq" or "fisher") to specify the primary test.
 #'
-#' @return The function produces an HTML table output, and if requested, an additional
-#' downloadable CSV export.
+#' @return The function produces an HTML table output in the selected style.
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -294,15 +306,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (length(validation_results$warnings) > 0) {
                     warning_msg <- paste0(
                         "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<strong>Variable Name Warnings:</strong><br>",
+                        "<strong>⚠️ Variable Name Warnings:</strong><br>",
                         paste(validation_results$warnings, collapse = "<br>"),
                         "</div>"
                     )
-                    # Note: Store warning for later display in results
-                    # TEMPORARILY DISABLED - assumptions results element not defined in .r.yaml
-                    # if (exists("self") && "results" %in% names(self) && "assumptions" %in% names(self$results)) {
-                    #     self$results$assumptions$setContent(warning_msg)
-                    # }
+                    # Display in todo2 section
+                    self$results$todo2$setContent(warning_msg)
                 }
 
                 return(list(
@@ -348,19 +357,51 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {
-                    todo <- glue::glue(
-                        "<br><br>Welcome to ClinicoPath.<br>
-                         This tool creates a Cross Table comparing your selected variables.
-                         Please select the dependent variable (rows) and the grouping variable (columns).
-                         The appropriate hypothesis tests are chosen automatically.
-                         <br>Please ensure data distribution and test appropriateness before use.<br>
-                         <hr>"
+                    todo <- paste0(
+                        "<div style='background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #007bff;'>",
+                        "<h3 style='margin-top: 0; color: #007bff;'>Welcome to Cross Table Analysis</h3>",
+
+                        "<p><strong>Purpose:</strong> Compare distributions of clinical variables across groups with automatic test selection.</p>",
+
+                        "<h4 style='margin-top: 15px;'>Quick Start:</h4>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Select <strong>dependent variables</strong> (rows) - continuous or categorical measures</li>",
+                        "<li>Select <strong>grouping variable</strong> (columns) - treatment groups, disease stages, etc.</li>",
+                        "<li>Choose <strong>table style</strong> from Options (NEJM, Lancet, gtsummary, etc.)</li>",
+                        "<li>Enable <strong>stratified analysis</strong> (Mantel-Haenszel) if controlling for confounders</li>",
+                        "</ol>",
+
+                        "<h4 style='margin-top: 15px;'>Automatic Test Selection:</h4>",
+                        "<ul style='margin-left: 20px;'>",
+                        "<li><strong>Categorical variables:</strong> Chi-square or Fisher's exact test (based on expected counts)</li>",
+                        "<li><strong>Continuous variables:</strong> t-test, ANOVA, or non-parametric equivalents</li>",
+                        "<li><strong>Multiple testing correction:</strong> Benjamini-Hochberg (FDR) recommended for exploratory analysis</li>",
+                        "</ul>",
+
+                        "<h4 style='margin-top: 15px;'>Table Styles Available:</h4>",
+                        "<ul style='margin-left: 20px;'>",
+                        "<li><strong>gtsummary:</strong> Modern, publication-ready with q-values (recommended)</li>",
+                        "<li><strong>NEJM / Lancet:</strong> Journal-specific formatting</li>",
+                        "<li><strong>finalfit:</strong> Clinical research standard</li>",
+                        "<li><strong>arsenal:</strong> Comprehensive tables with many options</li>",
+                        "</ul>",
+
+                        "<p style='margin-top: 15px;'><em>💡 Tip: Use gtsummary style for publication-ready tables with automatic q-values and FDR correction.</em></p>",
+                        "</div>"
                     )
                     self$results$todo$setContent(todo)
                     return()
                 } else {
                     self$results$todo$setContent("")
                 }
+
+                # Set subtitle with grouping variable
+                group_display <- if (!is.null(self$options$group) && self$options$group != "") {
+                    self$options$group
+                } else {
+                    "No group selected"
+                }
+                self$results$subtitle$setContent(paste0("Cross Table Analysis - Grouped by ", group_display))
 
                 # Provide additional information when using 'finalfit' style.
                 if (sty == "finalfit") {
@@ -414,10 +455,19 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Validate analysis assumptions and data quality
                 validation_results <- .validateAnalysisAssumptions(mydata, myvars, mygroup)
                 if (length(validation_results$warnings) > 0) {
-                    warning_text <- paste("<strong>Data Quality Warnings:</strong><br>",
-                                        paste(validation_results$warnings, collapse = "<br>"))
-                    # TEMPORARILY DISABLED - assumptions results element not defined in .r.yaml
-                    # self$results$assumptions$setContent(warning_text)
+                    warning_text <- paste0(
+                        "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
+                        "<strong>⚠️ Data Quality Warnings:</strong><br>",
+                        paste(validation_results$warnings, collapse = "<br>"),
+                        "</div>"
+                    )
+                    # Append to existing todo2 content
+                    current_content <- self$results$todo2$content
+                    if (!is.null(current_content) && nchar(current_content) > 0) {
+                        self$results$todo2$setContent(paste0(current_content, "<br>", warning_text))
+                    } else {
+                        self$results$todo2$setContent(warning_text)
+                    }
                 }
 
                 # Generate table based on selected style.
@@ -723,19 +773,30 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     }
                 }
 
-                # TEMPORARILY DISABLED - pairwise and advanced options not available in .a.yaml
-                # Pairwise comparisons section
+                # ========================================================================
+                # STUBBED FEATURES - NOT IMPLEMENTED
+                # The following features are commented out and NOT available to users.
+                # Do not uncomment without adding corresponding UI controls in .a.yaml
+                # and output definitions in .r.yaml.
+                # ========================================================================
+
+                # PAIRWISE COMPARISONS - NOT IMPLEMENTED
+                # No pairwise option exists in .a.yaml
+                # No pairwiseTable output exists in .r.yaml
                 # if (self$options$pairwise && !is.null(self$options$group) && !is.null(self$options$vars)) {
                 #     private$.performPairwiseComparisons()
                 # }
 
-                # Advanced post-hoc analysis section
+                # ADVANCED POST-HOC ANALYSIS - NOT IMPLEMENTED
+                # No posthoc_method, effect_size_measures, residual_analysis, or
+                # correspondence_analysis options exist in .a.yaml
                 # if (self$options$posthoc_method != "none" || self$options$effect_size_measures ||
                 #     self$options$residual_analysis || self$options$correspondence_analysis) {
                 #     private$.performAdvancedPosthoc()
                 # }
-                
-                # # Generate clinical summary with natural language interpretation
+
+                # CLINICAL SUMMARY & COPY-READY SENTENCES - NOT IMPLEMENTED
+                # No clinicalSummary or reportSentences outputs exist in .r.yaml
                 # tryCatch({
                 #     clinical_summary <- private$.generateClinicalSummary(
                 #         results = list(data = mydata, vars = myvars, group = mygroup),
@@ -779,8 +840,14 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # })
 
             },
-            
-            # TEMPORARILY DISABLED - pairwise option not available in .a.yaml
+
+            # ========================================================================
+            # STUBBED HELPER METHODS - NOT IMPLEMENTED
+            # The following private methods are placeholders for future features.
+            # They are NOT wired to any UI controls or output items.
+            # ========================================================================
+
+            # PAIRWISE COMPARISONS HELPER - NOT IMPLEMENTED
             # .performPairwiseComparisons ----
             # .performPairwiseComparisons = function() {
                 # # Get the labeled data
@@ -945,9 +1012,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # #     self$results$pairwiseNote$setContent(note)
                 # # }
             # },
-            
-            # TEMPORARILY DISABLED - advanced post-hoc options not available in .a.yaml
-            # Advanced Post-hoc Testing Methods
+
+            # ADVANCED POST-HOC TESTING HELPER - NOT IMPLEMENTED
+            # No corresponding UI options in .a.yaml
             # .performAdvancedPosthoc = function() {
                 # # Get the labeled data
                 # labelData <- private$.labelData()
@@ -996,7 +1063,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # #     private$.prepareCorrespondencePlot()
                 # # }
             # },
-            
+
+            # EFFECT SIZES CALCULATION - NOT IMPLEMENTED
+            # No effectsizes output table in .r.yaml
             # .calculateEffectSizes = function(var, contingency_table) {
                 # # Calculate various effect size measures
                 # n <- sum(contingency_table)
@@ -1040,7 +1109,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 #     )
                 # # }
             # },
-            
+
+            # RESIDUAL ANALYSIS - NOT IMPLEMENTED
+            # No residuals output table in .r.yaml
             # .performResidualAnalysis = function(var, contingency_table) {
                 # # Calculate standardized and adjusted residuals
                 # chi_test <- chisq.test(contingency_table)
@@ -1082,6 +1153,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # }
             # },
 
+            # POST-HOC STATISTICAL TESTS - NOT IMPLEMENTED
+            # No posthocstats output table in .r.yaml
             # .performPosthocTests = function(var, contingency_table) {
                 # method <- self$options$posthoc_method
                 # 
@@ -1164,6 +1237,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # }
             # },
 
+            # CORRESPONDENCE ANALYSIS - NOT IMPLEMENTED
+            # No correspondenceanalysis output table in .r.yaml
             # .performCorrespondenceAnalysis = function(var, contingency_table) {
                 # tryCatch({
                 #     if (requireNamespace("ca", quietly = TRUE)) {
@@ -1194,6 +1269,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # })
             # },
 
+            # MOSAIC PLOT - NOT IMPLEMENTED
+            # No mosaicplot output in .r.yaml
             # .prepareMosaicPlot = function() {
                 # # Prepare data for mosaic plot
                 # labelData <- private$.labelData()
@@ -1206,6 +1283,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # self$results$mosaicplot$setState(plot_data)
             # },
 
+            # CORRESPONDENCE PLOT - NOT IMPLEMENTED
+            # No correspondenceplot output in .r.yaml
             # .prepareCorrespondencePlot = function() {
                 # # Prepare data for correspondence analysis plot
                 # labelData <- private$.labelData()
@@ -1218,6 +1297,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # self$results$correspondenceplot$setState(plot_data)
             # },
 
+            # EFFECT SIZE INTERPRETATION - NOT IMPLEMENTED
+            # Helper for effect size calculations (also not implemented)
             # .interpretEffectSize = function(value, type) {
                 # if (type == "cramers_v") {
                 #     if (value < 0.1) return("Negligible")
@@ -1233,7 +1314,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # return("Unknown")
             # },
 
-            # Plot rendering functions
+            # MOSAIC PLOT RENDERER - NOT IMPLEMENTED
+            # No mosaicplot output in .r.yaml, no mosaic_plot option in .a.yaml
             # .mosaicplot = function(image, ggtheme, theme, ...) {
                 # if (is.null(image$state)) return(FALSE)
                 # 
@@ -1273,6 +1355,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # return(FALSE)
             # },
 
+            # CORRESPONDENCE PLOT RENDERER - NOT IMPLEMENTED
+            # No correspondenceplot output in .r.yaml, no correspondence_analysis option in .a.yaml
             # .correspondenceplot = function(image, ggtheme, theme, ...) {
                 # if (is.null(image$state)) return(FALSE)
                 #

@@ -54,6 +54,12 @@ children:
           - type: TextBox
             name: thresholdValue
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: positiveLevel
+        format: string
   - type: CollapseBox
     label: Plot Options
     collapsed: true

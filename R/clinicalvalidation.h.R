@@ -29,14 +29,14 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             calibration_bins = 10,
             compare_models = FALSE,
             comparison_models = "logistic_rf",
-            show_model_summary = TRUE,
-            show_performance_table = TRUE,
-            show_calibration_plot = TRUE,
-            show_roc_curve = TRUE,
+            show_model_summary = FALSE,
+            show_performance_table = FALSE,
+            show_calibration_plot = FALSE,
+            show_roc_curve = FALSE,
             show_prc_curve = FALSE,
             show_validation_curves = FALSE,
             show_residual_plots = FALSE,
-            show_clinical_interpretation = TRUE,
+            show_clinical_interpretation = FALSE,
             export_results = FALSE,
             detailed_bootstrap = FALSE,
             missing_data_handling = "complete_cases",
@@ -216,19 +216,19 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..show_model_summary <- jmvcore::OptionBool$new(
                 "show_model_summary",
                 show_model_summary,
-                default=TRUE)
+                default=FALSE)
             private$..show_performance_table <- jmvcore::OptionBool$new(
                 "show_performance_table",
                 show_performance_table,
-                default=TRUE)
+                default=FALSE)
             private$..show_calibration_plot <- jmvcore::OptionBool$new(
                 "show_calibration_plot",
                 show_calibration_plot,
-                default=TRUE)
+                default=FALSE)
             private$..show_roc_curve <- jmvcore::OptionBool$new(
                 "show_roc_curve",
                 show_roc_curve,
-                default=TRUE)
+                default=FALSE)
             private$..show_prc_curve <- jmvcore::OptionBool$new(
                 "show_prc_curve",
                 show_prc_curve,
@@ -244,7 +244,7 @@ clinicalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..show_clinical_interpretation <- jmvcore::OptionBool$new(
                 "show_clinical_interpretation",
                 show_clinical_interpretation,
-                default=TRUE)
+                default=FALSE)
             private$..export_results <- jmvcore::OptionBool$new(
                 "export_results",
                 export_results,
@@ -891,14 +891,14 @@ clinicalvalidation <- function(
     calibration_bins = 10,
     compare_models = FALSE,
     comparison_models = "logistic_rf",
-    show_model_summary = TRUE,
-    show_performance_table = TRUE,
-    show_calibration_plot = TRUE,
-    show_roc_curve = TRUE,
+    show_model_summary = FALSE,
+    show_performance_table = FALSE,
+    show_calibration_plot = FALSE,
+    show_roc_curve = FALSE,
     show_prc_curve = FALSE,
     show_validation_curves = FALSE,
     show_residual_plots = FALSE,
-    show_clinical_interpretation = TRUE,
+    show_clinical_interpretation = FALSE,
     export_results = FALSE,
     detailed_bootstrap = FALSE,
     missing_data_handling = "complete_cases",

@@ -210,133 +210,10 @@ items:
           - vars
           - gwetWeights
 
-    - name:  headingCCC
-      title: "Concordance Correlation Coefficient"
-      type:  Preformatted
-      visible: (ccc)
-
-
-    - name: cccTable
-      title: "Concordance Correlation Coefficient Results"
-      type: Table
-      visible: (ccc)
-      columns:
-        - name: rater1
-          title: 'Rater 1'
-          type: text
-        - name: rater2
-          title: 'Rater 2'
-          type: text
-        - name: n
-          title: 'N'
-          type: integer
-        - name: ccc
-          title: 'CCC'
-          type: number
-        - name: pearson_r
-          title: 'Pearson r'
-          type: number
-        - name: precision
-          title: 'Precision (ρ)'
-          type: number
-        - name: accuracy
-          title: 'Accuracy (Cb)'
-          type: number
-        - name: ci_lower
-          title: '95% CI Lower'
-          type: number
-        - name: ci_upper
-          title: '95% CI Upper'
-          type: number
-        - name: interpretation
-          title: 'Interpretation'
-          type: text
-      clearWith:
-          - vars
-
-
-    - name:  headingBlandAltman
-      title: "Bland-Altman"
-      type:  Preformatted
-      visible: (blandAltman)
-
-    - name: blandAltmanTable
-      title: "Bland-Altman Statistics"
-      type: Table
-      visible: (blandAltman)
-      columns:
-        - name: method1
-          title: 'Method 1'
-          type: text
-        - name: method2
-          title: 'Method 2'
-          type: text
-        - name: n
-          title: 'N'
-          type: integer
-        - name: mean_diff
-          title: 'Mean Difference (Bias)'
-          type: number
-        - name: sd_diff
-          title: 'SD of Differences'
-          type: number
-        - name: loa_lower
-          title: 'Lower LOA'
-          type: number
-        - name: loa_upper
-          title: 'Upper LOA'
-          type: number
-        - name: loa_lower_ci
-          title: 'Lower LOA 95% CI'
-          type: number
-        - name: loa_upper_ci
-          title: 'Upper LOA 95% CI'
-          type: number
-        - name: bias_ttest_p
-          title: 'Bias t-test p'
-          type: number
-          format: zto,pvalue
-      clearWith:
-          - vars
-          - baConfidenceLevel
-
-    - name: proportionalBiasTable
-      title: "Proportional Bias Test"
-      type: Table
-      visible: (blandAltman && proportionalBias)
-      columns:
-        - name: comparison
-          title: 'Comparison'
-          type: text
-        - name: slope
-          title: 'Slope'
-          type: number
-        - name: slope_se
-          title: 'Slope SE'
-          type: number
-        - name: slope_p
-          title: 'Slope p-value'
-          type: number
-          format: zto,pvalue
-        - name: r_squared
-          title: 'R²'
-          type: number
-        - name: interpretation
-          title: 'Interpretation'
-          type: text
-      clearWith:
-          - vars
-
-    - name: blandAltmanPlot
-      title: "Bland-Altman Plot"
-      type: Image
-      visible: (blandAltman && blandAltmanPlot)
-      requiresData: true
-      renderFun: .populateBlandAltmanPlot
-      clearWith:
-          - vars
-          - baConfidenceLevel
-          - proportionalBias
+    - name: levelInfo
+      title: "Variable Level Ordering"
+      type: Html
+      visible: (showLevelInfo)
 
     - name: weightedKappaGuide
       title: "Weighted Kappa Interpretation Guide"
@@ -485,6 +362,16 @@ items:
           - consensusRule
           - tieBreaker
 
+    - name: consensusVar
+      title: Consensus Variable
+      type: Output
+      measureType: nominal
+      clearWith:
+          - vars
+          - consensusRule
+          - tieBreaker
+          - consensusName
+
     # Pairwise Kappa Results
     - name: headingPairwise
       title: "Pairwise Kappa (Each Rater vs. Reference)"
@@ -552,6 +439,17 @@ items:
           - loaThresholds
           - loaHighThreshold
           - loaLowThreshold
+
+    - name: loaVar
+      title: Level of Agreement Variable
+      type: Output
+      measureType: ordinal
+      clearWith:
+          - vars
+          - loaThresholds
+          - loaHighThreshold
+          - loaLowThreshold
+          - loaVarName
 
     - name: summary
       title: "Summary"

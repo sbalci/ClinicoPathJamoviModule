@@ -1,3 +1,10 @@
+run_advancedraincloud_analysis <- function(data, ...) {
+  opts <- advancedraincloudOptions$new(...)
+  analysis <- advancedraincloudClass$new(options = opts, data = data)
+  analysis$run()
+  analysis
+}
+
 test_that("advancedraincloud module loads correctly", {
   expect_true(exists("advancedraincloudClass"))
   expect_true(is.function(advancedraincloud))
@@ -24,7 +31,7 @@ test_that("advancedraincloud works with valid inputs", {
     x_var = "Group"
   )
   
-  expect_s3_class(result, "advancedraincloudClass")
+  expect_s3_class(result, "advancedraincloudResults")
   expect_true("Group" %in% names(histopathology))
   expect_true("Age" %in% names(histopathology))
 })
@@ -274,11 +281,12 @@ test_that("advancedraincloud works with different continuous variables", {
   for (var in continuous_vars) {
     if (var %in% names(histopathology)) {
       expect_error({
-        result <- advancedraincloud(
+        args <- list(
           data = histopathology,
           y_var = var,
           x_var = "Group"
         )
+        result <- do.call(advancedraincloud, args)
       }, NA, info = paste("y_var:", var))
     }
   }
@@ -291,11 +299,12 @@ test_that("advancedraincloud works with different grouping variables", {
   for (var in categorical_vars) {
     if (var %in% names(histopathology)) {
       expect_error({
-        result <- advancedraincloud(
+        args <- list(
           data = histopathology,
           y_var = "Age",
           x_var = var
         )
+        result <- do.call(advancedraincloud, args)
       }, NA, info = paste("x_var:", var))
     }
   }
@@ -335,4 +344,205 @@ test_that("advancedraincloud vs standard raincloud compatibility", {
   expect_true(exists("plot", envir = result))
   expect_true(exists("statistics", envir = result))
   expect_true(exists("interpretation", envir = result))
+})
+
+test_that("advancedraincloud stores accurate comparison statistics", {
+  skip_if_not_installed("ggrain")
+
+  analysis <- run_advancedraincloud_analysis(
+    data = histopathology,
+    y_var = "Age",
+    x_var = "Group",
+    show_comparisons = TRUE
+  )
+
+  private_env <- analysis$.__enclos_env__$private
+  comp_stats <- private_env$.comparison_results
+
+  expect_false(is.null(comp_stats))
+  expect_equal(comp_stats$method, "Wilcoxon rank-sum test")
+
+  reference_test <- wilcox.test(Age ~ Group, data = histopathology)
+  expect_equal(comp_stats$p_value, reference_test$p.value, tolerance = 1e-6)
+
+  formatted_reference <- if (reference_test$p.value < 0.001) "< 0.001" else round(reference_test$p.value, 3)
+  expect_equal(comp_stats$label, formatted_reference)
+})
+
+test_that("change score analysis respects baseline group and direction", {
+  skip_if_not_installed("ggrain")
+
+  data(advancedraincloud_data, package = "ClinicoPath")
+
+  analysis <- run_advancedraincloud_analysis(
+    data = advancedraincloud_data,
+    y_var = "biomarker_level",
+    x_var = "time_point",
+    id_var = "patient_id",
+    baseline_group = "Baseline",
+    show_change_scores = TRUE,
+    responder_threshold = 15
+  )
+
+  summary <- analysis$.__enclos_env__$private$.change_summary
+  expect_false(is.null(summary))
+  expect_equal(summary$baseline_group, "Baseline")
+  expect_equal(summary$direction, "increase")
+  expect_true(summary$n_total > 0)
+  expect_true(summary$n_responders <= summary$n_total)
+})
+
+test_that("optional ID variables do not remove data when longitudinal features are off", {
+  skip_if_not_installed("ggrain")
+
+  synthetic <- data.frame(
+    response = c(1, 2, 3, 4),
+    cohort = factor(c("A", "A", "B", "B")),
+    subject_id = c("s1", NA, "s3", "s4")
+  )
+
+  analysis <- run_advancedraincloud_analysis(
+    data = synthetic,
+    y_var = "response",
+    x_var = "cohort",
+    id_var = "subject_id",
+    show_longitudinal = FALSE,
+    show_change_scores = FALSE
+  )
+
+  analysis_data <- analysis$.__enclos_env__$private$.analysis_data
+  expect_equal(nrow(analysis_data), 4)
+})
+
+test_that("p-value placement modes update the plot appropriately", {
+  skip_if_not_installed("ggrain")
+
+  analysis <- run_advancedraincloud_analysis(
+    data = histopathology,
+    y_var = "Age",
+    x_var = "Group",
+    show_comparisons = TRUE
+  )
+
+  private <- analysis$.__enclos_env__$private
+  data_used <- private$.analysis_data
+  stats <- private$.comparison_results
+  y_sym <- rlang::sym(analysis$options$y_var)
+  x_sym <- rlang::sym(analysis$options$x_var)
+
+  base_plot <- ggplot2::ggplot(data_used, ggplot2::aes(x = !!x_sym, y = !!y_sym))
+
+  plot_above <- private$.add_p_values(base_plot, data_used, analysis$options$y_var, analysis$options$x_var, "above")
+  built <- ggplot2::ggplot_build(plot_above)
+  expect_true(any(grepl(paste0("p = ", stats$label), built$data[[1]]$label)))
+
+  plot_legend <- private$.add_p_values(base_plot, data_used, analysis$options$y_var, analysis$options$x_var, "legend")
+  expect_true(grepl(stats$label, plot_legend$labels$caption, fixed = TRUE))
+
+  plot_table <- private$.add_p_values(base_plot, data_used, analysis$options$y_var, analysis$options$x_var, "table")
+  expect_true(is.null(plot_table$labels$caption))
+})
+
+test_that("statistics html output matches snapshot", {
+  skip_if_not_installed("ggrain")
+
+  analysis <- run_advancedraincloud_analysis(
+    data = histopathology,
+    y_var = "Age",
+    x_var = "Group",
+    show_statistics = TRUE,
+    show_missing_info = TRUE,
+    show_comparisons = TRUE
+  )
+
+  private <- analysis$.__enclos_env__$private
+  stats_html <- private$.generate_statistics(
+    private$.analysis_data,
+    analysis$options$y_var,
+    analysis$options$x_var,
+    analysis$options$fill_var
+  )
+
+  stats_html <- paste0(
+    stats_html,
+    private$.generate_missing_data_info(
+      histopathology,
+      private$.analysis_data,
+      colnames(private$.analysis_data)
+    )
+  )
+
+  expect_snapshot(stats_html, cran = TRUE)
+})
+
+test_that("change analysis html output matches snapshot", {
+  skip_if_not_installed("ggrain")
+  data(advancedraincloud_data, package = "ClinicoPath")
+
+  analysis <- run_advancedraincloud_analysis(
+    data = advancedraincloud_data,
+    y_var = "biomarker_level",
+    x_var = "time_point",
+    id_var = "patient_id",
+    baseline_group = "Baseline",
+    show_change_scores = TRUE,
+    responder_threshold = 15,
+    show_statistics = FALSE
+  )
+
+  private <- analysis$.__enclos_env__$private
+  change_res <- private$.generate_change_analysis(
+    advancedraincloud_data[c("biomarker_level", "time_point", "patient_id")],
+    "biomarker_level",
+    "time_point",
+    "patient_id",
+    "Baseline",
+    15
+  )
+
+  expect_snapshot(change_res$html, cran = TRUE)
+})
+
+test_that("effect size html output matches snapshot", {
+  skip_if_not_installed("ggrain")
+
+  analysis <- run_advancedraincloud_analysis(
+    data = histopathology,
+    y_var = "Age",
+    x_var = "Group",
+    show_effect_size = TRUE,
+    show_comparisons = FALSE
+  )
+
+  private <- analysis$.__enclos_env__$private
+  effect_html <- private$.generate_effect_sizes(
+    private$.analysis_data,
+    analysis$options$y_var,
+    analysis$options$x_var,
+    analysis$options$effect_size_type
+  )
+
+  expect_snapshot(effect_html, cran = TRUE)
+})
+
+test_that("clinical report html output matches snapshot", {
+  skip_if_not_installed("ggrain")
+
+  analysis <- run_advancedraincloud_analysis(
+    data = histopathology,
+    y_var = "Age",
+    x_var = "Group",
+    generate_report = TRUE,
+    population_type = "pp"
+  )
+
+  private <- analysis$.__enclos_env__$private
+  report_html <- private$.generate_clinical_report(
+    private$.analysis_data,
+    analysis$options$y_var,
+    analysis$options$x_var,
+    analysis$options$population_type
+  )
+
+  expect_snapshot(report_html, cran = TRUE)
 })

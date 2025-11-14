@@ -97,38 +97,84 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             # Input validation ----
             # Enforce mutual exclusion of CI and custom prevalence
             if (ci && pp) {
-                stop("Cannot use both confidence intervals (ci=TRUE) and custom prevalence (pp=TRUE) simultaneously. ",
-                     "Confidence interval calculations require study prevalence. Please disable one option.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'ciAndPpConflict',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Cannot use both confidence intervals and custom prevalence simultaneously.\n• Confidence interval calculations require study prevalence.\n• Custom prevalence overrides study prevalence.\n• Please disable one of these options to proceed.')
+                self$results$insert(1, notice)
+                return()
             }
 
             # Check for non-negative values
             if (TP < 0 || FP < 0 || TN < 0 || FN < 0) {
-                stop("All counts must be non-negative. Please check your input values.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'negativeCountsDetected',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Negative counts detected.\n• All counts (TP, FP, TN, FN) must be non-negative.\n• Please check your input values for errors.')
+                self$results$insert(1, notice)
+                return()
             }
             
             # Check for at least some data
             if (TP + FP + TN + FN == 0) {
-                stop("All counts are zero. Please provide valid diagnostic test data.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'allCountsZero',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('All counts are zero.\n• Please provide valid diagnostic test data.\n• Ensure TP, FP, TN, and FN values are entered correctly.')
+                self$results$insert(1, notice)
+                return()
             }
             
             # Check for diseased subjects
             if (TP + FN == 0) {
-                stop("No diseased subjects (TP + FN = 0). Cannot calculate sensitivity and related metrics.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noDiseasedSubjects',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No diseased subjects detected (TP + FN = 0).\n• Cannot calculate sensitivity and related metrics.\n• Ensure your confusion matrix includes cases with disease present.')
+                self$results$insert(1, notice)
+                return()
             }
-            
+
             # Check for healthy subjects
             if (TN + FP == 0) {
-                stop("No healthy subjects (TN + FP = 0). Cannot calculate specificity and related metrics.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noHealthySubjects',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No healthy subjects detected (TN + FP = 0).\n• Cannot calculate specificity and related metrics.\n• Ensure your confusion matrix includes cases without disease.')
+                self$results$insert(1, notice)
+                return()
             }
             
             # Check for positive tests
             if (TP + FP == 0) {
-                warning("No positive test results (TP + FP = 0). PPV will be undefined.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noPositiveTests',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent('No positive test results detected (TP + FP = 0).\n• Positive Predictive Value (PPV) is undefined.\n• Ensure your confusion matrix includes both positive and negative test results.')
+                self$results$insert(1, notice)
             }
             
             # Check for negative tests
             if (TN + FN == 0) {
-                warning("No negative test results (TN + FN = 0). NPV will be undefined.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noNegativeTests',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent('No negative test results detected (TN + FN = 0).\n• Negative Predictive Value (NPV) is undefined.\n• Ensure your confusion matrix includes both positive and negative test results.')
+                self$results$insert(1, notice)
             }
 
 
@@ -211,10 +257,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         Spec <- if (DiseaseN > 0) TN/DiseaseN else 0
         AccurT <- if (TotalPop > 0) TestT/TotalPop else 0
         PrevalenceD <- if (TotalPop > 0) DiseaseP/TotalPop else 0
-        PPV <- if (TestP > 0) TP/TestP else NA
-        NPV <- if (TestN > 0) TN/TestN else NA
 
-
+        # Determine which prevalence to use
         if (pp) {
             # Known prior probability from population
             PriorProb <- pprob
@@ -223,14 +267,40 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             PriorProb <- PrevalenceD
         }
 
+        # CRITICAL FIX: Calculate PPV and NPV using the selected prevalence
+        # When pp=TRUE, PPV/NPV must use population prevalence via Bayes' theorem,
+        # NOT the sample-based TP/(TP+FP) calculation
+        if (pp) {
+            # Population-adjusted PPV/NPV using Bayes' theorem
+            PPV <- if (!is.na(Sens) && !is.na(Spec)) {
+                numerator <- Sens * PriorProb
+                denominator <- (Sens * PriorProb) + ((1 - Spec) * (1 - PriorProb))
+                if (denominator > 0) numerator / denominator else NA
+            } else NA
 
-        PostTestProbDisease <- (PriorProb * Sens)/((PriorProb * Sens) + ((1 -
-            PriorProb) * (1 - Spec)))
+            NPV <- if (!is.na(Sens) && !is.na(Spec)) {
+                numerator <- Spec * (1 - PriorProb)
+                denominator <- (Spec * (1 - PriorProb)) + ((1 - Sens) * PriorProb)
+                if (denominator > 0) numerator / denominator else NA
+            } else NA
+        } else {
+            # Sample-based PPV/NPV
+            PPV <- if (TestP > 0) TP/TestP else NA
+            NPV <- if (TestN > 0) TN/TestN else NA
+        }
 
+        # Post-test probabilities (same as PPV/NPV when using population prevalence)
+        PostTestProbDisease <- if (!is.na(Sens) && !is.na(Spec)) {
+            numerator <- PriorProb * Sens
+            denominator <- (PriorProb * Sens) + ((1 - PriorProb) * (1 - Spec))
+            if (denominator > 0) numerator / denominator else NA
+        } else NA
 
-
-        PostTestProbHealthy <- ((1 - PriorProb) * Spec)/(((1 - PriorProb) *
-            Spec) + (PriorProb * (1 - Sens)))
+        PostTestProbHealthy <- if (!is.na(Sens) && !is.na(Spec)) {
+            numerator <- (1 - PriorProb) * Spec
+            denominator <- ((1 - PriorProb) * Spec) + (PriorProb * (1 - Sens))
+            if (denominator > 0) numerator / denominator else NA
+        } else NA
 
 
 
@@ -625,19 +695,64 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             
             # Helper function to calculate metrics for a cut-off
             calculate_cutoff_metrics <- function(tp, fp, tn, fn, cutoff_name) {
+                # Validate inputs and guard against zero/NA division
+                if (any(is.na(c(tp, fp, tn, fn))) || any(c(tp, fp, tn, fn) < 0)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'invalidCutoffInputs',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Invalid inputs for cut-off "%s".\n• All values (TP=%s, FP=%s, TN=%s, FN=%s) must be non-negative numbers.\n• Check your input values for errors.', cutoff_name, tp, fp, tn, fn))
+                    self$results$insert(1, notice)
+                    return(NULL)
+                }
+
                 total <- tp + fp + tn + fn
                 diseased <- tp + fn
                 healthy <- tn + fp
-                
-                sens <- tp / diseased
-                spec <- tn / healthy
-                ppv <- tp / (tp + fp)
-                npv <- tn / (tn + fn)
-                accuracy <- (tp + tn) / total
-                youden <- sens + spec - 1
+
+                # Validate that we have cases to analyze
+                if (total == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noCasesForCutoff',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('No cases for cut-off "%s".\n• Total cases (TP+FP+TN+FN) = 0.\n• Check your confusion matrix inputs.', cutoff_name))
+                    self$results$insert(1, notice)
+                    return(NULL)
+                }
+
+                # Safe division with appropriate handling for zero denominators
+                sens <- if (diseased > 0) tp / diseased else NA_real_
+                spec <- if (healthy > 0) tn / healthy else NA_real_
+                ppv <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
+                npv <- if ((tn + fn) > 0) tn / (tn + fn) else NA_real_
+                accuracy <- if (total > 0) (tp + tn) / total else NA_real_
+
+                # Youden index only defined when both sens and spec are available
+                youden <- if (!is.na(sens) && !is.na(spec)) sens + spec - 1 else NA_real_
+
+                # Warn if metrics are undefined
+                if (diseased == 0 || healthy == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = sprintf('incompleteCutoff_%s', make.names(cutoff_name)),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    msg <- sprintf('Cut-off "%s" has incomplete data.\n', cutoff_name)
+                    if (diseased == 0) msg <- paste0(msg, '• No diseased cases (TP+FN=0): Sensitivity is undefined.\n')
+                    if (healthy == 0) msg <- paste0(msg, '• No healthy cases (TN+FP=0): Specificity is undefined.\n')
+                    msg <- paste0(msg, '• Consider this cut-off unreliable for clinical decisions.')
+                    notice$setContent(msg)
+                    self$results$insert(1, notice)
+                }
 
                 # Clinical recommendation based on Youden index and balanced metrics
-                if (youden > private$.YOUDEN_EXCELLENT && accuracy > private$.ACCURACY_EXCELLENT) {
+                # Only make recommendations when all metrics are valid
+                if (is.na(youden) || is.na(accuracy)) {
+                    recommendation <- "Incomplete data - Cannot recommend"
+                } else if (youden > private$.YOUDEN_EXCELLENT && accuracy > private$.ACCURACY_EXCELLENT) {
                     recommendation <- "Excellent performance - Recommended"
                 } else if (youden > private$.YOUDEN_GOOD && accuracy > private$.ACCURACY_GOOD) {
                     recommendation <- "Good performance - Consider for use"
@@ -661,38 +776,53 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
             
             # Calculate metrics for both cut-offs
             cutoff1_metrics <- calculate_cutoff_metrics(
-                self$options$tp1, self$options$fp1, 
+                self$options$tp1, self$options$fp1,
                 self$options$tn1, self$options$fn1,
                 self$options$cutoff1
             )
-            
+
             cutoff2_metrics <- calculate_cutoff_metrics(
                 self$options$tp2, self$options$fp2,
-                self$options$tn2, self$options$fn2, 
+                self$options$tn2, self$options$fn2,
                 self$options$cutoff2
             )
-            
+
+            # Skip table population if validation failed
+            if (is.null(cutoff1_metrics) || is.null(cutoff2_metrics)) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'cutoffValidationFailed',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Cut-off comparison cannot be performed due to invalid inputs.\n• Check the error messages above for specific issues.\n• Ensure all TP, FP, TN, FN values are non-negative numbers.')
+                self$results$insert(1, notice)
+                return()
+            }
+
             # Add rows to comparison table
             multipleCutoffTable$addRow(
                 rowKey = 1,
                 values = cutoff1_metrics
             )
-            
+
             multipleCutoffTable$addRow(
-                rowKey = 2, 
+                rowKey = 2,
                 values = cutoff2_metrics
             )
-            
+
             # Add optimal cut-off recommendation based on current data
             current_youden <- YoudenIndex
             current_accuracy <- AccurT
-            
-            if (cutoff1_metrics$youden > current_youden && cutoff1_metrics$accuracy > current_accuracy) {
+
+            # Safe comparison (handle NA values)
+            optimal_msg <- "Current cut-off appears optimal"
+
+            if (!is.na(cutoff1_metrics$youden) && !is.na(cutoff1_metrics$accuracy) &&
+                cutoff1_metrics$youden > current_youden && cutoff1_metrics$accuracy > current_accuracy) {
                 optimal_msg <- paste0(cutoff1_metrics$cutoffName, " cut-off performs better than current")
-            } else if (cutoff2_metrics$youden > current_youden && cutoff2_metrics$accuracy > current_accuracy) {
+            } else if (!is.na(cutoff2_metrics$youden) && !is.na(cutoff2_metrics$accuracy) &&
+                       cutoff2_metrics$youden > current_youden && cutoff2_metrics$accuracy > current_accuracy) {
                 optimal_msg <- paste0(cutoff2_metrics$cutoffName, " cut-off performs better than current")
-            } else {
-                optimal_msg <- "Current cut-off appears optimal"
             }
             
             multipleCutoffTable$addRow(

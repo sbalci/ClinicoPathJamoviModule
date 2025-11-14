@@ -14,49 +14,62 @@ children:
           - type: VariablesListBox
             name: date_vars
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Correction Settings
+    collapsed: false
     children:
-      - type: ComboBox
-        name: correction_method
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: Choose correction method and date format
+        children:
+          - type: ComboBox
+            name: correction_method
+          - type: ComboBox
+            name: date_format
+
+  - type: CollapseBox
+    label: Missing Value Imputation
+    collapsed: true
     children:
-      - type: ComboBox
-        name: date_format
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: Configure imputation for missing date components
+        children:
+          - type: TextBox
+            name: day_impute
+            format: number
+          - type: TextBox
+            name: month_impute
+            format: number
+
+  - type: CollapseBox
+    label: Additional Options
+    collapsed: true
     children:
-      - type: TextBox
-        name: day_impute
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: Method-specific settings
+        children:
+          - type: CheckBox
+            name: handle_excel
+            enable: (correction_method:datefixr || correction_method:consensus)
+          - type: TextBox
+            name: timezone
+            format: string
+            enable: (correction_method:anytime || correction_method:consensus)
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
     children:
-      - type: TextBox
-        name: month_impute
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: handle_excel
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: timezone
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_correction_table
-      - type: CheckBox
-        name: show_quality_assessment
-      - type: CheckBox
-        name: show_format_analysis
-      - type: CheckBox
-        name: show_correction_summary
-      - type: CheckBox
-        name: show_interpretation
+      - type: Label
+        label: Select which outputs to display
+        children:
+          - type: CheckBox
+            name: show_correction_table
+          - type: CheckBox
+            name: show_quality_assessment
+          - type: CheckBox
+            name: show_format_analysis
+          - type: CheckBox
+            name: show_correction_summary
+          - type: CheckBox
+            name: show_interpretation

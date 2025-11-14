@@ -35,8 +35,12 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: timezone
+      - type: Label
+        label: Timezone (Olson identifier, e.g., Europe/Istanbul; use 'system' for local time)
+        children:
+          - type: TextBox
+            name: timezone
+            format: string
   - type: LayoutBox
     margin: large
     children:

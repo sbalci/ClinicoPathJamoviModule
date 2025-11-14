@@ -1,13 +1,27 @@
 ---
 name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.31'
 jas: '1.2'
 
 description:
-    main: Performs Chi-Square test and post-hoc pairwise comparisons.
+    main: >
+        Performs Chi-Square test and post-hoc pairwise comparisons.
+
+        ⚠️ IMPORTANT LIMITATIONS:
+
+        - Post-hoc pairwise comparisons are ONLY performed when the overall chi-square
+          test is significant (p < α). This enforces proper statistical workflow and
+          prevents data dredging.
+
+        - Selecting 'None' for post-hoc method DISABLES all pairwise testing. If you
+          want unadjusted pairwise comparisons, this feature is not available (by design,
+          as it would encourage inappropriate multiple testing).
+
+        - No automated validation against established packages exists. Use with caution
+          for clinical decision-making.
     R:
         dontrun: true
         usage: |
@@ -56,11 +70,15 @@ options:
           name: holm
         - title: FDR
           name: fdr
-        - title: None
+        - title: None (Disable Post-Hoc)
           name: none
       default: bonferroni
       description: >
-                  Method for p-value adjustment in post-hoc tests
+                  Method for p-value adjustment in post-hoc tests. IMPORTANT: Selecting
+                  'None' DISABLES all pairwise comparisons entirely (not just adjustment).
+                  Unadjusted pairwise testing is not supported to prevent inappropriate
+                  multiple testing. Choose Bonferroni (most conservative), Holm (less
+                  conservative), or FDR (controls false discovery rate) for pairwise testing.
 
     - name: sig
       title: Significance Level
@@ -142,22 +160,6 @@ options:
       default: false
       description: >
                   Export comprehensive analysis results to downloadable format for further analysis
-
-    - name: clinicalPreset
-      title: Clinical Preset
-      type: List
-      options:
-        - title: Custom Settings
-          name: custom
-        - title: 2×2 Diagnostic Test
-          name: diagnostic2x2
-        - title: Treatment Response (3+ groups)
-          name: treatment_response
-        - title: Pathology Grade Distribution
-          name: grade_distribution
-      default: custom
-      description: >
-                  Pre-configured settings for common clinical scenarios
 
     - name: showClinicalSummary
       title: Show Clinical Summary

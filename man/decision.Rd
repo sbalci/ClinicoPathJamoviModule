@@ -10,14 +10,16 @@ decision(
   goldPositive,
   newtest,
   testPositive,
+  goldNegative,
+  testNegative,
   pp = FALSE,
   pprob = 0.3,
   od = FALSE,
   fnote = FALSE,
   ci = FALSE,
   fagan = FALSE,
-  showNaturalLanguage = TRUE,
-  showClinicalInterpretation = TRUE,
+  showNaturalLanguage = FALSE,
+  showClinicalInterpretation = FALSE,
   showReportTemplate = FALSE,
   showAboutAnalysis = FALSE,
   showMisclassified = FALSE,
@@ -38,6 +40,12 @@ standard variable.}
 performance.}
 
 \item{testPositive}{The level representing a positive result for the test
+under evaluation.}
+
+\item{goldNegative}{The level indicating absence of disease in the gold
+standard variable.}
+
+\item{testNegative}{The level representing a negative result for the test
 under evaluation.}
 
 \item{pp}{Boolean selection whether to use known population prevalence
@@ -77,6 +85,7 @@ tables.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$rawContingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$rawCounts} \tab \tab \tab \tab \tab a table \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr

@@ -59,8 +59,6 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: ComboBox
-            name: clinicalPreset
           - type: CheckBox
             name: showClinicalSummary
           - type: CheckBox

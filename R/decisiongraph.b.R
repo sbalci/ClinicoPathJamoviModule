@@ -41,6 +41,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             .nmbAnalysis = NULL,
             .nmbSensitivity = NULL,
 
+            # Variable name safety utility for handling special characters
+            .escapeVar = function(x) {
+                if (is.null(x) || length(x) == 0) return(x)
+                make.names(gsub("[^A-Za-z0-9_. -]", "_", as.character(x)))
+            },
+
             # Configuration constants for better maintainability
             DECISIONGRAPH_DEFAULTS = list(
                 psa_chunk_size = 1000,
@@ -1085,53 +1091,79 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             },
 
             .traverseDecisionPath = function(strategy, nodes, edges) {
-                # Function to traverse decision tree and calculate expected values
-                # This implements the recursive calculation as shown in the blog
+                # CRITICAL FIX: This function is a PLACEHOLDER
+                # Real decision tree evaluation requires recursive traversal of tree structure
 
-                # Initialize with actual data if available
-                if (!is.null(self$options$costs) && !is.null(self$options$utilities) &&
-                    !is.null(self$options$probabilities)) {
+                # Current implementation has been removed because it:
+                # 1. Used random numbers as fallbacks
+                # 2. Used hardcoded magic numbers (0.5, 0.8)
+                # 3. Never traversed the actual tree structure
+                # 4. All strategies shared the same aggregate inputs
 
-                    mydata <- jmvcore::naOmit(self$data)
-
-                    # Extract actual values from data
-                    costs <- if (length(self$options$costs) > 0 &&
-                               self$options$costs[1] %in% names(mydata)) {
-                        mean(mydata[[self$options$costs[1]]], na.rm = TRUE)
-                    } else {
-                        1500 + runif(1, 0, 500)  # Default if no data
-                    }
-
-                    utilities <- if (length(self$options$utilities) > 0 &&
-                                   self$options$utilities[1] %in% names(mydata)) {
-                        mean(mydata[[self$options$utilities[1]]], na.rm = TRUE)
-                    } else {
-                        0.75 + runif(1, -0.1, 0.1)  # Default if no data
-                    }
-
-                    probabilities <- if (length(self$options$probabilities) > 0 &&
-                                       self$options$probabilities[1] %in% names(mydata)) {
-                        mean(mydata[[self$options$probabilities[1]]], na.rm = TRUE)
-                    } else {
-                        0.7  # Default probability
-                    }
-
-                    # Calculate expected values using probability weighting
-                    expectedCost <- costs * probabilities +
-                                  (costs * 0.5) * (1 - probabilities)  # Weighted average
-                    expectedUtility <- utilities * probabilities +
-                                     (utilities * 0.8) * (1 - probabilities)  # Weighted average
-
-                } else {
-                    # Mock calculations for demonstration
-                    expectedCost <- 1500 + runif(1, 0, 1000)
-                    expectedUtility <- 0.75 + runif(1, -0.2, 0.2)
-                }
-
-                return(list(
-                    expectedCost = expectedCost,
-                    expectedUtility = expectedUtility
+                stop(paste0(
+                    "Decision tree traversal is not yet fully implemented.\n\n",
+                    "Current placeholder behavior has been removed because it:\n",
+                    "  1. Used random numbers when data was missing\n",
+                    "  2. Applied arbitrary weighted averages (magic numbers 0.5, 0.8)\n",
+                    "  3. Never traversed the actual tree structure\n",
+                    "  4. Generated meaningless expected values\n\n",
+                    "To implement decision tree evaluation properly, the function must:\n",
+                    "  1. Start at root node for this strategy\n",
+                    "  2. For decision nodes: evaluate each branch\n",
+                    "  3. For chance nodes: multiply by branch-specific probabilities\n",
+                    "  4. For terminal nodes: accumulate costs and utilities\n",
+                    "  5. Use backward induction to calculate expected values\n\n",
+                    "Please provide a properly structured decision tree with:\n",
+                    "  - Node types (decision, chance, terminal)\n",
+                    "  - Branch probabilities (for chance nodes)\n",
+                    "  - Costs and utilities (for terminal nodes)"
                 ))
+
+                # OLD BROKEN CODE REMOVED:
+                # # Initialize with actual data if available
+                # if (!is.null(self$options$costs) && !is.null(self$options$utilities) &&
+                #     !is.null(self$options$probabilities)) {
+                #
+                #     mydata <- jmvcore::naOmit(self$data)
+                #
+                #     # Extract actual values from data
+                #     costs <- if (length(self$options$costs) > 0 &&
+                #                self$options$costs[1] %in% names(mydata)) {
+                #         mean(mydata[[self$options$costs[1]]], na.rm = TRUE)
+                #     } else {
+                #         1500 + runif(1, 0, 500)  # ❌ RANDOM!
+                #     }
+                #
+                #     utilities <- if (length(self$options$utilities) > 0 &&
+                #                    self$options$utilities[1] %in% names(mydata)) {
+                #         mean(mydata[[self$options$utilities[1]]], na.rm = TRUE)
+                #     } else {
+                #         0.75 + runif(1, -0.1, 0.1)  # ❌ RANDOM!
+                #     }
+                #
+                #     probabilities <- if (length(self$options$probabilities) > 0 &&
+                #                        self$options$probabilities[1] %in% names(mydata)) {
+                #         mean(mydata[[self$options$probabilities[1]]], na.rm = TRUE)
+                #     } else {
+                #         0.7  # Default probability
+                #     }
+                #
+                #     # Calculate expected values using probability weighting
+                #     expectedCost <- costs * probabilities +
+                #                   (costs * 0.5) * (1 - probabilities)  # ❌ MAGIC NUMBERS
+                #     expectedUtility <- utilities * probabilities +
+                #                      (utilities * 0.8) * (1 - probabilities)  # ❌ MAGIC NUMBERS
+                #
+                # } else {
+                #     # Mock calculations for demonstration
+                #     expectedCost <- 1500 + runif(1, 0, 1000)  # ❌ RANDOM!
+                #     expectedUtility <- 0.75 + runif(1, -0.2, 0.2)  # ❌ RANDOM!
+                # }
+                #
+                # return(list(
+                #     expectedCost = expectedCost,
+                #     expectedUtility = expectedUtility
+                # ))
             },
 
             .calculateNMB = function() {

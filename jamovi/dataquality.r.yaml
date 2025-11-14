@@ -6,7 +6,7 @@ jrs: '1.1'
 items:
     - name: todo
       type: Html
-      visible: (vars)
+      visible: true
 
     - name: text
       title: Data Quality Summary
@@ -20,6 +20,9 @@ items:
       renderFun: .plotDataOverview
       visible: (plot_data_overview)
       requiresData: true
+      clearWith:
+          - vars
+          - missing_threshold_visual
 
     - name: plotMissingPatterns
       title: Missing Patterns
@@ -29,6 +32,9 @@ items:
       renderFun: .plotMissingPatterns
       visible: (plot_missing_patterns)
       requiresData: true
+      clearWith:
+          - vars
+          - missing_threshold_visual
 
     - name: plotDataTypes
       title: Data Types
@@ -38,15 +44,20 @@ items:
       renderFun: .plotDataTypes
       visible: (plot_data_types)
       requiresData: true
+      clearWith:
+          - vars
 
-    - name: plotValueExpectations
-      title: Value Expectations
-      type: Image
-      width: 900
-      height: 600
-      renderFun: .plotValueExpectations
-      visible: (plot_value_expectations)
-      requiresData: true
+    # NOTE: vis_expect disabled until expectation formulas can be configured
+    # - name: plotValueExpectations
+    #   title: Value Expectations
+    #   type: Image
+    #   width: 900
+    #   height: 600
+    #   renderFun: .plotValueExpectations
+    #   visible: (plot_value_expectations)
+    #   requiresData: true
+    #   clearWith:
+    #       - vars
 
 
 refs:

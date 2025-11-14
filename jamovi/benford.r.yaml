@@ -9,6 +9,14 @@ items:
       title: "About Benford's Law in Clinical Data"
       type:  Html
 
+    - name: dataWarning
+      title: Data Validation
+      type: Html
+      visible: true
+      clearWith:
+          - var
+          - digits
+
     - name:  summary
       title: Analysis Summary
       type:  Table

@@ -15,25 +15,25 @@ concordanceindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             cindex_method = "harrell",
             time_dependent = FALSE,
             evaluation_times = "12, 36, 60",
-            confidence_intervals = TRUE,
+            confidence_intervals = FALSE,
             ci_method = "bootstrap",
             bootstrap_samples = 500,
             confidence_level = 0.95,
             compare_models = FALSE,
             additional_predictors = NULL,
             model_names = "Model 1, Model 2, Model 3",
-            compare_test = TRUE,
+            compare_test = FALSE,
             competing_risks = FALSE,
-            cause_specific = TRUE,
+            cause_specific = FALSE,
             decompose_cindex = FALSE,
             risk_groups = 3,
-            somers_d = TRUE,
+            somers_d = FALSE,
             goodman_kruskal_gamma = FALSE,
             stratified_cindex = FALSE,
             stratify_by = NULL,
             plot_cindex_over_time = FALSE,
             plot_model_comparison = FALSE,
-            plot_risk_group_kaplan_meier = TRUE,
+            plot_risk_group_kaplan_meier = FALSE,
             plot_decomposition = FALSE,
             clinical_application = "general",
             show_interpretation = TRUE,
@@ -104,7 +104,7 @@ concordanceindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..confidence_intervals <- jmvcore::OptionBool$new(
                 "confidence_intervals",
                 confidence_intervals,
-                default=TRUE)
+                default=FALSE)
             private$..ci_method <- jmvcore::OptionList$new(
                 "ci_method",
                 ci_method,
@@ -142,7 +142,7 @@ concordanceindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..compare_test <- jmvcore::OptionBool$new(
                 "compare_test",
                 compare_test,
-                default=TRUE)
+                default=FALSE)
             private$..competing_risks <- jmvcore::OptionBool$new(
                 "competing_risks",
                 competing_risks,
@@ -150,7 +150,7 @@ concordanceindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..cause_specific <- jmvcore::OptionBool$new(
                 "cause_specific",
                 cause_specific,
-                default=TRUE)
+                default=FALSE)
             private$..decompose_cindex <- jmvcore::OptionBool$new(
                 "decompose_cindex",
                 decompose_cindex,
@@ -164,7 +164,7 @@ concordanceindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..somers_d <- jmvcore::OptionBool$new(
                 "somers_d",
                 somers_d,
-                default=TRUE)
+                default=FALSE)
             private$..goodman_kruskal_gamma <- jmvcore::OptionBool$new(
                 "goodman_kruskal_gamma",
                 goodman_kruskal_gamma,
@@ -192,7 +192,7 @@ concordanceindexOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..plot_risk_group_kaplan_meier <- jmvcore::OptionBool$new(
                 "plot_risk_group_kaplan_meier",
                 plot_risk_group_kaplan_meier,
-                default=TRUE)
+                default=FALSE)
             private$..plot_decomposition <- jmvcore::OptionBool$new(
                 "plot_decomposition",
                 plot_decomposition,
@@ -837,25 +837,25 @@ concordanceindex <- function(
     cindex_method = "harrell",
     time_dependent = FALSE,
     evaluation_times = "12, 36, 60",
-    confidence_intervals = TRUE,
+    confidence_intervals = FALSE,
     ci_method = "bootstrap",
     bootstrap_samples = 500,
     confidence_level = 0.95,
     compare_models = FALSE,
     additional_predictors,
     model_names = "Model 1, Model 2, Model 3",
-    compare_test = TRUE,
+    compare_test = FALSE,
     competing_risks = FALSE,
-    cause_specific = TRUE,
+    cause_specific = FALSE,
     decompose_cindex = FALSE,
     risk_groups = 3,
-    somers_d = TRUE,
+    somers_d = FALSE,
     goodman_kruskal_gamma = FALSE,
     stratified_cindex = FALSE,
     stratify_by,
     plot_cindex_over_time = FALSE,
     plot_model_comparison = FALSE,
-    plot_risk_group_kaplan_meier = TRUE,
+    plot_risk_group_kaplan_meier = FALSE,
     plot_decomposition = FALSE,
     clinical_application = "general",
     show_interpretation = TRUE,

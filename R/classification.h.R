@@ -18,8 +18,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             complexity = 0.01,
             maxCompete = 4,
             maxSurrogate = 5,
-            unsurrogate = 2,
-            noCrossValidations = 10,
             maxDepth = 30,
             noOfTrees = 10,
             maxDepthRandFor = 30,
@@ -38,9 +36,10 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             clinicalCutoff = 0.5,
             validateMethod = "holdout",
             bootstrapSamples = 1000,
-            reportClinicalMetrics = TRUE,
-            reportConfidenceIntervals = TRUE,
-            reportMCC = TRUE, ...) {
+            reportClinicalMetrics = FALSE,
+            reportConfidenceIntervals = FALSE,
+            reportMCC = FALSE,
+            positiveClass = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -114,14 +113,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "maxSurrogate",
                 maxSurrogate,
                 default=5)
-            private$..unsurrogate <- jmvcore::OptionNumber$new(
-                "unsurrogate",
-                unsurrogate,
-                default=2)
-            private$..noCrossValidations <- jmvcore::OptionNumber$new(
-                "noCrossValidations",
-                noCrossValidations,
-                default=10)
             private$..maxDepth <- jmvcore::OptionNumber$new(
                 "maxDepth",
                 maxDepth,
@@ -228,15 +219,19 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..reportClinicalMetrics <- jmvcore::OptionBool$new(
                 "reportClinicalMetrics",
                 reportClinicalMetrics,
-                default=TRUE)
+                default=FALSE)
             private$..reportConfidenceIntervals <- jmvcore::OptionBool$new(
                 "reportConfidenceIntervals",
                 reportConfidenceIntervals,
-                default=TRUE)
+                default=FALSE)
             private$..reportMCC <- jmvcore::OptionBool$new(
                 "reportMCC",
                 reportMCC,
-                default=TRUE)
+                default=FALSE)
+            private$..positiveClass <- jmvcore::OptionString$new(
+                "positiveClass",
+                positiveClass,
+                default="")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..indep)
@@ -249,8 +244,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..complexity)
             self$.addOption(private$..maxCompete)
             self$.addOption(private$..maxSurrogate)
-            self$.addOption(private$..unsurrogate)
-            self$.addOption(private$..noCrossValidations)
             self$.addOption(private$..maxDepth)
             self$.addOption(private$..noOfTrees)
             self$.addOption(private$..maxDepthRandFor)
@@ -272,6 +265,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..reportClinicalMetrics)
             self$.addOption(private$..reportConfidenceIntervals)
             self$.addOption(private$..reportMCC)
+            self$.addOption(private$..positiveClass)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -285,8 +279,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         complexity = function() private$..complexity$value,
         maxCompete = function() private$..maxCompete$value,
         maxSurrogate = function() private$..maxSurrogate$value,
-        unsurrogate = function() private$..unsurrogate$value,
-        noCrossValidations = function() private$..noCrossValidations$value,
         maxDepth = function() private$..maxDepth$value,
         noOfTrees = function() private$..noOfTrees$value,
         maxDepthRandFor = function() private$..maxDepthRandFor$value,
@@ -307,7 +299,8 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         bootstrapSamples = function() private$..bootstrapSamples$value,
         reportClinicalMetrics = function() private$..reportClinicalMetrics$value,
         reportConfidenceIntervals = function() private$..reportConfidenceIntervals$value,
-        reportMCC = function() private$..reportMCC$value),
+        reportMCC = function() private$..reportMCC$value,
+        positiveClass = function() private$..positiveClass$value),
     private = list(
         ..dep = NA,
         ..indep = NA,
@@ -320,8 +313,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..complexity = NA,
         ..maxCompete = NA,
         ..maxSurrogate = NA,
-        ..unsurrogate = NA,
-        ..noCrossValidations = NA,
         ..maxDepth = NA,
         ..noOfTrees = NA,
         ..maxDepthRandFor = NA,
@@ -342,7 +333,8 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..bootstrapSamples = NA,
         ..reportClinicalMetrics = NA,
         ..reportConfidenceIntervals = NA,
-        ..reportMCC = NA)
+        ..reportMCC = NA,
+        ..positiveClass = NA)
 )
 
 classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -607,8 +599,6 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param complexity .
 #' @param maxCompete .
 #' @param maxSurrogate .
-#' @param unsurrogate .
-#' @param noCrossValidations .
 #' @param maxDepth .
 #' @param noOfTrees .
 #' @param maxDepthRandFor .
@@ -638,6 +628,11 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   balanced metric for imbalanced datasets. MCC ranges from -1 (perfect
 #'   disagreement) to +1 (perfect agreement), with 0 indicating random
 #'   prediction.
+#' @param positiveClass Specify which class should be considered "positive"
+#'   for clinical metrics (sensitivity, specificity, PPV, NPV, likelihood
+#'   ratios). If left empty, the second factor level will be used as positive.
+#'   This is critical for ensuring correct interpretation of diagnostic
+#'   performance metrics.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$modelSettings} \tab \tab \tab \tab \tab a html \cr
@@ -668,8 +663,6 @@ classification <- function(
     complexity = 0.01,
     maxCompete = 4,
     maxSurrogate = 5,
-    unsurrogate = 2,
-    noCrossValidations = 10,
     maxDepth = 30,
     noOfTrees = 10,
     maxDepthRandFor = 30,
@@ -688,9 +681,10 @@ classification <- function(
     clinicalCutoff = 0.5,
     validateMethod = "holdout",
     bootstrapSamples = 1000,
-    reportClinicalMetrics = TRUE,
-    reportConfidenceIntervals = TRUE,
-    reportMCC = TRUE) {
+    reportClinicalMetrics = FALSE,
+    reportConfidenceIntervals = FALSE,
+    reportMCC = FALSE,
+    positiveClass = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("classification requires jmvcore to be installed (restart may be required)")
@@ -717,8 +711,6 @@ classification <- function(
         complexity = complexity,
         maxCompete = maxCompete,
         maxSurrogate = maxSurrogate,
-        unsurrogate = unsurrogate,
-        noCrossValidations = noCrossValidations,
         maxDepth = maxDepth,
         noOfTrees = noOfTrees,
         maxDepthRandFor = maxDepthRandFor,
@@ -739,7 +731,8 @@ classification <- function(
         bootstrapSamples = bootstrapSamples,
         reportClinicalMetrics = reportClinicalMetrics,
         reportConfidenceIntervals = reportConfidenceIntervals,
-        reportMCC = reportMCC)
+        reportMCC = reportMCC,
+        positiveClass = positiveClass)
 
     analysis <- classificationClass$new(
         options = options,

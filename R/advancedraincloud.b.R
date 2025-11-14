@@ -7,7 +7,7 @@
 #' @importFrom ggplot2 ggplot aes labs theme_minimal theme element_text
 #' @importFrom ggplot2 scale_fill_manual scale_color_manual
 #' @importFrom ggrain geom_rain
-#' @importFrom dplyr group_by summarise mutate n
+#' @importFrom dplyr group_by summarise mutate n arrange transmute slice_tail inner_join ungroup
 #' @importFrom stats t.test wilcox.test aov kruskal.test
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom viridis viridis
@@ -18,6 +18,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
     private = list(
         
         .analysis_data = NULL,
+        .comparison_results = NULL,
+        .change_summary = NULL,
         
         # Constants for maintainability
         .constants = list(
@@ -133,8 +135,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 
                 # Validate reference range logic only when both values are set and non-zero
                 if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max)) {
-                    if (is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
-                        self$options$reference_range_min != 0 && self$options$reference_range_max != 0) {
+                    if (is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max)) {
                         if (self$options$reference_range_min >= self$options$reference_range_max) {
                             jmvcore::reject(.("Reference range minimum must be less than maximum"), code = "")
                         }
@@ -218,6 +219,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 return()
             }
 
+            private$.comparison_results <- NULL
+            private$.change_summary <- NULL
+
             # Get data and variables
             dataset <- self$data
             y_var <- self$options$y_var
@@ -226,19 +230,26 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             id_var <- self$options$id_var
             cov_var <- self$options$cov_var
 
-            # Prepare analysis data
-            required_vars <- c(y_var, x_var)
-            if (!is.null(fill_var) && fill_var != "") {
-                required_vars <- c(required_vars, fill_var)
+            if (self$options$show_longitudinal && (is.null(id_var) || id_var == "")) {
+                warning(.("Longitudinal connections requested but ID variable is not set."))
             }
-            if (!is.null(id_var) && id_var != "") {
-                required_vars <- c(required_vars, id_var)
+
+            # Prepare analysis data
+            analysis_vars <- c(y_var, x_var)
+            if (!is.null(fill_var) && fill_var != "") {
+                analysis_vars <- c(analysis_vars, fill_var)
+            }
+            id_needed <- !is.null(id_var) && id_var != "" && 
+                (isTRUE(self$options$show_longitudinal) || isTRUE(self$options$show_change_scores))
+            if (id_needed) {
+                analysis_vars <- c(analysis_vars, id_var)
             }
             if (!is.null(cov_var) && cov_var != "") {
-                required_vars <- c(required_vars, cov_var)
+                analysis_vars <- c(analysis_vars, cov_var)
             }
+            analysis_vars <- unique(analysis_vars[!(is.na(analysis_vars) | analysis_vars == "")])
             
-            analysis_data <- dataset[required_vars]
+            analysis_data <- as.data.frame(dataset[analysis_vars], stringsAsFactors = FALSE)
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
             if (nrow(analysis_data) == 0) {
@@ -249,13 +260,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             analysis_data[[y_var]] <- as.numeric(analysis_data[[y_var]])
             analysis_data[[x_var]] <- as.factor(analysis_data[[x_var]])
             
-            if (!is.null(fill_var) && fill_var != "") {
+            if (!is.null(fill_var) && fill_var != "" && fill_var %in% names(analysis_data)) {
                 analysis_data[[fill_var]] <- as.factor(analysis_data[[fill_var]])
             }
-            if (!is.null(id_var) && id_var != "") {
+            if (!is.null(id_var) && id_var != "" && id_var %in% names(analysis_data)) {
                 analysis_data[[id_var]] <- as.factor(analysis_data[[id_var]])
             }
-            if (!is.null(cov_var) && cov_var != "") {
+            if (!is.null(cov_var) && cov_var != "" && cov_var %in% names(analysis_data)) {
                 if (is.numeric(analysis_data[[cov_var]])) {
                     # Keep numeric for continuous covariate mapping
                 } else {
@@ -282,7 +293,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 
                 # Add missing data information if requested
                 if (self$options$show_missing_info) {
-                    missing_info_html <- private$.generate_missing_data_info(dataset, analysis_data, required_vars)
+                    missing_info_html <- private$.generate_missing_data_info(dataset, analysis_data, analysis_vars)
                     stats_html <- paste0(stats_html, missing_info_html)
                 }
                 
@@ -292,10 +303,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             # Generate group comparisons if requested
             if (self$options$show_comparisons) {
                 private$.checkpoint()  # Before comparison tests
-                comparison_html <- private$.generate_comparisons(analysis_data, y_var, x_var, fill_var)
-                self$results$comparisons$setContent(comparison_html)
+                comparison_res <- private$.generate_comparisons(analysis_data, y_var, x_var, fill_var)
+                private$.comparison_results <- comparison_res$stats
+                self$results$comparisons$setContent(comparison_res$html)
+            } else {
+                private$.comparison_results <- NULL
             }
-            
+
             # Generate interpretation guide
             if (self$options$show_interpretation) {
                 interpretation_html <- private$.generate_interpretation_guide(analysis_data, y_var, x_var, id_var)
@@ -321,11 +335,28 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             # Generate change analysis if requested
             if (self$options$show_change_scores) {
                 private$.checkpoint()  # Before change score analysis
-                change_html <- private$.generate_change_analysis(
-                    analysis_data, y_var, x_var, id_var, 
-                    self$options$baseline_group, self$options$responder_threshold
-                )
-                self$results$change_analysis$setContent(change_html)
+                if (is.null(id_var) || id_var == "") {
+                    warning(.("Change score analysis requires an ID variable."))
+                    warning_html <- paste0(
+                        "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px;'>",
+                        "<p>", .("Please provide an ID variable to compute change scores."), "</p>",
+                        "</div>"
+                    )
+                    self$results$change_analysis$setContent(warning_html)
+                } else {
+                    change_data <- as.data.frame(dataset[c(y_var, x_var, id_var)], stringsAsFactors = FALSE)
+                    change_data[[y_var]] <- as.numeric(change_data[[y_var]])
+                    change_data[[x_var]] <- as.factor(change_data[[x_var]])
+                    change_data[[id_var]] <- as.factor(change_data[[id_var]])
+                    change_res <- private$.generate_change_analysis(
+                        change_data, y_var, x_var, id_var, 
+                        self$options$baseline_group, self$options$responder_threshold
+                    )
+                    private$.change_summary <- change_res$summary
+                    self$results$change_analysis$setContent(change_res$html)
+                }
+            } else {
+                private$.change_summary <- NULL
             }
             
             # Generate clinical report if requested
@@ -637,7 +668,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
             
             # Add clinical cutoff line if specified
-            if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff) && self$options$clinical_cutoff != 0) {
+            if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff) && !is.na(self$options$clinical_cutoff)) {
                 p <- p + ggplot2::geom_hline(
                     yintercept = self$options$clinical_cutoff,
                     linetype = "dashed",
@@ -659,7 +690,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             # Add reference range shading if specified
             if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max) &&
                 is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
-                self$options$reference_range_min != 0 && self$options$reference_range_max != 0) {
+                !is.na(self$options$reference_range_min) && !is.na(self$options$reference_range_max) &&
+                self$options$reference_range_min < self$options$reference_range_max) {
                 p <- p + ggplot2::annotate(
                     "rect",
                     xmin = -Inf, xmax = Inf,
@@ -957,10 +989,14 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             n_groups <- length(groups)
             
             if (n_groups < 2) {
-                return("<div style='padding: 20px;'><p>Group comparisons require at least 2 groups.</p></div>")
+                return(list(
+                    html = "<div style='padding: 20px;'><p>Group comparisons require at least 2 groups.</p></div>",
+                    stats = NULL
+                ))
             }
             
             # Perform appropriate statistical test
+            df_value <- NA
             if (n_groups == 2) {
                 group1_data <- data[data[[group_var]] == groups[1], y_var]
                 group2_data <- data[data[[group_var]] == groups[2], y_var]
@@ -969,7 +1005,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 test_result <- wilcox.test(group1_data, group2_data)
                 test_name <- "Wilcoxon rank-sum test"
                 test_stat <- round(test_result$statistic, 4)
-                p_value <- round(test_result$p.value, 4)
+                raw_p <- test_result$p.value
+                p_value <- round(raw_p, 4)
                 test_details <- paste0("W = ", test_stat)
                 
             } else {
@@ -979,8 +1016,10 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 
                 test_name <- "Kruskal-Wallis test"
                 test_stat <- round(kw_result$statistic, 4)
-                p_value <- round(kw_result$p.value, 4)
+                raw_p <- kw_result$p.value
+                p_value <- round(raw_p, 4)
                 test_details <- paste0("χ² = ", test_stat, ", df = ", kw_result$parameter)
+                df_value <- kw_result$parameter
             }
             
             # Format results
@@ -1002,7 +1041,15 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 "</p></div>"
             )
             
-            return(comparison_html)
+            stats <- list(
+                method = test_name,
+                statistic = test_stat,
+                df = df_value,
+                p_value = raw_p,
+                label = private$.format_p_value(raw_p)
+            )
+            
+            return(list(html = comparison_html, stats = stats))
         },
 
         .generate_interpretation_guide = function(data, y_var, x_var, id_var) {
@@ -1218,21 +1265,24 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
         
         .generate_change_analysis = function(data, y_var, x_var, id_var, baseline_group, threshold) {
             if (is.null(id_var) || id_var == "" || is.null(baseline_group) || baseline_group == "") {
-                return(paste0(
-                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
-                    "<p>", .("Change analysis requires both a longitudinal ID variable and a baseline group specification."), "</p>",
-                    "</div>"
+                return(list(
+                    html = paste0(
+                        "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<p>", .("Change analysis requires both a longitudinal ID variable and a baseline group specification."), "</p>",
+                        "</div>"
+                    ),
+                    summary = NULL
                 ))
             }
-            
-            # Clean data using complete.cases for change analysis
+
+            id_sym <- rlang::sym(id_var)
+
             original_n <- nrow(data)
             required_vars <- c(id_var, x_var, y_var)
             complete_data <- data[complete.cases(data[required_vars]), ]
             excluded_n <- original_n - nrow(complete_data)
-            
-            # Report data cleaning if exclusions occurred
+
             cleaning_report <- ""
             if (excluded_n > 0) {
                 cleaning_report <- paste0(
@@ -1247,94 +1297,134 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     "</em></p></div>"
                 )
             }
-            
-            # Validate baseline group exists in clean data
+
             if (!baseline_group %in% unique(complete_data[[x_var]])) {
                 available_groups <- paste(unique(complete_data[[x_var]]), collapse = ", ")
-                return(paste0(
-                    cleaning_report,
-                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
-                    "<p>", .("Baseline group '"), baseline_group, .("' not found in complete data. Available groups: "), available_groups, "</p>",
-                    "</div>"
+                return(list(
+                    html = paste0(
+                        cleaning_report,
+                        "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<p>", .("Baseline group '"), baseline_group, .("' not found in complete data. Available groups: "), available_groups, "</p>",
+                        "</div>"
+                    ),
+                    summary = NULL
                 ))
             }
-            
-            # Validate ID structure for longitudinal analysis
+
             id_counts <- table(complete_data[[id_var]])
             if (all(id_counts == 1)) {
-                return(paste0(
-                    cleaning_report,
-                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
-                    "<p>", .("No repeated observations found in complete data. Change analysis requires subjects with multiple measurements."), "</p>",
-                    "</div>"
+                return(list(
+                    html = paste0(
+                        cleaning_report,
+                        "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<p>", .("No repeated observations found in complete data. Change analysis requires subjects with multiple measurements."), "</p>",
+                        "</div>"
+                    ),
+                    summary = NULL
                 ))
             }
-            
-            # Perform actual change score analysis on complete data
-            paired_data <- complete_data %>%
-                dplyr::filter(.data[[id_var]] %in% names(id_counts[id_counts > 1])) %>%
-                dplyr::select(dplyr::all_of(c(id_var, x_var, y_var))) %>%
-                dplyr::arrange(.data[[id_var]], .data[[x_var]])
-            
-            # Calculate change scores for paired observations
-            change_results <- paired_data %>%
+
+            level_index <- setNames(seq_along(levels(complete_data[[x_var]])), levels(complete_data[[x_var]]))
+            baseline_data <- complete_data[complete_data[[x_var]] == baseline_group, ]
+            followup_data <- complete_data[complete_data[[x_var]] != baseline_group, ]
+
+            if (nrow(baseline_data) == 0 || nrow(followup_data) == 0) {
+                return(list(
+                    html = paste0(
+                        cleaning_report,
+                        "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<p>", .("Insufficient baseline or follow-up observations to compute change scores."), "</p>",
+                        "</div>"
+                    ),
+                    summary = NULL
+                ))
+            }
+
+            baseline_by_id <- baseline_data %>%
                 dplyr::group_by(.data[[id_var]]) %>%
-                dplyr::filter(dplyr::n() >= 2) %>%
-                dplyr::arrange(.data[[x_var]]) %>%
-                dplyr::summarise(
-                    baseline_value = dplyr::first(.data[[y_var]]),
-                    followup_value = dplyr::last(.data[[y_var]]),
-                    change_score = dplyr::last(.data[[y_var]]) - dplyr::first(.data[[y_var]]),
-                    percent_change = (dplyr::last(.data[[y_var]]) - dplyr::first(.data[[y_var]])) / abs(dplyr::first(.data[[y_var]])) * 100,
-                    .groups = 'drop'
+                dplyr::summarise(baseline_value = dplyr::first(.data[[y_var]]), .groups = "drop")
+
+            followup_by_id <- followup_data %>%
+                dplyr::mutate(.time_index = level_index[as.character(.data[[x_var]])]) %>%
+                dplyr::group_by(.data[[id_var]]) %>%
+                dplyr::arrange(.data$.time_index) %>%
+                dplyr::slice_tail(n = 1) %>%
+                dplyr::ungroup() %>%
+                dplyr::transmute(
+                    !!id_sym := .data[[id_var]],
+                    followup_group = as.character(.data[[x_var]]),
+                    followup_value = .data[[y_var]]
                 )
-            
-            if (nrow(change_results) == 0) {
-                return(paste0(
-                    cleaning_report,
-                    "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                    "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
-                    "<p>", .("No paired observations found for change analysis in complete data."), "</p>",
-                    "</div>"
+
+            paired_data <- dplyr::inner_join(baseline_by_id, followup_by_id, by = id_var)
+            if (nrow(paired_data) == 0) {
+                return(list(
+                    html = paste0(
+                        cleaning_report,
+                        "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
+                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<p>", .("No paired observations found for change analysis in complete data."), "</p>",
+                        "</div>"
+                    ),
+                    summary = NULL
                 ))
             }
-            
-            # Responder analysis
-            responders <- change_results %>%
+
+            paired_data <- paired_data %>%
                 dplyr::mutate(
-                    responder = abs(.data$percent_change) >= threshold,
+                    change_score = followup_value - baseline_value,
+                    percent_change = ifelse(abs(baseline_value) > .Machine$double.eps,
+                        (change_score / abs(baseline_value)) * 100,
+                        NA_real_
+                    )
+                )
+
+            direction_label <- if (threshold >= 0) "increase" else "decrease"
+            threshold_value <- abs(threshold)
+
+            responders <- paired_data %>%
+                dplyr::mutate(
+                    responder = dplyr::case_when(
+                        is.na(.data$percent_change) ~ FALSE,
+                        threshold >= 0 ~ .data$percent_change >= threshold_value,
+                        TRUE ~ .data$percent_change <= -threshold_value
+                    ),
                     improver = .data$change_score > 0,
                     decliner = .data$change_score < 0,
                     stable = .data$change_score == 0
                 )
-            
+
             n_total <- nrow(responders)
             n_responders <- sum(responders$responder, na.rm = TRUE)
             n_improvers <- sum(responders$improver, na.rm = TRUE)
             n_decliners <- sum(responders$decliner, na.rm = TRUE)
             n_stable <- sum(responders$stable, na.rm = TRUE)
-            
+            pct_fmt <- function(count) {
+                if (n_total > 0) round((count / n_total) * 100, 1) else 0
+            }
+
             mean_change <- round(mean(responders$change_score, na.rm = TRUE), 3)
             median_change <- round(median(responders$change_score, na.rm = TRUE), 3)
             sd_change <- round(sd(responders$change_score, na.rm = TRUE), 3)
-            
+
+            threshold_label <- paste0(ifelse(threshold >= 0, "≥", "≤"), threshold_value)
+
             html <- paste0(
                 cleaning_report,
                 "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
                 "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
-                
                 "<h4>", .("Analysis Parameters"), "</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Baseline group:"), "</strong></td>",
                 "<td style='padding: 8px; border: 1px solid #ddd;'>", baseline_group, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Response threshold:"), "</strong></td>",
-                "<td style='padding: 8px; border: 1px solid #ddd;'>", threshold, "%</td></tr>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", threshold_label, "%</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Paired subjects:"), "</strong></td>",
                 "<td style='padding: 8px; border: 1px solid #ddd;'>", n_total, "</td></tr>",
                 "</table>",
-                
                 "<h4>", .("Change Score Summary"), "</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Mean change:"), "</strong></td>",
@@ -1342,25 +1432,37 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Median change:"), "</strong></td>",
                 "<td style='padding: 8px; border: 1px solid #ddd;'>", median_change, "</td></tr>",
                 "</table>",
-                
                 "<h4>", .("Response Categories"), "</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
-                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Responders (≥"), threshold, "% change):</strong></td>",
-                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_responders, " (", round(n_responders/n_total*100, 1), "%)</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Responders ("), threshold_label, "% change):</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_responders, " (", pct_fmt(n_responders), "%)</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Improved:"), "</strong></td>",
-                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_improvers, " (", round(n_improvers/n_total*100, 1), "%)</td></tr>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_improvers, " (", pct_fmt(n_improvers), "%)</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Declined:"), "</strong></td>",
-                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_decliners, " (", round(n_decliners/n_total*100, 1), "%)</td></tr>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_decliners, " (", pct_fmt(n_decliners), "%)</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Stable:"), "</strong></td>",
-                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_stable, " (", round(n_stable/n_total*100, 1), "%)</td></tr>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", n_stable, " (", pct_fmt(n_stable), "%)</td></tr>",
                 "</table>",
-                
                 "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
                 "<em>", .("Analysis based on complete paired observations. Change scores calculated as (Follow-up - Baseline) values."), "</em>",
                 "</p></div>"
             )
-            
-            return(html)
+
+            summary <- list(
+                baseline_group = baseline_group,
+                n_total = n_total,
+                n_responders = n_responders,
+                n_improvers = n_improvers,
+                n_decliners = n_decliners,
+                n_stable = n_stable,
+                mean_change = mean_change,
+                median_change = median_change,
+                sd_change = sd_change,
+                direction = direction_label,
+                threshold = threshold
+            )
+
+            return(list(html = html, summary = summary))
         },
         
         .generate_clinical_report = function(data, y_var, x_var, pop_type) {
@@ -1534,26 +1636,44 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
         },
         
         .add_p_values = function(p, data, y_var, x_var, position) {
-            # Simplified p-value addition
-            # In practice, would retrieve from comparison results
+            stats <- private$.comparison_results
+            if (is.null(stats) || is.null(position) || position == "none") {
+                return(p)
+            }
             
+            label <- paste0("p = ", stats$label)
             if (position == "above") {
                 y_max <- max(data[[y_var]], na.rm = TRUE)
                 y_pos <- y_max + diff(range(data[[y_var]], na.rm = TRUE)) * 0.1
-                
                 p <- p + ggplot2::annotate(
                     "text",
-                    x = mean(1:length(unique(data[[x_var]]))),
+                    x = mean(seq_along(unique(data[[x_var]]))),
                     y = y_pos,
-                    label = "p < 0.001",
+                    label = label,
                     size = 3,
                     fontface = "italic"
                 )
+            } else if (position == "legend") {
+                current_caption <- if (!is.null(p$labels$caption)) p$labels$caption else ""
+                caption_text <- trimws(paste(current_caption, label))
+                p <- p + ggplot2::labs(caption = caption_text)
+            } else if (position == "table") {
+                # Already displayed via comparison table, nothing to add to plot
+                return(p)
             }
             
             return(p)
+        },
+        
+        .format_p_value = function(p_value) {
+            if (is.na(p_value)) {
+                return("NA")
+            }
+            if (p_value < 0.001) {
+                return("< 0.001")
+            }
+            round(p_value, 3)
         }
 
     )
 )
-

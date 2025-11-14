@@ -71,25 +71,47 @@ options:
         Last follow-up date or time
 
   # Event Variables
+  - name: progressionDate
+    title: Progression Date/Time
+    type: Variable
+    suggested:
+      - continuous
+    default:
+    description:
+      R: >
+        Date/time of disease progression (required for accurate PFS/TTP/DOR)
+
+  - name: deathDate
+    title: Death Date/Time
+    type: Variable
+    suggested:
+      - continuous
+    default:
+    description:
+      R: >
+        Date/time of death (required for accurate OS/PFS)
+
   - name: deathEvent
-    title: Death Event
+    title: Death Event (optional if death date provided)
     type: Variable
     suggested:
       - nominal
       - ordinal
+    default:
     description:
       R: >
-        Death event indicator (0=alive, 1=dead)
+        Death event indicator (0=alive, 1=dead). Not needed if death date is provided.
 
   - name: progressionEvent
-    title: Progression Event
+    title: Progression Event (optional if progression date provided)
     type: Variable
     suggested:
       - nominal
       - ordinal
+    default:
     description:
       R: >
-        Disease progression indicator (0=no progression, 1=progression)
+        Disease progression indicator (0=no progression, 1=progression). Not needed if progression date is provided.
 
   # Optional Dates
   - name: treatmentEnd
@@ -97,6 +119,7 @@ options:
     type: Variable
     suggested:
       - continuous
+    default:
     description:
       R: >
         Treatment end date (optional, for time on treatment calculation)
@@ -106,6 +129,7 @@ options:
     type: Variable
     suggested:
       - continuous
+    default:
     description:
       R: >
         Date of confirmed response (optional, for DOR calculation)
@@ -146,7 +170,7 @@ options:
   - name: calculatePFS
     title: Calculate PFS
     type: Bool
-    default: true
+    default: false
     description:
       R: >
         Calculate progression-free survival (time to progression or death)
@@ -154,7 +178,7 @@ options:
   - name: calculateOS
     title: Calculate OS
     type: Bool
-    default: true
+    default: false
     description:
       R: >
         Calculate overall survival (time to death)
@@ -187,7 +211,7 @@ options:
   - name: showDerivedData
     title: Show Derived Endpoints Table
     type: Bool
-    default: true
+    default: false
     description:
       R: >
         Display table with all derived survival endpoints
@@ -195,7 +219,7 @@ options:
   - name: showSummaryStats
     title: Show Summary Statistics
     type: Bool
-    default: true
+    default: false
     description:
       R: >
         Display summary statistics for each endpoint
@@ -203,7 +227,7 @@ options:
   - name: showEventRates
     title: Show Event Rates
     type: Bool
-    default: true
+    default: false
     description:
       R: >
         Display event rates and censoring proportions
@@ -211,7 +235,7 @@ options:
   - name: showKMPlot
     title: Show Simple KM Plot
     type: Bool
-    default: true
+    default: false
     description:
       R: >
         Display simple Kaplan-Meier curves for derived endpoints
@@ -244,7 +268,7 @@ options:
   - name: showUsageGuide
     title: Show Usage Guide
     type: Bool
-    default: true
+    default: false
     description:
       R: >
         Display guide for using derived endpoints in survival analysis

@@ -82,7 +82,7 @@ options:
     - name: graystest
       title: "Gray's Test for Competing Risks"
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Perform Gray's test to compare cumulative incidence functions between groups
@@ -92,7 +92,7 @@ options:
     - name: subdistribution
       title: 'Subdistribution Hazard Model'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Use Fine-Gray subdistribution hazard model for competing risks regression
@@ -124,7 +124,7 @@ options:
     - name: showrisksets
       title: 'Show Number at Risk'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Display number at risk table below cumulative incidence plot

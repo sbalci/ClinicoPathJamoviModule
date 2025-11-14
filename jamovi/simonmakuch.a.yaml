@@ -1,7 +1,7 @@
 ---
 name: simonmakuch
 title: Simon-Makuch Time-Dependent Survival Analysis
-menuGroup: SurvivalT
+menuGroup: SurvivalT2
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Time-Dependent Variables, Simon-Makuch Plots, Landmark Analysis'
 version: '0.0.1'

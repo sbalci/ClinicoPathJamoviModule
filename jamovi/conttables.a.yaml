@@ -224,7 +224,7 @@ options:
     - name: ci
       title: Confidence intervals
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             `TRUE` or `FALSE` (default), provide confidence intervals for the

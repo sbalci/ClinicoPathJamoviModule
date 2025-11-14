@@ -1,7 +1,7 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Agreement
 version: '0.0.32'
 jas: '1.2'
@@ -9,9 +9,32 @@ jas: '1.2'
 description:
     main: Function for Interrater Reliability.
     R:
-        dontrun: true
+        dontrun: false
         usage: |
-            # example will be added
+            # Basic kappa analysis with 3 pathologists rating tumor grades
+            data('histopathologyDescriptives')
+            jmv::agreement(
+                data = histopathologyDescriptives,
+                vars = c('Pathologist_1', 'Pathologist_2', 'Pathologist_3')
+            )
+
+            # Weighted kappa for ordinal data (tumor grades: G1 < G2 < G3)
+            # First ensure variables are set as Ordinal with proper level ordering
+            jmv::agreement(
+                data = histopathologyDescriptives,
+                vars = c('Grade_Rater1', 'Grade_Rater2'),
+                wght = 'equal',
+                showLevelInfo = TRUE  # Verify level ordering before analysis
+            )
+
+            # Create consensus variable from 5 raters
+            jmv::agreement(
+                data = histopathologyDescriptives,
+                vars = c('R1', 'R2', 'R3', 'R4', 'R5'),
+                consensusVar = TRUE,
+                consensusRule = 'majority',
+                consensusName = 'consensus_diagnosis'
+            )
 
 
 options:
@@ -138,58 +161,15 @@ options:
           R: >
             Unweighted (AC1) for nominal categories. Linear or Quadratic weights (AC2) for ordinal data.
 
-    - name: ccc
-      title: "Calculate Concordance Correlation Coefficient (CCC)"
+    - name: showLevelInfo
+      title: "Show Level Ordering Information"
       type: Bool
       default: false
       description:
           R: >
-            Calculate Lin's Concordance Correlation Coefficient for continuous measurement agreement.
-            CCC assesses the agreement between two continuous measurements or raters, combining
-            measures of both precision and accuracy. Particularly useful for method comparison studies,
-            inter-rater reliability of continuous scores (e.g., quantitative pathology measurements,
-            biomarker levels), and validation of new measurement techniques. CCC ranges from -1 to +1,
-            with +1 indicating perfect concordance.
-
-    - name: blandAltman
-      title: "Bland-Altman Analysis"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Perform Bland-Altman analysis for assessing agreement between two continuous measurement
-            methods. Calculates mean difference (bias) and limits of agreement (LOA = mean ± 1.96×SD).
-            Essential for method comparison and validation studies in clinical chemistry, pathology,
-            and diagnostic imaging. Particularly useful for comparing a new measurement method against
-            a reference standard, or assessing inter-rater reliability for continuous measurements.
-
-    - name: blandAltmanPlot
-      title: "Bland-Altman Plot"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Generate Bland-Altman plot showing difference vs. average of two measurements.
-            Displays mean bias line and limits of agreement (±1.96 SD).
-
-    - name: proportionalBias
-      title: "Test for Proportional Bias"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Test whether the difference between methods is related to the magnitude of measurements
-            (proportional bias). Uses linear regression of difference on average values.
-
-    - name: baConfidenceLevel
-      title: "Bland-Altman CI Level"
-      type: Number
-      default: 0.95
-      min: 0.80
-      max: 0.99
-      description:
-          R: >
-            Confidence level for limits of agreement (default 95%).
+            Display information about how categorical levels are currently ordered in your variables.
+            Essential for weighted kappa analysis to ensure ordinal levels are properly ordered
+            (e.g., G1 → G2 → G3 for tumor grades).
 
     # Hierarchical/Multilevel Agreement Analysis
     - name: hierarchicalKappa
@@ -385,7 +365,7 @@ options:
     - name: rankRaters
       title: "Rank Raters by Kappa"
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Rank raters from highest to lowest kappa (relative to reference).

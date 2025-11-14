@@ -11,21 +11,90 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .run = function() {
             # Check for required inputs
-            if (is.null(self$options$time) || is.null(self$options$event) ||
-                is.null(self$options$predicted_survival)) {
+            if (is.null(self$options$time) || is.null(self$options$event)) {
                 return()
             }
 
-            # Get data
+            # Get data with escaped variable names
             data <- self$data
-            time_var <- data[[self$options$time]]
-            event_var <- data[[self$options$event]]
-            pred_surv <- data[[self$options$predicted_survival]]
+            time_var <- data[[private$.escapeVar(self$options$time)]]
+            event_var_raw <- data[[private$.escapeVar(self$options$event)]]
+
+            # Handle event_code for factor events
+            if (!is.null(self$options$event_code) && self$options$event_code != "") {
+                # Recode event: selected level = 1, others = 0
+                event_var <- as.numeric(event_var_raw == self$options$event_code)
+            } else if (is.factor(event_var_raw) || is.character(event_var_raw)) {
+                # If factor but no event_code specified, use first non-zero level
+                event_levels <- unique(event_var_raw)
+                event_levels <- event_levels[!is.na(event_levels)]
+                if (length(event_levels) > 1) {
+                    # Assume binary: find "1", "Yes", "TRUE", "Event", "Death", etc.
+                    event_code <- event_levels[grep("^(1|Yes|TRUE|Event|Death)",
+                                                    event_levels, ignore.case = TRUE)[1]]
+                    if (is.na(event_code)) {
+                        event_code <- event_levels[2]  # Default to second level
+                    }
+                    warning(paste0("event_code not specified. Using '", event_code, "' as event indicator."))
+                    event_var <- as.numeric(event_var_raw == event_code)
+                } else {
+                    stop("Event variable must have at least 2 levels")
+                }
+            } else {
+                event_var <- as.numeric(event_var_raw)
+            }
+
+            # Validate binary event
+            unique_events <- unique(event_var[!is.na(event_var)])
+            if (!all(unique_events %in% c(0, 1))) {
+                stop("Event indicator must be binary (0/1) after recoding")
+            }
+
+            # SAFETY CHECKS: Disable features that are not statistically valid
+            if (self$options$multiple_time_points) {
+                stop("Multiple time points is NOT SUPPORTED. This feature incorrectly reuses ",
+                     "a single prediction vector for all time points. Each time point requires ",
+                     "its own prediction variable. Please disable 'Evaluate at Multiple Time Points'.")
+            }
+
+            if (self$options$calculate_ibs) {
+                stop("Integrated Brier Score is NOT SUPPORTED. IBS requires time-varying predictions, ",
+                     "but this implementation only accepts static predictions for a single time point. ",
+                     "Please disable 'Calculate Integrated Brier Score (IBS)'.")
+            }
+
+            if (self$options$competing_risks) {
+                stop("Competing risks is NOT IMPLEMENTED despite being in the UI. ",
+                     "Please disable 'Handle Competing Risks'.")
+            }
+
+            # Get pre-computed predictions - REQUIRED
+            pred_surv <- NULL
+            if (!is.null(self$options$predicted_survival)) {
+                pred_surv <- data[[private$.escapeVar(self$options$predicted_survival)]]
+            }
+
+            # Check for dangerous alternative inputs
+            if (!is.null(self$options$linear_predictor) ||
+                (!is.null(self$options$prediction_formula) && self$options$prediction_formula != "")) {
+                stop("Linear predictor and formula inputs are NOT SUPPORTED. ",
+                     "These use oversimplified statistical conversions that produce biased results. ",
+                     "Please provide pre-computed survival probabilities in 'Predicted Survival Probabilities'.")
+            }
+
+            # Require predictions
+            if (is.null(pred_surv) || all(is.na(pred_surv))) {
+                stop("Predicted Survival Probabilities are REQUIRED. ",
+                     "This variable must contain survival probabilities at the specified Prediction Time.")
+            }
 
             # Validate predictions are probabilities
             if (any(pred_surv < 0 | pred_surv > 1, na.rm = TRUE)) {
                 warning("Predicted survival probabilities should be between 0 and 1")
             }
+
+            # Additional validations
+            private$.validateInputs(time_var, event_var, pred_surv)
 
             # Calculate Brier scores
             private$.populateBrierSummary(time_var, event_var, pred_surv)
@@ -35,8 +104,143 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.populateIntegratedBrier(time_var, event_var, pred_surv)
             }
 
+            # Model comparison if requested
+            if (self$options$compare_multiple_models || self$options$reference_model) {
+                private$.populateModelComparison(time_var, event_var)
+            }
+
+            # Calibration table if requested
+            if (self$options$plot_calibration_curve) {
+                private$.populateCalibrationTable(time_var, event_var, pred_surv)
+            }
+
+            # Stratified analysis if requested
+            if (self$options$stratified_brier) {
+                private$.populateStratifiedBrier(time_var, event_var, pred_surv)
+            }
+
             # Populate interpretation
             private$.populateInterpretation()
+        },
+
+        .escapeVar = function(x) {
+            # Escape variable names for special characters and spaces
+            if (is.null(x) || x == "") return(x)
+            # Use jmvcore's toB64 if available for consistency with other jamovi modules
+            if (requireNamespace("jmvcore", quietly = TRUE)) {
+                return(jmvcore::toB64(x))
+            }
+            # Fallback: make syntactically valid names
+            return(make.names(x))
+        },
+
+        .computePredictions = function(data, time_var, event_var) {
+            # Compute predictions from alternative inputs (linear_predictor or formula)
+            pred_surv <- NULL
+
+            # Check for linear predictor
+            if (!is.null(self$options$linear_predictor)) {
+                linear_pred <- data[[private$.escapeVar(self$options$linear_predictor)]]
+
+                # Convert linear predictor to survival probabilities
+                # using baseline hazard approximation
+                warning("linear_predictor support is experimental. Using median survival baseline hazard.")
+
+                # Baseline hazard approximation (median survival time)
+                median_time <- median(time_var[event_var == 1], na.rm = TRUE)
+                if (is.na(median_time) || median_time <= 0) {
+                    warning("Cannot estimate baseline hazard from data")
+                    return(NULL)
+                }
+                baseline_hazard <- log(2) / median_time
+
+                # S(t|LP) = exp(-H0(t) * exp(LP))
+                cumulative_hazard <- baseline_hazard * self$options$prediction_time
+                pred_surv <- exp(-cumulative_hazard * exp(linear_pred))
+
+            } else if (self$options$prediction_formula != "" &&
+                       !is.null(self$options$prediction_formula)) {
+                # Fit Cox model internally
+                tryCatch({
+                    # Build full formula
+                    formula_str <- self$options$prediction_formula
+                    time_name <- self$options$time
+                    event_name <- self$options$event
+
+                    # Create formula: Surv(time, event) ~ predictors
+                    full_formula <- as.formula(paste0("survival::Surv(",
+                                                      time_name, ", ",
+                                                      event_name, ") ",
+                                                      formula_str))
+
+                    # Fit Cox model
+                    cox_fit <- survival::coxph(full_formula, data = data)
+
+                    # Generate predictions at prediction_time
+                    newdata <- data
+                    pred_obj <- survival::survfit(cox_fit, newdata = newdata)
+
+                    # Extract survival probability at prediction_time
+                    time_idx <- findInterval(self$options$prediction_time, pred_obj$time)
+                    if (time_idx == 0) {
+                        pred_surv <- rep(1.0, nrow(data))  # Before any events
+                    } else {
+                        # For each individual, extract their survival at prediction_time
+                        if (is.matrix(pred_obj$surv)) {
+                            pred_surv <- pred_obj$surv[time_idx, ]
+                        } else {
+                            pred_surv <- rep(pred_obj$surv[time_idx], nrow(data))
+                        }
+                    }
+
+                }, error = function(e) {
+                    warning(paste0("Failed to fit Cox model from formula: ", e$message))
+                    return(NULL)
+                })
+            }
+
+            return(pred_surv)
+        },
+
+        .validateInputs = function(time_var, event_var, pred_surv) {
+            # Additional input validations
+            n <- length(time_var)
+
+            # Check sample size
+            if (n < 20) {
+                warning("Very small sample size (n=", n, "); results may be unstable")
+            }
+
+            # Check time point beyond data range
+            max_follow_up <- max(time_var, na.rm = TRUE)
+            if (self$options$prediction_time > max_follow_up) {
+                stop(paste0("Prediction time (", self$options$prediction_time,
+                           ") exceeds maximum follow-up (", round(max_follow_up, 2), ")"))
+            }
+
+            # Check sufficient events
+            n_events <- sum(event_var == 1, na.rm = TRUE)
+            if (n_events < 10) {
+                warning("Very few events (n=", n_events, "); results may be unreliable")
+            }
+
+            # Check bootstrap sample size
+            if (self$options$confidence_intervals &&
+                self$options$ci_method == "bootstrap" &&
+                n_events < 50) {
+                warning("Few events (n=", n_events, "); bootstrap CIs may be unstable. Consider influence function method.")
+            }
+
+            # Check calibration groups vs sample size
+            if (self$options$plot_calibration_curve) {
+                n_groups <- self$options$calibration_groups
+                if (n / n_groups < 10) {
+                    warning("Few observations per calibration group (", round(n/n_groups, 1),
+                           "); consider fewer groups")
+                }
+            }
+
+            invisible(TRUE)
         },
 
         .initInstructions = function() {
@@ -44,12 +248,28 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             html <- "<h3>Brier Score & Integrated Brier Score</h3>
             <p>Calibration accuracy assessment for time-to-event predictions.</p>
 
+            <p><b>⚠️ IMPORTANT LIMITATION:</b> This implementation evaluates Brier score using
+            <b>pre-computed survival probabilities</b> at a single time point. The predicted
+            survival variable must contain probabilities specifically calculated for the
+            'Prediction Time' you specify (e.g., if Prediction Time = 60 months, the
+            predicted survival variable must contain 5-year survival probabilities).</p>
+
             <h4>Required Inputs:</h4>
             <ul>
                 <li><b>Time:</b> Time-to-event or censoring (days, months, years)</li>
                 <li><b>Event:</b> Binary event indicator (1 = event, 0 = censored)</li>
-                <li><b>Predicted Survival:</b> Pre-computed survival probabilities (0-1)</li>
-                <li><b>Prediction Time:</b> Time point for Brier score evaluation</li>
+                <li><b>Predicted Survival:</b> Pre-computed survival probabilities (0-1)
+                AT THE SPECIFIED PREDICTION TIME</li>
+                <li><b>Prediction Time:</b> Time point corresponding to your predictions
+                (must match the time horizon used to generate the predicted survival probabilities)</li>
+            </ul>
+
+            <h4>⚠️ NOT CURRENTLY SUPPORTED:</h4>
+            <ul>
+                <li>Multiple time points with single prediction variable</li>
+                <li>Integrated Brier Score (requires time-varying predictions)</li>
+                <li>Competing risks</li>
+                <li>Linear predictor or formula inputs (oversimplified conversions)</li>
             </ul>
 
             <h4>Brier Score Interpretation:</h4>
@@ -97,12 +317,17 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             <h4>Required R Packages:</h4>
             <ul>
-                <li><b>pec:</b> Prediction error curves</li>
-                <li><b>riskRegression:</b> Integrated Brier score</li>
-                <li><b>survival:</b> Kaplan-Meier for null model</li>
+                <li><b>survival:</b> Kaplan-Meier estimation for null model and IPCW</li>
             </ul>
 
-            <p><b>Note:</b> Implementation in development. Full functionality requires pec and riskRegression packages.</p>"
+            <h4>Statistical Method:</h4>
+            <p>This is a <b>basic hand-coded implementation</b> of the time-dependent Brier score
+            using inverse probability of censoring weighting (IPCW). It has NOT been validated
+            against established packages like <code>pec</code> or <code>riskRegression</code>.</p>
+
+            <p><b>⚠️ For clinical validation studies:</b> Consider using validated packages:
+            <code>riskRegression::Score()</code> or <code>pec::pec()</code> which provide
+            rigorous implementations with comprehensive testing.</p>"
 
             instructions$setContent(html)
         },
@@ -493,6 +718,397 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ))
         },
 
+        .calculateIBS = function(time_var, event_var, pred_surv) {
+            # Extract IBS calculation logic for reuse
+            start_time <- self$options$ibs_start_time
+            end_time <- self$options$ibs_end_time
+
+            # Validate time range
+            max_time <- max(time_var[event_var == 1], na.rm = TRUE)
+            if (end_time > max_time) {
+                end_time <- max_time
+            }
+
+            # Get evaluation times
+            event_times <- sort(unique(time_var[event_var == 1]))
+            eval_times <- event_times[event_times >= start_time & event_times <= end_time]
+            if (length(eval_times) < 10) {
+                eval_times <- seq(start_time, end_time, length.out = 20)
+            }
+
+            # Calculate Brier at each time
+            brier_values <- numeric(length(eval_times))
+            for (i in seq_along(eval_times)) {
+                brier_result <- private$.calculateBrierScore(
+                    time_var = time_var,
+                    event_var = event_var,
+                    pred_surv = pred_surv,
+                    time_point = eval_times[i]
+                )
+                brier_values[i] <- brier_result$brier
+            }
+
+            # Integrate using trapezoidal rule
+            time_diffs <- diff(eval_times)
+            brier_avg <- (brier_values[-length(brier_values)] + brier_values[-1]) / 2
+            ibs <- sum(time_diffs * brier_avg) / (end_time - start_time)
+
+            return(ibs)
+        },
+
+        .populateModelComparison = function(time_var, event_var) {
+            table <- self$results$modelComparison
+
+            # Only populate if comparison requested
+            if (!self$options$compare_multiple_models && !self$options$reference_model) {
+                return()
+            }
+
+            models <- list()
+            model_names <- c()
+            data <- self$data
+
+            # Main model
+            if (!is.null(self$options$predicted_survival)) {
+                models[[1]] <- data[[private$.escapeVar(self$options$predicted_survival)]]
+                model_names <- c(model_names, "Primary Model")
+            }
+
+            # Reference model
+            if (self$options$reference_model) {
+                if (!is.null(self$options$reference_predictions)) {
+                    ref_pred <- data[[private$.escapeVar(self$options$reference_predictions)]]
+                    models[[length(models) + 1]] <- ref_pred
+                    model_names <- c(model_names, "Reference Model")
+                } else if (self$options$reference_formula != "") {
+                    warning("Reference formula not yet implemented")
+                }
+            }
+
+            # Additional models
+            if (self$options$compare_multiple_models &&
+                length(self$options$additional_predictions) > 0) {
+                user_names <- trimws(unlist(strsplit(self$options$model_names, ",")))
+                for (i in seq_along(self$options$additional_predictions)) {
+                    var_name <- self$options$additional_predictions[[i]]
+                    models[[length(models) + 1]] <- data[[private$.escapeVar(var_name)]]
+                    if (i <= length(user_names)) {
+                        model_names <- c(model_names, user_names[i])
+                    } else {
+                        model_names <- c(model_names, paste0("Model ", i + 1))
+                    }
+                }
+            }
+
+            # Calculate metrics for each model
+            results <- data.frame(
+                model = character(),
+                brier = numeric(),
+                brier_ci_lower = numeric(),
+                brier_ci_upper = numeric(),
+                scaled_brier = numeric(),
+                ibs = numeric(),
+                stringsAsFactors = FALSE
+            )
+
+            for (i in seq_along(models)) {
+                pred <- models[[i]]
+
+                # Calculate Brier score at prediction_time
+                brier_result <- private$.calculateBrierScore(
+                    time_var = time_var,
+                    event_var = event_var,
+                    pred_surv = pred,
+                    time_point = self$options$prediction_time
+                )
+
+                # Calculate CI if requested
+                brier_ci_lower <- NA
+                brier_ci_upper <- NA
+                if (self$options$confidence_intervals) {
+                    ci_result <- private$.calculateBrierCI(
+                        time_var = time_var,
+                        event_var = event_var,
+                        pred_surv = pred,
+                        time_point = self$options$prediction_time,
+                        brier_point = brier_result$brier
+                    )
+                    brier_ci_lower <- ci_result$lower
+                    brier_ci_upper <- ci_result$upper
+                }
+
+                # Calculate scaled Brier
+                scaled_brier <- NA
+                if (self$options$scaled_brier) {
+                    null_brier <- private$.calculateNullModelBrier(
+                        time_var, event_var, self$options$prediction_time
+                    )
+                    if (!is.na(null_brier) && null_brier > 0) {
+                        scaled_brier <- 1 - (brier_result$brier / null_brier)
+                    }
+                }
+
+                # Calculate IBS if requested
+                ibs_val <- NA
+                if (self$options$calculate_ibs) {
+                    ibs_val <- private$.calculateIBS(
+                        time_var = time_var,
+                        event_var = event_var,
+                        pred_surv = pred
+                    )
+                }
+
+                results <- rbind(results, data.frame(
+                    model = model_names[i],
+                    brier = brier_result$brier,
+                    brier_ci_lower = brier_ci_lower,
+                    brier_ci_upper = brier_ci_upper,
+                    scaled_brier = scaled_brier,
+                    ibs = ibs_val,
+                    stringsAsFactors = FALSE
+                ))
+            }
+
+            # Rank models by Brier score (lower is better)
+            results$rank <- rank(results$brier, ties.method = "min")
+
+            # Populate table
+            for (i in 1:nrow(results)) {
+                table$addRow(rowKey=i, values=list(
+                    model = results$model[i],
+                    brier_score = results$brier[i],
+                    brier_ci_lower = results$brier_ci_lower[i],
+                    brier_ci_upper = results$brier_ci_upper[i],
+                    scaled_brier = results$scaled_brier[i],
+                    ibs = results$ibs[i],
+                    rank = results$rank[i]
+                ))
+            }
+
+            # Call pairwise comparisons if requested
+            if (self$options$compare_multiple_models && length(models) >= 2) {
+                private$.populatePairwiseComparisons(models, model_names, time_var, event_var)
+            }
+        },
+
+        .populatePairwiseComparisons = function(models, model_names, time_var, event_var) {
+            table <- self$results$pairwiseComparisons
+
+            if (!self$options$compare_multiple_models || length(models) < 2) {
+                return()
+            }
+
+            # Calculate Brier scores for all models
+            brier_scores <- numeric(length(models))
+            for (i in seq_along(models)) {
+                result <- private$.calculateBrierScore(
+                    time_var = time_var,
+                    event_var = event_var,
+                    pred_surv = models[[i]],
+                    time_point = self$options$prediction_time
+                )
+                brier_scores[i] <- result$brier
+            }
+
+            # Pairwise comparisons
+            row_idx <- 1
+            for (i in 1:(length(models) - 1)) {
+                for (j in (i + 1):length(models)) {
+                    # Difference in Brier scores
+                    brier_diff <- brier_scores[i] - brier_scores[j]
+
+                    # Bootstrap test for difference
+                    if (self$options$confidence_intervals &&
+                        self$options$ci_method == "bootstrap") {
+                        set.seed(self$options$random_seed + row_idx)
+                        n_boot <- self$options$bootstrap_samples
+                        boot_diffs <- numeric(n_boot)
+                        n <- length(time_var)
+
+                        for (b in 1:n_boot) {
+                            boot_idx <- sample(1:n, n, replace = TRUE)
+
+                            tryCatch({
+                                brier_i <- private$.calculateBrierScore(
+                                    time_var = time_var[boot_idx],
+                                    event_var = event_var[boot_idx],
+                                    pred_surv = models[[i]][boot_idx],
+                                    time_point = self$options$prediction_time
+                                )$brier
+
+                                brier_j <- private$.calculateBrierScore(
+                                    time_var = time_var[boot_idx],
+                                    event_var = event_var[boot_idx],
+                                    pred_surv = models[[j]][boot_idx],
+                                    time_point = self$options$prediction_time
+                                )$brier
+
+                                boot_diffs[b] <- brier_i - brier_j
+                            }, error = function(e) {
+                                boot_diffs[b] <- NA
+                            })
+                        }
+
+                        # Calculate p-value (two-sided test)
+                        p_value <- mean(abs(boot_diffs) >= abs(brier_diff), na.rm = TRUE)
+
+                    } else {
+                        # Simple z-test approximation
+                        se_diff <- sqrt(brier_scores[i] * (1 - brier_scores[i]) / length(time_var) +
+                                       brier_scores[j] * (1 - brier_scores[j]) / length(time_var))
+                        z_stat <- brier_diff / se_diff
+                        p_value <- 2 * pnorm(-abs(z_stat))
+                    }
+
+                    # Conclusion
+                    alpha <- 1 - self$options$confidence_level
+                    if (p_value < alpha) {
+                        if (brier_diff < 0) {
+                            conclusion <- paste0(model_names[i], " significantly better")
+                        } else {
+                            conclusion <- paste0(model_names[j], " significantly better")
+                        }
+                    } else {
+                        conclusion <- "No significant difference"
+                    }
+
+                    table$addRow(rowKey=row_idx, values=list(
+                        comparison = paste0(model_names[i], " vs ", model_names[j]),
+                        brier_diff = brier_diff,
+                        p_value = p_value,
+                        conclusion = conclusion
+                    ))
+
+                    row_idx <- row_idx + 1
+                }
+            }
+        },
+
+        .populateCalibrationTable = function(time_var, event_var, pred_surv) {
+            table <- self$results$calibrationTable
+
+            if (!self$options$plot_calibration_curve) {
+                return()
+            }
+
+            time_point <- self$options$prediction_time
+            n_groups <- self$options$calibration_groups
+
+            # Group patients by predicted survival
+            pred_groups <- cut(pred_surv,
+                               breaks = quantile(pred_surv, probs = seq(0, 1, length.out = n_groups + 1)),
+                               include.lowest = TRUE, labels = FALSE)
+
+            hosmer_lemeshow_sum <- 0
+
+            for (g in sort(unique(pred_groups))) {
+                if (is.na(g)) next
+
+                group_idx <- which(pred_groups == g)
+                group_time <- time_var[group_idx]
+                group_event <- event_var[group_idx]
+                group_pred <- pred_surv[group_idx]
+
+                # Calculate mean predicted
+                mean_pred <- mean(group_pred, na.rm = TRUE)
+
+                # Calculate observed survival (KM)
+                surv_obj <- survival::Surv(group_time, group_event)
+                km_fit <- survival::survfit(surv_obj ~ 1)
+                idx <- which(km_fit$time <= time_point)
+                if (length(idx) > 0) {
+                    observed_surv <- km_fit$surv[max(idx)]
+                } else {
+                    observed_surv <- 1.0
+                }
+
+                # Calibration error
+                calib_error <- observed_surv - mean_pred
+
+                # Hosmer-Lemeshow contribution
+                n_group <- length(group_idx)
+                expected <- mean_pred * n_group
+                observed_events <- sum(group_time <= time_point & group_event == 1)
+                hl_contrib <- (observed_events - (n_group - expected))^2 /
+                             (expected * (1 - mean_pred) + 1e-10)
+                hosmer_lemeshow_sum <- hosmer_lemeshow_sum + hl_contrib
+
+                table$addRow(rowKey=g, values=list(
+                    group = g,
+                    n = n_group,
+                    mean_predicted = mean_pred,
+                    observed_survival = observed_surv,
+                    calibration_error = calib_error,
+                    hosmer_lemeshow_contrib = hl_contrib
+                ))
+            }
+        },
+
+        .populateStratifiedBrier = function(time_var, event_var, pred_surv) {
+            table <- self$results$stratifiedBrier
+
+            if (!self$options$stratified_brier || is.null(self$options$stratify_by)) {
+                return()
+            }
+
+            strat_var <- self$data[[private$.escapeVar(self$options$stratify_by)]]
+
+            # Get unique strata
+            strata <- unique(strat_var)
+            strata <- strata[!is.na(strata)]
+
+            for (stratum in strata) {
+                # Subset to this stratum
+                idx <- which(strat_var == stratum)
+                strat_time <- time_var[idx]
+                strat_event <- event_var[idx]
+                strat_pred <- pred_surv[idx]
+
+                # Calculate Brier score
+                brier_result <- private$.calculateBrierScore(
+                    time_var = strat_time,
+                    event_var = strat_event,
+                    pred_surv = strat_pred,
+                    time_point = self$options$prediction_time
+                )
+
+                # Calculate CI
+                brier_ci_lower <- NA
+                brier_ci_upper <- NA
+                if (self$options$confidence_intervals) {
+                    ci_result <- private$.calculateBrierCI(
+                        time_var = strat_time,
+                        event_var = strat_event,
+                        pred_surv = strat_pred,
+                        time_point = self$options$prediction_time,
+                        brier_point = brier_result$brier
+                    )
+                    brier_ci_lower <- ci_result$lower
+                    brier_ci_upper <- ci_result$upper
+                }
+
+                # Calculate scaled Brier
+                scaled_brier <- NA
+                if (self$options$scaled_brier) {
+                    null_brier <- private$.calculateNullModelBrier(
+                        strat_time, strat_event, self$options$prediction_time
+                    )
+                    if (!is.na(null_brier) && null_brier > 0) {
+                        scaled_brier <- 1 - (brier_result$brier / null_brier)
+                    }
+                }
+
+                table$addRow(rowKey=stratum, values=list(
+                    stratum = as.character(stratum),
+                    n = length(idx),
+                    brier_score = brier_result$brier,
+                    brier_ci_lower = brier_ci_lower,
+                    brier_ci_upper = brier_ci_upper,
+                    scaled_brier = scaled_brier
+                ))
+            }
+        },
+
         .plotBrierOverTime = function(image, ...) {
             # Plot time-dependent Brier score across follow-up period
 
@@ -697,11 +1313,198 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .plotModelComparison = function(image, ...) {
-            # Stub for model comparison plot
+            # Bar plot comparing Brier scores across multiple models
+
+            if (is.null(self$options$time) || is.null(self$options$event)) {
+                return()
+            }
+
+            if (!self$options$compare_multiple_models && !self$options$reference_model) {
+                return()
+            }
+
+            # Extract data from modelComparison table
+            table <- self$results$modelComparison
+            if (table$rowCount == 0) {
+                return()
+            }
+
+            # Build data frame from table
+            plot_data <- data.frame(
+                model = character(),
+                brier = numeric(),
+                ci_lower = numeric(),
+                ci_upper = numeric(),
+                stringsAsFactors = FALSE
+            )
+
+            for (i in 1:table$rowCount) {
+                row <- table$getRow(rowNo = i)
+                plot_data <- rbind(plot_data, data.frame(
+                    model = row$model,
+                    brier = row$brier_score,
+                    ci_lower = if (self$options$confidence_intervals) row$brier_ci_lower else NA,
+                    ci_upper = if (self$options$confidence_intervals) row$brier_ci_upper else NA,
+                    stringsAsFactors = FALSE
+                ))
+            }
+
+            # Reorder by brier score
+            plot_data$model <- factor(plot_data$model,
+                                      levels = plot_data$model[order(plot_data$brier)])
+
+            # Create bar plot
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = model, y = brier, fill = model)) +
+                ggplot2::geom_col(alpha = 0.7) +
+                ggplot2::labs(
+                    x = "Model",
+                    y = "Brier Score",
+                    title = "Model Comparison: Brier Scores",
+                    subtitle = "Lower scores indicate better calibration"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(face = "bold", size = 14),
+                    plot.subtitle = ggplot2::element_text(size = 10, color = "gray40"),
+                    axis.title = ggplot2::element_text(size = 12),
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    legend.position = "none"
+                ) +
+                ggplot2::scale_fill_brewer(palette = "Set2")
+
+            # Add error bars if CIs available
+            if (self$options$confidence_intervals) {
+                p <- p + ggplot2::geom_errorbar(
+                    ggplot2::aes(ymin = ci_lower, ymax = ci_upper),
+                    width = 0.2,
+                    linewidth = 0.8
+                )
+            }
+
+            # Add reference lines
+            p <- p +
+                ggplot2::geom_hline(yintercept = 0.10, linetype = "dashed",
+                                   color = "darkgreen", linewidth = 0.5) +
+                ggplot2::geom_hline(yintercept = 0.15, linetype = "dashed",
+                                   color = "orange", linewidth = 0.5) +
+                ggplot2::geom_hline(yintercept = 0.25, linetype = "dashed",
+                                   color = "red", linewidth = 0.5)
+
+            print(p)
+            TRUE
         },
 
         .plotIntegratedBrier = function(image, ...) {
-            # Stub for integrated Brier score visualization
+            # Visualize IBS as area under Brier score curve
+
+            if (is.null(self$options$time) || is.null(self$options$event) ||
+                is.null(self$options$predicted_survival)) {
+                return()
+            }
+
+            if (!self$options$calculate_ibs) {
+                return()
+            }
+
+            # Get data with escaped variable names
+            data <- self$data
+            time_var <- data[[private$.escapeVar(self$options$time)]]
+            event_var_raw <- data[[private$.escapeVar(self$options$event)]]
+
+            # Handle event_code (same logic as .run())
+            if (!is.null(self$options$event_code) && self$options$event_code != "") {
+                event_var <- as.numeric(event_var_raw == self$options$event_code)
+            } else if (is.factor(event_var_raw) || is.character(event_var_raw)) {
+                event_levels <- unique(event_var_raw)
+                event_levels <- event_levels[!is.na(event_levels)]
+                if (length(event_levels) > 1) {
+                    event_code <- event_levels[grep("^(1|Yes|TRUE|Event|Death)",
+                                                    event_levels, ignore.case = TRUE)[1]]
+                    if (is.na(event_code)) {
+                        event_code <- event_levels[2]
+                    }
+                    event_var <- as.numeric(event_var_raw == event_code)
+                } else {
+                    return()
+                }
+            } else {
+                event_var <- as.numeric(event_var_raw)
+            }
+
+            pred_surv <- data[[private$.escapeVar(self$options$predicted_survival)]]
+
+            # Remove missing
+            complete_cases <- complete.cases(time_var, event_var, pred_surv)
+            time_var <- time_var[complete_cases]
+            event_var <- event_var[complete_cases]
+            pred_surv <- pred_surv[complete_cases]
+
+            # Get time range
+            start_time <- self$options$ibs_start_time
+            end_time <- self$options$ibs_end_time
+            max_time <- max(time_var[event_var == 1], na.rm = TRUE)
+            if (end_time > max_time) {
+                end_time <- max_time
+            }
+
+            # Get evaluation times
+            event_times <- sort(unique(time_var[event_var == 1]))
+            eval_times <- event_times[event_times >= start_time & event_times <= end_time]
+            if (length(eval_times) < 10) {
+                eval_times <- seq(start_time, end_time, length.out = 50)
+            }
+
+            # Calculate Brier at each time
+            brier_data <- data.frame(
+                time = numeric(),
+                brier = numeric()
+            )
+
+            for (t in eval_times) {
+                tryCatch({
+                    result <- private$.calculateBrierScore(
+                        time_var = time_var,
+                        event_var = event_var,
+                        pred_surv = pred_surv,
+                        time_point = t
+                    )
+                    brier_data <- rbind(brier_data, data.frame(
+                        time = t,
+                        brier = result$brier
+                    ))
+                }, error = function(e) {
+                    # Skip
+                })
+            }
+
+            # Calculate IBS (area under curve)
+            time_diffs <- diff(brier_data$time)
+            brier_avg <- (brier_data$brier[-nrow(brier_data)] + brier_data$brier[-1]) / 2
+            ibs <- sum(time_diffs * brier_avg) / (end_time - start_time)
+
+            # Create area plot
+            p <- ggplot2::ggplot(brier_data, ggplot2::aes(x = time, y = brier)) +
+                ggplot2::geom_area(fill = "steelblue", alpha = 0.5) +
+                ggplot2::geom_line(color = "steelblue", linewidth = 1.2) +
+                ggplot2::geom_point(color = "steelblue", size = 2, alpha = 0.6) +
+                ggplot2::labs(
+                    x = "Time",
+                    y = "Brier Score",
+                    title = "Integrated Brier Score (IBS)",
+                    subtitle = paste0("IBS = ", round(ibs, 4),
+                                    " (area under curve, time ", start_time, " to ", round(end_time, 1), ")")
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(face = "bold", size = 14),
+                    plot.subtitle = ggplot2::element_text(size = 10, color = "gray40"),
+                    axis.title = ggplot2::element_text(size = 12),
+                    panel.grid.minor = ggplot2::element_blank()
+                ) +
+                ggplot2::ylim(0, max(brier_data$brier, na.rm = TRUE) * 1.1)
+
+            print(p)
+            TRUE
         }
     )
 )

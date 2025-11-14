@@ -9,15 +9,16 @@ biomarkerresponse(
   biomarker,
   response,
   responseType = "categorical",
+  positiveLevel,
   plotType = "boxplot",
-  showThreshold = TRUE,
+  showThreshold = FALSE,
   thresholdValue,
   thresholdMethod = "median",
-  addTrendLine = TRUE,
+  addTrendLine = FALSE,
   trendMethod = "loess",
-  performTests = TRUE,
+  performTests = FALSE,
   groupVariable,
-  showCorrelation = TRUE,
+  showCorrelation = FALSE,
   logTransform = FALSE,
   outlierHandling = "highlight",
   confidenceLevel = "0.95"
@@ -34,6 +35,10 @@ continuous).}
 
 \item{responseType}{Type of response variable for appropriate analysis and
 visualization.}
+
+\item{positiveLevel}{Specify which level represents positive response
+(e.g., 'Responder', 'Yes', '1'). If blank, uses second level
+alphabetically.}
 
 \item{plotType}{Primary visualization method for biomarker-response
 relationship.}
@@ -67,6 +72,7 @@ disease stage).}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$correlation} \tab \tab \tab \tab \tab a table \cr
 \code{results$threshold} \tab \tab \tab \tab \tab a table \cr

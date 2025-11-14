@@ -15,14 +15,14 @@ brierscoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             prediction_time = 60,
             multiple_time_points = FALSE,
             time_points = "12, 36, 60",
-            calculate_ibs = TRUE,
+            calculate_ibs = FALSE,
             ibs_start_time = 0,
             ibs_end_time = 60,
             scaled_brier = TRUE,
             reference_model = FALSE,
             reference_predictions = NULL,
             reference_formula = "",
-            confidence_intervals = TRUE,
+            confidence_intervals = FALSE,
             ci_method = "bootstrap",
             bootstrap_samples = 500,
             confidence_level = 0.95,
@@ -32,7 +32,7 @@ brierscoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             competing_risks = FALSE,
             cause_specific = TRUE,
             plot_brier_over_time = TRUE,
-            plot_calibration_curve = TRUE,
+            plot_calibration_curve = FALSE,
             calibration_groups = 10,
             plot_model_comparison = FALSE,
             plot_integrated_brier = FALSE,
@@ -105,7 +105,7 @@ brierscoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..calculate_ibs <- jmvcore::OptionBool$new(
                 "calculate_ibs",
                 calculate_ibs,
-                default=TRUE)
+                default=FALSE)
             private$..ibs_start_time <- jmvcore::OptionNumber$new(
                 "ibs_start_time",
                 ibs_start_time,
@@ -138,7 +138,7 @@ brierscoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..confidence_intervals <- jmvcore::OptionBool$new(
                 "confidence_intervals",
                 confidence_intervals,
-                default=TRUE)
+                default=FALSE)
             private$..ci_method <- jmvcore::OptionList$new(
                 "ci_method",
                 ci_method,
@@ -188,7 +188,7 @@ brierscoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..plot_calibration_curve <- jmvcore::OptionBool$new(
                 "plot_calibration_curve",
                 plot_calibration_curve,
-                default=TRUE)
+                default=FALSE)
             private$..calibration_groups <- jmvcore::OptionInteger$new(
                 "calibration_groups",
                 calibration_groups,
@@ -661,21 +661,22 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Brier Score & Integrated Brier Score
 #'
-#' Brier Score analysis for evaluating calibration accuracy of survival 
-#' probability predictions. The Brier score measures the mean squared 
-#' difference between predicted survival probabilities and observed outcomes 
-#' at specific time points, providing a comprehensive assessment of both 
-#' discrimination and calibration. Lower Brier scores indicate better 
-#' prediction accuracy (perfect prediction = 0, worst = 1). The Integrated 
-#' Brier Score (IBS) extends this by integrating the time-dependent Brier 
-#' score across the follow-up period, providing a single summary measure of 
-#' overall prediction performance. Includes scaled Brier scores relative to 
-#' null model (KM curve) and comparison to reference models. Essential for 
-#' validating Cox regression models, machine learning survival predictions, 
-#' and risk calculators. Particularly valuable for clinical prediction models 
-#' where accurate probability estimates are critical for patient counseling 
-#' and treatment decisions. Supports external validation, temporal validation, 
-#' and competing risks scenarios.
+#' ⚠️ IMPORTANT LIMITATIONS: This is a BASIC implementation for single 
+#' time-point Brier score evaluation. It requires PRE-COMPUTED survival 
+#' probabilities (not raw Cox models). Many features listed below are NOT 
+#' IMPLEMENTED or STATISTICALLY INVALID.
+#' Brier Score analysis evaluates calibration accuracy by measuring the mean 
+#' squared difference between predicted survival probabilities and observed 
+#' outcomes at a SINGLE specified time point. Lower Brier scores indicate 
+#' better prediction accuracy (perfect prediction = 0, worst = 1). Includes 
+#' scaled Brier scores relative to null model (Kaplan-Meier curve).
+#' ⚠️ NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS), 
+#' competing risks, linear predictor inputs, formula inputs, temporal/external 
+#' validation flags. These features may appear in the UI but will generate 
+#' errors if used.
+#' For rigorous clinical validation, use established packages: 
+#' riskRegression::Score() or pec::pec(). This implementation has NOT been 
+#' validated against those standards.
 #' 
 #'
 #' @examples
@@ -714,7 +715,8 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   evaluation. Example: "12, 24, 36, 60" for 1, 2, 3, and 5 years (in months).
 #' @param calculate_ibs Calculate Integrated Brier Score by integrating
 #'   time-dependent Brier score across follow-up period. Provides single summary
-#'   measure of overall prediction performance across time.
+#'   measure of overall prediction performance across time. Computationally
+#'   expensive.
 #' @param ibs_start_time Start time for IBS integration. Usually 0 to include
 #'   entire follow-up period.
 #' @param ibs_end_time End time for IBS integration. Should not exceed maximum
@@ -732,7 +734,8 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reference_predictions not provided. Example: "~ age + stage" (simpler than
 #'   full model).
 #' @param confidence_intervals Calculate confidence intervals for Brier scores
-#'   using bootstrap or influence function methods.
+#'   using bootstrap or influence function methods. Bootstrap method is
+#'   computationally expensive.
 #' @param ci_method Method for confidence interval estimation. Bootstrap is
 #'   more accurate but computationally intensive, influence function is faster.
 #' @param bootstrap_samples Number of bootstrap samples for confidence
@@ -814,14 +817,14 @@ brierscore <- function(
     prediction_time = 60,
     multiple_time_points = FALSE,
     time_points = "12, 36, 60",
-    calculate_ibs = TRUE,
+    calculate_ibs = FALSE,
     ibs_start_time = 0,
     ibs_end_time = 60,
     scaled_brier = TRUE,
     reference_model = FALSE,
     reference_predictions,
     reference_formula = "",
-    confidence_intervals = TRUE,
+    confidence_intervals = FALSE,
     ci_method = "bootstrap",
     bootstrap_samples = 500,
     confidence_level = 0.95,
@@ -831,7 +834,7 @@ brierscore <- function(
     competing_risks = FALSE,
     cause_specific = TRUE,
     plot_brier_over_time = TRUE,
-    plot_calibration_curve = TRUE,
+    plot_calibration_curve = FALSE,
     calibration_groups = 10,
     plot_model_comparison = FALSE,
     plot_integrated_brier = FALSE,

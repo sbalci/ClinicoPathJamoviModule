@@ -259,23 +259,39 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             
             # Data preparation and cleaning
             .prepareData = function() {
-                # Clean data and handle missing values
-                mydata <- jmvcore::naOmit(self$data)
-                
-                if (nrow(mydata) < nrow(self$data)) {
-                    warning(paste0("Removed ", nrow(self$data) - nrow(mydata), " rows with missing values"))
-                }
-                
-                if (nrow(mydata) == 0) {
-                    stop(jmvcore::.("Data contains no complete rows after removing missing values"))
-                }
-                
-                # Extract variable names
+                # Extract variable names first
                 goldVariable <- self$options$gold
                 goldPLevel <- self$options$goldPositive
 
                 if (is.null(goldVariable) || goldVariable == "") {
                     stop(jmvcore::.("Gold standard variable must be specified"))
+                }
+
+                # Get test variables
+                testVariables <- private$.getTestVariables()
+
+                if (length(testVariables) == 0) {
+                    stop(jmvcore::.("At least one test variable must be specified"))
+                }
+
+                # CRITICAL FIX: Only subset to SELECTED variables before removing NA
+                # This prevents bias from unrelated missing values in other columns
+                all_vars <- c(goldVariable, testVariables)
+                mydata <- self$data[, all_vars, drop = FALSE]
+
+                # Now remove rows with missing values in SELECTED variables only
+                n_before <- nrow(mydata)
+                mydata <- na.omit(mydata)
+                n_after <- nrow(mydata)
+
+                if (n_after < n_before) {
+                    n_removed <- n_before - n_after
+                    warning(jmvcore::format("Removed {n} rows with missing values in selected variables (gold standard or tests). This may affect prevalence estimates.",
+                                          n = n_removed))
+                }
+
+                if (nrow(mydata) == 0) {
+                    stop(jmvcore::.("Data contains no complete rows after removing missing values in selected variables"))
                 }
 
                 # Convert to factor and validate positive level
@@ -384,13 +400,42 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                 mydata[[testVariable]] <- forcats::as_factor(mydata[[testVariable]])
                 private$.assertLevelExists(mydata[[testVariable]], testPLevel, testVariable, testVariable)
 
+                # CRITICAL: Check for multi-level variables (equivocal/invalid results)
+                test_levels <- levels(mydata[[testVariable]])
+                gold_levels <- levels(mydata[[goldVariable]])
+
+                # Warn if more than 2 levels (indicates equivocal/invalid/indeterminate results)
+                if (length(test_levels) > 2) {
+                    extra_levels <- setdiff(test_levels, testPLevel)
+                    warning(jmvcore::format(
+                        "⚠️ {test} has {n} levels: {levels}. Only '{pos}' is treated as positive; all other levels ({extra}) are treated as NEGATIVE. This may inflate specificity/NPV if these represent equivocal or invalid results. Consider excluding these cases or using a binary variable.",
+                        test = testVariable,
+                        n = length(test_levels),
+                        levels = paste(test_levels, collapse = ", "),
+                        pos = testPLevel,
+                        extra = paste(extra_levels, collapse = ", ")
+                    ), call. = FALSE)
+                }
+
+                if (length(gold_levels) > 2) {
+                    extra_levels <- setdiff(gold_levels, goldPLevel)
+                    warning(jmvcore::format(
+                        "⚠️ Gold standard '{gold}' has {n} levels: {levels}. Only '{pos}' is treated as positive; all others ({extra}) are treated as NEGATIVE.",
+                        gold = goldVariable,
+                        n = length(gold_levels),
+                        levels = paste(gold_levels, collapse = ", "),
+                        pos = goldPLevel,
+                        extra = paste(extra_levels, collapse = ", ")
+                    ), call. = FALSE)
+                }
+
                 # Recode data to positive/negative with explicit handling of missing values
                 mydata2 <- mydata %>%
                     dplyr::mutate(
                         testVariable2 = dplyr::case_when(
                             is.na(.data[[testVariable]]) ~ NA_character_,
                             .data[[testVariable]] == testPLevel ~ "Positive",
-                            TRUE ~ "Negative"
+                            TRUE ~ "Negative"  # All non-positive levels become Negative
                         ),
                         goldVariable2 = dplyr::case_when(
                             is.na(.data[[goldVariable]]) ~ NA_character_,
@@ -754,6 +799,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             },
 
             # Perform Cochran's Q test for 3+ tests (global test)
+            # CRITICAL: Compare CORRECTNESS relative to gold standard, not raw positivity rates
             .performCochranQ = function(test_results, mcnemarTable) {
                 tryCatch({
                     # Extract test results and gold standard
@@ -762,11 +808,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
 
                     # Get common valid cases
                     gold <- test_results[[test_names[1]]]$gold_reference
+
+                    # Build matrix of CORRECTNESS (not raw positivity)
                     all_tests_matrix <- sapply(test_names, function(tn) {
-                        ifelse(test_results[[tn]]$test_results == "Positive", 1, 0)
+                        test_result <- test_results[[tn]]$test_results
+                        # 1 if correct (matches gold), 0 if wrong
+                        ifelse(test_result == gold, 1, 0)
                     })
 
-                    valid_idx <- complete.cases(all_tests_matrix)
+                    valid_idx <- complete.cases(all_tests_matrix) & !is.na(gold)
                     if (sum(valid_idx) == 0) {
                         return()
                     }
@@ -778,8 +828,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     k <- n_tests
                     n <- nrow(all_tests_matrix)
 
-                    Ci <- colSums(all_tests_matrix)  # Column sums (successes per test)
-                    Ri <- rowSums(all_tests_matrix)  # Row sums (successes per subject)
+                    Ci <- colSums(all_tests_matrix)  # Column sums (correct per test)
+                    Ri <- rowSums(all_tests_matrix)  # Row sums (correct per subject)
 
                     numerator <- k * sum(Ci^2) - (sum(Ci))^2
                     denominator <- k * sum(Ri) - sum(Ri^2)
@@ -846,18 +896,24 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             },
 
             # Get McNemar p-value only (for adjustment calculation)
+            # CRITICAL: Compare CORRECTNESS relative to gold standard, not raw positivity rates
             .getMcNemarPValue = function(test_results, test1, test2) {
                 test1_results <- test_results[[test1]]$test_results
                 test2_results <- test_results[[test2]]$test_results
+                gold_results <- test_results[[test1]]$gold_reference  # Same for both tests
 
                 tryCatch({
-                    valid_idx <- !is.na(test1_results) & !is.na(test2_results)
+                    valid_idx <- !is.na(test1_results) & !is.na(test2_results) & !is.na(gold_results)
                     if (sum(valid_idx) == 0) return(1)
 
-                    lvls <- c("Positive", "Negative")
+                    # Compare CORRECTNESS: does each test match the gold standard?
+                    test1_correct <- (test1_results[valid_idx] == gold_results[valid_idx])
+                    test2_correct <- (test2_results[valid_idx] == gold_results[valid_idx])
+
+                    # McNemar table of correctness (not raw test results)
                     mcnemar_table <- table(
-                        factor(test1_results[valid_idx], levels = lvls),
-                        factor(test2_results[valid_idx], levels = lvls),
+                        factor(test1_correct, levels = c(TRUE, FALSE)),
+                        factor(test2_correct, levels = c(TRUE, FALSE)),
                         useNA = "no"
                     )
 
@@ -871,22 +927,28 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             },
             
             # Perform McNemar's test with clinical interpretation
+            # CRITICAL: Compare CORRECTNESS relative to gold standard, not raw positivity rates
             .performMcNemarTest = function(test_results, test1, test2, comparison_name, mcnemarTable, p_adjusted = NULL) {
                 test1_results <- test_results[[test1]]$test_results
                 test2_results <- test_results[[test2]]$test_results
+                gold_results <- test_results[[test1]]$gold_reference  # Same for both tests
 
                 tryCatch({
-                    valid_idx <- !is.na(test1_results) & !is.na(test2_results)
+                    valid_idx <- !is.na(test1_results) & !is.na(test2_results) & !is.na(gold_results)
                     if (sum(valid_idx) == 0) {
                         comparison <- comparison_name
                         warning(jmvcore::format("Could not perform McNemar's test for {comparison}: no paired observations after removing missing values."))
                         return()
                     }
 
-                    lvls <- c("Positive", "Negative")
+                    # Compare CORRECTNESS: does each test match the gold standard?
+                    test1_correct <- (test1_results[valid_idx] == gold_results[valid_idx])
+                    test2_correct <- (test2_results[valid_idx] == gold_results[valid_idx])
+
+                    # McNemar table of correctness (TRUE/FALSE for each test)
                     mcnemar_table <- table(
-                        factor(test1_results[valid_idx], levels = lvls),
-                        factor(test2_results[valid_idx], levels = lvls),
+                        factor(test1_correct, levels = c(TRUE, FALSE)),
+                        factor(test2_correct, levels = c(TRUE, FALSE)),
                         useNA = "no"
                     )
 
@@ -898,8 +960,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
                     mcnemar_result <- stats::mcnemar.test(mcnemar_table)
 
                     # Check sample size adequacy (number of discordant pairs)
-                    b <- mcnemar_table["Positive", "Negative"]  # Test1+/Test2-
-                    c <- mcnemar_table["Negative", "Positive"]  # Test1-/Test2+
+                    # b = Test1 correct, Test2 wrong
+                    # c = Test1 wrong, Test2 correct
+                    b <- mcnemar_table[1, 2]  # TRUE, FALSE
+                    c <- mcnemar_table[2, 1]  # FALSE, TRUE
                     n_discordant <- b + c
 
                     # Use adjusted p-value if provided, otherwise use raw p-value
@@ -1252,17 +1316,18 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
             # Generate methods section for manuscripts
             .generateMethodsSection = function(test_results, processed_data) {
                 n_tests <- length(test_results)
-                n_cases <- nrow(processed_data)
+                # CRITICAL FIX: processed_data is a list, need to access $data element
+                n_cases <- nrow(processed_data$data)
                 test_names <- names(test_results)
-                
+
                 methods <- sprintf(
                     "We compared the diagnostic performance of %s tests (%s) against the gold standard reference using diagnostic accuracy analysis. The study included %d cases with complete data. Performance metrics calculated included sensitivity, specificity, positive and negative predictive values, likelihood ratios, and overall accuracy. %s",
                     n_tests,
                     paste(test_names, collapse = ", "),
                     n_cases,
-                    if (n_tests >= 2 && self$options$statComp) "Statistical comparisons between tests were performed using McNemar's test for paired proportions." else ""
+                    if (n_tests >= 2 && self$options$statComp) "Statistical comparisons between tests were performed using McNemar's test comparing diagnostic correctness (agreement with gold standard)." else ""
                 )
-                
+
                 return(methods)
             },
             
@@ -1671,12 +1736,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
 
                 html <- paste0(html,
                     "<dt><b>McNemar's Test</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Compares diagnostic accuracy of two tests on the same patients. Focuses on <i>discordant pairs</i> (cases where tests disagree). Appropriate for paired/matched data only. P < 0.05 indicates tests differ significantly in accuracy.</dd>"
+                    "<dd style='margin-bottom:12px;'><strong>Compares diagnostic CORRECTNESS</strong> of two tests relative to the gold standard. Focuses on <i>discordant pairs</i> (cases where one test is correct and the other is wrong). Tests whether Test A correctly classifies significantly more/fewer cases than Test B. Appropriate for paired/matched data only. P < 0.05 indicates tests differ significantly in accuracy.</dd>"
                 )
 
                 html <- paste0(html,
                     "<dt><b>Cochran's Q Test</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Extension of McNemar's for 3+ tests. Tests whether any differences exist among tests. If significant (p < 0.05), proceed to pairwise comparisons with multiple comparison correction.</dd>"
+                    "<dd style='margin-bottom:12px;'>Extension of McNemar's for 3+ tests. <strong>Tests whether diagnostic correctness differs</strong> among tests relative to the gold standard. If significant (p < 0.05), at least one test is significantly more/less accurate than the others. Proceed to pairwise comparisons with multiple comparison correction to identify which tests differ.</dd>"
                 )
 
                 html <- paste0(html,
@@ -1686,7 +1751,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore"))
 
                 html <- paste0(html,
                     "<dt><b>Discordant Pairs</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Cases where Test A and Test B give different results (e.g., Test A positive, Test B negative). McNemar's test examines if these imbalances are significant. At least 10 discordant pairs recommended for reliable results.</dd>"
+                    "<dd style='margin-bottom:12px;'><strong>Cases where Test A and Test B have different CORRECTNESS</strong> relative to the gold standard (e.g., Test A correct but Test B wrong, or vice versa). McNemar's test examines if the imbalance between these discordant types (A-correct-B-wrong vs. A-wrong-B-correct) is statistically significant. At least 10 discordant pairs recommended for reliable results.</dd>"
                 )
 
                 html <- paste0(html,

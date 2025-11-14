@@ -10,7 +10,88 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
     "biomarkerresponseClass",
     inherit = biomarkerresponseBase,
     private = list(
-        
+
+        # Escape variable names with spaces/special characters
+        .escapeVar = function(x) {
+            if (is.null(x) || length(x) == 0) return(x)
+            # Convert to safe variable name
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        # Set correct factor level ordering for binary response
+        .setBinaryFactorLevels = function(response_values, positive_level = NULL) {
+            # Convert to factor
+            response_factor <- as.factor(response_values)
+            current_levels <- levels(response_factor)
+
+            # Validate we have exactly 2 levels
+            if (length(current_levels) != 2) {
+                html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Non-Binary Response Data</h4>",
+                    "<p style='color: #856404;'>Binary response type selected but found ", length(current_levels), " levels.</p>",
+                    "<p><strong>Current levels:</strong> ", paste(current_levels, collapse = ", "), "</p>",
+                    "<p><strong>Solutions:</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>Select 'Categorical' response type instead</li>",
+                    "<li>Filter data to include only 2 response levels</li>",
+                    "<li>Recode response variable to binary (0/1, Yes/No, etc.)</li>",
+                    "</ol>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return(NULL)
+            }
+
+            # If positive level is specified, use it
+            if (!is.null(positive_level) && nchar(positive_level) > 0) {
+                # Check if specified level exists
+                if (!(positive_level %in% current_levels)) {
+                    html <- paste0(
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #856404;'>⚠️ Specified Positive Level Not Found</h4>",
+                        "<p style='color: #856404;'>Positive level '<strong>", positive_level, "</strong>' not found in response data.</p>",
+                        "<p><strong>Available levels:</strong> ", paste(current_levels, collapse = ", "), "</p>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Correct the spelling of the positive level</li>",
+                        "<li>Check for case sensitivity (e.g., 'Responder' vs 'responder')</li>",
+                        "<li>Leave blank to use default ordering</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return(NULL)
+                }
+
+                # Set levels with positive level as second (will become 1 when converted to numeric)
+                negative_level <- setdiff(current_levels, positive_level)
+                response_factor <- factor(response_values, levels = c(negative_level, positive_level))
+
+            } else {
+                # No positive level specified - use alphabetical ordering but issue warning
+                html <- paste0(
+                    "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #0c5460;'>ℹ️ Using Default Level Ordering</h4>",
+                    "<p style='color: #0c5460;'>No positive response level specified. Using alphabetical ordering.</p>",
+                    "<p><strong>Current ordering:</strong></p>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li>Negative class (0): <strong>", current_levels[1], "</strong></li>",
+                    "<li>Positive class (1): <strong>", current_levels[2], "</strong></li>",
+                    "</ul>",
+                    "<p><strong>Note:</strong> If this ordering is incorrect for your clinical interpretation ",
+                    "(e.g., 'Non-responder' should be negative), please specify the positive level in the ",
+                    "'Positive Response Level' field.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                # Keep alphabetical ordering
+                response_factor <- factor(response_values, levels = current_levels)
+            }
+
+            return(response_factor)
+        },
+
         # Determine optimal threshold using ROC analysis
         .calculateOptimalThreshold = function(biomarker_values, response_binary) {
             tryCatch({
@@ -32,17 +113,56 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         # Calculate threshold performance metrics
         .calculateThresholdMetrics = function(biomarker_values, response_binary, threshold) {
             biomarker_positive <- biomarker_values >= threshold
-            
+
             tp <- sum(biomarker_positive & response_binary, na.rm = TRUE)
             tn <- sum(!biomarker_positive & !response_binary, na.rm = TRUE)
             fp <- sum(biomarker_positive & !response_binary, na.rm = TRUE)
             fn <- sum(!biomarker_positive & response_binary, na.rm = TRUE)
-            
-            sensitivity <- tp / (tp + fn)
-            specificity <- tn / (tn + fp)
-            ppv <- tp / (tp + fp)
-            npv <- tn / (tn + fn)
-            
+
+            # Guard against zero denominators (single-class cohorts or empty cells)
+            # Check for sufficient positive and negative cases
+            total_positive <- tp + fn
+            total_negative <- tn + fp
+            total_predicted_positive <- tp + fp
+            total_predicted_negative <- tn + fn
+
+            # Issue warning if insufficient class representation
+            if (total_positive == 0 || total_negative == 0) {
+                html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Single-Class Cohort Detected</h4>",
+                    "<p style='color: #856404;'>All patients belong to a single response class. Cannot calculate classification metrics.</p>",
+                    "<p><strong>Data distribution:</strong></p>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li>Positive cases (responders): ", total_positive, "</li>",
+                    "<li>Negative cases (non-responders): ", total_negative, "</li>",
+                    "</ul>",
+                    "<p><strong>Solutions:</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>Include patients from both response groups</li>",
+                    "<li>Verify Response Type setting matches your data</li>",
+                    "<li>Check if response variable is correctly coded</li>",
+                    "</ol>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+
+                return(list(
+                    threshold = threshold,
+                    sensitivity = NA,
+                    specificity = NA,
+                    ppv = NA,
+                    npv = NA,
+                    auc = NA
+                ))
+            }
+
+            # Calculate metrics with guards for zero denominators
+            sensitivity <- if (total_positive > 0) tp / total_positive else NA
+            specificity <- if (total_negative > 0) tn / total_negative else NA
+            ppv <- if (total_predicted_positive > 0) tp / total_predicted_positive else NA
+            npv <- if (total_predicted_negative > 0) tn / total_predicted_negative else NA
+
             # Calculate AUC
             tryCatch({
                 roc_obj <- pROC::roc(response_binary, biomarker_values)
@@ -50,7 +170,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             }, error = function(e) {
                 auc_val <- NA
             })
-            
+
             return(list(
                 threshold = threshold,
                 sensitivity = sensitivity,
@@ -225,7 +345,15 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             
             # Enhanced error checking and validation
             if (nrow(self$data) == 0) {
-                stop("Error: Dataset contains no rows. Please provide data for biomarker analysis.")
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
+                    "<p style='color: #721c24;'>Dataset contains no rows.</p>",
+                    "<p>Please load data for biomarker analysis.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
             }
             
             # Enhanced data validation and preprocessing
@@ -241,19 +369,61 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             
             # Initial data validation
             if (is.null(raw_biomarker_values)) {
-                stop("Error: Biomarker variable could not be found in the dataset.")
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Variable Not Found</h4>",
+                    "<p style='color: #721c24;'>Biomarker variable '<strong>", biomarker_var, "</strong>' could not be found in the dataset.</p>",
+                    "<p>Please check that the variable name is correct and exists in your data.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
             }
-            
+
             if (is.null(raw_response_values)) {
-                stop("Error: Response variable could not be found in the dataset.")
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Variable Not Found</h4>",
+                    "<p style='color: #721c24;'>Response variable '<strong>", response_var, "</strong>' could not be found in the dataset.</p>",
+                    "<p>Please check that the variable name is correct and exists in your data.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
             }
-            
+
             if (all(is.na(raw_biomarker_values))) {
-                stop("Error: Biomarker variable contains only missing values.")
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ All Values Missing</h4>",
+                    "<p style='color: #721c24;'>Biomarker variable contains only missing values.</p>",
+                    "<p><strong>Solutions:</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>Check data import for errors</li>",
+                    "<li>Remove rows with missing biomarker values</li>",
+                    "<li>Select a different biomarker variable</li>",
+                    "</ol>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
             }
-            
+
             if (all(is.na(raw_response_values))) {
-                stop("Error: Response variable contains only missing values.")
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ All Values Missing</h4>",
+                    "<p style='color: #721c24;'>Response variable contains only missing values.</p>",
+                    "<p><strong>Solutions:</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>Check data import for errors</li>",
+                    "<li>Remove rows with missing response values</li>",
+                    "<li>Select a different response variable</li>",
+                    "</ol>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
             }
             
             # Convert biomarker to numeric if possible
@@ -261,23 +431,57 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 tryCatch({
                     raw_biomarker_values <- as.numeric(raw_biomarker_values)
                 }, error = function(e) {
-                    stop("Error: Biomarker variable must be numeric or convertible to numeric.")
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Biomarker Data Type</h4>",
+                        "<p style='color: #721c24;'>Biomarker variable must be numeric or convertible to numeric.</p>",
+                        "<p><strong>Current variable type:</strong> ", class(raw_biomarker_values)[1], "</p>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Select a different variable with numeric values</li>",
+                        "<li>Convert variable to numeric in jamovi (Data → Transform)</li>",
+                        "<li>Check for non-numeric characters in the data</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return()
                 })
             }
             
             # Validate response variable based on type
-            if (response_type %in% c("binary", "categorical")) {
-                raw_response_values <- as.factor(raw_response_values)
-                if (response_type == "binary" && length(levels(raw_response_values)) != 2) {
-                    warning(paste("Binary response specified but", length(levels(raw_response_values)), 
-                                "levels found. Using first two levels for analysis."))
+            if (response_type == "binary") {
+                # Use explicit level ordering for binary response
+                positive_level <- self$options$positiveLevel
+                raw_response_values <- private$.setBinaryFactorLevels(raw_response_values, positive_level)
+
+                # If setBinaryFactorLevels returned NULL (validation failed), stop
+                if (is.null(raw_response_values)) {
+                    return()
                 }
+            } else if (response_type == "categorical") {
+                # Categorical response - keep natural factor ordering
+                raw_response_values <- as.factor(raw_response_values)
             } else if (response_type == "continuous") {
                 if (!is.numeric(raw_response_values)) {
                     tryCatch({
                         raw_response_values <- as.numeric(raw_response_values)
                     }, error = function(e) {
-                        stop("Error: Continuous response variable must be numeric or convertible to numeric.")
+                        html <- paste0(
+                            "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                            "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Response Data Type</h4>",
+                            "<p style='color: #721c24;'>Continuous response variable must be numeric or convertible to numeric.</p>",
+                            "<p><strong>Current variable type:</strong> ", class(raw_response_values)[1], "</p>",
+                            "<p><strong>Solutions:</strong></p>",
+                            "<ol style='margin-left: 20px;'>",
+                            "<li>Change Response Type to 'Binary' or 'Categorical' for non-numeric responses</li>",
+                            "<li>Convert response variable to numeric in jamovi (Data → Transform)</li>",
+                            "<li>Select a different response variable</li>",
+                            "</ol>",
+                            "</div>"
+                        )
+                        self$results$dataWarning$setContent(html)
+                        return()
                     })
                 }
             }
@@ -305,7 +509,26 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             
             # Final data validation
             if (length(biomarker_values) == 0) {
-                stop("Error: No valid data points remain after preprocessing. Check for missing values and outliers.")
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Valid Data Points</h4>",
+                    "<p style='color: #721c24;'>No valid data points remain after preprocessing.</p>",
+                    "<p><strong>Possible causes:</strong></p>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li>All values are missing (NA)</li>",
+                    "<li>Outlier removal eliminated all data points</li>",
+                    "<li>Biomarker and response variables have no overlapping non-missing values</li>",
+                    "</ul>",
+                    "<p><strong>Solutions:</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>Check data for missing values</li>",
+                    "<li>Change Outlier Handling to 'Include All' or 'Highlight Outliers'</li>",
+                    "<li>Review data quality and completeness</li>",
+                    "</ol>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
             }
             
             if (length(biomarker_values) < 10) {
@@ -325,12 +548,29 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             # Check biomarker data quality
             biomarker_range <- max(biomarker_values) - min(biomarker_values)
             if (biomarker_range == 0) {
-                stop("Error: Biomarker values are constant. Cannot perform analysis.")
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Constant Biomarker Values</h4>",
+                    "<p style='color: #721c24;'>All biomarker values are identical. Cannot perform analysis.</p>",
+                    "<p><strong>Current value:</strong> ", unique(biomarker_values)[1], "</p>",
+                    "<p><strong>Solutions:</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>Select a biomarker variable with varying values</li>",
+                    "<li>Check if data was incorrectly filtered or transformed</li>",
+                    "<li>Verify data import was successful</li>",
+                    "</ol>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
             }
             
             # Data quality assessment
             private$.assessDataQuality(biomarker_values, response_values, response_type)
-            
+
+            # Clear warnings if all validation passed
+            self$results$dataWarning$setContent("")
+
             # Determine threshold
             threshold_value <- NULL
             if (self$options$showThreshold) {
@@ -341,15 +581,16 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 } else if (self$options$thresholdMethod == "q75") {
                     threshold_value <- quantile(biomarker_values, 0.75, na.rm = TRUE)
                 } else if (self$options$thresholdMethod == "optimal" && response_type == "binary") {
-                    # Convert response to binary if needed
-                    response_binary <- as.numeric(as.factor(response_values)) - 1
+                    # Convert response to binary (factor levels already correctly ordered by .setBinaryFactorLevels)
+                    response_binary <- as.numeric(response_values) - 1
                     optimal_result <- private$.calculateOptimalThreshold(biomarker_values, response_binary)
                     threshold_value <- optimal_result$threshold
                 }
-                
+
                 # Calculate threshold metrics if binary response
                 if (!is.null(threshold_value) && response_type == "binary") {
-                    response_binary <- as.numeric(as.factor(response_values)) - 1
+                    # Factor levels already correctly ordered by .setBinaryFactorLevels
+                    response_binary <- as.numeric(response_values) - 1
                     threshold_metrics <- private$.calculateThresholdMetrics(biomarker_values, response_binary, threshold_value)
                     
                     self$results$threshold$addRow(rowKey = 1, values = list(
@@ -449,20 +690,73 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         
         .preprocessBiomarkerData = function(raw_data) {
             # Enhanced biomarker data preprocessing
-            
+
             # Apply log transformation if requested
             if (self$options$logTransform) {
-                # Log(x+1) transformation to handle zeros
+                # Validate data is suitable for log transformation
+                non_na_data <- raw_data[!is.na(raw_data)]
+
+                # Check for negative values
+                if (any(non_na_data < 0, na.rm = TRUE)) {
+                    negative_count <- sum(non_na_data < 0)
+                    min_value <- min(non_na_data, na.rm = TRUE)
+
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Data for Log Transformation</h4>",
+                        "<p style='color: #721c24;'>Log transformation requires non-negative values.</p>",
+                        "<p><strong>Your data contains:</strong></p>",
+                        "<ul style='margin-left: 20px;'>",
+                        "<li>", negative_count, " negative values</li>",
+                        "<li>Minimum value: ", round(min_value, 3), "</li>",
+                        "</ul>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Uncheck 'Log Transform Biomarker' option</li>",
+                        "<li>Remove or recode negative values in your data</li>",
+                        "<li>Use a different transformation appropriate for your data range</li>",
+                        "<li>Check if biomarker values were incorrectly recorded</li>",
+                        "</ol>",
+                        "<p><strong>Note:</strong> Analysis will continue WITHOUT log transformation.</p>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+
+                    # Return untransformed data to allow analysis to continue
+                    return(raw_data)
+                }
+
+                # Apply log(x+1) transformation (safe for x >= 0)
                 processed_data <- log(raw_data + 1)
-                
-                # Check for infinite values after transformation
-                if (any(is.infinite(processed_data), na.rm = TRUE)) {
-                    warning("Log transformation resulted in infinite values. Consider data cleaning.")
+
+                # Check for infinite or NaN values after transformation
+                if (any(is.infinite(processed_data) | is.nan(processed_data), na.rm = TRUE)) {
+                    inf_count <- sum(is.infinite(processed_data), na.rm = TRUE)
+                    nan_count <- sum(is.nan(processed_data), na.rm = TRUE)
+
+                    html <- paste0(
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #856404;'>⚠️ Log Transformation Issues</h4>",
+                        "<p style='color: #856404;'>Log transformation produced invalid values.</p>",
+                        "<p><strong>Issues detected:</strong></p>",
+                        "<ul style='margin-left: 20px;'>",
+                        if (inf_count > 0) paste0("<li>", inf_count, " infinite values</li>") else "",
+                        if (nan_count > 0) paste0("<li>", nan_count, " NaN values</li>") else "",
+                        "</ul>",
+                        "<p><strong>Recommendations:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Review data quality and remove problematic values</li>",
+                        "<li>Consider using untransformed data</li>",
+                        "<li>Check for extreme outliers or data entry errors</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
                 }
             } else {
                 processed_data <- raw_data
             }
-            
+
             return(processed_data)
         },
         

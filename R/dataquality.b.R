@@ -6,7 +6,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom dplyr n_distinct
 #' @importFrom htmltools HTML
-#' @importFrom visdat vis_dat vis_miss vis_guess vis_expect vis_cor
+#' @importFrom visdat vis_dat vis_miss vis_guess
 #' @importFrom ggplot2 ggsave theme_minimal labs
 
 dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityClass",
@@ -57,10 +57,24 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         dataset <- self$data
 
-        # Determine variables to analyze
+        # Determine variables to analyze with proper escaping
         if (length(self$options$vars) > 0) {
-            var_formula <- jmvcore::constructFormula(terms = self$options$vars)
-            var_list <- unlist(jmvcore::decomposeFormula(formula = var_formula))
+            # Apply variable escaping for safe access (handles spaces/special chars)
+            var_list <- sapply(self$options$vars, function(v) {
+                jmvcore::composeTerm(v)
+            }, USE.NAMES = FALSE)
+
+            # Validate that all requested variables exist in the dataset
+            missing_vars <- var_list[!var_list %in% names(dataset)]
+            if (length(missing_vars) > 0) {
+                stop(paste0(
+                    "Error: The following variables do not exist in the dataset: ",
+                    paste(missing_vars, collapse = ", "),
+                    ". Please check variable names and try again."
+                ))
+            }
+
+            # Safely extract columns
             analysis_data <- dataset[var_list]
         } else {
             var_list <- names(dataset)
@@ -104,11 +118,17 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 # Check for duplicates within each variable
                 dup_summary <- sapply(analysis_data, function(x) {
                     total <- length(x)
+                    non_missing <- sum(!is.na(x))
                     unique_vals <- length(unique(na.omit(x)))
-                    duplicates <- total - unique_vals - sum(is.na(x))
-                    dup_pct <- round(duplicates / total * 100, 1)
+                    duplicate_vals <- non_missing - unique_vals
+                    dup_pct <- if (non_missing > 0) {
+                        round(duplicate_vals / non_missing * 100, 1)
+                    } else {
+                        0
+                    }
 
-                    paste0("Unique: ", unique_vals, ", Duplicates: ", duplicates, " (", dup_pct, "%)")
+                    paste0("Unique: ", unique_vals, ", Duplicates: ", duplicate_vals,
+                           " (", dup_pct, "% of non-missing)")
                 })
 
                 quality_results$duplicates <- paste0(
@@ -132,7 +152,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # visdat Visual Analysis - Individual plot options
         if (self$options$plot_data_overview || self$options$plot_missing_patterns ||
-            self$options$plot_data_types || self$options$plot_value_expectations) {
+            self$options$plot_data_types) {
             visdat_results <- private$.generate_visdat_analysis(analysis_data)
             quality_results$visual <- visdat_results
         }
@@ -159,10 +179,6 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             self$results$plotDataTypes$setState(plotData)
         }
 
-        if (self$options$plot_value_expectations) {
-            self$results$plotValueExpectations$setState(plotData)
-        }
-
     },
 
     .generate_visdat_analysis = function(data) {
@@ -186,7 +202,6 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (self$options$plot_data_overview) enabled_analyses <- c(enabled_analyses, "Data Overview")
         if (self$options$plot_missing_patterns) enabled_analyses <- c(enabled_analyses, "Missing Patterns")
         if (self$options$plot_data_types) enabled_analyses <- c(enabled_analyses, "Data Types")
-        if (self$options$plot_value_expectations) enabled_analyses <- c(enabled_analyses, "Value Expectations")
 
         # Generate visual analysis summary
         header_html <- paste0(
@@ -341,8 +356,16 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
 
         tryCatch({
-            # Create missing patterns plot
-            plot <- visdat::vis_miss(plotData$data) +
+            # Create missing patterns plot with threshold highlighting
+            threshold_decimal <- plotData$threshold / 100  # Convert percentage to decimal
+            plot <- visdat::vis_miss(
+                plotData$data,
+                warn_recode = threshold_decimal,  # Highlight vars above threshold
+                sort_miss = TRUE  # Sort by missingness for clarity
+            ) +
+                ggplot2::labs(
+                    subtitle = paste0("Variables with >", plotData$threshold, "% missing highlighted")
+                ) +
                 ggtheme +
                 ggplot2::theme(
                     axis.text.x = ggplot2::element_text(
@@ -413,9 +436,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
 
         tryCatch({
-            # Create value expectations plot (fallback to data overview)
+            # Create value expectations plot
+            # NOTE: vis_expect requires expectation formula specification
+            # Using vis_dat as visual overview until expectations are configurable
             plot <- visdat::vis_dat(plotData$data) +
-                ggplot2::labs(subtitle = "Value Expectations Analysis") +
+                ggplot2::labs(
+                    title = "Value Expectations Analysis",
+                    subtitle = "Visual overview of data types and missingness"
+                ) +
                 ggtheme +
                 ggplot2::theme(
                     axis.text.x = ggplot2::element_text(

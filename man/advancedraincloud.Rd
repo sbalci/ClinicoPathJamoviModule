@@ -69,7 +69,8 @@ covariate values.}
 
 \item{rain_side}{Position of the raincloud relative to the data points.
 Options include left (l), right (r), flanking both sides (f), 1x1 flanking
-(f1x1), and 2x2 flanking (f2x2).}
+for paired comparisons (f1x1), and 2x2 flanking for grouped comparisons
+(f2x2).}
 
 \item{likert_mode}{If TRUE, adds Y-axis jittering for Likert scale or
 ordinal data.}

@@ -17,11 +17,15 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 return()
             }
 
-            # Get data
+            # Get data with variable escaping for special characters
             data <- self$data
-            strategy <- data[[self$options$strategy]]
-            cost <- as.numeric(data[[self$options$cost]])
-            effectiveness <- as.numeric(data[[self$options$effectiveness]])
+            strategyVar <- private$.escapeVar(self$options$strategy)
+            costVar <- private$.escapeVar(self$options$cost)
+            effectivenessVar <- private$.escapeVar(self$options$effectiveness)
+
+            strategy <- data[[strategyVar]]
+            cost <- as.numeric(data[[costVar]])
+            effectiveness <- as.numeric(data[[effectivenessVar]])
 
             # Remove missing values
             complete_cases <- complete.cases(strategy, cost, effectiveness)
@@ -37,6 +41,34 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             strategy_levels <- levels(strategy)
             if (length(strategy_levels) < 2) {
                 stop("Need at least 2 strategies for comparison.")
+            }
+
+            # Validate comparator level exists and has sufficient data
+            comparator_level <- self$options$comparator_level
+            if (is.null(comparator_level) || comparator_level == "") {
+                comparator_level <- strategy_levels[1]
+            }
+
+            # Check comparator exists in filtered data
+            if (!(comparator_level %in% strategy_levels)) {
+                stop(sprintf("Comparator strategy '%s' not found in data. Available strategies: %s",
+                            comparator_level, paste(strategy_levels, collapse=", ")))
+            }
+
+            # Check comparator has observations after filtering
+            comp_idx <- strategy == comparator_level
+            if (sum(comp_idx) < 3) {
+                stop(sprintf("Insufficient observations for comparator strategy '%s' (n=%d). Need at least 3 observations after removing missing values.",
+                            comparator_level, sum(comp_idx)))
+            }
+
+            # Check all other strategies have sufficient observations
+            for (strat in strategy_levels) {
+                strat_idx <- strategy == strat
+                if (sum(strat_idx) < 3) {
+                    stop(sprintf("Insufficient observations for strategy '%s' (n=%d). Need at least 3 observations per strategy.",
+                                strat, sum(strat_idx)))
+                }
             }
 
             # Set random seed for reproducibility
@@ -69,8 +101,9 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
                 # Subgroup analysis
                 if (self$options$subgroup_analysis && !is.null(self$options$subgroup_variable)) {
+                    subgroupVar <- private$.escapeVar(self$options$subgroup_variable)
                     private$.performSubgroupAnalysis(strategy, cost, effectiveness,
-                                                    data[[self$options$subgroup_variable]][complete_cases])
+                                                    data[[subgroupVar]][complete_cases])
                 }
 
                 # Deterministic sensitivity analysis
@@ -501,22 +534,146 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         },
 
         .performDeterministicSA = function(strategy, cost, effectiveness, data) {
-            # Placeholder for deterministic sensitivity analysis
-            # Would vary individual parameters and recalculate ICER
-            # This is complex as it requires parameter columns in data
+            # One-way deterministic sensitivity analysis for ALL strategy comparisons
+            # Vary cost and effectiveness parameters and recalculate ICER
             table <- self$results$sensitivityAnalysis
 
-            # For now, just add a note that this requires parameter columns
-            table$addRow(rowKey = "note", values = list(
-                parameter = "Deterministic SA",
-                base_value = NA,
-                low_value = NA,
-                high_value = NA,
-                icer_at_low = NA,
-                icer_at_high = NA,
-                icer_range = NA,
-                sensitivity_rank = NA
-            ))
+            # Get comparator and target strategies
+            comparator_level <- self$options$comparator_level
+            if (is.null(comparator_level) || comparator_level == "") {
+                comparator_level <- levels(strategy)[1]
+            }
+
+            strategy_levels <- levels(strategy)
+            target_strategies <- strategy_levels[strategy_levels != comparator_level]
+
+            if (length(target_strategies) == 0) {
+                table$addRow(rowKey = "note", values = list(
+                    parameter = "No comparison strategy available",
+                    base_value = NA, low_value = NA, high_value = NA,
+                    icer_at_low = NA, icer_at_high = NA, icer_range = NA, sensitivity_rank = NA
+                ))
+                return()
+            }
+
+            # Calculate base case comparator values (shared across all comparisons)
+            comp_idx <- strategy == comparator_level
+            base_comp_cost <- mean(cost[comp_idx], na.rm = TRUE)
+            base_comp_effect <- mean(effectiveness[comp_idx], na.rm = TRUE)
+
+            range_pct <- self$options$sensitivity_range_pct / 100
+
+            # Storage for ALL results across ALL strategies
+            all_results <- list()
+            result_counter <- 0
+
+            # Loop over ALL target strategies (not just first one)
+            for (target_strategy in target_strategies) {
+                target_idx <- strategy == target_strategy
+
+                base_target_cost <- mean(cost[target_idx], na.rm = TRUE)
+                base_target_effect <- mean(effectiveness[target_idx], na.rm = TRUE)
+
+                base_inc_cost <- base_target_cost - base_comp_cost
+                base_inc_effect <- base_target_effect - base_comp_effect
+
+                # Skip if no difference in effectiveness
+                if (abs(base_inc_effect) < 1e-10) {
+                    result_counter <- result_counter + 1
+                    all_results[[result_counter]] <- list(
+                        parameter = sprintf("%s: No effect difference", target_strategy),
+                        base_value = NA,
+                        low_value = NA,
+                        high_value = NA,
+                        icer_at_low = NA,
+                        icer_at_high = NA,
+                        icer_range = 0,
+                        sensitivity_rank = 999
+                    )
+                    next
+                }
+
+                base_icer <- base_inc_cost / base_inc_effect
+
+                # Parameters to vary for THIS comparison
+                param_names <- c(
+                    paste0(target_strategy, " Cost"),
+                    paste0(target_strategy, " Effectiveness"),
+                    paste0(comparator_level, " Cost"),
+                    paste0(comparator_level, " Effectiveness")
+                )
+                base_values <- c(base_target_cost, base_target_effect, base_comp_cost, base_comp_effect)
+
+                # Analyze each parameter
+                for (i in 1:4) {
+                    param_name <- param_names[i]
+                    base_val <- base_values[i]
+                    low_val <- base_val * (1 - range_pct)
+                    high_val <- base_val * (1 + range_pct)
+
+                    # Calculate ICER at low value
+                    if (i == 1) {  # Target cost low
+                        icer_low <- ((base_target_cost * (1 - range_pct)) - base_comp_cost) / base_inc_effect
+                    } else if (i == 2) {  # Target effect low
+                        low_inc_effect <- (base_target_effect * (1 - range_pct)) - base_comp_effect
+                        icer_low <- if (abs(low_inc_effect) > 1e-10) base_inc_cost / low_inc_effect else base_icer
+                    } else if (i == 3) {  # Comparator cost low
+                        icer_low <- (base_target_cost - (base_comp_cost * (1 - range_pct))) / base_inc_effect
+                    } else {  # Comparator effect low
+                        low_inc_effect <- base_target_effect - (base_comp_effect * (1 - range_pct))
+                        icer_low <- if (abs(low_inc_effect) > 1e-10) base_inc_cost / low_inc_effect else base_icer
+                    }
+
+                    # Calculate ICER at high value
+                    if (i == 1) {  # Target cost high
+                        icer_high <- ((base_target_cost * (1 + range_pct)) - base_comp_cost) / base_inc_effect
+                    } else if (i == 2) {  # Target effect high
+                        high_inc_effect <- (base_target_effect * (1 + range_pct)) - base_comp_effect
+                        icer_high <- if (abs(high_inc_effect) > 1e-10) base_inc_cost / high_inc_effect else base_icer
+                    } else if (i == 3) {  # Comparator cost high
+                        icer_high <- (base_target_cost - (base_comp_cost * (1 + range_pct))) / base_inc_effect
+                    } else {  # Comparator effect high
+                        high_inc_effect <- base_target_effect - (base_comp_effect * (1 + range_pct))
+                        icer_high <- if (abs(high_inc_effect) > 1e-10) base_inc_cost / high_inc_effect else base_icer
+                    }
+
+                    # Calculate range and store
+                    icer_range_val <- abs(icer_high - icer_low)
+
+                    result_counter <- result_counter + 1
+                    all_results[[result_counter]] <- list(
+                        parameter = param_name,
+                        base_value = base_val,
+                        low_value = low_val,
+                        high_value = high_val,
+                        icer_at_low = icer_low,
+                        icer_at_high = icer_high,
+                        icer_range = icer_range_val,
+                        sensitivity_rank = NA  # Will be filled after sorting
+                    )
+                }
+            }
+
+            # Sort ALL results by icer_range (descending) for global sensitivity ranking
+            if (length(all_results) > 0) {
+                ranges <- sapply(all_results, function(x) x$icer_range)
+                rank_order <- order(ranges, decreasing = TRUE)
+
+                # Add rows to table in order of sensitivity
+                for (rank in 1:length(rank_order)) {
+                    idx <- rank_order[rank]
+                    result <- all_results[[idx]]
+                    result$sensitivity_rank <- rank
+
+                    table$addRow(rowKey = paste0("param_", idx), values = result)
+                }
+            } else {
+                table$addRow(rowKey = "note", values = list(
+                    parameter = "No valid comparisons available",
+                    base_value = NA, low_value = NA, high_value = NA,
+                    icer_at_low = NA, icer_at_high = NA, icer_range = NA, sensitivity_rank = NA
+                ))
+            }
         },
 
         .performProbabilisticSA = function(strategy, cost, effectiveness) {
@@ -804,13 +961,67 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             wtp <- self$options$wtp_threshold
             currency <- self$options$currency
             eff_label <- self$options$effectiveness_label
+            perspective <- self$options$perspective
+            cost_year <- self$options$cost_year
+            time_horizon <- self$options$time_horizon
+            handling_missing <- self$options$handling_missing
+
+            # Get perspective label
+            perspective_label <- switch(perspective,
+                healthcare = "Healthcare System",
+                provider = "Hospital/Provider",
+                payer = "Payer/Insurance",
+                societal = "Societal",
+                "Healthcare System"
+            )
+
+            # Get missing handling label
+            missing_label <- switch(handling_missing,
+                complete = "Complete Cases Only",
+                mean = "Mean Imputation",
+                mi = "Multiple Imputation",
+                "Complete Cases Only"
+            )
+
+            # Construct discounting message
+            discount_msg <- "None (costs and effects not discounted)"
+            if (self$options$discount_costs || self$options$discount_effects) {
+                discount_parts <- character()
+                if (self$options$discount_costs) {
+                    discount_parts <- c(discount_parts, sprintf("Costs: %g%%", self$options$discount_rate_costs))
+                }
+                if (self$options$discount_effects) {
+                    discount_parts <- c(discount_parts, sprintf("Effects: %g%%", self$options$discount_rate_effects))
+                }
+                discount_msg <- sprintf("%s (PLACEHOLDER - not yet implemented)", paste(discount_parts, collapse=", "))
+            }
 
             html <- sprintf("<h4>Interpretation</h4>
             <p><b>Cost-Effectiveness Analysis Summary</b></p>
 
+            <p><b>Analysis Parameters:</b></p>
+            <ul>
+                <li><b>Perspective:</b> %s</li>
+                <li><b>Time Horizon:</b> %g years</li>
+                <li><b>Cost Year:</b> %d</li>
+                <li><b>Currency:</b> %s</li>
+                <li><b>Missing Data:</b> %s</li>
+                <li><b>Discounting:</b> %s</li>
+            </ul>
+
             <p><b>Willingness-to-Pay Threshold:</b> %s %s per %s</p>
 
-            <h5>Key Decision Rules:</h5>
+            <p><b>⚠️ IMPORTANT NOTE:</b> The current implementation uses complete-case analysis (missing values removed)
+            without discounting from a healthcare perspective. Some options (discounting, alternative perspectives,
+            imputation methods) are displayed in the interface but <b>DO NOT affect the current analysis</b> - they are
+            placeholders for future implementation. All costs and effects are analyzed as provided in the data without
+            adjustment for time value or perspective-specific cost components.</p>
+
+            <h5>Key Decision Rules:</h5>",
+            perspective_label, time_horizon, cost_year, currency, missing_label, discount_msg,
+            currency, format(wtp, big.mark = ","), eff_label)
+
+            html <- paste0(html, "
             <ul>
                 <li><b>ICER < WTP:</b> New strategy is cost-effective at specified threshold</li>
                 <li><b>Positive NMB:</b> Strategy provides net value (adopt if highest NMB)</li>
@@ -848,8 +1059,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             </ul>
 
             <p><b>Note:</b> Cost-effectiveness does not equal cost-saving. A strategy can be cost-effective
-            even if it increases total costs, as long as the health gains justify the additional expenditure.</p>",
-            currency, format(wtp, big.mark = ","), eff_label)
+            even if it increases total costs, as long as the health gains justify the additional expenditure.</p>")
 
             interpretation$setContent(html)
         },
@@ -862,11 +1072,15 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 is.null(self$options$effectiveness))
                 return()
 
-            # Get data
+            # Get data with variable escaping
             data <- self$data
-            strategy <- data[[self$options$strategy]]
-            cost <- as.numeric(data[[self$options$cost]])
-            effectiveness <- as.numeric(data[[self$options$effectiveness]])
+            strategyVar <- private$.escapeVar(self$options$strategy)
+            costVar <- private$.escapeVar(self$options$cost)
+            effectivenessVar <- private$.escapeVar(self$options$effectiveness)
+
+            strategy <- data[[strategyVar]]
+            cost <- as.numeric(data[[costVar]])
+            effectiveness <- as.numeric(data[[effectivenessVar]])
 
             # Remove missing
             complete_cases <- complete.cases(strategy, cost, effectiveness)
@@ -974,11 +1188,15 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 is.null(self$options$effectiveness))
                 return()
 
-            # Get data
+            # Get data with variable escaping
             data <- self$data
-            strategy <- data[[self$options$strategy]]
-            cost <- as.numeric(data[[self$options$cost]])
-            effectiveness <- as.numeric(data[[self$options$effectiveness]])
+            strategyVar <- private$.escapeVar(self$options$strategy)
+            costVar <- private$.escapeVar(self$options$cost)
+            effectivenessVar <- private$.escapeVar(self$options$effectiveness)
+
+            strategy <- data[[strategyVar]]
+            cost <- as.numeric(data[[costVar]])
+            effectiveness <- as.numeric(data[[effectivenessVar]])
 
             # Remove missing
             complete_cases <- complete.cases(strategy, cost, effectiveness)
@@ -1114,11 +1332,15 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 is.null(self$options$effectiveness))
                 return()
 
-            # Get data
+            # Get data with variable escaping
             data <- self$data
-            strategy <- data[[self$options$strategy]]
-            cost <- as.numeric(data[[self$options$cost]])
-            effectiveness <- as.numeric(data[[self$options$effectiveness]])
+            strategyVar <- private$.escapeVar(self$options$strategy)
+            costVar <- private$.escapeVar(self$options$cost)
+            effectivenessVar <- private$.escapeVar(self$options$effectiveness)
+
+            strategy <- data[[strategyVar]]
+            cost <- as.numeric(data[[costVar]])
+            effectiveness <- as.numeric(data[[effectivenessVar]])
 
             # Remove missing
             complete_cases <- complete.cases(strategy, cost, effectiveness)
@@ -1205,11 +1427,15 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 is.null(self$options$effectiveness))
                 return()
 
-            # Get data
+            # Get data with variable escaping
             data <- self$data
-            strategy <- data[[self$options$strategy]]
-            cost <- as.numeric(data[[self$options$cost]])
-            effectiveness <- as.numeric(data[[self$options$effectiveness]])
+            strategyVar <- private$.escapeVar(self$options$strategy)
+            costVar <- private$.escapeVar(self$options$cost)
+            effectivenessVar <- private$.escapeVar(self$options$effectiveness)
+
+            strategy <- data[[strategyVar]]
+            cost <- as.numeric(data[[costVar]])
+            effectiveness <- as.numeric(data[[effectivenessVar]])
 
             # Remove missing
             complete_cases <- complete.cases(strategy, cost, effectiveness)
@@ -1389,11 +1615,15 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 is.null(self$options$effectiveness))
                 return()
 
-            # Get data
+            # Get data with variable escaping
             data <- self$data
-            strategy <- data[[self$options$strategy]]
-            cost <- as.numeric(data[[self$options$cost]])
-            effectiveness <- as.numeric(data[[self$options$effectiveness]])
+            strategyVar <- private$.escapeVar(self$options$strategy)
+            costVar <- private$.escapeVar(self$options$cost)
+            effectivenessVar <- private$.escapeVar(self$options$effectiveness)
+
+            strategy <- data[[strategyVar]]
+            cost <- as.numeric(data[[costVar]])
+            effectiveness <- as.numeric(data[[effectivenessVar]])
 
             # Remove missing
             complete_cases <- complete.cases(strategy, cost, effectiveness)
@@ -1516,6 +1746,12 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
 
             TRUE
+        },
+
+        .escapeVar = function(varName) {
+            # Escape variable names with special characters using jmvcore
+            if (is.null(varName)) return(NULL)
+            return(jmvcore::composeTerm(varName))
         }
     )
 )

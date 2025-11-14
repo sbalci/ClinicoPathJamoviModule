@@ -4,6 +4,15 @@ title: Co-Testing Analysis
 jrs:   '1.1'
 
 items:
+    - name: instructions
+      title: 'Instructions'
+      type: Html
+
+    - name: notices
+      title: 'Validation Notices'
+      type: Html
+      visible: true
+
     - name:  testParamsTable
       title: 'Test Parameters'
       type: Table

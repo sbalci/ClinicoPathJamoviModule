@@ -1,10 +1,10 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Combine and evaluate test patterns
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

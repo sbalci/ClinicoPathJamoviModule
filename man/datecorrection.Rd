@@ -11,13 +11,13 @@ datecorrection(
   date_format = "auto",
   day_impute = 1,
   month_impute = 7,
-  handle_excel = TRUE,
+  handle_excel = FALSE,
   timezone = "UTC",
-  show_correction_table = TRUE,
-  show_quality_assessment = TRUE,
-  show_format_analysis = TRUE,
-  show_correction_summary = TRUE,
-  show_interpretation = TRUE
+  show_correction_table = FALSE,
+  show_quality_assessment = FALSE,
+  show_format_analysis = FALSE,
+  show_correction_summary = FALSE,
+  show_interpretation = FALSE
 )
 }
 \arguments{
@@ -46,7 +46,8 @@ is 7 (July). Commonly used middle-year value for clinical research.}
 since 1900-01-01). Useful for data exported from Excel spreadsheets.}
 
 \item{timezone}{Timezone for output dates. Use UTC for standardization, or
-local timezone if time-of-day information is critical.}
+local timezone if time-of-day information is critical. Only applies to
+anytime and consensus methods.}
 
 \item{show_correction_table}{Display detailed table showing original
 values, corrected values, and correction status for each observation.}
@@ -67,12 +68,19 @@ best practices, and recommendations for clinical research data.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$corrected_data} \tab \tab \tab \tab \tab a table \cr
 \code{results$correction_table} \tab \tab \tab \tab \tab a html \cr
 \code{results$quality_assessment} \tab \tab \tab \tab \tab a html \cr
 \code{results$format_analysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$correction_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$corrected_data$asDF}
+
+\code{as.data.frame(results$corrected_data)}
 }
 \description{
 Comprehensive date field correction and standardization using multiple R

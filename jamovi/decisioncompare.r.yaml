@@ -193,9 +193,9 @@ items:
       rows: 0
       notes:
         note: >
-          For 2 tests: McNemar's test compares overall diagnostic accuracy between paired tests.
+          For 2 tests: McNemar's test compares diagnostic CORRECTNESS (agreement with gold standard) between paired tests.
           For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests with Holm-Bonferroni correction for multiple comparisons.
-          Tests examine discordant pairs (cases where tests disagree) to determine if differences in accuracy are statistically significant.
+          Tests examine discordant pairs (cases where one test is correct and the other is wrong relative to the gold standard) to determine if differences in accuracy are statistically significant.
       columns:
         - name: comparison
           title: 'Comparison'

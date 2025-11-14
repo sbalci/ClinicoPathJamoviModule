@@ -19,6 +19,16 @@ enhancedROCClass <- R6::R6Class(
         .outcome = NULL,
         .predictors = NULL,
         .rocObjects = NULL,
+        .positiveClass = NULL,
+
+        # Variable name escaping utility for special characters
+        .escapeVar = function(x) {
+            if (is.character(x)) {
+                # Mirror modelbuilder/jmvcore behavior
+                x <- gsub("[^A-Za-z0-9_]", "_", make.names(x))
+            }
+            return(x)
+        },
 
         .init = function() {
             # Initialize error handling
@@ -49,10 +59,15 @@ enhancedROCClass <- R6::R6Class(
 
             # Apply clinical presets if selected
             private$.applyClinicalPresets()
-            
+
             # Prepare and validate data
             analysisData <- private$.prepareData()
             if (is.null(analysisData)) return()
+
+            # CRITICAL FIX: Store cleaned data in private$.data
+            # This ensures all downstream confusion matrix and metric calculations
+            # use the same sample as the ROC analysis (same NA removal, same outcome re-leveling)
+            private$.data <- analysisData
 
             # Checkpoint before expensive ROC analysis
             private$.checkpoint()
@@ -325,6 +340,10 @@ enhancedROCClass <- R6::R6Class(
 
             data[[private$.outcome]] <- outcome_var
 
+            # CRITICAL FIX: Store the determined positive class for use in imbalance detection
+            # positive_class was set in the multi-level (line 255) or binary (lines 297, 320) branches above
+            private$.positiveClass <- positive_class
+
             # Check predictor variables are numeric
             non_numeric_preds <- c()
             for (pred in private$.predictors) {
@@ -392,17 +411,20 @@ enhancedROCClass <- R6::R6Class(
                 
                 # Comprehensive error handling for ROC analysis
                 tryCatch({
-                    # Determine direction
-                    direction <- self$options$direction
-                    if (direction == "auto") {
-                        direction <- "<"  # Default assumption: lower values indicate negative outcome
-                    } else if (direction == "higher") {
+                    # CRITICAL FIX: Determine direction
+                    # Let pROC auto-detect direction when "auto" is selected
+                    # This prevents AUC inversion for biomarkers where higher values indicate disease
+                    direction_param <- self$options$direction
+                    if (direction_param == "auto") {
+                        direction <- "auto"  # Let pROC::roc() auto-detect based on AUC maximization
+                    } else if (direction_param == "higher") {
                         direction <- ">"
-                    } else {
+                    } else if (direction_param == "lower") {
                         direction <- "<"
+                    } else {
+                        direction <- "auto"  # Fallback to auto-detection
                     }
 
-                    # Create ROC object
                     # Create ROC object with optional smoothing
                     roc_obj <- pROC::roc(
                         response = data[[private$.outcome]],
@@ -479,16 +501,29 @@ enhancedROCClass <- R6::R6Class(
             }
         },
 
+        # CRITICAL FIX: Helper function to apply cutoff respecting ROC direction
+        .applyDirectionCutoff = function(predictor_values, cutoff, roc_direction) {
+            # When direction is "<", lower values predict positive outcome
+            # When direction is ">", higher values predict positive outcome
+            if (roc_direction == "<") {
+                return(predictor_values < cutoff)
+            } else {
+                return(predictor_values >= cutoff)
+            }
+        },
+
         .calculateOptimalCutoff = function(roc_obj, data, predictor) {
             # Check if Youden optimization is enabled
             if (!self$options$youdenOptimization) {
                 # If Youden optimization is disabled, return a simple result based on best threshold
                 coords_result <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
-                
-                # Calculate confusion matrix at best cutoff
-                predictions <- ifelse(data[[predictor]] >= coords_result$threshold,
-                                    levels(data[[private$.outcome]])[2],
-                                    levels(data[[private$.outcome]])[1])
+
+                # CRITICAL FIX: Calculate confusion matrix respecting ROC direction
+                predictions <- ifelse(
+                    private$.applyDirectionCutoff(data[[predictor]], coords_result$threshold, roc_obj$direction),
+                    levels(data[[private$.outcome]])[2],
+                    levels(data[[private$.outcome]])[1]
+                )
                 predictions <- factor(predictions, levels = levels(data[[private$.outcome]]))
 
                 cm <- caret::confusionMatrix(predictions, data[[private$.outcome]],
@@ -540,10 +575,12 @@ enhancedROCClass <- R6::R6Class(
             optimal_spec <- coords_result$specificity[optimal_idx]
             optimal_youden <- youden_indices[optimal_idx]
 
-            # Calculate confusion matrix at optimal cutoff
-            predictions <- ifelse(data[[predictor]] >= optimal_cutoff,
-                                levels(data[[private$.outcome]])[2],
-                                levels(data[[private$.outcome]])[1])
+            # CRITICAL FIX: Calculate confusion matrix at optimal cutoff respecting ROC direction
+            predictions <- ifelse(
+                private$.applyDirectionCutoff(data[[predictor]], optimal_cutoff, roc_obj$direction),
+                levels(data[[private$.outcome]])[2],
+                levels(data[[private$.outcome]])[1]
+            )
             predictions <- factor(predictions, levels = levels(data[[private$.outcome]]))
 
             cm <- caret::confusionMatrix(predictions, data[[private$.outcome]],
@@ -594,10 +631,12 @@ enhancedROCClass <- R6::R6Class(
                     # Calculate sensitivity and specificity at this cutoff
                     coords <- pROC::coords(roc_obj, cutoff, ret = c("sensitivity", "specificity", "ppv", "npv"))
 
-                    # Create predictions and calculate confusion matrix
-                    predictions <- ifelse(predictor_var >= cutoff,
-                                        levels(outcome_var)[2],
-                                        levels(outcome_var)[1])
+                    # CRITICAL FIX: Create predictions respecting ROC direction
+                    predictions <- ifelse(
+                        private$.applyDirectionCutoff(predictor_var, cutoff, roc_obj$direction),
+                        levels(outcome_var)[2],
+                        levels(outcome_var)[1]
+                    )
                     predictions <- factor(predictions, levels = levels(outcome_var))
 
                     cm <- caret::confusionMatrix(predictions, outcome_var,
@@ -1303,7 +1342,16 @@ enhancedROCClass <- R6::R6Class(
                 return()  # Only check binary classification
             }
 
-            n_positive <- as.integer(class_counts[self$options$positiveClass])
+            # CRITICAL FIX: Use stored positive class instead of option (which may be empty)
+            # private$.positiveClass was set in .prepareData() after determining positive class
+            positive_class_label <- if (!is.null(private$.positiveClass) && private$.positiveClass != "") {
+                private$.positiveClass
+            } else {
+                # Fallback: assume second level is positive
+                levels(outcome)[2]
+            }
+
+            n_positive <- as.integer(class_counts[positive_class_label])
             n_negative <- sum(class_counts) - n_positive
 
             # Calculate ratio (always express as larger:smaller)

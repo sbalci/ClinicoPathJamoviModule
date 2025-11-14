@@ -20,7 +20,6 @@ chisqposttest(
   residualsCutoff = 2,
   testSelection = "auto",
   exportResults = FALSE,
-  clinicalPreset = "custom",
   showClinicalSummary = TRUE,
   showExampleInterpretations = FALSE,
   copyReadySentences = FALSE,
@@ -40,7 +39,12 @@ chisqposttest(
 specified, the data is treated as already summarized with counts per
 combination.}
 
-\item{posthoc}{Method for p-value adjustment in post-hoc tests}
+\item{posthoc}{Method for p-value adjustment in post-hoc tests. IMPORTANT:
+Selecting 'None' DISABLES all pairwise comparisons entirely (not just
+adjustment). Unadjusted pairwise testing is not supported to prevent
+inappropriate multiple testing. Choose Bonferroni (most conservative), Holm
+(less conservative), or FDR (controls false discovery rate) for pairwise
+testing.}
 
 \item{sig}{alpha level for significance testing}
 
@@ -66,8 +70,6 @@ comparisons}
 
 \item{exportResults}{Export comprehensive analysis results to downloadable
 format for further analysis}
-
-\item{clinicalPreset}{Pre-configured settings for common clinical scenarios}
 
 \item{showClinicalSummary}{Display natural-language summary of results for
 clinical interpretation}
@@ -115,6 +117,26 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Performs Chi-Square test and post-hoc pairwise comparisons.
+⚠️ IMPORTANT LIMITATIONS:
+\itemize{
+\item Post-hoc pairwise comparisons are ONLY performed when the overall
+chi-square
+test is significant (p < alpha). This enforces proper statistical
+workflow and
+prevents data dredging.
+}
+}
+\details{
+\itemize{
+\item Selecting 'None' for post-hoc method DISABLES all pairwise testing. If
+you
+want unadjusted pairwise comparisons, this feature is not available (by
+design,
+as it would encourage inappropriate multiple testing).
+\item No automated validation against established packages exists. Use with
+caution
+for clinical decision-making.
+}
 }
 \examples{
 \donttest{

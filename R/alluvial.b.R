@@ -4,7 +4,7 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @importFrom magrittr %>%
-#' @import easyalluvial
+#' @importFrom easyalluvial alluvial_wide add_marginal_histograms plot_condensation
 #'
 #' @description 
 #' This tool creates Alluvial Diagrams (Alluvial Plots) to visualize the flow of 
@@ -25,46 +25,119 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "alluvialClass",
     inherit = alluvialBase,
     private = list(
-        
+
         # Shared validation helper to reduce duplication
         .validateAlluvialInputs = function() {
             if (is.null(self$options$vars) || length(self$options$vars) == 0)
                 return(FALSE)
-            
-            if (length(self$options$vars) < 2)
-                stop('Alluvial diagrams require at least 2 variables. Please select additional variables.')
-            
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows. Please check your data.')
-            
+
+            if (length(self$options$vars) < 2) {
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Insufficient Variables</h4>",
+                    "<p style='color: #721c24;'>Alluvial diagrams require at least <strong>2 variables</strong>.</p>",
+                    "<p>Please select additional variables from the left panel.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return(FALSE)
+            }
+
+            if (nrow(self$data) == 0) {
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
+                    "<p style='color: #721c24;'>Data contains no (complete) rows.</p>",
+                    "<p>Please check your data for missing values or filtering issues.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return(FALSE)
+            }
+
             # Validate that variables are appropriate for alluvial diagrams
-            private$.validateVariableTypes(self$options$vars)
-            
+            if (!private$.validateVariableTypes(self$options$vars)) {
+                return(FALSE)
+            }
+
+            # Clear warnings if everything is valid
+            self$results$dataWarning$setContent("")
             return(TRUE)
         },
 
-        # Data type validation helper
+        # Data type validation and discretization helper
         .validateVariableTypes = function(vars) {
             for (var in vars) {
                 if (!(var %in% names(self$data))) {
-                    stop(paste("Variable '", var, "' not found in the data."))
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Variable Not Found</h4>",
+                        "<p style='color: #721c24;'>Variable '<strong>", var, "</strong>' not found in the data.</p>",
+                        "<p>Please ensure all selected variables exist in your dataset.</p>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return(FALSE)
                 }
-                
+
                 var_data <- self$data[[var]]
-                
+
                 # Check if variable is numeric with too many unique values (likely continuous)
                 if (is.numeric(var_data)) {
                     unique_values <- length(unique(var_data[!is.na(var_data)]))
                     total_values <- sum(!is.na(var_data))
-                    
-                    # If more than 20 unique values or >50% unique values, warn user
-                    if (unique_values > 20 || (unique_values / total_values) > 0.5) {
-                        warning(paste("Variable '", var, "' appears to be continuous (", unique_values, 
-                                    " unique values). Alluvial diagrams work best with categorical variables. ",
-                                    "Consider binning this variable first."))
+
+                    # If more than 10 unique values, strongly recommend binning
+                    if (unique_values > 10) {
+                        html <- paste0(
+                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                            "<h4 style='margin-top: 0; color: #856404;'>⚠️ Continuous Variable Detected</h4>",
+                            "<p style='color: #856404;'>Variable '<strong>", var, "</strong>' has <strong>", unique_values, "</strong> unique values and appears continuous.</p>",
+                            "<p><strong>⚠️ Security Warning:</strong> Continuous variables can expose individual patient measurements in alluvial plots.</p>",
+                            "<hr style='border-color: #ffc107;'>",
+                            "<p><strong>Required Action:</strong> Please bin this variable before creating the plot.</p>",
+                            "<p style='margin: 10px 0;'><strong>Option 1: jamovi Transform</strong></p>",
+                            "<ol style='margin-left: 20px;'>",
+                            "<li>Go to <strong>Data → Compute</strong></li>",
+                            "<li>Create a new variable with binned categories</li>",
+                            "<li>Example formula: <code>IF(", var, " &lt; 25, '0-25', IF(", var, " &lt; 50, '25-50', '50+'))</code></li>",
+                            "</ol>",
+                            "<p style='margin: 10px 0;'><strong>Option 2: R Console</strong></p>",
+                            "<pre style='background-color: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px;'>",
+                            "# Create binned variable\ndata$", var, "_binned <- cut(data$", var, ", \n    breaks = 5, \n    labels = c('Very Low', 'Low', 'Medium', 'High', 'Very High'))",
+                            "</pre>",
+                            "<p><strong>After binning:</strong> Select the new binned variable instead of the continuous one.</p>",
+                            "</div>"
+                        )
+                        self$results$dataWarning$setContent(html)
+                        return(FALSE)
                     }
                 }
             }
+            return(TRUE)
+        },
+
+        # Automatic discretization helper for numeric variables
+        .discretizeData = function(data, bin_method = "default") {
+            # Apply discretization to numeric columns
+            for (col in names(data)) {
+                if (is.numeric(data[[col]])) {
+                    unique_vals <- length(unique(data[[col]][!is.na(data[[col]])]))
+
+                    # Only discretize if more than 5 unique values
+                    if (unique_vals > 5) {
+                        # Use quantile-based binning for discretization
+                        data[[col]] <- cut(
+                            data[[col]],
+                            breaks = 5,
+                            labels = c("Very Low", "Low", "Medium", "High", "Very High"),
+                            include.lowest = TRUE,
+                            ordered_result = TRUE
+                        )
+                    }
+                }
+            }
+            return(data)
         },
         .run = function() {
 
@@ -128,15 +201,26 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Set color fill strategy for the alluvial flows
             fill <- jmvcore::composeTerm(self$options$fill)
 
-            # Configure bin labels with custom override capability
-            bin <- self$options$bin
+            # Configure bin labels with proper binning method
+            bin_option <- self$options$bin
             custombinlabels <- self$options$custombinlabels
 
-            # Use custom bin labels if provided, otherwise use bin option
+            # Determine bin labels based on user selection
+            # Note: easyalluvial's bin_labels parameter only controls label display,
+            # not the binning method itself. Actual binning is done by easyalluvial internally.
             if (!is.null(custombinlabels) && custombinlabels != "") {
+                # Custom labels provided by user
                 bin <- trimws(strsplit(custombinlabels, ",")[[1]])
-            } else if (bin == "default") {
-                bin <- c("LL", "ML", "M", "MH", "HH")
+            } else {
+                # Use predefined labels based on bin option
+                bin <- switch(bin_option,
+                    "default" = c("LL", "ML", "M", "MH", "HH"),
+                    "mean" = "mean",
+                    "median" = "median",
+                    "min_max" = c("min", "max"),
+                    "cuts" = c("Q1", "Q2", "Q3", "Q4", "Q5"),
+                    c("LL", "ML", "M", "MH", "HH")  # fallback
+                )
             }
 
             # Generate core alluvial plot ----
@@ -194,23 +278,72 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot2 = function(image, ggtheme, theme, ...) {
             # Condensation plot generation function
             # Creates a detailed view of how one specific variable relates to others
-            
+
             # Input validation - requires both variables and condensation variable
             if (is.null(self$options$condensationvar) || is.null(self$options$vars))
                 return()
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows. Please check your data.')
+            if (nrow(self$data) == 0) {
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
+                    "<p style='color: #721c24;'>Data contains no (complete) rows.</p>",
+                    "<p>Please check your data for missing values or filtering issues.</p>",
+                    "</div>"
+                )
+                self$results$condensationWarning$setContent(html)
+                return()
+            }
 
             # Data preparation for condensation analysis ----
-            # Extract the primary condensation variable
+            # CRITICAL: Only use selected variables to prevent PHI leakage
             condvarName <- self$options$condensationvar
             condvarName <- jmvcore::composeTerm(components = condvarName)
-            mydata <- self$data
+
+            # Ensure condensation variable is included in selected variables
+            varsName <- self$options$vars
+            if (!(condvarName %in% varsName)) {
+                varsName <- c(condvarName, varsName)
+            }
+
+            # Extract ONLY selected variables (prevent PHI leakage)
+            mydata <- jmvcore::select(self$data, varsName)
+
+            # Validate condensation variable is appropriate (not continuous)
+            condvar_data <- mydata[[condvarName]]
+            if (is.numeric(condvar_data)) {
+                unique_vals <- length(unique(condvar_data[!is.na(condvar_data)]))
+                if (unique_vals > 10) {
+                    html <- paste0(
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #856404;'>⚠️ Continuous Condensation Variable</h4>",
+                        "<p style='color: #856404;'>Condensation variable '<strong>", condvarName, "</strong>' has <strong>", unique_vals, "</strong> unique values.</p>",
+                        "<p><strong>⚠️ Security Warning:</strong> Continuous variables can expose patient-level data in condensation plots.</p>",
+                        "<hr style='border-color: #ffc107;'>",
+                        "<p><strong>Required Action:</strong> Condensation plots require categorical variables.</p>",
+                        "<p style='margin: 10px 0;'><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Select a different <strong>categorical</strong> variable for condensation</li>",
+                        "<li>Or bin '<strong>", condvarName, "</strong>' first using Data → Compute</li>",
+                        "<li>Example: Create categories like 'Low', 'Medium', 'High'</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$condensationWarning$setContent(html)
+                    return()
+                }
+            }
+
+            # Clear warnings if validation passes
+            self$results$condensationWarning$setContent("")
+
+            # Handle missing values based on user preference
+            excl <- self$options$excl
+            if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
             # Generate condensation plot ----
             # Condensation plots show detailed relationships between the primary variable
-            # and all other variables in the dataset
+            # and selected variables only (not the entire dataset)
             plot2 <- easyalluvial::plot_condensation(
                 df = mydata,
                 first = condvarName

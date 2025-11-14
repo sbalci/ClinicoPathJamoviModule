@@ -64,7 +64,23 @@ A results object containing:
 }
 }
 \description{
-Function for making Cross Tables.
+Function for making Cross Tables with multiple table styles.
+}
+\details{
+Currently implemented features:
+\itemize{
+\item Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
+\item Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+\item Stratified analysis (Mantel-Haenszel, Breslow-Day)
+\item Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg,
+Benjamini-Yekutieli)
+\item Variable name safety (special characters, spaces)
+\item Data quality validation warnings
+}
+
+Note: Advanced features (pairwise comparisons, effect sizes, residual
+analysis,
+correspondence analysis) are planned but not yet available.
 }
 \examples{
 \donttest{
@@ -77,8 +93,7 @@ Function for making Cross Tables.
 #   sty = "finalfit",
 #   excl = TRUE,
 #   cont = "mean",
-#   pcat = "chisq",
-#   exportCSV = TRUE
+#   pcat = "chisq"
 # )
 }
 }

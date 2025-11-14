@@ -50,29 +50,81 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, character(1), USE.NAMES = FALSE)
         },
 
-        .prepareRatingColumn = function(column, categoricalMode, numericLevels = NULL) {
+        .prepareRatingColumn = function(column, numericLevels = NULL) {
             if (is.data.frame(column)) {
                 stop("Internal error: expected a vector when preparing ratings")
             }
 
+            # Convert character columns to factors
             if (is.character(column))
                 column <- factor(column)
 
-            if (categoricalMode) {
-                if (is.numeric(column)) {
-                    levels_sorted <- numericLevels
-                    if (is.null(levels_sorted))
-                        levels_sorted <- sort(unique(column))
-                    return(factor(column, levels = levels_sorted, ordered = TRUE))
-                }
-                return(column)
+            # Convert numeric columns to ordered factors
+            if (is.numeric(column)) {
+                levels_sorted <- numericLevels
+                if (is.null(levels_sorted))
+                    levels_sorted <- sort(unique(column))
+                return(factor(column, levels = levels_sorted, ordered = TRUE))
             }
 
-            if (!is.numeric(column)) {
-                stop("Continuous agreement options (CCC/Bland-Altman) require numeric rating variables. Provide numeric columns or disable these options.")
-            }
-
+            # Return factor columns as-is (preserving jamovi's ordering)
             column
+        },
+
+        .buildLevelInfo = function() {
+            # Build HTML output showing current level ordering for all variables
+            html <- "<div style='background-color: #fff9c4; padding: 15px; border-radius: 8px; margin: 10px 0;'>"
+            html <- paste0(html, "<h4 style='margin-top: 0; color: #f57c00;'>📋 Current Level Ordering</h4>")
+            html <- paste0(html, "<p style='margin: 10px 0;'>For weighted kappa, ordinal levels must be properly ordered. ",
+                          "Check your level ordering below:</p>")
+
+            vars <- self$options$vars
+            if (length(vars) == 0) {
+                html <- paste0(html, "<p style='color: #666; font-style: italic;'>No variables selected yet.</p>")
+                html <- paste0(html, "</div>")
+                return(html)
+            }
+
+            for (var in vars) {
+                col <- self$data[[var]]
+                if (is.factor(col)) {
+                    lvls <- levels(col)
+                    is_ord <- is.ordered(col)
+
+                    # Color code based on ordered status
+                    border_color <- if (is_ord) "#4CAF50" else "#FF9800"
+                    status_icon <- if (is_ord) "✓" else "⚠️"
+                    status_text <- if (is_ord) "Ordered" else "Unordered"
+
+                    html <- paste0(html, "<div style='margin: 10px 0; padding: 10px; background-color: white; ",
+                                  "border-left: 4px solid ", border_color, "; border-radius: 4px;'>")
+                    html <- paste0(html, "<strong>", var, "</strong>: ")
+                    html <- paste0(html, "<span style='color: ", border_color, ";'>",
+                                  status_icon, " ", status_text, "</span><br>")
+                    html <- paste0(html, "<span style='font-family: monospace; font-size: 13px; color: #333;'>",
+                                  paste(lvls, collapse = " → "), "</span>")
+
+                    # Show warning if weighted kappa is requested but variable is unordered
+                    if (!is_ord && self$options$wght != "unweighted") {
+                        html <- paste0(html, "<br><span style='color: #d32f2f; font-size: 12px; margin-top: 5px;'>",
+                                      "⚠️ Weighted kappa requires ordered factors. ",
+                                      "Set variable to Ordinal in Data tab.</span>")
+                    }
+                    html <- paste0(html, "</div>")
+                }
+            }
+
+            html <- paste0(html, "<div style='margin-top: 15px; padding: 10px; background-color: #e3f2fd; ",
+                          "border-radius: 4px; font-size: 12px;'>")
+            html <- paste0(html, "<strong>💡 To fix ordering:</strong><br>")
+            html <- paste0(html, "1. Go to Data tab → Select variable<br>")
+            html <- paste0(html, "2. Set as Ordinal (if appropriate)<br>")
+            html <- paste0(html, "3. Click Edit Levels → Drag levels to reorder<br>")
+            html <- paste0(html, "4. First level = lowest, last level = highest")
+            html <- paste0(html, "</div>")
+            html <- paste0(html, "</div>")
+
+            return(html)
         },
 
         .interpretKappa = function(kappa) {
@@ -577,6 +629,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
             }
 
+            # Display level ordering information if requested ----
+            if (self$options$showLevelInfo) {
+                levelInfoHtml <- private$.buildLevelInfo()
+                self$results$levelInfo$setContent(levelInfoHtml)
+            }
+
             # Data preparation ----
             exct <- self$options$exct
             wght <- self$options$wght
@@ -590,22 +648,18 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 ratings <- as.data.frame(ratings)
             }
 
-            needsNumeric <- any(c(self$options$ccc, self$options$blandAltman,
-                                  self$options$blandAltmanPlot, self$options$proportionalBias))
-            categoricalMode <- !needsNumeric
-
+            # Extract numeric levels for variables (used to preserve ordering when converting to factors)
             numericLevels <- NULL
-            if (categoricalMode) {
-                numeric_values <- unique(unlist(lapply(ratings, function(col) {
-                    if (is.numeric(col)) return(as.numeric(stats::na.omit(col)))
-                    NULL
-                })))
-                if (length(numeric_values) > 0)
-                    numericLevels <- sort(numeric_values)
-            }
+            numeric_values <- unique(unlist(lapply(ratings, function(col) {
+                if (is.numeric(col)) return(as.numeric(stats::na.omit(col)))
+                NULL
+            })))
+            if (length(numeric_values) > 0)
+                numericLevels <- sort(numeric_values)
 
+            # Prepare all rating columns as categorical factors
             ratings[] <- lapply(ratings, function(col)
-                private$.prepareRatingColumn(col, categoricalMode, numericLevels))
+                private$.prepareRatingColumn(col, numericLevels))
 
             # Preserve jamovi attributes if they exist
             if (!is.null(attr(mydata, "jmv-desc"))) {
@@ -844,12 +898,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
         # Consensus Score Derivation (if requested) ----
         if (self$options$consensusVar) {
-            if (!categoricalMode) {
-                stop("Consensus scoring requires categorical ratings. Disable continuous agreement options to create consensus variables.")
-            }
             tryCatch({
                 ratings <- self$data[, self$options$vars, drop = FALSE]
-                ratings[] <- lapply(ratings, function(col) private$.prepareRatingColumn(col, TRUE, numericLevels))
+                ratings[] <- lapply(ratings, function(col) private$.prepareRatingColumn(col, numericLevels))
                 n_raters <- length(self$options$vars)
 
                 # Calculate modal category for each row
@@ -908,7 +959,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     consensus <- factor(consensus, levels = levels(self$data[[self$options$vars[1]]]))
                 }
 
-                # Create computed column
+                # Update summary table
                 self$results$consensusTable$setRow(rowNo = 1, values = list(
                     consensus_var = consensus_name,
                     n_consensus = sum(!is.na(consensus)),
@@ -916,9 +967,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     pct_consensus = round(100 * sum(!is.na(consensus)) / nrow(ratings), 1)
                 ))
 
-                # Store consensus in data for potential downstream use
-                # Note: In jamovi, we would use jmvcore::addColumnComputed()
-                # For now, just report the results
+                # Create the actual computed column in the dataset
+                self$results$consensusVar$setValue(consensus)
 
             }, error = function(e) {
                 # Handle errors gracefully
@@ -936,7 +986,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         if (!is.null(self$options$referenceRater)) {
             tryCatch({
                 reference_var <- self$options$referenceRater
-                reference_data <- private$.prepareRatingColumn(self$data[[reference_var]], categoricalMode, numericLevels)
+                reference_data <- private$.prepareRatingColumn(self$data[[reference_var]], numericLevels)
 
                 rater_results <- list()
 
@@ -945,7 +995,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                     private$.checkpoint()  # Allow UI responsiveness
 
-                    rater_data <- private$.prepareRatingColumn(self$data[[rater_var]], categoricalMode, numericLevels)
+                    rater_data <- private$.prepareRatingColumn(self$data[[rater_var]], numericLevels)
 
                     # Create pairwise data frame
                     pair_data <- data.frame(reference_data, rater_data)
@@ -1041,14 +1091,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
         # Level of Agreement (LoA) Categorization ----
         if (self$options$loaVariable) {
-            if (!categoricalMode) {
-                stop("Level of agreement categories are available only for categorical ratings. Disable continuous agreement options to use this feature.")
-            }
             tryCatch({
                 ratings <- self$data[, self$options$vars, drop = FALSE]
                 n_raters <- length(self$options$vars)
 
-                ratings[] <- lapply(ratings, function(col) private$.prepareRatingColumn(col, TRUE, numericLevels))
+                ratings[] <- lapply(ratings, function(col) private$.prepareRatingColumn(col, numericLevels))
 
                 # Calculate agreement count and available raters for each row
                 agreement_stats <- t(apply(ratings, 1, function(row) {
@@ -1117,8 +1164,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     )
                 }
 
-                # Note: In full jamovi implementation, would add computed column here
-                # using jmvcore::addColumnComputed() to add loa_category to dataset
+                # Create the actual computed column in the dataset
+                self$results$loaVar$setValue(loa_category)
 
             }, error = function(e) {
                 # Handle errors gracefully
@@ -1313,260 +1360,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 gwetTable <- self$results$gwetTable
                 gwetTable$setRow(rowNo = 1, values = values_list)
                 gwetTable$addFootnote(rowNo = 1, col = "coefficient", paste0("Error calculating Gwet's AC: ", e$message))
-            })
-        }
-
-        # Bland-Altman Analysis for continuous data ----
-        if (self$options$blandAltman) {
-            tryCatch({
-                data <- self$data
-                vars <- self$options$vars
-
-                if (length(vars) < 2) {
-                    stop("Bland-Altman analysis requires at least 2 continuous variables")
-                }
-
-                baTable <- self$results$blandAltmanTable
-                propBiasTable <- self$results$proportionalBiasTable
-
-                # Calculate pairwise Bland-Altman for all combinations
-                for (i in 1:(length(vars) - 1)) {
-                    for (j in (i + 1):length(vars)) {
-                        private$.checkpoint()  # Allow UI to remain responsive
-
-                        method1_name <- vars[i]
-                        method2_name <- vars[j]
-
-                        # Get data vectors
-                        x <- as.numeric(data[[method1_name]])
-                        y <- as.numeric(data[[method2_name]])
-
-                        # Remove missing values
-                        complete_cases <- complete.cases(x, y)
-                        x <- x[complete_cases]
-                        y <- y[complete_cases]
-                        n <- length(x)
-
-                        if (n < 3) {
-                            stop("Insufficient data for Bland-Altman analysis")
-                        }
-
-                        # Calculate Bland-Altman statistics
-                        differences <- x - y
-                        averages <- (x + y) / 2
-                        mean_diff <- mean(differences)
-                        sd_diff <- sd(differences)
-
-                        # Get confidence level
-                        conf_level <- self$options$baConfidenceLevel
-                        z_value <- qnorm(1 - (1 - conf_level) / 2)
-
-                        # Limits of agreement
-                        loa_lower <- mean_diff - z_value * sd_diff
-                        loa_upper <- mean_diff + z_value * sd_diff
-
-                        # CI for limits of agreement (approximate)
-                        se_loa <- sqrt(3 * sd_diff^2 / n)
-                        loa_lower_ci <- loa_lower - 1.96 * se_loa
-                        loa_upper_ci <- loa_upper + 1.96 * se_loa
-
-                        # Test if mean difference is significantly different from zero
-                        t_test <- t.test(differences)
-                        bias_ttest_p <- t_test$p.value
-
-                        # Add to Bland-Altman table
-                        ba_row <- list(
-                            method1 = method1_name,
-                            method2 = method2_name,
-                            n = n,
-                            mean_diff = mean_diff,
-                            sd_diff = sd_diff,
-                            loa_lower = loa_lower,
-                            loa_upper = loa_upper,
-                            loa_lower_ci = loa_lower_ci,
-                            loa_upper_ci = loa_upper_ci,
-                            bias_ttest_p = bias_ttest_p
-                        )
-
-                        baTable$addRow(rowKey = paste0(method1_name, "_", method2_name), values = ba_row)
-
-                        # Proportional bias test
-                        if (self$options$proportionalBias) {
-                            # Regress differences on averages
-                            prop_bias_model <- lm(differences ~ averages)
-                            slope <- coef(prop_bias_model)[2]
-                            slope_se <- summary(prop_bias_model)$coefficients[2, 2]
-                            slope_p <- summary(prop_bias_model)$coefficients[2, 4]
-                            r_squared <- summary(prop_bias_model)$r.squared
-
-                            # Interpretation
-                            interpretation <- if (slope_p < 0.05) {
-                                if (slope > 0) {
-                                    "Significant positive proportional bias detected"
-                                } else {
-                                    "Significant negative proportional bias detected"
-                                }
-                            } else {
-                                "No significant proportional bias"
-                            }
-
-                            prop_bias_row <- list(
-                                comparison = paste(method1_name, "vs", method2_name),
-                                slope = slope,
-                                slope_se = slope_se,
-                                slope_p = slope_p,
-                                r_squared = r_squared,
-                                interpretation = interpretation
-                            )
-
-                            propBiasTable$addRow(rowKey = paste0(method1_name, "_", method2_name),
-                                               values = prop_bias_row)
-                        }
-                    }
-                }
-
-                # Bland-Altman plot is now rendered automatically via renderFun
-
-            }, error = function(e) {
-                # Handle errors gracefully
-                baTable <- self$results$blandAltmanTable
-                error_row <- list(
-                    method1 = "Error",
-                    method2 = "",
-                    n = 0,
-                    mean_diff = NaN,
-                    sd_diff = NaN,
-                    loa_lower = NaN,
-                    loa_upper = NaN,
-                    loa_lower_ci = NaN,
-                    loa_upper_ci = NaN,
-                    bias_ttest_p = NaN
-                )
-                baTable$addRow(rowKey = "error", values = error_row)
-            })
-        }
-
-        # Concordance Correlation Coefficient (CCC) for continuous data ----
-        if (self$options$ccc) {
-            tryCatch({
-                # Check if variables are numeric (continuous)
-                data <- self$data
-                vars <- self$options$vars
-
-                # Check that we have exactly 2 variables for pairwise CCC
-                if (length(vars) < 2) {
-                    stop("CCC requires at least 2 continuous variables")
-                }
-
-                cccTable <- self$results$cccTable
-
-                # Calculate pairwise CCC for all combinations
-                for (i in 1:(length(vars) - 1)) {
-                    for (j in (i + 1):length(vars)) {
-                        private$.checkpoint()  # Allow UI to remain responsive
-
-                        var1_name <- vars[i]
-                        var2_name <- vars[j]
-
-                        # Get data vectors
-                        x <- as.numeric(data[[var1_name]])
-                        y <- as.numeric(data[[var2_name]])
-
-                        # Remove missing values
-                        complete_cases <- complete.cases(x, y)
-                        x <- x[complete_cases]
-                        y <- y[complete_cases]
-                        n <- length(x)
-
-                        if (n < 3) {
-                            stop("Insufficient data for CCC calculation")
-                        }
-
-                        # Calculate CCC components
-                        mean_x <- mean(x)
-                        mean_y <- mean(y)
-                        var_x <- var(x)
-                        var_y <- var(y)
-                        sd_x <- sd(x)
-                        sd_y <- sd(y)
-
-                        # Pearson correlation
-                        pearson_r <- cor(x, y, method = "pearson")
-
-                        # CCC = 2 * ρ * σ_x * σ_y / (σ_x² + σ_y² + (μ_x - μ_y)²)
-                        numerator <- 2 * pearson_r * sd_x * sd_y
-                        denominator <- var_x + var_y + (mean_x - mean_y)^2
-                        ccc_value <- numerator / denominator
-
-                        # Calculate precision (how close the data points are to the best-fit line)
-                        # Precision = r (Pearson correlation)
-                        precision <- pearson_r
-
-                        # Calculate accuracy (how far the best-fit line deviates from 45-degree line)
-                        # Accuracy (Cb) = 2 / ((σ_x/σ_y + σ_y/σ_x) + ((μ_x - μ_y)²/(σ_x * σ_y)))
-                        accuracy <- 2 / ((sd_x/sd_y + sd_y/sd_x) + ((mean_x - mean_y)^2 / (sd_x * sd_y)))
-
-                        # Calculate 95% CI using Fisher's Z transformation
-                        if (requireNamespace("psych", quietly = TRUE)) {
-                            # Use psych package if available for more accurate CI
-                            ccc_result <- psych::ICC(cbind(x, y), missing = FALSE, alpha = 0.05)
-                            ci_lower <- ccc_result$results$`lower bound`[1]
-                            ci_upper <- ccc_result$results$`upper bound`[1]
-                        } else {
-                            # Simple approximation using Fisher's Z
-                            z <- 0.5 * log((1 + ccc_value) / (1 - ccc_value))
-                            se_z <- 1 / sqrt(n - 3)
-                            z_lower <- z - 1.96 * se_z
-                            z_upper <- z + 1.96 * se_z
-                            ci_lower <- (exp(2 * z_lower) - 1) / (exp(2 * z_lower) + 1)
-                            ci_upper <- (exp(2 * z_upper) - 1) / (exp(2 * z_upper) + 1)
-                        }
-
-                        # Interpretation based on CCC value
-                        interpretation <- if (ccc_value < 0.90) {
-                            "Poor agreement"
-                        } else if (ccc_value < 0.95) {
-                            "Moderate agreement"
-                        } else if (ccc_value < 0.99) {
-                            "Substantial agreement"
-                        } else {
-                            "Almost perfect agreement"
-                        }
-
-                        # Add row to table
-                        row_values <- list(
-                            rater1 = var1_name,
-                            rater2 = var2_name,
-                            n = n,
-                            ccc = ccc_value,
-                            pearson_r = pearson_r,
-                            precision = precision,
-                            accuracy = accuracy,
-                            ci_lower = ci_lower,
-                            ci_upper = ci_upper,
-                            interpretation = interpretation
-                        )
-
-                        cccTable$addRow(rowKey = paste0(var1_name, "_", var2_name), values = row_values)
-                    }
-                }
-
-            }, error = function(e) {
-                # Handle errors gracefully
-                cccTable <- self$results$cccTable
-                error_row <- list(
-                    rater1 = "Error",
-                    rater2 = "",
-                    n = 0,
-                    ccc = NaN,
-                    pearson_r = NaN,
-                    precision = NaN,
-                    accuracy = NaN,
-                    ci_lower = NaN,
-                    ci_upper = NaN,
-                    interpretation = paste0("Error: ", e$message)
-                )
-                cccTable$addRow(rowKey = "error", values = error_row)
             })
         }
 

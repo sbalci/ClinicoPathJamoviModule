@@ -1,9 +1,9 @@
 ---
 name: advancedraincloud
 title: Advanced Raincloud Plot
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -109,14 +109,14 @@ options:
           name: r
         - title: "Flanking (Both Sides)"
           name: f
-        - title: "Flanking 1x1"
+        - title: "Flanking 1x1 (Paired)"
           name: f1x1
-        - title: "Flanking 2x2" 
+        - title: "Flanking 2x2 (Grouped)"
           name: f2x2
       default: l
       description:
         R: >
-          Position of the raincloud relative to the data points. Options include left (l), right (r), flanking both sides (f), 1x1 flanking (f1x1), and 2x2 flanking (f2x2).
+          Position of the raincloud relative to the data points. Options include left (l), right (r), flanking both sides (f), 1x1 flanking for paired comparisons (f1x1), and 2x2 flanking for grouped comparisons (f2x2).
 
     - name: likert_mode
       title: Likert Scale Mode

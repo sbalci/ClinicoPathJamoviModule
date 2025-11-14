@@ -39,10 +39,10 @@ datetime representations.}
 attempts to identify the format automatically. Manual selection ensures
 accurate parsing for specific datetime formats.}
 
-\item{timezone}{Timezone for datetime parsing. 'System Default' uses your
-computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
-Time. Note: Excel serial and Unix epoch conversions always use UTC
-regardless of this setting.}
+\item{timezone}{Timezone for datetime parsing. Provide an Olson identifier
+such as "Europe/Istanbul", "America/New_York", "UTC", or "system" to use
+the local machine timezone. Excel serial and Unix epoch conversions always
+use UTC regardless of this setting.}
 
 \item{preview_rows}{Number of rows to display in preview tables. Shows
 original values, corrected datetimes, and extracted components for quality

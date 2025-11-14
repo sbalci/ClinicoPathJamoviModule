@@ -17,8 +17,6 @@ classification(
   complexity = 0.01,
   maxCompete = 4,
   maxSurrogate = 5,
-  unsurrogate = 2,
-  noCrossValidations = 10,
   maxDepth = 30,
   noOfTrees = 10,
   maxDepthRandFor = 30,
@@ -37,9 +35,10 @@ classification(
   clinicalCutoff = 0.5,
   validateMethod = "holdout",
   bootstrapSamples = 1000,
-  reportClinicalMetrics = TRUE,
-  reportConfidenceIntervals = TRUE,
-  reportMCC = TRUE
+  reportClinicalMetrics = FALSE,
+  reportConfidenceIntervals = FALSE,
+  reportMCC = FALSE,
+  positiveClass = ""
 )
 }
 \arguments{
@@ -66,10 +65,6 @@ classification(
 \item{maxCompete}{.}
 
 \item{maxSurrogate}{.}
-
-\item{unsurrogate}{.}
-
-\item{noCrossValidations}{.}
 
 \item{maxDepth}{.}
 
@@ -120,6 +115,12 @@ clinical metrics.}
 balanced metric for imbalanced datasets. MCC ranges from -1 (perfect
 disagreement) to +1 (perfect agreement), with 0 indicating random
 prediction.}
+
+\item{positiveClass}{Specify which class should be considered "positive"
+for clinical metrics (sensitivity, specificity, PPV, NPV, likelihood
+ratios). If left empty, the second factor level will be used as positive.
+This is critical for ensuring correct interpretation of diagnostic
+performance metrics.}
 }
 \value{
 A results object containing:

@@ -108,12 +108,12 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="noOutliers",
-                title="Outlier Detection (Z-Score > 3)",
+                title="Outlier Detection (Consensus: \u22652 methods)",
                 visible="(showOutliers)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outliers",
-                title="Outlier Detection (Z-Score > 3)",
+                title="Outlier Detection (Consensus: \u22652 methods)",
                 visible="(showOutliers)",
                 rows=0,
                 columns=list(
@@ -230,7 +230,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$noOutliers} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$outliers} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$outliers} \tab \tab \tab \tab \tab Shows outliers detected by at least 2 of 3 methods: Z-score (|z|>3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|>3.5). Points flagged by only 1 method are NOT shown. \cr
 #'   \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$patterns} \tab \tab \tab \tab \tab a table \cr

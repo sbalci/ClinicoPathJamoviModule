@@ -16,11 +16,7 @@ agreement(
   bootstrap = FALSE,
   gwet = FALSE,
   gwetWeights = "unweighted",
-  ccc = FALSE,
-  blandAltman = FALSE,
-  blandAltmanPlot = FALSE,
-  proportionalBias = FALSE,
-  baConfidenceLevel = 0.95,
+  showLevelInfo = FALSE,
   hierarchicalKappa = FALSE,
   clusterVariable,
   randomEffectsRater = FALSE,
@@ -39,7 +35,7 @@ agreement(
   tieBreaker = "exclude",
   consensusName = "consensus_score",
   referenceRater,
-  rankRaters = TRUE,
+  rankRaters = FALSE,
   loaVariable = FALSE,
   loaThresholds = "custom",
   loaHighThreshold = 75,
@@ -89,33 +85,10 @@ paradoxical behavior of kappa in extreme cases.}
 \item{gwetWeights}{Unweighted (AC1) for nominal categories. Linear or
 Quadratic weights (AC2) for ordinal data.}
 
-\item{ccc}{Calculate Lin's Concordance Correlation Coefficient for
-continuous measurement agreement. CCC assesses the agreement between two
-continuous measurements or raters, combining measures of both precision and
-accuracy. Particularly useful for method comparison studies, inter-rater
-reliability of continuous scores (e.g., quantitative pathology
-measurements, biomarker levels), and validation of new measurement
-techniques. CCC ranges from -1 to +1, with +1 indicating perfect
-concordance.}
-
-\item{blandAltman}{Perform Bland-Altman analysis for assessing agreement
-between two continuous measurement methods. Calculates mean difference
-(bias) and limits of agreement (LOA = mean ± 1.96×SD). Essential for method
-comparison and validation studies in clinical chemistry, pathology, and
-diagnostic imaging. Particularly useful for comparing a new measurement
-method against a reference standard, or assessing inter-rater reliability
-for continuous measurements.}
-
-\item{blandAltmanPlot}{Generate Bland-Altman plot showing difference vs.
-average of two measurements. Displays mean bias line and limits of
-agreement (±1.96 SD).}
-
-\item{proportionalBias}{Test whether the difference between methods is
-related to the magnitude of measurements (proportional bias). Uses linear
-regression of difference on average values.}
-
-\item{baConfidenceLevel}{Confidence level for limits of agreement (default
-95\\%).}
+\item{showLevelInfo}{Display information about how categorical levels are
+currently ordered in your variables. Essential for weighted kappa analysis
+to ensure ordinal levels are properly ordered (e.g., G1 → G2 → G3 for tumor
+grades).}
 
 \item{hierarchicalKappa}{Enable hierarchical (multilevel) kappa analysis
 for nested data structures (e.g., pathologists nested within institutions,
@@ -227,12 +200,7 @@ A results object containing:
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$headingGwet} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$headingCCC} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$cccTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$headingBlandAltman} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$blandAltmanTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$proportionalBiasTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$levelInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$varianceComponents} \tab \tab \tab \tab \tab a table \cr
@@ -240,10 +208,12 @@ A results object containing:
 \code{results$clusterHomogeneityTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterRankingsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
 \code{results$headingPairwise} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$headingLoA} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$loaVar} \tab \tab \tab \tab \tab an output \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 }
@@ -258,7 +228,29 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for Interrater Reliability.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Basic kappa analysis with 3 pathologists rating tumor grades
+data('histopathologyDescriptives')
+jmv::agreement(
+    data = histopathologyDescriptives,
+    vars = c('Pathologist_1', 'Pathologist_2', 'Pathologist_3')
+)
+
+# Weighted kappa for ordinal data (tumor grades: G1 < G2 < G3)
+# First ensure variables are set as Ordinal with proper level ordering
+jmv::agreement(
+    data = histopathologyDescriptives,
+    vars = c('Grade_Rater1', 'Grade_Rater2'),
+    wght = 'equal',
+    showLevelInfo = TRUE  # Verify level ordering before analysis
+)
+
+# Create consensus variable from 5 raters
+jmv::agreement(
+    data = histopathologyDescriptives,
+    vars = c('R1', 'R2', 'R3', 'R4', 'R5'),
+    consensusVar = TRUE,
+    consensusRule = 'majority',
+    consensusName = 'consensus_diagnosis'
+)
+
 }

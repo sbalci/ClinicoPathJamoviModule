@@ -44,30 +44,53 @@ Actions enable you to:
 
 ### jamovi Action Architecture
 
-```mermaid
-graph TD
-    A[.a.yaml Action Definition] --> B[UI Action Button]
-    B --> C[User Clicks Button]
-    C --> D[.run() Execution]
-    D --> E{Action Type}
-    E -->|Data Frame| F[Return data + title]
-    E -->|File Export| G[Write file + return path]
-    F --> H[New jamovi Window]
-    G --> H
-    H --> I[User Interacts with New Data]
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    jamovi Action Workflow                        │
+└─────────────────────────────────────────────────────────────────┘
+
+1. .a.yaml Definition
+   ↓
+   └─> Creates action button in UI with title from 'title' field
+
+2. User Clicks Button
+   ↓
+   └─> Sets option value to TRUE, triggers .run() execution
+
+3. .b.R Implementation (.run method)
+   ↓
+   └─> Step 1: Retrieve option via self$options$option('actionName')
+   ↓
+   └─> Step 2: Verify compatibility (check option$perform exists)
+   ↓
+   └─> Step 3: Execute callback via option$perform(function(action) {...})
+   ↓
+   └─> Step 4: Process data/write files
+   ↓
+   └─> Step 5: Return result
+
+4. Return Format (choose one):
+   ├─> Data Frame: list(data = df, title = 'title')
+   ├─> File Path: list(path = action$params$path, title = 'title', ext = 'csv')
+   └─> Error: stop("error message")
+
+5. New Window/Tab Opens
+   ↓
+   └─> User interacts with new dataset in separate jamovi window
 ```
 
 ### Version Requirements
 
-- **Minimum Version**: jamovi 2.7.12 or newer
-- **API Type**: Proper action API (replaces legacy hackish implementations)
-- **Platform Support**: Desktop version (cloud requires additional setup)
+- **Minimum Version**: jamovi 2.7.12 or later
+- **API Type**: Official action API (replaces legacy implementations)
+- **Platform Support**: Desktop version and browser
+- **Action Type**: Currently only `open` is supported (opens new datasets in separate windows/tabs)
 
 ## 2. Action Definition in .a.yaml Files
 
 ### Basic Action Structure
 
-Every action in jamovi is defined as an `Action` type option in the `.a.yaml` file:
+Every action in jamovi is defined as an `Action` type option in the `.a.yaml` file. When defined, actions **automatically generate a button** in the analysis interface.
 
 ```yaml
 - name: open
@@ -75,6 +98,11 @@ Every action in jamovi is defined as an `Action` type option in the `.a.yaml` fi
   type: Action
   action: open
 ```
+
+**What this creates:**
+- A button in the UI labeled with the `title` text ("Open")
+- When clicked, the analysis executes and sets the option value to `TRUE`
+- The `.run()` method detects this and executes the action logic
 
 ### Essential Properties
 
@@ -89,11 +117,11 @@ Every action in jamovi is defined as an `Action` type option in the `.a.yaml` fi
 
 ### Supported Action Types
 
-Currently, jamovi supports:
+Currently, jamovi supports only one action type:
 
-- **`open`**: Opens a new dataset in a new window/tab
+- **`open`**: Opens a new dataset in a new window/tab (or browser tab in web version)
 
-Future versions may support additional action types.
+**Note**: The `action` field in `.a.yaml` must be set to `"open"` - this is currently the only supported value. Future jamovi versions may introduce additional action types.
 
 ### Basic Example
 
@@ -150,7 +178,7 @@ Actions can be conditionally enabled based on other options:
 
 ### Standard Implementation Pattern
 
-All jamovi actions follow this implementation pattern in the `.run()` method:
+All jamovi actions follow this **5-step implementation pattern** in the `.run()` method:
 
 ```R
 .run = function() {
@@ -158,59 +186,79 @@ All jamovi actions follow this implementation pattern in the `.run()` method:
     # Check if action was triggered
     if (self$options$actionName) {
 
-        # 1. Retrieve the option
+        # Step 1: Retrieve the option
         option <- self$options$option('actionName')
 
-        # 2. Check version compatibility
+        # Step 2: Verify compatibility (check if option$perform exists)
         if (is.null(option$perform)) {
-            # Action system not supported
+            # Action system not supported in this jamovi version
             return()
         }
 
-        # 3. Perform the action
+        # Step 3: Execute the callback via option$perform()
         option$perform(function(action) {
 
-            # 4. Prepare data or file
+            # Step 4: Process the request (prepare data or file)
             # ... your logic here ...
 
-            # 5. Return result
+            # Step 5: Return results (data frame, file, or error)
             return(result)
         })
     }
 }
 ```
 
+### The Five-Step Implementation Process
+
+The jamovi action API requires following these five steps in order:
+
+1. **Retrieve the option**: Use `self$options$option('actionName')` to get the action option object
+2. **Verify compatibility**: Check if `option$perform` exists (ensures jamovi version supports actions)
+3. **Execute the callback**: Call `option$perform(function(action) { ... })` with your callback function
+4. **Process the request**: Prepare your data, write files, or perform computations
+5. **Return results**: Return one of three result types (data frame, file path, or error)
+
 ### Action Callback Function
 
 The `option$perform()` method takes a callback function with one parameter:
 
-- **`action`**: Action context object containing parameters
+- **`action`**: Action context object containing parameters (e.g., `action$params$path`, `action$params$fullPath`)
 
-### Return Value Types
+### Three Ways to Return Results (Step 5)
 
-#### 5a. Data Frame Return (In-Memory)
+The jamovi action API supports three return formats:
 
-For returning data directly to jamovi:
+#### Option 1: Return a Data Frame
+
+For returning data directly to jamovi (in-memory):
 
 ```R
 option$perform(function(action) {
 
     # Prepare your data frame
-    exportData <- prepareDataFrame()
+    exportData <- data.frame(
+        ID = 1:100,
+        Value = rnorm(100)
+    )
 
-    # Return as list
+    # Return list with data and title
     list(
         data = exportData,
-        title = 'Filtered Patient Data'
+        title = 'Descriptive title'
     )
 })
 ```
 
 **Required fields:**
-- `data`: Data frame to open
-- `title`: Title for the new window/dataset
+- `data`: A data.frame object to open in new window
+- `title`: Descriptive title for the new dataset (string)
 
-#### 5b. File Export Return
+**Example from official docs:**
+```R
+list(data = ToothGrowth, title = 'descriptive title')
+```
+
+#### Option 2: Return a File Path
 
 For writing data to a file first:
 
@@ -227,23 +275,30 @@ option$perform(function(action) {
     # IMPORTANT: Use action$params$path (not $fullPath) for return
     list(
         path = action$params$path,
-        title = 'Exported Analysis Results',
+        title = 'Descriptive title',
         ext = 'csv'
     )
 })
 ```
 
 **Required fields:**
-- `path`: Use `action$params$path` (not `$fullPath`)
-- `title`: Title for the new window/dataset
-- `ext`: File extension ('csv', 'xlsx', etc.)
+- `path`: Use `action$params$path` (NOT `action$params$fullPath`)
+- `title`: Descriptive title for the new dataset (string)
+- `ext`: File extension ('csv', 'xlsx', 'rds', etc.)
 
 **Critical Path Handling:**
 
-- **Write to**: `action$params$fullPath`
-- **Return**: `action$params$path`
+| Operation | Use |
+|-----------|-----|
+| **Writing file** | `action$params$fullPath` |
+| **Returning path** | `action$params$path` |
 
-#### 5c. Error Handling
+**Example from official docs:**
+```R
+list(path = action$params$path, title = 'descriptive title', ext = 'csv')
+```
+
+#### Option 3: Throw an Error
 
 Throw errors when action cannot be completed:
 
@@ -252,7 +307,7 @@ option$perform(function(action) {
 
     # Check conditions
     if (!conditionsMet) {
-        stop("Cannot export: No data available")
+        stop("Error message describing the issue")
     }
 
     if (nrow(data) == 0) {
@@ -262,6 +317,10 @@ option$perform(function(action) {
     # ... proceed with export ...
 })
 ```
+
+**Error format:**
+- Use `stop("Error message describing the issue")`
+- Provide clear, actionable error messages to users
 
 ### Version Compatibility Check
 

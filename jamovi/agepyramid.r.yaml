@@ -5,6 +5,15 @@ jrs:   '1.1'
 
 items:
 
+    - name: welcome
+      title: 'Getting Started'
+      type: Html
+      visible: (!age || !gender)
+
+    - name: dataInfo
+      title: 'Data Summary & Quality Information'
+      type: Html
+      visible: true
 
     - name:  pyramidTable
       title: 'Population Data'
@@ -33,6 +42,7 @@ items:
           - age
           - gender
           - female
+          - male
           - bin_width
           - plot_title
           - color1
@@ -40,8 +50,6 @@ items:
           - color_palette
           - age_groups
           - plot_engine
-
-
 
     - name: plot
       title: 'Age Pyramid'
@@ -54,6 +62,7 @@ items:
           - age
           - gender
           - female
+          - male
           - bin_width
           - plot_title
           - color1

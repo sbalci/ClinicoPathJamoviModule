@@ -25,6 +25,9 @@ children:
           - type: ComboBox
             name: wght
           - type: CheckBox
+            name: showLevelInfo
+            enable: (wght:unweighted == FALSE)
+          - type: CheckBox
             name: exct
 
   - type: CollapseBox
@@ -55,36 +58,6 @@ children:
           - type: ComboBox
             name: gwetWeights
             enable: (gwet)
-
-  - type: CollapseBox
-    label: "Concordance Correlation Coefficient (CCC)"
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: ccc
-
-  - type: CollapseBox
-    label: "Bland-Altman Analysis"
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: blandAltman
-          - type: CheckBox
-            name: blandAltmanPlot
-            enable: (blandAltman)
-          - type: CheckBox
-            name: proportionalBias
-            enable: (blandAltman)
-          - type: TextBox
-            name: baConfidenceLevel
-            format: number
-            enable: (blandAltman)
 
   - type: CollapseBox
     label: "Pairwise Kappa Analysis"

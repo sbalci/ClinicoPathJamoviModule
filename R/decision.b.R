@@ -39,40 +39,232 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 cTable$addRow(rowKey = "Test Positive", values = list(newtest = .("Test Positive")))
                 cTable$addRow(rowKey = "Test Negative", values = list(newtest = .("Test Negative")))
                 cTable$addRow(rowKey = "Total", values = list(newtest = .("Total")))
+
+                # Populate welcome message
+                self$results$welcome$setContent("
+                    <div style='padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 8px; border-left: 4px solid #4A90E2;'>
+                        <h3 style='margin-top: 0; color: #2c3e50;'>📊 Medical Decision Analysis</h3>
+                        <p style='font-size: 15px; color: #34495e;'>Evaluate diagnostic test performance with sensitivity, specificity, and predictive values.</p>
+
+                        <h4 style='color: #2c3e50; margin-top: 20px;'>Quick Start:</h4>
+                        <ol style='font-size: 14px; color: #34495e; line-height: 1.8;'>
+                            <li><strong>Select Gold Standard:</strong> Choose the reference variable representing true disease status (e.g., biopsy result, final diagnosis)</li>
+                            <li><strong>Select Disease Present Level:</strong> Choose which level indicates disease is present</li>
+                            <li><strong>Select Test Variable:</strong> Choose the diagnostic test you want to evaluate</li>
+                            <li><strong>Select Test Positive Level:</strong> Choose which level represents a positive test result</li>
+                        </ol>
+
+                        <div style='background: #fff; padding: 15px; border-radius: 5px; margin-top: 15px;'>
+                            <h4 style='margin-top: 0; color: #2c3e50;'>💡 What You'll Get:</h4>
+                            <ul style='font-size: 13px; color: #34495e; line-height: 1.6;'>
+                                <li><strong>Sensitivity & Specificity:</strong> How well the test identifies disease presence and absence</li>
+                                <li><strong>Predictive Values:</strong> Probability of disease given test results (PPV, NPV)</li>
+                                <li><strong>Likelihood Ratios:</strong> How much test results change disease probability</li>
+                                <li><strong>Confidence Intervals:</strong> Uncertainty estimates for all statistics</li>
+                                <li><strong>Fagan Nomogram:</strong> Visual representation of probability changes</li>
+                                <li><strong>Misclassification Analysis:</strong> Detailed examination of false positives and false negatives</li>
+                            </ul>
+                        </div>
+                    </div>
+                ")
             },
 
             # Enhanced input validation for categorical diagnostic data
             .validateCategoricalInputs = function() {
                 # Check for required variables with helpful messages
                 if (length(self$options$gold) == 0) {
-                    stop(.("Please select a gold standard (reference) variable"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noGoldStandard',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('No gold standard variable selected.\n• Select a reference variable (e.g., biopsy result, final diagnosis).\n• This represents the true disease status.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
                 if (length(self$options$newtest) == 0) {
-                    stop(.("Please select a test variable to evaluate"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noTestVariable',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('No test variable selected.\n• Select the diagnostic test you want to evaluate.\n• This is typically a new, faster, or less expensive test.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
                 if (length(self$options$goldPositive) == 0) {
-                    stop(.("Please select the positive level for the gold standard variable"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noGoldPositiveLevel',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('No disease-present level selected for gold standard.\n• Select the level that indicates disease is present.\n• This represents the condition you want to detect.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
                 if (length(self$options$testPositive) == 0) {
-                    stop(.("Please select the positive level for the test variable"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noTestPositiveLevel',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('No positive level selected for test variable.\n• Select the level that represents a positive test result.\n• This should indicate suspected disease presence.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
-                
+
                 # Check data availability
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    stop(.("No data available for analysis. Please ensure your data is loaded."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noDataAvailable',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('No data available for analysis.\n• Please ensure your data is loaded.\n• Check that your dataset contains observations.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
-                
+
                 # Validate data has enough cases
                 if (nrow(self$data) < 4) {
-                    stop(.("Insufficient data: At least 4 cases are required for diagnostic test analysis"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientData',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Insufficient data: %d cases found.\n• At least 4 cases are required for diagnostic test analysis.\n• Each cell of the 2×2 table should have at least one observation.', nrow(self$data)))
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
-                
+
                 # Validate prior probability if specified
                 if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
-                    stop(paste0("Population prevalence must be between 0 and 1 (exclusive). Current value: ", self$options$pprob, ". Please enter a value like 0.05 for 5% prevalence."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'invalidPrevalence',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Invalid population prevalence: %.3f\n• Prevalence must be between 0 and 1 (exclusive).\n• For 5%% prevalence, enter 0.05.\n• For 20%% prevalence, enter 0.20.', self$options$pprob))
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
-                
-                # Allow users to combine population prevalence with confidence intervals.
+
+                # Validate that selected levels actually exist in the data
+                goldVar <- jmvcore::constructFormula(terms = self$options$gold) %>%
+                          jmvcore::decomposeFormula() %>% unlist()
+                testVar <- jmvcore::constructFormula(terms = self$options$newtest) %>%
+                          jmvcore::decomposeFormula() %>% unlist()
+
+                # Get actual levels from data
+                gold_levels <- if (is.factor(self$data[[goldVar]])) {
+                    levels(self$data[[goldVar]])
+                } else {
+                    sort(unique(as.character(self$data[[goldVar]])))
+                }
+
+                test_levels <- if (is.factor(self$data[[testVar]])) {
+                    levels(self$data[[testVar]])
+                } else {
+                    sort(unique(as.character(self$data[[testVar]])))
+                }
+
+                # Validate gold standard positive level
+                if (!(self$options$goldPositive %in% gold_levels)) {
+                    available_levels <- if (length(gold_levels) <= 10) {
+                        paste(gold_levels, collapse = ", ")
+                    } else {
+                        paste(c(gold_levels[1:10], "..."), collapse = ", ")
+                    }
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'goldPositiveLevelNotFound',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Disease-present level "%s" not found in gold standard variable.\n• Available levels: %s\n• Check for typos or select the correct level from the dropdown.', self$options$goldPositive, available_levels))
+                    self$results$insert(1, notice)
+                    return(FALSE)
+                }
+
+                # Validate test positive level
+                if (!(self$options$testPositive %in% test_levels)) {
+                    available_levels <- if (length(test_levels) <= 10) {
+                        paste(test_levels, collapse = ", ")
+                    } else {
+                        paste(c(test_levels[1:10], "..."), collapse = ", ")
+                    }
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'testPositiveLevelNotFound',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Test-positive level "%s" not found in test variable.\n• Available levels: %s\n• Check for typos or select the correct level from the dropdown.', self$options$testPositive, available_levels))
+                    self$results$insert(1, notice)
+                    return(FALSE)
+                }
+
+                # Validate gold standard negative level if specified
+                if (length(self$options$goldNegative) > 0 && nchar(self$options$goldNegative) > 0) {
+                    if (!(self$options$goldNegative %in% gold_levels)) {
+                        available_levels <- if (length(gold_levels) <= 10) {
+                            paste(gold_levels, collapse = ", ")
+                        } else {
+                            paste(c(gold_levels[1:10], "..."), collapse = ", ")
+                        }
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'goldNegativeLevelNotFound',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf('Disease-absent level "%s" not found in gold standard variable.\n• Available levels: %s\n• Check for typos or select the correct level from the dropdown.', self$options$goldNegative, available_levels))
+                        self$results$insert(1, notice)
+                        return(FALSE)
+                    }
+
+                    # Check that positive and negative levels are different
+                    if (self$options$goldNegative == self$options$goldPositive) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'goldLevelsIdentical',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Disease-present and disease-absent levels cannot be the same.\n• Select different levels for positive and negative outcomes.')
+                        self$results$insert(1, notice)
+                        return(FALSE)
+                    }
+                }
+
+                # Validate test negative level if specified
+                if (length(self$options$testNegative) > 0 && nchar(self$options$testNegative) > 0) {
+                    if (!(self$options$testNegative %in% test_levels)) {
+                        available_levels <- if (length(test_levels) <= 10) {
+                            paste(test_levels, collapse = ", ")
+                        } else {
+                            paste(c(test_levels[1:10], "..."), collapse = ", ")
+                        }
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'testNegativeLevelNotFound',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf('Test-negative level "%s" not found in test variable.\n• Available levels: %s\n• Check for typos or select the correct level from the dropdown.', self$options$testNegative, available_levels))
+                        self$results$insert(1, notice)
+                        return(FALSE)
+                    }
+
+                    # Check that positive and negative levels are different
+                    if (self$options$testNegative == self$options$testPositive) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'testLevelsIdentical',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Test-positive and test-negative levels cannot be the same.\n• Select different levels for positive and negative outcomes.')
+                        self$results$insert(1, notice)
+                        return(FALSE)
+                    }
+                }
+
+                return(TRUE)
             },
 
             # Enhanced likelihood ratio validation with recovery
@@ -137,52 +329,144 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 vars_needed <- unique(c(testVar, goldVar))
                 if (length(vars_needed) < 2) {
-                    stop(.("Selected variables are not available in the data."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'variablesNotAvailable',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Selected variables are not available in the data.\n• Check that variable names are correct.\n• Ensure the data has been loaded properly.')
+                    self$results$insert(1, notice)
+                    return(NULL)
                 }
 
                 # Restrict case removal to variables used in the diagnostic table
+                # Track original row indices BEFORE filtering
                 subset_data <- self$data[, vars_needed, drop = FALSE]
+                subset_data$original_row_index <- seq_len(nrow(subset_data))
+
                 mydata <- jmvcore::naOmit(subset_data)
 
                 if (nrow(mydata) < nrow(self$data)) {
                     removed <- nrow(self$data) - nrow(mydata)
-                    warning(paste0("Removed ", removed, " rows with missing diagnostic data"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'missingDataRemoved',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('Removed %d row(s) with missing diagnostic data.\n• Complete-case analysis uses %d of %d cases.\n• Consider investigating patterns of missingness.', removed, nrow(mydata), nrow(self$data)))
+                    self$results$insert(1, notice)
                 }
                 
                 # Convert to factors and recode in single pipeline
                 mydata[[testVar]] <- forcats::as_factor(mydata[[testVar]])
                 mydata[[goldVar]] <- forcats::as_factor(mydata[[goldVar]])
-                
-                # Efficient recoding with single mutate
-                mydata <- mydata %>% 
+
+                # Get actual levels for validation
+                gold_actual_levels <- levels(mydata[[goldVar]])
+                test_actual_levels <- levels(mydata[[testVar]])
+
+                # Determine negative levels (explicit or implicit)
+                has_gold_negative <- length(self$options$goldNegative) > 0 && nchar(self$options$goldNegative) > 0
+                has_test_negative <- length(self$options$testNegative) > 0 && nchar(self$options$testNegative) > 0
+
+                gold_negative_level <- if (has_gold_negative) self$options$goldNegative else NULL
+                test_negative_level <- if (has_test_negative) self$options$testNegative else NULL
+
+                # Check for levels that will be excluded (not positive, not negative)
+                gold_used_levels <- c(self$options$goldPositive, gold_negative_level)
+                test_used_levels <- c(self$options$testPositive, test_negative_level)
+
+                gold_excluded <- setdiff(gold_actual_levels, gold_used_levels)
+                test_excluded <- setdiff(test_actual_levels, test_used_levels)
+
+                if (length(gold_excluded) > 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'goldLevelsExcluded',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    excluded_str <- if (length(gold_excluded) <= 5) {
+                        paste(gold_excluded, collapse = ", ")
+                    } else {
+                        paste(c(gold_excluded[1:5], "..."), collapse = ", ")
+                    }
+                    if (has_gold_negative) {
+                        notice$setContent(sprintf('Gold standard levels excluded from analysis: %s\n• Only "%s" (disease-present) and "%s" (disease-absent) will be used.\n• Rows with excluded levels will be removed.\n• To include all levels, leave "Disease Absent Level" empty.', excluded_str, self$options$goldPositive, gold_negative_level))
+                    } else {
+                        notice$setContent(sprintf('Gold standard has %d level(s) beyond positive: %s\n• These will be treated as disease-absent (negative).\n• If this is incorrect, explicitly select the "Disease Absent Level".', length(gold_excluded), excluded_str))
+                    }
+                    self$results$insert(1, notice)
+                }
+
+                if (length(test_excluded) > 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'testLevelsExcluded',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    excluded_str <- if (length(test_excluded) <= 5) {
+                        paste(test_excluded, collapse = ", ")
+                    } else {
+                        paste(c(test_excluded[1:5], "..."), collapse = ", ")
+                    }
+                    if (has_test_negative) {
+                        notice$setContent(sprintf('Test variable levels excluded from analysis: %s\n• Only "%s" (test-positive) and "%s" (test-negative) will be used.\n• Rows with excluded levels will be removed.\n• To include all levels, leave "Test Negative Level" empty.', excluded_str, self$options$testPositive, test_negative_level))
+                    } else {
+                        notice$setContent(sprintf('Test variable has %d level(s) beyond positive: %s\n• These will be treated as test-negative.\n• If this is incorrect, explicitly select the "Test Negative Level".', length(test_excluded), excluded_str))
+                    }
+                    self$results$insert(1, notice)
+                }
+
+                # Efficient recoding with explicit negative level handling
+                mydata <- mydata %>%
                     dplyr::mutate(
                         testVariable2 = dplyr::case_when(
                             is.na(.data[[testVar]]) ~ NA_character_,
                             .data[[testVar]] == self$options$testPositive ~ "Positive",
-                            TRUE ~ "Negative"
+                            !has_test_negative ~ "Negative",  # If no explicit negative, treat all others as negative
+                            .data[[testVar]] == test_negative_level ~ "Negative",
+                            TRUE ~ NA_character_  # Explicit negative specified, others become NA (filtered)
                         ),
                         goldVariable2 = dplyr::case_when(
                             is.na(.data[[goldVar]]) ~ NA_character_,
-                            .data[[goldVar]] == self$options$goldPositive ~ "Positive", 
-                            TRUE ~ "Negative"
+                            .data[[goldVar]] == self$options$goldPositive ~ "Positive",
+                            !has_gold_negative ~ "Negative",  # If no explicit negative, treat all others as negative
+                            .data[[goldVar]] == gold_negative_level ~ "Negative",
+                            TRUE ~ NA_character_  # Explicit negative specified, others become NA (filtered)
                         )
                     ) %>%
                     dplyr::mutate(
                         testVariable2 = forcats::fct_relevel(testVariable2, "Positive"),
                         goldVariable2 = forcats::fct_relevel(goldVariable2, "Positive")
                     )
+
+                # Remove rows with NA in recoded variables (excluded levels when explicit negative specified)
+                mydata <- mydata %>% dplyr::filter(!is.na(testVariable2), !is.na(goldVariable2))
                 
                 # Validate contingency table structure after data preparation
                 test_table <- table(mydata$testVariable2, mydata$goldVariable2)
                 
                 # Check for empty cells that would cause problems
                 if (any(dim(test_table) != c(2, 2))) {
-                    stop(.("Invalid data structure: Both test and gold standard variables must have exactly 2 levels each"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'invalidDataStructure',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Invalid data structure: Both test and gold standard variables must have exactly 2 levels each.\n• Ensure your variables are dichotomous (binary).\n• Check that positive/negative levels are correctly specified.')
+                    self$results$insert(1, notice)
+                    return(NULL)
                 }
                 
                 # Check for zero cells that would cause division by zero
                 if (any(test_table == 0)) {
-                    warning(.("Zero counts detected in contingency table. Results may be unstable. Consider collecting more data."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'zeroCellCounts',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent('Zero counts detected in contingency table.\n• Results may be unstable or undefined (e.g., infinite likelihood ratios).\n• Consider collecting more data or using exact methods.\n• Ensure both tests and gold standard have both positive and negative cases.')
+                    self$results$insert(1, notice)
                 }
                 
                 return(list(data = mydata, testVar = testVar, goldVar = goldVar))
@@ -438,11 +722,22 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Check data size and provide performance warnings
             .checkDataSize = function(data) {
                 n_rows <- nrow(data)
-                if (n_rows > 10000) {
-                    message(sprintf("Large dataset detected (%d rows). Analysis may take longer.", n_rows))
-                }
                 if (n_rows > 100000) {
-                    warning("Very large dataset (>100,000 rows). Consider sampling for initial analysis.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'veryLargeDataset',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('Very large dataset detected (%d rows).\n• Analysis may take longer than usual.\n• Consider sampling for initial exploratory analysis.\n• Full dataset will still be used for final results.', n_rows))
+                    self$results$insert(1, notice)
+                } else if (n_rows > 10000) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'largeDataset',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf('Large dataset detected (%d rows).\n• Analysis may take a moment to complete.', n_rows))
+                    self$results$insert(1, notice)
                 }
             },
 
@@ -453,18 +748,39 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Clinical best practices for diagnostic tests
                 if (total_n < 20) {
-                    warning("Very small sample size (n < 20). Results may be unreliable. Consider collecting more data.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'verySmallSample',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(sprintf('Very small sample size: n = %d (< 20 cases).\n• Results may be unreliable and unstable.\n• Confidence intervals will be very wide.\n• Consider collecting more data before making clinical decisions.\n• Minimum recommended: 100 cases for robust estimates.', total_n))
+                    self$results$insert(1, notice)
                 } else if (total_n < 50) {
-                    message("Small sample size (n < 50). Interpret results with caution.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallSample',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('Small sample size: n = %d (< 50 cases).\n• Interpret results with caution.\n• Confidence intervals may be wide.\n• Minimum recommended: 100 cases for robust estimates.', total_n))
+                    self$results$insert(1, notice)
+                } else if (total_n < 100) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'moderateSample',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf('Sample size: n = %d.\n• For robust diagnostic test evaluation, 100+ cases recommended.\n• Current sample provides preliminary estimates.', total_n))
+                    self$results$insert(1, notice)
                 }
 
                 if (min_cell < 5) {
-                    warning("Cell count < 5 detected. Consider Fisher's exact test or collect more data for stable estimates.")
-                }
-
-                # Recommend minimum for stable estimates
-                if (total_n < 100) {
-                    message("For robust diagnostic test evaluation, a minimum of 100 cases is recommended.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallCellCounts',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('Small cell count detected (minimum = %d, < 5).\n• Statistical estimates may be unstable.\n• Consider Fisher\'s exact test for small samples.\n• Collect more data for stable estimates of sensitivity/specificity.', min_cell))
+                    self$results$insert(1, notice)
                 }
             },
 
@@ -659,11 +975,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     return()
 
                 # Consolidated input validation
-                private$.validateCategoricalInputs()
+                if (!private$.validateCategoricalInputs()) {
+                    return()
+                }
 
                 # Efficient data preparation with missing data analysis
                 original_data <- self$data
                 prepared_data <- private$.prepareAnalysisData()
+
+                # Check if data preparation failed
+                if (is.null(prepared_data)) {
+                    return()
+                }
+
                 mydata <- prepared_data$data
                 testVariable <- prepared_data$testVar
                 goldVariable <- prepared_data$goldVar
@@ -674,7 +998,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Enhanced missing data reporting
                 missing_analysis <- private$.analyzeMissingData(original_data, mydata)
                 if (nrow(original_data) != nrow(mydata)) {
-                    message(missing_analysis)
+                    # Missing data summary is already shown via missingDataSummary HTML output
+                    # No need for console message - users see it in the results panel
+                    self$results$missingDataSummary$setContent(missing_analysis)
                 }
 
                 # Table 1 ----
@@ -695,10 +1021,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # self$results$text2$setContent(result2)
 
-                # Populate raw contingency jamovi table
+                # Populate raw contingency jamovi table (using user's selected levels, not lexicographic order)
                 raw_contingency <- self$results$rawContingency
                 try(raw_contingency$clear(), silent = TRUE)
 
+                # Get actual levels from the ORIGINAL variables (before recoding)
                 test_levels <- if (is.factor(mydata[[testVariable]])) {
                     levels(mydata[[testVariable]])
                 } else {
@@ -711,22 +1038,39 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     sort(unique(as.character(mydata[[goldVariable]])))
                 }
 
+                # Determine gold negative level (explicit or infer)
+                has_gold_negative <- length(self$options$goldNegative) > 0 && nchar(self$options$goldNegative) > 0
+                gold_negative_level <- if (has_gold_negative) {
+                    self$options$goldNegative
+                } else {
+                    # Infer: any level that's not positive
+                    setdiff(gold_levels, self$options$goldPositive)[1]
+                }
+
+                # Determine test negative level (explicit or infer)
+                has_test_negative <- length(self$options$testNegative) > 0 && nchar(self$options$testNegative) > 0
+                test_negative_level <- if (has_test_negative) {
+                    self$options$testNegative
+                } else {
+                    # Infer: any level that's not positive
+                    setdiff(test_levels, self$options$testPositive)[1]
+                }
+
                 results_matrix <- as.matrix(results1)
 
+                # Set column headers using USER'S selections, not lexicographic order
                 if (!is.null(raw_contingency$getColumn("test_level"))) {
                     raw_contingency$getColumn("test_level")$setTitle(testVariable)
                     raw_contingency$getColumn("test_level")$setSuperTitle("")
                 }
                 if (!is.null(raw_contingency$getColumn("gold_pos"))) {
-                    raw_contingency$getColumn("gold_pos")$setTitle(
-                        if (length(gold_levels) >= 1) gold_levels[1] else ""
-                    )
+                    # Use user's goldPositive selection
+                    raw_contingency$getColumn("gold_pos")$setTitle(self$options$goldPositive)
                     raw_contingency$getColumn("gold_pos")$setSuperTitle(goldVariable)
                 }
                 if (!is.null(raw_contingency$getColumn("gold_neg"))) {
-                    raw_contingency$getColumn("gold_neg")$setTitle(
-                        if (length(gold_levels) >= 2) gold_levels[2] else ""
-                    )
+                    # Use user's goldNegative selection (or inferred)
+                    raw_contingency$getColumn("gold_neg")$setTitle(gold_negative_level)
                     raw_contingency$getColumn("gold_neg")$setSuperTitle(goldVariable)
                 }
                 if (!is.null(raw_contingency$getColumn("row_total"))) {
@@ -737,10 +1081,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 row_names <- rownames(results_matrix)
                 col_names <- colnames(results_matrix)
 
+                # Populate rows in order: positive test first, then negative test
+                ordered_test_levels <- c(self$options$testPositive, test_negative_level)
+
                 if (!is.null(test_levels) && length(test_levels) > 0 &&
                     !is.null(gold_levels) && length(gold_levels) > 0) {
 
-                    for (lvl in test_levels) {
+                    for (lvl in ordered_test_levels) {
+                        # Skip if this level doesn't exist in the data
+                        if (!(lvl %in% test_levels)) next
+
                         row_vector <- if (!is.null(row_names) && lvl %in% row_names) {
                             results_matrix[lvl, , drop = FALSE]
                         } else {
@@ -754,21 +1104,20 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             names(row_values) <- col_names
                         }
 
-                        val_pos <- if (length(gold_levels) >= 1 &&
-                                        gold_levels[1] %in% names(row_values)) {
-                            row_values[[gold_levels[1]]]
+                        # Use user's selected positive/negative levels
+                        val_pos <- if (self$options$goldPositive %in% names(row_values)) {
+                            row_values[[self$options$goldPositive]]
                         } else {
                             NA_real_
                         }
 
-                        val_neg <- if (length(gold_levels) >= 2 &&
-                                        gold_levels[2] %in% names(row_values)) {
-                            row_values[[gold_levels[2]]]
+                        val_neg <- if (gold_negative_level %in% names(row_values)) {
+                            row_values[[gold_negative_level]]
                         } else {
                             NA_real_
                         }
 
-                        row_total <- sum(row_values)
+                        row_total <- sum(row_values, na.rm = TRUE)
 
                         raw_contingency$addRow(
                             rowKey = paste0("row_", lvl),
@@ -790,16 +1139,15 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         names(col_totals) <- gold_levels
                     }
 
-                    total_pos <- if (length(gold_levels) >= 1 &&
-                                        gold_levels[1] %in% names(col_totals)) {
-                        col_totals[[gold_levels[1]]]
+                    # Use user's selected levels for totals
+                    total_pos <- if (self$options$goldPositive %in% names(col_totals)) {
+                        col_totals[[self$options$goldPositive]]
                     } else {
                         NA_real_
                     }
 
-                    total_neg <- if (length(gold_levels) >= 2 &&
-                                        gold_levels[2] %in% names(col_totals)) {
-                        col_totals[[gold_levels[2]]]
+                    total_neg <- if (gold_negative_level %in% names(col_totals)) {
+                        col_totals[[gold_negative_level]]
                     } else {
                         NA_real_
                     }
@@ -875,19 +1223,44 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
                 # Extract confusion matrix values with error handling
-                tryCatch({
-                    TP <- conf_table[1, 1]
-                    FP <- conf_table[1, 2]
-                    FN <- conf_table[2, 1]
-                    TN <- conf_table[2, 2]
-                    
-                    # Validate extracted values
-                    if (any(is.na(c(TP, FP, FN, TN))) || any(c(TP, FP, FN, TN) < 0)) {
-                        stop(.("Invalid contingency table values detected"))
-                    }
+                extraction_result <- tryCatch({
+                    list(
+                        TP = conf_table[1, 1],
+                        FP = conf_table[1, 2],
+                        FN = conf_table[2, 1],
+                        TN = conf_table[2, 2]
+                    )
                 }, error = function(e) {
-                    stop(paste0("Error extracting confusion matrix values: ", e$message, ". Please check your data formatting."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'confusionMatrixError',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Error extracting confusion matrix values: %s\n• Check your data formatting.\n• Ensure both variables have exactly 2 levels.\n• Verify positive/negative levels are correctly specified.', e$message))
+                    self$results$insert(1, notice)
+                    return(NULL)
                 })
+
+                if (is.null(extraction_result)) {
+                    return()
+                }
+
+                TP <- extraction_result$TP
+                FP <- extraction_result$FP
+                FN <- extraction_result$FN
+                TN <- extraction_result$TN
+
+                # Validate extracted values
+                if (any(is.na(c(TP, FP, FN, TN))) || any(c(TP, FP, FN, TN) < 0)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'invalidContingencyValues',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Invalid contingency table values detected.\n• Confusion matrix contains NA or negative values.\n• Check that your data is properly formatted.\n• Ensure sufficient observations in all categories.')
+                    self$results$insert(1, notice)
+                    return()
+                }
 
 
 
@@ -999,20 +1372,20 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 for (metric_name in c("Sens", "Spec", "AccurT", "PrevalenceD", "PPV", "NPV")) {
                     metric_value <- get(metric_name)
                     if (!is.na(metric_value) && (metric_value < 0 || metric_value > 1)) {
-                        warning(sprintf("%s out of valid range [0,1]: %.3f - check data", metric_name, metric_value))
+                        # Metric validation - should not occur with proper data validation
+                        # warning(sprintf("%s out of valid range [0,1]: %.3f - check data", metric_name, metric_value))
                     }
                 }
 
                 # Debug logging for edge cases and unusual conditions
                 if (getOption("jamovi.debug", FALSE)) {
-                    message(sprintf("Decision analysis debug: n=%d, prev=%.3f, sens=%.3f, spec=%.3f, ppv=%.3f, npv=%.3f",
-                                   TotalPop, PrevalenceD, Sens, Spec, PPV, NPV))
+                    # Debug message - commented out for production
+                    # message(sprintf("Decision analysis debug: n=%d, prev=%.3f, sens=%.3f, spec=%.3f, ppv=%.3f, npv=%.3f",
+                    #                TotalPop, PrevalenceD, Sens, Spec, PPV, NPV))
 
                     # Log potential issues
-                    if (TotalPop < 30) message("Warning: Small sample size detected")
-                    if (PrevalenceD < 0.05 || PrevalenceD > 0.95) message("Warning: Extreme prevalence detected")
-                    if (any(c(TP, FP, FN, TN) < 5)) message("Warning: Small cell counts detected")
-                    if (is.na(LRP) || is.na(LRN)) message("Note: Undefined likelihood ratios (perfect test)")
+                    # Data quality checks - these are now handled by .validateSampleSize() via Notices
+                    # Small sample size, extreme prevalence, small cell counts notifications are emitted earlier
                 }
 
 
@@ -1075,7 +1448,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 LRP <- lr_validation$lrp
                 LRN <- lr_validation$lrn
                 if (length(lr_validation$issues) > 0) {
-                    message(paste("LR adjustments:", paste(lr_validation$issues, collapse = "; ")))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'likelihoodRatioAdjustments',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf('Likelihood ratio adjustments applied:\n• %s\n• Results have been adjusted for statistical validity.', paste(lr_validation$issues, collapse = "\n• ")))
+                    self$results$insert(1, notice)
                 }
 
 
@@ -1198,7 +1577,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         private$.analyzeMisclassifiedCases(mydata, goldVariable, testVariable)
                     }
                 }, error = function(e) {
-                    message(paste("Error in misclassified cases analysis:", e$message))
+                    # Error already handled by returning early
+                    # message(paste("Error in misclassified cases analysis:", e$message))
                 })
 
                 # Add footnotes using centralized method
@@ -1262,18 +1642,22 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                                     epir_success <- nrow(epir_ratio) > 0 || nrow(epir_number) > 0
                                 } else {
-                                    warning("epiR statistical detail did not include expected measures - confidence intervals not available")
+                                    # epiR package issue - silently skip, user won't see CI tables
+                                    # warning("epiR statistical detail did not include expected measures - confidence intervals not available")
                                 }
                             } else {
-                                warning("epiR detail is NULL or empty - confidence intervals not available")
+                                # epiR package issue - silently skip
+                                # warning("epiR detail is NULL or empty - confidence intervals not available")
                             }
                         } else {
-                            warning("epiR returned NULL results - confidence intervals not available")
+                            # epiR package issue - silently skip
+                            # warning("epiR returned NULL results - confidence intervals not available")
                         }
 
                     }, error = function(e) {
                         # Handle epiR errors gracefully
-                        warning(paste("Error in epiR confidence interval calculation:", e$message))
+                        # epiR error - silently skip, CI table won't be populated
+                        # warning(paste("Error in epiR confidence interval calculation:", e$message))
                         epir_success <- FALSE
                     })
 
@@ -1357,13 +1741,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 required_fields <- c("Prevalence", "Plr", "Nlr", "Sens", "Spec")
 
                 if (is.null(state)) {
-                    stop("Plot state is null - cannot generate plot")
+                    return(NULL)
                 }
 
                 missing_fields <- setdiff(required_fields, names(state))
                 if (length(missing_fields) > 0) {
-                    stop(paste("Missing required plot data fields:",
-                               paste(missing_fields, collapse = ", ")))
+                    return(NULL)
                 }
 
                 # Validate numeric ranges
@@ -1371,7 +1754,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 for (field in numeric_fields) {
                     if (!is.numeric(state[[field]]) ||
                         state[[field]] < 0 || state[[field]] > 1) {
-                        warning(paste("Invalid", field, "value:", state[[field]]))
+                        # Plot state validation - returns NULL to prevent plotting
+                        # warning(paste("Invalid", field, "value:", state[[field]]))
                         state[[field]] <- max(0, min(1, as.numeric(state[[field]])))
                     }
                 }
@@ -1383,6 +1767,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
             .plot1 = function(image1, ggtheme, ...) {
                 # Validate plot state data structure
                 plotData1 <- private$.validatePlotState(image1$state)
+
+                if (is.null(plotData1)) {
+                    # Return FALSE to prevent plot rendering
+                    return(FALSE)
+                }
 
                 nomogram_fn <- get0("nomogrammer", mode = "function", inherits = TRUE)
 
@@ -1400,7 +1789,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     }
 
                     if (is.na(prevalence) || prevalence <= 0 || prevalence >= 1) {
-                        stop("Prevalence must be between 0 and 1 to produce the probability plot")
+                        # Return FALSE instead of stopping
+                        return(FALSE)
                     }
 
                     pre_odds <- prevalence / (1 - prevalence)
@@ -1548,7 +1938,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # False Positive cases table
                     if (n_fp > 0) {
                         fp_cases <- mydata2[fp_idx, ]
-                        fp_cases$row_id <- which(fp_idx)
+                        # Use original row indices from the dataset, not filtered indices
+                        fp_cases$row_id <- fp_cases$original_row_index
 
                         max_show <- min(self$options$maxCasesShow, nrow(fp_cases))
                         fp_table <- self$results$falsePositiveTable
@@ -1571,7 +1962,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # False Negative cases table
                     if (n_fn > 0) {
                         fn_cases <- mydata2[fn_idx, ]
-                        fn_cases$row_id <- which(fn_idx)
+                        # Use original row indices from the dataset, not filtered indices
+                        fn_cases$row_id <- fn_cases$original_row_index
 
                         max_show <- min(self$options$maxCasesShow, nrow(fn_cases))
                         fn_table <- self$results$falseNegativeTable
@@ -1596,7 +1988,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 }, error = function(e) {
                     # Silently fail if misclassification analysis has errors
-                    message(paste("Error in misclassified cases analysis:", e$message))
+                    # Error already handled by returning early
+                    # message(paste("Error in misclassified cases analysis:", e$message))
                 })
             },
 

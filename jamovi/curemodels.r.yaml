@@ -18,6 +18,11 @@ items:
       type:  Html
       visible: true
 
+    - name:  errors
+      title: Errors
+      type:  Html
+      visible: true
+
     - name:  summary
       title: Analysis Summary
       type:  Html
@@ -27,7 +32,7 @@ items:
       title: Cure Model Results
       type:  Table
       visible: true
-      rows: 1
+      rows: 0
       columns:
           - name: parameter
             title: 'Parameter'
@@ -56,7 +61,7 @@ items:
       title: Cure Fraction Summary
       type:  Table
       visible: true
-      rows: 1
+      rows: 0
       columns:
           - name: group
             title: 'Group'
@@ -106,7 +111,7 @@ items:
       title: Goodness of Fit Tests
       type:  Table
       visible: (goodness_of_fit)
-      rows: 1
+      rows: 0
       columns:
           - name: test_name
             title: 'Test'
@@ -135,8 +140,8 @@ items:
     - name:  modelComparison
       title: Model Comparison
       type:  Table
-      visible: (model_type:both)
-      rows: 2
+      visible: (model_type:all)
+      rows: 0
       columns:
           - name: model
             title: 'Model Type'

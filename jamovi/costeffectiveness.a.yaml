@@ -1,7 +1,7 @@
 ---
 name: costeffectiveness
 title: Cost-Effectiveness Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Economic Evaluation
 menuSubtitle: ICER and cost-utility analysis for diagnostic tests
 version: '0.0.32'
@@ -134,7 +134,7 @@ options:
     - name: dominance_analysis
       title: Dominance Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Identify dominated strategies (more costly and less effective) and
@@ -144,7 +144,7 @@ options:
     - name: net_monetary_benefit
       title: Calculate Net Monetary Benefit
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Calculate Net Monetary Benefit (NMB) at specified willingness-to-pay
@@ -164,7 +164,7 @@ options:
     - name: multiple_wtp_thresholds
       title: Multiple WTP Thresholds
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Evaluate cost-effectiveness at multiple willingness-to-pay thresholds
@@ -183,7 +183,7 @@ options:
     - name: confidence_intervals
       title: Confidence Intervals for Costs and Effects
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Calculate confidence intervals for mean costs, mean effects, and ICER
@@ -230,7 +230,7 @@ options:
     - name: deterministic_sensitivity
       title: Deterministic Sensitivity Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             One-way sensitivity analysis varying individual parameters to assess
@@ -447,7 +447,7 @@ options:
     - name: plot_nmb
       title: Net Monetary Benefit Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Bar plot showing net monetary benefit for each strategy at specified

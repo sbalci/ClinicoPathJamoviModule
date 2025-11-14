@@ -25,18 +25,109 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$var)) {
                 return(FALSE)
             }
+
             if (nrow(self$data) == 0) {
-                stop(.("Data contains no (complete) rows"))
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
+                    "<p style='color: #721c24;'>", .("Data contains no (complete) rows."), "</p>",
+                    "<p>", .("Please check your data for missing values or filtering issues."), "</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return(FALSE)
             }
-            
+
             # Enhanced validation with clinical guidance
             var_data <- jmvcore::toNumeric(self$data[[self$options$var]])
             valid_count <- sum(!is.na(var_data))
-            
+
+            # Check minimum sample size
             if (valid_count < 30) {
-                stop(.("Insufficient data: Benford's Law requires at least 30 valid observations for meaningful results"))
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Insufficient Data</h4>",
+                    "<p style='color: #721c24;'>", .("Benford's Law analysis requires at least <strong>30 valid observations</strong> for meaningful results."), "</p>",
+                    "<p><strong>", .("Current data:"), "</strong> ", valid_count, " ", .("valid observations"), "</p>",
+                    "<hr style='border-color: #dc3545;'>",
+                    "<p><strong>", .("Recommendations:"), "</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>", .("Combine data from multiple sources or time periods"), "</li>",
+                    "<li>", .("Use a different variable with more observations"), "</li>",
+                    "<li>", .("Consider alternative data quality checks for small samples"), "</li>",
+                    "</ol>",
+                    "<p style='margin-top: 10px;'><em>", .("Note: Ideally, 100-1000+ observations are recommended for reliable Benford's Law analysis."), "</em></p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return(FALSE)
             }
-            
+
+            # Check for positive values only (Benford's Law requirement)
+            non_na_data <- var_data[!is.na(var_data)]
+            if (any(non_na_data <= 0)) {
+                zero_count <- sum(non_na_data == 0)
+                negative_count <- sum(non_na_data < 0)
+
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Values Detected</h4>",
+                    "<p style='color: #721c24;'><strong>", .("Benford's Law only applies to positive numbers."), "</strong></p>",
+                    "<p>", .("Your data contains:"), "</p>",
+                    "<ul style='margin-left: 20px;'>",
+                    if (zero_count > 0) paste0("<li>", zero_count, " ", .("zero values"), "</li>") else "",
+                    if (negative_count > 0) paste0("<li>", negative_count, " ", .("negative values"), "</li>") else "",
+                    "</ul>",
+                    "<hr style='border-color: #dc3545;'>",
+                    "<p><strong>", .("Solutions:"), "</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li><strong>", .("Filter data:"), "</strong> ", .("Remove or exclude zero/negative values before analysis"), "</li>",
+                    "<li><strong>", .("Transform data:"), "</strong> ", .("If analyzing deltas/changes, use absolute values or analyze increases separately from decreases"), "</li>",
+                    "<li><strong>", .("Select different variable:"), "</strong> ", .("Choose a naturally positive variable (e.g., lab values, measurements, counts)"), "</li>",
+                    "</ol>",
+                    "<p style='margin-top: 10px;'><em>", .("Example valid data: lab test values, patient ages, tumor sizes, cell counts"), "</em></p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return(FALSE)
+            }
+
+            # Check for multiple orders of magnitude (Benford's Law requirement)
+            min_val <- min(non_na_data, na.rm = TRUE)
+            max_val <- max(non_na_data, na.rm = TRUE)
+            magnitude_range <- log10(max_val / min_val)
+
+            if (magnitude_range < 1) {
+                html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Limited Data Range</h4>",
+                    "<p style='color: #856404;'><strong>", .("Warning: Data spans less than one order of magnitude."), "</strong></p>",
+                    "<p>", .("Benford's Law works best when data spans multiple orders of magnitude (e.g., values ranging from 10 to 1000+)."), "</p>",
+                    "<p><strong>", .("Your data range:"), "</strong> ", round(min_val, 2), " ", .("to"), " ", round(max_val, 2),
+                    " (", round(magnitude_range, 2), " ", .("orders of magnitude"), ")</p>",
+                    "<hr style='border-color: #ffc107;'>",
+                    "<p><strong>", .("This analysis may not be meaningful because:"), "</strong></p>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li>", .("Narrow ranges (e.g., 45-55) don't exhibit Benford's Law patterns"), "</li>",
+                    "<li>", .("Results will likely show false deviations"), "</li>",
+                    "<li>", .("Clinical interpretation will be unreliable"), "</li>",
+                    "</ul>",
+                    "<p><strong>", .("Recommendations:"), "</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>", .("Use variables that naturally vary widely (e.g., protein levels, gene expression, population counts)"), "</li>",
+                    "<li>", .("Combine data across different scales or contexts"), "</li>",
+                    "<li>", .("Consider alternative data quality checks for narrow-range data"), "</li>",
+                    "</ol>",
+                    "<p style='margin-top: 10px;'><em>", .("Proceeding with analysis, but results should be interpreted with caution."), "</em></p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                # Continue with analysis but user is warned
+            } else {
+                # Clear warnings if validation passes
+                self$results$dataWarning$setContent("")
+            }
+
             return(TRUE)
         },
         
@@ -44,22 +135,30 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_total <- length(var_data[!is.na(var_data)])
             n_suspects <- if (!is.null(suspects_obj) && nrow(suspects_obj) > 0) nrow(suspects_obj) else 0
             suspicion_rate <- round((n_suspects / n_total) * 100, 1)
-            
-            # Clinical interpretation based on suspicion rate
-            if (suspicion_rate < 5) {
-                clinical_interpretation <- .("Data follows expected Benford's Law pattern. Low concern for data quality issues.")
-                recommendation <- .("Data appears reliable. No immediate action required.")
-                concern_level <- .("Low")
-            } else if (suspicion_rate < 15) {
-                clinical_interpretation <- .("Moderate deviation from expected pattern. Review recommended.")
-                recommendation <- .("Consider reviewing data collection and entry procedures.")
-                concern_level <- .("Moderate")
+
+            # CRITICAL: Add guardrails for small samples
+            # Prevent authoritative clinical recommendations on statistically invalid data
+            if (n_total < 100) {
+                clinical_interpretation <- .("CAUTION: Sample size too small for reliable Benford's Law interpretation. Statistical validity is questionable with fewer than 100 observations. Results should NOT be used for clinical decision-making.")
+                recommendation <- .("Increase sample size to at least 100-1000 observations before drawing conclusions. Consider alternative data quality checks for small datasets.")
+                concern_level <- .("Unreliable (Small Sample)")
             } else {
-                clinical_interpretation <- .("High deviation from expected pattern. Significant data quality concerns.")
-                recommendation <- .("Immediate review of data sources and validation procedures strongly recommended.")
-                concern_level <- .("High")
+                # Clinical interpretation based on suspicion rate (only for adequate sample sizes)
+                if (suspicion_rate < 5) {
+                    clinical_interpretation <- .("Data follows expected Benford's Law pattern. Low concern for data quality issues.")
+                    recommendation <- .("Data appears reliable. No immediate action required.")
+                    concern_level <- .("Low")
+                } else if (suspicion_rate < 15) {
+                    clinical_interpretation <- .("Moderate deviation from expected pattern. Review recommended.")
+                    recommendation <- .("Consider reviewing data collection and entry procedures.")
+                    concern_level <- .("Moderate")
+                } else {
+                    clinical_interpretation <- .("High deviation from expected pattern. Significant data quality concerns.")
+                    recommendation <- .("Immediate review of data sources and validation procedures strongly recommended.")
+                    concern_level <- .("High")
+                }
             }
-            
+
             return(list(
                 total_observations = n_total,
                 valid_observations = n_total,
@@ -178,31 +277,55 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Store detailed results (hidden by default)
                 self$results$text$setContent(bfd.cp)
                 
-                # Get suspects
-                suspects <- benford.analysis::getSuspects(bfd = bfd.cp, 
-                                                         data = mydata)
-                
+                # Get suspects - CRITICAL: Only extract the selected variable to prevent PHI leakage
+                # getSuspects returns the entire data frame with all columns, which could expose PHI
+                # We only need the selected variable values, not patient IDs, dates, etc.
+                var_name <- self$options$var
+                suspects_full <- benford.analysis::getSuspects(bfd = bfd.cp,
+                                                              data = data.frame(value = var))
+
+                # Extract only the selected variable column - do NOT expose other columns
+                # This prevents PHI leakage from unselected variables
+                if (!is.null(suspects_full) && nrow(suspects_full) > 0) {
+                    # Get indices of suspects from the full dataset
+                    suspect_indices <- as.numeric(rownames(suspects_full))
+                    # Extract only the suspicious VALUES from the selected variable
+                    suspect_values <- var[suspect_indices]
+
+                    # Create safe output with only the selected variable values
+                    suspects_safe <- data.frame(
+                        Index = suspect_indices,
+                        Value = suspect_values,
+                        stringsAsFactors = FALSE
+                    )
+                    colnames(suspects_safe) <- c(.("Row"), var_name)
+                } else {
+                    suspects_safe <- NULL
+                }
+
                 # Format suspects output with clinical context
-                if (nrow(suspects) > 0) {
+                if (!is.null(suspects_safe) && nrow(suspects_safe) > 0) {
                     suspects_text <- glue::glue("
                     {header}
-                    
+
                     {found_text} {n_suspects} {suspicious_text} {total_text} {n_total} {observations_text}
-                    
+
                     {details_header}
                     {suspects_output}
-                    
+
+                    {security_note}
                     {note_text}
                     ",
                     header = .("SUSPICIOUS DATA POINTS IDENTIFIED"),
                     found_text = .("Found"),
-                    n_suspects = nrow(suspects),
+                    n_suspects = nrow(suspects_safe),
                     suspicious_text = .("suspicious data points out of"),
                     total_text = "",
                     n_total = valid_count,
                     observations_text = .("total observations"),
                     details_header = .("Details:"),
-                    suspects_output = paste(capture.output(print(suspects)), collapse = "\n"),
+                    suspects_output = paste(capture.output(print(suspects_safe, row.names = FALSE)), collapse = "\n"),
+                    security_note = .("(Only showing selected variable values for privacy protection)"),
                     note_text = .("Note: These points deviate significantly from expected Benford's Law patterns and should be verified against source data.")
                     )
                 } else {
@@ -210,9 +333,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 self$results$text2$setContent(suspects_text)
-                
-                # Generate clinical interpretation
-                interpretation <- private$.interpretResults(bfd.cp, suspects, var)
+
+                # Generate clinical interpretation with safe suspect data
+                interpretation <- private$.interpretResults(bfd.cp, suspects_safe, var)
                 
                 # Populate summary table using addRow method
                 self$results$summary$addRow(rowKey=1, values=list(

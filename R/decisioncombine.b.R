@@ -5,12 +5,26 @@
 #' @importFrom dplyr %>% mutate case_when
 #' @importFrom forcats as_factor fct_relevel
 #' @importFrom epiR epi.tests
+#' @importFrom tidyr pivot_longer
+#' @importFrom scales percent_format
+#' @importFrom rlang .data
 
 decisioncombineClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
         "decisioncombineClass",
         inherit = decisioncombineBase,
         private = list(
+            .escapeVariableNames = function(var_names) {
+                # Escape variable names with spaces/special characters
+                sapply(var_names, function(x) {
+                    if (grepl("[^A-Za-z0-9_.]", x)) {
+                        paste0("`", x, "`")
+                    } else {
+                        x
+                    }
+                }, USE.NAMES = FALSE)
+            },
+
             .init = function() {
                 # Minimal initialization
             },
@@ -23,11 +37,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     return()
                 }
 
-                # Step 1: Validate inputs
-                private$.validateInputs()
+                # Step 1: Validate inputs (will stop on errors)
+                validation_result <- private$.validateInputs()
+                if (!validation_result) {
+                    return()  # Halt execution if validation failed
+                }
 
                 # Step 2: Prepare data
                 data_prep <- private$.prepareData()
+
+                # Halt if data preparation failed
+                if (is.null(data_prep)) {
+                    return()
+                }
 
                 # Step 3: Individual test analysis (if requested)
                 if (self$options$showIndividual) {
@@ -45,9 +67,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 # Step 4: Combination analysis
                 private$.analyzeCombinations(data_prep)
 
-                # Step 5: Prepare plot data (if requested)
-                if (self$options$showPlot) {
-                    private$.preparePlotData(data_prep)
+                # Step 5: Populate frequency tables (if requested)
+                if (self$options$showFrequency) {
+                    private$.populateFrequencyTables(data_prep)
+                }
+
+                # Step 6: Populate recommendation (if requested)
+                if (self$options$showRecommendation) {
+                    private$.populateRecommendation()
+                }
+
+                # Step 7: Add pattern to data (if requested)
+                if (self$options$addPatternToData) {
+                    private$.addPatternColumn(data_prep)
                 }
             },
 
@@ -79,26 +111,62 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             },
 
             .validateInputs = function() {
-                # Strict validation with clear error messages
+                # Strict validation with clear error messages using jmvcore::Notice
+                # Returns TRUE if validation passes, FALSE otherwise
 
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    stop("No data available. Please load data before running analysis.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noData',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('No data available. Please load data before running analysis.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
 
                 if (length(self$options$gold) == 0 || self$options$gold == "") {
-                    stop("Gold standard variable is required. Please select a reference test.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noGoldStandard',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Gold standard variable is required. Please select a reference test.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
 
                 if (is.null(self$options$goldPositive) || self$options$goldPositive == "") {
-                    stop("Please select the disease present level for the gold standard.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noGoldPositiveLevel',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Please select the disease present level for the gold standard.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
 
                 if (length(self$options$test1) == 0 || self$options$test1 == "") {
-                    stop("Test 1 is required. Please select at least one test variable.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noTest1',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Test 1 is required. Please select at least one test variable.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
 
                 if (is.null(self$options$test1Positive) || self$options$test1Positive == "") {
-                    stop("Please select the positive level for Test 1.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noTest1PositiveLevel',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Please select the positive level for Test 1.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
 
                 # Check if we have at least 2 tests for combination analysis
@@ -106,7 +174,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 if (has_test2) {
                     if (is.null(self$options$test2Positive) || self$options$test2Positive == "") {
-                        stop("Please select the positive level for Test 2.")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'noTest2PositiveLevel',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Please select the positive level for Test 2.')
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
                 }
 
@@ -114,14 +189,30 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 has_test3 <- !is.null(self$options$test3) && self$options$test3 != ""
                 if (has_test3) {
                     if (is.null(self$options$test3Positive) || self$options$test3Positive == "") {
-                        stop("Please select the positive level for Test 3.")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'noTest3PositiveLevel',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Please select the positive level for Test 3.')
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
                 }
 
                 # Minimum data requirement
                 if (nrow(self$data) < 4) {
-                    stop("Insufficient data: At least 4 cases are required for analysis.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientData',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Insufficient data: At least 4 cases are required for analysis.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
+
+                return(TRUE)  # All validation checks passed
             },
 
             .prepareData = function() {
@@ -149,7 +240,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 mydata <- jmvcore::naOmit(subset_data)
 
                 if (nrow(mydata) == 0) {
-                    stop("No complete cases available after removing missing data.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noCompleteCases',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('No complete cases available after removing missing data.')
+                    self$results$insert(1, notice)
+                    return(NULL)
                 }
 
                 # Convert to factors
@@ -241,6 +339,36 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 fn <- cont_table[2, 1]
                 tn <- cont_table[2, 2]
 
+                # Validate counts
+                if (any(is.na(c(tp, fp, fn, tn))) || any(c(tp, fp, fn, tn) < 0)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('invalidCountsTest', test_num),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Invalid counts detected for Test %d. Skipping individual analysis.',
+                        test_num
+                    ))
+                    self$results$insert(1, notice)
+                    return()
+                }
+
+                # Check if all counts are zero
+                if (tp == 0 && fp == 0 && fn == 0 && tn == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('allZeroCountsTest', test_num),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'No valid observations for Test %d. Skipping individual analysis.',
+                        test_num
+                    ))
+                    self$results$insert(1, notice)
+                    return()
+                }
+
                 # Get results tables
                 if (test_num == 1) {
                     contTable <- self$results$individualTest1$test1Contingency
@@ -319,9 +447,13 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 if (!has_test3) {
                     # Two-test combinations (4 patterns)
                     private$.analyzeTwoTestPatterns(data_prep)
+                    # Add clinical strategies for 2 tests
+                    private$.addTwoTestStrategies(data_prep)
                 } else {
                     # Three-test combinations (8 patterns)
                     private$.analyzeThreeTestPatterns(data_prep)
+                    # Add clinical strategies for 3 tests
+                    private$.addThreeTestStrategies(data_prep)
                 }
             },
 
@@ -365,6 +497,62 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 fn <- cont_table[2, 1]
                 tn <- cont_table[2, 2]
 
+                # Validate counts - check for negative values
+                if (any(is.na(c(tp, fp, fn, tn))) || any(c(tp, fp, fn, tn) < 0)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('invalidCounts_', gsub("[^A-Za-z0-9]", "_", pattern_name)),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Invalid counts detected for pattern "%s". Skipping this combination.',
+                        pattern_name
+                    ))
+                    self$results$insert(1, notice)
+                    return()
+                }
+
+                # Check if all counts are zero
+                if (tp == 0 && fp == 0 && fn == 0 && tn == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('allZeroCounts_', gsub("[^A-Za-z0-9]", "_", pattern_name)),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'No observations found for pattern "%s". Skipping this combination.',
+                        pattern_name
+                    ))
+                    self$results$insert(1, notice)
+                    return()
+                }
+
+                # Apply continuity correction if any cell is zero (except when all are zero)
+                # This prevents Inf/NaN in likelihood ratios and allows valid CIs
+                use_continuity <- any(c(tp, fp, fn, tn) == 0)
+                if (use_continuity) {
+                    tp_adj <- tp + 0.5
+                    fp_adj <- fp + 0.5
+                    fn_adj <- fn + 0.5
+                    tn_adj <- tn + 0.5
+                    # Post informative notice
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('continuityCorrectionApplied_', gsub("[^A-Za-z0-9]", "_", pattern_name)),
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf(
+                        'Continuity correction (+0.5) applied to pattern "%s" due to zero cell count(s).',
+                        pattern_name
+                    ))
+                    self$results$insert(1, notice)
+                } else {
+                    tp_adj <- tp
+                    fp_adj <- fp
+                    fn_adj <- fn
+                    tn_adj <- tn
+                }
+
                 # Calculate statistics using epiR
                 result <- epiR::epi.tests(cont_table, conf.level = 0.95)
 
@@ -390,6 +578,23 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 npv_ci <- private$.calcWilsonCI(tn, total_test_neg)
                 acc_ci <- private$.calcWilsonCI(tp + tn, total)
 
+                # Calculate additional metrics using adjusted counts for LR/DOR
+                n <- tp + fp + fn + tn
+                prev <- (tp + fn) / n
+                balanced_acc <- (sens + spec) / 2
+                youden_j <- sens + spec - 1
+
+                # Calculate sensitivity and specificity from adjusted counts for LR/DOR
+                sens_adj <- tp_adj / (tp_adj + fn_adj)
+                spec_adj <- tn_adj / (fp_adj + tn_adj)
+
+                # Likelihood ratios using adjusted counts (prevents Inf/NaN)
+                lr_pos <- sens_adj / (1 - spec_adj)
+                lr_neg <- (1 - sens_adj) / spec_adj
+
+                # Diagnostic odds ratio using adjusted counts
+                dor <- (tp_adj * tn_adj) / (fp_adj * fn_adj)
+
                 # Add to main table
                 combTable <- self$results$combinationTable
                 combTable$addRow(rowKey = pattern_name, values = list(
@@ -398,11 +603,17 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     fp = fp,
                     fn = fn,
                     tn = tn,
+                    prevalence = prev,
                     sens = sens,
                     spec = spec,
                     ppv = ppv,
                     npv = npv,
-                    acc = acc
+                    acc = acc,
+                    balancedAccuracy = balanced_acc,
+                    youden = youden_j,
+                    lrPos = lr_pos,
+                    lrNeg = lr_neg,
+                    dor = dor
                 ))
 
                 # Populate CI table with Wilson score intervals
@@ -451,6 +662,65 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     estimate = acc,
                     lower = acc_ci[1],
                     upper = acc_ci[2]
+                ))
+
+                # LR+ with CI (log-scale transformation for CI, using adjusted counts)
+                if (!is.na(lr_pos) && lr_pos > 0) {
+                    log_lr_pos <- log(lr_pos)
+                    # Approximate SE for log(LR+) using delta method with adjusted values
+                    se_log_lr_pos <- sqrt((1 - sens_adj) / (sens_adj * (tp_adj + fn_adj)) +
+                                        spec_adj / ((1 - spec_adj) * (fp_adj + tn_adj)))
+                    lr_pos_lower <- exp(log_lr_pos - 1.96 * se_log_lr_pos)
+                    lr_pos_upper <- exp(log_lr_pos + 1.96 * se_log_lr_pos)
+                } else {
+                    lr_pos_lower <- NA
+                    lr_pos_upper <- NA
+                }
+                ciTable$addRow(rowKey = paste0(pattern_name, "_lrPos"), values = list(
+                    pattern = pattern_name,
+                    statistic = "LR+",
+                    estimate = lr_pos,
+                    lower = lr_pos_lower,
+                    upper = lr_pos_upper
+                ))
+
+                # LR- with CI (log-scale transformation for CI, using adjusted counts)
+                if (!is.na(lr_neg) && lr_neg > 0) {
+                    log_lr_neg <- log(lr_neg)
+                    # Approximate SE for log(LR-) using delta method with adjusted values
+                    se_log_lr_neg <- sqrt(sens_adj / ((1 - sens_adj) * (tp_adj + fn_adj)) +
+                                        (1 - spec_adj) / (spec_adj * (fp_adj + tn_adj)))
+                    lr_neg_lower <- exp(log_lr_neg - 1.96 * se_log_lr_neg)
+                    lr_neg_upper <- exp(log_lr_neg + 1.96 * se_log_lr_neg)
+                } else {
+                    lr_neg_lower <- NA
+                    lr_neg_upper <- NA
+                }
+                ciTable$addRow(rowKey = paste0(pattern_name, "_lrNeg"), values = list(
+                    pattern = pattern_name,
+                    statistic = "LR-",
+                    estimate = lr_neg,
+                    lower = lr_neg_lower,
+                    upper = lr_neg_upper
+                ))
+
+                # DOR with CI (log-scale transformation for CI, using adjusted counts)
+                if (!is.na(dor) && dor > 0) {
+                    log_dor <- log(dor)
+                    # Approximate SE for log(DOR) using adjusted counts
+                    se_log_dor <- sqrt(1/tp_adj + 1/fp_adj + 1/fn_adj + 1/tn_adj)
+                    dor_lower <- exp(log_dor - 1.96 * se_log_dor)
+                    dor_upper <- exp(log_dor + 1.96 * se_log_dor)
+                } else {
+                    dor_lower <- NA
+                    dor_upper <- NA
+                }
+                ciTable$addRow(rowKey = paste0(pattern_name, "_dor"), values = list(
+                    pattern = pattern_name,
+                    statistic = "DOR",
+                    estimate = dor,
+                    lower = dor_lower,
+                    upper = dor_upper
                 ))
             },
 
@@ -504,82 +774,320 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 }
             },
 
-            .preparePlotData = function(data_prep) {
-                # Store data for plotting
-                # This will be called by .plotPerformance when image is rendered
+            .addTwoTestStrategies = function(data_prep) {
+                # Add clinical strategy rows for 2-test combinations
 
-                # Extract combination table data
-                combTable <- self$results$combinationTable
+                # Parallel strategy: Positive if ANY test is positive (high sensitivity)
+                parallel_condition <- data_prep$test1Variable2 == "Positive" |
+                                    data_prep$test2Variable2 == "Positive"
+                private$.analyzeSinglePattern(data_prep, "Parallel (≥1 pos)", parallel_condition)
 
-                if (combTable$rowCount == 0) {
-                    return()
-                }
-
-                # Convert table to data frame (recommended method from jamovi tables guide)
-                table_df <- combTable$asDF()
-
-                # Create plot data structure from data frame
-                plot_data <- list()
-                for (i in seq_len(nrow(table_df))) {
-                    plot_data[[i]] <- list(
-                        pattern = table_df$pattern[i],
-                        sens = table_df$sens[i],
-                        spec = table_df$spec[i],
-                        ppv = table_df$ppv[i],
-                        npv = table_df$npv[i],
-                        acc = table_df$acc[i]
-                    )
-                }
-
-                # Store in image state
-                image <- self$results$performancePlot
-                image$setState(plot_data)
+                # Serial strategy: Positive only if BOTH tests are positive (high specificity)
+                serial_condition <- data_prep$test1Variable2 == "Positive" &
+                                  data_prep$test2Variable2 == "Positive"
+                private$.analyzeSinglePattern(data_prep, "Serial (all pos)", serial_condition)
             },
 
-            .plotPerformance = function(image, ...) {
-                # Simple performance visualization
+            .addThreeTestStrategies = function(data_prep) {
+                # Add clinical strategy rows for 3-test combinations
 
-                plot_data <- image$state
+                # Parallel strategy: Positive if ANY test is positive (high sensitivity)
+                parallel_condition <- data_prep$test1Variable2 == "Positive" |
+                                    data_prep$test2Variable2 == "Positive" |
+                                    data_prep$test3Variable2 == "Positive"
+                private$.analyzeSinglePattern(data_prep, "Parallel (≥1 pos)", parallel_condition)
 
-                if (is.null(plot_data) || length(plot_data) == 0) {
-                    return(FALSE)
+                # Serial strategy: Positive only if ALL tests are positive (high specificity)
+                serial_condition <- data_prep$test1Variable2 == "Positive" &
+                                  data_prep$test2Variable2 == "Positive" &
+                                  data_prep$test3Variable2 == "Positive"
+                private$.analyzeSinglePattern(data_prep, "Serial (all pos)", serial_condition)
+
+                # Majority rule: Positive if at least 2 of 3 tests are positive (balanced)
+                t1_pos <- data_prep$test1Variable2 == "Positive"
+                t2_pos <- data_prep$test2Variable2 == "Positive"
+                t3_pos <- data_prep$test3Variable2 == "Positive"
+                majority_condition <- (as.integer(t1_pos) + as.integer(t2_pos) + as.integer(t3_pos)) >= 2
+                private$.analyzeSinglePattern(data_prep, "Majority (≥2/3 pos)", majority_condition)
+            },
+
+            .populateFrequencyTables = function(data_prep) {
+                # Gold standard frequency
+                goldTable <- self$results$goldFreqTable
+                gold_freq <- table(data_prep$goldVariable2)
+                total <- sum(gold_freq)
+
+                for (level in names(gold_freq)) {
+                    goldTable$addRow(rowKey = level, values = list(
+                        level = level,
+                        count = as.integer(gold_freq[level]),
+                        percent = as.numeric(gold_freq[level]) / total
+                    ))
                 }
 
-                # Convert to data frame
-                patterns <- sapply(plot_data, function(x) x$pattern)
-                sens <- sapply(plot_data, function(x) x$sens)
-                spec <- sapply(plot_data, function(x) x$spec)
-                ppv <- sapply(plot_data, function(x) x$ppv)
-                npv <- sapply(plot_data, function(x) x$npv)
-                acc <- sapply(plot_data, function(x) x$acc)
+                # Cross-tabulation
+                crossTable <- self$results$crossTabTable
+                has_test2 <- "test2Variable2" %in% names(data_prep)
+                has_test3 <- "test3Variable2" %in% names(data_prep)
 
-                # Create long format data
-                df <- data.frame(
-                    Pattern = rep(patterns, 5),
-                    Metric = rep(c("Sensitivity", "Specificity", "PPV", "NPV", "Accuracy"),
-                                each = length(patterns)),
-                    Value = c(sens, spec, ppv, npv, acc),
-                    stringsAsFactors = FALSE
+                if (!has_test2) return()
+
+                # Generate patterns
+                if (!has_test3) {
+                    patterns <- list(
+                        "+/+" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive",
+                        "+/-" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Negative",
+                        "-/+" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Positive",
+                        "-/-" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Negative"
+                    )
+                } else {
+                    patterns <- list(
+                        "+/+/+" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Positive",
+                        "+/+/-" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Negative",
+                        "+/-/+" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Positive",
+                        "+/-/-" = data_prep$test1Variable2 == "Positive" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Negative",
+                        "-/+/+" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Positive",
+                        "-/+/-" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Positive" & data_prep$test3Variable2 == "Negative",
+                        "-/-/+" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Positive",
+                        "-/-/-" = data_prep$test1Variable2 == "Negative" & data_prep$test2Variable2 == "Negative" & data_prep$test3Variable2 == "Negative"
+                    )
+                }
+
+                for (pattern_name in names(patterns)) {
+                    pattern_data <- data_prep[patterns[[pattern_name]], ]
+                    gold_pos <- sum(pattern_data$goldVariable2 == "Positive", na.rm = TRUE)
+                    gold_neg <- sum(pattern_data$goldVariable2 == "Negative", na.rm = TRUE)
+
+                    crossTable$addRow(rowKey = pattern_name, values = list(
+                        testCombo = pattern_name,
+                        goldPos = gold_pos,
+                        goldNeg = gold_neg,
+                        total = gold_pos + gold_neg
+                    ))
+                }
+            },
+
+            .populateRecommendation = function() {
+                combTable <- self$results$combinationTable
+                if (combTable$rowCount == 0) return()
+
+                # Convert to data frame
+                table_df <- combTable$asDF()
+
+                # Find pattern with highest Youden's J
+                max_youden_idx <- which.max(table_df$youden)
+                best_pattern <- table_df[max_youden_idx, ]
+
+                # Generate rationale
+                rationale <- sprintf(
+                    "Highest Youden's J (%.3f) indicates optimal balance of sensitivity and specificity. ",
+                    best_pattern$youden
                 )
 
-                # Create grouped bar plot
-                p <- ggplot2::ggplot(df, ggplot2::aes(x = Pattern, y = Value, fill = Metric)) +
+                if (best_pattern$sens > 0.8 && best_pattern$spec > 0.8) {
+                    rationale <- paste0(rationale, "Excellent discriminatory performance.")
+                } else if (best_pattern$sens > 0.7 && best_pattern$spec > 0.7) {
+                    rationale <- paste0(rationale, "Good overall performance.")
+                } else {
+                    rationale <- paste0(rationale, "Trade-off between sensitivity and specificity.")
+                }
+
+                # Populate recommendation table
+                recTable <- self$results$recommendationTable
+                recTable$setRow(rowNo = 1, values = list(
+                    pattern = best_pattern$pattern,
+                    method = "Youden's Index (Sensitivity + Specificity - 1)",
+                    youden = best_pattern$youden,
+                    sens = best_pattern$sens,
+                    spec = best_pattern$spec,
+                    acc = best_pattern$acc,
+                    rationale = rationale
+                ))
+            },
+
+            .addPatternColumn = function(data_prep) {
+                has_test2 <- "test2Variable2" %in% names(data_prep)
+                has_test3 <- "test3Variable2" %in% names(data_prep)
+
+                if (!has_test2) {
+                    # Single test pattern
+                    pattern_values <- ifelse(data_prep$test1Variable2 == "Positive", "+", "-")
+                } else if (!has_test3) {
+                    # Two-test pattern
+                    t1 <- ifelse(data_prep$test1Variable2 == "Positive", "+", "-")
+                    t2 <- ifelse(data_prep$test2Variable2 == "Positive", "+", "-")
+                    pattern_values <- paste0(t1, "/", t2)
+                } else {
+                    # Three-test pattern
+                    t1 <- ifelse(data_prep$test1Variable2 == "Positive", "+", "-")
+                    t2 <- ifelse(data_prep$test2Variable2 == "Positive", "+", "-")
+                    t3 <- ifelse(data_prep$test3Variable2 == "Positive", "+", "-")
+                    pattern_values <- paste0(t1, "/", t2, "/", t3)
+                }
+
+                # Add column to original dataset
+                self$results$setColumn("test_pattern", pattern_values)
+            },
+
+            .plotBarChart = function(image, ...) {
+                combTable <- self$results$combinationTable
+                if (combTable$rowCount == 0) return(FALSE)
+
+                table_df <- combTable$asDF()
+
+                # Apply statistic filter
+                stat_filter <- self$options$filterStatistic
+                if (stat_filter != "all") {
+                    metrics <- stat_filter
+                } else {
+                    metrics <- c("sens", "spec", "ppv", "npv", "acc")
+                }
+
+                # Apply pattern filter
+                pattern_filter <- self$options$filterPattern
+                filtered_df <- private$.applyPatternFilter(table_df, pattern_filter)
+
+                if (nrow(filtered_df) == 0) return(FALSE)
+
+                # Create long format
+                plot_data <- data.frame()
+                for (metric in metrics) {
+                    if (metric %in% names(filtered_df)) {
+                        temp <- data.frame(
+                            Pattern = filtered_df$pattern,
+                            Metric = metric,
+                            Value = filtered_df[[metric]],
+                            stringsAsFactors = FALSE
+                        )
+                        plot_data <- rbind(plot_data, temp)
+                    }
+                }
+
+                # Create plot
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Pattern, y = Value, fill = Metric)) +
                     ggplot2::geom_bar(stat = "identity", position = "dodge") +
-                    ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
+                    ggplot2::scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
                     ggplot2::labs(
-                        title = "Diagnostic Performance by Test Combination",
-                        x = "Test Combination Pattern",
-                        y = "Performance Metric",
-                        fill = "Metric"
+                        title = "Diagnostic Performance Comparison",
+                        x = "Test Pattern",
+                        y = "Value"
                     ) +
                     ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-                        legend.position = "bottom"
-                    )
+                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
                 print(p)
                 return(TRUE)
+            },
+
+            .plotHeatmap = function(image, ...) {
+                combTable <- self$results$combinationTable
+                if (combTable$rowCount == 0) return(FALSE)
+
+                table_df <- combTable$asDF()
+                pattern_filter <- self$options$filterPattern
+                filtered_df <- private$.applyPatternFilter(table_df, pattern_filter)
+
+                if (nrow(filtered_df) == 0) return(FALSE)
+
+                # Select metrics for heatmap
+                metrics <- c("sens", "spec", "ppv", "npv", "acc", "balancedAccuracy", "youden")
+                metric_data <- filtered_df[, c("pattern", metrics)]
+
+                # Reshape to long format
+                plot_data <- tidyr::pivot_longer(
+                    metric_data,
+                    cols = -pattern,
+                    names_to = "Metric",
+                    values_to = "Value"
+                )
+
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Metric, y = pattern, fill = Value)) +
+                    ggplot2::geom_tile() +
+                    ggplot2::geom_text(ggplot2::aes(label = sprintf("%.2f", Value)), color = "white") +
+                    ggplot2::scale_fill_gradient2(low = "red", mid = "yellow", high = "green", midpoint = 0.5) +
+                    ggplot2::labs(title = "Performance Heatmap", x = "", y = "Pattern") +
+                    ggplot2::theme_minimal()
+
+                print(p)
+                return(TRUE)
+            },
+
+            .plotForest = function(image, ...) {
+                ciTable <- self$results$combinationTableCI
+                if (ciTable$rowCount == 0) return(FALSE)
+
+                table_df <- ciTable$asDF()
+
+                # Filter by statistic
+                stat_filter <- self$options$filterStatistic
+                if (stat_filter != "all") {
+                    table_df <- table_df[table_df$statistic == stat_filter, ]
+                }
+
+                if (nrow(table_df) == 0) return(FALSE)
+
+                p <- ggplot2::ggplot(table_df, ggplot2::aes(x = estimate, y = pattern, color = statistic)) +
+                    ggplot2::geom_point(size = 3) +
+                    ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper), height = 0.2) +
+                    ggplot2::labs(
+                        title = "Forest Plot - 95% Confidence Intervals",
+                        x = "Estimate (95% CI)",
+                        y = "Pattern"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::facet_wrap(~statistic, ncol = 1)
+
+                print(p)
+                return(TRUE)
+            },
+
+            .plotDecisionTree = function(image, ...) {
+                combTable <- self$results$combinationTable
+                if (combTable$rowCount == 0) return(FALSE)
+
+                table_df <- combTable$asDF()
+
+                # Simple tree structure based on patterns
+                # This is a placeholder - real implementation would need tree layout algorithm
+
+                p <- ggplot2::ggplot(table_df, ggplot2::aes(x = sens, y = spec)) +
+                    ggplot2::geom_point(ggplot2::aes(size = youden, color = pattern)) +
+                    ggplot2::geom_text(ggplot2::aes(label = pattern), vjust = -1) +
+                    ggplot2::scale_x_continuous(labels = scales::percent_format()) +
+                    ggplot2::scale_y_continuous(labels = scales::percent_format()) +
+                    ggplot2::labs(
+                        title = "Decision Space - Sensitivity vs Specificity",
+                        x = "Sensitivity",
+                        y = "Specificity",
+                        size = "Youden's J"
+                    ) +
+                    ggplot2::theme_minimal()
+
+                print(p)
+                return(TRUE)
+            },
+
+            .applyPatternFilter = function(data, filter_type) {
+                if (filter_type == "all") return(data)
+
+                # Pattern filtering logic
+                if (filter_type == "allPositive") {
+                    pattern <- grep("^\\+/\\+(/\\+)?$", data$pattern)
+                } else if (filter_type == "allNegative") {
+                    pattern <- grep("^-/-(/-)$", data$pattern)
+                } else if (filter_type == "mixed") {
+                    pattern <- grep("[+-]/[+-]", data$pattern)
+                    pattern <- pattern[!grepl("^\\+/\\+|^-/-", data$pattern[pattern])]
+                } else {
+                    # Default to all
+                    return(data)
+                }
+
+                if (length(pattern) > 0) {
+                    return(data[pattern, ])
+                } else {
+                    return(data)
+                }
             }
         )
     )

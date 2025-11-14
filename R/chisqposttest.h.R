@@ -20,7 +20,6 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             residualsCutoff = 2,
             testSelection = "auto",
             exportResults = FALSE,
-            clinicalPreset = "custom",
             showClinicalSummary = TRUE,
             showExampleInterpretations = FALSE,
             copyReadySentences = FALSE,
@@ -115,15 +114,6 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "exportResults",
                 exportResults,
                 default=FALSE)
-            private$..clinicalPreset <- jmvcore::OptionList$new(
-                "clinicalPreset",
-                clinicalPreset,
-                options=list(
-                    "custom",
-                    "diagnostic2x2",
-                    "treatment_response",
-                    "grade_distribution"),
-                default="custom")
             private$..showClinicalSummary <- jmvcore::OptionBool$new(
                 "showClinicalSummary",
                 showClinicalSummary,
@@ -163,7 +153,6 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..residualsCutoff)
             self$.addOption(private$..testSelection)
             self$.addOption(private$..exportResults)
-            self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..showClinicalSummary)
             self$.addOption(private$..showExampleInterpretations)
             self$.addOption(private$..copyReadySentences)
@@ -186,7 +175,6 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         residualsCutoff = function() private$..residualsCutoff$value,
         testSelection = function() private$..testSelection$value,
         exportResults = function() private$..exportResults$value,
-        clinicalPreset = function() private$..clinicalPreset$value,
         showClinicalSummary = function() private$..showClinicalSummary$value,
         showExampleInterpretations = function() private$..showExampleInterpretations$value,
         copyReadySentences = function() private$..copyReadySentences$value,
@@ -208,7 +196,6 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..residualsCutoff = NA,
         ..testSelection = NA,
         ..exportResults = NA,
-        ..clinicalPreset = NA,
         ..showClinicalSummary = NA,
         ..showExampleInterpretations = NA,
         ..copyReadySentences = NA,
@@ -489,6 +476,23 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Chi-Square Post-Hoc Tests
 #'
 #' Performs Chi-Square test and post-hoc pairwise comparisons.
+#' ⚠️ IMPORTANT LIMITATIONS:
+#' - Post-hoc pairwise comparisons are ONLY performed when the overall 
+#' chi-square
+#'   test is significant (p < alpha). This enforces proper statistical 
+#' workflow and
+#'   prevents data dredging.
+#' 
+#' - Selecting 'None' for post-hoc method DISABLES all pairwise testing. If 
+#' you
+#'   want unadjusted pairwise comparisons, this feature is not available (by 
+#' design,
+#'   as it would encourage inappropriate multiple testing).
+#' 
+#' - No automated validation against established packages exists. Use with 
+#' caution
+#'   for clinical decision-making.
+#' 
 #'
 #' @examples
 #' \donttest{
@@ -500,7 +504,12 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param counts Frequency/weight variable for contingency table data. When
 #'   specified, the data is treated as already summarized with counts per
 #'   combination.
-#' @param posthoc Method for p-value adjustment in post-hoc tests
+#' @param posthoc Method for p-value adjustment in post-hoc tests. IMPORTANT:
+#'   Selecting 'None' DISABLES all pairwise comparisons entirely (not just
+#'   adjustment). Unadjusted pairwise testing is not supported to prevent
+#'   inappropriate multiple testing. Choose Bonferroni (most conservative), Holm
+#'   (less conservative), or FDR (controls false discovery rate) for pairwise
+#'   testing.
 #' @param sig alpha level for significance testing
 #' @param excl exclude missing values from analysis
 #' @param exp show expected values in the table
@@ -516,7 +525,6 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   comparisons
 #' @param exportResults Export comprehensive analysis results to downloadable
 #'   format for further analysis
-#' @param clinicalPreset Pre-configured settings for common clinical scenarios
 #' @param showClinicalSummary Display natural-language summary of results for
 #'   clinical interpretation
 #' @param showExampleInterpretations Display example interpretations for
@@ -571,7 +579,6 @@ chisqposttest <- function(
     residualsCutoff = 2,
     testSelection = "auto",
     exportResults = FALSE,
-    clinicalPreset = "custom",
     showClinicalSummary = TRUE,
     showExampleInterpretations = FALSE,
     copyReadySentences = FALSE,
@@ -610,7 +617,6 @@ chisqposttest <- function(
         residualsCutoff = residualsCutoff,
         testSelection = testSelection,
         exportResults = exportResults,
-        clinicalPreset = clinicalPreset,
         showClinicalSummary = showClinicalSummary,
         showExampleInterpretations = showExampleInterpretations,
         copyReadySentences = copyReadySentences,

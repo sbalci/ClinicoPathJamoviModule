@@ -1,7 +1,7 @@
 ---
 name: datetimeconverter
 title: DateTime Converter
-menuGroup: SurvivalT2
+menuGroup: SurvivalT
 menuSubgroup: Data Preparation
 menuSubtitle: Convert datetime and extract components
 version: '0.0.31'
@@ -95,18 +95,13 @@ options:
 
     - name: timezone
       title: Timezone
-      type: List
-      options:
-        - name: system
-          title: System Default
-        - name: utc
-          title: UTC
-      default: system
+      type: String
+      default: "system"
       description:
           R: >
-            Timezone for datetime parsing. 'System Default' uses your computer's timezone.
-            'UTC' interprets datetimes as Coordinated Universal Time. Note: Excel serial and
-            Unix epoch conversions always use UTC regardless of this setting.
+            Timezone for datetime parsing. Provide an Olson identifier such as "Europe/Istanbul",
+            "America/New_York", "UTC", or "system" to use the local machine timezone. Excel serial
+            and Unix epoch conversions always use UTC regardless of this setting.
 
     # === PREVIEW OPTIONS ===
     - name: preview_rows
@@ -278,17 +273,6 @@ options:
       description:
           R: >
             Extract month as numeric value (1-12).
-
-
-    # - name: calculatedtime
-    #   title: Add Calculated Time to Data
-    #   type: Output
-    #   description:
-    #       R: >
-    #         If the time is in date format, the time will be calculated as the difference between the event date and the diagnosis date. If the follow-up date is available, the time will be calculated as the difference between the event date and the follow-up date.
-
-
-
 
     - name: monthname_out
       title: Extract Month Name

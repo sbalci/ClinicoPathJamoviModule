@@ -1,6 +1,6 @@
 ---
 name: check-function-base
-description: Perform systematic quality check of a jamovi function
+description: Perform systematic quality check of a jamovi function (with jamovi Notices audit & enforcement)
 interactive: true
 args:
   function_name:
@@ -20,12 +20,37 @@ args:
   upstream_fn:
     description: Upstream function name if it differs from SANITIZED_FN
     required: false
-usage: /check-function-base <function_name>
+  notices_mode:
+    description: Notices check mode — enforce (create & require), audit-only (report only), or off
+    required: false
+    default: enforce
+    enum: [enforce, audit-only, off]
+  notices_min_severity:
+    description: Minimum severity to surface (info, warning, strong_warning, error)
+    required: false
+    default: info
+    enum: [info, warning, strong_warning, error]
+  clinical_profile:
+    description: Apply clinical-pathology notice templates and thresholds (AUC, events-per-variable, etc.)
+    required: false
+    default: true
+  notice_insert_position:
+    description: Preferred default insert position for notices (top, mid, bottom, auto)
+    required: false
+    default: auto
+    enum: [top, mid, bottom, auto]
+usage: /check-function-base &lt;function_name&gt;
 ---
 
-# Systematic Jamovi Function Quality Check
+# Systematic Jamovi Function Quality Check (with **Notices** audit)
 
-You are an expert jamovi module developer performing a comprehensive quality assessment of the jamovi function `$ARGUMENTS`. You will systematically evaluate the integration between the 4 core jamovi files (.a.yaml, .b.R, .r.yaml, .u.yaml) and provide actionable recommendations.
+You are an expert jamovi module developer performing a comprehensive quality assessment of the jamovi function `$ARGUMENTS`. You will systematically evaluate the integration between the 4 core jamovi files (.a.yaml, .b.R, .r.yaml, .u.yaml), **and enforce jamovi Notice best‑practices** (via `jmvcore::Notice`) for errors, strong warnings, warnings, and info messages.
+
+> **Why:** Notices surface user‑facing guidance directly in results and are the canonical UX pattern in jamovi (`jmvcore::Notice` and `jmvcore::NoticeType`). Follow the API recommendations and the internal ClinicoPath guide to produce consistent, actionable messages. 
+
+**Jamovi Notices references:**  
+• Official API overview (Notice/NoticeType, insert positions)  
+• ClinicoPath internal guide (content patterns, clinical thresholds, wording)
 
 ## Analysis Target
 
@@ -42,12 +67,14 @@ Please analyze these files:
 - `jamovi/SANITIZED_FN.r.yaml` - Results definition (outputs)
 - `jamovi/SANITIZED_FN.u.yaml` - User interface definition
 
-External sources (if available and check_external=true):
+External sources (if available and `check_external=true`):
 
 - CRAN reference manual PDF – `https://cran.r-project.org/web/packages/$ARG_cran_pkg/$ARG_cran_pkg.pdf`
 - CRAN NEWS – `https://cran.r-project.org/web/packages/$ARG_cran_pkg/NEWS`
 - pkgdown reference – `https://$ARG_cran_pkg.tidyverse.org/` or project site if known
 - GitHub repo – `https://github.com/$ARG_github_repo` (read `R/*.R`, `man/*.Rd`, `NEWS.md`, `README.md`)
+
+---
 
 ## Systematic Evaluation Framework
 
@@ -68,7 +95,7 @@ External sources (if available and check_external=true):
 3. **Error Handling & Robustness**
    - Input validation for required variables
    - Missing data handling (empty datasets, NA values)
-   - User-friendly error messages (not cryptic R errors)
+   - User-friendly error messages (via Notices)
    - Graceful degradation when analysis cannot proceed
 
 4. **Code Quality & User Experience**
@@ -106,6 +133,73 @@ External sources (if available and check_external=true):
    - Search for signs of placeholders: constant return values, unused options, empty/zero-length tables, `TODO/FIXME`, stubs that only echo inputs, or results populated with template text.
    - If most options are unused and results are constant regardless of inputs, classify as **PLACEHOLDER / SCAFFOLD** and provide concrete remediation.
 
+---
+
+## **Jamovi Notices Audit & Enforcement**
+
+Apply this **in addition** to the framework above. Create, review, or refactor notices in `R/SANITIZED_FN.b.R` using `jmvcore::Notice` and `jmvcore::NoticeType`:
+
+### A. Required notice types & triggers
+
+- **ERROR** (`NoticeType$ERROR`)  
+  Use when analysis **cannot proceed** (missing inputs, invalid types, fatal calc errors). Immediately `insert(1, ...)` and `return()`.
+- **STRONG_WARNING** (`NoticeType$STRONG_WARNING`)  
+  Use when results may be unreliable (assumption violations, very small n/events, extreme prevalence).
+- **WARNING** (`NoticeType$WARNING`)  
+  Use for minor concerns and methodological notes.
+- **INFO** (`NoticeType$INFO`)  
+  Use for confirmations, methodology summaries, success/end notices.
+
+> Follow the official jamovi API notice semantics and positioning guidance.  
+
+### B. Positioning policy
+
+Respect `$ARG_notices_mode` and `$ARG_notice_insert_position`:
+
+- `auto` (default): ERROR/STRONG_WARNING at top (`insert(1, ...)`), contextual WARNING before related table, INFO at bottom (`insert(999, ...)`).
+- `top`/`mid`/`bottom`: prefer requested band while keeping ERROR at top.
+
+### C. Content rules
+
+- Plain text only (no HTML).  
+- Specific, measurable, and **actionable**: quantify counts/percentages, state implications, and list next steps.  
+- Use bullet points via `\n•` for clarity.  
+- Keep names unique (`name='...'`) and deterministic.
+
+### D. Clinical profile (if `$ARG_clinical_profile`)
+
+Add domain‑specific notices for clinical/pathology modules, for example:
+
+- Diagnostic models with **AUC &lt; 0.5** → ERROR; **AUC &lt; 0.7** → STRONG_WARNING with clinical implications.  
+- Survival analysis: enforce minimum events (e.g., **&lt; 10 events → ERROR**, 10–19 → STRONG_WARNING, 20–49 → WARNING) and surface EPV considerations.  
+- Diagnostic prevalence extremes (**&lt;5% or &gt;95%**) → STRONG_WARNING about PPV/NPV/generalizability.
+
+### E. Minimal code patterns to implement
+
+**Create & insert a notice**
+```r
+notice <- jmvcore::Notice$new(options=self$options, name='validationError', type=jmvcore::NoticeType$ERROR)
+notice$setContent('Time and event variables are required. Please select both and re-run.')
+self$results$insert(1, notice)
+```
+
+**Priority insertion (error → strong_warning → warning → info)**
+```r
+position <- 1
+for (n in notices_in_priority) { self$results$insert(position, n); position <- position + 1 }
+```
+
+**Success summary at bottom**
+```r
+ok <- jmvcore::Notice$new(options=self$options, name='analysisComplete', type=jmvcore::NoticeType$INFO)
+ok$setContent(sprintf('Analysis completed using %d observations.', nrow(self$data)))
+self$results$insert(999, ok)
+```
+
+> Use these patterns consistently across modules. (See the internal guide for phrasing templates and thresholds.)
+
+---
+
 ## Response Format
 
 ### SYSTEMATIC CHECK: `$ARGUMENTS`
@@ -115,9 +209,9 @@ External sources (if available and check_external=true):
 
 #### QUICK SUMMARY
 
-- **Arguments**: X defined → X/X used in .b.R
+- **Arguments**: X defined → X/X used in .b.R  
 - **Outputs**: X defined → X/X populated in .b.R  
-- **Error Handling**: [Brief assessment]
+- **Error Handling (Notices)**: [Brief assessment of ERROR/STRONG_WARNING/WARNING/INFO coverage and placement]  
 - **Integration Quality**: [Brief assessment]
 
 #### ARGUMENT BEHAVIOR MATRIX (Does each argument change behavior?)
@@ -132,12 +226,21 @@ External sources (if available and check_external=true):
 |---|---|---|---|:---:|---|
 | `report` | Html | `setContent()` | always | YES/NO |  |
 
+#### **NOTICES COVERAGE MATRIX**
+
+| Trigger | Type | Insert Position | Present? | Message quality | Notes |
+|---|---|---|---:|---|---|
+| Missing required inputs | ERROR | top (1) | ✅/❌ | specific/actionable |  |
+| Low events / small n | STRONG_WARNING/WARNING | top/mid | ✅/❌ | quantifies thresholds |  |
+| Assumption violation | STRONG_WARNING | top | ✅/❌ | suggests remedies |  |
+| Methodology summary | INFO | bottom (999) | ✅/❌ | concise & numeric |  |
+
 #### PLACEHOLDER ASSESSMENT
 
-- **Data used?** (accesses `self$data` columns in computations): YES/NO  
-- **Options used in logic?** (beyond labels): YES/NO  
+- **Data used?** YES/NO  
+- **Options used in logic?** YES/NO  
 - **Constant results regardless of inputs?** YES/NO  
-- **Placeholder indicators**: [TODOs, empty tables, echo-only behavior, etc.]  
+- **Placeholder indicators**: …  
 - **Classification**: FUNCTIONAL / PARTIAL PLACEHOLDER / PLACEHOLDER
 
 #### CRITICAL ISSUES (Fix immediately)
@@ -175,25 +278,21 @@ State which upstreams were checked (CRAN pkg: `$ARG_cran_pkg`, GitHub: `$ARG_git
 #### ACTIONABLE FIXES
 
 **Immediate (Critical):**
-
 ```yaml
 # Exact code changes needed
 ```
 
 **Schema Updates:**
-
-```yaml  
+```yaml
 # Specific .yaml file changes
 ```
 
-**Code Improvements:**
-
+**Code Improvements (.b.R):**
 ```r
-# Specific .b.R improvements
+# Implement/adjust notices per findings
 ```
 
 **Upstream Sync Tasks:**
-
 - Align argument names/defaults with upstream or document intentional divergence
 - Port missing behavior notes (assumptions, edge-case handling) into docs
 - Reflect deprecations/renames; add migration notes
@@ -204,20 +303,14 @@ State which upstreams were checked (CRAN pkg: `$ARG_cran_pkg`, GitHub: `$ARG_git
 ```r
 # Minimal differential-run harness for behavior checks
 run_with_opts <- function(opts) {
-  # simulate how the .b.R would be called; adapt to your analysis wrapper
   results <- run_analysis(data = demo_df, options = modifyList(default_opts, opts))
-  digest_results(results)  # return a compact comparable representation
+  digest_results(results)  # compact comparable representation
 }
 
-# Compare default vs. changed argument
+# Compare default vs. changed argument (example)
 res_default <- run_with_opts(list())
-res_changed <- run_with_opts(list(assume_equal_var = TRUE))  # example toggle
-
-if (!identical(res_default, res_changed)) {
-  message("assume_equal_var = effective (results differ).")
-} else {
-  warning("assume_equal_var = NON-EFFECTIVE (no observable change).")
-}
+res_changed <- run_with_opts(list(assume_equal_var = TRUE))
+if (!identical(res_default, res_changed)) message("assume_equal_var = effective.") else warning("assume_equal_var = NON-EFFECTIVE.")
 ```
 
 #### TESTING CHECKLIST
@@ -225,14 +318,22 @@ if (!identical(res_default, res_changed)) {
 - [ ] Test with [specific scenario]
 - [ ] Validate [specific behavior]
 - [ ] Check [edge case]
+- [ ] Verify notices presence/positioning and message quality
 - [ ] Compare local function signature against upstream (CRAN/GitHub) and reconcile
 - [ ] Re-run examples from upstream docs with local function; fix divergences or document them
 
 #### READINESS ASSESSMENT
 
 - **File Integration**: ✅❌  
-- **Error Handling**: ✅⚠️❌  
+- **Error Handling (Notices)**: ✅⚠️❌  
 - **User Experience**: ✅⚠️❌  
-- **Production Ready**: YES/NO  
+- **Production Ready**: YES/NO
 
-Be specific, actionable, and focus on integration between files - this is where most jamovi function issues occur.
+---
+
+### Notes for Claude CLI integration
+
+- This file lives in `.claude/commands/` and is executed via `/check-function-base <function_name>`.  
+- `$ARGUMENTS` injects whatever follows the command name; multi‑word args are supported.  
+- Additional flags can be passed inline, e.g.:  
+  `/check-function-base myFn notices_mode=audit-only clinical_profile=false`

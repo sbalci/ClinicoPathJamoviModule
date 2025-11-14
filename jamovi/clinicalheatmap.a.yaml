@@ -1,7 +1,7 @@
 ---
 name: clinicalheatmap
 title: Clinical Heatmap
-menuGroup: OncoPathT2
+menuGroup: OncoPathT
 menuSubgroup: Visualization
 menuSubtitle: Tidy Heatmaps for Clinical Data
 version: '0.0.31'
@@ -94,7 +94,7 @@ options:
     - name: clusterRows
       title: 'Cluster Rows'
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to perform hierarchical clustering on rows.
@@ -104,7 +104,7 @@ options:
     - name: clusterCols
       title: 'Cluster Columns'
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to perform hierarchical clustering on columns.
@@ -139,7 +139,7 @@ options:
     - name: showRownames
       title: 'Show Row Names'
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display row names in the heatmap.
@@ -149,7 +149,7 @@ options:
     - name: showColnames
       title: 'Show Column Names'
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display column names in the heatmap.
@@ -178,7 +178,7 @@ options:
     - name: showDataSummary
       title: 'Show Data Summary'
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display a summary of the data structure and values.
@@ -188,7 +188,7 @@ options:
     - name: showInterpretation
       title: 'Show Interpretation Guide'
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display interpretation guidelines and clinical context.
@@ -455,5 +455,24 @@ options:
       type: Variables
       suggested: [ continuous, nominal ]
       permitted: [ numeric, factor ]
+
+    # === HEATMAP ENGINE SELECTION ===
+    # tidyHeatmap support commented out due to Bioconductor dependencies
+    # - name: heatmapEngine
+    #   title: 'Heatmap Engine'
+    #   type: List
+    #   options:
+    #     - name: both
+    #       title: 'Both (tidyheatmaps + tidyHeatmap)'
+    #     - name: tidyheatmaps
+    #       title: 'tidyheatmaps (Simple, pheatmap-based)'
+    #     - name: tidyHeatmap
+    #       title: 'tidyHeatmap (Advanced, ComplexHeatmap-based)'
+    #   default: both
+    #   description:
+    #       R: >
+    #         Choose which heatmap engine(s) to use for visualization.
+    #       jamovi: >
+    #         Select which heatmap package to generate plots with.
 
 ...

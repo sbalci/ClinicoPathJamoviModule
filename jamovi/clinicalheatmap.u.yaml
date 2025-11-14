@@ -41,6 +41,16 @@ children:
           - type: VariablesListBox
             name: annotationRows
             isTarget: true
+  # tidyHeatmap support commented out due to Bioconductor dependencies
+  # - type: CollapseBox
+  #   label: Heatmap Engine Selection
+  #   collapsed: false
+  #   children:
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: ComboBox
+  #           name: heatmapEngine
   - type: CollapseBox
     label: Heatmap Appearance
     collapsed: false
@@ -104,7 +114,7 @@ children:
                 name: clusterMethodCols
                 enable: (clusterCols)
   - type: CollapseBox
-    label: Annotation & Layer Options
+    label: Annotation Options
     collapsed: true
     children:
       - type: LayoutBox
@@ -112,24 +122,6 @@ children:
         children:
           - type: ComboBox
             name: annotationType
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: addLayer
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: ComboBox
-            name: layerType
-            enable: (addLayer)
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: layerFilter
-            format: string
-            enable: (addLayer)
   - type: CollapseBox
     label: Split Heatmap by Dendrogram
     collapsed: true
@@ -146,6 +138,16 @@ children:
           - type: TextBox
             name: splitCols
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: addLayer
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: findOptimalK
   - type: CollapseBox
     label: Data Handling & Display
     collapsed: true
@@ -162,6 +164,24 @@ children:
             name: showDataSummary
           - type: CheckBox
             name: showInterpretation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: kRange
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: layerType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: exportRowClusters
+      - type: CheckBox
+        name: exportColClusters
   - type: CollapseBox
     label: Export Settings
     collapsed: true
@@ -178,48 +198,33 @@ children:
           - type: TextBox
             name: exportHeight
             format: number
-
-  - type: CollapseBox
-    label: Advanced Cluster Analysis
-    collapsed: true
+  - type: LayoutBox
+    margin: large
     children:
-      - type: CheckBox
-        name: findOptimalK
-      - type: Label
-        label: 'K Range (format: min:max):'
-        enable: (findOptimalK)
-        children:
-          - type: TextBox
-            name: kRange
-            format: string
-            enable: (findOptimalK)
-      - type: CheckBox
-        name: exportRowClusters
-      - type: Label
-        label: 'Row Cluster Column Name:'
-        enable: (exportRowClusters)
-        children:
-          - type: TextBox
-            name: rowClusterPrefix
-            format: string
-            enable: (exportRowClusters)
-      - type: CheckBox
-        name: exportColClusters
-      - type: Label
-        label: 'Column Cluster Column Name:'
-        enable: (exportColClusters)
-        children:
-          - type: TextBox
-            name: colClusterPrefix
-            format: string
-            enable: (exportColClusters)
-
-  - type: CollapseBox
-    label: Survival Integration
-    collapsed: true
+      - type: TextBox
+        name: rowClusterPrefix
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: layerFilter
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: colClusterPrefix
+        format: string
+  - type: LayoutBox
+    margin: large
     children:
       - type: CheckBox
         name: survivalAnalysis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
       - type: TargetLayoutBox
         label: Survival Time Variable
         children:
@@ -227,7 +232,6 @@ children:
             name: survivalTime
             maxItemCount: 1
             isTarget: true
-            enable: (survivalAnalysis)
       - type: TargetLayoutBox
         label: Event Variable
         children:
@@ -235,21 +239,23 @@ children:
             name: survivalEvent
             maxItemCount: 1
             isTarget: true
-            enable: (survivalAnalysis)
-          - type: ComboBox
-            name: survivalEventLevel
-            enable: (survivalAnalysis)
-
-  - type: CollapseBox
-    label: Cluster Comparison
-    collapsed: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: survivalEventLevel
+  - type: LayoutBox
+    margin: large
     children:
       - type: CheckBox
         name: clusterComparison
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
       - type: TargetLayoutBox
-        label: Variables for Comparison
+        label: Variables for Cluster Comparison
         children:
           - type: VariablesListBox
             name: comparisonVars
             isTarget: true
-            enable: (clusterComparison)

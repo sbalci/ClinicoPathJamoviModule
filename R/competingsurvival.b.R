@@ -7,7 +7,13 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "competingsurvivalClass",
     inherit = competingsurvivalBase,
     private = list(
-        
+
+        .escapeVar = function(x) {
+            # Escape variable names for safe use (handle spaces, special chars)
+            if (is.null(x) || length(x) == 0) return(x)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         .getData = function() {
             # Clean and label data following survival module pattern
             mydata <- self$data
@@ -92,6 +98,27 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             awd <- self$options$awd
             awod <- self$options$awod
             analysistype <- self$options$analysistype
+
+            # Validate event levels based on analysis type
+            if (analysistype == "overall") {
+                # Need at least one death type defined
+                if (is.null(dod) && is.null(dooc)) {
+                    stop("For overall survival, please specify at least one death type (Dead of Disease or Dead of Other)")
+                }
+            } else if (analysistype == "cause") {
+                # Need disease death defined
+                if (is.null(dod)) {
+                    stop("For cause-specific survival, please specify 'Dead of Disease' level")
+                }
+            } else if (analysistype == "compete") {
+                # Need both death types defined
+                if (is.null(dod)) {
+                    stop("For competing risks analysis, please specify 'Dead of Disease' level")
+                }
+                if (is.null(dooc)) {
+                    stop("For competing risks analysis, please specify 'Dead of Other' level")
+                }
+            }
             
             # Clean data and handle missing values
             # Only filter explanatory if it's provided
@@ -125,8 +152,12 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
         
         .overallSurvival = function(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod) {
             # Create overall survival outcome: all deaths = 1, alive = 0
+            # Build death levels vector (only non-NULL values)
+            death_levels <- c(dod, dooc)
+            death_levels <- death_levels[!sapply(death_levels, is.null)]
+
             mydata$status_os <- ifelse(
-                mydata[[myoutcome]] %in% c(dod, dooc), 1, 0
+                mydata[[myoutcome]] %in% death_levels, 1, 0
             )
             
             # Create survival object
@@ -203,19 +234,23 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
  
         .competingRisksSurvival = function(mydata, mytime, myoutcome, myexplanatory, dod, dooc, awd, awod) {
             # Create competing risks outcome: alive=0, disease death=1, other death=2
+            # Build censored levels vector (only non-NULL values)
+            censored_levels <- c(awd, awod)
+            censored_levels <- censored_levels[!sapply(censored_levels, is.null)]
+
             mydata$status_crr <- dplyr::case_when(
-                mydata[[myoutcome]] %in% c(awd, awod) ~ 0,  # alive/censored
-                mydata[[myoutcome]] == dod ~ 1,            # disease death
-                mydata[[myoutcome]] == dooc ~ 2,           # other death
-                TRUE ~ 0
+                !is.null(dod) & mydata[[myoutcome]] == dod ~ 1,              # disease death
+                !is.null(dooc) & mydata[[myoutcome]] == dooc ~ 2,            # other death
+                length(censored_levels) > 0 & mydata[[myoutcome]] %in% censored_levels ~ 0,  # alive/censored
+                TRUE ~ 0  # default to censored
             )
             
             # Get analysis options
-            graystest <- self$options$graystest %||% TRUE
-            subdistribution <- self$options$subdistribution %||% TRUE
+            graystest <- self$options$graystest %||% FALSE
+            subdistribution <- self$options$subdistribution %||% FALSE
             timepoints_str <- self$options$timepoints %||% "12,24,36,60"
             conf_level <- self$options$confidencelevel %||% 0.95
-            showrisksets <- self$options$showrisksets %||% TRUE
+            showrisksets <- self$options$showrisksets %||% FALSE
             
             # Parse time points
             timepoints <- as.numeric(unlist(strsplit(timepoints_str, ",")))
@@ -301,10 +336,17 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 
                 # Format all results
                 private$.formatEnhancedCompetingRisksResults(
-                    result_crr, cuminc_result, grays_test_result, 
-                    subdist_result, cuminc_timepoints
+                    result_crr, cuminc_result, grays_test_result,
+                    subdist_result, cuminc_timepoints, timepoints
                 )
                 
+                # Add notice if showrisksets is enabled but not yet implemented
+                if (showrisksets) {
+                    notice_text <- "<p><strong>Note:</strong> The 'Show Number at Risk' option is currently in development. Risk tables will be added in a future update.</p>"
+                    current_summary <- self$results$summary$content
+                    self$results$summary$setContent(paste0(current_summary, notice_text))
+                }
+
                 # Store data for plotting
                 self$results$comprisksPlot$setState(list(
                     "data" = mydata,
@@ -359,7 +401,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             })
         },
         
-        .performSubdistributionAnalysis = function(mydata, time_var, status_var, 
+        .performSubdistributionAnalysis = function(mydata, time_var, status_var,
                                                   group_var, myexplanatory, conf_level) {
             # Perform Fine-Gray subdistribution hazard model
             tryCatch({
@@ -367,58 +409,96 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 if (is.null(group_var)) {
                     return(NULL)
                 }
-                
+
                 # Prepare data for crr function
-                # Convert group variable to numeric if factor
-                if (is.factor(group_var)) {
-                    group_numeric <- as.numeric(group_var) - 1
-                } else if (is.character(group_var)) {
-                    group_numeric <- as.numeric(as.factor(group_var)) - 1
+                # Handle categorical variables properly (create contrasts for multi-level factors)
+                if (is.factor(group_var) || is.character(group_var)) {
+                    # Convert to factor if character
+                    if (is.character(group_var)) {
+                        group_var <- factor(group_var)
+                    }
+
+                    # Check number of levels
+                    n_levels <- length(levels(group_var))
+
+                    if (n_levels < 2) {
+                        message("Not enough groups for subdistribution analysis")
+                        return(NULL)
+                    } else if (n_levels == 2) {
+                        # Binary factor: safe to convert to 0/1
+                        group_matrix <- as.numeric(group_var) - 1
+                        group_labels <- paste0(levels(group_var)[2], " vs ", levels(group_var)[1], " (ref)")
+                    } else {
+                        # Multi-level factor: create dummy variables (treatment contrasts)
+                        # WARNING: cmprsk::crr expects a matrix for multiple covariates
+                        # For now, we'll warn the user that only binary comparisons are supported
+                        warning(paste0(
+                            "Fine-Gray model in this module only supports binary comparisons. ",
+                            "Variable '", myexplanatory, "' has ", n_levels, " levels. ",
+                            "Results will compare all groups against the reference (", levels(group_var)[1], ") ",
+                            "but interpretation may be complex. Consider creating a binary variable."
+                        ))
+
+                        # Create contrast matrix (treatment coding)
+                        group_matrix <- model.matrix(~ group_var)[, -1, drop = FALSE]
+                        group_labels <- paste0("Multi-level comparison (", n_levels, " groups)")
+                    }
                 } else {
-                    group_numeric <- group_var
+                    # Numeric variable
+                    group_matrix <- as.matrix(group_var)
+                    group_labels <- "Continuous predictor (per unit increase)"
                 }
-                
+
+                # Ensure matrix format
+                if (!is.matrix(group_matrix)) {
+                    group_matrix <- as.matrix(group_matrix)
+                }
+
                 # Check if we have valid data
-                if (length(unique(group_numeric)) < 2) {
-                    message("Not enough groups for subdistribution analysis")
+                if (nrow(group_matrix) == 0 || ncol(group_matrix) == 0) {
+                    message("Invalid covariate matrix for subdistribution analysis")
                     return(NULL)
                 }
-                
+
                 # Fit Fine-Gray model for disease death (failcode = 1)
                 fg_model <- cmprsk::crr(
                     ftime = time_var,
                     fstatus = status_var,
-                    cov1 = group_numeric,
+                    cov1 = group_matrix,
                     failcode = 1,  # Disease death
                     cencode = 0    # Censored
                 )
-                
+
                 # Check if model fitted successfully
                 if (is.null(fg_model$coef) || length(fg_model$coef) == 0) {
                     return(NULL)
                 }
-                
+
                 # Extract coefficients and confidence intervals
-                coef_val <- fg_model$coef[1]  # Take first coefficient
-                se_val <- sqrt(fg_model$var[1, 1])  # Take first variance
+                # For binary factors, report the single coefficient
+                # For multi-level, report first coefficient with warning that full results need interpretation
+                coef_val <- fg_model$coef[1]
+                se_val <- sqrt(fg_model$var[1, 1])
                 z_val <- qnorm((1 + conf_level) / 2)
-                
+
                 # Calculate HR and CI
                 hr <- exp(coef_val)
                 ci_lower <- exp(coef_val - z_val * se_val)
                 ci_upper <- exp(coef_val + z_val * se_val)
                 p_value <- 2 * (1 - pnorm(abs(coef_val / se_val)))
-                
+
                 subdist_result <- list(
                     hr = as.numeric(hr),
                     ci_lower = as.numeric(ci_lower),
                     ci_upper = as.numeric(ci_upper),
                     p_value = as.numeric(p_value),
-                    model = fg_model
+                    model = fg_model,
+                    comparison = group_labels,
+                    n_coef = length(fg_model$coef)  # Track if multiple coefficients
                 )
-                
+
                 return(subdist_result)
-                
+
             }, error = function(e) {
                 message("Subdistribution hazard model could not be fitted: ", e$message)
                 return(NULL)
@@ -510,9 +590,9 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             })
         },
         
-        .formatEnhancedCompetingRisksResults = function(result_crr, cuminc_result, 
+        .formatEnhancedCompetingRisksResults = function(result_crr, cuminc_result,
                                                        grays_test_result, subdist_result,
-                                                       cuminc_timepoints) {
+                                                       cuminc_timepoints, timepoints = NULL) {
             # Format traditional competing risks results
             if (is.data.frame(result_crr) && nrow(result_crr) > 0) {
                 hr_col <- grep("HR", names(result_crr), value = TRUE)[1]
@@ -534,12 +614,19 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             # Add subdistribution hazard results
             if (!is.null(subdist_result) && is.list(subdist_result)) {
                 # Check if all required elements are present and numeric
-                if (!is.null(subdist_result$hr) && !is.null(subdist_result$ci_lower) && 
+                if (!is.null(subdist_result$hr) && !is.null(subdist_result$ci_lower) &&
                     !is.null(subdist_result$ci_upper) && !is.null(subdist_result$p_value)) {
-                    
+
+                    # Build term name with comparison info
+                    term_name <- if (!is.null(subdist_result$comparison)) {
+                        paste0("Subdistribution HR (Fine-Gray): ", subdist_result$comparison)
+                    } else {
+                        "Subdistribution HR (Fine-Gray)"
+                    }
+
                     table <- self$results$survivalTable
                     table$addRow(rowKey = 2, values = list(
-                        term = "Subdistribution HR (Fine-Gray)",
+                        term = term_name,
                         hr = round(as.numeric(subdist_result$hr), 3),
                         ci_lower = round(as.numeric(subdist_result$ci_lower), 3),
                         ci_upper = round(as.numeric(subdist_result$ci_upper), 3),
@@ -593,35 +680,30 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             if (!is.null(cuminc_timepoints)) {
                 private$.formatCumulativeIncidenceTimepoints(cuminc_timepoints)
             }
-            
+
             # Format cumulative incidence results
             if (!is.null(cuminc_result)) {
-                private$.formatCumulativeIncidence(cuminc_result)
+                private$.formatCumulativeIncidence(cuminc_result, timepoints)
             }
-            
-            # Advanced risk stratification
-            risk_strata <- private$.performRiskStratification(mydata, time_var, status_var, group_var)
-            
-            # Time-dependent cumulative incidence analysis
-            time_dependent_cif <- private$.performTimeDependentCIF(mydata, time_var, status_var, group_var)
-            
-            # Generate enhanced summary
+
+            # Note: Advanced risk stratification and time-dependent CIF functions
+            # are available (.performRiskStratification, .performTimeDependentCIF)
+            # but not currently integrated into output to reduce computation cost
+
+            # Generate summary (only list features actually implemented and displayed)
             summary_text <- glue::glue(
-                "<h3>Enhanced Competing Risks Analysis Results</h3>
-                <p>Advanced analysis includes:</p>
+                "<h3>Competing Risks Analysis Results</h3>
+                <p>Analysis includes:</p>
                 <ul>
                 <li>Fine-Gray subdistribution hazard model for competing risks regression</li>
                 <li>Gray's test for comparing cumulative incidence functions between groups</li>
                 <li>Cumulative incidence estimates at specified time points</li>
-                <li>Risk stratification for competing events using quantile-based approach</li>
-                <li>Time-dependent cumulative incidence function analysis</li>
-                <li>Advanced competing risks diagnostics and model validation</li>
                 </ul>
-                <p>Results account for the competing nature of different death causes with enhanced predictive capabilities.</p>"
+                <p>Results account for the competing nature of different death causes.</p>"
             )
-            
+
             self$results$summary$setContent(summary_text)
-            private$.generateInterpretation("Enhanced Competing Risks")
+            private$.generateInterpretation("Competing Risks")
         },
         
         .formatCumulativeIncidenceTimepoints = function(cuminc_timepoints) {
@@ -772,14 +854,43 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                         }
                     }
                 } else {
-                    # If no HR column found, show message
-                    table$addRow(rowKey = 1, values = list(
-                        term = "Analysis did not produce hazard ratios",
-                        hr = NA,
-                        ci_lower = NA,
-                        ci_upper = NA,
-                        p_value = NA
-                    ))
+                    # If no HR column found, check if we have descriptive survival data
+                    if ("median" %in% names(result) && nrow(result) > 0) {
+                        # No explanatory variable - show median survival
+                        levels_val <- if ("levels" %in% names(result)) result$levels[1] else "All patients"
+                        n_val <- if ("n" %in% names(result)) result$n[1] else NA
+                        events_val <- if ("events" %in% names(result)) result$events[1] else NA
+                        median_val <- result$median[1]
+
+                        term_text <- paste0(levels_val, " (n=", n_val, ", events=", events_val, ")")
+
+                        table$addRow(rowKey = 1, values = list(
+                            term = term_text,
+                            hr = median_val,  # Use HR column to show median survival
+                            ci_lower = NA,
+                            ci_upper = NA,
+                            p_value = NA
+                        ))
+
+                        # Update summary to clarify we're showing median, not HR
+                        # Set a flag so we don't overwrite this summary later
+                        summary_text <- glue::glue(
+                            "<h3>{analysis_type} Analysis Results</h3>
+                            <p>Analysis completed for all patients (no group comparison).</p>
+                            <p>Median survival time shown in months.</p>"
+                        )
+                        self$results$summary$setContent(summary_text)
+                        return()  # Exit early to avoid overwriting summary
+                    } else {
+                        # No HR and no descriptive data - show message
+                        table$addRow(rowKey = 1, values = list(
+                            term = "Analysis did not produce hazard ratios",
+                            hr = NA,
+                            ci_lower = NA,
+                            ci_upper = NA,
+                            p_value = NA
+                        ))
+                    }
                 }
             }
             
@@ -814,12 +925,13 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                     ))
                 }
             }
-            
-            # Format cumulative incidence results
+
+            # Format cumulative incidence results (Note: this function appears to be unused)
             if (!is.null(cuminc_result)) {
-                private$.formatCumulativeIncidence(cuminc_result)
+                # Would need timepoints from caller if this code is ever activated
+                private$.formatCumulativeIncidence(cuminc_result, NULL)
             }
-            
+
             # Generate summary for competing risks
             summary_text <- glue::glue(
                 "<h3>Competing Risks Analysis Results</h3>
@@ -832,24 +944,28 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             private$.generateInterpretation("Competing Risks")
         },
         
-        .formatCumulativeIncidence = function(cuminc_result) {
-            # Extract cumulative incidence estimates at key timepoints
+        .formatCumulativeIncidence = function(cuminc_result, timepoints = NULL) {
+            # Extract cumulative incidence estimates at user-specified timepoints
             if (!is.null(cuminc_result) && length(cuminc_result) > 0) {
                 table <- self$results$cuminc
-                
+
                 # Get time points and estimates for first group
                 first_group <- names(cuminc_result)[1]
                 times <- cuminc_result[[first_group]]$time
                 est1 <- cuminc_result[[first_group]]$est
                 var1 <- cuminc_result[[first_group]]$var
-                
+
                 # Find estimates for competing risk if available
                 competing_group <- names(cuminc_result)[length(cuminc_result)]
                 est2 <- if(length(cuminc_result) > 1) cuminc_result[[competing_group]]$est else rep(NA, length(times))
                 var2 <- if(length(cuminc_result) > 1) cuminc_result[[competing_group]]$var else rep(NA, length(times))
-                
-                # Add key time points (1, 2, 3, 5 years)
-                key_times <- c(12, 24, 36, 60)  # months
+
+                # Use user-specified timepoints or default to 1, 2, 3, 5 years
+                key_times <- if (!is.null(timepoints) && length(timepoints) > 0) {
+                    timepoints
+                } else {
+                    c(12, 24, 36, 60)  # default: months
+                }
                 for (i in seq_along(key_times)) {
                     target_time <- key_times[i]
                     closest_idx <- which.min(abs(times - target_time))

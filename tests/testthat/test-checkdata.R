@@ -1,5 +1,15 @@
 context("Data Quality Assessment - checkdata")
 
+# ⚠️ WARNING: These tests RE-IMPLEMENT the statistical logic instead of calling
+# jmv::checkdata(). They validate R functions in isolation, but do NOT test:
+# - jamovi UI integration
+# - Option handling
+# - Table/HTML output generation
+# - Actual user-facing functionality
+#
+# For integration testing, see test-checkdata-integration.R which actually calls
+# jmv::checkdata() and validates end-to-end behavior.
+
 # Test data preparation
 set.seed(123)  # For reproducible results
 

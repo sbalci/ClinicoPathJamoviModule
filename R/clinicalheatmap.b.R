@@ -65,12 +65,20 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom tidyheatmaps tidyheatmap
-#' @importFrom dplyr select mutate group_by summarise across arrange filter pull
+# tidyHeatmap support commented out due to Bioconductor dependencies
+# #' @importFrom tidyHeatmap heatmap layer_point layer_text layer_diamond layer_square layer_star
+#' @importFrom dplyr select mutate group_by summarise across arrange filter pull n inner_join
 #' @importFrom tidyr pivot_wider complete
+#' @importFrom tibble column_to_rownames
+#' @importFrom rlang sym
 #' @importFrom ggplot2 ggtitle theme element_text labs
 #' @importFrom magrittr %>%
-#' @importFrom stats complete.cases median na.omit sd
+#' @importFrom stats complete.cases median na.omit sd hclust cutree dist
 #' @importFrom utils head tail
+#' @importFrom factoextra fviz_nbclust
+#' @importFrom cluster silhouette
+#' @importFrom survival Surv survdiff survfit
+#' @importFrom survminer ggsurvplot
 #'
 #' @return A jamovi analysis object containing the clinical heatmap and supporting information
 #' @export clinicalheatmapClass
@@ -123,6 +131,12 @@
 clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalheatmapClass",
     inherit = clinicalheatmapBase,
     private = list(
+
+        .escapeVar = function(x) {
+            # Escape variable names with spaces/special characters
+            if (is.null(x) || length(x) == 0) return(x)
+            make.names(x)
+        },
 
         .createHTMLSection = function(title, content, style = "info", icon = NULL) {
             # Helper function to create consistent HTML sections
@@ -250,11 +264,11 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             # Generate explanatory content
             private$.generateAboutAnalysis()
 
-            # Get data and variables
+            # Get data and variables - escape names for safety
             dataset <- self$data
-            row_var <- self$options$rowVar
-            col_var <- self$options$colVar
-            value_var <- self$options$valueVar
+            row_var <- private$.escapeVar(self$options$rowVar)
+            col_var <- private$.escapeVar(self$options$colVar)
+            value_var <- private$.escapeVar(self$options$valueVar)
 
             # Perform comprehensive input validation
             validation_results <- private$.validateInputs(dataset, row_var, col_var, value_var)
@@ -306,6 +320,25 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
             private$.generateAssumptions()
 
+            # Populate annotation summaries if annotations are used
+            if (!is.null(self$options$annotationCols) && length(self$options$annotationCols) > 0) {
+                col_ann_html <- paste0(
+                    "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
+                    "<p><strong>Column Annotations:</strong> ", paste(self$options$annotationCols, collapse = ", "), "</p>",
+                    "</div>"
+                )
+                self$results$annotations$columnAnnotations$setContent(col_ann_html)
+            }
+
+            if (!is.null(self$options$annotationRows) && length(self$options$annotationRows) > 0) {
+                row_ann_html <- paste0(
+                    "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
+                    "<p><strong>Row Annotations:</strong> ", paste(self$options$annotationRows, collapse = ", "), "</p>",
+                    "</div>"
+                )
+                self$results$annotations$rowAnnotations$setContent(row_ann_html)
+            }
+
             # Store plot data for visualization
             plot_data <- list(
                 data = heatmap_data,
@@ -335,10 +368,46 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             )
 
             self$results$heatmap$setState(plot_data)
+
+            # === ADVANCED FEATURES IMPLEMENTATION ===
+
+            # Perform optimal K analysis if requested
+            if (self$options$findOptimalK && self$options$clusterRows) {
+                private$.performOptimalKAnalysis(heatmap_data, row_var, col_var, value_var)
+            }
+
+            # Export cluster assignments if requested
+            cluster_assignments <- NULL
+            if ((self$options$exportRowClusters || self$options$exportColClusters) &&
+                (self$options$clusterRows || self$options$clusterCols)) {
+                cluster_assignments <- private$.extractClusterAssignments(
+                    heatmap_data, row_var, col_var, value_var
+                )
+            }
+
+            # Perform survival analysis by clusters if requested
+            if (self$options$survivalAnalysis &&
+                !is.null(self$options$survivalTime) &&
+                !is.null(self$options$survivalEvent) &&
+                !is.null(cluster_assignments$row_clusters)) {
+                private$.performSurvivalAnalysis(
+                    dataset, cluster_assignments$row_clusters, row_var
+                )
+            }
+
+            # Perform cluster comparison if requested
+            if (self$options$clusterComparison &&
+                !is.null(self$options$comparisonVars) &&
+                length(self$options$comparisonVars) > 0 &&
+                !is.null(cluster_assignments$row_clusters)) {
+                private$.performClusterComparison(
+                    dataset, cluster_assignments$row_clusters, row_var
+                )
+            }
         },
 
         .plotHeatmap = function(image, ggtheme, theme, ...) {
-            # Heatmap plotting function
+            # Heatmap plotting function using tidyheatmaps
             plot_data <- image$state
 
             if (is.null(plot_data) || is.null(plot_data$data)) {
@@ -361,10 +430,10 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
                 # Build base heatmap call arguments
                 heatmap_args <- list(
-                    .data = data,
-                    .row = rlang::sym(row_var),
-                    .column = rlang::sym(col_var),
-                    .value = rlang::sym(value_var),
+                    df = data,
+                    rows = rlang::sym(row_var),
+                    columns = rlang::sym(col_var),
+                    values = rlang::sym(value_var),
                     scale = if(options$scale_method == "none") "none" else options$scale_method,
                     cluster_rows = options$cluster_rows,
                     cluster_cols = options$cluster_cols,
@@ -385,14 +454,14 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
                 # Add column annotations if specified
                 if (!is.null(options$annotation_cols) && length(options$annotation_cols) > 0) {
-                    # Build annotation list for columns
+                    # tidyheatmaps expects column names as symbols, can be a vector
                     col_ann_syms <- lapply(options$annotation_cols, rlang::sym)
                     heatmap_args$annotation_col <- col_ann_syms
                 }
 
                 # Add row annotations if specified
                 if (!is.null(options$annotation_rows) && length(options$annotation_rows) > 0) {
-                    # Build annotation list for rows
+                    # tidyheatmaps expects column names as symbols, can be a vector
                     row_ann_syms <- lapply(options$annotation_rows, rlang::sym)
                     heatmap_args$annotation_row <- row_ann_syms
                 }
@@ -412,35 +481,17 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 }
 
                 # Create the base heatmap using tidyheatmaps
-                p <- do.call(tidyheatmaps::heatmap, heatmap_args)
+                p <- do.call(tidyheatmaps::tidyheatmap, heatmap_args)
 
-                # Add layer if requested
-                if (!is.null(options$add_layer) && options$add_layer) {
-                    layer_type <- options$layer_type
-                    layer_filter <- options$layer_filter
-
-                    # Map layer types to appropriate geom layers
-                    if (!is.null(layer_type) && layer_type != "point") {
-                        # Add layer based on type
-                        # Note: tidyheatmaps layer syntax may vary
-                        tryCatch({
-                            if (layer_type == "text") {
-                                p <- p %>% tidyheatmaps::add_tile(geom = "text")
-                            } else if (layer_type %in% c("star", "square", "diamond", "arrow_up", "arrow_down")) {
-                                shape_map <- list(
-                                    star = 8,
-                                    square = 15,
-                                    diamond = 18,
-                                    arrow_up = 24,
-                                    arrow_down = 25
-                                )
-                                p <- p %>% tidyheatmaps::add_point(shape = shape_map[[layer_type]])
-                            }
-                        }, error = function(e) {
-                            # If layer addition fails, continue without it
-                        })
-                    }
-                }
+                # === LAYER FUNCTIONALITY NOT SUPPORTED ===
+                # The tidyheatmaps package does not support add_tile() or add_point()
+                # layer functions. These are available in tidyHeatmap (different package)
+                # but not in tidyheatmaps (jbengler). Layer options are disabled in UI.
+                #
+                # To implement layers, would need to either:
+                # 1. Switch to tidyHeatmap package (stemangiola) which has layer_*() functions
+                # 2. Or create custom overlay logic using ggplot2 after heatmap generation
+                # 3. Or remove layer options entirely from the interface
 
                 # Apply color palette if specified
                 if (!is.null(options$color_palette) && options$color_palette != "viridis") {
@@ -486,12 +537,151 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             })
         },
 
+        # tidyHeatmap support commented out due to Bioconductor dependencies
+        # .plotHeatmapAdvanced = function(image, ggtheme, theme, ...) {
+        #     # Heatmap plotting function using tidyHeatmap (advanced, ComplexHeatmap-based)
+        #     plot_data <- image$state
+        #
+        #     if (is.null(plot_data) || is.null(plot_data$data)) {
+        #         return(FALSE)
+        #     }
+        #
+        #     # Extract plotting parameters
+        #     data <- plot_data$data
+        #     row_var <- plot_data$row_var
+        #     col_var <- plot_data$col_var
+        #     value_var <- plot_data$value_var
+        #     options <- plot_data$options
+        #
+        #     # Safely create heatmap with error handling
+        #     tryCatch({
+        #         # Load required packages
+        #         if (!requireNamespace("tidyHeatmap", quietly = TRUE)) {
+        #             stop("tidyHeatmap package is required")
+        #         }
+        #
+        #         # Build base heatmap using tidyHeatmap
+        #         p <- data %>%
+        #             tidyHeatmap::heatmap(
+        #                 .row = !!rlang::sym(row_var),
+        #                 .column = !!rlang::sym(col_var),
+        #                 .value = !!rlang::sym(value_var),
+        #                 scale = if(options$scale_method == "none") "none" else options$scale_method,
+        #                 cluster_rows = options$cluster_rows,
+        #                 cluster_columns = options$cluster_cols,
+        #                 show_row_names = options$show_rownames,
+        #                 show_column_names = options$show_colnames
+        #             )
+        #
+        #         # Add row/column clustering options if enabled
+        #         if (options$cluster_rows) {
+        #             # tidyHeatmap uses ComplexHeatmap internally with different parameter names
+        #             # Note: Advanced distance/method options may need custom ComplexHeatmap config
+        #         }
+        #
+        #         # Add annotations using tidyHeatmap's annotation functions
+        #         if (!is.null(options$annotation_cols) && length(options$annotation_cols) > 0) {
+        #             for (ann_col in options$annotation_cols) {
+        #                 annotation_func <- switch(
+        #                     options$annotation_type,
+        #                     "bar" = tidyHeatmap::annotation_bar,
+        #                     "point" = tidyHeatmap::annotation_point,
+        #                     "line" = tidyHeatmap::annotation_line,
+        #                     tidyHeatmap::annotation_tile  # default tile
+        #                 )
+        #
+        #                 p <- p %>% annotation_func(!!rlang::sym(ann_col))
+        #             }
+        #         }
+        #
+        #         # Add layer/symbol overlays if requested
+        #         if (options$add_layer) {
+        #             layer_type <- options$layer_type
+        #             layer_filter <- options$layer_filter
+        #
+        #             # Build filter expression if provided
+        #             if (!is.null(layer_filter) && nchar(layer_filter) > 0) {
+        #                 # Parse user's filter expression (e.g., "> 0.5" becomes value > 0.5)
+        #                 filter_expr <- paste(value_var, layer_filter)
+        #
+        #                 # Add appropriate layer based on type
+        #                 p <- p %>%
+        #                     switch(
+        #                         layer_type,
+        #                         "point" = tidyHeatmap::layer_point(!!rlang::parse_expr(filter_expr)),
+        #                         "text" = tidyHeatmap::layer_text(!!rlang::parse_expr(filter_expr)),
+        #                         "star" = tidyHeatmap::layer_star(!!rlang::parse_expr(filter_expr)),
+        #                         "square" = tidyHeatmap::layer_square(!!rlang::parse_expr(filter_expr)),
+        #                         "diamond" = tidyHeatmap::layer_diamond(!!rlang::parse_expr(filter_expr)),
+        #                         "arrow_up" = tidyHeatmap::layer_arrow_up(!!rlang::parse_expr(filter_expr)),
+        #                         "arrow_down" = tidyHeatmap::layer_down(!!rlang::parse_expr(filter_expr)),
+        #                         tidyHeatmap::layer_point(!!rlang::parse_expr(filter_expr))  # default
+        #                     )
+        #             } else {
+        #                 # No filter - add layer to all cells
+        #                 p <- p %>%
+        #                     switch(
+        #                         layer_type,
+        #                         "point" = tidyHeatmap::layer_point(),
+        #                         "text" = tidyHeatmap::layer_text(),
+        #                         "star" = tidyHeatmap::layer_star(),
+        #                         "square" = tidyHeatmap::layer_square(),
+        #                         "diamond" = tidyHeatmap::layer_diamond(),
+        #                         tidyHeatmap::layer_point()  # default
+        #                     )
+        #             }
+        #         }
+        #
+        #         # Apply color palette if specified
+        #         if (!is.null(options$color_palette) && options$color_palette != "viridis") {
+        #             # Build color palette
+        #             palette_colors <- switch(
+        #                 options$color_palette,
+        #                 "plasma" = grDevices::hcl.colors(100, "Plasma"),
+        #                 "inferno" = grDevices::hcl.colors(100, "Inferno"),
+        #                 "RdYlBu" = grDevices::hcl.colors(100, "RdYlBu"),
+        #                 "RdBu" = grDevices::hcl.colors(100, "RdBu"),
+        #                 "Blues" = grDevices::hcl.colors(100, "Blues"),
+        #                 "Reds" = grDevices::hcl.colors(100, "Reds"),
+        #                 grDevices::hcl.colors(100, "Viridis")  # default
+        #             )
+        #
+        #             # tidyHeatmap handles palettes differently than tidyheatmaps
+        #             # May need to pass as a named vector or use add_palette if available
+        #         }
+        #
+        #         # Add title
+        #         # Note: tidyHeatmap returns a different object type (ComplexHeatmap)
+        #         # Title handling may differ from ggplot2
+        #
+        #         print(p)
+        #         return(TRUE)
+        #
+        #     }, error = function(e) {
+        #         # If tidyHeatmap fails, create a simple fallback message
+        #         plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+        #         text(1, 1, paste("Error creating heatmap:\n", e$message), cex = 1.2, col = "red")
+        #         title("Clinical Heatmap (tidyHeatmap) - Error")
+        #         return(TRUE)
+        #     })
+        # },
+
         .prepareHeatmapData = function(dataset, row_var, col_var, value_var) {
             # Prepare data for heatmap visualization
             tryCatch({
-                # Select only the required variables
+                # Determine which columns to retain
+                required_vars <- c(row_var, col_var, value_var)
+
+                # Add annotation columns if specified
+                annotation_cols <- self$options$annotationCols
+                annotation_rows <- self$options$annotationRows
+
+                # Combine all needed variables
+                vars_to_keep <- unique(c(required_vars, annotation_cols, annotation_rows))
+
+                # Select only the variables we need (core + annotations)
                 analysis_data <- dataset %>%
-                    dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var))
+                    dplyr::select(dplyr::all_of(vars_to_keep))
 
                 # Handle missing data based on user selection
                 na_handling <- self$options$naHandling
@@ -899,6 +1089,414 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             )
 
             self$results$assumptions$setContent(assumptions_content)
+        },
+
+        # === ADVANCED FEATURES IMPLEMENTATION ===
+
+        .performOptimalKAnalysis = function(data, row_var, col_var, value_var) {
+            tryCatch({
+                # Parse K range
+                k_range_str <- self$options$kRange
+                k_range <- eval(parse(text = k_range_str))
+                if (length(k_range) < 2) k_range <- 2:8
+
+                # Prepare data matrix for clustering
+                mat_data <- data %>%
+                    dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
+                    tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var)) %>%
+                    tibble::column_to_rownames(row_var) %>%
+                    as.matrix()
+
+                # Scale if needed
+                if (self$options$scaleMethod == "row") {
+                    mat_data <- t(scale(t(mat_data)))
+                } else if (self$options$scaleMethod == "column") {
+                    mat_data <- scale(mat_data)
+                }
+
+                # Store data for plotting
+                self$results$optimalKAnalysis$elbowPlot$setState(list(
+                    data = mat_data,
+                    k_range = k_range,
+                    method = self$options$clusterMethodRows
+                ))
+
+                self$results$optimalKAnalysis$silhouettePlot$setState(list(
+                    data = mat_data,
+                    k_range = k_range
+                ))
+
+                # Calculate optimal K using different methods
+                optimal_k_results <- data.frame(
+                    method = character(),
+                    optimal_k = integer(),
+                    metric_value = numeric(),
+                    stringsAsFactors = FALSE
+                )
+
+                # Within-cluster sum of squares (elbow method)
+                wss <- sapply(k_range, function(k) {
+                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
+                    km$tot.withinss
+                })
+
+                # Find elbow using simple difference method
+                elbow_k <- k_range[which.max(diff(diff(wss)))] + 1
+                optimal_k_results <- rbind(optimal_k_results, data.frame(
+                    method = "Elbow Method",
+                    optimal_k = as.integer(elbow_k),
+                    metric_value = wss[k_range == elbow_k]
+                ))
+
+                # Silhouette method
+                sil_scores <- sapply(k_range[k_range > 1], function(k) {
+                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
+                    sil <- cluster::silhouette(km$cluster, stats::dist(mat_data))
+                    mean(sil[, 3])
+                })
+
+                best_sil_k <- k_range[k_range > 1][which.max(sil_scores)]
+                optimal_k_results <- rbind(optimal_k_results, data.frame(
+                    method = "Silhouette",
+                    optimal_k = as.integer(best_sil_k),
+                    metric_value = max(sil_scores)
+                ))
+
+                # Populate table
+                for (i in seq_len(nrow(optimal_k_results))) {
+                    self$results$optimalKAnalysis$optimalKTable$addRow(rowKey = i, values = list(
+                        method = optimal_k_results$method[i],
+                        optimal_k = optimal_k_results$optimal_k[i],
+                        metric_value = optimal_k_results$metric_value[i]
+                    ))
+                }
+
+            }, error = function(e) {
+                # Silently handle errors
+            })
+        },
+
+        .extractClusterAssignments = function(data, row_var, col_var, value_var) {
+            tryCatch({
+                # Prepare data matrix
+                mat_data <- data %>%
+                    dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
+                    tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var)) %>%
+                    tibble::column_to_rownames(row_var) %>%
+                    as.matrix()
+
+                result <- list(row_clusters = NULL, col_clusters = NULL)
+
+                # Extract row clusters if requested
+                if (self$options$exportRowClusters && self$options$clusterRows) {
+                    # Perform hierarchical clustering on rows
+                    dist_rows <- stats::dist(mat_data, method = self$options$clusterDistanceRows)
+                    hc_rows <- stats::hclust(dist_rows, method = self$options$clusterMethodRows)
+
+                    # Cut tree - use splitRows if > 1, otherwise estimate optimal K
+                    n_clusters <- self$options$splitRows
+                    if (n_clusters <= 1) n_clusters <- min(3, nrow(mat_data) - 1)
+
+                    row_clusters <- stats::cutree(hc_rows, k = n_clusters)
+                    result$row_clusters <- data.frame(
+                        row_id = names(row_clusters),
+                        cluster = as.integer(row_clusters),
+                        stringsAsFactors = FALSE
+                    )
+
+                    # Populate table
+                    for (i in seq_len(nrow(result$row_clusters))) {
+                        self$results$clusterAssignments$rowClusterTable$addRow(rowKey = i, values = list(
+                            row_id = result$row_clusters$row_id[i],
+                            cluster = result$row_clusters$cluster[i]
+                        ))
+                    }
+                }
+
+                # Extract column clusters if requested
+                if (self$options$exportColClusters && self$options$clusterCols) {
+                    # Perform hierarchical clustering on columns
+                    dist_cols <- stats::dist(t(mat_data), method = self$options$clusterDistanceCols)
+                    hc_cols <- stats::hclust(dist_cols, method = self$options$clusterMethodCols)
+
+                    n_clusters <- self$options$splitCols
+                    if (n_clusters <= 1) n_clusters <- min(3, ncol(mat_data) - 1)
+
+                    col_clusters <- stats::cutree(hc_cols, k = n_clusters)
+                    result$col_clusters <- data.frame(
+                        col_id = names(col_clusters),
+                        cluster = as.integer(col_clusters),
+                        stringsAsFactors = FALSE
+                    )
+
+                    # Populate table
+                    for (i in seq_len(nrow(result$col_clusters))) {
+                        self$results$clusterAssignments$colClusterTable$addRow(rowKey = i, values = list(
+                            col_id = result$col_clusters$col_id[i],
+                            cluster = result$col_clusters$cluster[i]
+                        ))
+                    }
+                }
+
+                return(result)
+            }, error = function(e) {
+                return(list(row_clusters = NULL, col_clusters = NULL))
+            })
+        },
+
+        .performSurvivalAnalysis = function(dataset, row_clusters, row_var) {
+            tryCatch({
+                # Get survival variables
+                surv_time_var <- self$options$survivalTime
+                surv_event_var <- self$options$survivalEvent
+                event_level <- self$options$survivalEventLevel
+
+                # Merge cluster assignments with dataset
+                cluster_data <- row_clusters
+                names(cluster_data) <- c(row_var, "cluster")
+
+                surv_data <- dataset %>%
+                    dplyr::inner_join(cluster_data, by = row_var) %>%
+                    dplyr::filter(!is.na(!!rlang::sym(surv_time_var)),
+                                  !is.na(!!rlang::sym(surv_event_var)))
+
+                # Create binary event indicator
+                if (!is.null(event_level)) {
+                    surv_data <- surv_data %>%
+                        dplyr::mutate(event = as.integer(!!rlang::sym(surv_event_var) == event_level))
+                } else {
+                    surv_data <- surv_data %>%
+                        dplyr::mutate(event = as.integer(!!rlang::sym(surv_event_var)))
+                }
+
+                # Perform survival analysis
+                surv_obj <- survival::Surv(surv_data[[surv_time_var]], surv_data$event)
+                fit <- survival::survfit(surv_obj ~ cluster, data = surv_data)
+
+                # Log-rank test
+                log_rank <- survival::survdiff(surv_obj ~ cluster, data = surv_data)
+
+                # Populate results
+                self$results$clusterSurvival$logRankTest$addRow(rowKey = 1, values = list(
+                    chisq = log_rank$chisq,
+                    df = length(log_rank$n) - 1,
+                    p = 1 - stats::pchisq(log_rank$chisq, length(log_rank$n) - 1)
+                ))
+
+                # Extract survival summary by cluster
+                for (i in seq_along(fit$strata)) {
+                    cluster_id <- gsub("cluster=", "", names(fit$strata)[i])
+                    cluster_idx <- fit$strata[1:i]
+                    if (i > 1) cluster_idx <- sum(fit$strata[1:(i-1)]) + 1:fit$strata[i]
+                    else cluster_idx <- 1:fit$strata[i]
+
+                    median_surv <- summary(fit)$table[i, "median"]
+                    ci_lower <- summary(fit)$table[i, paste0("0.95LCL")]
+                    ci_upper <- summary(fit)$table[i, paste0("0.95UCL")]
+
+                    self$results$clusterSurvival$survivalTable$addRow(rowKey = i, values = list(
+                        cluster = cluster_id,
+                        n = log_rank$n[i],
+                        events = log_rank$obs[i],
+                        median_surv = median_surv,
+                        ci_lower = ci_lower,
+                        ci_upper = ci_upper
+                    ))
+                }
+
+                # Store plot data
+                self$results$clusterSurvival$kmPlot$setState(list(
+                    fit = fit,
+                    data = surv_data
+                ))
+
+            }, error = function(e) {
+                # Silently handle errors
+            })
+        },
+
+        .performClusterComparison = function(dataset, row_clusters, row_var) {
+            tryCatch({
+                # Merge cluster assignments with dataset
+                cluster_data <- row_clusters
+                names(cluster_data) <- c(row_var, "cluster")
+
+                comp_data <- dataset %>%
+                    dplyr::inner_join(cluster_data, by = row_var)
+
+                comparison_vars <- self$options$comparisonVars
+
+                # Compare each variable across clusters
+                for (var in comparison_vars) {
+                    if (is.numeric(comp_data[[var]])) {
+                        # Use ANOVA or Kruskal-Wallis for numeric variables
+                        test_result <- tryCatch({
+                            aov_result <- stats::aov(as.formula(paste(var, "~ cluster")), data = comp_data)
+                            p_value <- summary(aov_result)[[1]][["Pr(>F)"]][1]
+
+                            # Get mean by cluster
+                            means <- comp_data %>%
+                                dplyr::group_by(cluster) %>%
+                                dplyr::summarise(mean_val = mean(!!rlang::sym(var), na.rm = TRUE), .groups = "drop")
+
+                            for (i in seq_len(nrow(means))) {
+                                self$results$clusterCharacteristics$characteristicTable$addRow(
+                                    rowKey = paste(var, means$cluster[i], sep = "_"),
+                                    values = list(
+                                        variable = var,
+                                        cluster = paste("Cluster", means$cluster[i]),
+                                        summary = sprintf("Mean: %.2f", means$mean_val[i]),
+                                        p_value = if (i == 1) p_value else NA
+                                    )
+                                )
+                            }
+                        }, error = function(e) NULL)
+
+                    } else {
+                        # Use chi-square for categorical variables
+                        test_result <- tryCatch({
+                            tbl <- table(comp_data$cluster, comp_data[[var]])
+                            chi_result <- stats::chisq.test(tbl)
+                            p_value <- chi_result$p.value
+
+                            # Get frequencies by cluster
+                            freqs <- comp_data %>%
+                                dplyr::group_by(cluster, !!rlang::sym(var)) %>%
+                                dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+                                dplyr::group_by(cluster) %>%
+                                dplyr::mutate(pct = n / sum(n) * 100)
+
+                            for (i in seq_len(nrow(freqs))) {
+                                self$results$clusterCharacteristics$characteristicTable$addRow(
+                                    rowKey = paste(var, freqs$cluster[i], freqs[[var]][i], sep = "_"),
+                                    values = list(
+                                        variable = var,
+                                        cluster = paste("Cluster", freqs$cluster[i]),
+                                        summary = sprintf("%s: %d (%.1f%%)",
+                                                          freqs[[var]][i], freqs$n[i], freqs$pct[i]),
+                                        p_value = if (i == 1) p_value else NA
+                                    )
+                                )
+                            }
+                        }, error = function(e) NULL)
+                    }
+                }
+
+                # Add interpretation
+                interp_html <- paste0(
+                    "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px;'>",
+                    "<h4>Cluster Characteristics Interpretation</h4>",
+                    "<p>P-values indicate whether there are significant differences in each variable across clusters.</p>",
+                    "<ul>",
+                    "<li>P < 0.05 suggests significant differences between clusters</li>",
+                    "<li>Review cluster-specific summaries to understand patterns</li>",
+                    "<li>Consider clinical significance alongside statistical significance</li>",
+                    "</ul>",
+                    "</div>"
+                )
+                self$results$clusterCharacteristics$clusterInterpretation$setContent(interp_html)
+
+            }, error = function(e) {
+                # Silently handle errors
+            })
+        },
+
+        # Plot functions for advanced features
+        .elbowPlot = function(image, ggtheme, theme, ...) {
+            plot_state <- image$state
+            if (is.null(plot_state)) return(FALSE)
+
+            tryCatch({
+                mat_data <- plot_state$data
+                k_range <- plot_state$k_range
+                method <- plot_state$method
+
+                # Calculate WSS for each K
+                wss <- sapply(k_range, function(k) {
+                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
+                    km$tot.withinss
+                })
+
+                # Create elbow plot
+                plot(k_range, wss, type = "b", pch = 19, frame = FALSE,
+                     xlab = "Number of Clusters (K)",
+                     ylab = "Total Within-Cluster Sum of Squares",
+                     main = "Elbow Method for Optimal K",
+                     col = "steelblue", lwd = 2)
+                grid()
+
+                return(TRUE)
+            }, error = function(e) {
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                text(1, 1, paste("Error creating elbow plot:\n", e$message), col = "red")
+                return(TRUE)
+            })
+        },
+
+        .silhouettePlot = function(image, ggtheme, theme, ...) {
+            plot_state <- image$state
+            if (is.null(plot_state)) return(FALSE)
+
+            tryCatch({
+                mat_data <- plot_state$data
+                k_range <- plot_state$k_range
+
+                # Calculate silhouette scores
+                sil_scores <- sapply(k_range[k_range > 1], function(k) {
+                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
+                    sil <- cluster::silhouette(km$cluster, stats::dist(mat_data))
+                    mean(sil[, 3])
+                })
+
+                # Create silhouette plot
+                plot(k_range[k_range > 1], sil_scores, type = "b", pch = 19, frame = FALSE,
+                     xlab = "Number of Clusters (K)",
+                     ylab = "Average Silhouette Width",
+                     main = "Silhouette Analysis for Optimal K",
+                     col = "darkgreen", lwd = 2)
+                grid()
+                abline(h = 0.5, col = "red", lty = 2)
+
+                return(TRUE)
+            }, error = function(e) {
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                text(1, 1, paste("Error creating silhouette plot:\n", e$message), col = "red")
+                return(TRUE)
+            })
+        },
+
+        .kmPlotClusters = function(image, ggtheme, theme, ...) {
+            plot_state <- image$state
+            if (is.null(plot_state)) return(FALSE)
+
+            tryCatch({
+                requireNamespace("survminer", quietly = TRUE)
+
+                fit <- plot_state$fit
+                data <- plot_state$data
+
+                # Create KM plot using survminer
+                p <- survminer::ggsurvplot(
+                    fit,
+                    data = data,
+                    pval = TRUE,
+                    conf.int = TRUE,
+                    risk.table = TRUE,
+                    risk.table.height = 0.25,
+                    ggtheme = theme_minimal(),
+                    palette = "jco",
+                    legend.title = "Cluster",
+                    legend.labs = paste("Cluster", unique(data$cluster)),
+                    title = "Kaplan-Meier Survival by Cluster"
+                )
+
+                print(p$plot)
+                return(TRUE)
+            }, error = function(e) {
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                text(1, 1, paste("Error creating KM plot:\n", e$message), col = "red")
+                return(TRUE)
+            })
         }
     )
 )

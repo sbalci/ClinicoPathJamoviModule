@@ -7,13 +7,12 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     public = list(
         initialize = function(
             vars = NULL,
-            check_duplicates = TRUE,
-            check_missing = TRUE,
+            check_duplicates = FALSE,
+            check_missing = FALSE,
             complete_cases_only = FALSE,
             plot_data_overview = FALSE,
             plot_missing_patterns = FALSE,
             plot_data_types = FALSE,
-            plot_value_expectations = FALSE,
             missing_threshold_visual = 10, ...) {
 
             super$initialize(
@@ -28,11 +27,11 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..check_duplicates <- jmvcore::OptionBool$new(
                 "check_duplicates",
                 check_duplicates,
-                default=TRUE)
+                default=FALSE)
             private$..check_missing <- jmvcore::OptionBool$new(
                 "check_missing",
                 check_missing,
-                default=TRUE)
+                default=FALSE)
             private$..complete_cases_only <- jmvcore::OptionBool$new(
                 "complete_cases_only",
                 complete_cases_only,
@@ -49,10 +48,6 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "plot_data_types",
                 plot_data_types,
                 default=FALSE)
-            private$..plot_value_expectations <- jmvcore::OptionBool$new(
-                "plot_value_expectations",
-                plot_value_expectations,
-                default=FALSE)
             private$..missing_threshold_visual <- jmvcore::OptionNumber$new(
                 "missing_threshold_visual",
                 missing_threshold_visual,
@@ -67,7 +62,6 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..plot_data_overview)
             self$.addOption(private$..plot_missing_patterns)
             self$.addOption(private$..plot_data_types)
-            self$.addOption(private$..plot_value_expectations)
             self$.addOption(private$..missing_threshold_visual)
         }),
     active = list(
@@ -78,7 +72,6 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         plot_data_overview = function() private$..plot_data_overview$value,
         plot_missing_patterns = function() private$..plot_missing_patterns$value,
         plot_data_types = function() private$..plot_data_types$value,
-        plot_value_expectations = function() private$..plot_value_expectations$value,
         missing_threshold_visual = function() private$..missing_threshold_visual$value),
     private = list(
         ..vars = NA,
@@ -88,7 +81,6 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..plot_data_overview = NA,
         ..plot_missing_patterns = NA,
         ..plot_data_types = NA,
-        ..plot_value_expectations = NA,
         ..missing_threshold_visual = NA)
 )
 
@@ -100,8 +92,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         text = function() private$.items[["text"]],
         plotDataOverview = function() private$.items[["plotDataOverview"]],
         plotMissingPatterns = function() private$.items[["plotMissingPatterns"]],
-        plotDataTypes = function() private$.items[["plotDataTypes"]],
-        plotValueExpectations = function() private$.items[["plotValueExpectations"]]),
+        plotDataTypes = function() private$.items[["plotDataTypes"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -115,7 +106,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                visible="(vars)"))
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
@@ -128,7 +119,10 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 height=600,
                 renderFun=".plotDataOverview",
                 visible="(plot_data_overview)",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "missing_threshold_visual")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotMissingPatterns",
@@ -137,7 +131,10 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 height=600,
                 renderFun=".plotMissingPatterns",
                 visible="(plot_missing_patterns)",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "missing_threshold_visual")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotDataTypes",
@@ -146,16 +143,9 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 height=600,
                 renderFun=".plotDataTypes",
                 visible="(plot_data_types)",
-                requiresData=TRUE))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plotValueExpectations",
-                title="Value Expectations",
-                width=900,
-                height=600,
-                renderFun=".plotValueExpectations",
-                visible="(plot_value_expectations)",
-                requiresData=TRUE))}))
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars")))}))
 
 dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dataqualityBase",
@@ -197,17 +187,16 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param vars Variables to assess for data quality. If none selected,  entire
 #'   dataset will be analyzed.
 #' @param check_duplicates If TRUE, analyzes duplicate values within each
-#'   variable or across  the entire dataset.
+#'   variable or across the entire dataset.
 #' @param check_missing If TRUE, provides detailed missing value statistics
 #'   and patterns.
-#' @param complete_cases_only If TRUE, analyzes completeness across all
-#'   selected variables simultaneously.
+#' @param complete_cases_only If TRUE, checks for duplicate rows across all
+#'   selected variables. If FALSE, checks for duplicate values within each
+#'   variable separately.
 #' @param plot_data_overview Show data overview visualization displaying
 #'   variable types and missing values.
 #' @param plot_missing_patterns Show missing value patterns visualization.
 #' @param plot_data_types Show data type detection and validation
-#'   visualization.
-#' @param plot_value_expectations Show value expectations analysis
 #'   visualization.
 #' @param missing_threshold_visual Threshold percentage for highlighting
 #'   variables with missing values in visual analysis.
@@ -218,20 +207,18 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plotDataOverview} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotMissingPatterns} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotDataTypes} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plotValueExpectations} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export
 dataquality <- function(
     data,
     vars,
-    check_duplicates = TRUE,
-    check_missing = TRUE,
+    check_duplicates = FALSE,
+    check_missing = FALSE,
     complete_cases_only = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
-    plot_value_expectations = FALSE,
     missing_threshold_visual = 10) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -252,7 +239,6 @@ dataquality <- function(
         plot_data_overview = plot_data_overview,
         plot_missing_patterns = plot_missing_patterns,
         plot_data_types = plot_data_types,
-        plot_value_expectations = plot_value_expectations,
         missing_threshold_visual = missing_threshold_visual)
 
     analysis <- dataqualityClass$new(

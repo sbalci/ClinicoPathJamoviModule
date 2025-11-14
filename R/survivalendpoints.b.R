@@ -15,6 +15,16 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
     private = list(
 
         #---------------------------------------------
+        # UTILITY FUNCTIONS
+        #---------------------------------------------
+
+        # Escape variable names with spaces/special characters
+        .escapeVar = function(x) {
+            if (is.null(x) || length(x) == 0) return(x)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        #---------------------------------------------
         # INITIALIZATION
         #---------------------------------------------
 
@@ -136,14 +146,40 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             if (is.null(self$options$patientId) ||
                 is.null(self$options$startDate) ||
                 is.null(self$options$lastFollowup)) {
+
+                html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Required Variables Missing</h4>",
+                    "<p style='color: #856404;'>Please select the following required variables to derive survival endpoints:</p>",
+                    "<ul style='margin-left: 20px;'>",
+                    if (is.null(self$options$patientId)) "<li><strong>Patient ID</strong> - Unique identifier for each patient</li>" else "",
+                    if (is.null(self$options$startDate)) "<li><strong>Treatment Start Date/Time</strong> - Baseline timepoint</li>" else "",
+                    if (is.null(self$options$lastFollowup)) "<li><strong>Last Follow-up Date/Time</strong> - Last known contact</li>" else "",
+                    "</ul>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
                 return()
             }
 
             # Get data
             data <- self$data
 
-            # Extract variables
-            patientId <- jmvcore::toNumeric(data[[self$options$patientId]])
+            # Check for empty dataset
+            if (nrow(data) == 0) {
+                html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
+                    "<p style='color: #721c24;'>Dataset contains no rows.</p>",
+                    "<p>Please load data to derive survival endpoints.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+                return()
+            }
+
+            # Extract variables (keep patientId as character to preserve alphanumeric IDs)
+            patientId <- as.character(data[[self$options$patientId]])
             startDate <- data[[self$options$startDate]]
             lastFollowup <- data[[self$options$lastFollowup]]
 
@@ -151,13 +187,61 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             if (!self$options$calculatePFS && !self$options$calculateOS &&
                 !self$options$calculateTTP && !self$options$calculateDOR &&
                 !self$options$calculateTOT) {
+
+                html <- paste0(
+                    "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #0c5460;'>ℹ️ No Endpoints Selected</h4>",
+                    "<p style='color: #0c5460;'>Please select at least one survival endpoint to calculate:</p>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li><strong>PFS</strong> (Progression-Free Survival) - Time to progression or death</li>",
+                    "<li><strong>OS</strong> (Overall Survival) - Time to death</li>",
+                    "<li><strong>TTP</strong> (Time to Progression) - Time to progression only</li>",
+                    "<li><strong>DOR</strong> (Duration of Response) - Time from response to progression</li>",
+                    "<li><strong>Time on Treatment</strong> - Treatment duration</li>",
+                    "</ul>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
                 return()
             }
+
+            # Clear warnings if validation passed
+            self$results$dataWarning$setContent("")
 
             # Convert dates if needed
             if (self$options$inputType == 'dates') {
                 startDate <- private$.convertToDate(startDate)
                 lastFollowup <- private$.convertToDate(lastFollowup)
+            }
+
+            # Extract event dates if provided
+            progressionDate <- NULL
+            deathDate <- NULL
+
+            if (!is.null(self$options$progressionDate)) {
+                progressionDate <- data[[self$options$progressionDate]]
+                if (self$options$inputType == 'dates') {
+                    progressionDate <- private$.convertToDate(progressionDate)
+                }
+            }
+
+            if (!is.null(self$options$deathDate)) {
+                deathDate <- data[[self$options$deathDate]]
+                if (self$options$inputType == 'dates') {
+                    deathDate <- private$.convertToDate(deathDate)
+                }
+            }
+
+            # Extract event indicators (used if dates not provided)
+            progressionEvent <- NULL
+            deathEvent <- NULL
+
+            if (!is.null(self$options$progressionEvent)) {
+                progressionEvent <- jmvcore::toNumeric(data[[self$options$progressionEvent]])
+            }
+
+            if (!is.null(self$options$deathEvent)) {
+                deathEvent <- jmvcore::toNumeric(data[[self$options$deathEvent]])
             }
 
             # Create base data frame
@@ -166,46 +250,37 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 stringsAsFactors = FALSE
             )
 
-            # Calculate each endpoint
-            if (self$options$calculatePFS && !is.null(self$options$progressionEvent)) {
-                progressionEvent <- jmvcore::toNumeric(data[[self$options$progressionEvent]])
-                deathEvent <- if (!is.null(self$options$deathEvent)) {
-                    jmvcore::toNumeric(data[[self$options$deathEvent]])
-                } else {
-                    rep(0, length(patientId))
-                }
-
+            # Calculate each endpoint with CORRECT time-to-event calculations
+            if (self$options$calculatePFS) {
                 pfs <- private$.calculatePFS(startDate, lastFollowup,
+                                            progressionDate, deathDate,
                                             progressionEvent, deathEvent)
                 derivedData$pfs_time <- pfs$time
                 derivedData$pfs_event <- pfs$event
             }
 
-            if (self$options$calculateOS && !is.null(self$options$deathEvent)) {
-                deathEvent <- jmvcore::toNumeric(data[[self$options$deathEvent]])
-
-                os <- private$.calculateOS(startDate, lastFollowup, deathEvent)
+            if (self$options$calculateOS) {
+                os <- private$.calculateOS(startDate, lastFollowup,
+                                          deathDate, deathEvent)
                 derivedData$os_time <- os$time
                 derivedData$os_event <- os$event
             }
 
-            if (self$options$calculateTTP && !is.null(self$options$progressionEvent)) {
-                progressionEvent <- jmvcore::toNumeric(data[[self$options$progressionEvent]])
-
-                ttp <- private$.calculateTTP(startDate, lastFollowup, progressionEvent)
+            if (self$options$calculateTTP) {
+                ttp <- private$.calculateTTP(startDate, lastFollowup,
+                                            progressionDate, progressionEvent, deathDate)
                 derivedData$ttp_time <- ttp$time
                 derivedData$ttp_event <- ttp$event
             }
 
-            if (self$options$calculateDOR && !is.null(self$options$responseDate) &&
-                !is.null(self$options$progressionEvent)) {
+            if (self$options$calculateDOR && !is.null(self$options$responseDate)) {
                 responseDate <- data[[self$options$responseDate]]
                 if (self$options$inputType == 'dates') {
                     responseDate <- private$.convertToDate(responseDate)
                 }
-                progressionEvent <- jmvcore::toNumeric(data[[self$options$progressionEvent]])
 
-                dor <- private$.calculateDOR(responseDate, lastFollowup, progressionEvent)
+                dor <- private$.calculateDOR(responseDate, lastFollowup,
+                                            progressionDate, progressionEvent)
                 derivedData$dor_time <- dor$time
                 derivedData$dor_event <- dor$event
             }
@@ -254,42 +329,149 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         },
 
         #---------------------------------------------
-        # ENDPOINT CALCULATION FUNCTIONS
+        # ENDPOINT CALCULATION FUNCTIONS (CLINICALLY CORRECT)
         #---------------------------------------------
 
-        .calculatePFS = function(startDate, lastFollowup, progressionEvent, deathEvent) {
-            # PFS: time to progression OR death (whichever first)
-            time <- private$.calculateTimeDiff(startDate, lastFollowup)
-            event <- pmax(progressionEvent, deathEvent, na.rm = TRUE)
+        .calculatePFS = function(startDate, lastFollowup, progressionDate, deathDate,
+                                 progressionEvent, deathEvent) {
+            # PFS: time to FIRST event (progression OR death, whichever occurs first)
+            n <- length(startDate)
+            time <- rep(NA_real_, n)
+            event <- rep(0, n)
+
+            for (i in 1:n) {
+                # Determine event times
+                prog_time <- NA
+                death_time <- NA
+
+                # Get progression time
+                if (!is.null(progressionDate) && !is.na(progressionDate[i])) {
+                    prog_time <- private$.calculateTimeDiff(startDate[i], progressionDate[i])
+                } else if (!is.null(progressionEvent) && !is.na(progressionEvent[i]) && progressionEvent[i] == 1) {
+                    # If only event indicator, assume event at last followup (legacy support)
+                    prog_time <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
+                }
+
+                # Get death time
+                if (!is.null(deathDate) && !is.na(deathDate[i])) {
+                    death_time <- private$.calculateTimeDiff(startDate[i], deathDate[i])
+                } else if (!is.null(deathEvent) && !is.na(deathEvent[i]) && deathEvent[i] == 1) {
+                    # If only event indicator, assume event at last followup (legacy support)
+                    death_time <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
+                }
+
+                # Time to last followup (for censoring)
+                followup_time <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
+
+                # PFS = time to FIRST event (progression or death)
+                if (!is.na(prog_time) && !is.na(death_time)) {
+                    # Both events occurred - take earliest
+                    time[i] <- min(prog_time, death_time, followup_time, na.rm = TRUE)
+                    event[i] <- 1
+                } else if (!is.na(prog_time)) {
+                    # Only progression occurred
+                    time[i] <- min(prog_time, followup_time, na.rm = TRUE)
+                    event[i] <- 1
+                } else if (!is.na(death_time)) {
+                    # Only death occurred
+                    time[i] <- min(death_time, followup_time, na.rm = TRUE)
+                    event[i] <- 1
+                } else {
+                    # No event - censored at last followup
+                    time[i] <- followup_time
+                    event[i] <- 0
+                }
+            }
 
             list(time = time, event = event)
         },
 
-        .calculateOS = function(startDate, lastFollowup, deathEvent) {
-            # OS: time to death
-            time <- private$.calculateTimeDiff(startDate, lastFollowup)
-            event <- deathEvent
+        .calculateOS = function(startDate, lastFollowup, deathDate, deathEvent) {
+            # OS: time to death (alive patients censored at last followup)
+            n <- length(startDate)
+            time <- rep(NA_real_, n)
+            event <- rep(0, n)
+
+            for (i in 1:n) {
+                # Check if death occurred
+                if (!is.null(deathDate) && !is.na(deathDate[i])) {
+                    # Use actual death date
+                    time[i] <- private$.calculateTimeDiff(startDate[i], deathDate[i])
+                    event[i] <- 1
+                } else if (!is.null(deathEvent) && !is.na(deathEvent[i]) && deathEvent[i] == 1) {
+                    # Legacy support: event indicator without date
+                    time[i] <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
+                    event[i] <- 1
+                } else {
+                    # Alive - censored at last followup
+                    time[i] <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
+                    event[i] <- 0
+                }
+            }
 
             list(time = time, event = event)
         },
 
-        .calculateTTP = function(startDate, lastFollowup, progressionEvent) {
-            # TTP: time to progression (censors death without progression)
-            time <- private$.calculateTimeDiff(startDate, lastFollowup)
-            event <- progressionEvent
+        .calculateTTP = function(startDate, lastFollowup, progressionDate, progressionEvent, deathDate = NULL) {
+            # TTP: time to progression (death WITHOUT progression is censored)
+            n <- length(startDate)
+            time <- rep(NA_real_, n)
+            event <- rep(0, n)
+
+            for (i in 1:n) {
+                # Check if progression occurred
+                if (!is.null(progressionDate) && !is.na(progressionDate[i])) {
+                    # Use actual progression date
+                    time[i] <- private$.calculateTimeDiff(startDate[i], progressionDate[i])
+                    event[i] <- 1
+                } else if (!is.null(progressionEvent) && !is.na(progressionEvent[i]) && progressionEvent[i] == 1) {
+                    # Legacy support: event indicator without date
+                    time[i] <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
+                    event[i] <- 1
+                } else {
+                    # No progression - censored
+                    # If patient died, censor at death; otherwise censor at last followup
+                    if (!is.null(deathDate) && !is.na(deathDate[i])) {
+                        time[i] <- private$.calculateTimeDiff(startDate[i], deathDate[i])
+                    } else {
+                        time[i] <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
+                    }
+                    event[i] <- 0
+                }
+            }
 
             list(time = time, event = event)
         },
 
-        .calculateDOR = function(responseDate, lastFollowup, progressionEvent) {
-            # DOR: time from response to progression
-            # Only for patients with a response
-            time <- private$.calculateTimeDiff(responseDate, lastFollowup)
-            event <- progressionEvent
+        .calculateDOR = function(responseDate, lastFollowup, progressionDate, progressionEvent) {
+            # DOR: time from confirmed response to progression (for responders only)
+            n <- length(responseDate)
+            time <- rep(NA_real_, n)
+            event <- rep(NA_integer_, n)
 
-            # Set time to NA if no response date
-            time[is.na(responseDate)] <- NA
-            event[is.na(responseDate)] <- NA
+            for (i in 1:n) {
+                # Only calculate for patients with a response
+                if (is.na(responseDate[i])) {
+                    time[i] <- NA
+                    event[i] <- NA
+                    next
+                }
+
+                # Check if progression occurred
+                if (!is.null(progressionDate) && !is.na(progressionDate[i])) {
+                    # Use actual progression date
+                    time[i] <- private$.calculateTimeDiff(responseDate[i], progressionDate[i])
+                    event[i] <- 1
+                } else if (!is.null(progressionEvent) && !is.na(progressionEvent[i]) && progressionEvent[i] == 1) {
+                    # Legacy support: event indicator without date
+                    time[i] <- private$.calculateTimeDiff(responseDate[i], lastFollowup[i])
+                    event[i] <- 1
+                } else {
+                    # No progression - censored at last followup
+                    time[i] <- private$.calculateTimeDiff(responseDate[i], lastFollowup[i])
+                    event[i] <- 0
+                }
+            }
 
             list(time = time, event = event)
         },
@@ -335,9 +517,41 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 tryCatch({
                     as.Date(as.numeric(x), origin = "1970-01-01")
                 }, error = function(e2) {
+                    # Conversion failed - warn user
+                    na_count <- sum(is.na(x))
+                    total_count <- length(x)
+
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Date Conversion Failed</h4>",
+                        "<p style='color: #721c24;'>Could not convert date/time variables to Date format.</p>",
+                        "<p><strong>Data status:</strong> ", na_count, " of ", total_count, " values could not be parsed.</p>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Ensure dates are in standard format (YYYY-MM-DD or YYYY/MM/DD)</li>",
+                        "<li>Check for text values or inconsistent date formats</li>",
+                        "<li>Use 'Numeric (time values)' input type if already calculated</li>",
+                        "<li>Preprocess dates in jamovi Data → Transform</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
                     rep(NA, length(x))
                 })
             })
+
+            # Check if conversion resulted in many NAs
+            if (sum(is.na(result)) > length(result) * 0.5 && sum(!is.na(x)) > 0) {
+                html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Partial Date Conversion Issues</h4>",
+                    "<p style='color: #856404;'>More than 50% of date values could not be converted.</p>",
+                    "<p><strong>Converted:</strong> ", sum(!is.na(result)), " / ", length(result), " values</p>",
+                    "<p>Please check your date format and consider using numeric time values instead.</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(html)
+            }
 
             return(result)
         },

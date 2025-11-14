@@ -24,8 +24,6 @@ test_that("AUC calculation is correct", {
 
 # Test main decision() function
 test_that("decision function works with basic parameters", {
-  testthat::skip_on_cran()
-  
   # Load test data
   data("histopathology", package = "ClinicoPath")
   
@@ -59,8 +57,6 @@ test_that("decision function works with basic parameters", {
 })
 
 test_that("decision function works with confidence intervals", {
-  testthat::skip_on_cran()
-  
   data("histopathology", package = "ClinicoPath")
   
   # Test with confidence intervals enabled
@@ -90,8 +86,6 @@ test_that("decision function works with confidence intervals", {
 })
 
 test_that("decision function works with prior probability", {
-  testthat::skip_on_cran()
-  
   data("histopathology", package = "ClinicoPath")
   
   # Test with prior probability
@@ -109,8 +103,6 @@ test_that("decision function works with prior probability", {
 })
 
 test_that("decision function works with Fagan nomogram", {
-  testthat::skip_on_cran()
-  
   data("histopathology", package = "ClinicoPath")
   
   # Test with Fagan nomogram
@@ -139,8 +131,6 @@ test_that("decision function works with Fagan nomogram", {
 })
 
 test_that("decision function works with alternative datasets", {
-  testthat::skip_on_cran()
-  
   # Test with breast cancer data
   data("breast_cancer_data", package = "ClinicoPath")
   
@@ -169,8 +159,6 @@ test_that("decision function works with alternative datasets", {
 })
 
 test_that("decision function validates parameters correctly", {
-  testthat::skip_on_cran()
-  
   data("histopathology", package = "ClinicoPath")
   
   # Test invalid prior probability
@@ -200,8 +188,6 @@ test_that("decision function validates parameters correctly", {
 })
 
 test_that("decision function handles missing data appropriately", {
-  testthat::skip_on_cran()
-  
   data("histopathology", package = "ClinicoPath")
   
   # Create dataset with some missing values
@@ -221,8 +207,6 @@ test_that("decision function handles missing data appropriately", {
 })
 
 test_that("decision function produces correct metrics", {
-  testthat::skip_on_cran()
-  
   # Create a simple known dataset for validation
   test_data <- data.frame(
     gold_standard = c(1, 1, 1, 1, 0, 0, 0, 0),

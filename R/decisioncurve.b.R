@@ -611,14 +611,35 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     message(sprintf("Processing model %d/%d: %s", i, length(model_vars), model_name))
                 }
 
-                # Validate predictions are between 0 and 1 (or convert if needed)
-                if (min(predictions, na.rm = TRUE) < 0 || max(predictions, na.rm = TRUE) > 1) {
-                    # If not probabilities, assume they are risk scores and need conversion
-                    # Simple normalization to 0-1 range
-                    pred_range <- range(predictions, na.rm = TRUE)
-                    if (pred_range[1] != pred_range[2]) {
-                        predictions <- (predictions - pred_range[1]) / (pred_range[2] - pred_range[1])
-                    }
+                # CRITICAL: Validate predictions are CALIBRATED probabilities between 0 and 1
+                # DO NOT auto-scale: linear transformation destroys probability interpretation
+                pred_min <- min(predictions, na.rm = TRUE)
+                pred_max <- max(predictions, na.rm = TRUE)
+
+                if (pred_min < 0 || pred_max > 1) {
+                    stop(sprintf(
+                        paste0(
+                            "Model '%s' contains values outside [0,1] range (min=%.3f, max=%.3f).\n\n",
+                            "Decision curve analysis requires CALIBRATED PROBABILITIES, not raw scores.\n\n",
+                            "Common solutions:\n",
+                            "  • If using logistic regression: Use predicted probabilities (predict(model, type='response')), not logits\n",
+                            "  • If using risk scores: Calibrate to probabilities first (e.g., via logistic calibration)\n",
+                            "  • If using other scores: Transform to probabilities using appropriate calibration method\n\n",
+                            "Why this matters: The threshold probability must have clinical meaning. ",
+                            "Min-max scaling would make thresholds uninterpretable."
+                        ),
+                        model_name, pred_min, pred_max
+                    ))
+                }
+
+                # Warn if probabilities are suspiciously concentrated
+                if (pred_max - pred_min < 0.05) {
+                    warning(sprintf(
+                        "Model '%s' has very narrow probability range (%.3f to %.3f). " +
+                        "Decision curve analysis may not be informative with such limited variation. " +
+                        "Consider checking model calibration or discrimination.",
+                        model_name, pred_min, pred_max
+                    ))
                 }
 
                 # Optimized threshold calculations - vectorize when possible
@@ -869,9 +890,17 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             model_names <- names(private$.dcaResults)
             thresholds <- private$.dcaResults[[1]]$thresholds
 
-            # Calculate treat all weighted AUC for comparison
-            outcomes <- self$data[[self$options$outcome]]
+            # CRITICAL FIX: Calculate treat all weighted AUC on SAME COHORT as models
+            # Using self$data would include cases with missing predictors, creating biased baseline
+            outcome_var <- self$options$outcome
+            model_vars <- self$options$models
+            complete_vars <- c(outcome_var, model_vars)
+            complete_cases <- complete.cases(self$data[complete_vars])
+            analysis_data <- self$data[complete_cases, ]
+
+            outcomes <- analysis_data[[outcome_var]]
             outcome_positive <- self$options$outcomePositive
+
             treat_all_nb <- numeric(length(thresholds))
             for (j in seq_along(thresholds)) {
                 treat_all_nb[j] <- private$.calculateTreatAllNetBenefit(
@@ -1096,47 +1125,59 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
         
         # Calculate clinical decision rule net benefit
+        # CRITICAL WARNING: This implementation is a SIMPLIFIED APPROXIMATION
         .calculateClinicalDecisionRule = function(outcomes, thresholds, outcome_positive) {
             rule_threshold <- self$options$decisionRuleThreshold
             rule_label <- self$options$decisionRuleLabel
-            
+
             if (rule_label == "") {
                 rule_label <- paste0("Clinical Rule (", round(rule_threshold * 100, 1), "%)")
             }
-            
+
+            # CRITICAL WARNING: Emit warning about simplified implementation
+            warning(paste0(
+                "Clinical Decision Rule feature uses a SIMPLIFIED approximation.\n\n",
+                "Current implementation: Treats clinical rule as a constant strategy ",
+                "(treat all patients when plot threshold ≤ ", round(rule_threshold * 100, 1), "%).\n\n",
+                "This does NOT reflect actual patient-level rule performance (sensitivity/specificity). ",
+                "For accurate decision rule evaluation, apply the rule to your data and create a binary predictor variable.\n\n",
+                "Consider this feature EXPERIMENTAL and verify results against established DCA tools."
+            ))
+
             # Clinical decision rule: binary decision at fixed threshold
-            # Net benefit = prevalence - (1-prevalence) * [rule_threshold/(1-rule_threshold)]
+            # APPROXIMATION: This assumes rule = "treat all if prevalence justifies it at rule threshold"
             binary_outcomes <- as.numeric(outcomes == outcome_positive)
             prevalence <- mean(binary_outcomes)
-            
-            # Calculate net benefit for the clinical decision rule at each threshold
+
+            # Calculate APPROXIMATE net benefit for the clinical decision rule at each threshold
             rule_net_benefits <- numeric(length(thresholds))
-            
+
             for (j in seq_along(thresholds)) {
                 threshold <- thresholds[j]
-                
-                # Clinical rule performance:
-                # If current threshold <= rule threshold: apply rule (screen/treat all above rule threshold)
-                # If current threshold > rule threshold: rule says "don't screen/treat"
-                
+
+                # Simplified logic:
+                # If current plot threshold <= rule threshold: rule says "intervene" → treat-all net benefit
+                # If current plot threshold > rule threshold: rule says "don't intervene" → treat-none (0)
+
                 if (threshold <= rule_threshold) {
-                    # Rule recommends intervention for patients above rule threshold
-                    # This is equivalent to treating all patients with net benefit calculation
-                    rule_net_benefits[j] <- prevalence - (1 - prevalence) * (rule_threshold / (1 - rule_threshold))
+                    # Rule recommends intervention at this threshold
+                    # Net benefit = prevalence - (1-prev) × [threshold/(1-threshold)]
+                    # NOTE: This uses PLOT threshold, not rule threshold - this is approximate
+                    rule_net_benefits[j] <- prevalence - (1 - prevalence) * (threshold / (1 - threshold))
                 } else {
-                    # Rule recommends no intervention at this threshold
+                    # Rule recommends no intervention
                     rule_net_benefits[j] <- 0
                 }
             }
-            
+
             # Create decision rule data
             decision_rule_data <- data.frame(
                 threshold = thresholds,
                 net_benefit = rule_net_benefits,
-                model = rule_label,
+                model = paste0(rule_label, " (Approximation)"),
                 stringsAsFactors = FALSE
             )
-            
+
             return(decision_rule_data)
         },
 

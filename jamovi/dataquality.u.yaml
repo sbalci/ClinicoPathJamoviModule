@@ -14,26 +14,47 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
     children:
-      - type: CheckBox
-        name: check_duplicates
-      - type: CheckBox
-        name: check_missing
-      - type: CheckBox
-        name: complete_cases_only
-      - type: CheckBox
-        name: plot_data_overview
-      - type: CheckBox
-        name: plot_missing_patterns
-      - type: CheckBox
-        name: plot_data_types
-      - type: CheckBox
-        name: plot_value_expectations
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Basic Quality Checks
+            children:
+              - type: CheckBox
+                name: check_duplicates
+              - type: CheckBox
+                name: check_missing
+              - type: CheckBox
+                name: complete_cases_only
+
+  - type: CollapseBox
+    label: Visual Data Exploration (visdat)
+    collapsed: true
     children:
-      - type: TextBox
-        name: missing_threshold_visual
-        format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Plot Types
+            children:
+              - type: CheckBox
+                name: plot_data_overview
+              - type: CheckBox
+                name: plot_missing_patterns
+              - type: CheckBox
+                name: plot_data_types
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Visual Parameters
+            children:
+              - type: TextBox
+                name: missing_threshold_visual
+                format: number
+                suffix: '%'

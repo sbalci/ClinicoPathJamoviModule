@@ -25,6 +25,9 @@ children:
           - type: LevelSelector
             name: female
             enable: (gender)
+          - type: LevelSelector
+            name: male
+            enable: (gender)
   - type: CollapseBox
     label: Plot Configuration
     collapsed: false

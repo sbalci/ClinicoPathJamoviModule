@@ -12,14 +12,14 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             annotationCols = NULL,
             annotationRows = NULL,
             scaleMethod = "none",
-            clusterRows = TRUE,
-            clusterCols = TRUE,
+            clusterRows = FALSE,
+            clusterCols = FALSE,
             colorPalette = "viridis",
-            showRownames = TRUE,
-            showColnames = TRUE,
+            showRownames = FALSE,
+            showColnames = FALSE,
             naHandling = "exclude",
-            showDataSummary = TRUE,
-            showInterpretation = TRUE,
+            showDataSummary = FALSE,
+            showInterpretation = FALSE,
             exportWidth = 8,
             exportHeight = 6,
             clusterDistanceRows = "euclidean",
@@ -106,11 +106,11 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..clusterRows <- jmvcore::OptionBool$new(
                 "clusterRows",
                 clusterRows,
-                default=TRUE)
+                default=FALSE)
             private$..clusterCols <- jmvcore::OptionBool$new(
                 "clusterCols",
                 clusterCols,
-                default=TRUE)
+                default=FALSE)
             private$..colorPalette <- jmvcore::OptionList$new(
                 "colorPalette",
                 colorPalette,
@@ -126,11 +126,11 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..showRownames <- jmvcore::OptionBool$new(
                 "showRownames",
                 showRownames,
-                default=TRUE)
+                default=FALSE)
             private$..showColnames <- jmvcore::OptionBool$new(
                 "showColnames",
                 showColnames,
-                default=TRUE)
+                default=FALSE)
             private$..naHandling <- jmvcore::OptionList$new(
                 "naHandling",
                 naHandling,
@@ -143,11 +143,11 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..showDataSummary <- jmvcore::OptionBool$new(
                 "showDataSummary",
                 showDataSummary,
-                default=TRUE)
+                default=FALSE)
             private$..showInterpretation <- jmvcore::OptionBool$new(
                 "showInterpretation",
                 showInterpretation,
-                default=TRUE)
+                default=FALSE)
             private$..exportWidth <- jmvcore::OptionNumber$new(
                 "exportWidth",
                 exportWidth,
@@ -910,14 +910,14 @@ clinicalheatmap <- function(
     annotationCols,
     annotationRows,
     scaleMethod = "none",
-    clusterRows = TRUE,
-    clusterCols = TRUE,
+    clusterRows = FALSE,
+    clusterCols = FALSE,
     colorPalette = "viridis",
-    showRownames = TRUE,
-    showColnames = TRUE,
+    showRownames = FALSE,
+    showColnames = FALSE,
     naHandling = "exclude",
-    showDataSummary = TRUE,
-    showInterpretation = TRUE,
+    showDataSummary = FALSE,
+    showInterpretation = FALSE,
     exportWidth = 8,
     exportHeight = 6,
     clusterDistanceRows = "euclidean",

@@ -269,7 +269,21 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Cross Tables
 #'
-#' Function for making Cross Tables.
+#' Function for making Cross Tables with multiple table styles.
+#' 
+#' Currently implemented features:
+#' - Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
+#' - Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+#' - Stratified analysis (Mantel-Haenszel, Breslow-Day)
+#' - Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg, 
+#' Benjamini-Yekutieli)
+#' - Variable name safety (special characters, spaces)
+#' - Data quality validation warnings
+#' 
+#' Note: Advanced features (pairwise comparisons, effect sizes, residual 
+#' analysis,
+#' correspondence analysis) are planned but not yet available.
+#' 
 #'
 #' @examples
 #' \donttest{
@@ -282,8 +296,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #   sty = "finalfit",
 #' #   excl = TRUE,
 #' #   cont = "mean",
-#' #   pcat = "chisq",
-#' #   exportCSV = TRUE
+#' #   pcat = "chisq"
 #' # )
 #'}
 #' @param data The data as a data frame.

@@ -1,7 +1,7 @@
 ---
 name: aivalidation
 title: AI Model Validation
-menuGroup: meddecideT2
+menuGroup: meddecideD
 menuSubgroup: AI & Machine Learning
 menuSubtitle: AI Model Performance and Comparison
 version: '0.0.32'

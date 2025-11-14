@@ -574,7 +574,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "advancedraincloud",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = advancedraincloudResults$new(options=options),
                 data = data,
@@ -620,7 +620,8 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   covariate values.
 #' @param rain_side Position of the raincloud relative to the data points.
 #'   Options include left (l), right (r), flanking both sides (f), 1x1 flanking
-#'   (f1x1), and 2x2 flanking (f2x2).
+#'   for paired comparisons (f1x1), and 2x2 flanking for grouped comparisons
+#'   (f2x2).
 #' @param likert_mode If TRUE, adds Y-axis jittering for Likert scale or
 #'   ordinal data.
 #' @param show_longitudinal If TRUE, connects repeated observations using the

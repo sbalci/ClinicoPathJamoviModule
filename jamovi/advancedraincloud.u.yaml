@@ -168,6 +168,9 @@ children:
             format: number
           - type: ComboBox
             name: color_palette
+          - type: TextBox
+            name: jitter_seed
+            format: number
   - type: CollapseBox
     label: Labels & Titles
     collapsed: true
@@ -184,12 +187,6 @@ children:
           - type: TextBox
             name: y_label
             format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: jitter_seed
-        format: number
   - type: CollapseBox
     label: Publication & Export
     collapsed: true

@@ -19,37 +19,65 @@
 #'
 #' @return ggplot2 object representing the decision tree
 #' @export
-createDecisionTreePlot <- function(treeData, layout = "horizontal", colorScheme = "medical", 
-                                  nodeShapes = TRUE, showProbabilities = TRUE, 
+createDecisionTreePlot <- function(treeData, layout = "horizontal", colorScheme = "medical",
+                                  nodeShapes = TRUE, showProbabilities = TRUE,
                                   showCosts = TRUE, showUtilities = TRUE) {
-  
-  if (is.null(treeData) || !is.list(treeData)) {
-    return(ggplot2::ggplot() + 
-           ggplot2::ggtitle("No tree data available") +
-           ggplot2::theme_minimal())
-  }
-  
-  tryCatch({
-    # Create basic network plot structure
-    # This is a placeholder implementation - would need actual network visualization library
-    plot <- ggplot2::ggplot() +
-      ggplot2::geom_point(data = data.frame(x = 1:3, y = 1:3), 
-                         ggplot2::aes(x = x, y = y), size = 5) +
-      ggplot2::ggtitle("Decision Tree Visualization") +
-      ggplot2::theme_minimal() +
-      ggplot2::theme(
-        plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
-        axis.text = ggplot2::element_blank(),
-        axis.ticks = ggplot2::element_blank()
-      )
-    
-    return(plot)
-    
-  }, error = function(e) {
-    return(ggplot2::ggplot() + 
-           ggplot2::ggtitle(paste("Error creating tree plot:", e$message)) +
-           ggplot2::theme_minimal())
-  })
+
+  # CRITICAL FIX: Remove placeholder visualization
+  # Previous implementation showed three hardcoded dots instead of actual tree
+
+  plot <- ggplot2::ggplot() +
+    ggplot2::annotate("text", x = 0.5, y = 0.6,
+                     label = "Decision Tree Visualization Not Yet Implemented",
+                     size = 6, fontface = "bold", color = "#D32F2F") +
+    ggplot2::annotate("text", x = 0.5, y = 0.4,
+                     label = paste0(
+                       "Previous placeholder (three hardcoded dots) has been removed.\n\n",
+                       "To implement proper tree visualization:\n",
+                       "1. Use network graph library (e.g., igraph, visNetwork)\n",
+                       "2. Render actual nodes and edges from user's tree\n",
+                       "3. Display probabilities, costs, utilities on branches\n",
+                       "4. Use different shapes for decision/chance/terminal nodes"
+                     ),
+                     size = 3.5, hjust = 0.5, vjust = 0.5,
+                     color = "#666666", lineheight = 1.2) +
+    ggplot2::xlim(0, 1) +
+    ggplot2::ylim(0, 1) +
+    ggplot2::theme_void() +
+    ggplot2::theme(
+      plot.margin = ggplot2::margin(20, 20, 20, 20)
+    )
+
+  return(plot)
+
+  # OLD PLACEHOLDER CODE REMOVED:
+  # if (is.null(treeData) || !is.list(treeData)) {
+  #   return(ggplot2::ggplot() +
+  #          ggplot2::ggtitle("No tree data available") +
+  #          ggplot2::theme_minimal())
+  # }
+  #
+  # tryCatch({
+  #   # Create basic network plot structure
+  #   # This is a placeholder implementation - would need actual network visualization library
+  #   plot <- ggplot2::ggplot() +
+  #     ggplot2::geom_point(data = data.frame(x = 1:3, y = 1:3),  # ❌ HARDCODED DOTS!
+  #                        ggplot2::aes(x = x, y = y), size = 5) +
+  #     ggplot2::ggtitle("Decision Tree Visualization") +
+  #     ggplot2::theme_minimal() +
+  #     ggplot2::theme(
+  #       plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+  #       axis.text = ggplot2::element_blank(),
+  #       axis.ticks = ggplot2::element_blank()
+  #     )
+  #
+  #   return(plot)
+  #
+  # }, error = function(e) {
+  #   return(ggplot2::ggplot() +
+  #          ggplot2::ggtitle(paste("Error creating tree plot:", e$message)) +
+  #          ggplot2::theme_minimal())
+  # })
 }
 
 #' Calculate Markov Transition Matrix
@@ -63,45 +91,89 @@ createDecisionTreePlot <- function(treeData, layout = "horizontal", colorScheme 
 #' @return Matrix with transition probabilities
 #' @export
 calculateMarkovTransitionMatrix <- function(uniqueStates, transitionData, validate = TRUE) {
-  
+
   numStates <- length(uniqueStates)
   transitionMatrix <- matrix(0, nrow = numStates, ncol = numStates,
                             dimnames = list(uniqueStates, uniqueStates))
-  
+
+  # CRITICAL FIX: Remove hardcoded transitions, require user data
+  if (is.null(transitionData) || nrow(transitionData) == 0) {
+    stop(paste0(
+      "Markov transition data is required but not provided.\n\n",
+      "To run Markov models, you must supply:\n",
+      "  1. A 'from state' column\n",
+      "  2. A 'to state' column\n",
+      "  3. A 'transition probability' column\n\n",
+      "Previous behavior (hardcoded 0.7/0.2/0.1 transitions) has been removed ",
+      "as it generated meaningless results."
+    ))
+  }
+
   tryCatch({
-    # Fill transition matrix from data
-    for (i in 1:numStates) {
-      for (j in 1:numStates) {
-        # Look for transition probability in data
-        fromState <- uniqueStates[i]
-        toState <- uniqueStates[j]
-        
-        # Default transition logic
-        if (i == j) {
-          transitionMatrix[i, j] <- 0.7  # Stay in same state
-        } else if (j == i + 1) {
-          transitionMatrix[i, j] <- 0.2  # Progress to next state
-        } else if (j == numStates) {
-          transitionMatrix[i, j] <- 0.1  # Absorbing state (death)
-        }
-      }
+    # Validate required columns exist
+    required_cols <- c("from", "to", "prob")
+    missing_cols <- setdiff(required_cols, names(transitionData))
+    if (length(missing_cols) > 0) {
+      stop(paste0(
+        "Transition data is missing required columns: ",
+        paste(missing_cols, collapse = ", "), "\n",
+        "Required columns: 'from', 'to', 'prob'"
+      ))
     }
-    
-    # Normalize rows to sum to 1
+
+    # Fill transition matrix from USER data
+    for (i in 1:nrow(transitionData)) {
+      fromState <- as.character(transitionData$from[i])
+      toState <- as.character(transitionData$to[i])
+      prob <- transitionData$prob[i]
+
+      # Validate probability
+      if (is.na(prob) || prob < 0 || prob > 1) {
+        warning(paste0(
+          "Invalid probability (", prob, ") for transition ",
+          fromState, " -> ", toState, ". Skipping."
+        ))
+        next
+      }
+
+      # Find indices
+      from_idx <- which(uniqueStates == fromState)
+      to_idx <- which(uniqueStates == toState)
+
+      if (length(from_idx) == 0 || length(to_idx) == 0) {
+        warning(paste0(
+          "Unknown state in transition ", fromState, " -> ", toState, ". Skipping."
+        ))
+        next
+      }
+
+      transitionMatrix[from_idx, to_idx] <- prob
+    }
+
+    # Validate row sums = 1 (required for Markov models)
     if (validate) {
       for (i in 1:numStates) {
         rowSum <- sum(transitionMatrix[i, ])
-        if (rowSum > 0) {
+
+        if (abs(rowSum - 1.0) > 0.001 && rowSum > 0) {
+          warning(paste0(
+            "State '", uniqueStates[i], "' transition probabilities sum to ",
+            round(rowSum, 4), " instead of 1.0. Normalizing."
+          ))
           transitionMatrix[i, ] <- transitionMatrix[i, ] / rowSum
+        } else if (rowSum == 0) {
+          stop(paste0(
+            "State '", uniqueStates[i], "' has no outgoing transitions. ",
+            "All states must have transition probabilities that sum to 1."
+          ))
         }
       }
     }
-    
+
     return(transitionMatrix)
-    
+
   }, error = function(e) {
-    # Return identity matrix as fallback
-    diag(numStates)
+    stop(paste("Markov transition matrix calculation failed:", e$message))
   })
 }
 
@@ -116,68 +188,88 @@ calculateMarkovTransitionMatrix <- function(uniqueStates, transitionData, valida
 #'
 #' @return List containing simulation results and summary statistics
 #' @export
-performMonteCarloSimulation <- function(numSimulations, parameters, baseResults, 
+performMonteCarloSimulation <- function(numSimulations, parameters, baseResults,
                                        distributionType = "normal") {
-  
-  tryCatch({
-    # Initialize results storage
-    simResults <- data.frame(
-      simulation = 1:numSimulations,
-      cost = numeric(numSimulations),
-      utility = numeric(numSimulations),
-      nmb = numeric(numSimulations),
-      strategy = character(numSimulations),
-      stringsAsFactors = FALSE
-    )
-    
-    # Run simulations
-    for (sim in 1:numSimulations) {
-      # Sample parameters from distributions
-      sampledCost <- switch(distributionType,
-        "normal" = rnorm(1, mean = mean(baseResults$expectedCost, na.rm = TRUE),
-                        sd = sd(baseResults$expectedCost, na.rm = TRUE)),
-        "gamma" = rgamma(1, shape = 2, rate = 0.01),
-        mean(baseResults$expectedCost, na.rm = TRUE)
-      )
-      
-      sampledUtility <- switch(distributionType,
-        "normal" = rnorm(1, mean = mean(baseResults$expectedUtility, na.rm = TRUE),
-                        sd = sd(baseResults$expectedUtility, na.rm = TRUE)),
-        "beta" = rbeta(1, shape1 = 2, shape2 = 2),
-        mean(baseResults$expectedUtility, na.rm = TRUE)
-      )
-      
-      # Calculate derived values
-      simResults$cost[sim] <- pmax(0, sampledCost)  # Ensure non-negative
-      simResults$utility[sim] <- pmax(0, pmin(1, sampledUtility))  # Bound 0-1
-      simResults$nmb[sim] <- simResults$utility[sim] * 50000 - simResults$cost[sim]
-      simResults$strategy[sim] <- sample(baseResults$strategy, 1)
-    }
-    
-    # Calculate summary statistics
-    summaryStats <- list(
-      meanCost = mean(simResults$cost),
-      meanUtility = mean(simResults$utility),
-      meanNMB = mean(simResults$nmb),
-      costCI = quantile(simResults$cost, c(0.025, 0.975)),
-      utilityCI = quantile(simResults$utility, c(0.025, 0.975)),
-      nmbCI = quantile(simResults$nmb, c(0.025, 0.975))
-    )
-    
-    return(list(
-      results = simResults,
-      summary = summaryStats,
-      convergence = TRUE
-    ))
-    
-  }, error = function(e) {
-    return(list(
-      results = data.frame(),
-      summary = list(),
-      convergence = FALSE,
-      error = e$message
-    ))
-  })
+
+  # CRITICAL FIX: This function is a PLACEHOLDER
+  # Real PSA should resample actual model parameters (transition probs, costs, utilities)
+  # Not just sample from aggregated results
+
+  stop(paste0(
+    "Probabilistic Sensitivity Analysis (PSA) is not yet fully implemented.\n\n",
+    "Current placeholder behavior has been removed because it:\n",
+    "  1. Sampled from aggregate results, not actual model parameters\n",
+    "  2. Used hardcoded WTP = $50,000 (ignoring user threshold)\n",
+    "  3. Randomly assigned strategy labels\n",
+    "  4. Generated mathematically meaningless outputs\n\n",
+    "To implement PSA properly, the function must:\n",
+    "  1. Resample actual model parameters (transition probabilities, branch probabilities, costs, utilities)\n",
+    "  2. Re-run the decision tree/Markov model for each iteration\n",
+    "  3. Use user-specified willingness-to-pay threshold\n",
+    "  4. Calculate strategy-specific NMB for each iteration\n\n",
+    "Please implement proper PSA or use deterministic sensitivity analysis instead."
+  ))
+
+  # OLD BROKEN CODE REMOVED:
+  # tryCatch({
+  #   # Initialize results storage
+  #   simResults <- data.frame(
+  #     simulation = 1:numSimulations,
+  #     cost = numeric(numSimulations),
+  #     utility = numeric(numSimulations),
+  #     nmb = numeric(numSimulations),
+  #     strategy = character(numSimulations),
+  #     stringsAsFactors = FALSE
+  #   )
+  #
+  #   # Run simulations
+  #   for (sim in 1:numSimulations) {
+  #     # Sample parameters from distributions
+  #     sampledCost <- switch(distributionType,
+  #       "normal" = rnorm(1, mean = mean(baseResults$expectedCost, na.rm = TRUE),
+  #                       sd = sd(baseResults$expectedCost, na.rm = TRUE)),
+  #       "gamma" = rgamma(1, shape = 2, rate = 0.01),
+  #       mean(baseResults$expectedCost, na.rm = TRUE)
+  #     )
+  #
+  #     sampledUtility <- switch(distributionType,
+  #       "normal" = rnorm(1, mean = mean(baseResults$expectedUtility, na.rm = TRUE),
+  #                       sd = sd(baseResults$expectedUtility, na.rm = TRUE)),
+  #       "beta" = rbeta(1, shape1 = 2, shape2 = 2),
+  #       mean(baseResults$expectedUtility, na.rm = TRUE)
+  #     )
+  #
+  #     # Calculate derived values
+  #     simResults$cost[sim] <- pmax(0, sampledCost)  # Ensure non-negative
+  #     simResults$utility[sim] <- pmax(0, pmin(1, sampledUtility))  # Bound 0-1
+  #     simResults$nmb[sim] <- simResults$utility[sim] * 50000 - simResults$cost[sim]  // ❌ HARDCODED WTP
+  #     simResults$strategy[sim] <- sample(baseResults$strategy, 1)  // ❌ RANDOM!
+  #   }
+  #
+  #   # Calculate summary statistics
+  #   summaryStats <- list(
+  #     meanCost = mean(simResults$cost),
+  #     meanUtility = mean(simResults$utility),
+  #     meanNMB = mean(simResults$nmb),
+  #     costCI = quantile(simResults$cost, c(0.025, 0.975)),
+  #     utilityCI = quantile(simResults$utility, c(0.025, 0.975)),
+  #     nmbCI = quantile(simResults$nmb, c(0.025, 0.975))
+  #   )
+  #
+  #   return(list(
+  #     results = simResults,
+  #     summary = summaryStats,
+  #     convergence = TRUE
+  #   ))
+  #
+  # }, error = function(e) {
+  #   return(list(
+  #     results = data.frame(),
+  #     summary = list(),
+  #     convergence = FALSE,
+  #     error = e$message
+  #   ))
+  # })
 }
 
 #' Calculate Cost-Effectiveness Acceptability Curve (CEAC)
@@ -191,11 +283,11 @@ performMonteCarloSimulation <- function(numSimulations, parameters, baseResults,
 #' @return Data frame with CEAC probabilities for each threshold
 #' @export
 calculateCEAC <- function(psaResults, thresholds, strategies) {
-  
+
   if (nrow(psaResults) == 0) {
     return(data.frame(threshold = thresholds, probability = 0))
   }
-  
+
   tryCatch({
     ceacData <- data.frame(
       threshold = numeric(0),
@@ -203,31 +295,55 @@ calculateCEAC <- function(psaResults, thresholds, strategies) {
       probability = numeric(0),
       stringsAsFactors = FALSE
     )
-    
+
+    # Get unique simulation IDs (if available)
+    if (!"simulation" %in% names(psaResults)) {
+      psaResults$simulation <- 1:nrow(psaResults)
+    }
+
     for (threshold in thresholds) {
-      for (strategy in strategies) {
-        # Calculate NMB for this threshold
+      # CRITICAL FIX: Calculate NMB for ALL strategies at this threshold
+      # Then find which strategy has MAX NMB for EACH simulation
+
+      # Create NMB matrix: rows = simulations, columns = strategies
+      unique_sims <- unique(psaResults$simulation)
+      nmb_matrix <- matrix(NA, nrow = length(unique_sims), ncol = length(strategies))
+      colnames(nmb_matrix) <- strategies
+
+      for (i in seq_along(strategies)) {
+        strategy <- strategies[i]
         strategyData <- psaResults[psaResults$strategy == strategy, ]
-        if (nrow(strategyData) == 0) next
-        
-        nmb <- strategyData$utility * threshold - strategyData$cost
-        
-        # Calculate probability this strategy has highest NMB
-        allNMB <- psaResults$utility * threshold - psaResults$cost
-        probability <- mean(nmb >= allNMB, na.rm = TRUE)
-        
+
+        if (nrow(strategyData) > 0) {
+          # Calculate NMB for this strategy at this threshold
+          nmb_matrix[, i] <- strategyData$utility * threshold - strategyData$cost
+        }
+      }
+
+      # CORRECT CEAC FORMULA:
+      # For each simulation (row), find which strategy has highest NMB
+      optimal_strategy_indices <- apply(nmb_matrix, 1, function(row) {
+        if (all(is.na(row))) return(NA)
+        which.max(row)
+      })
+
+      # CEAC = proportion of iterations where EACH strategy is optimal
+      for (i in seq_along(strategies)) {
+        probability <- mean(optimal_strategy_indices == i, na.rm = TRUE)
+
         ceacData <- rbind(ceacData, data.frame(
           threshold = threshold,
-          strategy = strategy,
+          strategy = strategies[i],
           probability = probability,
           stringsAsFactors = FALSE
         ))
       }
     }
-    
+
     return(ceacData)
-    
+
   }, error = function(e) {
+    warning(paste("CEAC calculation failed:", e$message))
     return(data.frame(threshold = thresholds, strategy = "", probability = 0))
   })
 }

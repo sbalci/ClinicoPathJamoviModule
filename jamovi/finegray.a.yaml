@@ -1,7 +1,7 @@
 ---
 name: finegray
 title: Fine-Gray Competing Risks Regression
-menuGroup: jsurvivalT
+menuGroup: jsurvivalT2
 menuSubgroup: Competing Risks
 menuSubtitle: Subdistribution Hazard Regression
 version: '0.0.32'

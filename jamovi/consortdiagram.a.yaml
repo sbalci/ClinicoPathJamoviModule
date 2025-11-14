@@ -1,7 +1,7 @@
 ---
 name: consortdiagram
 title: CONSORT Flow Diagram
-menuGroup: OncoPathT2
+menuGroup: OncoPathT
 menuSubgroup: Study Design
 menuTitle: CONSORT Diagram
 menuSubtitle: Clinical Trial Flow

@@ -9,6 +9,7 @@ agepyramid(
   age,
   gender,
   female,
+  male,
   bin_width = 5,
   plot_title = "Age Pyramid",
   color1 = "#1F77B4",
@@ -29,6 +30,9 @@ the categorical values used for the report}
 
 \item{female}{a string naming the level from \code{gender} that contains
 the level female}
+
+\item{male}{a string naming the level from \code{gender} that contains the
+level male}
 
 \item{bin_width}{The width of the age bins in years. Adjust this to change
 the granularity of the age groups.}
@@ -52,6 +56,8 @@ pyramid styling, ggplot2 offers more customization.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }

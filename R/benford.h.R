@@ -45,6 +45,7 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         explanation = function() private$.items[["explanation"]],
+        dataWarning = function() private$.items[["dataWarning"]],
         summary = function() private$.items[["summary"]],
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
@@ -65,6 +66,14 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="explanation",
                 title="About Benford's Law in Clinical Data"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataWarning",
+                title="Data Validation",
+                visible=TRUE,
+                clearWith=list(
+                    "var",
+                    "digits")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -140,6 +149,7 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr

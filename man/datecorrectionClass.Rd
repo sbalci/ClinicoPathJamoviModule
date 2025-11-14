@@ -11,6 +11,7 @@ Date Field Correction and Standardization
 
 Date Field Correction and Standardization
 }
+\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::datecorrectionBase} -> \code{datecorrectionClass}
 }

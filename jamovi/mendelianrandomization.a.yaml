@@ -1,7 +1,7 @@
 ---
 name: mendelianrandomization
 title: Mendelian Randomization
-menuGroup: meddecideT
+menuGroup: meddecideT2
 menuSubgroup: Medical Decision Analysis
 menuTitle: Mendelian Randomization
 menuSubtitle: Causal inference with genetic variants

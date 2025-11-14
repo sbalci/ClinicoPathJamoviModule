@@ -1,10 +1,10 @@
 ---
 name:  cotest
 title: Co-Testing Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Decision Calculators
 menuSubtitle: Analyze combined test results
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

@@ -47,6 +47,11 @@ children:
           - type: ComboBox
             name: pcat
             enable: (sty:finalfit || sty:gtsummary)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: p_adjust
   - type: CollapseBox
     label: Stratified Analysis
     collapsed: true
@@ -82,8 +87,3 @@ children:
           - type: CheckBox
             name: breslow_day
             enable: (mantel_haenszel)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: p_adjust

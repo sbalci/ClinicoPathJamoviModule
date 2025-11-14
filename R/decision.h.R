@@ -10,14 +10,16 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             goldPositive = NULL,
             newtest = NULL,
             testPositive = NULL,
+            goldNegative = NULL,
+            testNegative = NULL,
             pp = FALSE,
             pprob = 0.3,
             od = FALSE,
             fnote = FALSE,
             ci = FALSE,
             fagan = FALSE,
-            showNaturalLanguage = TRUE,
-            showClinicalInterpretation = TRUE,
+            showNaturalLanguage = FALSE,
+            showClinicalInterpretation = FALSE,
             showReportTemplate = FALSE,
             showAboutAnalysis = FALSE,
             showMisclassified = FALSE,
@@ -51,6 +53,14 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "testPositive",
                 testPositive,
                 variable="(newtest)")
+            private$..goldNegative <- jmvcore::OptionLevel$new(
+                "goldNegative",
+                goldNegative,
+                variable="(gold)")
+            private$..testNegative <- jmvcore::OptionLevel$new(
+                "testNegative",
+                testNegative,
+                variable="(newtest)")
             private$..pp <- jmvcore::OptionBool$new(
                 "pp",
                 pp,
@@ -80,11 +90,11 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showNaturalLanguage <- jmvcore::OptionBool$new(
                 "showNaturalLanguage",
                 showNaturalLanguage,
-                default=TRUE)
+                default=FALSE)
             private$..showClinicalInterpretation <- jmvcore::OptionBool$new(
                 "showClinicalInterpretation",
                 showClinicalInterpretation,
-                default=TRUE)
+                default=FALSE)
             private$..showReportTemplate <- jmvcore::OptionBool$new(
                 "showReportTemplate",
                 showReportTemplate,
@@ -110,6 +120,8 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..goldPositive)
             self$.addOption(private$..newtest)
             self$.addOption(private$..testPositive)
+            self$.addOption(private$..goldNegative)
+            self$.addOption(private$..testNegative)
             self$.addOption(private$..pp)
             self$.addOption(private$..pprob)
             self$.addOption(private$..od)
@@ -129,6 +141,8 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         goldPositive = function() private$..goldPositive$value,
         newtest = function() private$..newtest$value,
         testPositive = function() private$..testPositive$value,
+        goldNegative = function() private$..goldNegative$value,
+        testNegative = function() private$..testNegative$value,
         pp = function() private$..pp$value,
         pprob = function() private$..pprob$value,
         od = function() private$..od$value,
@@ -147,6 +161,8 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..goldPositive = NA,
         ..newtest = NA,
         ..testPositive = NA,
+        ..goldNegative = NA,
+        ..testNegative = NA,
         ..pp = NA,
         ..pprob = NA,
         ..od = NA,
@@ -166,6 +182,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
         rawContingency = function() private$.items[["rawContingency"]],
         rawCounts = function() private$.items[["rawCounts"]],
         cTable = function() private$.items[["cTable"]],
@@ -195,6 +212,20 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "DiagnosticTests",
                     "ClinicoPathJamoviModule",
                     "epiR"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="Getting Started",
+                visible="(!(gold && newtest && goldPositive && testPositive))",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rawContingency",
@@ -222,7 +253,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "gold",
                     "newtest",
                     "goldPositive",
-                    "testPositive")))
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rawCounts",
@@ -583,6 +616,10 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   performance.
 #' @param testPositive The level representing a positive result for the test
 #'   under evaluation.
+#' @param goldNegative The level indicating absence of disease in the gold
+#'   standard variable.
+#' @param testNegative The level representing a negative result for the test
+#'   under evaluation.
 #' @param pp Boolean selection whether to use known population prevalence
 #'   instead of study prevalence.
 #' @param pprob Population disease prevalence as a proportion between 0.001
@@ -607,6 +644,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   tables.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rawContingency} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rawCounts} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
@@ -640,14 +678,16 @@ decision <- function(
     goldPositive,
     newtest,
     testPositive,
+    goldNegative,
+    testNegative,
     pp = FALSE,
     pprob = 0.3,
     od = FALSE,
     fnote = FALSE,
     ci = FALSE,
     fagan = FALSE,
-    showNaturalLanguage = TRUE,
-    showClinicalInterpretation = TRUE,
+    showNaturalLanguage = FALSE,
+    showClinicalInterpretation = FALSE,
     showReportTemplate = FALSE,
     showAboutAnalysis = FALSE,
     showMisclassified = FALSE,
@@ -672,6 +712,8 @@ decision <- function(
         goldPositive = goldPositive,
         newtest = newtest,
         testPositive = testPositive,
+        goldNegative = goldNegative,
+        testNegative = testNegative,
         pp = pp,
         pprob = pprob,
         od = od,

@@ -1,7 +1,7 @@
 ---
 name: dataquality
 title: Multi-Variable Visual Quality
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'
@@ -38,27 +38,28 @@ options:
     - name: check_duplicates
       title: "Check for Duplicates"
       type: Bool
-      default: true
+      default: false
       description:
         R: >
-          If TRUE, analyzes duplicate values within each variable or across 
+          If TRUE, analyzes duplicate values within each variable or across
           the entire dataset.
 
     - name: check_missing
       title: "Missing Value Analysis"
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           If TRUE, provides detailed missing value statistics and patterns.
 
     - name: complete_cases_only
-      title: "Complete Cases Analysis"
+      title: "Check Duplicate Rows (not values)"
       type: Bool
       default: false
       description:
         R: >
-          If TRUE, analyzes completeness across all selected variables simultaneously.
+          If TRUE, checks for duplicate rows across all selected variables.
+          If FALSE, checks for duplicate values within each variable separately.
 
     - name: plot_data_overview
       title: "Data Overview Plot (vis_dat)"
@@ -84,13 +85,14 @@ options:
         R: >
           Show data type detection and validation visualization.
 
-    - name: plot_value_expectations
-      title: "Value Expectations Plot (vis_expect)"
-      type: Bool
-      default: false
-      description:
-        R: >
-          Show value expectations analysis visualization.
+    # NOTE: vis_expect disabled - requires expectation formula specification
+    # - name: plot_value_expectations
+    #   title: "Value Expectations Plot (vis_expect)"
+    #   type: Bool
+    #   default: false
+    #   description:
+    #     R: >
+    #       Show value expectations analysis visualization.
 
     - name: missing_threshold_visual
       title: "Missing Data Highlight Threshold (%)"

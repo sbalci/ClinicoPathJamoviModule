@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.15
+version: 0.0.32.24
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-11-05'
+date: '2025-11-14'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -56,7 +56,7 @@ analyses:
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -72,7 +72,7 @@ analyses:
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial Diagrams
     ribbon: analyses
@@ -105,7 +105,7 @@ analyses:
     menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
-    description: Function for making Cross Tables.
+    description: Function for making Cross Tables with multiple table styles.
     ribbon: analyses
     category: analyses
   - title: Treatment Response Analysis
@@ -138,7 +138,7 @@ analyses:
   - title: Clinical Heatmap
     name: clinicalheatmap
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: Visualization
     menuTitle: Clinical Heatmap
     menuSubtitle: Tidy Heatmaps for Clinical Data
@@ -316,7 +316,7 @@ analyses:
   - title: Diagnostic Test Sample Size Calculator
     name: diagnosticsamplesize
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideD
     menuSubgroup: Sample Size Planning
     menuTitle: Diagnostic Sample Size (CI Width)
     menuSubtitle: Clopper-Pearson precision-based planning (Bujang 2023)
@@ -353,7 +353,7 @@ analyses:
   - title: Multi-Variable Visual Quality
     name: dataquality
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Multi-Variable Visual Quality
     description: >
@@ -695,7 +695,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -717,7 +717,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -789,7 +789,7 @@ analyses:
   - title: Single Variable Quality Check
     name: checkdata
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuTitle: Single Variable Quality Check
     menuSubgroup: ClinicoPath Data Quality
     ribbon: analyses
@@ -901,10 +901,18 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
-    description: Performs Chi-Square test and post-hoc pairwise comparisons.
+    description: >-
+      Performs Chi-Square test and post-hoc pairwise comparisons.
+
+      ⚠️ IMPORTANT LIMITATIONS:
+
+      - Post-hoc pairwise comparisons are ONLY performed when the overall
+      chi-square
+        test is significant (p < α). This enforces proper statistical workflow and
+        prevents data dredging.
     ribbon: analyses
     category: analyses
   - title: Group and Summarize
@@ -1010,7 +1018,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -1036,7 +1044,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1120,7 +1128,7 @@ analyses:
   - title: Date Field Correction
     name: datecorrection
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Data Preparation
     menuTitle: Date Field Correction
     menuSubtitle: Multi-Package Date Standardization
@@ -1143,7 +1151,7 @@ analyses:
   - title: DateTime Converter
     name: datetimeconverter
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: Data Preparation
     menuTitle: DateTime Converter
     menuSubtitle: Convert datetime and extract components
@@ -1173,7 +1181,7 @@ analyses:
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
@@ -1350,7 +1358,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -1359,7 +1367,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1371,7 +1379,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1403,7 +1411,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1463,7 +1471,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
@@ -1499,7 +1507,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Analyze combined test results
@@ -1532,7 +1540,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -1581,7 +1589,7 @@ analyses:
   - title: Decision Panel Optimization
     name: decisionpanel
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuTitle: Decision Panel Optimization
     menuSubgroup: Decision
     menuSubtitle: Optimize test panels and decision trees
@@ -1603,7 +1611,7 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: Dendrogram
     menuSubgroup: Drafts
     ribbon: analyses
@@ -1628,7 +1636,7 @@ analyses:
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Distribution
     menuTitle: Histogram
     description: |
@@ -1711,7 +1719,7 @@ analyses:
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples
@@ -1739,7 +1747,7 @@ analyses:
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: |
@@ -2353,7 +2361,7 @@ analyses:
     name: simonmakuch
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalT2
     menuSubgroup: ClinicoPath Survival
     menuTitle: Simon-Makuch Time-Dependent Survival Analysis
     menuSubtitle: Time-Dependent Variables, Simon-Makuch Plots, Landmark Analysis
@@ -2530,7 +2538,7 @@ analyses:
     name: pathsampling
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuTitle: Pathology Sampling Adequacy Analysis
     description: >
       Determines the minimum number of tissue samples (blocks, cassettes,
@@ -2547,7 +2555,7 @@ analyses:
     name: qtwist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Quality-Adjusted Survival
     menuTitle: Q-TWiST Analysis
     menuSubtitle: Quality-adjusted Time Without Symptoms or Toxicity
@@ -2694,7 +2702,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
@@ -2838,7 +2846,7 @@ analyses:
     name: recurrentsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Survival Analysis
     menuTitle: Recurrent Event Survival Analysis
     description: >
@@ -4268,7 +4276,7 @@ analyses:
     name: aivalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideD
     menuSubgroup: AI & Machine Learning
     menuTitle: AI Model Validation
     menuSubtitle: AI Model Performance and Comparison
@@ -4494,7 +4502,7 @@ analyses:
     name: clinicalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Clinical Model Validation Suite
     menuSubtitle: Comprehensive validation for clinical prediction models
@@ -5236,7 +5244,7 @@ analyses:
     name: consortdiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: Study Design
     menuTitle: CONSORT Diagram
     menuSubtitle: Clinical Trial Flow
@@ -5374,31 +5382,35 @@ analyses:
     name: brierscore
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideD
     menuSubgroup: Survival Model Validation
     menuTitle: Brier Score & Integrated Brier Score
     menuSubtitle: Calibration accuracy for time-to-event predictions
     description: >
-      Brier Score analysis for evaluating calibration accuracy of survival
-      probability predictions. The Brier score measures the mean squared
-      difference between predicted survival probabilities and observed outcomes
-      at specific time points, providing a comprehensive assessment of both
-      discrimination and calibration. Lower Brier scores indicate better
-      prediction accuracy (perfect prediction = 0, worst = 1). The Integrated
-      Brier Score (IBS) extends this by integrating the time-dependent Brier
-      score across the follow-up period, providing a single summary measure of
-      overall prediction performance. Includes scaled Brier scores relative to
-      null model (KM curve) and comparison to reference models. Essential for
-      validating Cox regression models, machine learning survival predictions,
-      and risk calculators. Particularly valuable for clinical prediction models
-      where accurate probability estimates are critical for patient counseling
-      and treatment decisions. Supports external validation, temporal
-      validation, and competing risks scenarios.
+      ⚠️ IMPORTANT LIMITATIONS: This is a BASIC implementation for single
+      time-point Brier score evaluation. It requires PRE-COMPUTED survival
+      probabilities (not raw Cox models). Many features listed below are NOT
+      IMPLEMENTED or STATISTICALLY INVALID.
+
+      Brier Score analysis evaluates calibration accuracy by measuring the mean
+      squared difference between predicted survival probabilities and observed
+      outcomes at a SINGLE specified time point. Lower Brier scores indicate
+      better prediction accuracy (perfect prediction = 0, worst = 1). Includes
+      scaled Brier scores relative to null model (Kaplan-Meier curve).
+
+      ⚠️ NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS),
+      competing risks, linear predictor inputs, formula inputs,
+      temporal/external validation flags. These features may appear in the UI
+      but will generate errors if used.
+
+      For rigorous clinical validation, use established packages:
+      riskRegression::Score() or pec::pec(). This implementation has NOT been
+      validated against those standards.
   - title: Concordance Index (Harrell's C-index)
     name: concordanceindex
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Survival Model Validation
     menuTitle: Concordance Index (Harrell's C-index)
     menuSubtitle: Rank-based discrimination for time-to-event predictions
@@ -5468,7 +5480,7 @@ analyses:
     name: costeffectiveness
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Economic Evaluation
     menuTitle: Cost-Effectiveness Analysis
     menuSubtitle: ICER and cost-utility analysis for diagnostic tests
@@ -5532,7 +5544,7 @@ analyses:
     name: generalizedroc
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Medical Decision Analysis
     menuTitle: Generalized ROC Analysis
     menuSubtitle: ROC for continuous outcomes with unequal variance
@@ -5617,7 +5629,7 @@ analyses:
     name: mendelianrandomization
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Medical Decision Analysis
     menuTitle: Mendelian Randomization
     menuSubtitle: Causal inference with genetic variants
@@ -5628,7 +5640,7 @@ analyses:
     name: predmodel
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Prediction Models
     menuTitle: Clinical Prediction Model
     description: >
@@ -5640,7 +5652,7 @@ analyses:
     name: modelval
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Prediction Models
     menuTitle: Model Validation Dashboard
     description: >
@@ -5652,7 +5664,7 @@ analyses:
     name: survivalcalibration
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalT
+    menuGroup: jsurvivalT2
     menuSubgroup: Model Validation
     menuTitle: Time-Dependent Survival Calibration
     description: >
@@ -5664,7 +5676,7 @@ analyses:
     name: jjcoefstats
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Regression Plots
     menuTitle: Coefficient Forest Plot (ggcoefstats)
     description: >
@@ -5676,7 +5688,7 @@ analyses:
     name: reclassmetrics
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideT2
     menuSubgroup: Prediction Models
     menuTitle: Model Reclassification Metrics (NRI & IDI)
     description: >
@@ -5689,7 +5701,7 @@ analyses:
     name: finegray
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalT
+    menuGroup: jsurvivalT2
     menuSubgroup: Competing Risks
     menuTitle: Fine-Gray Competing Risks Regression
     menuSubtitle: Subdistribution Hazard Regression
@@ -5701,7 +5713,7 @@ analyses:
     name: irecist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Response Evaluation
     menuTitle: iRECIST Analysis
     menuSubtitle: Immune-related Response Criteria
@@ -5714,7 +5726,7 @@ analyses:
     name: recist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathT2
     menuSubgroup: Response Evaluation
     menuTitle: RECIST 1.1 Multi-Lesion Aggregation
     menuSubtitle: Automated Best Overall Response

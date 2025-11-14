@@ -1,7 +1,7 @@
 ---
 name: concordanceindex
 title: Concordance Index (Harrell's C-index)
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Survival Model Validation
 menuSubtitle: Rank-based discrimination for time-to-event predictions
 version: '0.0.32'
@@ -139,7 +139,7 @@ options:
     - name: confidence_intervals
       title: Confidence Intervals
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Calculate confidence intervals for C-index using bootstrap or
@@ -209,7 +209,7 @@ options:
     - name: compare_test
       title: Statistical Test for Model Comparison
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Perform statistical test for differences in C-index between models.
@@ -227,7 +227,7 @@ options:
     - name: cause_specific
       title: Cause-Specific C-index
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             For competing risks, calculate cause-specific C-index for event
@@ -257,7 +257,7 @@ options:
     - name: somers_d
       title: Calculate Somers' D
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Calculate Somers' D rank correlation (D = 2*(C-index - 0.5)). Ranges
@@ -312,7 +312,7 @@ options:
     - name: plot_risk_group_kaplan_meier
       title: Kaplan-Meier by Risk Groups
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display Kaplan-Meier curves stratified by risk groups defined by

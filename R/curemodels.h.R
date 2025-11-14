@@ -15,14 +15,12 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap_ci = FALSE,
             n_bootstrap = 1000,
             cure_threshold = 60,
-            plot_cure_fraction = TRUE,
-            plot_survival = TRUE,
-            goodness_of_fit = TRUE,
+            plot_cure_fraction = FALSE,
+            plot_survival = FALSE,
+            goodness_of_fit = FALSE,
             sensitivity_analysis = FALSE,
             use_background_mortality = FALSE,
             background_hazard_var = NULL,
-            cure_expected_rate = NULL,
-            use_nonparametric = FALSE,
             npcure_covariate = NULL,
             npcure_bandwidth = "auto",
             npcure_time_points = 100, ...) {
@@ -104,15 +102,15 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..plot_cure_fraction <- jmvcore::OptionBool$new(
                 "plot_cure_fraction",
                 plot_cure_fraction,
-                default=TRUE)
+                default=FALSE)
             private$..plot_survival <- jmvcore::OptionBool$new(
                 "plot_survival",
                 plot_survival,
-                default=TRUE)
+                default=FALSE)
             private$..goodness_of_fit <- jmvcore::OptionBool$new(
                 "goodness_of_fit",
                 goodness_of_fit,
-                default=TRUE)
+                default=FALSE)
             private$..sensitivity_analysis <- jmvcore::OptionBool$new(
                 "sensitivity_analysis",
                 sensitivity_analysis,
@@ -124,24 +122,15 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..background_hazard_var <- jmvcore::OptionVariable$new(
                 "background_hazard_var",
                 background_hazard_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
                     "numeric"))
-            private$..cure_expected_rate <- jmvcore::OptionVariable$new(
-                "cure_expected_rate",
-                cure_expected_rate,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
-            private$..use_nonparametric <- jmvcore::OptionBool$new(
-                "use_nonparametric",
-                use_nonparametric,
-                default=FALSE)
             private$..npcure_covariate <- jmvcore::OptionVariable$new(
                 "npcure_covariate",
                 npcure_covariate,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -177,8 +166,6 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sensitivity_analysis)
             self$.addOption(private$..use_background_mortality)
             self$.addOption(private$..background_hazard_var)
-            self$.addOption(private$..cure_expected_rate)
-            self$.addOption(private$..use_nonparametric)
             self$.addOption(private$..npcure_covariate)
             self$.addOption(private$..npcure_bandwidth)
             self$.addOption(private$..npcure_time_points)
@@ -199,8 +186,6 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sensitivity_analysis = function() private$..sensitivity_analysis$value,
         use_background_mortality = function() private$..use_background_mortality$value,
         background_hazard_var = function() private$..background_hazard_var$value,
-        cure_expected_rate = function() private$..cure_expected_rate$value,
-        use_nonparametric = function() private$..use_nonparametric$value,
         npcure_covariate = function() private$..npcure_covariate$value,
         npcure_bandwidth = function() private$..npcure_bandwidth$value,
         npcure_time_points = function() private$..npcure_time_points$value),
@@ -220,8 +205,6 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sensitivity_analysis = NA,
         ..use_background_mortality = NA,
         ..background_hazard_var = NA,
-        ..cure_expected_rate = NA,
-        ..use_nonparametric = NA,
         ..npcure_covariate = NA,
         ..npcure_bandwidth = NA,
         ..npcure_time_points = NA)
@@ -233,6 +216,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         warnings = function() private$.items[["warnings"]],
+        errors = function() private$.items[["errors"]],
         summary = function() private$.items[["summary"]],
         modelTable = function() private$.items[["modelTable"]],
         cureTable = function() private$.items[["cureTable"]],
@@ -272,6 +256,11 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="errors",
+                title="Errors",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="summary",
                 title="Analysis Summary",
                 visible=TRUE))
@@ -280,7 +269,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="modelTable",
                 title="Cure Model Results",
                 visible=TRUE,
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -316,7 +305,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="cureTable",
                 title="Cure Fraction Summary",
                 visible=TRUE,
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="group", 
@@ -371,7 +360,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="goodnessOfFit",
                 title="Goodness of Fit Tests",
                 visible="(goodness_of_fit)",
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="test_name", 
@@ -404,8 +393,8 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="modelComparison",
                 title="Model Comparison",
-                visible="(model_type:both)",
-                rows=2,
+                visible="(model_type:all)",
+                rows=0,
                 columns=list(
                     list(
                         `name`="model", 
@@ -487,10 +476,6 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param use_background_mortality Enable background mortality integration
 #'   using cuRe package
 #' @param background_hazard_var Background hazard variable for cuRe models
-#' @param cure_expected_rate Expected cure rate variable for relative cure
-#'   models
-#' @param use_nonparametric Enable nonparametric cure estimation using npcure
-#'   package
 #' @param npcure_covariate Continuous covariate for npcure model (limited to
 #'   one variable)
 #' @param npcure_bandwidth Bandwidth parameter for npcure kernel smoothing
@@ -499,6 +484,7 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cureTable} \tab \tab \tab \tab \tab a table \cr
@@ -528,15 +514,13 @@ curemodels <- function(
     bootstrap_ci = FALSE,
     n_bootstrap = 1000,
     cure_threshold = 60,
-    plot_cure_fraction = TRUE,
-    plot_survival = TRUE,
-    goodness_of_fit = TRUE,
+    plot_cure_fraction = FALSE,
+    plot_survival = FALSE,
+    goodness_of_fit = FALSE,
     sensitivity_analysis = FALSE,
     use_background_mortality = FALSE,
-    background_hazard_var,
-    cure_expected_rate,
-    use_nonparametric = FALSE,
-    npcure_covariate,
+    background_hazard_var = NULL,
+    npcure_covariate = NULL,
     npcure_bandwidth = "auto",
     npcure_time_points = 100) {
 
@@ -547,7 +531,6 @@ curemodels <- function(
     if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
     if ( ! missing(background_hazard_var)) background_hazard_var <- jmvcore::resolveQuo(jmvcore::enquo(background_hazard_var))
-    if ( ! missing(cure_expected_rate)) cure_expected_rate <- jmvcore::resolveQuo(jmvcore::enquo(cure_expected_rate))
     if ( ! missing(npcure_covariate)) npcure_covariate <- jmvcore::resolveQuo(jmvcore::enquo(npcure_covariate))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -556,7 +539,6 @@ curemodels <- function(
             `if`( ! missing(status), status, NULL),
             `if`( ! missing(predictors), predictors, NULL),
             `if`( ! missing(background_hazard_var), background_hazard_var, NULL),
-            `if`( ! missing(cure_expected_rate), cure_expected_rate, NULL),
             `if`( ! missing(npcure_covariate), npcure_covariate, NULL))
 
 
@@ -576,8 +558,6 @@ curemodels <- function(
         sensitivity_analysis = sensitivity_analysis,
         use_background_mortality = use_background_mortality,
         background_hazard_var = background_hazard_var,
-        cure_expected_rate = cure_expected_rate,
-        use_nonparametric = use_nonparametric,
         npcure_covariate = npcure_covariate,
         npcure_bandwidth = npcure_bandwidth,
         npcure_time_points = npcure_time_points)

@@ -66,14 +66,21 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Determine outlier severity
+        # FIXED: Previous version returned "High" for all values including z~0
         .outlierSeverity = function(zscore) {
             abs_z <- abs(zscore)
             if (abs_z > 4) {
                 return("Extreme")
             } else if (abs_z > 3.5) {
                 return("Very High")
-            } else {
+            } else if (abs_z > 3) {
                 return("High")
+            } else if (abs_z > 2.5) {
+                return("Moderate")
+            } else if (abs_z > 2) {
+                return("Mild")
+            } else {
+                return("Not an outlier")  # Should not happen if only called on detected outliers
             }
         },
         
@@ -759,6 +766,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <h3>📊 ClinicoPath Data Quality Assessment</h3>
                 <p><strong>Purpose:</strong> Comprehensive evaluation of data completeness, accuracy, and patterns for clinical research.</p>
 
+                <p><strong>⚠️ IMPORTANT:</strong> Outlier detection uses a <strong>consensus approach</strong> -
+                points are only flagged if detected by ≥2 of 3 methods (Z-score, IQR, Modified Z-score).
+                Points flagged by only 1 method are <strong>not shown</strong>, even if they exceed |z|>3.</p>
+
                 <h4>Required Input:</h4>
                 <ul>
                     <li><strong>Variable to Check:</strong> Select any variable for quality assessment</li>
@@ -766,7 +777,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 <h4>⚙️ Analysis Options:</h4>
                 <ul>
-                    <li><strong>Outlier Analysis:</strong> Statistical outlier detection using multiple methods</li>
+                    <li><strong>Outlier Analysis:</strong> Consensus-based detection (≥2 of 3 methods: Z-score |z|>3, IQR 1.5×rule, Modified Z-score |z|>3.5)</li>
                     <li><strong>Distribution Analysis:</strong> Descriptive statistics and normality assessment</li>
                     <li><strong>Duplicate Analysis:</strong> Identify repeated values and patterns</li>
                     <li><strong>Pattern Analysis:</strong> Missing data mechanisms and systematic issues</li>

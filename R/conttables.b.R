@@ -198,6 +198,7 @@ contTablesClass <- R6::R6Class(
                     odds$addRow(rowKey=i, values=values)
                     gamma$addRow(rowKey=i, values=values)
                     taub$addRow(rowKey=i, values=values)
+                    trendTest$addRow(rowKey=i, values=values)
                 }
             }
 
@@ -261,8 +262,17 @@ contTablesClass <- R6::R6Class(
 
                     test <- try(chisq.test(mat, correct=FALSE))
                     corr <- try(chisq.test(mat, correct=TRUE))
-                    asso <- vcd::assocstats(mat)
-                    gamm <- vcdExtra::GKgamma(mat)
+
+                    # Only compute association stats if requested
+                    asso <- NULL
+                    if (self$options$contCoef || self$options$phiCra)
+                        asso <- vcd::assocstats(mat)
+
+                    # Only compute gamma if requested (can error on nominal tables)
+                    gamm <- NULL
+                    if (self$options$gamma)
+                        gamm <- try(vcdExtra::GKgamma(mat), silent = TRUE)
+
                     n <- sum(mat)
 
                     if (base::inherits(test, 'try-error'))
@@ -279,16 +289,19 @@ contTablesClass <- R6::R6Class(
                         tau <- try(cor.test(v1, v2, method='kendall', conf.level=ciWidth))
                     }
 
-                    # Cochran-Armitage trend test
+                    # Cochran-Armitage trend test (only valid for 2×k tables)
                     trend <- NULL
                     if (self$options$trendTest) {
-                        if (requireNamespace("DescTools", quietly = TRUE)) {
+                        # Validate dimensions: must be 2 rows × k columns
+                        if (nrow(mat) != 2) {
+                            trend <- 'dimension_error'  # Signal invalid dimensions
+                        } else if (requireNamespace("DescTools", quietly = TRUE)) {
                             alternative <- switch(self$options$trendDirection,
                                                 "twosided" = "two.sided",
                                                 "increasing" = "greater",
                                                 "decreasing" = "less")
                             trend <- try(DescTools::CochranArmitageTest(
-                                x = mat, 
+                                x = mat,
                                 alternative = alternative
                             ))
                         }
@@ -296,12 +309,21 @@ contTablesClass <- R6::R6Class(
 
                     lor <- NULL
                     fish <- NULL
+                    rr <- NULL
+                    rd <- NULL
+                    nnt_result <- NULL
+
                     if (all(dim(mat) == 2)) {
-                        fish <- stats::fisher.test(mat, conf.level=ciWidth)
-                        lor <- vcd::loddsratio(mat)
-                        rr <- private$.relativeRisk(mat)
-                        rd <- private$.riskDifference(mat)
-                        nnt_result <- private$.nnt(mat)
+                        if (self$options$fisher)
+                            fish <- stats::fisher.test(mat, conf.level=ciWidth)
+                        if (self$options$logOdds || self$options$odds)
+                            lor <- vcd::loddsratio(mat)
+                        if (self$options$relRisk)
+                            rr <- private$.relativeRisk(mat)
+                        if (self$options$riskDiff)
+                            rd <- private$.riskDifference(mat)
+                        if (self$options$nnt)
+                            nnt_result <- private$.nnt(mat)
                     }
 
                 }) # suppressWarnings
@@ -409,9 +431,9 @@ contTablesClass <- R6::R6Class(
                         `value[chiSqCorr]`=unname(corr$statistic),
                         `df[chiSqCorr]`=unname(corr$parameter),
                         `p[chiSqCorr]`=unname(corr$p.value),
-                        `value[likeRat]`=asso$chisq_tests['Likelihood Ratio', 'X^2'],
-                        `df[likeRat]`=asso$chisq_tests['Likelihood Ratio', 'df'],
-                        `p[likeRat]`=asso$chisq_tests['Likelihood Ratio', 'P(> X^2)'],
+                        `value[likeRat]`=if (!is.null(asso)) asso$chisq_tests['Likelihood Ratio', 'X^2'] else NaN,
+                        `df[likeRat]`=if (!is.null(asso)) asso$chisq_tests['Likelihood Ratio', 'df'] else '',
+                        `p[likeRat]`=if (!is.null(asso)) asso$chisq_tests['Likelihood Ratio', 'P(> X^2)'] else '',
                         `value[fisher]`=fishE,
                         `p[fisher]`=fishP,
                         `value[N]`=n)
@@ -422,17 +444,36 @@ contTablesClass <- R6::R6Class(
                 if (is.null(fish))
                     chiSq$addFootnote(rowNo=othRowNo, 'value[fisher]', 'Available for 2x2 tables only')
 
-                values <- list(
-                    `v[cont]`=asso$contingency,
-                    `v[phi]`=ifelse(is.na(asso$phi), NaN, asso$phi),
-                    `v[cra]`=asso$cramer)
+                # Nominal stats - only populate if asso was computed
+                if (!is.null(asso)) {
+                    values <- list(
+                        `v[cont]`=asso$contingency,
+                        `v[phi]`=ifelse(is.na(asso$phi), NaN, asso$phi),
+                        `v[cra]`=asso$cramer)
+                } else {
+                    values <- list(
+                        `v[cont]`=NaN,
+                        `v[phi]`=NaN,
+                        `v[cra]`=NaN)
+                }
                 nom$setRow(rowNo=othRowNo, values=values)
 
-                values <- list(
-                    gamma=gamm$gamma,
-                    se=gamm$sigma,
-                    cil=gamm$CI[1],
-                    ciu=gamm$CI[2])
+                # Gamma stats - only populate if gamm was computed successfully
+                if (!is.null(gamm) && !base::inherits(gamm, 'try-error')) {
+                    values <- list(
+                        gamma=gamm$gamma,
+                        se=gamm$sigma,
+                        cil=gamm$CI[1],
+                        ciu=gamm$CI[2])
+                } else {
+                    values <- list(
+                        gamma=NaN,
+                        se=NaN,
+                        cil='',
+                        ciu='')
+                    if (self$options$gamma && base::inherits(gamm, 'try-error'))
+                        gamma$addFootnote(rowNo=othRowNo, 'gamma', 'Gamma requires ordinal variables')
+                }
                 gamma$setRow(rowNo=othRowNo, values=values)
 
                 if (self$options$taub) {
@@ -449,16 +490,23 @@ contTablesClass <- R6::R6Class(
                 # Populate trend test results
                 if (self$options$trendTest) {
                     trendResult <- self$results$trendTest
-                    if (base::inherits(trend, 'try-error') || is.null(trend))
+                    if (identical(trend, 'dimension_error')) {
+                        # Invalid dimensions for Cochran-Armitage test
                         values <- list(statistic=NaN, p='')
-                    else
+                        trendResult$setRow(rowNo=othRowNo, values=values)
+                        trendResult$addFootnote(rowNo=othRowNo, 'statistic',
+                            'Cochran-Armitage test requires exactly 2 rows')
+                    } else if (base::inherits(trend, 'try-error') || is.null(trend)) {
+                        values <- list(statistic=NaN, p='')
+                        trendResult$setRow(rowNo=othRowNo, values=values)
+                        if (base::inherits(trend, 'try-error'))
+                            trendResult$addFootnote(rowNo=othRowNo, 'statistic', 'DescTools package required')
+                    } else {
                         values <- list(
                             statistic=unname(trend$statistic),
                             p=trend$p.value)
-                    trendResult$setRow(rowNo=othRowNo, values=values)
-                    
-                    if (base::inherits(trend, 'try-error'))
-                        trendResult$addFootnote(rowNo=othRowNo, 'statistic', 'DescTools package required')
+                        trendResult$setRow(rowNo=othRowNo, values=values)
+                    }
                 }
 
                 if ( ! is.null(lor)) {
@@ -500,6 +548,12 @@ contTablesClass <- R6::R6Class(
         },
 
         #### Helper functions ----
+        .escapeVar = function(varName) {
+            # Escape variable names with special characters
+            if (is.null(varName)) return(NULL)
+            return(jmvcore::composeTerm(varName))
+        },
+
         .cleanData = function() {
 
             data <- self$data
@@ -515,8 +569,11 @@ contTablesClass <- R6::R6Class(
                 data[[colVarName]] <- as.factor(data[[colVarName]])
             for (layerName in layerNames)
                 data[[layerName]] <- as.factor(data[[layerName]])
-            if ( ! is.null(countsName))
+            if ( ! is.null(countsName)) {
                 data[[countsName]] <- toNumeric(data[[countsName]])
+                # Remove rows where counts are NA to prevent xtabs() errors
+                data <- data[!is.na(data[[countsName]]), ]
+            }
 
             data
         },

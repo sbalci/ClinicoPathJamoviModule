@@ -11,14 +11,12 @@ items:
       clearWith:
           - vars
 
-    # - name:  plothtml
-    #   title: Plot html
-    #   type:  Html
-    #   clearWith:
-    #       - vars
-    #       - excl
-    #       - marg
-    #       - inter
+    - name: dataWarning
+      title: Data Validation
+      type: Html
+      visible: true
+      clearWith:
+          - vars
 
     - title: Alluvial Diagrams
       name: plot
@@ -41,6 +39,14 @@ items:
           # - themex
           # - originaltheme
 
+
+    - name: condensationWarning
+      title: Condensation Plot Information
+      type: Html
+      visible: (condensationvar)
+      clearWith:
+          - vars
+          - condensationvar
 
     - title: '`Condensation Plot ${condensationvar}`'
       name: plot2

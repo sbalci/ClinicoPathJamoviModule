@@ -7,7 +7,19 @@ version: '0.0.32'
 jas: '1.2'
 
 description:
-    main: Function for making Cross Tables.
+    main: |
+        Function for making Cross Tables with multiple table styles.
+
+        Currently implemented features:
+        - Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
+        - Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
+        - Stratified analysis (Mantel-Haenszel, Breslow-Day)
+        - Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg, Benjamini-Yekutieli)
+        - Variable name safety (special characters, spaces)
+        - Data quality validation warnings
+
+        Note: Advanced features (pairwise comparisons, effect sizes, residual analysis,
+        correspondence analysis) are planned but not yet available.
     R:
         dontrun: true
         usage: |
@@ -20,8 +32,7 @@ description:
             #   sty = "finalfit",
             #   excl = TRUE,
             #   cont = "mean",
-            #   pcat = "chisq",
-            #   exportCSV = TRUE
+            #   pcat = "chisq"
             # )
 
 options:

@@ -22,6 +22,12 @@ classificationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 "classificationClass",
 inherit = classificationBase,
 private = list(
+    # Utility to handle variables with spaces/special characters
+    .escapeVar = function(x) {
+        if (is.null(x) || length(x) == 0) return(x)
+        make.names(x)
+    },
+
     .init = function() {
         preformatted <- jmvcore::Preformatted$new(self$options, 'preformatted')
         self$results$add(preformatted)
@@ -65,8 +71,9 @@ private = list(
 
         learner <- private$.initLearner()
 
-        # Set clinical cutoff if specified
-        learner$param_set$values$cutoff <- self$options$clinicalCutoff
+        # NOTE: Clinical cutoff is stored for potential future use
+        # Most mlr3 learners don't support cutoff parameter directly
+        # Threshold can be applied during prediction post-processing if needed
 
         # Add checkpoint before model training
         private$.checkpoint()
@@ -105,7 +112,64 @@ private = list(
             }
             task <- TaskClassif$new(id = task$id, backend = balanced_data, target = target_col)
         } else if (self$options$balancingMethod == "smote") {
-            stop("SMOTE requires the 'smotefamily' package. Please install it or choose another balancing method.")
+            # Check if smotefamily package is available
+            if (!requireNamespace("smotefamily", quietly = TRUE)) {
+                warning(paste(
+                    "SMOTE requires the 'smotefamily' package which is not installed.",
+                    "Falling back to upsampling method.",
+                    "To use SMOTE, install the package with: install.packages('smotefamily')"
+                ))
+                # Fall back to upsampling
+                task_data <- task$data()
+                target_col <- task$target_names
+                minority_class <- names(sort(table(task_data[[target_col]])))[1]
+                majority_count <- max(table(task_data[[target_col]]))
+
+                minority_indices <- which(task_data[[target_col]] == minority_class)
+                n_replicate <- majority_count - length(minority_indices)
+
+                if (n_replicate > 0) {
+                    replicated_indices <- sample(minority_indices, n_replicate, replace = TRUE)
+                    upsampled_data <- rbind(task_data, task_data[replicated_indices, ])
+                    task <- TaskClassif$new(id = task$id, backend = upsampled_data, target = target_col)
+                }
+            } else {
+                # Use SMOTE if package is available
+                tryCatch({
+                    task_data <- task$data()
+                    target_col <- task$target_names
+
+                    # Separate features and target
+                    feature_cols <- setdiff(names(task_data), target_col)
+                    features <- as.data.frame(task_data[, feature_cols, with = FALSE])
+                    target <- task_data[[target_col]]
+
+                    # Apply SMOTE
+                    smote_result <- smotefamily::SMOTE(features, target, K = 5, dup_size = 0)
+
+                    # Combine SMOTE data with target
+                    smote_data <- as.data.table(smote_result$data)
+                    names(smote_data)[names(smote_data) == "class"] <- target_col
+
+                    task <- TaskClassif$new(id = task$id, backend = smote_data, target = target_col)
+                }, error = function(e) {
+                    warning(paste("SMOTE failed:", e$message, "- Falling back to upsampling"))
+                    # Fall back to upsampling on error
+                    task_data <- task$data()
+                    target_col <- task$target_names
+                    minority_class <- names(sort(table(task_data[[target_col]])))[1]
+                    majority_count <- max(table(task_data[[target_col]]))
+
+                    minority_indices <- which(task_data[[target_col]] == minority_class)
+                    n_replicate <- majority_count - length(minority_indices)
+
+                    if (n_replicate > 0) {
+                        replicated_indices <- sample(minority_indices, n_replicate, replace = TRUE)
+                        upsampled_data <- rbind(task_data, task_data[replicated_indices, ])
+                        task <- TaskClassif$new(id = task$id, backend = upsampled_data, target = target_col)
+                    }
+                })
+            }
         }
         return(task)
     },
@@ -125,19 +189,43 @@ private = list(
             return(list())
         }
 
+        # Determine positive class
+        factor_levels <- levels(truth_factor)
+
+        # Use user-specified positive class if provided, otherwise default to second level
+        if (!is.null(self$options$positiveClass) && nchar(self$options$positiveClass) > 0) {
+            positive_class <- self$options$positiveClass
+
+            # Validate that the specified class exists
+            if (!(positive_class %in% factor_levels)) {
+                warning(paste(
+                    "Specified positive class '", positive_class, "' not found in data.",
+                    "Available classes are:", paste(factor_levels, collapse = ", "),
+                    ". Using second factor level '", factor_levels[2], "' as positive."
+                ))
+                positive_class <- factor_levels[2]
+            }
+        } else {
+            # Default to second factor level
+            positive_class <- factor_levels[2]
+        }
+
+        # Determine negative class
+        negative_class <- setdiff(factor_levels, positive_class)[1]
+
         # Calculate clinical metrics using caret functions
         tryCatch({
-            sens <- caret::sensitivity(pred_response, truth_factor, positive = levels(truth_factor)[2])
-            spec <- caret::specificity(pred_response, truth_factor, negative = levels(truth_factor)[1])
-            ppv <- caret::posPredValue(pred_response, truth_factor, positive = levels(truth_factor)[2])
-            npv <- caret::negPredValue(pred_response, truth_factor, negative = levels(truth_factor)[1])
+            sens <- caret::sensitivity(pred_response, truth_factor, positive = positive_class)
+            spec <- caret::specificity(pred_response, truth_factor, negative = negative_class)
+            ppv <- caret::posPredValue(pred_response, truth_factor, positive = positive_class)
+            npv <- caret::negPredValue(pred_response, truth_factor, negative = negative_class)
 
             # Calculate likelihood ratios
             pos_lr <- sens / (1 - spec)
             neg_lr <- (1 - sens) / spec
 
             # Calculate prevalence
-            prevalence <- sum(truth_factor == levels(truth_factor)[2]) / length(truth_factor)
+            prevalence <- sum(truth_factor == positive_class) / length(truth_factor)
 
             # Calculate Number Needed to Treat (if applicable)
             nnt <- if (ppv > prevalence) 1 / (ppv - prevalence) else NA
@@ -166,10 +254,10 @@ private = list(
                     boot_pred <- pred_response[indices]
                     boot_truth <- truth_factor[indices]
                     return(c(
-                        caret::sensitivity(boot_pred, boot_truth, positive = levels(truth_factor)[2]),
-                        caret::specificity(boot_pred, boot_truth, negative = levels(truth_factor)[1]),
-                        caret::posPredValue(boot_pred, boot_truth, positive = levels(truth_factor)[2]),
-                        caret::negPredValue(boot_pred, boot_truth, negative = levels(truth_factor)[1])
+                        caret::sensitivity(boot_pred, boot_truth, positive = positive_class),
+                        caret::specificity(boot_pred, boot_truth, negative = negative_class),
+                        caret::posPredValue(boot_pred, boot_truth, positive = positive_class),
+                        caret::negPredValue(boot_pred, boot_truth, negative = negative_class)
                     ))
                 }
 
@@ -382,13 +470,10 @@ private = list(
         if(self$options$classifier == 'singleDecisionTree') {
             selectedClassifier <- list(
             "min. split " = self$options$minSplit,
-            "min. bucket" = self$options$minBucket,
             "complexity" = self$options$complexity,
             "max. compete" = self$options$maxCompete,
             "max. surrogate" = self$options$maxSurrogate,
-            "unsurrogate" = self$options$unsurrogate,
-            "max depth" = self$options$maxDepth,
-            "no. cross validations" = self$options$noCrossValidations
+            "max depth" = self$options$maxDepth
             )
         } else if(self$options$classifier == 'randomForest') {
             selectedClassifier <- list(
@@ -525,20 +610,6 @@ private = list(
                 clinical_metrics <- private$.calculateClinicalMetrics(prediction$response, prediction$truth)
                 private$.populateClinicalMetrics(clinical_metrics)
             }
-        }
-
-        # Cross-validation specific handling
-        resampling <- rsmp("cv", folds = self$options$noOfFolds)
-        resampling$instantiate(task)
-
-        columns <- classTable$columns
-        for (i in seq_along(columns)) {
-            if (columns[[i]]$name == 'class') next
-        }
-
-        if (self$options$testing == "split") {
-            trainSet <- sample(task$nrow, (1 - self$options$testSize) * task$nrow)
-            testSet <- setdiff(seq_len(task$nrow), as.numeric(trainSet))
         }
 
         # Set up ROC curve if AUC reporting is enabled

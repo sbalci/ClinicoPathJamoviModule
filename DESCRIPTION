@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.32.18
-Date: 2025-01-05
+Version: 0.0.32.24
+Date: 2025-11-14
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -132,6 +132,8 @@ Imports:
     htmlwidgets,
     arcdiagram,
     tidyheatmaps,
+    factoextra,
+    cluster,
     tidyplots,
     moments,
     ggswim,
@@ -144,6 +146,7 @@ Imports:
     maxstat,
     binom,
     pROC,
+    PRROC,
     plotROC,
     timeROC,
     UpSetR,
@@ -244,7 +247,6 @@ Imports:
     Icens,
     regplot,
     smcure,
-    flexsurvcure,
     brms,
     metaBMA,
     robustbase,
@@ -307,5 +309,8 @@ Suggests:
     OncoDataSets,
     digest,
     coxphw,
+    flexsurvcure,
+    cuRe,
+    npcure,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

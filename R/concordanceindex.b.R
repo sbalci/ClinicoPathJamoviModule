@@ -5,6 +5,12 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
     "concordanceindexClass",
     inherit = concordanceindexBase,
     private = list(
+        .escapeVar = function(x) {
+            # Escape variable names with spaces/special chars
+            if (is.null(x) || length(x) == 0) return(x)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         .init = function() {
             private$.initInstructions()
         },
@@ -13,18 +19,131 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Check for required inputs
             if (is.null(self$options$time) || is.null(self$options$event) ||
                 is.null(self$options$predictor)) {
+                notice <- jmvcore::Notice$new(options=self$options, name='requiredInputs', type=jmvcore::NoticeType$ERROR)
+                notice$setContent('Time, Event, and Predictor variables are all required. Please select all three variables and re-run the analysis.')
+                self$results$insert(1, notice)
                 return()
             }
 
-            # Get data
+            # Get data (with variable name escaping for special characters)
             data <- self$data
-            time_var <- data[[self$options$time]]
-            event_var <- data[[self$options$event]]
-            predictor <- data[[self$options$predictor]]
+            time_var <- data[[private$.escapeVar(self$options$time)]]
+            event_var <- data[[private$.escapeVar(self$options$event)]]
+            predictor <- data[[private$.escapeVar(self$options$predictor)]]
+
+            # Handle event coding for multi-level events
+            event_code_level <- self$options$event_code
+            if (!is.null(event_code_level)) {
+                if (is.factor(event_var)) {
+                    # Convert to binary: selected level = 1, others = 0
+                    event_var <- ifelse(event_var == event_code_level, 1, 0)
+                } else if (is.numeric(event_var)) {
+                    # Convert numeric event_code to numeric and recode
+                    event_code_num <- as.numeric(event_code_level)
+                    event_var <- ifelse(event_var == event_code_num, 1, 0)
+                }
+            } else {
+                # No event_code: ensure binary 0/1 coding
+                if (is.factor(event_var)) {
+                    event_var <- as.numeric(event_var) - 1
+                } else if (is.numeric(event_var)) {
+                    # Check if already binary 0/1
+                    unique_vals <- sort(unique(event_var[!is.na(event_var)]))
+                    if (!all(unique_vals %in% c(0, 1))) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = "nonBinaryEvent",
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf(
+                            "Event variable has non-binary values (%s). Please specify which value represents the event using the Event Code option.",
+                            paste(unique_vals, collapse = ", ")
+                        ))
+                        self$results$insert(1, notice)
+                        return()
+                    }
+                }
+            }
 
             # Reverse direction if requested
             if (self$options$reverse_direction) {
                 predictor <- -predictor
+            }
+
+            # Warn about unimplemented features
+            if (self$options$competing_risks) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "competingRisksNotImplemented",
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(
+                    "Competing risks C-index is not yet implemented. Please disable this option. Standard C-index will be calculated treating competing events as censored."
+                )
+                self$results$insert(1, notice)
+            }
+
+            if (self$options$decompose_cindex) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "decompositionNotImplemented",
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(
+                    "C-index decomposition by risk groups is not yet implemented. Please disable this option."
+                )
+                self$results$insert(1, notice)
+            }
+
+            if (self$options$stratified_cindex) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "stratifiedNotImplemented",
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(
+                    "Stratified C-index analysis is not yet implemented. Please disable this option."
+                )
+                self$results$insert(1, notice)
+            }
+
+            # Warn about unimplemented plots
+            unimplemented_plots <- c(
+                self$options$plot_cindex_over_time,
+                self$options$plot_decomposition
+            )
+            if (any(unimplemented_plots)) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "plotsNotImplemented",
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(
+                    "C-index over time plot and decomposition plot are not yet implemented. These plots will be empty. Model comparison and risk group K-M plots are available."
+                )
+                self$results$insert(1, notice)
+            }
+
+            # Apply restricted time if requested
+            if (self$options$restricted_time && !is.null(self$options$max_time)) {
+                max_time <- self$options$max_time
+                # Censor observations beyond max_time
+                beyond_max <- time_var > max_time
+                if (any(beyond_max)) {
+                    time_var[beyond_max] <- max_time
+                    event_var[beyond_max] <- 0  # Administratively censor
+
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "restrictedTime",
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf(
+                        "Follow-up restricted to %g time units. %d observations beyond this time were administratively censored. C-index reflects discrimination within this restricted period.",
+                        max_time, sum(beyond_max)
+                    ))
+                    self$results$insert(999, notice)
+                }
             }
 
             # Calculate C-index
@@ -48,80 +167,73 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .initInstructions = function() {
             instructions <- self$results$instructions
             html <- "<h3>Concordance Index (Harrell's C-index)</h3>
-            <p>Rank-based discrimination measure for time-to-event predictions.</p>
+            <p>Rank-based discrimination measure for time-to-event predictions using validated methods.</p>
 
             <h4>Required Inputs:</h4>
             <ul>
-                <li><b>Time:</b> Time-to-event or censoring</li>
-                <li><b>Event:</b> Binary event indicator (1 = event, 0 = censored)</li>
-                <li><b>Predictor:</b> Risk score or linear predictor (higher = worse prognosis)</li>
+                <li><b>Time:</b> Time-to-event or censoring (continuous variable)</li>
+                <li><b>Event:</b> Binary event indicator (1 = event, 0 = censored, factor or numeric)</li>
+                <li><b>Predictor:</b> Risk score or linear predictor (higher values = higher risk)</li>
             </ul>
 
             <h4>C-index Interpretation:</h4>
             <ul>
-                <li><b>C = 0.5:</b> No discrimination (random)</li>
-                <li><b>C = 0.6-0.7:</b> Poor to acceptable discrimination</li>
-                <li><b>C = 0.7-0.8:</b> Good discrimination</li>
+                <li><b>C = 0.5:</b> No discrimination (random chance)</li>
+                <li><b>C = 0.6-0.7:</b> Acceptable discrimination</li>
+                <li><b>C = 0.7-0.8:</b> Good discrimination (clinically useful)</li>
                 <li><b>C = 0.8-0.9:</b> Excellent discrimination</li>
-                <li><b>C > 0.9:</b> Outstanding discrimination (rare, check for overfitting)</li>
-                <li><b>C = 1.0:</b> Perfect discrimination</li>
+                <li><b>C > 0.9:</b> Outstanding discrimination (verify - may indicate overfitting)</li>
             </ul>
 
             <h4>What C-index Measures:</h4>
             <ul>
-                <li>Proportion of all patient pairs correctly ranked by the model</li>
-                <li>For any two patients, does the model predict longer survival for the one who actually lived longer?</li>
+                <li>Probability that the model correctly ranks any pair of patients by their survival times</li>
+                <li>Extension of ROC curve AUC to censored survival data</li>
                 <li>Accounts for censoring through appropriate pair weighting</li>
-                <li>Extension of ROC's AUC to survival data</li>
+                <li>Global measure across entire follow-up period</li>
             </ul>
 
-            <h4>Calculation Methods:</h4>
+            <h4>Current Implementation:</h4>
             <ul>
-                <li><b>Harrell's:</b> Standard method from survival package, handles censoring</li>
-                <li><b>Uno's:</b> Uses inverse probability censoring weighting (IPCW), less biased with heavy censoring</li>
-                <li><b>Gönen-Heller:</b> Bias-free for proportional hazards, doesn't need follow-up data</li>
+                <li><b>Method:</b> Harrell's C-index using survival::concordance() (validated, standard)</li>
+                <li><b>Bootstrap CI:</b> Available for confidence intervals</li>
+                <li><b>Model Comparison:</b> Compare multiple risk scores</li>
+                <li><b>Visualizations:</b> Model comparison plot, Kaplan-Meier by risk groups</li>
+                <li><b>Missing Data:</b> Complete-case analysis (listwise deletion)</li>
             </ul>
 
-            <h4>C-index vs Time-Dependent ROC:</h4>
+            <h4>Features in Development:</h4>
             <ul>
-                <li><b>C-index:</b> Global measure across entire follow-up</li>
-                <li><b>TD-ROC:</b> Discrimination at specific time points (e.g., 5-year survival)</li>
-                <li>Both valuable, C-index simpler and more interpretable</li>
+                <li><b>Time-dependent C-index:</b> Discrimination at specific time points (placeholder only)</li>
+                <li><b>Competing risks:</b> C-index for cause-specific events (not yet implemented)</li>
+                <li><b>Stratified analysis:</b> C-index by subgroups (not yet implemented)</li>
+                <li><b>Advanced methods:</b> Uno's IPCW, Gönen-Heller estimators (planned)</li>
             </ul>
 
             <h4>Clinical Applications:</h4>
             <ul>
-                <li><b>Cox Model Validation:</b> Primary discrimination metric</li>
-                <li><b>Risk Score Evaluation:</b> AJCC staging, Nottingham PI, gene signatures</li>
-                <li><b>Biomarker Assessment:</b> Prognostic value of molecular markers</li>
-                <li><b>ML Model Selection:</b> Compare random forests, neural nets, boosting</li>
-                <li><b>External Validation:</b> Test generalizability in new populations</li>
+                <li><b>Cox Model Validation:</b> Primary discrimination metric for proportional hazards models</li>
+                <li><b>Risk Score Evaluation:</b> AJCC staging, prognostic indices, gene signatures</li>
+                <li><b>Biomarker Assessment:</b> Prognostic value of novel markers (often need C > 0.75)</li>
+                <li><b>ML Model Selection:</b> Compare predictive algorithms</li>
+                <li><b>External Validation:</b> Test model transportability to new populations</li>
             </ul>
 
-            <h4>Somers' D:</h4>
+            <h4>Sample Size Requirements:</h4>
             <ul>
-                <li>D = 2 × (C-index - 0.5)</li>
-                <li>Ranges from -1 to +1 (like correlation)</li>
-                <li>Easier to interpret as strength of association</li>
-                <li>D = 0.4 means moderate association, D = 0.6 strong</li>
+                <li><b>Minimum:</b> 10 events (enforced by error check)</li>
+                <li><b>Adequate:</b> 50+ events for stable estimates</li>
+                <li><b>Recommended:</b> 100+ events for reliable confidence intervals</li>
+                <li><b>Model comparison:</b> 200+ events per model for adequate power</li>
             </ul>
 
-            <h4>Sample Size Considerations:</h4>
+            <h4>Important Notes:</h4>
             <ul>
-                <li>Minimum ~100 events for stable C-index estimate</li>
-                <li>More events needed for model comparison (200+ per model)</li>
-                <li>Heavy censoring (>50%) may require Uno's method</li>
-            </ul>
-
-            <h4>Required R Packages:</h4>
-            <ul>
-                <li><b>survival:</b> concordance() function (Harrell's method)</li>
-                <li><b>Hmisc:</b> rcorr.cens() alternative implementation</li>
-                <li><b>survcomp:</b> Uno's C-index</li>
-                <li><b>survAUC:</b> Various C-index estimators</li>
-            </ul>
-
-            <p><b>Note:</b> Implementation in development. Full functionality requires survival and Hmisc packages.</p>"
+                <li>C-index measures discrimination only, not calibration</li>
+                <li>Good discrimination (high C) does not guarantee good calibration</li>
+                <li>Always complement with calibration assessment and clinical utility evaluation</li>
+                <li>External validation essential before clinical implementation</li>
+            </ul>"
 
             instructions$setContent(html)
         },
@@ -131,21 +243,76 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Remove missing values
             complete_cases <- complete.cases(time_var, event_var, predictor)
+            n_missing <- sum(!complete_cases)
+            pct_missing <- 100 * n_missing / length(complete_cases)
+
+            # Notice: missing data handling (always inform if any missing)
+            if (n_missing > 0) {
+                notice_type <- if (pct_missing > 20) {
+                    jmvcore::NoticeType$WARNING
+                } else {
+                    jmvcore::NoticeType$INFO
+                }
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingDataHandling',
+                    type = notice_type
+                )
+
+                msg <- sprintf(
+                    'Missing data handling: %d/%d cases (%.1f%%) excluded using complete-case analysis (listwise deletion). ',
+                    n_missing, length(complete_cases), pct_missing
+                )
+
+                if (pct_missing > 20) {
+                    msg <- paste0(msg,
+                        'High missingness may bias results. Consider: (1) investigating missingness patterns (MCAR/MAR/MNAR), ',
+                        '(2) multiple imputation if MAR, or (3) sensitivity analyses.'
+                    )
+                } else if (pct_missing > 5) {
+                    msg <- paste0(msg, 'Moderate missingness detected. Verify that data are missing completely at random (MCAR).')
+                } else {
+                    msg <- paste0(msg, 'Low missingness unlikely to bias results if MCAR.')
+                }
+
+                notice$setContent(msg)
+                if (pct_missing > 20) {
+                    self$results$insert(1, notice)  # Warning at top
+                } else {
+                    self$results$insert(999, notice)  # Info at bottom
+                }
+            }
+
             time_var <- time_var[complete_cases]
             event_var <- event_var[complete_cases]
             predictor <- predictor[complete_cases]
 
-            # Calculate C-index based on selected method
-            if (self$options$cindex_method == "harrell") {
-                # Use survival::concordance() for Harrell's method
-                cindex_result <- private$.calculateHarrellCindex(time_var, event_var, predictor)
-            } else if (self$options$cindex_method == "uno") {
-                # Use Uno's method with IPCW
-                cindex_result <- private$.calculateUnoCindex(time_var, event_var, predictor)
-            } else {
-                # Gönen-Heller method
-                cindex_result <- private$.calculateGonenHellerCindex(time_var, event_var, predictor)
+            # Notice: too few events
+            n_events <- sum(event_var, na.rm=TRUE)
+            censoring_rate <- 100 * (1 - n_events / length(event_var))
+
+            if (n_events < 10) {
+                notice <- jmvcore::Notice$new(options=self$options, name='tooFewEvents', type=jmvcore::NoticeType$ERROR)
+                notice$setContent(sprintf('Too few events for reliable C-index estimation (n_events=%d). Minimum 10 events required, 100+ recommended for stable estimates. Results may be unreliable.', n_events))
+                self$results$insert(1, notice)
+                return()
+            } else if (n_events < 50) {
+                notice <- jmvcore::Notice$new(options=self$options, name='lowEvents', type=jmvcore::NoticeType$STRONG_WARNING)
+                notice$setContent(sprintf('Low number of events (n_events=%d). Standard errors and confidence intervals may be unstable. Consider cautious interpretation. Recommended minimum: 100 events.', n_events))
+                self$results$insert(1, notice)
             }
+
+            # Notice: extreme censoring
+            if (censoring_rate > 70) {
+                notice <- jmvcore::Notice$new(options=self$options, name='heavyCensoring', type=jmvcore::NoticeType$WARNING)
+                notice$setContent(sprintf('Heavy censoring detected (%.1f%% censored). C-index estimates may be biased. Consider sensitivity analyses or alternative discrimination metrics.', censoring_rate))
+                self$results$insert(1, notice)
+            }
+
+            # Calculate C-index using Harrell's method (survival::concordance)
+            # Note: Uno's and Gönen-Heller methods removed due to implementation issues
+            cindex_result <- private$.calculateHarrellCindex(time_var, event_var, predictor)
 
             # Calculate confidence intervals
             cindex_ci_lower <- NA
@@ -183,7 +350,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             table$setRow(rowNo=1, values=list(
                 predictor = self$options$predictor,
-                method = self$options$cindex_method,
+                method = "harrell",
                 n_pairs = cindex_result$n_pairs,
                 concordant = cindex_result$concordant,
                 discordant = cindex_result$discordant,
@@ -195,35 +362,145 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 somers_d = somers_d,
                 interpretation = interpretation
             ))
+
+            # Populate Somers' D table if requested
+            if (self$options$somers_d && !is.na(somers_d)) {
+                somers_d_table <- self$results$somersD
+
+                d_se <- 2 * cindex_result$se
+                d_ci_lower <- if (!is.na(cindex_ci_lower)) 2 * (cindex_ci_lower - 0.5) else NA
+                d_ci_upper <- if (!is.na(cindex_ci_upper)) 2 * (cindex_ci_upper - 0.5) else NA
+
+                d_interp <- if (abs(somers_d) < 0.2) {
+                    "Weak association (|D| < 0.2)"
+                } else if (abs(somers_d) < 0.4) {
+                    "Moderate association (0.2 ≤ |D| < 0.4)"
+                } else if (abs(somers_d) < 0.6) {
+                    "Strong association (0.4 ≤ |D| < 0.6)"
+                } else {
+                    "Very strong association (|D| ≥ 0.6)"
+                }
+
+                somers_d_table$setRow(rowNo=1, values=list(
+                    somers_d = somers_d,
+                    d_se = d_se,
+                    d_ci_lower = d_ci_lower,
+                    d_ci_upper = d_ci_upper,
+                    interpretation = d_interp
+                ))
+            }
+
+            # Notice: analysis completion summary (INFO at bottom)
+            {
+                notice_info <- jmvcore::Notice$new(options=self$options, name='analysisComplete', type=jmvcore::NoticeType$INFO)
+                notice_info$setContent(sprintf('C-index analysis completed: %d observations, %d events (%.1f%% event rate), method=Harrell.',
+                    length(event_var), n_events, 100 * n_events / length(event_var)))
+                self$results$insert(999, notice_info)
+            }
         },
 
         .populateInterpretation = function() {
             interpretation <- self$results$interpretation
 
-            html <- "<h4>Clinical Interpretation</h4>
-            <p>Concordance index assessment for survival model discrimination.</p>
+            # Get C-index from results if available
+            cindex_table <- self$results$cindexSummary
+            cindex_val <- if (!is.null(cindex_table) && cindex_table$rowCount > 0) {
+                cindex_table$getRow(rowNo = 1)$cindex
+            } else {
+                NA
+            }
 
+            # Build context-specific interpretation
+            is_external <- self$options$external_validation
+            clinical_app <- self$options$clinical_application
+
+            html <- "<h4>Clinical Interpretation</h4>"
+
+            if (is_external) {
+                html <- paste0(html, "
+                <p><b>External Validation Analysis:</b> This analysis evaluates model performance in an independent cohort.</p>")
+            } else {
+                html <- paste0(html, "
+                <p>Concordance index assessment for survival model discrimination.</p>")
+            }
+
+            html <- paste0(html, "
             <h5>Discrimination Performance:</h5>
             <ul>
-                <li>C-index represents probability that model correctly ranks patient pairs</li>
-                <li>Values > 0.7 generally indicate clinically useful discrimination</li>
+                <li>C-index represents probability that model correctly ranks patient pairs</li>")
+
+            if (!is.na(cindex_val)) {
+                if (cindex_val >= 0.8) {
+                    html <- paste0(html, "
+                <li><b>Your C-index (", sprintf("%.3f", cindex_val), "):</b> Excellent discrimination</li>")
+                } else if (cindex_val >= 0.7) {
+                    html <- paste0(html, "
+                <li><b>Your C-index (", sprintf("%.3f", cindex_val), "):</b> Good discrimination, clinically useful</li>")
+                } else if (cindex_val >= 0.6) {
+                    html <- paste0(html, "
+                <li><b>Your C-index (", sprintf("%.3f", cindex_val), "):</b> Acceptable discrimination, may need improvement</li>")
+                } else {
+                    html <- paste0(html, "
+                <li><b>Your C-index (", sprintf("%.3f", cindex_val), "):</b> Poor discrimination, limited clinical utility</li>")
+                }
+            }
+
+            html <- paste0(html, "
                 <li>Compare to clinical staging or established risk scores</li>
-            </ul>
+            </ul>")
 
-            <h5>Kaplan-Meier Risk Groups:</h5>
+            if (is_external) {
+                html <- paste0(html, "
+            <h5>External Validation Context:</h5>
             <ul>
-                <li>Visual assessment of separation between risk groups</li>
-                <li>Good discrimination shows clear separation of curves</li>
-                <li>Crossing curves suggest time-varying effects</li>
-            </ul>
+                <li>Some degradation from development cohort is expected</li>
+                <li>C-index drop of 0.05-0.10 is typical and acceptable</li>
+                <li>Larger drops suggest overfitting or population differences</li>
+                <li>Consider recalibration if discrimination is adequate but calibration poor</li>
+            </ul>")
+            }
 
-            <h5>Recommendations:</h5>
+            html <- paste0(html, "
+            <h5>Clinical Application: ", clinical_app, "</h5>")
+
+            if (clinical_app == "biomarker") {
+                html <- paste0(html, "
+            <ul>
+                <li>For biomarker studies, C > 0.75 often needed for clinical adoption</li>
+                <li>Compare incremental value over standard clinical variables</li>
+                <li>Consider net reclassification improvement (NRI)</li>
+            </ul>")
+            } else if (clinical_app == "staging") {
+                html <- paste0(html, "
+            <ul>
+                <li>Staging systems typically achieve C = 0.60-0.75</li>
+                <li>Values > 0.70 indicate good prognostic separation</li>
+                <li>Complement with calibration and clinical utility assessments</li>
+            </ul>")
+            } else if (clinical_app == "ml_model") {
+                html <- paste0(html, "
+            <ul>
+                <li>ML models should substantially outperform simple scores (ΔC > 0.05)</li>
+                <li>Beware of overfitting - external validation essential</li>
+                <li>High C-index alone insufficient - assess calibration and fairness</li>
+            </ul>")
+            } else {
+                html <- paste0(html, "
             <ul>
                 <li>C > 0.7 supports clinical utility for prognostication</li>
-                <li>For biomarker studies, C > 0.75 often needed for clinical adoption</li>
                 <li>Consider calibration in addition to discrimination</li>
                 <li>External validation essential before clinical implementation</li>
-            </ul>"
+            </ul>")
+            }
+
+            html <- paste0(html, "
+            <h5>Next Steps:</h5>
+            <ul>
+                <li>Assess model calibration (observed vs predicted risk)</li>
+                <li>Evaluate clinical utility using decision curve analysis</li>",
+                if (!is_external) "<li>Perform external validation in independent cohort</li>" else "",
+                "<li>Consider subgroup analyses for heterogeneity</li>
+            </ul>")
 
             interpretation$setContent(html)
         },
@@ -261,140 +538,6 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             ))
         },
 
-        .calculateUnoCindex = function(time_var, event_var, predictor) {
-            # Uno's C-index with Inverse Probability of Censoring Weighting (IPCW)
-            # Less biased with heavy censoring
-
-            n <- length(time_var)
-
-            # Fit censoring distribution (reverse event indicator)
-            surv_cens <- survival::Surv(time_var, 1 - event_var)
-            km_cens <- survival::survfit(surv_cens ~ 1)
-
-            # Calculate weights for each observation
-            weights <- rep(1, n)
-            for (i in 1:n) {
-                idx <- which(km_cens$time <= time_var[i])
-                if (length(idx) > 0) {
-                    weights[i] <- km_cens$surv[max(idx)]
-                }
-            }
-
-            # Avoid division by zero
-            weights[weights < 0.01] <- 0.01
-            weights <- 1 / weights
-
-            # Calculate weighted concordance
-            concordant <- 0
-            discordant <- 0
-            tied <- 0
-            total_weight <- 0
-
-            for (i in 1:(n-1)) {
-                for (j in (i+1):n) {
-                    # Only consider comparable pairs (one had event)
-                    if (event_var[i] == 1 && time_var[i] <= time_var[j]) {
-                        # i had event first, j either had event later or censored
-                        weight <- weights[i]
-                        total_weight <- total_weight + weight
-
-                        if (predictor[i] > predictor[j]) {
-                            concordant <- concordant + weight
-                        } else if (predictor[i] < predictor[j]) {
-                            discordant <- discordant + weight
-                        } else {
-                            tied <- tied + weight
-                        }
-                    } else if (event_var[j] == 1 && time_var[j] <= time_var[i]) {
-                        # j had event first, i either had event later or censored
-                        weight <- weights[j]
-                        total_weight <- total_weight + weight
-
-                        if (predictor[j] > predictor[i]) {
-                            concordant <- concordant + weight
-                        } else if (predictor[j] < predictor[i]) {
-                            discordant <- discordant + weight
-                        } else {
-                            tied <- tied + weight
-                        }
-                    }
-                }
-            }
-
-            # Calculate C-index
-            if (self$options$handle_ties == "average") {
-                cindex <- (concordant + 0.5 * tied) / total_weight
-            } else if (self$options$handle_ties == "exclude") {
-                cindex <- concordant / (concordant + discordant)
-            } else {
-                # Random
-                cindex <- (concordant + 0.5 * tied) / total_weight
-            }
-
-            # Approximate SE
-            se <- sqrt(cindex * (1 - cindex) / total_weight)
-
-            return(list(
-                cindex = cindex,
-                se = se,
-                n_pairs = total_weight,
-                concordant = concordant,
-                discordant = discordant,
-                tied = tied
-            ))
-        },
-
-        .calculateGonenHellerCindex = function(time_var, event_var, predictor) {
-            # Gönen-Heller estimator - bias-free for proportional hazards
-            # Doesn't require follow-up information, based on predictor distribution only
-
-            n <- length(predictor)
-
-            # Calculate all pairwise comparisons of predictors
-            concordant <- 0
-            discordant <- 0
-            tied <- 0
-
-            for (i in 1:(n-1)) {
-                for (j in (i+1):n) {
-                    diff <- predictor[i] - predictor[j]
-
-                    if (abs(diff) < 1e-10) {
-                        tied <- tied + 1
-                    } else if (diff > 0) {
-                        # i has higher risk than j
-                        # Under PH, i more likely to have event first
-                        concordant <- concordant + 1
-                    } else {
-                        discordant <- discordant + 1
-                    }
-                }
-            }
-
-            n_pairs <- choose(n, 2)
-
-            # Gönen-Heller C-index
-            if (self$options$handle_ties == "average") {
-                cindex <- (concordant + 0.5 * tied) / n_pairs
-            } else if (self$options$handle_ties == "exclude") {
-                cindex <- concordant / (concordant + discordant)
-            } else {
-                cindex <- (concordant + 0.5 * tied) / n_pairs
-            }
-
-            # Approximate SE (simplified)
-            se <- sqrt(cindex * (1 - cindex) / n_pairs)
-
-            return(list(
-                cindex = cindex,
-                se = se,
-                n_pairs = n_pairs,
-                concordant = concordant,
-                discordant = discordant,
-                tied = tied
-            ))
-        },
-
         .calculateCindexCI = function(time_var, event_var, predictor, cindex) {
             # Calculate confidence intervals for C-index
 
@@ -415,17 +558,20 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                     # Calculate C-index for bootstrap sample
                     tryCatch({
-                        if (self$options$cindex_method == "harrell") {
-                            result <- private$.calculateHarrellCindex(boot_time, boot_event, boot_pred)
-                        } else if (self$options$cindex_method == "uno") {
-                            result <- private$.calculateUnoCindex(boot_time, boot_event, boot_pred)
-                        } else {
-                            result <- private$.calculateGonenHellerCindex(boot_time, boot_event, boot_pred)
-                        }
+                        result <- private$.calculateHarrellCindex(boot_time, boot_event, boot_pred)
                         boot_cindex[b] <- result$cindex
                     }, error = function(e) {
                         boot_cindex[b] <- NA
                     })
+                }
+
+                # Notice: bootstrap failures
+                n_failed <- sum(is.na(boot_cindex))
+                if (n_failed > 0.1 * n_boot) {
+                    notice <- jmvcore::Notice$new(options=self$options, name='bootstrapFailures', type=jmvcore::NoticeType$WARNING)
+                    notice$setContent(sprintf('%d/%d bootstrap samples failed (%.1f%%). Confidence intervals may be unreliable. Consider using asymptotic CI method or checking data quality.',
+                        n_failed, n_boot, 100 * n_failed / n_boot))
+                    self$results$insert(1, notice)
                 }
 
                 # Calculate percentile CI
@@ -448,7 +594,18 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
         .populateTimeDependentCindex = function(time_var, event_var, predictor) {
             # Calculate time-dependent C-index at specific time horizons
-            # This is a simplified implementation - full implementation would use timeROC package
+            # WARNING: This is a simplified approximation, NOT proper time-dependent C-index
+
+            # Warn users about limitations
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = "tdCindexNotImplemented",
+                type = jmvcore::NoticeType$STRONG_WARNING
+            )
+            notice$setContent(
+                "Time-dependent C-index is NOT properly implemented. This analysis uses a simplified approximation that filters data by time and re-runs Harrell's C-index. It does NOT use inverse probability of censoring weighting or proper time-dependent methodology (timeROC/survivalROC). Results should NOT be considered valid time-dependent C-index estimates. Proper implementation planned for future release."
+            )
+            self$results$insert(1, notice)
 
             table <- self$results$timeDependentCindex
 
@@ -468,6 +625,10 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 include <- (time_var > t_horizon) | (time_var <= t_horizon & event_var == 1)
 
                 if (sum(include) < 10) {
+                    notice <- jmvcore::Notice$new(options=self$options, name=paste0('tdCindexSkipped_', i), type=jmvcore::NoticeType$WARNING)
+                    notice$setContent(sprintf('Time-dependent C-index at time point %.1f skipped due to insufficient observations (n=%d < 10). Consider removing this time point or using shorter evaluation times.',
+                        t_horizon, sum(include)))
+                    self$results$insert(1, notice)
                     next  # Skip if too few observations
                 }
 
@@ -479,12 +640,27 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         predictor[include]
                     )
 
+                    # Calculate CI for time-dependent C-index
+                    ci_lower <- NA
+                    ci_upper <- NA
+                    if (self$options$confidence_intervals) {
+                        ci_result <- private$.calculateCindexCI(
+                            time_var = time_var[include],
+                            event_var = event_var[include],
+                            predictor = predictor[include],
+                            cindex = result$cindex
+                        )
+                        ci_lower <- ci_result$lower
+                        ci_upper <- ci_result$upper
+                    }
+
                     table$addRow(rowKey=i, values=list(
-                        time_horizon = t_horizon,
+                        time_point = t_horizon,
+                        n_at_risk = sum(include),
                         cindex = result$cindex,
                         cindex_se = result$se,
-                        n_pairs = result$n_pairs,
-                        n_events = sum(event_var[include] == 1)
+                        cindex_ci_lower = ci_lower,
+                        cindex_ci_upper = ci_upper
                     ))
                 }, error = function(e) {
                     # Skip time points with errors
@@ -493,8 +669,127 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
 
         .populateModelComparison = function(time_var, event_var, predictor) {
-            # Compare C-index across multiple models
-            # TODO: Implement model comparison
+            table <- self$results$modelComparison
+
+            # Primary predictor
+            primary_result <- private$.calculateHarrellCindex(time_var, event_var, predictor)
+            primary_ci <- if (self$options$confidence_intervals) {
+                private$.calculateCindexCI(time_var, event_var, predictor, primary_result$cindex)
+            } else {
+                list(lower = NA, upper = NA)
+            }
+
+            # Parse model names
+            model_names_str <- self$options$model_names
+            model_names <- trimws(unlist(strsplit(model_names_str, ",")))
+            primary_name <- if (length(model_names) > 0) model_names[1] else self$options$predictor
+
+            table$addRow(rowKey=1, values=list(
+                model = primary_name,
+                cindex = primary_result$cindex,
+                cindex_se = primary_result$se,
+                cindex_ci_lower = primary_ci$lower,
+                cindex_ci_upper = primary_ci$upper,
+                rank = 1  # Will be recalculated after all models
+            ))
+
+            # Additional predictors
+            add_preds <- self$options$additional_predictors
+            if (!is.null(add_preds) && length(add_preds) > 0) {
+                for (i in seq_along(add_preds)) {
+                    pred_name <- add_preds[i]
+                    pred_var <- self$data[[private$.escapeVar(pred_name)]]
+
+                    # Skip if missing data
+                    if (is.null(pred_var)) next
+
+                    if (self$options$reverse_direction) {
+                        pred_var <- -pred_var
+                    }
+
+                    tryCatch({
+                        result <- private$.calculateHarrellCindex(time_var, event_var, pred_var)
+                        ci <- if (self$options$confidence_intervals) {
+                            private$.calculateCindexCI(time_var, event_var, pred_var, result$cindex)
+                        } else {
+                            list(lower = NA, upper = NA)
+                        }
+
+                        model_label <- if (length(model_names) > i) model_names[i+1] else pred_name
+
+                        table$addRow(rowKey=i+1, values=list(
+                            model = model_label,
+                            cindex = result$cindex,
+                            cindex_se = result$se,
+                            cindex_ci_lower = ci$lower,
+                            cindex_ci_upper = ci$upper,
+                            rank = NA  # Will set below
+                        ))
+                    }, error = function(e) {
+                        # Skip models with errors
+                    })
+                }
+            }
+
+            # Recalculate ranks
+            if (table$rowCount > 0) {
+                all_cindex <- sapply(1:table$rowCount, function(i) table$getRow(rowNo=i)$cindex)
+                ranks <- rank(-all_cindex, ties.method = "min")
+                for (i in 1:table$rowCount) {
+                    table$setCell(rowNo=i, col="rank", value=ranks[i])
+                }
+            }
+
+            # Pairwise tests if requested
+            if (self$options$compare_test && table$rowCount > 1) {
+                private$.populatePairwiseTests(table)
+            }
+        },
+
+        .populatePairwiseTests = function(comparison_table) {
+            test_table <- self$results$pairwiseTests
+
+            # Warning: test assumes independence (models are actually correlated)
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = "pairwiseTestLimitation",
+                type = jmvcore::NoticeType$STRONG_WARNING
+            )
+            notice$setContent(
+                "Pairwise comparison tests assume independence between models. Since all models are evaluated on the same patients, C-indices are correlated. These p-values may be anticonservative (inflated Type I error). Use bootstrap methods or DeLong's test for valid inference."
+            )
+            self$results$insert(1, notice)
+
+            n_models <- comparison_table$rowCount
+            row_key <- 1
+
+            for (i in 1:(n_models-1)) {
+                for (j in (i+1):n_models) {
+                    model1 <- comparison_table$getRow(rowNo=i)
+                    model2 <- comparison_table$getRow(rowNo=j)
+
+                    cindex_diff <- model1$cindex - model2$cindex
+                    se_diff <- sqrt(model1$cindex_se^2 + model2$cindex_se^2)
+                    z_stat <- cindex_diff / se_diff
+                    p_val <- 2 * pnorm(-abs(z_stat))
+
+                    conclusion <- if (p_val < 0.05) {
+                        paste(model1$model, "significantly different from", model2$model)
+                    } else {
+                        "No significant difference"
+                    }
+
+                    test_table$addRow(rowKey=row_key, values=list(
+                        comparison = paste(model1$model, "vs", model2$model),
+                        cindex_diff = cindex_diff,
+                        se_diff = se_diff,
+                        z_statistic = z_stat,
+                        p_value = p_val,
+                        conclusion = conclusion
+                    ))
+                    row_key <- row_key + 1
+                }
+            }
         },
 
         .plotCindexOverTime = function(image, ...) {
@@ -502,15 +797,157 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
 
         .plotModelComparison = function(image, ...) {
-            # Stub for model comparison plot
+            if (!self$options$compare_models) return()
+
+            table <- self$results$modelComparison
+            if (is.null(table) || table$rowCount == 0) return()
+
+            # Extract data from table
+            models <- character(table$rowCount)
+            cindex_vals <- numeric(table$rowCount)
+            ci_lower <- numeric(table$rowCount)
+            ci_upper <- numeric(table$rowCount)
+
+            for (i in 1:table$rowCount) {
+                row <- table$getRow(rowNo = i)
+                models[i] <- row$model
+                cindex_vals[i] <- row$cindex
+                ci_lower[i] <- if (!is.null(row$cindex_ci_lower)) row$cindex_ci_lower else NA
+                ci_upper[i] <- if (!is.null(row$cindex_ci_upper)) row$cindex_ci_upper else NA
+            }
+
+            # Create plot
+            plot_data <- data.frame(
+                Model = factor(models, levels = models),
+                Cindex = cindex_vals,
+                Lower = ci_lower,
+                Upper = ci_upper
+            )
+
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Model, y = Cindex)) +
+                ggplot2::geom_bar(stat = "identity", fill = "steelblue", alpha = 0.7, width = 0.6) +
+                ggplot2::geom_errorbar(
+                    ggplot2::aes(ymin = Lower, ymax = Upper),
+                    width = 0.2,
+                    na.rm = TRUE
+                ) +
+                ggplot2::ylim(0.5, 1.0) +
+                ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed", color = "red", alpha = 0.5) +
+                ggplot2::labs(
+                    title = "Model Comparison: C-index",
+                    y = "C-index",
+                    x = "Model"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
+                )
+
+            print(p)
+            TRUE
         },
 
         .plotRiskGroupKM = function(image, ...) {
-            # Stub for Kaplan-Meier by risk groups
+            # Get data
+            if (is.null(self$options$time) || is.null(self$options$event) ||
+                is.null(self$options$predictor)) {
+                return()
+            }
+
+            data <- self$data
+            time_var <- data[[private$.escapeVar(self$options$time)]]
+            event_var <- data[[private$.escapeVar(self$options$event)]]
+            predictor <- data[[private$.escapeVar(self$options$predictor)]]
+
+            # Handle event coding
+            event_code_level <- self$options$event_code
+            if (!is.null(event_code_level)) {
+                if (is.factor(event_var)) {
+                    event_var <- ifelse(event_var == event_code_level, 1, 0)
+                } else if (is.numeric(event_var)) {
+                    event_code_num <- as.numeric(event_code_level)
+                    event_var <- ifelse(event_var == event_code_num, 1, 0)
+                }
+            } else {
+                if (is.factor(event_var)) {
+                    event_var <- as.numeric(event_var) - 1
+                }
+            }
+
+            # Reverse direction if requested
+            if (self$options$reverse_direction) {
+                predictor <- -predictor
+            }
+
+            # Complete cases
+            complete_cases <- complete.cases(time_var, event_var, predictor)
+            time_var <- time_var[complete_cases]
+            event_var <- event_var[complete_cases]
+            predictor <- predictor[complete_cases]
+
+            # Create risk groups (tertiles by default, or use risk_groups option)
+            n_groups <- if (!is.null(self$options$risk_groups)) {
+                self$options$risk_groups
+            } else {
+                3
+            }
+
+            risk_group <- cut(
+                predictor,
+                breaks = quantile(predictor, probs = seq(0, 1, length.out = n_groups + 1)),
+                labels = paste0("Group ", 1:n_groups, " (",
+                               c("Low", "Medium", "High")[1:n_groups], ")"),
+                include.lowest = TRUE
+            )
+
+            # Fit Kaplan-Meier
+            surv_obj <- survival::Surv(time_var, event_var)
+            km_fit <- survival::survfit(surv_obj ~ risk_group)
+
+            # Plot using survminer if available, otherwise base plot
+            tryCatch({
+                if (requireNamespace("survminer", quietly = TRUE)) {
+                    p <- survminer::ggsurvplot(
+                        km_fit,
+                        data = data.frame(time_var, event_var, risk_group),
+                        risk.table = FALSE,
+                        pval = TRUE,
+                        conf.int = TRUE,
+                        title = "Kaplan-Meier Curves by Risk Groups",
+                        xlab = "Time",
+                        ylab = "Survival Probability",
+                        legend.title = "Risk Group",
+                        legend.labs = levels(risk_group),
+                        palette = "jco"
+                    )
+                    print(p$plot)
+                } else {
+                    # Fallback to base plot
+                    plot(km_fit,
+                         col = 1:n_groups,
+                         lwd = 2,
+                         xlab = "Time",
+                         ylab = "Survival Probability",
+                         main = "Kaplan-Meier Curves by Risk Groups")
+                    legend("topright",
+                           legend = levels(risk_group),
+                           col = 1:n_groups,
+                           lwd = 2,
+                           bty = "n")
+                }
+            }, error = function(e) {
+                plot(1, type = "n", xlab = "", ylab = "", main = "Error generating plot")
+                text(1, 1, paste("Error:", e$message))
+            })
+
+            TRUE
         },
 
         .plotDecomposition = function(image, ...) {
-            # Stub for C-index decomposition plot
+            # Not implemented - requires complex decomposition algorithm
+            # Would show which risk strata contribute most to discrimination
+            return()
         }
     )
 )

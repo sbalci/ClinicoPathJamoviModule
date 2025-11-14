@@ -16,11 +16,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrap = FALSE,
             gwet = FALSE,
             gwetWeights = "unweighted",
-            ccc = FALSE,
-            blandAltman = FALSE,
-            blandAltmanPlot = FALSE,
-            proportionalBias = FALSE,
-            baConfidenceLevel = 0.95,
+            showLevelInfo = FALSE,
             hierarchicalKappa = FALSE,
             clusterVariable = NULL,
             randomEffectsRater = FALSE,
@@ -39,7 +35,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             tieBreaker = "exclude",
             consensusName = "consensus_score",
             referenceRater = NULL,
-            rankRaters = TRUE,
+            rankRaters = FALSE,
             loaVariable = FALSE,
             loaThresholds = "custom",
             loaHighThreshold = 75,
@@ -109,28 +105,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "linear",
                     "quadratic"),
                 default="unweighted")
-            private$..ccc <- jmvcore::OptionBool$new(
-                "ccc",
-                ccc,
+            private$..showLevelInfo <- jmvcore::OptionBool$new(
+                "showLevelInfo",
+                showLevelInfo,
                 default=FALSE)
-            private$..blandAltman <- jmvcore::OptionBool$new(
-                "blandAltman",
-                blandAltman,
-                default=FALSE)
-            private$..blandAltmanPlot <- jmvcore::OptionBool$new(
-                "blandAltmanPlot",
-                blandAltmanPlot,
-                default=FALSE)
-            private$..proportionalBias <- jmvcore::OptionBool$new(
-                "proportionalBias",
-                proportionalBias,
-                default=FALSE)
-            private$..baConfidenceLevel <- jmvcore::OptionNumber$new(
-                "baConfidenceLevel",
-                baConfidenceLevel,
-                default=0.95,
-                min=0.8,
-                max=0.99)
             private$..hierarchicalKappa <- jmvcore::OptionBool$new(
                 "hierarchicalKappa",
                 hierarchicalKappa,
@@ -223,7 +201,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..rankRaters <- jmvcore::OptionBool$new(
                 "rankRaters",
                 rankRaters,
-                default=TRUE)
+                default=FALSE)
             private$..loaVariable <- jmvcore::OptionBool$new(
                 "loaVariable",
                 loaVariable,
@@ -263,11 +241,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap)
             self$.addOption(private$..gwet)
             self$.addOption(private$..gwetWeights)
-            self$.addOption(private$..ccc)
-            self$.addOption(private$..blandAltman)
-            self$.addOption(private$..blandAltmanPlot)
-            self$.addOption(private$..proportionalBias)
-            self$.addOption(private$..baConfidenceLevel)
+            self$.addOption(private$..showLevelInfo)
             self$.addOption(private$..hierarchicalKappa)
             self$.addOption(private$..clusterVariable)
             self$.addOption(private$..randomEffectsRater)
@@ -304,11 +278,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrap = function() private$..bootstrap$value,
         gwet = function() private$..gwet$value,
         gwetWeights = function() private$..gwetWeights$value,
-        ccc = function() private$..ccc$value,
-        blandAltman = function() private$..blandAltman$value,
-        blandAltmanPlot = function() private$..blandAltmanPlot$value,
-        proportionalBias = function() private$..proportionalBias$value,
-        baConfidenceLevel = function() private$..baConfidenceLevel$value,
+        showLevelInfo = function() private$..showLevelInfo$value,
         hierarchicalKappa = function() private$..hierarchicalKappa$value,
         clusterVariable = function() private$..clusterVariable$value,
         randomEffectsRater = function() private$..randomEffectsRater$value,
@@ -344,11 +314,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrap = NA,
         ..gwet = NA,
         ..gwetWeights = NA,
-        ..ccc = NA,
-        ..blandAltman = NA,
-        ..blandAltmanPlot = NA,
-        ..proportionalBias = NA,
-        ..baConfidenceLevel = NA,
+        ..showLevelInfo = NA,
         ..hierarchicalKappa = NA,
         ..clusterVariable = NA,
         ..randomEffectsRater = NA,
@@ -388,12 +354,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         krippTable = function() private$.items[["krippTable"]],
         headingGwet = function() private$.items[["headingGwet"]],
         gwetTable = function() private$.items[["gwetTable"]],
-        headingCCC = function() private$.items[["headingCCC"]],
-        cccTable = function() private$.items[["cccTable"]],
-        headingBlandAltman = function() private$.items[["headingBlandAltman"]],
-        blandAltmanTable = function() private$.items[["blandAltmanTable"]],
-        proportionalBiasTable = function() private$.items[["proportionalBiasTable"]],
-        blandAltmanPlot = function() private$.items[["blandAltmanPlot"]],
+        levelInfo = function() private$.items[["levelInfo"]],
         weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
         hierarchicalICCTable = function() private$.items[["hierarchicalICCTable"]],
         varianceComponents = function() private$.items[["varianceComponents"]],
@@ -401,10 +362,12 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         clusterHomogeneityTest = function() private$.items[["clusterHomogeneityTest"]],
         clusterRankingsTable = function() private$.items[["clusterRankingsTable"]],
         consensusTable = function() private$.items[["consensusTable"]],
+        consensusVar = function() private$.items[["consensusVar"]],
         headingPairwise = function() private$.items[["headingPairwise"]],
         pairwiseKappaTable = function() private$.items[["pairwiseKappaTable"]],
         headingLoA = function() private$.items[["headingLoA"]],
         loaTable = function() private$.items[["loaTable"]],
+        loaVar = function() private$.items[["loaVar"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]]),
     private = list(),
@@ -574,158 +537,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "gwetWeights")))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="headingCCC",
-                title="Concordance Correlation Coefficient",
-                visible="(ccc)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cccTable",
-                title="Concordance Correlation Coefficient Results",
-                visible="(ccc)",
-                columns=list(
-                    list(
-                        `name`="rater1", 
-                        `title`="Rater 1", 
-                        `type`="text"),
-                    list(
-                        `name`="rater2", 
-                        `title`="Rater 2", 
-                        `type`="text"),
-                    list(
-                        `name`="n", 
-                        `title`="N", 
-                        `type`="integer"),
-                    list(
-                        `name`="ccc", 
-                        `title`="CCC", 
-                        `type`="number"),
-                    list(
-                        `name`="pearson_r", 
-                        `title`="Pearson r", 
-                        `type`="number"),
-                    list(
-                        `name`="precision", 
-                        `title`="Precision (\u03C1)", 
-                        `type`="number"),
-                    list(
-                        `name`="accuracy", 
-                        `title`="Accuracy (Cb)", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="headingBlandAltman",
-                title="Bland-Altman",
-                visible="(blandAltman)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="blandAltmanTable",
-                title="Bland-Altman Statistics",
-                visible="(blandAltman)",
-                columns=list(
-                    list(
-                        `name`="method1", 
-                        `title`="Method 1", 
-                        `type`="text"),
-                    list(
-                        `name`="method2", 
-                        `title`="Method 2", 
-                        `type`="text"),
-                    list(
-                        `name`="n", 
-                        `title`="N", 
-                        `type`="integer"),
-                    list(
-                        `name`="mean_diff", 
-                        `title`="Mean Difference (Bias)", 
-                        `type`="number"),
-                    list(
-                        `name`="sd_diff", 
-                        `title`="SD of Differences", 
-                        `type`="number"),
-                    list(
-                        `name`="loa_lower", 
-                        `title`="Lower LOA", 
-                        `type`="number"),
-                    list(
-                        `name`="loa_upper", 
-                        `title`="Upper LOA", 
-                        `type`="number"),
-                    list(
-                        `name`="loa_lower_ci", 
-                        `title`="Lower LOA 95% CI", 
-                        `type`="number"),
-                    list(
-                        `name`="loa_upper_ci", 
-                        `title`="Upper LOA 95% CI", 
-                        `type`="number"),
-                    list(
-                        `name`="bias_ttest_p", 
-                        `title`="Bias t-test p", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "vars",
-                    "baConfidenceLevel")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="proportionalBiasTable",
-                title="Proportional Bias Test",
-                visible="(blandAltman && proportionalBias)",
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="slope", 
-                        `title`="Slope", 
-                        `type`="number"),
-                    list(
-                        `name`="slope_se", 
-                        `title`="Slope SE", 
-                        `type`="number"),
-                    list(
-                        `name`="slope_p", 
-                        `title`="Slope p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="r_squared", 
-                        `title`="R\u00B2", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="blandAltmanPlot",
-                title="Bland-Altman Plot",
-                visible="(blandAltman && blandAltmanPlot)",
-                requiresData=TRUE,
-                renderFun=".populateBlandAltmanPlot",
-                clearWith=list(
-                    "vars",
-                    "baConfidenceLevel",
-                    "proportionalBias")))
+                name="levelInfo",
+                title="Variable Level Ordering",
+                visible="(showLevelInfo)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="weightedKappaGuide",
@@ -900,6 +716,16 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "consensusRule",
                     "tieBreaker")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="consensusVar",
+                title="Consensus Variable",
+                measureType="nominal",
+                clearWith=list(
+                    "vars",
+                    "consensusRule",
+                    "tieBreaker",
+                    "consensusName")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="headingPairwise",
@@ -976,6 +802,17 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "loaThresholds",
                     "loaHighThreshold",
                     "loaLowThreshold")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="loaVar",
+                title="Level of Agreement Variable",
+                measureType="ordinal",
+                clearWith=list(
+                    "vars",
+                    "loaThresholds",
+                    "loaHighThreshold",
+                    "loaLowThreshold",
+                    "loaVarName")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -1013,9 +850,31 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for Interrater Reliability.
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Basic kappa analysis with 3 pathologists rating tumor grades
+#' data('histopathologyDescriptives')
+#' jmv::agreement(
+#'     data = histopathologyDescriptives,
+#'     vars = c('Pathologist_1', 'Pathologist_2', 'Pathologist_3')
+#' )
+#'
+#' # Weighted kappa for ordinal data (tumor grades: G1 < G2 < G3)
+#' # First ensure variables are set as Ordinal with proper level ordering
+#' jmv::agreement(
+#'     data = histopathologyDescriptives,
+#'     vars = c('Grade_Rater1', 'Grade_Rater2'),
+#'     wght = 'equal',
+#'     showLevelInfo = TRUE  # Verify level ordering before analysis
+#' )
+#'
+#' # Create consensus variable from 5 raters
+#' jmv::agreement(
+#'     data = histopathologyDescriptives,
+#'     vars = c('R1', 'R2', 'R3', 'R4', 'R5'),
+#'     consensusVar = TRUE,
+#'     consensusRule = 'majority',
+#'     consensusName = 'consensus_diagnosis'
+#' )
+#'
 #' @param data The data as a data frame. The data should be in long format,
 #'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the
@@ -1046,29 +905,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   paradoxical behavior of kappa in extreme cases.
 #' @param gwetWeights Unweighted (AC1) for nominal categories. Linear or
 #'   Quadratic weights (AC2) for ordinal data.
-#' @param ccc Calculate Lin's Concordance Correlation Coefficient for
-#'   continuous measurement agreement. CCC assesses the agreement between two
-#'   continuous measurements or raters, combining measures of both precision and
-#'   accuracy. Particularly useful for method comparison studies, inter-rater
-#'   reliability of continuous scores (e.g., quantitative pathology
-#'   measurements, biomarker levels), and validation of new measurement
-#'   techniques. CCC ranges from -1 to +1, with +1 indicating perfect
-#'   concordance.
-#' @param blandAltman Perform Bland-Altman analysis for assessing agreement
-#'   between two continuous measurement methods. Calculates mean difference
-#'   (bias) and limits of agreement (LOA = mean ± 1.96×SD). Essential for method
-#'   comparison and validation studies in clinical chemistry, pathology, and
-#'   diagnostic imaging. Particularly useful for comparing a new measurement
-#'   method against a reference standard, or assessing inter-rater reliability
-#'   for continuous measurements.
-#' @param blandAltmanPlot Generate Bland-Altman plot showing difference vs.
-#'   average of two measurements. Displays mean bias line and limits of
-#'   agreement (±1.96 SD).
-#' @param proportionalBias Test whether the difference between methods is
-#'   related to the magnitude of measurements (proportional bias). Uses linear
-#'   regression of difference on average values.
-#' @param baConfidenceLevel Confidence level for limits of agreement (default
-#'   95\%).
+#' @param showLevelInfo Display information about how categorical levels are
+#'   currently ordered in your variables. Essential for weighted kappa analysis
+#'   to ensure ordinal levels are properly ordered (e.g., G1 → G2 → G3 for tumor
+#'   grades).
 #' @param hierarchicalKappa Enable hierarchical (multilevel) kappa analysis
 #'   for nested data structures (e.g., pathologists nested within institutions,
 #'   readers nested within centers). Accounts for clustering effects and
@@ -1154,12 +994,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$headingGwet} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$headingCCC} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$cccTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$headingBlandAltman} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$blandAltmanTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$proportionalBiasTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$levelInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$varianceComponents} \tab \tab \tab \tab \tab a table \cr
@@ -1167,10 +1002,12 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$clusterHomogeneityTest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clusterRankingsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$headingPairwise} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$headingLoA} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$loaVar} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -1194,11 +1031,7 @@ agreement <- function(
     bootstrap = FALSE,
     gwet = FALSE,
     gwetWeights = "unweighted",
-    ccc = FALSE,
-    blandAltman = FALSE,
-    blandAltmanPlot = FALSE,
-    proportionalBias = FALSE,
-    baConfidenceLevel = 0.95,
+    showLevelInfo = FALSE,
     hierarchicalKappa = FALSE,
     clusterVariable,
     randomEffectsRater = FALSE,
@@ -1217,7 +1050,7 @@ agreement <- function(
     tieBreaker = "exclude",
     consensusName = "consensus_score",
     referenceRater,
-    rankRaters = TRUE,
+    rankRaters = FALSE,
     loaVariable = FALSE,
     loaThresholds = "custom",
     loaHighThreshold = 75,
@@ -1252,11 +1085,7 @@ agreement <- function(
         bootstrap = bootstrap,
         gwet = gwet,
         gwetWeights = gwetWeights,
-        ccc = ccc,
-        blandAltman = blandAltman,
-        blandAltmanPlot = blandAltmanPlot,
-        proportionalBias = proportionalBias,
-        baConfidenceLevel = baConfidenceLevel,
+        showLevelInfo = showLevelInfo,
         hierarchicalKappa = hierarchicalKappa,
         clusterVariable = clusterVariable,
         randomEffectsRater = randomEffectsRater,

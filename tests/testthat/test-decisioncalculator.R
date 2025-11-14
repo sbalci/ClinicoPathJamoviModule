@@ -2,8 +2,6 @@ context("Medical Decision Calculator")
 
 # Test basic function execution
 test_that("decisioncalculator function works with basic parameters", {
-  testthat::skip_on_cran()
-  
   # Test basic function call without errors
   expect_no_error({
     result <- decisioncalculator(
@@ -32,8 +30,6 @@ test_that("decisioncalculator function works with basic parameters", {
 })
 
 test_that("decisioncalculator function calculates metrics correctly", {
-  testthat::skip_on_cran()
-  
   # Test with known values for validation
   result <- decisioncalculator(
     TP = 90,
@@ -55,8 +51,6 @@ test_that("decisioncalculator function calculates metrics correctly", {
 })
 
 test_that("decisioncalculator function works with confidence intervals", {
-  testthat::skip_on_cran()
-  
   # Test with confidence intervals enabled
   expect_no_error({
     result <- decisioncalculator(
@@ -82,8 +76,6 @@ test_that("decisioncalculator function works with confidence intervals", {
 })
 
 test_that("decisioncalculator function works with prior probability", {
-  testthat::skip_on_cran()
-  
   # Test with prior probability
   expect_no_error({
     result <- decisioncalculator(
@@ -110,8 +102,6 @@ test_that("decisioncalculator function works with prior probability", {
 })
 
 test_that("decisioncalculator function works with Fagan nomogram", {
-  testthat::skip_on_cran()
-  
   # Test with Fagan nomogram
   expect_no_error({
     result <- decisioncalculator(
@@ -136,8 +126,6 @@ test_that("decisioncalculator function works with Fagan nomogram", {
 })
 
 test_that("decisioncalculator function works with footnotes", {
-  testthat::skip_on_cran()
-  
   # Test with footnotes enabled
   expect_no_error({
     result <- decisioncalculator(
@@ -151,8 +139,6 @@ test_that("decisioncalculator function works with footnotes", {
 })
 
 test_that("decisioncalculator function validates parameters correctly", {
-  testthat::skip_on_cran()
-  
   # Test valid parameter ranges
   expect_no_error({
     decisioncalculator(
@@ -178,8 +164,6 @@ test_that("decisioncalculator function validates parameters correctly", {
 })
 
 test_that("decisioncalculator function handles edge cases", {
-  testthat::skip_on_cran()
-  
   # Test with zero values
   expect_no_error({
     result <- decisioncalculator(
@@ -212,8 +196,6 @@ test_that("decisioncalculator function handles edge cases", {
 })
 
 test_that("decisioncalculator function output structure is complete", {
-  testthat::skip_on_cran()
-  
   result <- decisioncalculator(
     TP = 90,
     FN = 10,
@@ -235,8 +217,6 @@ test_that("decisioncalculator function output structure is complete", {
 })
 
 test_that("decisioncalculator function calculations are mathematically correct", {
-  testthat::skip_on_cran()
-  
   # Test with simple known values
   TP <- 90
   FN <- 10
@@ -269,8 +249,6 @@ test_that("decisioncalculator function calculations are mathematically correct",
 })
 
 test_that("decisioncalculator function works with various input combinations", {
-  testthat::skip_on_cran()
-  
   # Test different input scenarios
   test_scenarios <- list(
     list(TP = 95, FN = 5, TN = 85, FP = 15),
@@ -294,8 +272,6 @@ test_that("decisioncalculator function works with various input combinations", {
 })
 
 test_that("decisioncalculator function handles large numbers", {
-  testthat::skip_on_cran()
-  
   # Test with larger values to ensure no overflow issues
   expect_no_error({
     result <- decisioncalculator(
@@ -308,8 +284,6 @@ test_that("decisioncalculator function handles large numbers", {
 })
 
 test_that("decisioncalculator function default parameters work", {
-  testthat::skip_on_cran()
-  
   # Test with default parameters (should match yaml defaults)
   expect_no_error({
     result <- decisioncalculator()

@@ -50,6 +50,8 @@ with appropriate dependence parameters and prevalence estimates.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$testParamsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$cotestResultsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$dependenceInfo} \tab \tab \tab \tab \tab a html \cr

@@ -1,7 +1,7 @@
 ---
 name: datecorrection
 title: Date Field Correction
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: Data Preparation
 version: '0.0.3'
 jas: '1.2'
@@ -103,22 +103,10 @@ options:
             Month to impute when month is missing (1-12). Default is 7 (July).
             Commonly used middle-year value for clinical research.
 
-    # - name: year_threshold
-    #   title: Two-Digit Year Threshold
-    #   type: Number
-    #   min: 0
-    #   max: 99
-    #   default: 30
-    #   description:
-    #       R: >
-    #         Threshold for interpreting two-digit years. Years above threshold
-    #         are interpreted as 19xx, below as 20xx. Default 30 means 31-99 = 1931-1999,
-    #         00-30 = 2000-2030.
-
     - name: handle_excel
       title: Handle Excel Date Numbers
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to convert Excel numeric date values (days since 1900-01-01).
@@ -131,29 +119,12 @@ options:
       description:
           R: >
             Timezone for output dates. Use UTC for standardization, or local timezone
-            if time-of-day information is critical.
-
-    # - name: create_new_columns
-    #   title: Create New Corrected Columns
-    #   type: Bool
-    #   default: true
-    #   description:
-    #       R: >
-    #         Whether to create new columns with corrected dates (recommended) or
-    #         overwrite original columns.
-
-    # - name: column_suffix
-    #   title: New Column Suffix
-    #   type: String
-    #   default: "_corrected"
-    #   description:
-    #       R: >
-    #         Suffix to add to new corrected date columns when create_new_columns is enabled.
+            if time-of-day information is critical. Only applies to anytime and consensus methods.
 
     - name: show_correction_table
       title: Show Correction Results Table
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display detailed table showing original values, corrected values, and
@@ -162,7 +133,7 @@ options:
     - name: show_quality_assessment
       title: Show Quality Assessment
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Provide quality assessment including success rates, common problems,
@@ -171,7 +142,7 @@ options:
     - name: show_format_analysis
       title: Show Format Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Analyze detected date formats and patterns in the original data.
@@ -179,7 +150,7 @@ options:
     - name: show_correction_summary
       title: Show Correction Summary
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Summary statistics of the correction process including before/after
@@ -188,7 +159,7 @@ options:
     - name: show_interpretation
       title: Show Usage Guide
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display guidance on date correction methods, best practices, and

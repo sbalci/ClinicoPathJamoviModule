@@ -21,7 +21,7 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             relRisk = FALSE,
             riskDiff = FALSE,
             nnt = FALSE,
-            ci = TRUE,
+            ci = FALSE,
             ciWidth = 95,
             gamma = FALSE,
             taub = FALSE,
@@ -116,7 +116,7 @@ contTablesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..ci <- jmvcore::OptionBool$new(
                 "ci",
                 ci,
-                default=TRUE)
+                default=FALSE)
             private$..ciWidth <- jmvcore::OptionNumber$new(
                 "ciWidth",
                 ciWidth,
@@ -754,7 +754,7 @@ contTables <- function(
     relRisk = FALSE,
     riskDiff = FALSE,
     nnt = FALSE,
-    ci = TRUE,
+    ci = FALSE,
     ciWidth = 95,
     gamma = FALSE,
     taub = FALSE,

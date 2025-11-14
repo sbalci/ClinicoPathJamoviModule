@@ -152,7 +152,9 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Process participant flow ----
         .processParticipantFlow = function() {
-            data <- jmvcore::naOmit(self$data)
+            # Don't use naOmit - it drops rows with ANY NA in ANY column
+            # NA in exclusion columns means "participant continued"
+            data <- self$data
             id_var <- private$.escapeVar(self$options$participant_id)
 
             # Get total participants
@@ -228,7 +230,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            data <- jmvcore::naOmit(self$data)
+            data <- self$data
             id_var <- private$.escapeVar(self$options$participant_id)
             arm_var <- private$.escapeVar(self$options$randomization_var)
 
@@ -244,14 +246,20 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 n_allocated <- length(arm_ids)
 
-                # Count exclusions at each stage for this arm
-                excluded_allocation <- private$.countArmExclusions(arm_ids, self$options$allocation_exclusions)
-                excluded_followup <- private$.countArmExclusions(arm_ids, self$options$followup_exclusions)
-                excluded_analysis <- private$.countArmExclusions(arm_ids, self$options$analysis_exclusions)
+                # Track exclusions cumulatively by stage to prevent double-counting
+                # Stage 1: Allocation exclusions
+                excluded_allocation_ids <- private$.getExcludedIds(arm_ids, self$options$allocation_exclusions)
+                n_received <- n_allocated - length(excluded_allocation_ids)
 
-                n_received <- n_allocated - excluded_allocation
-                n_completed_followup <- n_received - excluded_followup
-                n_analyzed <- n_completed_followup - excluded_analysis
+                # Stage 2: Follow-up exclusions (only from those who received treatment)
+                ids_after_allocation <- setdiff(arm_ids, excluded_allocation_ids)
+                excluded_followup_ids <- private$.getExcludedIds(ids_after_allocation, self$options$followup_exclusions)
+                n_completed_followup <- n_received - length(excluded_followup_ids)
+
+                # Stage 3: Analysis exclusions (only from those who completed follow-up)
+                ids_after_followup <- setdiff(ids_after_allocation, excluded_followup_ids)
+                excluded_analysis_ids <- private$.getExcludedIds(ids_after_followup, self$options$analysis_exclusions)
+                n_analyzed <- n_completed_followup - length(excluded_analysis_ids)
 
                 arm_data[[as.character(arm)]] <- list(
                     arm = as.character(arm),
@@ -266,22 +274,27 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.armData <- arm_data
         },
 
-        .countArmExclusions = function(arm_ids, exclusion_vars) {
+        .getExcludedIds = function(eligible_ids, exclusion_vars) {
+            # Returns vector of participant IDs who were excluded at this stage
+            # Only considers participants in eligible_ids (those who reached this stage)
             if (is.null(exclusion_vars) || length(exclusion_vars) == 0) {
-                return(0)
+                return(character(0))
             }
 
-            data <- jmvcore::naOmit(self$data)
+            data <- self$data
             id_var <- private$.escapeVar(self$options$participant_id)
 
-            excluded_count <- 0
+            excluded_ids <- character(0)
             for (var in exclusion_vars) {
                 var_escaped <- private$.escapeVar(var)
-                mask <- (data[[id_var]] %in% arm_ids) & !is.na(data[[var_escaped]])
-                excluded_count <- excluded_count + sum(mask)
+                # Find participants in eligible_ids who have non-NA in this exclusion column
+                mask <- (data[[id_var]] %in% eligible_ids) & !is.na(data[[var_escaped]])
+                newly_excluded <- as.character(data[[id_var]][mask])
+                # Use union to avoid counting same participant twice if multiple exclusion reasons
+                excluded_ids <- union(excluded_ids, newly_excluded)
             }
 
-            return(excluded_count)
+            return(excluded_ids)
         },
 
         # Populate tables ----
@@ -353,12 +366,20 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stage_data <- private$.flowData[[stage_key]]
 
                 if (length(stage_data$exclusion_breakdown) > 0) {
+                    # Calculate denominator: number entering this stage (before exclusions)
+                    n_entering_stage <- stage_data$n_remaining + stage_data$n_excluded
+
                     for (var_name in names(stage_data$exclusion_breakdown)) {
                         counts <- stage_data$exclusion_breakdown[[var_name]]
 
                         for (reason in names(counts)) {
                             count_val <- counts[reason]
-                            pct_val <- round(count_val / stage_data$n_remaining * 100, 1)
+                            # Divide by participants ENTERING stage, not those remaining after
+                            pct_val <- if (n_entering_stage > 0) {
+                                round(count_val / n_entering_stage * 100, 1)
+                            } else {
+                                0
+                            }
 
                             table$addRow(rowKey = row_num, values = list(
                                 stage = stage_data$stage,
@@ -905,7 +926,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 # Prepare data for consort package
                 # The consort package expects patient-level data with exclusion columns
-                data <- jmvcore::naOmit(self$data)
+                data <- self$data
 
                 # Create a combined exclusion order list for consort_plot
                 # This maps the stages to the exclusion variables

@@ -16,12 +16,52 @@ cotestClass <- if (requireNamespace("jmvcore"))
             .nomogramCache = NULL,
             .lastNomogramParams = NULL,
             .init = function() {
+                # Add welcome instructions
+                instructions <- '
+<div style="max-width: 900px; font-family: sans-serif;">
+<h3>Welcome to Co-Testing Analysis</h3>
+<p><strong>Purpose:</strong> This analysis evaluates the combined diagnostic performance of two tests when used together, accounting for potential dependence between tests.</p>
+
+<h4>Quick Start Guide</h4>
+<ol>
+<li><strong>Choose a Clinical Preset</strong> (optional): Select from evidence-based scenarios like HPV+Pap, PSA+DRE, Troponin+ECG, etc. to auto-populate all parameters with published values.</li>
+<li><strong>Enter Custom Test Parameters</strong>: Input sensitivity and specificity for each test, or use preset values.</li>
+<li><strong>Set Disease Prevalence</strong>: Enter the pre-test probability of disease in your population.</li>
+<li><strong>Configure Test Independence</strong>: Specify whether tests are conditionally independent or dependent (see "Understanding Test Dependence" section for guidance).</li>
+<li><strong>Review Results</strong>: The analysis provides post-test probabilities for all test combination outcomes, including the critical <em>Either Test Positive (Parallel Rule)</em> used in clinical co-testing algorithms.</li>
+</ol>
+
+<h4>Key Clinical Scenarios</h4>
+<ul>
+<li><strong>Either Test Positive (Parallel Rule)</strong>: At least one test is positive → rule in disease (high sensitivity strategy)</li>
+<li><strong>Both Tests Positive</strong>: Maximum certainty for disease presence (high specificity strategy)</li>
+<li><strong>Both Tests Negative</strong>: Strong evidence against disease (rule out strategy)</li>
+<li><strong>Single Positive</strong>: Only one test positive → intermediate probability requiring clinical judgment</li>
+</ul>
+
+<h4>Preset Scenarios Include</h4>
+<ul>
+<li><strong>HPV + Pap Smear</strong>: Cervical cancer screening (dependent tests)</li>
+<li><strong>PSA + DRE</strong>: Prostate cancer screening (dependent tests)</li>
+<li><strong>Troponin + ECG</strong>: Acute coronary syndrome (independent tests)</li>
+<li><strong>Mammogram + Ultrasound</strong>: Breast cancer screening (dependent tests)</li>
+<li><strong>COVID Antigen + PCR</strong>: SARS-CoV-2 diagnosis (independent tests)</li>
+<li><strong>Chest X-ray + Sputum Culture</strong>: Tuberculosis diagnosis (dependent tests)</li>
+</ul>
+
+<p><strong>Tip:</strong> Enable "Display Footnotes" for detailed explanations of each metric. Enable "Fagan Nomogram" for visual representation of probability updates.</p>
+</div>'
+
+                self$results$instructions$setContent(instructions)
+
                 # Initialize tables with row headers
                 testParamsTable <- self$results$testParamsTable
                 testParamsTable$addRow(rowKey = "test1", values = list(test = "Test 1"))
                 testParamsTable$addRow(rowKey = "test2", values = list(test = "Test 2"))
 
                 cotestResultsTable <- self$results$cotestResultsTable
+                cotestResultsTable$addRow(rowKey = "either_pos",
+                                          values = list(scenario = "Either Test Positive (Parallel Rule)"))
                 cotestResultsTable$addRow(rowKey = "test1_pos",
                                           values = list(scenario = "Test 1 Positive Only"))
                 cotestResultsTable$addRow(rowKey = "test2_pos",
@@ -33,6 +73,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
             },
 
             .run = function() {
+                # Initialize notices collection for user-visible validation feedback
+                private$.notices <- character(0)
+
                 # Get parameters from user inputs
                 test1_sens <- self$options$test1_sens
                 test1_spec <- self$options$test1_spec
@@ -42,9 +85,28 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 cond_dep_pos <- self$options$cond_dep_pos
                 cond_dep_neg <- self$options$cond_dep_neg
                 prevalence <- self$options$prevalence
-                
+
+                # Apply clinical preset if selected (overrides custom values)
+                preset <- self$options$preset
+                if (preset != "custom") {
+                    preset_values <- private$.getPresetValues(preset)
+                    if (!is.null(preset_values)) {
+                        test1_sens <- preset_values$test1_sens
+                        test1_spec <- preset_values$test1_spec
+                        test2_sens <- preset_values$test2_sens
+                        test2_spec <- preset_values$test2_spec
+                        prevalence <- preset_values$prevalence
+                        indep <- preset_values$indep
+                        if (!is.null(preset_values$cond_dep_pos)) cond_dep_pos <- preset_values$cond_dep_pos
+                        if (!is.null(preset_values$cond_dep_neg)) cond_dep_neg <- preset_values$cond_dep_neg
+                    }
+                }
+
                 # Enhanced input validation with specific guidance
                 private$.validateInputParameters(test1_sens, test1_spec, test2_sens, test2_spec, prevalence, indep, cond_dep_pos, cond_dep_neg)
+
+                # Calculate pretest odds early (needed for "Either Test Positive" calculation)
+                pretest_odds <- prevalence / (1 - prevalence)
 
                 # Calculate likelihood ratios with numerical stability
                 test1_plr <- private$.calculateLikelihoodRatio(test1_sens, (1 - test1_spec), "Test 1 Positive LR")
@@ -72,6 +134,35 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 postest_odds_both_neg <- results$postest_odds_both_neg
                 dependence_info <- results$dependence_info
 
+                # Calculate "Either Test Positive" (clinical parallel rule)
+                # P(Disease | Either+) from P(Either+ | Disease) and P(Either+ | no Disease)
+                if (indep) {
+                    # P(Either+ | Disease+) = 1 - P(Both- | Disease+)
+                    p_either_pos_D <- 1 - ((1 - test1_sens) * (1 - test2_sens))
+                    p_either_pos_nD <- 1 - (test1_spec * test2_spec)
+                } else {
+                    # For dependent tests, use the joint probabilities already calculated
+                    dep_results <- results  # Already has the joint probabilities
+                    # P(Either+) = P(Test1+ only) + P(Test2+ only) + P(Both+)
+                    # We need to recalculate from the dependent probability structure
+                    # P(Either+ | D+) = 1 - P(Both- | D+)
+                    # From dependent calculation results, we can derive this
+                    p_either_pos_D <- test1_sens + test2_sens - (test1_sens * test2_sens + cond_dep_pos * sqrt(
+                        test1_sens * (1 - test1_sens) * test2_sens * (1 - test2_sens)
+                    ))
+                    p_either_pos_nD <- (1 - test1_spec) + (1 - test2_spec) - ((1 - test1_spec) * (1 - test2_spec) + cond_dep_neg * sqrt(
+                        (1 - test1_spec) * test1_spec * (1 - test2_spec) * test2_spec
+                    ))
+                    # Clamp to valid range
+                    p_either_pos_D <- max(0, min(1, p_either_pos_D))
+                    p_either_pos_nD <- max(0, min(1, p_either_pos_nD))
+                }
+
+                lr_either_pos <- private$.calculateLikelihoodRatio(p_either_pos_D, p_either_pos_nD, "Either Positive LR")
+                postest_odds_either <- pretest_odds * lr_either_pos
+                postest_prob_either <- postest_odds_either / (1 + postest_odds_either)
+                rel_prob_either <- postest_prob_either / prevalence
+
                 # Calculate relative probabilities compared to prevalence
                 rel_prob_t1 <- postest_prob_t1 / prevalence
                 rel_prob_t2 <- postest_prob_t2 / prevalence
@@ -79,9 +170,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 rel_prob_both_neg <- postest_prob_both_neg / prevalence
 
                 # Update co-test results table using helper method
-                private$.updateCotestResultsTable(postest_prob_t1, postest_prob_t2, postest_prob_both, postest_prob_both_neg,
-                                                  rel_prob_t1, rel_prob_t2, rel_prob_both, rel_prob_both_neg,
-                                                  postest_odds_t1, postest_odds_t2, postest_odds_both, postest_odds_both_neg)
+                private$.updateCotestResultsTable(postest_prob_either, postest_prob_t1, postest_prob_t2, postest_prob_both, postest_prob_both_neg,
+                                                  rel_prob_either, rel_prob_t1, rel_prob_t2, rel_prob_both, rel_prob_both_neg,
+                                                  postest_odds_either, postest_odds_t1, postest_odds_t2, postest_odds_both, postest_odds_both_neg)
 
                 # Add footnotes if requested
                 if (self$options$fnote) {
@@ -125,9 +216,12 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # Create dependency explanation
                 self$results$dependenceExplanation$setContent(private$.buildDependenceExplanation())
 
+                # Display validation notices if any were collected
+                private$.displayNotices()
+
                 # Store data for Fagan nomogram if requested
                 if (self$options$fagan) {
-                    private$.prepareFaganPlotData(prevalence, test1_sens, test1_spec, test2_sens, test2_spec, 
+                    private$.prepareFaganPlotData(prevalence, test1_sens, test1_spec, test2_sens, test2_spec,
                                                  indep, test1_plr, test1_nlr, test2_plr, test2_nlr, results)
                 }
             },
@@ -181,39 +275,39 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 
                 # Additional clinical validity checks
                 if (test1_sens + test1_spec < 1.1) {
-                    warning("Test 1 has low discriminatory power (sensitivity + specificity < 1.1). Consider if this test adds clinical value.")
+                    private$.addNotice("Test 1 has low discriminatory power (sensitivity + specificity < 1.1). Consider if this test adds clinical value.", "warning")
                 }
                 if (test2_sens + test2_spec < 1.1) {
-                    warning("Test 2 has low discriminatory power (sensitivity + specificity < 1.1). Consider if this test adds clinical value.")
+                    private$.addNotice("Test 2 has low discriminatory power (sensitivity + specificity < 1.1). Consider if this test adds clinical value.", "warning")
                 }
-                
+
                 # Check for extreme prevalence that might cause numerical issues
                 if (prevalence < 0.001) {
-                    warning("Very low prevalence may lead to unstable results. Consider if co-testing is appropriate for such rare conditions.")
+                    private$.addNotice("Very low prevalence (< 0.1%) may lead to unstable results. Consider if co-testing is appropriate for such rare conditions.", "warning")
                 }
                 if (prevalence > 0.5) {
-                    warning("High prevalence (>50%) - ensure this reflects your actual clinical population.")
+                    private$.addNotice("High prevalence (>50%) detected. Ensure this reflects your actual clinical population.", "info")
                 }
             },
 
             # Calculate likelihood ratios with numerical stability checks
             .calculateLikelihoodRatio = function(numerator, denominator, scenario_name) {
                 if (abs(denominator) < private$NUMERICAL_TOLERANCE) {
-                    warning(paste("Very small denominator in", scenario_name, "- results may be unstable. Consider adjusting test parameters."))
+                    private$.addNotice(paste("Very small denominator in", scenario_name, "- results may be unstable. Consider adjusting test parameters."), "warning")
                     return(if (numerator > 0) 1e6 else 0)  # Large but finite value
                 }
-                
+
                 result <- numerator / denominator
-                
+
                 # Check for extreme values that might indicate issues
                 if (result > 1000) {
-                    message(paste("Very high", scenario_name, "ratio (", round(result, 1), ") - indicates highly informative test."))
+                    private$.addNotice(paste("Very high", scenario_name, "ratio (", round(result, 1), ") - indicates highly informative test."), "info")
                 }
-                
+
                 return(result)
             },
 
-            # Clamp probabilities to valid ranges while providing informative warnings
+            # Clamp probabilities to valid ranges while providing informative notices
             .clampProbability = function(value, lower, upper, context) {
                 if (is.nan(value) || is.infinite(value)) {
                     stop(sprintf("%s resulted in a non-finite probability.", context))
@@ -222,18 +316,18 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 adjusted <- value
 
                 if (adjusted < lower - private$NUMERICAL_TOLERANCE) {
-                    warning(sprintf(
+                    private$.addNotice(sprintf(
                         "%s adjusted from %.6f to %.6f to satisfy joint probability bounds.",
                         context, adjusted, lower
-                    ))
+                    ), "info")
                     adjusted <- lower
                 }
 
                 if (adjusted > upper + private$NUMERICAL_TOLERANCE) {
-                    warning(sprintf(
+                    private$.addNotice(sprintf(
                         "%s adjusted from %.6f to %.6f to satisfy joint probability bounds.",
                         context, adjusted, upper
-                    ))
+                    ), "info")
                     adjusted <- upper
                 }
 
@@ -245,10 +339,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
             .validateJointDistribution = function(probabilities, label) {
                 total <- Reduce(`+`, probabilities)
                 if (abs(total - 1) > 1e-6) {
-                    warning(sprintf(
+                    private$.addNotice(sprintf(
                         "Joint probabilities for %s sum to %.6f (expected 1). Results may require review of dependence parameters.",
                         label, total
-                    ))
+                    ), "warning")
                 }
             },
 
@@ -446,20 +540,22 @@ cotestClass <- if (requireNamespace("jmvcore"))
             },
 
             # Update co-test results table with reduced duplication
-            .updateCotestResultsTable = function(postest_prob_t1, postest_prob_t2, postest_prob_both, postest_prob_both_neg,
-                                                 rel_prob_t1, rel_prob_t2, rel_prob_both, rel_prob_both_neg,
-                                                 postest_odds_t1, postest_odds_t2, postest_odds_both, postest_odds_both_neg) {
+            .updateCotestResultsTable = function(postest_prob_either, postest_prob_t1, postest_prob_t2, postest_prob_both, postest_prob_both_neg,
+                                                 rel_prob_either, rel_prob_t1, rel_prob_t2, rel_prob_both, rel_prob_both_neg,
+                                                 postest_odds_either, postest_odds_t1, postest_odds_t2, postest_odds_both, postest_odds_both_neg) {
                 cotestResultsTable <- self$results$cotestResultsTable
 
-                # Define scenarios with their data
+                # Define scenarios with their data (including clinical parallel rule)
                 scenarios <- list(
-                    list(key = "test1_pos", scenario = "Test 1 Positive Only", postProb = postest_prob_t1, 
+                    list(key = "either_pos", scenario = "Either Test Positive (Parallel Rule)", postProb = postest_prob_either,
+                         relativeProbability = rel_prob_either, orValue = postest_odds_either),
+                    list(key = "test1_pos", scenario = "Test 1 Positive Only", postProb = postest_prob_t1,
                          relativeProbability = rel_prob_t1, orValue = postest_odds_t1),
-                    list(key = "test2_pos", scenario = "Test 2 Positive Only", postProb = postest_prob_t2, 
+                    list(key = "test2_pos", scenario = "Test 2 Positive Only", postProb = postest_prob_t2,
                          relativeProbability = rel_prob_t2, orValue = postest_odds_t2),
-                    list(key = "both_pos", scenario = "Both Tests Positive", postProb = postest_prob_both, 
+                    list(key = "both_pos", scenario = "Both Tests Positive", postProb = postest_prob_both,
                          relativeProbability = rel_prob_both, orValue = postest_odds_both),
-                    list(key = "both_neg", scenario = "Both Tests Negative", postProb = postest_prob_both_neg, 
+                    list(key = "both_neg", scenario = "Both Tests Negative", postProb = postest_prob_both_neg,
                          relativeProbability = rel_prob_both_neg, orValue = postest_odds_both_neg)
                 )
 
@@ -579,6 +675,89 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     postest_prob_both * 100, rel_prob_both,
                     postest_prob_both_neg * 100, rel_prob_both_neg
                 )
+            },
+
+            # Get preset clinical values based on selection
+            .getPresetValues = function(preset) {
+                presets <- list(
+                    hpv_pap = list(
+                        test1_sens = 0.95, test1_spec = 0.85,
+                        test2_sens = 0.80, test2_spec = 0.95,
+                        prevalence = 0.05, indep = FALSE,
+                        cond_dep_pos = 0.15, cond_dep_neg = 0.10
+                    ),
+                    psa_dre = list(
+                        test1_sens = 0.70, test1_spec = 0.90,
+                        test2_sens = 0.50, test2_spec = 0.85,
+                        prevalence = 0.20, indep = FALSE,
+                        cond_dep_pos = 0.20, cond_dep_neg = 0.15
+                    ),
+                    troponin_ecg = list(
+                        test1_sens = 0.90, test1_spec = 0.95,
+                        test2_sens = 0.70, test2_spec = 0.90,
+                        prevalence = 0.15, indep = TRUE,
+                        cond_dep_pos = NULL, cond_dep_neg = NULL
+                    ),
+                    mammogram_ultrasound = list(
+                        test1_sens = 0.85, test1_spec = 0.90,
+                        test2_sens = 0.80, test2_spec = 0.85,
+                        prevalence = 0.10, indep = FALSE,
+                        cond_dep_pos = 0.10, cond_dep_neg = 0.05
+                    ),
+                    covid_antigen_pcr = list(
+                        test1_sens = 0.70, test1_spec = 0.98,
+                        test2_sens = 0.95, test2_spec = 0.99,
+                        prevalence = 0.05, indep = TRUE,
+                        cond_dep_pos = NULL, cond_dep_neg = NULL
+                    ),
+                    tb_xray_sputum = list(
+                        test1_sens = 0.75, test1_spec = 0.85,
+                        test2_sens = 0.80, test2_spec = 0.95,
+                        prevalence = 0.02, indep = FALSE,
+                        cond_dep_pos = 0.15, cond_dep_neg = 0.10
+                    )
+                )
+
+                if (!(preset %in% names(presets))) {
+                    return(NULL)  # Fall back to custom values
+                }
+
+                return(presets[[preset]])
+            },
+
+            # Add a notice to the collection
+            .addNotice = function(message, level = "warning") {
+                icon <- switch(level,
+                    "warning" = "⚠️",
+                    "info" = "ℹ️",
+                    "error" = "❌",
+                    "⚠️"
+                )
+                notice_text <- paste0(icon, " ", message)
+                private$.notices <- c(private$.notices, notice_text)
+            },
+
+            # Display collected notices to the user
+            .displayNotices = function() {
+                if (length(private$.notices) == 0) {
+                    # No notices, hide the notices section
+                    self$results$notices$setVisible(FALSE)
+                    return()
+                }
+
+                # Build HTML for notices
+                notices_html <- '<div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin: 10px 0;">'
+                notices_html <- paste0(notices_html, '<h4 style="margin-top: 0; color: #856404;">Validation Notices</h4>')
+                notices_html <- paste0(notices_html, '<ul style="margin-bottom: 0; padding-left: 20px;">')
+
+                for (notice in private$.notices) {
+                    notices_html <- paste0(notices_html, '<li style="margin: 5px 0;">', notice, '</li>')
+                }
+
+                notices_html <- paste0(notices_html, '</ul></div>')
+
+                self$results$notices$setContent(notices_html)
+                self$results$notices$setVisible(TRUE)
             },
 
             # Helper method to build dependence explanation content

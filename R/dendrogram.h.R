@@ -269,7 +269,7 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title="",
-                visible="(vars)"))
+                visible="(vars.length == 0)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

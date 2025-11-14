@@ -9,25 +9,27 @@ survivalendpointsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             patientId = NULL,
             startDate = NULL,
             lastFollowup = NULL,
+            progressionDate = NULL,
+            deathDate = NULL,
             deathEvent = NULL,
             progressionEvent = NULL,
             treatmentEnd = NULL,
             responseDate = NULL,
             timeUnit = "months",
             inputType = "dates",
-            calculatePFS = TRUE,
-            calculateOS = TRUE,
+            calculatePFS = FALSE,
+            calculateOS = FALSE,
             calculateTTP = FALSE,
             calculateDOR = FALSE,
             calculateTOT = FALSE,
-            showDerivedData = TRUE,
-            showSummaryStats = TRUE,
-            showEventRates = TRUE,
-            showKMPlot = TRUE,
+            showDerivedData = FALSE,
+            showSummaryStats = FALSE,
+            showEventRates = FALSE,
+            showKMPlot = FALSE,
             showMilestones = FALSE,
             milestones = "6,12,24",
             exportEndpoints = FALSE,
-            showUsageGuide = TRUE, ...) {
+            showUsageGuide = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -51,28 +53,44 @@ survivalendpointsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 required=TRUE,
                 suggested=list(
                     "continuous"))
+            private$..progressionDate <- jmvcore::OptionVariable$new(
+                "progressionDate",
+                progressionDate,
+                suggested=list(
+                    "continuous"),
+                default=NULL)
+            private$..deathDate <- jmvcore::OptionVariable$new(
+                "deathDate",
+                deathDate,
+                suggested=list(
+                    "continuous"),
+                default=NULL)
             private$..deathEvent <- jmvcore::OptionVariable$new(
                 "deathEvent",
                 deathEvent,
                 suggested=list(
                     "nominal",
-                    "ordinal"))
+                    "ordinal"),
+                default=NULL)
             private$..progressionEvent <- jmvcore::OptionVariable$new(
                 "progressionEvent",
                 progressionEvent,
                 suggested=list(
                     "nominal",
-                    "ordinal"))
+                    "ordinal"),
+                default=NULL)
             private$..treatmentEnd <- jmvcore::OptionVariable$new(
                 "treatmentEnd",
                 treatmentEnd,
                 suggested=list(
-                    "continuous"))
+                    "continuous"),
+                default=NULL)
             private$..responseDate <- jmvcore::OptionVariable$new(
                 "responseDate",
                 responseDate,
                 suggested=list(
-                    "continuous"))
+                    "continuous"),
+                default=NULL)
             private$..timeUnit <- jmvcore::OptionList$new(
                 "timeUnit",
                 timeUnit,
@@ -92,11 +110,11 @@ survivalendpointsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..calculatePFS <- jmvcore::OptionBool$new(
                 "calculatePFS",
                 calculatePFS,
-                default=TRUE)
+                default=FALSE)
             private$..calculateOS <- jmvcore::OptionBool$new(
                 "calculateOS",
                 calculateOS,
-                default=TRUE)
+                default=FALSE)
             private$..calculateTTP <- jmvcore::OptionBool$new(
                 "calculateTTP",
                 calculateTTP,
@@ -112,19 +130,19 @@ survivalendpointsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..showDerivedData <- jmvcore::OptionBool$new(
                 "showDerivedData",
                 showDerivedData,
-                default=TRUE)
+                default=FALSE)
             private$..showSummaryStats <- jmvcore::OptionBool$new(
                 "showSummaryStats",
                 showSummaryStats,
-                default=TRUE)
+                default=FALSE)
             private$..showEventRates <- jmvcore::OptionBool$new(
                 "showEventRates",
                 showEventRates,
-                default=TRUE)
+                default=FALSE)
             private$..showKMPlot <- jmvcore::OptionBool$new(
                 "showKMPlot",
                 showKMPlot,
-                default=TRUE)
+                default=FALSE)
             private$..showMilestones <- jmvcore::OptionBool$new(
                 "showMilestones",
                 showMilestones,
@@ -140,11 +158,13 @@ survivalendpointsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..showUsageGuide <- jmvcore::OptionBool$new(
                 "showUsageGuide",
                 showUsageGuide,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..patientId)
             self$.addOption(private$..startDate)
             self$.addOption(private$..lastFollowup)
+            self$.addOption(private$..progressionDate)
+            self$.addOption(private$..deathDate)
             self$.addOption(private$..deathEvent)
             self$.addOption(private$..progressionEvent)
             self$.addOption(private$..treatmentEnd)
@@ -169,6 +189,8 @@ survivalendpointsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         patientId = function() private$..patientId$value,
         startDate = function() private$..startDate$value,
         lastFollowup = function() private$..lastFollowup$value,
+        progressionDate = function() private$..progressionDate$value,
+        deathDate = function() private$..deathDate$value,
         deathEvent = function() private$..deathEvent$value,
         progressionEvent = function() private$..progressionEvent$value,
         treatmentEnd = function() private$..treatmentEnd$value,
@@ -192,6 +214,8 @@ survivalendpointsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..patientId = NA,
         ..startDate = NA,
         ..lastFollowup = NA,
+        ..progressionDate = NA,
+        ..deathDate = NA,
         ..deathEvent = NA,
         ..progressionEvent = NA,
         ..treatmentEnd = NA,
@@ -218,6 +242,7 @@ survivalendpointsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        dataWarning = function() private$.items[["dataWarning"]],
         dataInfo = function() private$.items[["dataInfo"]],
         derivedEndpoints = function() private$.items[["derivedEndpoints"]],
         summaryStats = function() private$.items[["summaryStats"]],
@@ -238,6 +263,17 @@ survivalendpointsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="instructions",
                 title="Instructions",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataWarning",
+                title="Data Validation",
+                visible=TRUE,
+                clearWith=list(
+                    "patientId",
+                    "startDate",
+                    "lastFollowup",
+                    "deathEvent",
+                    "progressionEvent")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="dataInfo",
@@ -512,9 +548,13 @@ survivalendpointsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param patientId Patient identifier variable
 #' @param startDate Treatment start date or baseline time (Date or numeric)
 #' @param lastFollowup Last follow-up date or time
-#' @param deathEvent Death event indicator (0=alive, 1=dead)
+#' @param progressionDate Date/time of disease progression (required for
+#'   accurate PFS/TTP/DOR)
+#' @param deathDate Date/time of death (required for accurate OS/PFS)
+#' @param deathEvent Death event indicator (0=alive, 1=dead). Not needed if
+#'   death date is provided.
 #' @param progressionEvent Disease progression indicator (0=no progression,
-#'   1=progression)
+#'   1=progression). Not needed if progression date is provided.
 #' @param treatmentEnd Treatment end date (optional, for time on treatment
 #'   calculation)
 #' @param responseDate Date of confirmed response (optional, for DOR
@@ -542,6 +582,7 @@ survivalendpointsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$derivedEndpoints} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summaryStats} \tab \tab \tab \tab \tab a table \cr
@@ -564,25 +605,27 @@ survivalendpoints <- function(
     patientId,
     startDate,
     lastFollowup,
-    deathEvent,
-    progressionEvent,
-    treatmentEnd,
-    responseDate,
+    progressionDate = NULL,
+    deathDate = NULL,
+    deathEvent = NULL,
+    progressionEvent = NULL,
+    treatmentEnd = NULL,
+    responseDate = NULL,
     timeUnit = "months",
     inputType = "dates",
-    calculatePFS = TRUE,
-    calculateOS = TRUE,
+    calculatePFS = FALSE,
+    calculateOS = FALSE,
     calculateTTP = FALSE,
     calculateDOR = FALSE,
     calculateTOT = FALSE,
-    showDerivedData = TRUE,
-    showSummaryStats = TRUE,
-    showEventRates = TRUE,
-    showKMPlot = TRUE,
+    showDerivedData = FALSE,
+    showSummaryStats = FALSE,
+    showEventRates = FALSE,
+    showKMPlot = FALSE,
     showMilestones = FALSE,
     milestones = "6,12,24",
     exportEndpoints = FALSE,
-    showUsageGuide = TRUE) {
+    showUsageGuide = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survivalendpoints requires jmvcore to be installed (restart may be required)")
@@ -590,6 +633,8 @@ survivalendpoints <- function(
     if ( ! missing(patientId)) patientId <- jmvcore::resolveQuo(jmvcore::enquo(patientId))
     if ( ! missing(startDate)) startDate <- jmvcore::resolveQuo(jmvcore::enquo(startDate))
     if ( ! missing(lastFollowup)) lastFollowup <- jmvcore::resolveQuo(jmvcore::enquo(lastFollowup))
+    if ( ! missing(progressionDate)) progressionDate <- jmvcore::resolveQuo(jmvcore::enquo(progressionDate))
+    if ( ! missing(deathDate)) deathDate <- jmvcore::resolveQuo(jmvcore::enquo(deathDate))
     if ( ! missing(deathEvent)) deathEvent <- jmvcore::resolveQuo(jmvcore::enquo(deathEvent))
     if ( ! missing(progressionEvent)) progressionEvent <- jmvcore::resolveQuo(jmvcore::enquo(progressionEvent))
     if ( ! missing(treatmentEnd)) treatmentEnd <- jmvcore::resolveQuo(jmvcore::enquo(treatmentEnd))
@@ -600,6 +645,8 @@ survivalendpoints <- function(
             `if`( ! missing(patientId), patientId, NULL),
             `if`( ! missing(startDate), startDate, NULL),
             `if`( ! missing(lastFollowup), lastFollowup, NULL),
+            `if`( ! missing(progressionDate), progressionDate, NULL),
+            `if`( ! missing(deathDate), deathDate, NULL),
             `if`( ! missing(deathEvent), deathEvent, NULL),
             `if`( ! missing(progressionEvent), progressionEvent, NULL),
             `if`( ! missing(treatmentEnd), treatmentEnd, NULL),
@@ -610,6 +657,8 @@ survivalendpoints <- function(
         patientId = patientId,
         startDate = startDate,
         lastFollowup = lastFollowup,
+        progressionDate = progressionDate,
+        deathDate = deathDate,
         deathEvent = deathEvent,
         progressionEvent = progressionEvent,
         treatmentEnd = treatmentEnd,

@@ -9,15 +9,16 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             biomarker = NULL,
             response = NULL,
             responseType = "categorical",
+            positiveLevel = NULL,
             plotType = "boxplot",
-            showThreshold = TRUE,
+            showThreshold = FALSE,
             thresholdValue = NULL,
             thresholdMethod = "median",
-            addTrendLine = TRUE,
+            addTrendLine = FALSE,
             trendMethod = "loess",
-            performTests = TRUE,
+            performTests = FALSE,
             groupVariable = NULL,
-            showCorrelation = TRUE,
+            showCorrelation = FALSE,
             logTransform = FALSE,
             outlierHandling = "highlight",
             confidenceLevel = "0.95", ...) {
@@ -47,6 +48,9 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "categorical",
                     "continuous"),
                 default="categorical")
+            private$..positiveLevel <- jmvcore::OptionString$new(
+                "positiveLevel",
+                positiveLevel)
             private$..plotType <- jmvcore::OptionList$new(
                 "plotType",
                 plotType,
@@ -59,7 +63,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..showThreshold <- jmvcore::OptionBool$new(
                 "showThreshold",
                 showThreshold,
-                default=TRUE)
+                default=FALSE)
             private$..thresholdValue <- jmvcore::OptionNumber$new(
                 "thresholdValue",
                 thresholdValue)
@@ -75,7 +79,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..addTrendLine <- jmvcore::OptionBool$new(
                 "addTrendLine",
                 addTrendLine,
-                default=TRUE)
+                default=FALSE)
             private$..trendMethod <- jmvcore::OptionList$new(
                 "trendMethod",
                 trendMethod,
@@ -87,7 +91,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..performTests <- jmvcore::OptionBool$new(
                 "performTests",
                 performTests,
-                default=TRUE)
+                default=FALSE)
             private$..groupVariable <- jmvcore::OptionVariable$new(
                 "groupVariable",
                 groupVariable,
@@ -96,7 +100,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..showCorrelation <- jmvcore::OptionBool$new(
                 "showCorrelation",
                 showCorrelation,
-                default=TRUE)
+                default=FALSE)
             private$..logTransform <- jmvcore::OptionBool$new(
                 "logTransform",
                 logTransform,
@@ -121,6 +125,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..biomarker)
             self$.addOption(private$..response)
             self$.addOption(private$..responseType)
+            self$.addOption(private$..positiveLevel)
             self$.addOption(private$..plotType)
             self$.addOption(private$..showThreshold)
             self$.addOption(private$..thresholdValue)
@@ -138,6 +143,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         biomarker = function() private$..biomarker$value,
         response = function() private$..response$value,
         responseType = function() private$..responseType$value,
+        positiveLevel = function() private$..positiveLevel$value,
         plotType = function() private$..plotType$value,
         showThreshold = function() private$..showThreshold$value,
         thresholdValue = function() private$..thresholdValue$value,
@@ -154,6 +160,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..biomarker = NA,
         ..response = NA,
         ..responseType = NA,
+        ..positiveLevel = NA,
         ..plotType = NA,
         ..showThreshold = NA,
         ..thresholdValue = NA,
@@ -173,6 +180,7 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        dataWarning = function() private$.items[["dataWarning"]],
         plot = function() private$.items[["plot"]],
         correlation = function() private$.items[["correlation"]],
         threshold = function() private$.items[["threshold"]],
@@ -194,6 +202,14 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="todo",
                 title="Instructions"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataWarning",
+                title="Data Validation",
+                visible=TRUE,
+                clearWith=list(
+                    "biomarker",
+                    "response")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -352,6 +368,9 @@ biomarkerresponseBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   continuous).
 #' @param responseType Type of response variable for appropriate analysis and
 #'   visualization.
+#' @param positiveLevel Specify which level represents positive response
+#'   (e.g., 'Responder', 'Yes', '1'). If blank, uses second level
+#'   alphabetically.
 #' @param plotType Primary visualization method for biomarker-response
 #'   relationship.
 #' @param showThreshold Display threshold lines for biomarker
@@ -371,6 +390,7 @@ biomarkerresponseBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$correlation} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$threshold} \tab \tab \tab \tab \tab a table \cr
@@ -390,15 +410,16 @@ biomarkerresponse <- function(
     biomarker,
     response,
     responseType = "categorical",
+    positiveLevel,
     plotType = "boxplot",
-    showThreshold = TRUE,
+    showThreshold = FALSE,
     thresholdValue,
     thresholdMethod = "median",
-    addTrendLine = TRUE,
+    addTrendLine = FALSE,
     trendMethod = "loess",
-    performTests = TRUE,
+    performTests = FALSE,
     groupVariable,
-    showCorrelation = TRUE,
+    showCorrelation = FALSE,
     logTransform = FALSE,
     outlierHandling = "highlight",
     confidenceLevel = "0.95") {
@@ -421,6 +442,7 @@ biomarkerresponse <- function(
         biomarker = biomarker,
         response = response,
         responseType = responseType,
+        positiveLevel = positiveLevel,
         plotType = plotType,
         showThreshold = showThreshold,
         thresholdValue = thresholdValue,

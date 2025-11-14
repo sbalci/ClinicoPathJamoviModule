@@ -131,14 +131,6 @@ children:
                 format: number
                 enable: (classifier_singleDecisionTree)
               - type: TextBox
-                name: unsurrogate
-                format: number
-                enable: (classifier_singleDecisionTree)
-              - type: TextBox
-                name: noCrossValidations
-                format: number
-                enable: (classifier_singleDecisionTree)
-              - type: TextBox
                 name: maxDepth
                 format: number
                 enable: (classifier_singleDecisionTree)
@@ -232,6 +224,10 @@ children:
           - type: CheckBox
             name: reportMCC
             label: Matthews Correlation Coefficient
+          - type: TextBox
+            name: positiveClass
+            format: string
+            enable: (reportClinicalMetrics)
   - type: CollapseBox
     label: K-Nearest Neighbors (KNN)
     collapsed: true

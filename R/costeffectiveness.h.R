@@ -14,16 +14,16 @@ costeffectivenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             effectiveness_label = "Correct Diagnoses",
             calculate_icer = TRUE,
             calculate_incremental = TRUE,
-            dominance_analysis = TRUE,
-            net_monetary_benefit = TRUE,
+            dominance_analysis = FALSE,
+            net_monetary_benefit = FALSE,
             wtp_threshold = 50000,
-            multiple_wtp_thresholds = TRUE,
+            multiple_wtp_thresholds = FALSE,
             wtp_range = "0, 25000, 50000, 100000, 150000",
-            confidence_intervals = TRUE,
+            confidence_intervals = FALSE,
             ci_method = "bootstrap",
             bootstrap_samples = 1000,
             confidence_level = 0.95,
-            deterministic_sensitivity = TRUE,
+            deterministic_sensitivity = FALSE,
             sensitivity_parameters = "test_cost, follow_up_cost, test_sensitivity, test_specificity",
             sensitivity_range_pct = 20,
             probabilistic_sensitivity = FALSE,
@@ -43,7 +43,7 @@ costeffectivenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             discount_rate_effects = 3,
             plot_ce_plane = TRUE,
             plot_ce_acceptability = FALSE,
-            plot_nmb = TRUE,
+            plot_nmb = FALSE,
             plot_tornado = FALSE,
             plot_incremental_frontier = FALSE,
             perspective = "healthcare",
@@ -110,11 +110,11 @@ costeffectivenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..dominance_analysis <- jmvcore::OptionBool$new(
                 "dominance_analysis",
                 dominance_analysis,
-                default=TRUE)
+                default=FALSE)
             private$..net_monetary_benefit <- jmvcore::OptionBool$new(
                 "net_monetary_benefit",
                 net_monetary_benefit,
-                default=TRUE)
+                default=FALSE)
             private$..wtp_threshold <- jmvcore::OptionNumber$new(
                 "wtp_threshold",
                 wtp_threshold,
@@ -123,7 +123,7 @@ costeffectivenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..multiple_wtp_thresholds <- jmvcore::OptionBool$new(
                 "multiple_wtp_thresholds",
                 multiple_wtp_thresholds,
-                default=TRUE)
+                default=FALSE)
             private$..wtp_range <- jmvcore::OptionString$new(
                 "wtp_range",
                 wtp_range,
@@ -131,7 +131,7 @@ costeffectivenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..confidence_intervals <- jmvcore::OptionBool$new(
                 "confidence_intervals",
                 confidence_intervals,
-                default=TRUE)
+                default=FALSE)
             private$..ci_method <- jmvcore::OptionList$new(
                 "ci_method",
                 ci_method,
@@ -155,7 +155,7 @@ costeffectivenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..deterministic_sensitivity <- jmvcore::OptionBool$new(
                 "deterministic_sensitivity",
                 deterministic_sensitivity,
-                default=TRUE)
+                default=FALSE)
             private$..sensitivity_parameters <- jmvcore::OptionString$new(
                 "sensitivity_parameters",
                 sensitivity_parameters,
@@ -262,7 +262,7 @@ costeffectivenessOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..plot_nmb <- jmvcore::OptionBool$new(
                 "plot_nmb",
                 plot_nmb,
-                default=TRUE)
+                default=FALSE)
             private$..plot_tornado <- jmvcore::OptionBool$new(
                 "plot_tornado",
                 plot_tornado,
@@ -1064,16 +1064,16 @@ costeffectiveness <- function(
     effectiveness_label = "Correct Diagnoses",
     calculate_icer = TRUE,
     calculate_incremental = TRUE,
-    dominance_analysis = TRUE,
-    net_monetary_benefit = TRUE,
+    dominance_analysis = FALSE,
+    net_monetary_benefit = FALSE,
     wtp_threshold = 50000,
-    multiple_wtp_thresholds = TRUE,
+    multiple_wtp_thresholds = FALSE,
     wtp_range = "0, 25000, 50000, 100000, 150000",
-    confidence_intervals = TRUE,
+    confidence_intervals = FALSE,
     ci_method = "bootstrap",
     bootstrap_samples = 1000,
     confidence_level = 0.95,
-    deterministic_sensitivity = TRUE,
+    deterministic_sensitivity = FALSE,
     sensitivity_parameters = "test_cost, follow_up_cost, test_sensitivity, test_specificity",
     sensitivity_range_pct = 20,
     probabilistic_sensitivity = FALSE,
@@ -1093,7 +1093,7 @@ costeffectiveness <- function(
     discount_rate_effects = 3,
     plot_ce_plane = TRUE,
     plot_ce_acceptability = FALSE,
-    plot_nmb = TRUE,
+    plot_nmb = FALSE,
     plot_tornado = FALSE,
     plot_incremental_frontier = FALSE,
     perspective = "healthcare",

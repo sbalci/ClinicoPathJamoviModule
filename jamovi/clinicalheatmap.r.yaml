@@ -61,7 +61,7 @@ items:
           clearWith: []
 
     - name: heatmap
-      title: Clinical Heatmap
+      title: 'Clinical Heatmap'
       type: Image
       width: 800
       height: 600
@@ -89,6 +89,38 @@ items:
         - layerFilter
         - splitRows
         - splitCols
+
+    # tidyHeatmap support commented out due to Bioconductor dependencies
+    # - name: heatmapAdvanced
+    #   title: 'Clinical Heatmap (tidyHeatmap)'
+    #   type: Image
+    #   width: 800
+    #   height: 600
+    #   renderFun: .plotHeatmapAdvanced
+    #   visible: (heatmapEngine:tidyHeatmap || heatmapEngine:both)
+    #   clearWith:
+    #     - rowVar
+    #     - colVar
+    #     - valueVar
+    #     - annotationCols
+    #     - annotationRows
+    #     - scaleMethod
+    #     - clusterRows
+    #     - clusterCols
+    #     - clusterDistanceRows
+    #     - clusterMethodRows
+    #     - clusterDistanceCols
+    #     - clusterMethodCols
+    #     - colorPalette
+    #     - showRownames
+    #     - showColnames
+    #     - annotationType
+    #     - addLayer
+    #     - layerType
+    #     - layerFilter
+    #     - splitRows
+    #     - splitCols
+    #     - heatmapEngine
 
     - name: annotations
       title: Annotation Summary
@@ -285,5 +317,6 @@ items:
 
 refs:
     - tidyheatmaps
+    # - tidyHeatmap  # Commented out due to Bioconductor dependencies
     - grDevices
 ...

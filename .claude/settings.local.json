@@ -125,7 +125,8 @@
       "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/multisurvival.r.yaml)",
       "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/multisurvival.b.R.backup)",
       "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/multisurvival.b.R)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "WebFetch(domain:dev.jamovi.org)"
     ],
     "deny": [],
     "ask": [],

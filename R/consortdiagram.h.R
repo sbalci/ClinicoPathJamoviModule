@@ -366,7 +366,6 @@ consortdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "allocation_exclusions",
                     "followup_exclusions",
                     "analysis_exclusions",
-                    "show_percentages",
                     "show_exclusion_details",
                     "diagram_width",
                     "diagram_height",

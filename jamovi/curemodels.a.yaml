@@ -155,7 +155,7 @@ options:
     - name: plot_cure_fraction
       title: 'Plot Cure Fraction'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Display plot of cure fraction by covariates
@@ -165,7 +165,7 @@ options:
     - name: plot_survival
       title: 'Plot Survival Curves'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Display survival curves for cured and uncured groups
@@ -175,7 +175,7 @@ options:
     - name: goodness_of_fit
       title: 'Goodness of Fit Tests'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Perform goodness of fit tests for the cure model
@@ -206,6 +206,7 @@ options:
     - name: background_hazard_var
       title: 'Background Hazard Variable'
       type: Variable
+      default: null
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:
@@ -214,31 +215,10 @@ options:
           R: >
             Background hazard variable for cuRe models
 
-    - name: cure_expected_rate
-      title: 'Expected Cure Rate Variable'
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-      description:
-          ui: >
-            Variable with expected cure rates from general population
-          R: >
-            Expected cure rate variable for relative cure models
-
-    # npcure Package Options (Nonparametric)
-    - name: use_nonparametric
-      title: 'Use Nonparametric Estimation (npcure)'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Use nonparametric cure probability estimation (no distribution assumption)
-          R: >
-            Enable nonparametric cure estimation using npcure package
-
     - name: npcure_covariate
       title: 'Covariate for Nonparametric Model'
       type: Variable
+      default: null
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:

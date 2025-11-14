@@ -1,7 +1,7 @@
 ---
 name: clinicalvalidation
 title: Clinical Model Validation Suite
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Comprehensive validation for clinical prediction models
 version: '0.0.32'
@@ -251,22 +251,22 @@ options:
     - name: show_model_summary
       title: Show Model Summary
       type: Bool
-      default: true
+      default: false
 
     - name: show_performance_table
       title: Show Performance Metrics Table
       type: Bool
-      default: true
+      default: false
 
     - name: show_calibration_plot
       title: Show Calibration Plot
       type: Bool
-      default: true
+      default: false
 
     - name: show_roc_curve
       title: Show ROC Curve
       type: Bool
-      default: true
+      default: false
 
     - name: show_prc_curve
       title: Show Precision-Recall Curve
@@ -289,7 +289,7 @@ options:
     - name: show_clinical_interpretation
       title: Show Clinical Guidelines
       type: Bool
-      default: true
+      default: false
 
     - name: export_results
       title: Export Validation Results

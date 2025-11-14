@@ -1,5 +1,17 @@
+# ⚠️ WARNING: These tests only verify that the function runs without errors.
+# They do NOT validate statistical correctness of:
+# - Chi-square statistics
+# - P-values
+# - Effect sizes
+# - Multiple testing corrections
+# - Pairwise comparison results
+#
+# For statistical validation, see test-chisqposttest-integration.R which actually
+# validates results against known correct values and checks enforcement of
+# statistical best practices (omnibus significance prerequisite, etc.).
+
 test_that("chisqposttest works", {
-    
+
     # Load test data
     data("histopathology", package = "ClinicoPath")
     

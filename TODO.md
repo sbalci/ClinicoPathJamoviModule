@@ -43,6 +43,15 @@ echo "/review-function FUNC_NAME" | claude
 echo "/fix-function FUNC_NAME" | claude
 echo "/document-function FUNC_NAME" | claude
 
+^menuGroup:\s*\S+(?<![TD2])$
+^menuGroup:\s*\S+([T])$
+
+(menuGroup:\s.*)T2$
+$1D
+
+
+you are an expert R-package and jamovi developer and an expert in biostatistics. critically evaluate decisioncombine function. is it mathematically and statistically accurate. is it ready to be used by clinicians and pathologists. is it ready for release?
+
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
 > how does FUNC_NAME handle varibale with empty spaces and characters in them.
@@ -83,17 +92,6 @@ prepare comprehensive test data generator under data-raw and prepare the data  a
 
 To lower the computation make all default checkboxes to be false in .a.yaml
 
-implement welcome/introductory message styling of decisionpanel.
-Key Styling Elements (matching decisionpanel):
-
-- Font: Arial, sans-serif
-- Line height: 1.4
-- Headers: #333 (dark gray) with 2px solid borders
-- Body text: 14px, #333
-- Backgrounds: #f5f5f5 and #f9f9f9
-- Accent text: #666
-- No bright colors or emoji
-- Consistent font sizes (14px body, 16-18px headers, 13px secondary)
 
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"

@@ -14,11 +14,11 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             awd = NULL,
             awod = NULL,
             analysistype = "overall",
-            graystest = TRUE,
-            subdistribution = TRUE,
+            graystest = FALSE,
+            subdistribution = FALSE,
             timepoints = "12,24,36,60",
             confidencelevel = 0.95,
-            showrisksets = TRUE,
+            showrisksets = FALSE,
             showStackedPlot = FALSE,
             showKMvsCIF = FALSE,
             cifColors = "default", ...) {
@@ -83,11 +83,11 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..graystest <- jmvcore::OptionBool$new(
                 "graystest",
                 graystest,
-                default=TRUE)
+                default=FALSE)
             private$..subdistribution <- jmvcore::OptionBool$new(
                 "subdistribution",
                 subdistribution,
-                default=TRUE)
+                default=FALSE)
             private$..timepoints <- jmvcore::OptionString$new(
                 "timepoints",
                 timepoints,
@@ -101,7 +101,7 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..showrisksets <- jmvcore::OptionBool$new(
                 "showrisksets",
                 showrisksets,
-                default=TRUE)
+                default=FALSE)
             private$..showStackedPlot <- jmvcore::OptionBool$new(
                 "showStackedPlot",
                 showStackedPlot,
@@ -393,11 +393,11 @@ competingsurvival <- function(
     awd,
     awod,
     analysistype = "overall",
-    graystest = TRUE,
-    subdistribution = TRUE,
+    graystest = FALSE,
+    subdistribution = FALSE,
     timepoints = "12,24,36,60",
     confidencelevel = 0.95,
-    showrisksets = TRUE,
+    showrisksets = FALSE,
     showStackedPlot = FALSE,
     showKMvsCIF = FALSE,
     cifColors = "default") {

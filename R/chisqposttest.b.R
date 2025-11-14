@@ -23,46 +23,11 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "chisqposttestClass",
     inherit = chisqposttestBase,
     private = list(
-        
+
         .init = function() {
-            # Apply clinical presets if selected with error handling
-            preset_value <- self$options$clinicalPreset %||% "custom"
-            if (preset_value != "custom") {
-                tryCatch({
-                    private$.applyClinicalPreset(preset_value)
-                }, error = function(e) {
-                    # Fallback to custom if preset application fails
-                    self$options$clinicalPreset <- "custom"
-                })
-            }
-            
             # Prevent analysis from running without variables selected
             if (is.null(self$options$rows) || is.null(self$options$cols)) {
                 return()
-            }
-        },
-        
-        # Apply clinical preset configurations
-        .applyClinicalPreset = function(preset) {
-            if (preset == "diagnostic2x2") {
-                # Settings for 2x2 diagnostic test evaluation
-                self$options$posthoc <- "none"  # No post-hoc needed for 2x2
-                self$options$showResiduals <- TRUE
-                self$options$testSelection <- "auto"
-                self$options$showClinicalSummary <- TRUE
-                self$options$showExampleInterpretations <- TRUE
-            } else if (preset == "treatment_response") {
-                # Settings for treatment response analysis
-                self$options$posthoc <- "bonferroni"
-                self$options$showDetailedTables <- TRUE
-                self$options$showClinicalSummary <- TRUE
-                self$options$copyReadySentences <- TRUE
-            } else if (preset == "grade_distribution") {
-                # Settings for pathology grade distribution
-                self$options$showResiduals <- TRUE
-                self$options$residualsCutoff <- 2.0
-                self$options$showEducational <- FALSE
-                self$options$showClinicalSummary <- TRUE
             }
         },
         
@@ -1402,14 +1367,44 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to handle post-hoc testing
         .handlePostHocTesting = function(chiSqTest, contTable, rows = NULL, cols = NULL) {
-            overall_significant <- chiSqTest$p.value < self$options$sig
-            
-            if (!overall_significant) {
-                # Chi-square not significant - show note but continue with detailed tables if requested
+            # CRITICAL FIX: Check if user wants to disable post-hoc tests entirely
+            # When posthoc = "none", skip all pairwise testing
+            if (self$options$posthoc == "none") {
+                message_text <- paste0(
+                    "You selected 'None' for post-hoc method. No pairwise comparisons will be performed. ",
+                    "If you want pairwise comparisons with no p-value adjustment, this feature is not currently available. ",
+                    "Please select Bonferroni, Holm, or FDR for pairwise testing with appropriate corrections."
+                )
                 self$results$multipleTestingInfo$setContent(
-                    paste0("<div style='padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb;'><strong>", .("Note:"), "</strong> ", .("Overall chi-square test is not significant (p ≥ 0.05). Post-hoc pairwise comparisons are not recommended when the overall test is non-significant, but detailed tables are shown below for educational purposes."), "</div>"))
+                    paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb;'>",
+                          "<strong>", .("Post-hoc Testing Disabled:"), "</strong> ",
+                          message_text,
+                          "</div>"))
+                return(invisible(NULL))
             }
-            
+
+            # CRITICAL FIX: Enforce omnibus significance prerequisite
+            # Only run post-hoc if overall chi-square is significant
+            overall_significant <- chiSqTest$p.value < self$options$sig
+
+            if (!overall_significant) {
+                # Chi-square not significant - DO NOT run post-hoc tests
+                message_text <- paste0(
+                    "Overall chi-square test is not significant (p = ",
+                    format.pval(chiSqTest$p.value, digits = 3),
+                    " ≥ ", self$options$sig, "). ",
+                    "Post-hoc pairwise comparisons are only valid when the overall test is significant. ",
+                    "Running pairwise tests after a non-significant omnibus test increases Type I error (false positives) ",
+                    "and constitutes data dredging."
+                )
+                self$results$multipleTestingInfo$setContent(
+                    paste0("<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffc107;'>",
+                          "<strong>", .("Post-hoc Testing Not Performed:"), "</strong> ",
+                          message_text,
+                          "</div>"))
+                return(invisible(NULL))
+            }
+
             adjustMethod <- self$options$posthoc
             
             # Use robust pairwise testing approach with user-selected test method

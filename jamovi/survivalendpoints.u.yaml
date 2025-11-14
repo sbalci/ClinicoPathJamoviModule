@@ -1,4 +1,3 @@
----
 name: survivalendpoints
 title: Survival Endpoint Derivation
 jus: '3.0'
@@ -20,7 +19,6 @@ children:
             name: patientId
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Data Inputs
     collapsed: false
@@ -65,7 +63,6 @@ children:
                 maxItemCount: 1
                 isTarget: true
                 label: Progression Event (0=no, 1=yes)
-
   - type: CollapseBox
     label: Time Configuration
     collapsed: false
@@ -81,7 +78,24 @@ children:
             name: timeUnit
             label: Time Unit
             enable: (inputType:numeric)
-
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Progression Date/Time
+        children:
+          - type: VariablesListBox
+            name: progressionDate
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Death Date/Time
+        children:
+          - type: VariablesListBox
+            name: deathDate
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Survival Endpoints
     collapsed: false
@@ -110,7 +124,6 @@ children:
                 name: calculateTOT
                 label: Time on Treatment
                 enable: (treatmentEnd)
-
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -148,7 +161,6 @@ children:
                 label: Milestone Times (comma-separated)
                 format: string
                 enable: (showMilestones)
-
   - type: CollapseBox
     label: Export and Documentation
     collapsed: true
@@ -163,4 +175,3 @@ children:
           - type: CheckBox
             name: showUsageGuide
             label: Show Usage Guide for Survival Analysis
-...

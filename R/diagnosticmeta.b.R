@@ -462,18 +462,42 @@ diagnosticmetaClass <- R6::R6Class(
             }
             private$.pooled_specificity <- pooled_spec
 
-            # Extract I² values from the i2 data frame
+            # CRITICAL FIX: Extract dimension-specific I² values
+            # mada returns separate I² estimates for sensitivity (tsens) and specificity (tfpr)
+            # Using the same value for both misrepresents heterogeneity
             sens_i2 <- NA_real_
             spec_i2 <- NA_real_
 
             if (!is.null(summary_results$i2) && is.data.frame(summary_results$i2)) {
                 # Use HollingUnadjusted1 method as it's commonly used for sensitivity/specificity
-                if ("HollingUnadjusted1" %in% names(summary_results$i2)) {
-                    # For bivariate model, we typically get one I² value that applies to both measures
-                    i2_value <- summary_results$i2$HollingUnadjusted1[1]
-                    if (is.finite(i2_value)) {
-                        sens_i2 <- i2_value * 100  # Convert to percentage
-                        spec_i2 <- i2_value * 100  # Same value for both in bivariate model
+                if ("HollingUnadjusted1" %in% names(summary_results$i2) && !is.null(rownames(summary_results$i2))) {
+                    # Extract I² values using row names (tsens for sensitivity, tfpr for false positive rate)
+                    row_names <- rownames(summary_results$i2)
+
+                    # Get I² for sensitivity (tsens row)
+                    tsens_idx <- which(row_names == "tsens")
+                    if (length(tsens_idx) > 0) {
+                        i2_tsens <- summary_results$i2$HollingUnadjusted1[tsens_idx[1]]
+                        if (is.finite(i2_tsens)) {
+                            sens_i2 <- i2_tsens * 100  # Convert to percentage
+                        }
+                    }
+
+                    # Get I² for false positive rate (tfpr row) - applies to specificity
+                    tfpr_idx <- which(row_names == "tfpr")
+                    if (length(tfpr_idx) > 0) {
+                        i2_tfpr <- summary_results$i2$HollingUnadjusted1[tfpr_idx[1]]
+                        if (is.finite(i2_tfpr)) {
+                            spec_i2 <- i2_tfpr * 100  # Convert to percentage
+                        }
+                    }
+
+                    # Fallback: if row names not found, try positional (but mark as potentially incorrect)
+                    if (is.na(sens_i2) && is.na(spec_i2) && nrow(summary_results$i2) >= 2) {
+                        i2_value1 <- summary_results$i2$HollingUnadjusted1[1]
+                        i2_value2 <- summary_results$i2$HollingUnadjusted1[2]
+                        if (is.finite(i2_value1)) sens_i2 <- i2_value1 * 100
+                        if (is.finite(i2_value2)) spec_i2 <- i2_value2 * 100
                     }
                 }
             }
@@ -926,16 +950,20 @@ diagnosticmetaClass <- R6::R6Class(
                     )
                 }
 
-                analysis_data$n_total <- analysis_data$tp + analysis_data$fp +
-                                          analysis_data$fn + analysis_data$tn
+                # CRITICAL FIX: Use effective sample size (ESS) for Deeks' test
+                # Deeks' method requires ESS = 4/(1/TP + 1/FN + 1/FP + 1/TN) - the harmonic mean
+                # Using arithmetic total (TP+FP+FN+TN) overweights large but imbalanced studies
+                analysis_data$ess <- 4 / (1 / analysis_data$tp + 1 / analysis_data$fn +
+                                          1 / analysis_data$fp + 1 / analysis_data$tn)
 
                 analysis_data$log_dor <- log((analysis_data$tp * analysis_data$tn) /
                                               (analysis_data$fp * analysis_data$fn))
                 analysis_data$se_log_dor <- sqrt(1 / analysis_data$tp + 1 / analysis_data$fp +
                                                   1 / analysis_data$fn + 1 / analysis_data$tn)
 
+                # Use 1/sqrt(ESS) as the predictor (correct Deeks' specification)
                 deeks_test <- metafor::rma(yi = log_dor, vi = se_log_dor^2,
-                                           mods = ~ I(1 / sqrt(n_total)), data = analysis_data, method = "FE")
+                                           mods = ~ I(1 / sqrt(ess)), data = analysis_data, method = "FE")
 
                 bias_table <- self$results$publicationbias
                 bias_table$deleteRows()
@@ -1065,11 +1093,13 @@ diagnosticmetaClass <- R6::R6Class(
 
             if (requireNamespace("ggplot2", quietly = TRUE)) {
 
-                # Get summary point from bivariate model
+                # CRITICAL FIX: Get summary point from bivariate model
+                # summary(reitsma)$coefficients already contains PROBABILITIES (sensitivity, specificity)
+                # DO NOT apply plogis() - that would double-transform and push estimates toward center
                 summary_results <- summary(biv_model)
-                sum_sens <- stats::plogis(summary_results$coefficients[1,1])
-                sum_spec <- stats::plogis(summary_results$coefficients[2,1])
-                sum_fpr <- 1 - sum_spec
+                sum_sens <- summary_results$coefficients[1,1]  # Already a probability
+                sum_spec <- 1 - summary_results$coefficients[2,1]  # Row 2 is "false pos. rate", convert to specificity
+                sum_fpr <- summary_results$coefficients[2,1]  # Use FPR directly
 
                 # Individual study points
                 meta_data$sens <- meta_data$tp / (meta_data$tp + meta_data$fn)

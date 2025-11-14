@@ -15,15 +15,13 @@ curemodels(
   bootstrap_ci = FALSE,
   n_bootstrap = 1000,
   cure_threshold = 60,
-  plot_cure_fraction = TRUE,
-  plot_survival = TRUE,
-  goodness_of_fit = TRUE,
+  plot_cure_fraction = FALSE,
+  plot_survival = FALSE,
+  goodness_of_fit = FALSE,
   sensitivity_analysis = FALSE,
   use_background_mortality = FALSE,
-  background_hazard_var,
-  cure_expected_rate,
-  use_nonparametric = FALSE,
-  npcure_covariate,
+  background_hazard_var = NULL,
+  npcure_covariate = NULL,
   npcure_bandwidth = "auto",
   npcure_time_points = 100
 )
@@ -63,12 +61,6 @@ using cuRe package}
 
 \item{background_hazard_var}{Background hazard variable for cuRe models}
 
-\item{cure_expected_rate}{Expected cure rate variable for relative cure
-models}
-
-\item{use_nonparametric}{Enable nonparametric cure estimation using npcure
-package}
-
 \item{npcure_covariate}{Continuous covariate for npcure model (limited to
 one variable)}
 
@@ -81,6 +73,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$cureTable} \tab \tab \tab \tab \tab a table \cr

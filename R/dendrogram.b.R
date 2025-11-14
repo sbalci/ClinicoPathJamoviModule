@@ -110,7 +110,20 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             clusteringMatrix <- prep$matrix
             distMatrix <- stats::dist(clusteringMatrix, method = distanceMethod)
-            
+
+            # CRITICAL: Validate distance/linkage compatibility
+            validationResult <- private$.validateDistanceLinkage(distanceMethod, clusterMethod)
+            if (!validationResult$valid) {
+                self$results$clusterInfo$setContent(validationResult$message)
+                return()
+            }
+            if (!is.null(validationResult$warning)) {
+                # Store warning to display in cluster info
+                compatibilityWarning <- validationResult$warning
+            } else {
+                compatibilityWarning <- NULL
+            }
+
             # Perform hierarchical clustering
             hclustResult <- stats::hclust(distMatrix, method = clusterMethod)
 
@@ -176,6 +189,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (colorGroups)
                 infoBullets <- c(infoBullets, paste0("<strong>Grouping variable:</strong> ", group))
 
+            if (!is.null(compatibilityWarning))
+                infoBullets <- c(infoBullets, paste0("<strong style='color: #dc3545;'>⚠️ Warning:</strong> ", compatibilityWarning))
+
             if (length(prep$messages) > 0)
                 infoBullets <- c(infoBullets, prep$messages)
 
@@ -239,6 +255,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (plotType == "heatmap") {
                 # tidyHeatmap-based heatmap with dendrograms
+                # CRITICAL FIX: Pass precomputed hclustResult to avoid reclustering
                 return(private$.plotTidyHeatmap(
                     data = data,
                     hclustResult = hclustResult,
@@ -247,6 +264,8 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     heatmapScale = self$options$heatmapScale,
                     heatmapPalette = self$options$heatmapPalette,
                     showCellBorders = self$options$showCellBorders,
+                    showLabels = showLabels,
+                    maxLabels = maxLabels,
                     colorGroups = colorGroups,
                     groupData = groupData,
                     groupLevels = groupLevels,
@@ -290,7 +309,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .plotTidyHeatmap = function(data, hclustResult, showRowDendro, showColDendro,
-                                   heatmapScale, heatmapPalette, showCellBorders,
+                                   heatmapScale, heatmapPalette, showCellBorders, showLabels, maxLabels,
                                    colorGroups, groupData, groupLevels, colorScheme) {
 
             tidyHeatmapAvailable <- requireNamespace('tidyHeatmap', quietly = TRUE) &&
@@ -304,9 +323,22 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
+            # CRITICAL FIX: Use precomputed hclustResult for column clustering
+            # The hclustResult clusters samples (rows), which become columns after transpose
+            # This ensures heatmap displays the SAME clustering reported in summary tables
+
             # Prepare data in tidy format for tidyHeatmap
             # Convert matrix to long format: row, column, value
-            dataMatrix <- t(as.matrix(data))  # Transpose for typical heatmap view
+            dataMatrix <- t(as.matrix(data))  # Transpose: features as rows, samples as columns
+
+            # Convert hclustResult to dendrogram for column clustering
+            columnDendro <- as.dendrogram(hclustResult)
+
+            # Determine whether to show labels based on count
+            sampleCount <- ncol(dataMatrix)
+            featureCount <- nrow(dataMatrix)
+            showColLabels <- showLabels && sampleCount <= maxLabels
+            showRowLabels <- TRUE  # Always show feature names (typically small number)
 
             tidyData <- tibble::as_tibble(dataMatrix, rownames = "feature") %>%
                 tidyr::pivot_longer(
@@ -323,54 +355,52 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           else if (heatmapScale == "row") "row"
                           else "column"
 
-            # Create base heatmap
-            hm <- tidyData %>%
-                tidyHeatmap::heatmap(
-                    .row = feature,
-                    .column = sample,
-                    .value = value,
-                    scale = scaleOption,
-                    palette_value = palette,
-                    cluster_rows = showRowDendro,
-                    cluster_columns = showColDendro,
-                    show_row_names = TRUE,
-                    show_column_names = TRUE,
-                    column_names_gp = grid::gpar(fontsize = 10),
-                    row_names_gp = grid::gpar(fontsize = 10)
-                )
+            # CRITICAL FIX: Build heatmap parameters to honor user options
+            heatmapParams <- list(
+                .row = quote(feature),
+                .column = quote(sample),
+                .value = quote(value),
+                scale = scaleOption,
+                palette_value = palette,
+                cluster_rows = showRowDendro,      # Cluster features (rows)
+                cluster_columns = columnDendro,     # Use precomputed sample clustering
+                show_row_names = showRowLabels,
+                show_column_names = showColLabels,
+                column_names_gp = grid::gpar(fontsize = 10),
+                row_names_gp = grid::gpar(fontsize = 10)
+            )
 
-            # Add cell borders if requested
+            # CRITICAL FIX: Add cell borders BEFORE annotation to ensure they persist
             if (showCellBorders) {
-                hm <- hm %>%
-                    tidyHeatmap::heatmap(
-                        rect_gp = grid::gpar(col = "white", lwd = 0.5)
-                    )
+                heatmapParams$rect_gp <- grid::gpar(col = "white", lwd = 0.5)
             }
+
+            # Create base heatmap with all parameters
+            hm <- do.call(tidyHeatmap::heatmap, c(list(tidyData), heatmapParams))
 
             # Add group annotation if requested
             if (colorGroups && !is.null(groupData) && !is.null(groupLevels)) {
+                # CRITICAL FIX: Keep NA for unmatched samples, render with neutral color
                 groupColors <- private$.getColors(length(groupLevels), colorScheme)
                 names(groupColors) <- groupLevels
 
                 # Add annotation for samples (columns)
+                # Convert groupData to character, preserving NA
                 annotationData <- tibble::tibble(
                     sample = names(groupData),
                     group = as.character(groupData)
                 )
 
+                # Mark unmatched as NA_character_ instead of reassigning
+                annotationData$group[is.na(annotationData$group)] <- NA_character_
+
                 tidyData <- tidyData %>%
                     dplyr::left_join(annotationData, by = "sample")
 
-                hm <- tidyData %>%
-                    tidyHeatmap::heatmap(
-                        .row = feature,
-                        .column = sample,
-                        .value = value,
-                        scale = scaleOption,
-                        palette_value = palette,
-                        cluster_rows = showRowDendro,
-                        cluster_columns = showColDendro
-                    ) %>%
+                # Add neutral color for NA
+                groupColors["NA"] <- "grey70"
+
+                hm <- hm %>%
                     tidyHeatmap::annotation_tile(group, palette = groupColors)
             }
 
@@ -496,6 +526,18 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 palette <- private$.getColors(max(1, length(levelsToUse)), colorScheme)
                 palette <- palette[seq_len(max(1, length(levelsToUse)))]
                 names(palette) <- levelsToUse
+
+                # CRITICAL FIX: Handle NA group assignments explicitly
+                # Check if there are any unmatched samples
+                hasUnmatched <- any(is.na(vertices_df$group) & vertices_df$leaf)
+
+                # If there are unmatched, add "Unmatched" as a level
+                if (hasUnmatched) {
+                    # Replace NA with "Unmatched" for plotting
+                    vertices_df$group[is.na(vertices_df$group)] <- "Unmatched"
+                    levelsToUse <- c(levelsToUse, "Unmatched")
+                    palette <- c(palette, "Unmatched" = "grey70")
+                }
 
                 vertices_df$group <- factor(vertices_df$group, levels = levelsToUse)
                 p <- p + ggraph::geom_node_point(
@@ -702,22 +744,41 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # groupData is a named factor where names are row names
                 groupAssignments <- as.character(groupData[leafLabels])
 
-                # Handle any NAs
-                if (any(is.na(groupAssignments))) {
-                    warning("Some leaf labels could not be matched to group data")
-                    groupAssignments[is.na(groupAssignments)] <- groupLevels[1]
+                # CRITICAL FIX: Keep NA for unmatched samples, render with neutral color
+                # DO NOT silently reassign to first group level
+                numUnmatched <- sum(is.na(groupAssignments))
+                if (numUnmatched > 0) {
+                    warning(sprintf(
+                        "Group coloring: %d sample%s could not be matched to group data and will be shown in grey",
+                        numUnmatched,
+                        if (numUnmatched == 1) "" else "s"
+                    ))
                 }
 
-                labelColours <- palette[groupAssignments]
-                labelColours[is.na(labelColours)] <- "grey40"
+                # Build color vector: use palette for matched groups, grey70 for NA
+                labelColours <- ifelse(
+                    is.na(groupAssignments),
+                    "grey70",  # Neutral color for unmatched
+                    palette[groupAssignments]
+                )
+                # Handle any remaining NAs (shouldn't happen but be safe)
+                labelColours[is.na(labelColours)] <- "grey70"
 
                 dendextend::labels_colors(styled) <- labelColours
                 styled <- dendextend::set(styled, "labels_cex", 0.8)
 
+                # Add "Unmatched" to legend if there are any
+                legendLabels <- names(palette)
+                legendColours <- palette
+                if (numUnmatched > 0) {
+                    legendLabels <- c(legendLabels, "Unmatched")
+                    legendColours <- c(legendColours, "grey70")
+                }
+
                 legendInfo <- list(
                     title = "Group",
-                    labels = names(palette),
-                    colours = palette
+                    labels = legendLabels,
+                    colours = legendColours
                 )
             } else if (highlightClusters && effectiveClusters > 1 && !is.null(clusterMembership)) {
                 palette <- private$.getColors(effectiveClusters, colorScheme)
@@ -758,11 +819,22 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (colorGroups && !is.null(groupData)) {
+                # CRITICAL FIX: Keep NA for unmatched samples instead of silent reassignment
                 # groupData is a named factor, preserve names when converting
                 groupVec <- as.character(groupData)
                 names(groupVec) <- names(groupData)
                 # Match vertex names to group data names
                 vertices_df$group <- groupVec[match(vertices_df$name, names(groupVec))]
+
+                # Warn about unmatched samples
+                numUnmatched <- sum(is.na(vertices_df$group) & vertices_df$leaf)
+                if (numUnmatched > 0) {
+                    warning(sprintf(
+                        "Group coloring: %d leaf sample%s could not be matched to group data and will be shown in grey",
+                        numUnmatched,
+                        if (numUnmatched == 1) "" else "s"
+                    ))
+                }
             } else {
                 vertices_df$group <- NA_character_
             }
@@ -835,5 +907,40 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Default blue-red palette
             return(grDevices::colorRampPalette(c("blue", "white", "red"))(100))
+        },
+
+        .validateDistanceLinkage = function(distanceMethod, clusterMethod) {
+            # CRITICAL: Ward, centroid, median methods require Euclidean distances
+            # Using these methods with non-Euclidean distances produces mathematically invalid results
+
+            result <- list(valid = TRUE, warning = NULL, message = NULL)
+
+            # Methods that REQUIRE Euclidean distance
+            euclideanOnly <- c("ward.D", "ward.D2", "centroid", "median")
+
+            if (clusterMethod %in% euclideanOnly && distanceMethod != "euclidean") {
+                result$valid <- FALSE
+                result$message <- paste0(
+                    "<p style='color: #dc3545;'><strong>Invalid Distance/Linkage Combination</strong></p>",
+                    "<p>The <strong>", clusterMethod, "</strong> clustering method requires <strong>Euclidean</strong> distances ",
+                    "to maintain mathematical validity.</p>",
+                    "<p>You selected: <strong>", distanceMethod, "</strong> distance</p>",
+                    "<p><strong>Why this matters:</strong></p>",
+                    "<ul>",
+                    "<li><strong>Ward methods (ward.D, ward.D2)</strong> minimize within-cluster sum of squares, ",
+                    "which is only defined for Euclidean distances. Using other distances produces tree heights ",
+                    "that don't reflect Ward's criterion.</li>",
+                    "<li><strong>Centroid/median methods</strong> compute cluster centers as geometric centroids, ",
+                    "which requires Euclidean geometry. Non-Euclidean distances cause inversions (negative heights).</li>",
+                    "</ul>",
+                    "<p><strong>Solutions:</strong></p>",
+                    "<ul>",
+                    "<li>Change distance method to <strong>Euclidean</strong>, or</li>",
+                    "<li>Change clustering method to <strong>Complete</strong>, <strong>Average</strong>, or <strong>Single</strong> linkage</li>",
+                    "</ul>"
+                )
+            }
+
+            return(result)
         })
 )

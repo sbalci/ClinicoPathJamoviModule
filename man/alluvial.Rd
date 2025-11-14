@@ -51,7 +51,9 @@ represented by color. Default is 'first_variable'.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 }
 }

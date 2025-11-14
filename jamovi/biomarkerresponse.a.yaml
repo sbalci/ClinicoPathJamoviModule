@@ -1,7 +1,7 @@
 ---
 name: biomarkerresponse
 title: Biomarker Response Association
-menuGroup: OncoPathT2
+menuGroup: OncoPathT
 menuSubgroup: ClinicoPath Biomarker Analysis
 version: '0.0.3'
 jas: '1.2'
@@ -44,6 +44,13 @@ options:
           R: >
             Type of response variable for appropriate analysis and visualization.
 
+    - name: positiveLevel
+      title: Positive Response Level (for binary)
+      type: String
+      description:
+          R: >
+            Specify which level represents positive response (e.g., 'Responder', 'Yes', '1'). If blank, uses second level alphabetically.
+
     - name: plotType
       title: Primary Plot Type
       type: List
@@ -64,7 +71,7 @@ options:
     - name: showThreshold
       title: Show Biomarker Thresholds
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display threshold lines for biomarker positivity/negativity.
@@ -96,7 +103,7 @@ options:
     - name: addTrendLine
       title: Add Trend Line
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Add fitted trend line for continuous responses.
@@ -119,7 +126,7 @@ options:
     - name: performTests
       title: Perform Statistical Tests
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Perform appropriate statistical tests for biomarker-response association.
@@ -135,7 +142,7 @@ options:
     - name: showCorrelation
       title: Show Correlation Statistics
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display correlation coefficients and tests.

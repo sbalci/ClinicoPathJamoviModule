@@ -21,7 +21,7 @@ contTables(
   relRisk = FALSE,
   riskDiff = FALSE,
   nnt = FALSE,
-  ci = TRUE,
+  ci = FALSE,
   ciWidth = 95,
   gamma = FALSE,
   taub = FALSE,

@@ -1,7 +1,7 @@
 ---
 name: qtwist
 title: Q-TWiST Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPathT2
 menuSubgroup: Quality-Adjusted Survival
 menuSubtitle: Quality-adjusted Time Without Symptoms or Toxicity
 version: '0.0.1'
