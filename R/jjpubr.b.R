@@ -11,6 +11,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # === Initialization ===
         .init = function() {
+            private$.applyClinicalPreset()
             if (is.null(self$options$xvar)) {
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(private$.generateWelcomeMessage())
@@ -32,6 +33,9 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop("The 'ggpubr' package is required. Install with: install.packages('ggpubr')")
             }
 
+            if (self$options$showExplanations) {
+                private$.generateExplanations()
+            }
             private$.generatePlotInfo()
             private$.populateDescriptives()
             private$.populateCorrelation()
@@ -51,7 +55,97 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
-            return(TRUE)
+            # Comprehensive data type validation
+            tryCatch({
+                # Validate X variable type based on plot type
+                x_data <- self$data[[self$options$xvar]]
+
+                # Plot types requiring categorical X
+                categorical_x_plots <- c("boxplot", "violin", "barplot", "dotplot")
+                # Plot types requiring numeric X
+                numeric_x_plots <- c("scatter", "histogram", "density", "line", "errorplot")
+
+                if (self$options$plotType %in% categorical_x_plots) {
+                    if (!is.factor(x_data) && !is.character(x_data)) {
+                        # Check if it's numeric with few unique values (possible patient IDs, etc.)
+                        if (is.numeric(x_data)) {
+                            n_unique <- length(unique(x_data[!is.na(x_data)]))
+                            stop(paste0(
+                                "X variable '", self$options$xvar, "' is numeric (", n_unique, " unique values) but ",
+                                self$options$plotType, " requires a categorical variable.\n\n",
+                                "⚠️ WARNING: Using numeric IDs (e.g., patient IDs) as categorical groups produces ",
+                                "meaningless statistical comparisons.\n\n",
+                                "💡 Solution: Convert numeric codes to factors or select a proper grouping variable ",
+                                "(e.g., treatment group, disease stage)."
+                            ))
+                        }
+                    }
+                } else if (self$options$plotType %in% numeric_x_plots) {
+                    if (!is.numeric(x_data)) {
+                        # Allow conversion for histogram/density if it's a factor with numeric levels
+                        if (self$options$plotType %in% c("histogram", "density")) {
+                            stop(paste0(
+                                "X variable '", self$options$xvar, "' must be numeric for ",
+                                self$options$plotType, " plots. Current type: ", class(x_data)[1]
+                            ))
+                        }
+                    }
+                }
+
+                # Validate Y variable type (must be numeric for all plots that use it)
+                if (!is.null(self$options$yvar)) {
+                    y_data <- self$data[[self$options$yvar]]
+                    if (!is.numeric(y_data)) {
+                        stop(paste0(
+                            "Y variable '", self$options$yvar, "' must be numeric for ",
+                            self$options$plotType, " plots. Current type: ", class(y_data)[1], "\n\n",
+                            "💡 Solution: Select a continuous numeric variable (e.g., biomarker level, ",
+                            "measurement value, score)."
+                        ))
+                    }
+                }
+
+                # Validate scatter plot specifically (both X and Y must be numeric)
+                if (self$options$plotType == "scatter") {
+                    if (!is.numeric(x_data)) {
+                        stop(paste0(
+                            "Scatter plots require both X and Y to be numeric.\n",
+                            "X variable '", self$options$xvar, "' is ", class(x_data)[1], " (must be numeric).\n\n",
+                            "💡 Solution: Select continuous numeric variables for both axes."
+                        ))
+                    }
+                    if (!is.numeric(self$data[[self$options$yvar]])) {
+                        stop(paste0(
+                            "Scatter plots require both X and Y to be numeric.\n",
+                            "Y variable '", self$options$yvar, "' is ", class(self$data[[self$options$yvar]])[1],
+                            " (must be numeric).\n\n",
+                            "💡 Solution: Select continuous numeric variables for both axes."
+                        ))
+                    }
+                }
+
+                # Validate grouping variable (must be categorical if specified)
+                if (!is.null(self$options$groupvar)) {
+                    group_data <- self$data[[self$options$groupvar]]
+                    if (!is.factor(group_data) && !is.character(group_data)) {
+                        warning(paste0(
+                            "Grouping variable '", self$options$groupvar, "' is numeric. ",
+                            "Converting to factor for visualization. Ensure this is appropriate."
+                        ))
+                    }
+                }
+
+                return(TRUE)
+
+            }, error = function(e) {
+                self$results$todo$setVisible(TRUE)
+                self$results$todo$setContent(paste0(
+                    "<div style='padding: 20px; background: #fff3cd; border: 2px solid #ff6b6b;'>",
+                    "<h3>❌ Data Validation Error</h3>",
+                    "<p><strong>", e$message, "</strong></p>",
+                    "</div>"))
+                return(FALSE)
+            })
         },
 
         # === Plot Generation ===
@@ -375,59 +469,243 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .populateCorrelation = function() {
             if (self$options$plotType != "scatter" || !self$options$addCorr) return()
 
-            cor_result <- cor.test(
-                self$data[[self$options$xvar]],
-                self$data[[self$options$yvar]],
-                method = self$options$corrMethod
-            )
+            tryCatch({
+                x_col <- self$options$xvar
+                y_col <- self$options$yvar
+                x_data <- self$data[[x_col]]
+                y_data <- self$data[[y_col]]
 
-            self$results$correlation$addRow(rowKey = 1, values = list(
-                method = tools::toTitleCase(self$options$corrMethod),
-                coefficient = cor_result$estimate,
-                pvalue = cor_result$p.value,
-                ci_lower = if (!is.null(cor_result$conf.int)) cor_result$conf.int[1] else NA,
-                ci_upper = if (!is.null(cor_result$conf.int)) cor_result$conf.int[2] else NA
-            ))
+                # Validate that both variables are numeric
+                if (!is.numeric(x_data)) {
+                    stop(paste0(
+                        "Correlation requires numeric variables. ",
+                        "X variable '", x_col, "' is ", class(x_data)[1], " (must be numeric)."
+                    ))
+                }
+
+                if (!is.numeric(y_data)) {
+                    stop(paste0(
+                        "Correlation requires numeric variables. ",
+                        "Y variable '", y_col, "' is ", class(y_data)[1], " (must be numeric)."
+                    ))
+                }
+
+                # Get complete cases for correlation analysis
+                complete_idx <- complete.cases(x_data, y_data)
+                n_total <- length(x_data)
+                n_complete <- sum(complete_idx)
+
+                if (n_total > n_complete) {
+                    warning(paste0(
+                        "Correlation: ", n_total - n_complete, " observations (",
+                        round(100 * (n_total - n_complete) / n_total, 1),
+                        "%) excluded due to missing values. ",
+                        "Correlation is based on n=", n_complete, " complete pairs."
+                    ))
+                }
+
+                if (n_complete < 3) {
+                    stop("Insufficient data for correlation analysis (n < 3 after removing missing values)")
+                }
+
+                # Compute correlation on complete cases only
+                x_complete <- x_data[complete_idx]
+                y_complete <- y_data[complete_idx]
+
+                # IMPORTANT: Use complete data, not self$data with use="complete.obs"
+                # This ensures the correlation matches the displayed scatter plot
+                cor_result <- cor.test(
+                    x_complete,
+                    y_complete,
+                    method = self$options$corrMethod
+                )
+
+                # Check if faceting is used (correlation may not match plot)
+                if (!is.null(self$options$facetvar)) {
+                    warning(paste0(
+                        "Note: Correlation is computed on the entire dataset (n=", n_complete, "). ",
+                        "When using faceting, correlations may differ within each facet. ",
+                        "Consider running separate analyses for each facet level."
+                    ))
+                }
+
+                self$results$correlation$addRow(rowKey = 1, values = list(
+                    method = paste0(tools::toTitleCase(self$options$corrMethod), " (n=", n_complete, ")"),
+                    coefficient = cor_result$estimate,
+                    pvalue = cor_result$p.value,
+                    ci_lower = if (!is.null(cor_result$conf.int)) cor_result$conf.int[1] else NA,
+                    ci_upper = if (!is.null(cor_result$conf.int)) cor_result$conf.int[2] else NA
+                ))
+
+            }, error = function(e) {
+                warning(paste("Correlation analysis failed:", e$message))
+            })
         },
 
         .populateStatistics = function() {
             if (!self$options$addStats) return()
             if (!(self$options$plotType %in% c("boxplot", "violin"))) return()
 
-            groups <- unique(self$data[[self$options$xvar]])
-            groups <- groups[!is.na(groups)]
-            if (length(groups) < 2) return()
+            tryCatch({
+                # Get complete data for statistical analysis
+                x_col <- self$options$xvar
+                y_col <- self$options$yvar
 
-            table <- self$results$statistics
-            method <- self$options$statMethod
-            if (method == "auto") method <- if (length(groups) == 2) "t.test" else "anova"
+                # Remove NAs explicitly for transparent sample size reporting
+                complete_data <- self$data[complete.cases(self$data[[x_col]], self$data[[y_col]]), ]
+                n_total <- nrow(self$data)
+                n_complete <- nrow(complete_data)
 
-            if (self$options$pairwiseComparisons && length(groups) > 2) {
-                comps <- combn(groups, 2, simplify = FALSE)
-                for (i in seq_along(comps)) {
-                    g1 <- comps[[i]][1]
-                    g2 <- comps[[i]][2]
-                    data1 <- self$data[[self$options$yvar]][self$data[[self$options$xvar]] == g1]
-                    data2 <- self$data[[self$options$yvar]][self$data[[self$options$xvar]] == g2]
+                if (n_total > n_complete) {
+                    warning(paste0(
+                        "Statistical tests: ", n_total - n_complete, " rows (",
+                        round(100 * (n_total - n_complete) / n_total, 1),
+                        "%) excluded due to missing values. ",
+                        "Tests are based on n=", n_complete, " complete observations."
+                    ))
+                }
+
+                if (n_complete < 3) {
+                    stop("Insufficient data for statistical testing (n < 3 after removing missing values)")
+                }
+
+                groups <- unique(complete_data[[x_col]])
+                groups <- groups[!is.na(groups)]
+                if (length(groups) < 2) return()
+
+                table <- self$results$statistics
+                method <- self$options$statMethod
+                if (method == "auto") method <- if (length(groups) == 2) "t.test" else "anova"
+
+                # Validate sample sizes by group
+                group_ns <- sapply(groups, function(g) {
+                    sum(complete_data[[x_col]] == g)
+                })
+
+                min_n <- min(group_ns)
+                if (min_n < 3) {
+                    warning(paste0(
+                        "Small sample size detected: minimum group has n=", min_n, ". ",
+                        "Statistical tests may be unreliable. Consider using nonparametric tests."
+                    ))
+                }
+
+                # Pairwise comparisons with multiple testing correction
+                if (self$options$pairwiseComparisons && length(groups) > 2) {
+                    comps <- combn(groups, 2, simplify = FALSE)
+                    n_comparisons <- length(comps)
+
+                    if (n_comparisons > 1) {
+                        warning(paste0(
+                            "Multiple testing: ", n_comparisons, " pairwise comparisons. ",
+                            "Consider Bonferroni correction (significance threshold: ",
+                            round(0.05 / n_comparisons, 4), ") or use p.adjust() for ",
+                            "multiple testing correction."
+                        ))
+                    }
+
+                    p_values <- numeric(n_comparisons)
+
+                    for (i in seq_along(comps)) {
+                        g1 <- comps[[i]][1]
+                        g2 <- comps[[i]][2]
+                        data1 <- complete_data[[y_col]][complete_data[[x_col]] == g1]
+                        data2 <- complete_data[[y_col]][complete_data[[x_col]] == g2]
+
+                        # Check group-specific sample sizes
+                        n1 <- length(data1)
+                        n2 <- length(data2)
+
+                        if (n1 < 2 || n2 < 2) {
+                            stop(paste0("Insufficient sample size for comparison ", g1, " vs ", g2))
+                        }
+
+                        # Perform test based on method
+                        test_result <- if (method %in% c("t.test", "auto")) {
+                            # Check variance homogeneity for t-test
+                            if (n1 >= 3 && n2 >= 3) {
+                                var_test <- var.test(data1, data2)
+                                if (var_test$p.value < 0.05) {
+                                    warning(paste0(
+                                        "Comparison ", g1, " vs ", g2, ": Unequal variances detected (p=",
+                                        round(var_test$p.value, 4), "). Using Welch t-test."
+                                    ))
+                                }
+                            }
+                            t.test(data1, data2, na.action = na.omit)
+                        } else if (method == "wilcox.test") {
+                            wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
+                        } else if (method == "anova") {
+                            # For pairwise ANOVA, use t-test
+                            t.test(data1, data2, na.action = na.omit)
+                        } else if (method == "kruskal.test") {
+                            # For pairwise Kruskal, use Wilcoxon
+                            wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
+                        } else {
+                            t.test(data1, data2, na.action = na.omit)
+                        }
+
+                        p_values[i] <- test_result$p.value
+
+                        # Apply Bonferroni correction for display
+                        p_adj <- p_values[i] * n_comparisons
+                        p_adj <- min(p_adj, 1.0)  # Cap at 1.0
+
+                        sig <- if (p_values[i] < 0.001) "***" else
+                               if (p_values[i] < 0.01) "**" else
+                               if (p_values[i] < 0.05) "*" else "ns"
+
+                        sig_adj <- if (p_adj < 0.001) "***" else
+                                   if (p_adj < 0.01) "**" else
+                                   if (p_adj < 0.05) "*" else "ns"
+
+                        table$addRow(rowKey = i, values = list(
+                            comparison = paste(g1, "(n=", n1, ") vs", g2, "(n=", n2, ")"),
+                            statistic = test_result$statistic,
+                            pvalue = p_values[i],
+                            significance = paste0(sig, " (adj: ", sig_adj, ")")
+                        ))
+                    }
+                } else if (!self$options$pairwiseComparisons && length(groups) == 2) {
+                    # Single comparison between two groups
+                    g1 <- groups[1]
+                    g2 <- groups[2]
+                    data1 <- complete_data[[y_col]][complete_data[[x_col]] == g1]
+                    data2 <- complete_data[[y_col]][complete_data[[x_col]] == g2]
+
+                    n1 <- length(data1)
+                    n2 <- length(data2)
 
                     test_result <- if (method %in% c("t.test", "auto")) {
-                        t.test(data1, data2)
+                        # Check variance homogeneity
+                        if (n1 >= 3 && n2 >= 3) {
+                            var_test <- var.test(data1, data2)
+                            if (var_test$p.value < 0.05) {
+                                warning(paste0(
+                                    "Unequal variances detected (p=", round(var_test$p.value, 4),
+                                    "). Using Welch t-test."
+                                ))
+                            }
+                        }
+                        t.test(data1, data2, na.action = na.omit)
                     } else {
-                        wilcox.test(data1, data2)
+                        wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
                     }
 
                     sig <- if (test_result$p.value < 0.001) "***" else
                            if (test_result$p.value < 0.01) "**" else
                            if (test_result$p.value < 0.05) "*" else "ns"
 
-                    table$addRow(rowKey = i, values = list(
-                        comparison = paste(g1, "vs", g2),
+                    table$addRow(rowKey = 1, values = list(
+                        comparison = paste(g1, "(n=", n1, ") vs", g2, "(n=", n2, ")"),
                         statistic = test_result$statistic,
                         pvalue = test_result$p.value,
                         significance = sig
                     ))
                 }
-            }
+            }, error = function(e) {
+                warning(paste("Statistical testing failed:", e$message))
+            })
         },
 
         .generatePlotInfo = function() {
@@ -474,6 +752,109 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<p style='margin-top: 15px; color: #666;'>",
                 "<em>💡 Tip: Enable 'Add statistical comparisons' for automatic p-values!</em>",
                 "</p></div>")
+        },
+
+        .applyClinicalPreset = function() {
+            preset <- self$options$clinicalPreset
+            if (preset == "custom") return()
+
+            # Track which settings will be overridden
+            overrides <- list()
+
+            switch(preset,
+                "prognostic_biomarker" = {
+                    if (self$options$plotType != "boxplot") {
+                        overrides <- c(overrides, paste0("Plot type changed from '", self$options$plotType, "' to 'boxplot'"))
+                    }
+                    if (!self$options$addStats) {
+                        overrides <- c(overrides, "Statistical comparisons enabled")
+                    }
+                    if (self$options$statMethod != "auto") {
+                        overrides <- c(overrides, paste0("Statistical method changed from '", self$options$statMethod, "' to 'auto'"))
+                    }
+
+                    self$options$plotType <- "boxplot"
+                    self$options$addStats <- TRUE
+                    self$options$statMethod <- "auto"
+                },
+                "diagnostic_test" = {
+                    if (self$options$plotType != "boxplot") {
+                        overrides <- c(overrides, paste0("Plot type changed from '", self$options$plotType, "' to 'boxplot'"))
+                    }
+                    if (!self$options$addStats) {
+                        overrides <- c(overrides, "Statistical comparisons enabled")
+                    }
+                    if (self$options$statMethod != "t.test") {
+                        overrides <- c(overrides, paste0("Statistical method changed from '", self$options$statMethod, "' to 't.test'"))
+                    }
+
+                    self$options$plotType <- "boxplot"
+                    self$options$addStats <- TRUE
+                    self$options$statMethod <- "t.test"
+                },
+                "correlation_analysis" = {
+                    if (self$options$plotType != "scatter") {
+                        overrides <- c(overrides, paste0("Plot type changed from '", self$options$plotType, "' to 'scatter'"))
+                    }
+                    if (!self$options$addCorr) {
+                        overrides <- c(overrides, "Correlation statistics enabled")
+                    }
+                    if (self$options$corrMethod != "pearson") {
+                        overrides <- c(overrides, paste0("Correlation method changed from '", self$options$corrMethod, "' to 'pearson'"))
+                    }
+
+                    self$options$plotType <- "scatter"
+                    self$options$addCorr <- TRUE
+                    self$options$corrMethod <- "pearson"
+                }
+            )
+
+            # Display warning if settings were overridden
+            if (length(overrides) > 0) {
+                preset_name <- tools::toTitleCase(gsub("_", " ", preset))
+                warning(paste0(
+                    "\n⚠️ CLINICAL PRESET OVERRIDE WARNING ⚠️\n\n",
+                    "The '", preset_name, "' preset has automatically changed the following settings:\n",
+                    paste0("  • ", overrides, collapse = "\n"), "\n\n",
+                    "These changes override your manual selections. In regulated clinical settings, ",
+                    "ensure these preset configurations are appropriate for your analysis and documented ",
+                    "in your protocol.\n\n",
+                    "To use custom settings instead, select 'Custom' from the Clinical Preset dropdown.\n"
+                ))
+            }
+        },
+
+        .generateExplanations = function() {
+            plot_type <- self$options$plotType
+            preset <- self$options$clinicalPreset
+
+            explanation <- "<h3>Clinical Explanations</h3>"
+
+            # General explanation based on plot type
+            explanation <- paste0(explanation, "<h4>", tools::toTitleCase(plot_type), "</h4>")
+            explanation <- paste0(explanation, "<p>", switch(plot_type,
+                "boxplot" = "Box plots are useful for comparing the distribution of a continuous variable between groups. The box represents the interquartile range (IQR), the line inside the box is the median, and the whiskers extend to 1.5 times the IQR.",
+                "violin" = "Violin plots are similar to box plots, but they also show the probability density of the data at different values. This can be useful for visualizing the distribution of the data.",
+                "scatter" = "Scatter plots are used to visualize the relationship between two continuous variables. A correlation coefficient can be added to quantify the strength and direction of the relationship.",
+                "histogram" = "Histograms are used to visualize the distribution of a single continuous variable. The height of each bar represents the number of observations that fall within that bin.",
+                "density" = "Density plots are a smoothed version of a histogram. They are useful for visualizing the underlying distribution of the data.",
+                "barplot" = "Bar plots are used to visualize the distribution of a categorical variable. The height of each bar represents the number of observations in that category.",
+                "dotplot" = "Dot plots are similar to bar plots, but they show the individual data points. This can be useful for visualizing the distribution of the data.",
+                "line" = "Line plots are used to visualize the trend of a continuous variable over time or another continuous variable.",
+                "errorplot" = "Error plots are used to visualize the mean and confidence interval of a continuous variable."
+            ), "</p>")
+
+            # Explanation based on clinical preset
+            if (preset != "custom") {
+                explanation <- paste0(explanation, "<h4>Clinical Preset: ", tools::toTitleCase(gsub("_", " ", preset)), "</h4>")
+                explanation <- paste0(explanation, "<p>", switch(preset,
+                    "prognostic_biomarker" = "This preset is designed for analyzing the relationship between a prognostic biomarker and a categorical outcome. The box plot allows for a quick comparison of the biomarker levels between the different outcome groups. The statistical test will help to determine if there is a significant difference in the biomarker levels between the groups.",
+                    "diagnostic_test" = "This preset is designed for evaluating the performance of a diagnostic test. The box plot allows for a quick comparison of the test results between the diseased and non-diseased groups. The t-test will help to determine if there is a significant difference in the test results between the groups.",
+                    "correlation_analysis" = "This preset is designed for analyzing the correlation between two continuous variables. The scatter plot allows for a quick visualization of the relationship between the two variables. The Pearson correlation coefficient will quantify the strength and direction of the linear relationship."
+                ), "</p>")
+            }
+
+            self$results$plotInfo$setContent(explanation)
         }
     )
 )

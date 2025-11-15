@@ -201,3 +201,5 @@ children:
         name: ggpubrShowLines
       - type: CheckBox
         name: ggpubrAddPoints
+      - type: CheckBox
+        name: showExplanations

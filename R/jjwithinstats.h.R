@@ -38,7 +38,8 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ggpubrPalette = "jco",
             ggpubrAddStats = TRUE,
             ggpubrShowLines = TRUE,
-            ggpubrAddPoints = FALSE, ...) {
+            ggpubrAddPoints = FALSE,
+            showExplanations = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -245,6 +246,10 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "ggpubrAddPoints",
                 ggpubrAddPoints,
                 default=FALSE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=TRUE)
 
             self$.addOption(private$..dep1)
             self$.addOption(private$..dep2)
@@ -279,6 +284,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..ggpubrAddStats)
             self$.addOption(private$..ggpubrShowLines)
             self$.addOption(private$..ggpubrAddPoints)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         dep1 = function() private$..dep1$value,
@@ -313,7 +319,8 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ggpubrPalette = function() private$..ggpubrPalette$value,
         ggpubrAddStats = function() private$..ggpubrAddStats$value,
         ggpubrShowLines = function() private$..ggpubrShowLines$value,
-        ggpubrAddPoints = function() private$..ggpubrAddPoints$value),
+        ggpubrAddPoints = function() private$..ggpubrAddPoints$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..dep1 = NA,
         ..dep2 = NA,
@@ -347,7 +354,8 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..ggpubrPalette = NA,
         ..ggpubrAddStats = NA,
         ..ggpubrShowLines = NA,
-        ..ggpubrAddPoints = NA)
+        ..ggpubrAddPoints = NA,
+        ..showExplanations = NA)
 )
 
 jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -587,6 +595,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ggpubrShowLines Show individual subject trajectories for paired
 #'   plot.
 #' @param ggpubrAddPoints Overlay individual data points on ggpubr plot.
+#' @param showExplanations Show explanations of the statistical results.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -631,7 +640,8 @@ jjwithinstats <- function(
     ggpubrPalette = "jco",
     ggpubrAddStats = TRUE,
     ggpubrShowLines = TRUE,
-    ggpubrAddPoints = FALSE) {
+    ggpubrAddPoints = FALSE,
+    showExplanations = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjwithinstats requires jmvcore to be installed (restart may be required)")
@@ -682,7 +692,8 @@ jjwithinstats <- function(
         ggpubrPalette = ggpubrPalette,
         ggpubrAddStats = ggpubrAddStats,
         ggpubrShowLines = ggpubrShowLines,
-        ggpubrAddPoints = ggpubrAddPoints)
+        ggpubrAddPoints = ggpubrAddPoints,
+        showExplanations = showExplanations)
 
     analysis <- jjwithinstatsClass$new(
         options = options,

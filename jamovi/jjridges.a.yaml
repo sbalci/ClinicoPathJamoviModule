@@ -1,7 +1,7 @@
 ---
 name: jjridges
 title: Ridge Plot
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Distribution
 # menuSubtitle: 'Enhanced Ridgeline Visualization'
 version: '0.0.31'
@@ -526,4 +526,22 @@ options:
           R: >
             Resolution for plot export.
 
+    - name: clinicalPreset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: Custom
+          name: custom
+        - title: Biomarker Distribution
+          name: biomarker_distribution
+        - title: Treatment Response
+          name: treatment_response
+        - title: Correlation Analysis
+          name: correlation_analysis
+      default: custom
+      description:
+          ui: >
+            Apply a preset for a specific clinical analysis
+          R: >
+            Clinical analysis preset
 ...

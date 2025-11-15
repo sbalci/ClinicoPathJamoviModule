@@ -250,12 +250,67 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             return(summary)
         },
+
+        .applyClinicalPreset = function() {
+            preset <- self$options$clinicalPreset
+            if (preset == "custom") {
+                return()
+            }
+
+            if (preset == "biomarker_distribution") {
+                self$options$plot_type <- "density_ridges"
+                self$options$add_boxplot <- TRUE
+                self$options$add_quantiles <- TRUE
+                self$options$quantiles <- "0.25, 0.5, 0.75"
+                self$options$theme_style <- "theme_pubr"
+
+            } else if (preset == "treatment_response") {
+                self$options$plot_type <- "violin_ridges"
+                self$options$show_stats <- TRUE
+                self$options$test_type <- "nonparametric"
+                self$options$effsize_type <- "cliff_delta"
+                self$options$theme_style <- "theme_pubr"
+
+            } else if (preset == "correlation_analysis") {
+                # CRITICAL FIX: This preset is not yet fully implemented
+                # The double_ridges plot type currently only mirrors the same variable
+                # For true correlation analysis between two biomarkers, use scatter plots or correlation matrix
+
+                # Show prominent warning
+                warning_msg <- paste0(
+                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Feature Not Yet Implemented</h4>",
+                    "<p><strong>The 'Correlation Analysis' preset is not yet fully implemented.</strong></p>",
+                    "<p>The current 'double_ridges' plot only shows a mirrored version of the same variable, ",
+                    "not a true two-variable correlation analysis.</p>",
+                    "<p><strong>For correlation analysis between two biomarkers:</strong></p>",
+                    "<ul>",
+                    "<li>Use the <strong>Correlation Matrix</strong> analysis instead (jjcorrmat)</li>",
+                    "<li>Or use <strong>Scatter Plot with Stats</strong> (jjscatterstats)</li>",
+                    "</ul>",
+                    "<p>This preset will fall back to standard density ridges for now.</p>",
+                    "</div>"
+                )
+                self$results$warnings$setContent(warning_msg)
+                self$results$warnings$setVisible(TRUE)
+
+                # Fallback to standard density plot instead of broken double_ridges
+                self$options$plot_type <- "density_ridges"
+                self$options$show_stats <- TRUE
+                self$options$test_type <- "parametric"
+                self$options$effsize_type <- "d"
+                self$options$theme_style <- "theme_pubr"
+            }
+        },
         
         .run = function() {
             # Check requirements
             if (is.null(self$options$x_var) || is.null(self$options$y_var))
                 return()
-            
+
+            # Apply clinical preset if selected (must be done before other processing)
+            private$.applyClinicalPreset()
+
             # Check package availability
             if (!requireNamespace("ggridges", quietly = TRUE)) {
                 self$results$warnings$setContent(
@@ -264,7 +319,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$warnings$setVisible(TRUE)
                 return()
             }
-            
+
             # Validate inputs and collect warnings
             input_warnings <- tryCatch({
                 private$.validateInputs()
@@ -842,10 +897,19 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateStatistics = function(data) {
             stats_table <- self$results$statistics
-            
-            # Calculate statistics for each group
+
+            # Build grouping variables: always include y, optionally add fill and facet
+            grouping_vars <- "y"
+            if (!is.null(self$options$fill_var) && "fill" %in% names(data)) {
+                grouping_vars <- c(grouping_vars, "fill")
+            }
+            if (!is.null(self$options$facet_var) && "facet" %in% names(data)) {
+                grouping_vars <- c(grouping_vars, "facet")
+            }
+
+            # Calculate statistics for each combination of grouping variables
             stats <- data %>%
-                group_by(y) %>%
+                group_by(across(all_of(grouping_vars))) %>%
                 summarise(
                     n = n(),
                     mean = mean(x, na.rm = TRUE),
@@ -854,16 +918,27 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     q1 = quantile(x, 0.25, na.rm = TRUE),
                     q3 = quantile(x, 0.75, na.rm = TRUE),
                     min = min(x, na.rm = TRUE),
-                    max = max(x, na.rm = TRUE)
+                    max = max(x, na.rm = TRUE),
+                    .groups = "drop"
                 )
-            
+
             # Populate table
             for (i in seq_len(nrow(stats))) {
                 private$.checkpoint(flush = FALSE)
+
+                # Build group label from all grouping variables
+                group_label <- as.character(stats$y[i])
+                if ("fill" %in% names(stats)) {
+                    group_label <- paste0(group_label, " [", stats$fill[i], "]")
+                }
+                if ("facet" %in% names(stats)) {
+                    group_label <- paste0(group_label, " (", stats$facet[i], ")")
+                }
+
                 stats_table$addRow(
                     rowKey = i,
                     values = list(
-                        group = as.character(stats$y[i]),
+                        group = group_label,
                         n = stats$n[i],
                         mean = stats$mean[i],
                         sd = stats$sd[i],
@@ -876,128 +951,372 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
         },
-        
-        .generateTests = function(data) {
-            tests_table <- self$results$tests
-            
-            # Perform pairwise comparisons if more than 2 groups
-            groups <- unique(data$y)
-            if (length(groups) > 1) {
-                comparisons <- combn(groups, 2, simplify = FALSE)
-                p_values <- numeric(length(comparisons))
-                test_results <- list()
-                
-                for (i in seq_along(comparisons)) {
-                    private$.checkpoint(flush = FALSE)
-                    group1 <- comparisons[[i]][1]
-                    group2 <- comparisons[[i]][2]
-                    
-                    data1 <- data$x[data$y == group1]
-                    data2 <- data$x[data$y == group2]
-                    
-                    # Perform test based on type
-                    if (self$options$test_type == "parametric") {
-                        test_result <- t.test(data1, data2)
-                        statistic <- test_result$statistic
-                        p_value <- test_result$p.value
-                        ci_lower <- test_result$conf.int[1]
-                        ci_upper <- test_result$conf.int[2]
-                    } else if (self$options$test_type == "nonparametric") {
-                        test_result <- wilcox.test(data1, data2, conf.int = TRUE)
-                        statistic <- test_result$statistic
-                        p_value <- test_result$p.value
-                        ci_lower <- if(!is.null(test_result$conf.int)) test_result$conf.int[1] else NA
-                        ci_upper <- if(!is.null(test_result$conf.int)) test_result$conf.int[2] else NA
-                    } else if (self$options$test_type == "robust") {
-                        # Use robust test if available
-                        if (requireNamespace("WRS2", quietly = TRUE)) {
-                            test_result <- WRS2::yuen(data1, data2)
-                            statistic <- test_result$test
-                            p_value <- test_result$p.value
-                            ci_lower <- test_result$conf.int[1]
-                            ci_upper <- test_result$conf.int[2]
-                        } else {
-                            # Fallback to t-test
-                            test_result <- t.test(data1, data2)
-                            statistic <- test_result$statistic
-                            p_value <- test_result$p.value
-                            ci_lower <- test_result$conf.int[1]
-                            ci_upper <- test_result$conf.int[2]
-                        }
+
+        # Helper method: Perform a single statistical test with proper warnings
+        .performSingleTest = function(data1, data2, group1, group2, stratum_label = "") {
+            test_type <- self$options$test_type
+            statistic <- NA
+            p_value <- NA
+            ci_lower <- NA
+            ci_upper <- NA
+            test_method <- ""
+            warning_msg <- NULL
+
+            if (test_type == "parametric") {
+                test_result <- t.test(data1, data2)
+                statistic <- test_result$statistic
+                p_value <- test_result$p.value
+                ci_lower <- test_result$conf.int[1]
+                ci_upper <- test_result$conf.int[2]
+                test_method <- "t-test"
+
+            } else if (test_type == "nonparametric") {
+                test_result <- wilcox.test(data1, data2, conf.int = TRUE)
+                statistic <- test_result$statistic
+                p_value <- test_result$p.value
+                ci_lower <- if(!is.null(test_result$conf.int)) test_result$conf.int[1] else NA
+                ci_upper <- if(!is.null(test_result$conf.int)) test_result$conf.int[2] else NA
+                test_method <- "Wilcoxon"
+
+            } else if (test_type == "robust") {
+                # CRITICAL FIX: Warn if WRS2 unavailable instead of silent fallback
+                if (requireNamespace("WRS2", quietly = TRUE)) {
+                    test_result <- WRS2::yuen(data1, data2)
+                    statistic <- test_result$test
+                    p_value <- test_result$p.value
+                    ci_lower <- test_result$conf.int[1]
+                    ci_upper <- test_result$conf.int[2]
+                    test_method <- "Yuen (robust)"
+                } else {
+                    # Fallback with warning
+                    test_result <- t.test(data1, data2)
+                    statistic <- test_result$statistic
+                    p_value <- test_result$p.value
+                    ci_lower <- test_result$conf.int[1]
+                    ci_upper <- test_result$conf.int[2]
+                    test_method <- "t-test (WRS2 unavailable)"
+                    warning_msg <- paste0("⚠️ WRS2 package not available for robust test. ",
+                                         "Falling back to standard t-test for comparison: ",
+                                         group1, " vs ", group2,
+                                         if(stratum_label != "") paste0(" (", stratum_label, ")") else "")
+                }
+
+            } else if (test_type == "bayes") {
+                # CRITICAL FIX: Implement Bayesian test or warn
+                if (requireNamespace("BayesFactor", quietly = TRUE)) {
+                    # Use BayesFactor for Bayesian t-test
+                    bf_result <- tryCatch({
+                        BayesFactor::ttestBF(x = data1, y = data2)
+                    }, error = function(e) NULL)
+
+                    if (!is.null(bf_result)) {
+                        statistic <- exp(bf_result@bayesFactor$bf)  # Bayes Factor
+                        p_value <- NA  # Bayesian inference doesn't use p-values
+                        ci_lower <- NA
+                        ci_upper <- NA
+                        test_method <- "Bayesian t-test"
                     } else {
                         statistic <- NA
                         p_value <- NA
                         ci_lower <- NA
                         ci_upper <- NA
+                        test_method <- "Bayesian (failed)"
+                        warning_msg <- paste0("⚠️ Bayesian test failed for: ", group1, " vs ", group2)
                     }
-                    
-                    # Calculate effect size
-                    if (self$options$effsize_type == "d") {
-                        # Cohen's d
-                        pooled_sd <- sqrt(((length(data1) - 1) * var(data1) + 
-                                         (length(data2) - 1) * var(data2)) / 
-                                        (length(data1) + length(data2) - 2))
-                        effect_size <- (mean(data1) - mean(data2)) / pooled_sd
-                    } else if (self$options$effsize_type == "g") {
-                        # Hedge's g (corrected Cohen's d)
-                        n1 <- length(data1)
-                        n2 <- length(data2)
-                        pooled_sd <- sqrt(((n1 - 1) * var(data1) + (n2 - 1) * var(data2)) / 
-                                        (n1 + n2 - 2))
-                        d <- (mean(data1) - mean(data2)) / pooled_sd
-                        # Correction factor
-                        J <- 1 - (3 / (4 * (n1 + n2 - 2) - 1))
-                        effect_size <- d * J
-                    } else if (self$options$effsize_type == "eta") {
-                        # Eta squared (for this comparison)
-                        ss_between <- sum(length(data1) * (mean(data1) - mean(c(data1, data2)))^2 +
-                                        length(data2) * (mean(data2) - mean(c(data1, data2)))^2)
-                        ss_total <- sum((c(data1, data2) - mean(c(data1, data2)))^2)
-                        effect_size <- ss_between / ss_total
-                    } else if (self$options$effsize_type == "cliff_delta") {
-                        # Cliff's Delta (nonparametric)
-                        effect_size <- private$.calculateCliffsDelta(data1, data2)
-                    } else if (self$options$effsize_type == "hodges_lehmann") {
-                        # Hodges-Lehmann shift (nonparametric)
-                        effect_size <- private$.calculateHodgesLehmann(data1, data2)
-                    } else {
-                        effect_size <- NA
-                    }
-                    
-                    # Store results
-                    p_values[i] <- p_value
-                    test_results[[i]] <- list(
-                        comparison = paste(group1, "vs", group2),
-                        statistic = statistic,
-                        p_value = p_value,
-                        effect_size = effect_size,
-                        ci_lower = ci_lower,
-                        ci_upper = ci_upper
-                    )
-                }
-                
-                # Apply p-value adjustment
-                if (self$options$p_adjust_method != "none" && !any(is.na(p_values))) {
-                    adjusted_p <- p.adjust(p_values, method = self$options$p_adjust_method)
                 } else {
-                    adjusted_p <- p_values
+                    statistic <- NA
+                    p_value <- NA
+                    ci_lower <- NA
+                    ci_upper <- NA
+                    test_method <- "Bayesian (unavailable)"
+                    warning_msg <- paste0("⚠️ BayesFactor package not available. ",
+                                         "Cannot perform Bayesian test for: ", group1, " vs ", group2)
                 }
-                
-                # Add rows to table with adjusted p-values
-                for (i in seq_along(test_results)) {
-                    private$.checkpoint(flush = FALSE)
-                    tests_table$addRow(
-                        rowKey = i,
-                        values = list(
-                            comparison = test_results[[i]]$comparison,
-                            statistic = test_results[[i]]$statistic,
-                            p_value = test_results[[i]]$p_value,
-                            p_adjusted = adjusted_p[i],
-                            effect_size = test_results[[i]]$effect_size,
-                            ci_lower = test_results[[i]]$ci_lower,
-                            ci_upper = test_results[[i]]$ci_upper
-                        )
-                    )
+
+            } else {
+                warning_msg <- paste0("⚠️ Unknown test type '", test_type, "' for: ", group1, " vs ", group2)
+            }
+
+            # Calculate effect size with proper CIs
+            effect_result <- private$.calculateEffectSizeWithCI(data1, data2)
+
+            # Build comparison label
+            comparison_label <- paste(group1, "vs", group2)
+            if (stratum_label != "") {
+                comparison_label <- paste0(comparison_label, " (", stratum_label, ")")
+            }
+
+            return(list(
+                comparison = comparison_label,
+                statistic = statistic,
+                p_value = p_value,
+                ci_lower = ci_lower,
+                ci_upper = ci_upper,
+                effect_size = effect_result$effect_size,
+                effect_ci_lower = effect_result$ci_lower,
+                effect_ci_upper = effect_result$ci_upper,
+                test_method = test_method,
+                warning = warning_msg
+            ))
+        },
+
+        # Helper method: Calculate effect size with proper confidence intervals
+        .calculateEffectSizeWithCI = function(data1, data2) {
+            effsize_type <- self$options$effsize_type
+            effect_size <- NA
+            ci_lower <- NA
+            ci_upper <- NA
+
+            n1 <- length(data1)
+            n2 <- length(data2)
+
+            if (effsize_type == "d") {
+                # Cohen's d with proper CI
+                pooled_sd <- sqrt(((n1 - 1) * var(data1) + (n2 - 1) * var(data2)) / (n1 + n2 - 2))
+                effect_size <- (mean(data1) - mean(data2)) / pooled_sd
+
+                # CI for Cohen's d using approximate formula
+                se_d <- sqrt(((n1 + n2) / (n1 * n2)) + (effect_size^2 / (2 * (n1 + n2))))
+                ci_lower <- effect_size - 1.96 * se_d
+                ci_upper <- effect_size + 1.96 * se_d
+
+            } else if (effsize_type == "g") {
+                # Hedge's g with CI
+                pooled_sd <- sqrt(((n1 - 1) * var(data1) + (n2 - 1) * var(data2)) / (n1 + n2 - 2))
+                d <- (mean(data1) - mean(data2)) / pooled_sd
+                J <- 1 - (3 / (4 * (n1 + n2 - 2) - 1))
+                effect_size <- d * J
+
+                # CI for Hedge's g
+                se_g <- sqrt(((n1 + n2) / (n1 * n2)) + (effect_size^2 / (2 * (n1 + n2)))) * J
+                ci_lower <- effect_size - 1.96 * se_g
+                ci_upper <- effect_size + 1.96 * se_g
+
+            } else if (effsize_type == "eta") {
+                # Eta squared
+                ss_between <- sum(n1 * (mean(data1) - mean(c(data1, data2)))^2 +
+                                n2 * (mean(data2) - mean(c(data1, data2)))^2)
+                ss_total <- sum((c(data1, data2) - mean(c(data1, data2)))^2)
+                effect_size <- ss_between / ss_total
+
+                # CI for eta-squared (approximate)
+                # Using Fisher's Z transformation
+                if (effect_size > 0 && effect_size < 1) {
+                    z <- 0.5 * log((1 + sqrt(effect_size)) / (1 - sqrt(effect_size)))
+                    se_z <- 1 / sqrt(n1 + n2 - 3)
+                    z_lower <- z - 1.96 * se_z
+                    z_upper <- z + 1.96 * se_z
+                    ci_lower <- tanh(z_lower)^2
+                    ci_upper <- tanh(z_upper)^2
+                }
+
+            } else if (effsize_type == "cliff_delta") {
+                # Cliff's Delta with CI using bootstrap
+                effect_size <- private$.calculateCliffsDelta(data1, data2)
+
+                # Bootstrap CI for Cliff's Delta
+                if (requireNamespace("boot", quietly = TRUE)) {
+                    boot_fn <- function(data, indices) {
+                        d1 <- data[indices[indices <= n1]]
+                        d2 <- data[indices[indices > n1]]
+                        private$.calculateCliffsDelta(d1, d2)
+                    }
+                    boot_result <- tryCatch({
+                        boot::boot(c(data1, data2), boot_fn, R = 1000)
+                    }, error = function(e) NULL)
+
+                    if (!is.null(boot_result)) {
+                        ci_result <- boot::boot.ci(boot_result, type = "perc")
+                        if (!is.null(ci_result$percent)) {
+                            ci_lower <- ci_result$percent[4]
+                            ci_upper <- ci_result$percent[5]
+                        }
+                    }
+                }
+
+            } else if (effsize_type == "hodges_lehmann") {
+                # Hodges-Lehmann shift (median of pairwise differences)
+                effect_size <- private$.calculateHodgesLehmann(data1, data2)
+
+                # CI from Wilcoxon test
+                wilcox_result <- wilcox.test(data1, data2, conf.int = TRUE)
+                if (!is.null(wilcox_result$conf.int)) {
+                    ci_lower <- wilcox_result$conf.int[1]
+                    ci_upper <- wilcox_result$conf.int[2]
+                }
+
+            } else if (effsize_type == "omega") {
+                # CRITICAL FIX: Implement omega-squared
+                # Omega-squared for two groups
+                grand_mean <- mean(c(data1, data2))
+                ss_between <- n1 * (mean(data1) - grand_mean)^2 + n2 * (mean(data2) - grand_mean)^2
+                ss_within <- sum((data1 - mean(data1))^2) + sum((data2 - mean(data2))^2)
+                ms_within <- ss_within / (n1 + n2 - 2)
+
+                effect_size <- (ss_between - ms_within) / (ss_between + ss_within + ms_within)
+                effect_size <- max(0, effect_size)  # Omega-squared can't be negative
+
+                # CI for omega-squared (approximate using eta-squared CI method)
+                if (effect_size > 0 && effect_size < 1) {
+                    z <- 0.5 * log((1 + sqrt(effect_size)) / (1 - sqrt(effect_size)))
+                    se_z <- 1 / sqrt(n1 + n2 - 3)
+                    z_lower <- z - 1.96 * se_z
+                    z_upper <- z + 1.96 * se_z
+                    ci_lower <- max(0, tanh(z_lower)^2)
+                    ci_upper <- min(1, tanh(z_upper)^2)
+                }
+            }
+
+            return(list(
+                effect_size = effect_size,
+                ci_lower = ci_lower,
+                ci_upper = ci_upper
+            ))
+        },
+
+        # Helper method: Adjust p-values handling NA correctly
+        .adjustPValues = function(p_values) {
+            if (self$options$p_adjust_method == "none") {
+                return(p_values)
+            }
+
+            # CRITICAL FIX: Handle NA values correctly
+            # Apply adjustment only to non-NA values, preserve NA positions
+            non_na_indices <- which(!is.na(p_values))
+
+            if (length(non_na_indices) == 0) {
+                # All NA, return as is
+                return(p_values)
+            }
+
+            # Adjust only non-NA p-values
+            adjusted <- p_values
+            adjusted[non_na_indices] <- p.adjust(p_values[non_na_indices],
+                                                 method = self$options$p_adjust_method)
+
+            return(adjusted)
+        },
+
+        # Helper method: Add test row to table
+        .addTestRow = function(tests_table, test_result, adjusted_p, row_key) {
+            # Display warning if present
+            if (!is.null(test_result$warning)) {
+                current_warnings <- self$results$warnings$state
+                if (is.null(current_warnings)) {
+                    current_warnings <- ""
+                }
+                new_warning <- paste0(
+                    current_warnings,
+                    "<p style='color:#856404;'>", test_result$warning, "</p>"
+                )
+                self$results$warnings$setContent(new_warning)
+                self$results$warnings$setVisible(TRUE)
+            }
+
+            tests_table$addRow(
+                rowKey = row_key,
+                values = list(
+                    comparison = test_result$comparison,
+                    statistic = test_result$statistic,
+                    p_value = test_result$p_value,
+                    p_adjusted = adjusted_p,
+                    effect_size = test_result$effect_size,
+                    ci_lower = test_result$effect_ci_lower,  # Effect size CI, not test CI
+                    ci_upper = test_result$effect_ci_upper   # Effect size CI, not test CI
+                )
+            )
+        },
+
+        .generateTests = function(data) {
+            tests_table <- self$results$tests
+
+            # Build stratification variables (facet and fill if present)
+            strata_vars <- c()
+            if (!is.null(self$options$facet_var) && "facet" %in% names(data)) {
+                strata_vars <- c(strata_vars, "facet")
+            }
+            if (!is.null(self$options$fill_var) && "fill" %in% names(data)) {
+                strata_vars <- c(strata_vars, "fill")
+            }
+
+            # If there are strata, perform comparisons within each stratum
+            if (length(strata_vars) > 0) {
+                # Get all unique combinations of strata
+                strata_combinations <- data %>%
+                    select(all_of(strata_vars)) %>%
+                    distinct()
+
+                all_test_results <- list()
+                all_p_values <- numeric()
+
+                for (s in seq_len(nrow(strata_combinations))) {
+                    # Filter data for this stratum
+                    stratum_data <- data
+                    stratum_label <- ""
+                    for (sv in strata_vars) {
+                        stratum_val <- strata_combinations[[sv]][s]
+                        stratum_data <- stratum_data[stratum_data[[sv]] == stratum_val, ]
+                        stratum_label <- paste0(stratum_label, if(stratum_label != "") " / " else "", sv, "=", stratum_val)
+                    }
+
+                    # Perform pairwise comparisons within this stratum
+                    groups <- unique(stratum_data$y)
+                    if (length(groups) > 1) {
+                        comparisons <- combn(groups, 2, simplify = FALSE)
+
+                        for (i in seq_along(comparisons)) {
+                            private$.checkpoint(flush = FALSE)
+                            group1 <- comparisons[[i]][1]
+                            group2 <- comparisons[[i]][2]
+
+                            data1 <- stratum_data$x[stratum_data$y == group1]
+                            data2 <- stratum_data$x[stratum_data$y == group2]
+
+                            # Perform test and store results with stratum label
+                            test_result <- private$.performSingleTest(data1, data2, group1, group2, stratum_label)
+                            all_test_results <- c(all_test_results, list(test_result))
+                            all_p_values <- c(all_p_values, test_result$p_value)
+                        }
+                    }
+                }
+
+                # Apply p-value adjustment across all tests
+                adjusted_p <- private$.adjustPValues(all_p_values)
+
+                # Add rows to table
+                for (i in seq_along(all_test_results)) {
+                    private$.addTestRow(tests_table, all_test_results[[i]], adjusted_p[i], i)
+                }
+
+            } else {
+                # No strata: perform simple pairwise comparisons as before
+                groups <- unique(data$y)
+                if (length(groups) > 1) {
+                    comparisons <- combn(groups, 2, simplify = FALSE)
+                    p_values <- numeric(length(comparisons))
+                    test_results <- list()
+
+                    for (i in seq_along(comparisons)) {
+                        private$.checkpoint(flush = FALSE)
+                        group1 <- comparisons[[i]][1]
+                        group2 <- comparisons[[i]][2]
+
+                        data1 <- data$x[data$y == group1]
+                        data2 <- data$x[data$y == group2]
+
+                        # Use helper method for single test
+                        test_result <- private$.performSingleTest(data1, data2, group1, group2, "")
+                        test_results[[i]] <- test_result
+                        p_values[i] <- test_result$p_value
+                    }
+
+                    # Apply p-value adjustment using helper method
+                    adjusted_p <- private$.adjustPValues(p_values)
+
+                    # Add rows to table using helper method
+                    for (i in seq_along(test_results)) {
+                        private$.addTestRow(tests_table, test_results[[i]], adjusted_p[i], i)
+                    }
                 }
             }
         },

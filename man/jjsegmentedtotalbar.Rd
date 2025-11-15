@@ -35,7 +35,8 @@ jjsegmentedtotalbar(
   outline_color = "white",
   export_ready = TRUE,
   show_statistical_tests = FALSE,
-  confidence_level = 0.95
+  confidence_level = 0.95,
+  showExplanations = TRUE
 )
 }
 \arguments{
@@ -103,6 +104,8 @@ ggsegmentedtotalbar.}
 proportion differences.}
 
 \item{confidence_level}{Confidence level for statistical tests (0.80-0.99).}
+
+\item{showExplanations}{Show explanations of the statistical results}
 }
 \value{
 A results object containing:

@@ -1,7 +1,7 @@
 ---
 name:  jjsyndromicplot
 title: Syndromic Plot (PCA Loadings)
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Multivariate Analysis
 version: '0.0.32'
 jas: '1.2'
@@ -214,3 +214,26 @@ options:
       default: 600
       description:
           R: Height of the plot in pixels.
+
+    - name: clinicalPreset
+      title: Clinical Preset
+      type: List
+      options:
+        - name: none
+          title: None
+        - name: biomarker_discovery
+          title: Biomarker Discovery
+        - name: disease_subtyping
+          title: Disease Subtyping
+      default: none
+      description:
+          R: >
+            Apply a set of predefined settings for common clinical analysis scenarios.
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show explanations of the PCA results and syndromic plot.

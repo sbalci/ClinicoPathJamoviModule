@@ -246,27 +246,22 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to configure analysis presets
         .configurePresets = function() {
             preset <- self$options$analysisPreset
-            
+
             # Apply preset-specific optimizations
             switch(preset,
                 "gene_interaction" = {
-                    # Gene network optimizations
                     if (is.null(self$options$plotTitle) || self$options$plotTitle == "") {
-                        # Note: Can't modify options after initialization in jamovi
-                        # This will be handled in UI guidance instead
+                        self$options$plotTitle <- "Gene Interaction Network"
                     }
                 },
                 "patient_network" = {
-                    # Patient similarity optimizations
-                    # Guidance will be provided in instructions
+                    self$options$horizontal <- TRUE
                 },
                 "pathway_network" = {
-                    # Pathway network optimizations
-                    # Guidance will be provided in instructions
+                    self$options$sortNodes <- "degree"
                 },
                 "comorbidity_network" = {
-                    # Comorbidity network optimizations
-                    # Guidance will be provided in instructions
+                    self$options$sortNodes <- "degree"
                 }
             )
         },
@@ -303,10 +298,9 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to prepare network data
         .prepareNetworkData = function() {
             mydata <- self$data
-            mydata <- jmvcore::naOmit(mydata)
-            
+
             if (nrow(mydata) == 0) {
-                self$results$todo$setContent(.("<br><b>Error:</b> No complete data rows available<br><hr>"))
+                self$results$todo$setContent(.("<br><b>Error:</b> No data available<br><hr>"))
                 return(NULL)
             }
 
@@ -322,13 +316,27 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
 
+            # Build list of columns to check for NAs (only those actually used)
+            required_cols <- c(source_var, target_var)
+            if (!is.null(weight_var) && weight_var %in% names(mydata)) {
+                required_cols <- c(required_cols, weight_var)
+            }
+            if (!is.null(group_var) && group_var %in% names(mydata)) {
+                required_cols <- c(required_cols, group_var)
+            }
+
+            # SELECTIVE NA OMISSION: Only drop rows with NAs in required columns
+            complete_rows <- complete.cases(mydata[required_cols])
+            mydata_clean <- mydata[complete_rows, , drop = FALSE]
+
+            if (nrow(mydata_clean) == 0) {
+                self$results$todo$setContent(.("<br><b>Error:</b> No complete rows in source/target/weight/group columns<br><hr>"))
+                return(NULL)
+            }
+
             # Create edge list matrix
-            edgelist <- as.matrix(mydata[c(source_var, target_var)])
-            
-            # Remove any rows with missing values
-            complete_rows <- complete.cases(edgelist)
-            edgelist <- edgelist[complete_rows, , drop = FALSE]
-            
+            edgelist <- as.matrix(mydata_clean[c(source_var, target_var)])
+
             if (nrow(edgelist) == 0) {
                 self$results$todo$setContent(.("<br><b>Error:</b> No complete edge data available<br><hr>"))
                 return(NULL)
@@ -338,14 +346,14 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             vlabels <- unique(c(edgelist[,1], edgelist[,2]))
             n_nodes <- length(vlabels)
             n_edges <- nrow(edgelist)
-            
+
             # Validate network structure
             validation <- private$.validateNetworkStructure(edgelist, list(n_nodes = n_nodes, n_edges = n_edges))
             edgelist <- validation$edgelist
-            
+
             # Update edge count after validation
             n_edges <- nrow(edgelist)
-            
+
             # Display warnings if any
             if (length(validation$warnings) > 0) {
                 warning_text <- paste(validation$warnings, collapse = "<br>")
@@ -353,17 +361,37 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Get edge weights if specified
-            if (!is.null(weight_var) && weight_var %in% names(mydata)) {
-                weights <- mydata[[weight_var]][complete_rows]
-                weights[is.na(weights)] <- 1  # Replace missing weights with 1
+            if (!is.null(weight_var) && weight_var %in% names(mydata_clean)) {
+                weights <- as.numeric(mydata_clean[[weight_var]])
+                # If any weights are still NA after filtering, replace with 1
+                weights[is.na(weights)] <- 1
             } else {
                 weights <- rep(1, nrow(edgelist))
             }
 
-            # Get group information if specified
-            groups <- NULL
-            if (!is.null(group_var) && group_var %in% names(mydata)) {
-                groups <- mydata[[group_var]][complete_rows]
+            # NODE-LEVEL GROUP HANDLING: Build proper node-to-group mapping
+            # Groups should be node attributes, not edge attributes
+            node_groups <- NULL
+            if (!is.null(group_var) && group_var %in% names(mydata_clean)) {
+                # Create a mapping from node labels to groups
+                # For each node, find its group by looking at source or target columns
+                node_groups <- setNames(rep(NA, length(vlabels)), vlabels)
+
+                for (i in seq_along(vlabels)) {
+                    node <- vlabels[i]
+                    # Look for this node in source column
+                    source_match <- which(mydata_clean[[source_var]] == node)
+                    if (length(source_match) > 0) {
+                        # Use the first occurrence's group
+                        node_groups[node] <- as.character(mydata_clean[[group_var]][source_match[1]])
+                    } else {
+                        # Look in target column
+                        target_match <- which(mydata_clean[[target_var]] == node)
+                        if (length(target_match) > 0) {
+                            node_groups[node] <- as.character(mydata_clean[[group_var]][target_match[1]])
+                        }
+                    }
+                }
             }
 
             # Create igraph object for analysis
@@ -374,13 +402,27 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent(.("<br><b>Error creating network:</b> Invalid edge structure<br><hr>"))
                 return(NULL)
             })
-            
+
             if (is.null(g)) return(NULL)
 
-            # Get vertex attributes  
+            # INJECT EDGE WEIGHTS into igraph object for centrality calculations
+            igraph::E(g)$weight <- weights
+
+            # INJECT NODE GROUPS into igraph object as vertex attribute
+            if (!is.null(node_groups)) {
+                igraph::V(g)$group <- node_groups[igraph::V(g)$name]
+            }
+
+            # Get vertex attributes with WEIGHTED degree if weights provided
             private$.checkpoint(flush = FALSE)  # Before degree calculation
-            degrees <- igraph::degree(g)
-            
+            if (!is.null(weight_var) && weight_var %in% names(mydata_clean)) {
+                # Use weighted degree (strength)
+                degrees <- igraph::strength(g, weights = igraph::E(g)$weight)
+            } else {
+                # Use unweighted degree
+                degrees <- igraph::degree(g)
+            }
+
             # Calculate network density
             private$.checkpoint(flush = FALSE)  # Before density calculation
             density <- igraph::edge_density(g)
@@ -388,7 +430,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(list(
                 edgelist = edgelist,
                 weights = weights,
-                groups = groups,
+                node_groups = node_groups,  # Now node-level, not edge-level
                 g = g,
                 vlabels = vlabels,
                 degrees = degrees,
@@ -450,29 +492,26 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .calculateNodeOrdering = function(network_data) {
             vlabels <- network_data$vlabels
             degrees <- network_data$degrees
-            groups <- network_data$groups
-            
+            node_groups <- network_data$node_groups  # Now using node-level groups
+
             ord <- switch(self$options$sortNodes,
                 "none" = seq_along(vlabels),
                 "name" = order(vlabels, decreasing = self$options$sortDecreasing),
                 "degree" = order(degrees, decreasing = self$options$sortDecreasing),
                 "group" = {
-                    if (!is.null(groups)) {
-                        # Match groups to vertices
-                        vertex_groups <- groups[match(vlabels, network_data$edgelist[,1])]
-                        vertex_groups[is.na(vertex_groups)] <- groups[match(vlabels[is.na(vertex_groups)], 
-                                                                          network_data$edgelist[,2])]
-                        if (all(is.na(vertex_groups))) {
+                    if (!is.null(node_groups)) {
+                        # node_groups is already a named vector mapping node labels to groups
+                        if (all(is.na(node_groups))) {
                             seq_along(vlabels)
                         } else {
-                            order(vertex_groups, decreasing = self$options$sortDecreasing, na.last = TRUE)
+                            order(node_groups, decreasing = self$options$sortDecreasing, na.last = TRUE)
                         }
                     } else {
                         seq_along(vlabels)
                     }
                 }
             )
-            
+
             return(ord)
         },
         
@@ -507,15 +546,15 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to get color schemes
         .getColors = function(network_data) {
-            groups <- network_data$groups
+            node_groups <- network_data$node_groups  # Now using node-level groups
             vlabels <- network_data$vlabels
-            
-            if (!is.null(groups) && self$options$colorByGroup) {
-                # Get unique groups
-                unique_groups <- unique(groups)
+
+            if (!is.null(node_groups) && self$options$colorByGroup) {
+                # Get unique groups (node-level)
+                unique_groups <- unique(node_groups)
                 unique_groups <- unique_groups[!is.na(unique_groups)]
                 n_groups <- length(unique_groups)
-                
+
                 # Get color palette
                 if (n_groups <= 3) {
                     group_colors <- RColorBrewer::brewer.pal(max(3, n_groups), "Set1")[1:n_groups]
@@ -525,24 +564,22 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     group_colors <- rainbow(n_groups)
                 }
                 names(group_colors) <- unique_groups
-                
-                # Assign colors to vertices
-                vertex_groups <- groups[match(vlabels, network_data$edgelist[,1])]
-                vertex_groups[is.na(vertex_groups)] <- groups[match(vlabels[is.na(vertex_groups)], 
-                                                                  network_data$edgelist[,2])]
-                
-                node_fill <- group_colors[vertex_groups]
+
+                # Assign colors to vertices using node_groups directly
+                # node_groups is already a named vector mapping node labels to groups
+                node_fill <- group_colors[node_groups]
                 node_fill[is.na(node_fill)] <- "lightgray"
                 node_border <- "black"
-                
-                # Arc colors with transparency - use group-based colors for arcs
-                edge_groups <- groups[1:length(network_data$weights)]  # Get group for each edge
-                arc_colors <- group_colors[edge_groups]
+
+                # Arc colors: Color edges based on SOURCE node's group
+                edgelist <- network_data$edgelist
+                source_groups <- node_groups[edgelist[, 1]]
+                arc_colors <- group_colors[source_groups]
                 arc_colors[is.na(arc_colors)] <- "gray50"
-                
+
                 # Apply transparency to arc colors
                 arc_color <- adjustcolor(arc_colors, alpha.f = self$options$arcTransparency)
-                
+
             } else {
                 # Default colors
                 node_fill <- "lightblue"
@@ -550,7 +587,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 arc_color <- hsv(0, 0, 0.2, self$options$arcTransparency)
                 group_colors <- NULL
             }
-            
+
             return(list(
                 node_fill = node_fill,
                 node_border = node_border,
@@ -610,29 +647,40 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Centrality measures with clinical context
             if (network_data$n_nodes > 1) {
                 private$.checkpoint(flush = FALSE)  # Before expensive centrality calculations
-                betweenness <- igraph::betweenness(g)
-                closeness <- igraph::closeness(g)
-                
+
+                # WEIGHTED CENTRALITY: Use edge weights if available
+                if (!is.null(igraph::E(g)$weight) && any(igraph::E(g)$weight != 1)) {
+                    # Network has meaningful weights - use weighted centrality
+                    betweenness <- igraph::betweenness(g, weights = igraph::E(g)$weight)
+                    closeness <- igraph::closeness(g, weights = igraph::E(g)$weight)
+                    degree_label <- .("connections/strength")
+                } else {
+                    # Unweighted network
+                    betweenness <- igraph::betweenness(g)
+                    closeness <- igraph::closeness(g)
+                    degree_label <- .("connections")
+                }
+
                 # Get key nodes for clinical interpretation
                 highest_degree_node <- names(which.max(network_data$degrees))
                 highest_betweenness_node <- names(which.max(betweenness))
                 max_degree <- max(network_data$degrees)
                 max_betweenness <- max(betweenness)
-                
+
                 stats_text <- paste(stats_text,
                     .("<h4>Centrality Measures:</h4>"),
                     "<ul>",
-                    paste(.("<li><strong>Highest Degree:</strong>"), highest_degree_node, " (", max_degree, .("connections)"), "</li>"),
+                    paste(.("<li><strong>Highest Degree:</strong>"), highest_degree_node, " (", round(max_degree, 2), " ", degree_label, ")</li>"),
                     paste(.("<li><strong>Highest Betweenness:</strong>"), highest_betweenness_node, " (", round(max_betweenness, 2), ")</li>"),
                     "</ul>",
                     sep = "\n"
                 )
-                
+
                 # Add centrality interpretation
                 centrality_interp <- paste(
                     "<div style='background-color: #fff5f5; padding: 8px; margin: 8px 0; border-left: 4px solid #FF6B6B;'>",
-                    sprintf(.("<p><strong>🎯 Key Players:</strong> '%s' is the most connected entity (%d links), suggesting it may be a hub or central player.</p>"), 
-                            highest_degree_node, max_degree),
+                    sprintf(.("<p><strong>🎯 Key Players:</strong> '%s' is the most connected entity (%.2f %s), suggesting it may be a hub or central player.</p>"),
+                            highest_degree_node, max_degree, degree_label),
                     if (highest_betweenness_node != highest_degree_node) {
                         sprintf(.("<p><strong>🌉 Bridge Entity:</strong> '%s' has the highest betweenness centrality, indicating it serves as an important bridge between different network regions.</p>"),
                                 highest_betweenness_node)
@@ -642,17 +690,18 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</div>",
                     sep = "\n"
                 )
-                
+
                 stats_text <- paste(stats_text, centrality_interp, sep = "\n")
             }
-            
-            # Group statistics if available
-            if (!is.null(network_data$groups)) {
-                group_counts <- table(network_data$groups)
+
+            # NODE-LEVEL Group statistics if available
+            if (!is.null(network_data$node_groups)) {
+                # Count nodes per group (not edges)
+                group_counts <- table(network_data$node_groups, useNA = "no")
                 stats_text <- paste(stats_text,
-                    .("<h4>Group Distribution:</h4>"),
+                    .("<h4>Group Distribution (Node Counts):</h4>"),
                     "<ul>",
-                    paste("<li><strong>", names(group_counts), ":</strong>", group_counts, "</li>", collapse = ""),
+                    paste("<li><strong>", names(group_counts), ":</strong>", group_counts, .(" nodes"), "</li>", collapse = ""),
                     "</ul>",
                     sep = "\n"
                 )
@@ -695,7 +744,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<ul style='margin-left: 20px;'>",
                 .("<li><strong>Small Networks:</strong> Centrality measures less reliable with < 10 nodes</li>"),
                 .("<li><strong>Threshold Effects:</strong> Edge weight filtering can dramatically alter network structure</li>"),
-                .("<li><strong>Directional vs Undirected:</strong> Choose based on whether relationships are symmetric</li>"),
+                .("<li><strong>Directed Networks:</strong> When 'Directed Network' is enabled, statistics respect edge direction but the arc diagram visualization does NOT display arrows. Consider this a limitation of the arc plot style.</li>"),
                 .("<li><strong>Clinical Relevance:</strong> High connectivity doesn't always imply biological significance</li>"),
                 "</ul>",
                 
@@ -732,16 +781,23 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Get centrality information if available
                     highest_degree_node <- names(which.max(network_data$degrees))
                     max_degree <- max(network_data$degrees)
-                    sprintf(.("<p><strong>Key Findings:</strong> The entity '%s' emerged as the most highly connected hub with %d direct connections, suggesting its central role in the network.</p>"),
-                            highest_degree_node, max_degree)
+                    # Use appropriate label for weighted vs unweighted
+                    if (!is.null(igraph::E(network_data$g)$weight) && any(igraph::E(network_data$g)$weight != 1)) {
+                        sprintf(.("<p><strong>Key Findings:</strong> The entity '%s' emerged as the most highly connected hub with %.2f weighted connections, suggesting its central role in the network.</p>"),
+                                highest_degree_node, max_degree)
+                    } else {
+                        sprintf(.("<p><strong>Key Findings:</strong> The entity '%s' emerged as the most highly connected hub with %.0f direct connections, suggesting its central role in the network.</p>"),
+                                highest_degree_node, max_degree)
+                    }
                 } else {
                     ""
                 },
-                
-                if (!is.null(network_data$groups)) {
-                    group_count <- length(unique(network_data$groups[!is.na(network_data$groups)]))
-                    sprintf(.("<p><strong>Grouping:</strong> Entities were categorized into %d distinct groups, with color-coding revealing potential functional clusters or classifications.</p>"),
-                            group_count)
+
+                if (!is.null(network_data$node_groups)) {
+                    # Count unique NODE groups (not edge groups)
+                    group_count <- length(unique(network_data$node_groups[!is.na(network_data$node_groups)]))
+                    sprintf(.("<p><strong>Grouping:</strong> %d nodes were categorized into %d distinct groups, with color-coding revealing potential functional clusters or classifications.</p>"),
+                            sum(!is.na(network_data$node_groups)), group_count)
                 } else {
                     ""
                 },

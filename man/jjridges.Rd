@@ -49,7 +49,8 @@ jjridges(
   custom_annotations = "",
   width = 800,
   height = 600,
-  dpi = 300
+  dpi = 300,
+  clinicalPreset = "custom"
 )
 }
 \arguments{
@@ -169,6 +170,8 @@ is specified.}
 \item{height}{Height of the plot in pixels.}
 
 \item{dpi}{Resolution for plot export.}
+
+\item{clinicalPreset}{Clinical analysis preset}
 }
 \value{
 A results object containing:

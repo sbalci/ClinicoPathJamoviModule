@@ -249,7 +249,8 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..newStage <- jmvcore::OptionVariable$new(
                 "newStage",
                 newStage,
@@ -257,14 +258,16 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..event <- jmvcore::OptionVariable$new(
                 "event",
                 event,
@@ -274,7 +277,8 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "continuous"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..eventLevel <- jmvcore::OptionLevel$new(
                 "eventLevel",
                 eventLevel,
@@ -8888,10 +8892,10 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @export
 stagemigration <- function(
     data,
-    oldStage,
-    newStage,
-    survivalTime,
-    event,
+    oldStage = NULL,
+    newStage = NULL,
+    survivalTime = NULL,
+    event = NULL,
     eventLevel,
     clinicalPreset = "routine_clinical",
     enableGuidedMode = TRUE,

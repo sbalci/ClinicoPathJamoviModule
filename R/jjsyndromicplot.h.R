@@ -21,7 +21,9 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             colormid = "white",
             colorhigh = "firebrick1",
             plotwidth = 600,
-            plotheight = 600, ...) {
+            plotheight = 600,
+            clinicalPreset = "none",
+            showExplanations = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -113,6 +115,18 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 min=300,
                 max=2000,
                 default=600)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "none",
+                    "biomarker_discovery",
+                    "disease_subtyping"),
+                default="none")
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=TRUE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..component)
@@ -130,6 +144,8 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..colorhigh)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
+            self$.addOption(private$..clinicalPreset)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -147,7 +163,9 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         colormid = function() private$..colormid$value,
         colorhigh = function() private$..colorhigh$value,
         plotwidth = function() private$..plotwidth$value,
-        plotheight = function() private$..plotheight$value),
+        plotheight = function() private$..plotheight$value,
+        clinicalPreset = function() private$..clinicalPreset$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..vars = NA,
         ..component = NA,
@@ -164,7 +182,9 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..colormid = NA,
         ..colorhigh = NA,
         ..plotwidth = NA,
-        ..plotheight = NA)
+        ..plotheight = NA,
+        ..clinicalPreset = NA,
+        ..showExplanations = NA)
 )
 
 jjsyndromicplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -343,6 +363,10 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   (e.g., "#FF0000").
 #' @param plotwidth Width of the plot in pixels.
 #' @param plotheight Height of the plot in pixels.
+#' @param clinicalPreset Apply a set of predefined settings for common
+#'   clinical analysis scenarios.
+#' @param showExplanations Show explanations of the PCA results and syndromic
+#'   plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -374,7 +398,9 @@ jjsyndromicplot <- function(
     colormid = "white",
     colorhigh = "firebrick1",
     plotwidth = 600,
-    plotheight = 600) {
+    plotheight = 600,
+    clinicalPreset = "none",
+    showExplanations = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjsyndromicplot requires jmvcore to be installed (restart may be required)")
@@ -402,7 +428,9 @@ jjsyndromicplot <- function(
         colormid = colormid,
         colorhigh = colorhigh,
         plotwidth = plotwidth,
-        plotheight = plotheight)
+        plotheight = plotheight,
+        clinicalPreset = clinicalPreset,
+        showExplanations = showExplanations)
 
     analysis <- jjsyndromicplotClass$new(
         options = options,

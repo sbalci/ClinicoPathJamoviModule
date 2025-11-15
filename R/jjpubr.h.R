@@ -33,7 +33,9 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             legendPosition = "right",
             theme = "pubr",
             plotWidth = 600,
-            plotHeight = 500, ...) {
+            plotHeight = 500,
+            showExplanations = TRUE,
+            clinicalPreset = "custom", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -221,6 +223,19 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=300,
                 max=2000,
                 default=500)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=TRUE)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "custom",
+                    "prognostic_biomarker",
+                    "diagnostic_test",
+                    "correlation_analysis"),
+                default="custom")
 
             self$.addOption(private$..plotType)
             self$.addOption(private$..xvar)
@@ -250,6 +265,8 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..theme)
             self$.addOption(private$..plotWidth)
             self$.addOption(private$..plotHeight)
+            self$.addOption(private$..showExplanations)
+            self$.addOption(private$..clinicalPreset)
         }),
     active = list(
         plotType = function() private$..plotType$value,
@@ -279,7 +296,9 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         legendPosition = function() private$..legendPosition$value,
         theme = function() private$..theme$value,
         plotWidth = function() private$..plotWidth$value,
-        plotHeight = function() private$..plotHeight$value),
+        plotHeight = function() private$..plotHeight$value,
+        showExplanations = function() private$..showExplanations$value,
+        clinicalPreset = function() private$..clinicalPreset$value),
     private = list(
         ..plotType = NA,
         ..xvar = NA,
@@ -308,7 +327,9 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..legendPosition = NA,
         ..theme = NA,
         ..plotWidth = NA,
-        ..plotHeight = NA)
+        ..plotHeight = NA,
+        ..showExplanations = NA,
+        ..clinicalPreset = NA)
 )
 
 jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -585,6 +606,8 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param theme Theme name
 #' @param plotWidth Plot width in pixels
 #' @param plotHeight Plot height in pixels
+#' @param showExplanations Whether to show detailed explanations
+#' @param clinicalPreset Clinical analysis preset
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -631,7 +654,9 @@ jjpubr <- function(
     legendPosition = "right",
     theme = "pubr",
     plotWidth = 600,
-    plotHeight = 500) {
+    plotHeight = 500,
+    showExplanations = TRUE,
+    clinicalPreset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjpubr requires jmvcore to be installed (restart may be required)")
@@ -679,7 +704,9 @@ jjpubr <- function(
         legendPosition = legendPosition,
         theme = theme,
         plotWidth = plotWidth,
-        plotHeight = plotHeight)
+        plotHeight = plotHeight,
+        showExplanations = showExplanations,
+        clinicalPreset = clinicalPreset)
 
     analysis <- jjpubrClass$new(
         options = options,

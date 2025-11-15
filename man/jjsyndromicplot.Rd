@@ -21,7 +21,9 @@ jjsyndromicplot(
   colormid = "white",
   colorhigh = "firebrick1",
   plotwidth = 600,
-  plotheight = 600
+  plotheight = 600,
+  clinicalPreset = "none",
+  showExplanations = TRUE
 )
 }
 \arguments{
@@ -74,6 +76,12 @@ gray.}
 \item{plotwidth}{Width of the plot in pixels.}
 
 \item{plotheight}{Height of the plot in pixels.}
+
+\item{clinicalPreset}{Apply a set of predefined settings for common
+clinical analysis scenarios.}
+
+\item{showExplanations}{Show explanations of the PCA results and syndromic
+plot.}
 }
 \value{
 A results object containing:

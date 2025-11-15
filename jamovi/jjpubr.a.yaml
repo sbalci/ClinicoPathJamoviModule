@@ -1,7 +1,7 @@
 ---
 name: jjpubr
 title: Publication-Ready Plots (ggpubr)
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: All-In-One
 menuTitle: ggpubr Plots
 menuSubtitle: Publication-ready visualizations
@@ -454,5 +454,34 @@ options:
             Height of the plot in pixels
           R: >
             Plot height in pixels
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Show detailed clinical explanations and guidance
+          R: >
+            Whether to show detailed explanations
+
+    - name: clinicalPreset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: Custom
+          name: custom
+        - title: Prognostic Biomarker
+          name: prognostic_biomarker
+        - title: Diagnostic Test
+          name: diagnostic_test
+        - title: Correlation Analysis
+          name: correlation_analysis
+      default: custom
+      description:
+          ui: >
+            Apply a preset for a specific clinical analysis
+          R: >
+            Clinical analysis preset
 
 ...

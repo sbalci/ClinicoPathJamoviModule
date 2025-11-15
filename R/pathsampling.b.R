@@ -807,14 +807,32 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }
                 }
 
-                # Guard against degenerate estimates for downstream calculations
+                # Validate probability estimate and warn on data quality issues
                 pForCalc <- pEstimate
+                dataQualityWarnings <- character(0)
+
                 if (is.na(pForCalc)) {
                     pForCalc <- NA_real_
+                    dataQualityWarnings <- c(dataQualityWarnings,
+                        "⚠️ Could not estimate detection probability from data")
                 } else if (pForCalc <= 0) {
+                    dataQualityWarnings <- c(dataQualityWarnings,
+                        "⚠️ DATA QUALITY ISSUE: Estimated probability ≤ 0. Check for data entry errors or insufficient positive cases.")
                     pForCalc <- 0
                 } else if (pForCalc >= 1) {
+                    dataQualityWarnings <- c(dataQualityWarnings,
+                        "⚠️ DATA QUALITY ISSUE: Estimated probability ≥ 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity.")
                     pForCalc <- 1 - 1e-12
+                }
+
+                # Check for impossible positive counts
+                if (!is.null(positiveCountData) && !is.null(totalSamplesData)) {
+                    invalid_counts <- positiveCountData > totalSamplesData
+                    if (any(invalid_counts, na.rm = TRUE)) {
+                        n_invalid <- sum(invalid_counts, na.rm = TRUE)
+                        dataQualityWarnings <- c(dataQualityWarnings,
+                            sprintf("⚠️ DATA ERROR: %d cases have positive count > total samples. These have been excluded from analysis.", n_invalid))
+                    }
                 }
 
                 binomialText <- self$results$binomialText
@@ -853,6 +871,21 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary))
                 }
 
+                # Add data quality warnings
+                dataQualityWarningHTML <- ""
+                if (length(dataQualityWarnings) > 0) {
+                    warningList <- paste(sprintf("<li>%s</li>", dataQualityWarnings), collapse = "\n")
+                    dataQualityWarningHTML <- sprintf("<div style='background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 10px 0; border-radius: 4px;'>
+                        <p style='%s margin: 0 0 10px 0;'><b>⚠️ DATA QUALITY WARNINGS</b></p>
+                        <ul style='%s margin: 0;'>
+                            %s
+                        </ul>
+                    </div>",
+                    private$.buildStyle(private$.styleConstants$fontSize14, "color: #d32f2f; font-weight: bold;"),
+                    private$.buildStyle(private$.styleConstants$fontSize13, "color: #d32f2f;"),
+                    warningList)
+                }
+
                 # Calculate description based on data available
                 if (!is.null(positiveCountData) && estimationMethod == "Empirical Proportion (uses all positive samples)") {
                     positive_idx <- !is.na(firstDetectionData)
@@ -868,6 +901,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 html <- sprintf("<div style='%s'>
+                    %s
                     %s
                     <div style='%s'>
                         <h4 style='%s'>Binomial Probability Model</h4>
@@ -886,6 +920,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </div>
                 </div>",
                 private$.styleConstants$font,
+                dataQualityWarningHTML,  # Insert data quality warnings FIRST
                 binomialWarning,  # Insert context-specific warning
                 private$.buildStyle(
                     private$.styleConstants$bgLight,
@@ -999,19 +1034,31 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Calculate prevalence and example probabilities
             prevalence <- nDetected / nCases
 
-            # Use pEstimate if available, otherwise use empirical estimate
-            qForExamples <- if (!is.na(pEstimate) && pEstimate > 0) {
-                pEstimate
-            } else if (nDetected > 0) {
-                # Fallback: use geometric MLE
+            # Use pEstimate if available, otherwise derive from observed first-detection data
+            qForExamples <- NA_real_
+            if (!is.na(pEstimate) && pEstimate > 0) {
+                qForExamples <- pEstimate
+            } else {
                 positive_first <- firstDetectionData[!is.na(firstDetectionData)]
                 if (length(positive_first) > 0) {
-                    1 / mean(positive_first, na.rm = TRUE)
-                } else {
-                    0.40  # Reasonable default for demonstration
+                    mean_first_detection <- mean(positive_first, na.rm = TRUE)
+                    if (is.finite(mean_first_detection) && mean_first_detection > 0) {
+                        qForExamples <- 1 / mean_first_detection
+                    }
                 }
-            } else {
-                0.40  # Reasonable default for demonstration
+            }
+
+            if (is.na(qForExamples) || qForExamples <= 0) {
+                probabilityExplanation$setContent(
+                    sprintf("<div style='%s %s %s'>\n                        <p style='%s'><strong>Insufficient detection data</strong></p>\n                        <p style='%s'>No positive cases with valid first detection positions were available, so example probabilities could not be calculated. Provide first detection data or additional positive cases to enable this narrative.</p>\n                    </div>",
+                        private$.styleConstants$font,
+                        private$.styleConstants$bgLight,
+                        private$.styleConstants$padding15,
+                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
+                    )
+                )
+                return()
             }
 
             # Calculate conditional probabilities (sensitivity)
@@ -2344,6 +2391,27 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return()
                 }
 
+                positiveCaseIdx <- K_int >= target & K_int > 0
+                if (sum(positiveCaseIdx) == 0) {
+                    hypergeometricText <- self$results$hypergeometricText
+                    hypergeometricTable <- self$results$hypergeometricTable
+                    hyperRecommendTable <- self$results$hyperRecommendTable
+                    note <- sprintf("<p>No cases had at least %d positive observations, so the hypergeometric model could not be estimated.</p>", target)
+                    if (self$options$showHypergeometric) {
+                        hypergeometricText$setContent(note)
+                    }
+                    hypergeometricTable$clearRows()
+                    hyperRecommendTable$clearRows()
+                    return()
+                }
+                removedZeroPos <- sum(!positiveCaseIdx)
+                if (removedZeroPos > 0) {
+                    hyperNotes <- c(hyperNotes,
+                        sprintf("%d cases excluded (no positive observations for conditional model)", removedZeroPos))
+                }
+                N_int <- N_int[positiveCaseIdx]
+                K_int <- K_int[positiveCaseIdx]
+
                 nHyperCases <- length(N_int)
                 medianN <- stats::median(N_int)
                 medianK <- stats::median(K_int)
@@ -2354,7 +2422,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else ""
 
                 html <- sprintf("<h4>Hypergeometric Probability Model</h4>
-                <p>Finite-population sampling without replacement (e.g., lymph node dissections) evaluated on %d cases.</p>
+                <p>Finite-population sampling without replacement (e.g., lymph node dissections) evaluated on %d positive cases.</p>
                 <p><b>Typical case:</b> median total nodes = %.0f, median positive nodes = %.0f.</p>
                 %s
                 <p><b>Model:</b> For each case i with population N<sub>i</sub> and positives K<sub>i</sub>, the probability of detecting ≥%d positives after n draws is averaged across cases:</p>
@@ -2602,16 +2670,23 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     betaCumProb <- rep(NA_real_, maxSamp)
                     prevProb <- 0
-                    for (n in 1:maxSamp) {
-                        # P(detect ≥ 1) using beta-binomial distribution
-                        # We need a function for the beta-binomial PMF
-                        dbetabinom_pmf <- function(k, n, alpha, beta) {
-                            exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
-                        }
 
-                        # P(X < 1) = P(X=0)
-                        prob_zero <- dbetabinom_pmf(0, n, alpha, beta)
-                        cumProb <- 1 - prob_zero
+                    # Beta-binomial PMF function
+                    dbetabinom_pmf <- function(k, n, alpha, beta) {
+                        exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
+                    }
+
+                    for (n in 1:maxSamp) {
+                        # P(detect ≥ target) using beta-binomial distribution
+                        # Calculate P(X < target) = sum of P(X=k) for k=0 to target-1
+                        prob_less_than_target <- 0
+                        for (k in 0:(target - 1)) {
+                            if (k <= n) {  # Can't have more successes than samples
+                                prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
+                            }
+                        }
+                        # P(X ≥ target) = 1 - P(X < target)
+                        cumProb <- 1 - prob_less_than_target
 
                         marginal <- cumProb - prevProb
 
@@ -2648,11 +2723,14 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         if (maxFeasible > 0) {
                             for (n in 1:maxFeasible) {
-                                dbetabinom_pmf <- function(k, n, alpha, beta) {
-                                    exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
+                                # Calculate P(X ≥ target) correctly
+                                prob_less_than_target <- 0
+                                for (k in 0:(target - 1)) {
+                                    if (k <= n) {
+                                        prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
+                                    }
                                 }
-                                prob_zero <- dbetabinom_pmf(0, n, alpha, beta)
-                                cumProb <- 1 - prob_zero
+                                cumProb <- 1 - prob_less_than_target
 
                                 if (cumProb >= conf) {
                                     minSamples <- n

@@ -200,6 +200,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
     inherit = stagemigrationBase,
     private = list(
 
+        # Escape variable names for safe handling
+        .escapeVar = function(x) {
+            # Handle variables with spaces/special characters
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         .init = function() {
             # If core variables are not selected, show a welcome message and hide results.
             if (is.null(self$options$oldStage) || is.null(self$options$newStage) ||
@@ -322,7 +328,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .setExplanationContent = function(resultName, htmlContent) {
             # Centralized explanation content management
             # Only set content if showExplanations is enabled to optimize memory usage
-            if (self$options$showExplanations) {
+            if (isTRUE(self$options$showExplanations)) {
                 self$results[[resultName]]$setContent(htmlContent)
             }
         },
@@ -406,13 +412,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             progress_html <- paste0(
                 '<div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 10px; margin: 10px 0;">',
-                '<h3 style="color: #2c3e50; margin-top: 0;">🧭 Analysis Progress</h3>',
+                '<h3 style="color: #2c3e50; margin-top: 0;">Analysis Progress</h3>',
                 '<div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">'
             )
-            
+
             for (i in 1:length(steps)) {
                 status_color <- if (i <= current_step) "#27ae60" else if (i == current_step + 1) "#f39c12" else "#bdc3c7"
-                status_icon <- if (i < current_step) "✅" else if (i == current_step) "🔄" else "⭕"
+                status_icon <- if (i < current_step) "[DONE]" else if (i == current_step) "[CURRENT]" else "[PENDING]"
                 
                 progress_html <- paste0(progress_html,
                     '<div style="text-align: center; flex: 1;">',
@@ -3726,7 +3732,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 })
                 
                 # Add explanatory text for cross-validation
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     cv_folds <- if(is.null(self$options$cvFolds)) 5 else self$options$cvFolds
                     institution_col <- self$options$institutionVariable
                     is_multi_institutional <- !is.null(institution_col) && institution_col != ""
@@ -4046,7 +4052,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$generateExecutiveSummary) {
                 # Add explanatory text for executive summary
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     executive_summary_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Executive Summary</h4>
@@ -4074,7 +4080,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$showMigrationOverview) {
                 # Add explanatory text for migration overview
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     explanation_html <- '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f4f8; border-left: 4px solid #3498db;">
                     <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Migration Overview Table</h4>
@@ -4097,7 +4103,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$showMigrationSummary) {
                 # Add explanatory text for migration summary
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     summary_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Migration Statistical Tests</h4>
@@ -4124,7 +4130,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$showStageDistribution) {
                 # Add explanatory text for stage distribution
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     distribution_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff4e6; border-left: 4px solid #f39c12;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage Distribution Changes</h4>
@@ -4152,7 +4158,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$showMigrationMatrix) {
                 # Add explanatory text for migration matrix
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     matrix_explanation_html <- '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #f5f3ff; border-left: 4px solid #9b59b6;">
                     <h4 style="margin-top: 0; color: #2c3e50;">How to Read the Migration Matrix</h4>
@@ -4176,7 +4182,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$showStatisticalComparison) {
                 # Add explanatory text for statistical comparison
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     statistical_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #3498db;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Statistical Comparison Metrics</h4>
@@ -4205,7 +4211,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$showConcordanceComparison) {
                 # Add explanatory text for concordance comparison
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     concordance_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ed; border-left: 4px solid #27ae60;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Concordance (C-Index) Analysis</h4>
@@ -4234,7 +4240,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (!is.null(all_results$nri_analysis)) {
                 # Add explanatory text for NRI analysis
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     nri_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff0f5; border-left: 4px solid #e91e63;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Net Reclassification Improvement (NRI)</h4>
@@ -4306,7 +4312,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (!is.null(all_results$idi_analysis)) {
                 # Add explanatory text for IDI analysis
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     idi_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f3e5f5; border-left: 4px solid #9c27b0;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Integrated Discrimination Improvement (IDI)</h4>
@@ -4349,7 +4355,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # DCA Results
             if (self$options$performDCA && !is.null(all_results$dca_analysis)) {
                 # Add explanatory text for DCA analysis
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     dca_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #2196f3;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Decision Curve Analysis (DCA)</h4>
@@ -4396,7 +4402,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 message("DEBUG: Populating pseudo R-squared results")
 
                 # Add explanatory text for pseudo R-squared
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     pseudo_r2_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Pseudo R-squared Measures</h4>
@@ -4449,7 +4455,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (!is.null(all_results$calibration_analysis)) {
                 # Add explanatory text for calibration analysis
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     calibration_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Enhanced Calibration Analysis</h4>
@@ -4503,7 +4509,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 if (!is.null(all_results$will_rogers)) {
                     # Add explanatory text for Will Rogers analysis
-                    if (self$options$showExplanations) {
+                    if (isTRUE(self$options$showExplanations)) {
                         will_rogers_explanation_html <- '
                         <div style="margin-bottom: 20px; padding: 15px; background-color: #fdf2e9; border-left: 4px solid #f39c12;">
                             <h4 style="margin-top: 0; color: #2c3e50;">Understanding Will Rogers Phenomenon Analysis</h4>
@@ -4534,7 +4540,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (!is.null(all_results$clinical_interpretation)) {
                 # Add explanatory text for clinical interpretation
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     clinical_interpretation_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Clinical Interpretation Guide</h4>
@@ -4562,7 +4568,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (!is.null(all_results$advanced_metrics$lr_test)) {
                 # Add explanatory text for likelihood ratio tests
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     likelihood_tests_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #2196f3;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Likelihood Ratio Tests</h4>
@@ -4613,7 +4619,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (!is.null(all_results$homogeneity_tests)) {
                 # Add explanatory text for homogeneity tests
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     homogeneity_tests_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff5e6; border-left: 4px solid #ff9800;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage Homogeneity Tests</h4>
@@ -4665,7 +4671,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 message("DEBUG: all_results$homogeneity_tests exists: ", !is.null(all_results$homogeneity_tests))
 
                 # Add explanatory text for trend tests
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     trend_tests_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage Trend Analysis</h4>
@@ -4693,7 +4699,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             if (self$options$showStatisticalSummary) {
                 # Add explanatory text for statistical summary
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     statistical_summary_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e3f2fd; border-left: 4px solid #2196f3;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Statistical Summary</h4>
@@ -4723,7 +4729,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Effect Sizes
             if (self$options$includeEffectSizes) {
                 # Add explanatory text for effect sizes
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     effect_sizes_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ff9800;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Effect Sizes</h4>
@@ -4754,7 +4760,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Advanced Migration Analysis
             if (self$options$advancedMigrationAnalysis) {
                 # Add explanatory text for advanced migration analysis
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     advanced_migration_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Advanced Migration Analysis</h4>
@@ -4829,7 +4835,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Multifactorial Analysis Population
             if (self$options$enableMultifactorialAnalysis && !is.null(all_results$multifactorial_analysis)) {
                 # Add explanatory text for multifactorial analysis
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     multifactorial_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Advanced Multifactorial Stage Migration Analysis</h4>
@@ -4927,7 +4933,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Migration Heatmap
             if (self$options$showMigrationHeatmap) {
                 # Add explanation if enabled
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     heatmap_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ffc107;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Interpreting the Migration Heatmap</h4>
@@ -4959,7 +4965,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # # Sankey Diagram for Stage Migration Flow
             # if (self$options$showSankeyDiagram) {
             #     # Add explanation if enabled
-            #     if (self$options$showExplanations) {
+            #     if (isTRUE(self$options$showExplanations)) {
             #         sankey_explanation_html <- '
             #         <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
             #             <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Stage Migration Flow Diagram</h4>
@@ -4995,7 +5001,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # ROC Comparison Plot
             if (self$options$showROCComparison) {
                 # Add explanation if enabled
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     roc_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #2196f3;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Time-dependent ROC Curves</h4>
@@ -5034,7 +5040,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Forest Plot
             if (self$options$showForestPlot) {
                 # Add explanation if enabled
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     forest_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ed; border-left: 4px solid #4caf50;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Hazard Ratio Forest Plots</h4>
@@ -5080,7 +5086,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Calibration Plots
             if (self$options$showCalibrationPlots && self$options$performCalibration) {
                 # Add explanation if enabled
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     calibration_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Enhanced Calibration Plots</h4>
@@ -5158,7 +5164,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Decision Curves
             if (self$options$showDecisionCurves && !is.null(all_results$dca_analysis)) {
                 # Add explanation if enabled
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     decision_curves_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f3e5f5; border-left: 4px solid #9c27b0;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Decision Curve Analysis</h4>
@@ -5189,7 +5195,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Survival Curves
             if (self$options$showSurvivalCurves) {
                 # Add explanation if enabled
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     survival_curves_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Survival Curves Comparison</h4>
@@ -6516,7 +6522,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (is.null(sme_results)) return()
             
             # Add explanatory text first
-            if (self$options$showExplanations) {
+            if (isTRUE(self$options$showExplanations)) {
                 if ("stageMigrationEffectExplanation" %in% names(self$results)) {
                     explanation_html <- "
                     <div style='margin: 10px;'>
@@ -6616,7 +6622,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (is.null(rmst_results)) return()
             
             # Add explanatory text first
-            if (self$options$showExplanations) {
+            if (isTRUE(self$options$showExplanations)) {
                 if ("rmstAnalysisExplanation" %in% names(self$results)) {
                     explanation_html <- "
                     <div style='margin: 10px;'>
@@ -6736,7 +6742,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (is.null(competing_results)) return()
             
             # Add explanatory text first
-            if (self$options$showExplanations) {
+            if (isTRUE(self$options$showExplanations)) {
                 if ("competingRisksExplanation" %in% names(self$results)) {
                     explanation_html <- "
                     <div style='margin: 10px;'>
@@ -7970,7 +7976,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Add dashboard explanation if enabled
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     dashboard_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #1976d2;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding the Comparative Analysis Dashboard</h4>
@@ -8319,7 +8325,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Add bootstrap validation if enabled
                 if (self$options$performBootstrap && self$options$bootstrapReps > 0) {
                     # Add explanatory content for bootstrap validation
-                    if (self$options$showExplanations) {
+                    if (isTRUE(self$options$showExplanations)) {
                         bootstrap_reps <- if(is.null(self$options$bootstrapReps)) 1000 else self$options$bootstrapReps
                         bootstrap_explanation_html <- paste0(
                         '<div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745;">
@@ -15599,7 +15605,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # 1. Populate main multifactorial results table
             if (self$options$showMultifactorialTables && !is.null(multifactorial_results$models)) {
                 # Add explanatory text for multifactorial results table
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     multifactorial_results_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multifactorial Model Results</h4>
@@ -15673,7 +15679,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Add explanatory output for adjusted C-index comparison
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     adjusted_cindex_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Adjusted C-Index Comparison</h4>
@@ -15725,7 +15731,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Add explanatory output for nested model tests
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     nested_model_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Nested Model Tests</h4>
@@ -15895,7 +15901,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Add explanatory output for stepwise results
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     stepwise_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stepwise Selection Results</h4>
@@ -16015,7 +16021,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Add explanatory output for interaction tests
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     interaction_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage-Covariate Interaction Tests</h4>
@@ -16071,7 +16077,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Add explanatory output for stratified analysis
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     stratified_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stratified Analysis</h4>
@@ -16355,7 +16361,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 evidence_summary <- all_results$will_rogers_evidence_summary
                 
                 # Add explanatory text
-                if (self$options$showExplanations) {
+                if (isTRUE(self$options$showExplanations)) {
                     explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #1e88e5;">
                         <h4 style="margin-top: 0; color: #0d47a1;">Understanding Will Rogers Evidence Assessment Framework</h4>
@@ -25594,7 +25600,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateRandomForestPerformance = function(results) {
             tryCatch({
-                table <- self$results$randomForestPerformance
+                table <- self$results$forestModelPerformance
                 
                 for (result in results) {
                     if (is.list(result) && "Model" %in% names(result)) {
@@ -25608,7 +25614,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateRandomForestImportance = function(results) {
             tryCatch({
-                table <- self$results$randomForestImportance
+                table <- self$results$forestVariableImportance
                 
                 for (result in results) {
                     if (is.list(result) && "Variable" %in% names(result)) {
@@ -25622,7 +25628,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateRandomForestComparison = function(results) {
             tryCatch({
-                table <- self$results$randomForestComparison
+                table <- self$results$forestCoxComparison
                 
                 for (result in results) {
                     if (is.list(result) && "Metric" %in% names(result)) {
@@ -25636,7 +25642,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateRandomForestSummary = function(results) {
             tryCatch({
-                table <- self$results$randomForestSummary
+                table <- self$results$forestAnalysisSummary
                 
                 for (result in results) {
                     if (is.list(result) && "Analysis_Component" %in% names(result)) {
@@ -26262,6 +26268,44 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     self$.populateCureAnalysisSummary(summary_data)
                 }
 
+                # Populate Bootstrap Validation Results
+                if (!is.null(cure_results$bootstrap)) {
+                    bootstrap_data <- list()
+                    boot <- cure_results$bootstrap
+
+                    if (!is.null(boot$old_stage)) {
+                        bootstrap_data <- append(bootstrap_data, list(list(
+                            Parameter = "Cure Fraction",
+                            Staging_System = "Original",
+                            Original_Estimate = boot$old_stage$original_estimate,
+                            Bootstrap_Mean = boot$old_stage$bootstrap_mean,
+                            Bootstrap_SD = boot$old_stage$bootstrap_sd,
+                            Bootstrap_Lower_CI = boot$old_stage$bootstrap_ci_lower,
+                            Bootstrap_Upper_CI = boot$old_stage$bootstrap_ci_upper,
+                            Bias = boot$old_stage$bias,
+                            Coverage_Probability = NA  # Can be calculated if needed
+                        )))
+                    }
+
+                    if (!is.null(boot$new_stage)) {
+                        bootstrap_data <- append(bootstrap_data, list(list(
+                            Parameter = "Cure Fraction",
+                            Staging_System = "New",
+                            Original_Estimate = boot$new_stage$original_estimate,
+                            Bootstrap_Mean = boot$new_stage$bootstrap_mean,
+                            Bootstrap_SD = boot$new_stage$bootstrap_sd,
+                            Bootstrap_Lower_CI = boot$new_stage$bootstrap_ci_lower,
+                            Bootstrap_Upper_CI = boot$new_stage$bootstrap_ci_upper,
+                            Bias = boot$new_stage$bias,
+                            Coverage_Probability = NA  # Can be calculated if needed
+                        )))
+                    }
+
+                    if (length(bootstrap_data) > 0) {
+                        self$.populateCureModelBootstrap(bootstrap_data)
+                    }
+                }
+
             }, error = function(e) {
                 # Silent error handling for table population
             })
@@ -26326,10 +26370,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .populateCureAnalysisSummary = function(results) {
             tryCatch({
                 table <- self$results$cureAnalysisSummary
-                
+
                 for (result in results) {
                     if (is.list(result) && "Analysis_Component" %in% names(result)) {
                         table$addRow(rowKey = result$Analysis_Component, values = result)
+                    }
+                }
+            }, error = function(e) {
+                # Silent error handling for table population
+            })
+        },
+
+        .populateCureModelBootstrap = function(results) {
+            tryCatch({
+                table <- self$results$cureModelBootstrap
+
+                for (result in results) {
+                    if (is.list(result) && "Staging_System" %in% names(result)) {
+                        table$addRow(rowKey = paste(result$Parameter, result$Staging_System, sep = "_"), values = result)
                     }
                 }
             }, error = function(e) {
@@ -28897,7 +28955,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateWinRatioComparisons = function(results) {
             tryCatch({
-                table <- self$results$winRatioComparisons
+                table <- self$results$winRatioStageSpecific
                 
                 for (result in results) {
                     if (is.list(result)) {
@@ -28911,7 +28969,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateWinRatioSensitivity = function(results) {
             tryCatch({
-                table <- self$results$winRatioSensitivity
+                table <- self$results$winRatioSensitivityResults
                 
                 for (result in results) {
                     if (is.list(result)) {
@@ -28926,7 +28984,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateWinRatioPairwise = function(results) {
             tryCatch({
-                table <- self$results$winRatioPairwise
+                table <- self$results$winRatioGeneralizedPairwiseResults
                 
                 for (result in results) {
                     if (is.list(result)) {

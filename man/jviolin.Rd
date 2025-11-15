@@ -32,7 +32,9 @@ jviolin(
   usexlabel = FALSE,
   xlabel = "",
   useylabel = FALSE,
-  ylabel = ""
+  ylabel = "",
+  showExplanations = TRUE,
+  clinicalPreset = "custom"
 )
 }
 \arguments{
@@ -93,6 +95,10 @@ empty)}
 \item{useylabel}{Override default y-axis label}
 
 \item{ylabel}{Custom label for y-axis}
+
+\item{showExplanations}{Show explanations of the statistical results}
+
+\item{clinicalPreset}{Clinical analysis preset}
 }
 \value{
 A results object containing:

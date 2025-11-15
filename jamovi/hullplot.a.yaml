@@ -3,7 +3,7 @@ name: hullplot
 title: Hull Plot
 menuGroup: JJStatsPlotT
 menuSubgroup: Continuous vs Continuous
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

@@ -1,7 +1,7 @@
 ---
 name: jjsegmentedtotalbar
 title: "Segmented Total Bar Charts"
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
 version: '0.0.31'
@@ -372,3 +372,13 @@ options:
       description:
         R: Confidence level for statistical tests (0.80-0.99).
         jamovi: Confidence level for proportion comparisons.
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Show explanations of the statistical results
+          R: >
+            Show explanations of the statistical results

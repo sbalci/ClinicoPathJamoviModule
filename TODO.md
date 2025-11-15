@@ -56,7 +56,11 @@ use gemini to make Readiness for Clinicians and Pathologists assessment and Use 
 
 
 
-you are an expert R-package and jamovi developer and an expert in biostatistics. critically evaluate decisioncombine function. is it mathematically and statistically accurate. is it ready to be used by clinicians and pathologists. is it ready for release?
+you are an expert R-package and jamovi developer.
+you are an expert in biostatistics working with pathologists and clinicians.
+critically evaluate jjbetweenstats function.
+is it mathematically and statistically accurate?
+is it ready to be used by clinicians and pathologists? is it ready for release?
 
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 

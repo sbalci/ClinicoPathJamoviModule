@@ -39,7 +39,9 @@ jjscatterstats(
   ggpubrPalette = "jco",
   ggpubrAddCorr = TRUE,
   ggpubrCorrMethod = "pearson",
-  ggpubrAddSmooth = TRUE
+  ggpubrAddSmooth = TRUE,
+  showExplanations = TRUE,
+  clinicalPreset = "custom"
 )
 }
 \arguments{
@@ -136,6 +138,10 @@ package.}
 \item{ggpubrCorrMethod}{Method for correlation in ggpubr plot.}
 
 \item{ggpubrAddSmooth}{Add smoothed trend line to ggpubr scatter plot.}
+
+\item{showExplanations}{Show explanations of the statistical results}
+
+\item{clinicalPreset}{Clinical analysis preset}
 }
 \value{
 A results object containing:

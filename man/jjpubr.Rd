@@ -33,7 +33,9 @@ jjpubr(
   legendPosition = "right",
   theme = "pubr",
   plotWidth = 600,
-  plotHeight = 500
+  plotHeight = 500,
+  showExplanations = TRUE,
+  clinicalPreset = "custom"
 )
 }
 \arguments{
@@ -95,6 +97,10 @@ barplot, dotplot, line, errorplot}
 \item{plotWidth}{Plot width in pixels}
 
 \item{plotHeight}{Plot height in pixels}
+
+\item{showExplanations}{Whether to show detailed explanations}
+
+\item{clinicalPreset}{Clinical analysis preset}
 }
 \value{
 A results object containing:

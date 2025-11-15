@@ -56,7 +56,6 @@ children:
                 name: partial
               - type: ComboBox
                 name: clinicalpreset
-
   - type: CollapseBox
     label: Matrix Display
     collapsed: true
@@ -72,7 +71,6 @@ children:
                 name: matrixtype
               - type: ComboBox
                 name: matrixmethod
-
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -115,7 +113,6 @@ children:
                 name: caption
                 format: string
                 width: large
-
   - type: CollapseBox
     label: Plot Configuration
     collapsed: true
@@ -133,4 +130,8 @@ children:
               - type: TextBox
                 name: plotheight
                 format: number
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showexplanations

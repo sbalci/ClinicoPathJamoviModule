@@ -1,7 +1,7 @@
 ---
 name:  jjcorrmat
 title: Correlation Matrix
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
 version: '0.0.31'
@@ -258,6 +258,14 @@ options:
           R: >
             Caption for the correlation matrix plot.
 
+    - name: showexplanations
+      title: Show Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed explanations of the analysis, including assumptions,
+            interpretation, and a copy-ready report.
     - name: plotwidth
       title: Plot Width
       type: Integer

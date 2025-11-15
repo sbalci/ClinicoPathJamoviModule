@@ -49,7 +49,8 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             custom_annotations = "",
             width = 800,
             height = 600,
-            dpi = 300, ...) {
+            dpi = 300,
+            clinicalPreset = "custom", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -316,6 +317,15 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=72,
                 max=600,
                 default=300)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "custom",
+                    "biomarker_distribution",
+                    "treatment_response",
+                    "correlation_analysis"),
+                default="custom")
 
             self$.addOption(private$..x_var)
             self$.addOption(private$..y_var)
@@ -361,6 +371,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..width)
             self$.addOption(private$..height)
             self$.addOption(private$..dpi)
+            self$.addOption(private$..clinicalPreset)
         }),
     active = list(
         x_var = function() private$..x_var$value,
@@ -406,7 +417,8 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         custom_annotations = function() private$..custom_annotations$value,
         width = function() private$..width$value,
         height = function() private$..height$value,
-        dpi = function() private$..dpi$value),
+        dpi = function() private$..dpi$value,
+        clinicalPreset = function() private$..clinicalPreset$value),
     private = list(
         ..x_var = NA,
         ..y_var = NA,
@@ -451,7 +463,8 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..custom_annotations = NA,
         ..width = NA,
         ..height = NA,
-        ..dpi = NA)
+        ..dpi = NA,
+        ..clinicalPreset = NA)
 )
 
 jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -774,6 +787,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param width Width of the plot in pixels.
 #' @param height Height of the plot in pixels.
 #' @param dpi Resolution for plot export.
+#' @param clinicalPreset Clinical analysis preset
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -837,7 +851,8 @@ jjridges <- function(
     custom_annotations = "",
     width = 800,
     height = 600,
-    dpi = 300) {
+    dpi = 300,
+    clinicalPreset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjridges requires jmvcore to be installed (restart may be required)")
@@ -902,7 +917,8 @@ jjridges <- function(
         custom_annotations = custom_annotations,
         width = width,
         height = height,
-        dpi = dpi)
+        dpi = dpi,
+        clinicalPreset = clinicalPreset)
 
     analysis <- jjridgesClass$new(
         options = options,

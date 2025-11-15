@@ -123,31 +123,65 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             },
 
             .validateStatisticalRequirements = function(dep_vars, group_var) {
-                # Check minimum group sizes for statistical tests
+                # WEIGHTED GROUP SIZES: Use weighted counts, not row counts
                 if (!is.null(group_var) && group_var %in% names(self$data)) {
                     # Checkpoint before table calculation
                     private$.checkpoint(flush = FALSE)
-                    group_sizes <- table(self$data[[group_var]], useNA = "no")
-                    
+
+                    # Get weighted group sizes
+                    group_sizes <- private$.getWeightedGroupCounts(self$data, group_var)
+
                     if (any(group_sizes < 5)) {
                         small_groups <- names(group_sizes[group_sizes < 5])
-                        warning(paste("Small group sizes detected (", paste(paste(small_groups, ":", group_sizes[small_groups]), collapse = ", "),
+                        warning(paste("Small group sizes detected (", paste(paste(small_groups, ":", round(group_sizes[small_groups], 1)), collapse = ", "),
                                     "). Chi-square tests require minimum 5 observations per group for reliable results."))
                     }
-                    
+
                     if (length(group_sizes) < 2) {
                         stop("Grouping variable must have at least 2 categories for comparison.")
                     }
+
+                    # INSPECT JOINT DISTRIBUTION: Check expected counts in contingency table
+                    for (dep_var in dep_vars) {
+                        if (!is.null(dep_var) && dep_var %in% names(self$data)) {
+                            # Build weighted contingency table
+                            cross_table <- private$.getWeightedTable(self$data, dep_var, group_var)
+
+                            # Check if any cells have zero counts
+                            if (any(cross_table == 0)) {
+                                warning(paste("Variable '", dep_var, "' vs '", group_var,
+                                            "': Some cells have zero counts. Consider collapsing categories."))
+                            }
+
+                            # Check expected counts
+                            expected_counts <- tryCatch({
+                                chisq.test(cross_table)$expected
+                            }, error = function(e) NULL)
+
+                            if (!is.null(expected_counts) && any(expected_counts < 5)) {
+                                warning(paste("Variable '", dep_var, "' vs '", group_var,
+                                            "': Chi-square expected count assumption violated (some cells < 5)."))
+                            }
+                        }
+                    }
                 }
-                
+
                 # Check dependent variables have sufficient variation
                 for (dep_var in dep_vars) {
                     if (!is.null(dep_var) && dep_var %in% names(self$data)) {
                         # Checkpoint before each table calculation in loop
                         private$.checkpoint(flush = FALSE)
-                        dep_levels <- table(self$data[[dep_var]], useNA = "no")
-                        if (length(dep_levels) < 2) {
-                            stop(paste("Variable '", dep_var, "' has insufficient variation (only", length(dep_levels), "level). Need at least 2 categories."))
+
+                        # Use weighted counts for dependent variable levels
+                        if (!is.null(self$options$counts) && self$options$counts %in% names(self$data)) {
+                            dep_levels_count <- length(unique(self$data[[dep_var]]))
+                        } else {
+                            dep_levels <- table(self$data[[dep_var]], useNA = "no")
+                            dep_levels_count <- length(dep_levels)
+                        }
+
+                        if (dep_levels_count < 2) {
+                            stop(paste("Variable '", dep_var, "' has insufficient variation (only", dep_levels_count, "level). Need at least 2 categories."))
                         }
                     }
                 }
@@ -272,9 +306,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (is.null(self$options$dep) || is.null(self$options$group)) {
                     return()
                 }
-                
-                n_total <- nrow(analysis_data)
-                n_groups <- length(unique(analysis_data[[self$options$group]]))
+
+                # WEIGHTED COUNTS: Use effective sample size, not row count
+                n_total <- private$.getEffectiveSampleSize(analysis_data)
+
+                # Get weighted group counts
+                group_counts <- private$.getWeightedGroupCounts(analysis_data, self$options$group)
+                n_groups <- length(group_counts)
+
                 dep_vars <- paste(self$options$dep, collapse = ", ")
                 
                 test_method <- switch(self$options$typestatistics,
@@ -317,7 +356,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(self$options$group) && self$options$group %in% names(analysis_data)) {
                     for (dep_var in self$options$dep) {
                         if (dep_var %in% names(analysis_data)) {
-                            cross_table <- table(analysis_data[[dep_var]], analysis_data[[self$options$group]])
+                            # WEIGHTED CONTINGENCY TABLE: Use weighted table helper
+                            cross_table <- private$.getWeightedTable(analysis_data, dep_var, self$options$group)
+
                             expected_counts <- tryCatch({
                                 chisq.test(cross_table)$expected
                             }, error = function(e) {
@@ -446,10 +487,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (is.null(self$options$dep) || is.null(self$options$group)) {
                     return()
                 }
-                
-                # Basic analysis info
-                n_total <- nrow(analysis_data)
-                n_groups <- length(unique(analysis_data[[self$options$group]]))
+
+                # WEIGHTED COUNTS: Use effective sample size
+                n_total <- private$.getEffectiveSampleSize(analysis_data)
+
+                # Get weighted group counts
+                group_counts <- private$.getWeightedGroupCounts(analysis_data, self$options$group)
+                n_groups <- length(group_counts)
+
                 dep_vars <- paste(self$options$dep, collapse = " and ")
                 
                 # Generate template report
@@ -496,9 +541,88 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 self$results$report$setContent(report_template)
             },
 
+            # Helper function to get effective sample size (weighted or unweighted)
+            .getEffectiveSampleSize = function(data) {
+                if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
+                    # Weighted data: sum of counts
+                    return(sum(data[[self$options$counts]], na.rm = TRUE))
+                } else {
+                    # Unweighted data: number of rows
+                    return(nrow(data))
+                }
+            },
+
+            # Helper function to create weighted contingency table
+            .getWeightedTable = function(data, var1, var2) {
+                if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
+                    # Weighted contingency table using xtabs
+                    formula_str <- paste0(self$options$counts, " ~ ", var1, " + ", var2)
+                    weighted_table <- xtabs(as.formula(formula_str), data = data)
+                    return(weighted_table)
+                } else {
+                    # Unweighted: regular table
+                    return(table(data[[var1]], data[[var2]]))
+                }
+            },
+
+            # Helper function to get weighted group counts
+            .getWeightedGroupCounts = function(data, group_var) {
+                if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
+                    # Weighted: aggregate by group
+                    counts_var <- self$options$counts
+                    agg_data <- aggregate(data[[counts_var]],
+                                         by = list(group = data[[group_var]]),
+                                         FUN = sum, na.rm = TRUE)
+                    group_counts <- setNames(agg_data$x, agg_data$group)
+                    return(group_counts)
+                } else {
+                    # Unweighted: simple table
+                    return(table(data[[group_var]], useNA = "no"))
+                }
+            },
+
+            # Helper function to expand weighted data for ggstatsplot
+            # ggstatsplot expects one row per observation, not aggregated data
+            .expandWeightedData = function(data) {
+                if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
+                    counts_var <- self$options$counts
+
+                    # Expand each row according to its count
+                    # For large counts, this can be memory-intensive
+                    # Check if total is reasonable
+                    total_count <- sum(data[[counts_var]], na.rm = TRUE)
+
+                    if (total_count > 100000) {
+                        warning(paste("Large weighted dataset (", total_count,
+                                    " observations). This may consume significant memory."))
+                    }
+
+                    # Expand rows
+                    expanded_rows <- lapply(seq_len(nrow(data)), function(i) {
+                        count <- round(data[[counts_var]][i])
+                        if (count > 0) {
+                            data[rep(i, count), , drop = FALSE]
+                        } else {
+                            NULL
+                        }
+                    })
+
+                    # Combine all expanded rows
+                    expanded_data <- do.call(rbind, expanded_rows[!sapply(expanded_rows, is.null)])
+
+                    # Remove the counts column from expanded data
+                    expanded_data[[counts_var]] <- NULL
+
+                    return(expanded_data)
+                } else {
+                    # Already unweighted
+                    return(data)
+                }
+            },
+
             .prepareData = function() {
                 mydata <- self$data
-                
+
                 # Handle missing data based on user preference
                 if (self$options$excl) {
                     # Checkpoint before potentially expensive complete.cases operation
@@ -513,14 +637,35 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     }
                     mydata <- mydata[complete.cases(mydata[relevant_vars]), ]
                 } else {
-                    # Let ggstatsplot handle NAs (it will exclude them with warnings)
-                    mydata <- mydata
+                    # IMPORTANT: When excl=FALSE, ggstatsplot will silently drop rows with NAs
+                    # before statistical testing. This means reported sample sizes in summaries
+                    # may differ from actual analyzed data if NAs are present.
+                    #
+                    # To ensure auditability, we filter NAs here and report consistent counts.
+                    private$.checkpoint(flush = FALSE)
+                    relevant_vars <- c(self$options$dep, self$options$group)
+                    if (!is.null(self$options$grvar)) {
+                        relevant_vars <- c(relevant_vars, self$options$grvar)
+                    }
+                    if (!is.null(self$options$counts)) {
+                        relevant_vars <- c(relevant_vars, self$options$counts)
+                    }
+
+                    # Count rows before NA removal for reporting
+                    n_before <- nrow(mydata)
+                    mydata <- mydata[complete.cases(mydata[relevant_vars]), ]
+                    n_after <- nrow(mydata)
+
+                    if (n_before > n_after) {
+                        n_dropped <- n_before - n_after
+                        message(paste("Note:", n_dropped, "rows with missing values were excluded from analysis."))
+                    }
                 }
-                
+
                 if (nrow(mydata) == 0) {
                     stop('No complete data rows available after handling missing values. Please check your data or change the "Exclude Missing (NA)" setting.')
                 }
-                
+
                 return(mydata)
             },
 
@@ -529,18 +674,36 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(progress_label)) {
                     private$.checkpoint()
                 }
-                
-                # Performance optimization: Disable expensive features for large datasets
-                n_groups <- length(unique(data[[self$options$group]]))
-                n_total <- nrow(data)
-                
+
+                # WEIGHTED DATA HANDLING:
+                # ggstatsplot::ggbarstats supports a 'counts' parameter for aggregated data.
+                # When counts is specified, ggstatsplot will properly weight the statistical tests.
+                # We pass the counts column directly to ggbarstats (see base_args below).
+                #
+                # IMPORTANT: Our summary statistics (.generateSummary, .checkStatisticalAssumptions,
+                # .generateCopyReadyReport) now use weighted counts via helper functions to ensure
+                # reported sample sizes match what ggstatsplot analyzes.
+
+                # Performance optimization: Use weighted counts for group size checks
+                if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
+                    # Weighted data: check effective sample size
+                    n_total_effective <- sum(data[[self$options$counts]], na.rm = TRUE)
+                    # Group counts based on weights
+                    group_counts <- private$.getWeightedGroupCounts(data, self$options$group)
+                    n_groups <- length(group_counts)
+                } else {
+                    # Unweighted data
+                    n_groups <- length(unique(data[[self$options$group]]))
+                    n_total_effective <- nrow(data)
+                }
+
                 # Auto-disable pairwise for large group counts (performance)
                 use_pairwise <- self$options$pairwisecomparisons
                 if (use_pairwise && n_groups > 10) {
                     warning("Pairwise comparisons disabled for performance (>10 groups). Set manually to override.")
                     use_pairwise <- FALSE
                 }
-                
+
                 # Parse ratio if provided
                 ratio_vec <- NULL
                 if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {

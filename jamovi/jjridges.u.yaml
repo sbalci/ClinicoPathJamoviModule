@@ -3,7 +3,6 @@ name: jjridges
 jus: '3.0'
 stage: 0
 compilerMode: tame
-
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -37,7 +36,6 @@ children:
             name: facet_var
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Plot Style
     collapsed: false
@@ -65,7 +63,6 @@ children:
             label: Histogram Bin Width
             format: number
             enable: (plot_type == 'histogram_ridges')
-
   - type: CollapseBox
     label: Advanced Features
     collapsed: true
@@ -98,7 +95,6 @@ children:
           - type: CheckBox
             name: add_median
             label: Show Median Line
-
   - type: CollapseBox
     label: Statistical Analysis
     collapsed: true
@@ -121,7 +117,6 @@ children:
             name: effsize_type
             label: Effect Size Type
             enable: (show_stats)
-
   - type: CollapseBox
     label: Visual Appearance
     collapsed: true
@@ -165,7 +160,6 @@ children:
             name: show_facet_legend
             label: Show Facet Legend
             enable: (facet_var)
-
   - type: CollapseBox
     label: Theme & Labels
     collapsed: true
@@ -214,7 +208,6 @@ children:
             name: y_label
             label: Y Axis Label
             format: string
-
   - type: CollapseBox
     label: Annotations
     collapsed: true
@@ -233,7 +226,6 @@ children:
             label: Custom Annotations
             format: string
             width: large
-
   - type: CollapseBox
     label: Export Options
     collapsed: true
@@ -253,3 +245,8 @@ children:
             name: dpi
             label: Plot DPI
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinicalPreset

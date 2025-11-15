@@ -23,6 +23,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
             # init ----
             .init = function() {
+                private$.applyClinicalPreset()
 
                 deplen <- length(self$options$dep)
 
@@ -141,25 +142,48 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     }
                 }
                 
-                if (needs_transformation) {
-                    mydata <- self$data
-                    # Convert variables to numeric only if needed
-                    for (var in vars) {
-                        if (!is.numeric(mydata[[var]])) {
-                            mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-                        }
-                        # Checkpoint during variable conversion loop
-                        private$.checkpoint(flush = FALSE)
+                # VALIDATE NUMERIC VARIABLES - reject factors instead of blind conversion
+                factor_warnings <- character()
+                for (var in vars) {
+                    if (is.factor(self$data[[var]])) {
+                        factor_warnings <- c(factor_warnings, var)
                     }
-                } else {
-                    mydata <- self$data
                 }
 
-                # Checkpoint before NA exclusion (potentially expensive for large datasets)
+                # Stop if any factors detected
+                if (length(factor_warnings) > 0) {
+                    stop(paste0("Histogram analysis requires numeric variables. The following variables are categorical: ",
+                               paste(factor_warnings, collapse = ", "),
+                               ". Please select continuous numeric variables for histogram analysis."))
+                }
+
+                mydata <- self$data
+
+                # SELECTIVE NA OMISSION - only remove rows with NAs in selected variables
+                # This prevents dropping patients with NAs in unused columns
+                relevant_cols <- vars
+
+                # Add grouping variable if present
+                if (!is.null(self$options$grvar)) {
+                    relevant_cols <- c(relevant_cols, self$options$grvar)
+                }
+
+                # Checkpoint before NA exclusion
                 private$.checkpoint(flush = FALSE)
-                
-                # Exclude NA
-                mydata <- jmvcore::naOmit(mydata)
+
+                # Count rows before and after NA removal
+                n_before <- nrow(mydata)
+                mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
+                n_after <- nrow(mydata)
+
+                # Report NA removal if any occurred
+                if (n_before > n_after) {
+                    n_dropped <- n_before - n_after
+                    self$results$todo$setContent(
+                        glue::glue("<br>ℹ️ Info: {n_dropped} rows excluded due to missing values in selected variables.<br>",
+                                  "Rows with data: {n_after} of {n_before} ({round(100 * n_after / n_before, 1)}%)<br><hr>")
+                    )
+                }
 
                 # Cache the processed data
                 private$.processedData <- mydata
@@ -250,13 +274,38 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             # Clinical assumption checking and warnings
             .generateClinicalWarnings = function(data, variables) {
                 warnings <- c()
-                
+
+                # WARN ABOUT DEFAULT TEST VALUE = 0
+                # Testing "is mean = 0?" is almost never clinically relevant
+                if (!is.null(self$options$test.value) && self$options$test.value == 0) {
+                    # Check if any variable has all positive or all negative values
+                    has_irrelevant_test <- FALSE
+                    for (var in variables) {
+                        if (!var %in% names(data)) next
+                        var_data <- data[[var]][!is.na(data[[var]])]
+                        if (length(var_data) > 0) {
+                            if (all(var_data > 0) || all(var_data < 0)) {
+                                has_irrelevant_test <- TRUE
+                                break
+                            }
+                        }
+                    }
+
+                    if (has_irrelevant_test) {
+                        warnings <- c(warnings, paste0(
+                            "⚠️ <strong>TEST VALUE WARNING:</strong> Testing 'is the mean equal to 0?' is rarely clinically meaningful. ",
+                            "Consider setting a clinically relevant test value (e.g., normal reference range limit, ",
+                            "treatment threshold, or population mean) in the 'Test Value' option."
+                        ))
+                    }
+                }
+
                 for (var in variables) {
                     if (!var %in% names(data)) next
-                    
+
                     var_data <- data[[var]]
                     var_data <- var_data[!is.na(var_data)]
-                    
+
                     if (length(var_data) == 0) next
                     
                     # Sample size warnings

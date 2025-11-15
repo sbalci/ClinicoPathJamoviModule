@@ -32,7 +32,9 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             usexlabel = FALSE,
             xlabel = "",
             useylabel = FALSE,
-            ylabel = "", ...) {
+            ylabel = "",
+            showExplanations = TRUE,
+            clinicalPreset = "custom", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -181,6 +183,18 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "ylabel",
                 ylabel,
                 default="")
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=TRUE)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "custom",
+                    "biomarker_distribution",
+                    "publication_ready"),
+                default="custom")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -209,6 +223,8 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..xlabel)
             self$.addOption(private$..useylabel)
             self$.addOption(private$..ylabel)
+            self$.addOption(private$..showExplanations)
+            self$.addOption(private$..clinicalPreset)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -237,7 +253,9 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         usexlabel = function() private$..usexlabel$value,
         xlabel = function() private$..xlabel$value,
         useylabel = function() private$..useylabel$value,
-        ylabel = function() private$..ylabel$value),
+        ylabel = function() private$..ylabel$value,
+        showExplanations = function() private$..showExplanations$value,
+        clinicalPreset = function() private$..clinicalPreset$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -265,7 +283,9 @@ jviolinOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..usexlabel = NA,
         ..xlabel = NA,
         ..useylabel = NA,
-        ..ylabel = NA)
+        ..ylabel = NA,
+        ..showExplanations = NA,
+        ..clinicalPreset = NA)
 )
 
 jviolinResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -373,6 +393,8 @@ jviolinBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param xlabel Custom label for x-axis
 #' @param useylabel Override default y-axis label
 #' @param ylabel Custom label for y-axis
+#' @param showExplanations Show explanations of the statistical results
+#' @param clinicalPreset Clinical analysis preset
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -408,7 +430,9 @@ jviolin <- function(
     usexlabel = FALSE,
     xlabel = "",
     useylabel = FALSE,
-    ylabel = "") {
+    ylabel = "",
+    showExplanations = TRUE,
+    clinicalPreset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jviolin requires jmvcore to be installed (restart may be required)")
@@ -453,7 +477,9 @@ jviolin <- function(
         usexlabel = usexlabel,
         xlabel = xlabel,
         useylabel = useylabel,
-        ylabel = ylabel)
+        ylabel = ylabel,
+        showExplanations = showExplanations,
+        clinicalPreset = clinicalPreset)
 
     analysis <- jviolinClass$new(
         options = options,

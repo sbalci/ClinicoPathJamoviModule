@@ -53,6 +53,15 @@ children:
             enable: (inputMode:precomputed)
 
       - type: TargetLayoutBox
+        label: Distribution Settings (Pre-computed)
+        children:
+          - type: TextBox
+            name: degreesOfFreedom
+            label: Degrees of Freedom
+            format: number
+            enable: (inputMode:precomputed)
+
+      - type: TargetLayoutBox
         label: Model Fitting (Automatic)
         children:
           - type: VariablesListBox
@@ -78,6 +87,15 @@ children:
             maxItemCount: 1
             isTarget: true
             enable: (inputMode:fitmodel && modelType:cox)
+
+      - type: TargetLayoutBox
+        label: Random Effects (Mixed Models)
+        children:
+          - type: VariablesListBox
+            name: randomEffects
+            maxItemCount: 1
+            isTarget: true
+            enable: (inputMode:fitmodel && modelType:mixed)
 
   - type: LayoutBox
     margin: large

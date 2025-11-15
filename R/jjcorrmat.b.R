@@ -88,9 +88,35 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- self$data
 
-            # Exclude NA with checkpoint
-            private$.checkpoint()
-            mydata <- jmvcore::naOmit(mydata)
+            # SELECTIVE NA OMISSION - only remove rows with NAs in selected correlation variables
+            # This prevents dropping patients with NAs in unused columns
+            if (!is.null(self$options$dep) && length(self$options$dep) >= 2) {
+                relevant_cols <- self$options$dep
+
+                # Add grouping variable if present
+                if (!is.null(self$options$grvar)) {
+                    relevant_cols <- c(relevant_cols, self$options$grvar)
+                }
+
+                private$.checkpoint()
+
+                # Count rows before and after NA removal
+                n_before <- nrow(mydata)
+                mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
+                n_after <- nrow(mydata)
+
+                # Report NA removal if any occurred
+                if (n_before > n_after) {
+                    n_dropped <- n_before - n_after
+                    message_text <- paste0(
+                        .("<br>ℹ️ Info: "), n_dropped,
+                        .(" rows excluded due to missing values in selected correlation variables.<br>"),
+                        .("Rows with data: "), n_after, .(" of "), n_before,
+                        .(" ("), round(100 * n_after / n_before, 1), .("%)<br><hr>")
+                    )
+                    self$results$todo$setContent(message_text)
+                }
+            }
 
             # Cache the processed data
             private$.processedData <- mydata
@@ -113,10 +139,21 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     stop(sprintf(.('Variable "%s" not found in data'), var))
             }
 
-            # Convert to numeric and check for sufficient numeric data
+            # VALIDATE NUMERIC VARIABLES - warn about factor conversion
             numeric_vars <- 0
+            factor_warnings <- character()
+
             for (var in self$options$dep) {
                 private$.checkpoint()  # Before numeric conversion operations
+
+                # Check if variable is a factor BEFORE conversion
+                if (is.factor(mydata[[var]])) {
+                    factor_warnings <- c(factor_warnings, var)
+                    warning(paste0("Variable '", var, "' is categorical (factor). ",
+                                  "Converting to numeric using internal codes may not be meaningful. ",
+                                  "Consider using categorical analysis methods instead."))
+                }
+
                 num_vals <- jmvcore::toNumeric(mydata[[var]])
                 num_vals <- num_vals[!is.na(num_vals)]
 
@@ -125,6 +162,13 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         numeric_vars <- numeric_vars + 1
                     }
                 }
+            }
+
+            # Stop if correlating category codes
+            if (length(factor_warnings) > 0) {
+                stop(paste0(.('Correlation analysis requires numeric variables. The following variables are categorical: '),
+                           paste(factor_warnings, collapse = ", "),
+                           .('. Please select continuous numeric variables for correlation analysis.')))
             }
 
             if (numeric_vars < 2)
@@ -271,23 +315,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()  # No preset modifications for custom analysis
             }
 
-            # Apply preset-specific recommendations (non-intrusive)
             if (preset == "biomarker") {
-                # Biomarker correlations: document robust method recommendation
-                private$.preset_recommendations <- .("For biomarker correlations, consider robust correlation methods to handle outliers.")
+                self$options$typestatistics <- "robust"
+                private$.preset_recommendations <- .("For biomarker correlations, robust correlation methods are recommended to handle outliers.")
 
             } else if (preset == "labvalues") {
-                # Lab value relationships: document parametric suitability
+                self$options$typestatistics <- "parametric"
                 private$.preset_recommendations <- .("For lab values, parametric correlations are often appropriate if distributions are normal.")
 
             } else if (preset == "imaging") {
-                # Imaging metrics: document nonparametric considerations
+                self$options$typestatistics <- "nonparametric"
                 private$.preset_recommendations <- .("For imaging metrics, consider nonparametric correlations due to potentially skewed distributions.")
             }
         },
 
         # Generate clinical interpretation of correlation results
-        .generateInterpretation = function(mydata, options_data) {
+        .generateInterpretationContent = function(mydata, options_data) {
             if (length(options_data$myvars) < 2) return()
 
             # Calculate correlation matrix for interpretation
@@ -306,45 +349,66 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Calculate correlations based on type
+            # Calculate correlations based on ACTUAL type selected
+            # NOTE: For robust and Bayesian, we can't use cor() directly
+            # But we provide proper interpretation based on what was actually computed
+
             method_name <- switch(options_data$typestatistics,
                 "parametric" = "pearson",
                 "nonparametric" = "spearman",
-                "robust" = "pearson",  # robust method
-                "bayes" = "pearson"
+                "robust" = "robust",  # Will need special handling
+                "bayes" = "bayes"     # Will need special handling
             )
 
             method_display <- switch(options_data$typestatistics,
                 "parametric" = "Pearson",
                 "nonparametric" = "Spearman",
-                "robust" = "Robust",
+                "robust" = "Robust (percentage bend)",
                 "bayes" = "Bayesian"
             )
 
-            # Calculate correlation matrix
+            # Calculate correlation matrix based on method type
+            # For robust and Bayesian, we can't use base cor() - skip calculation
+            # and just report that the analysis was performed
             cor_results <- tryCatch({
-                cor_matrix <- cor(cor_data, method = method_name, use = "complete.obs")
                 cor_test_results <- list()
 
-                # Calculate p-values for significant correlations
-                for (i in 1:(ncol(cor_data)-1)) {
-                    for (j in (i+1):ncol(cor_data)) {
-                        var1 <- names(cor_data)[i]
-                        var2 <- names(cor_data)[j]
+                if (method_name %in% c("pearson", "spearman")) {
+                    # Standard methods can use cor() and cor.test()
 
-                        test_result <- tryCatch({
-                            cor.test(cor_data[[i]], cor_data[[j]], method = method_name)
-                        }, error = function(e) NULL)
+                    # Handle partial vs zero-order correlations
+                    if (options_data$partial && ncol(cor_data) >= 3) {
+                        # Use ggstatsplot's approach for partial correlations
+                        # Note: We cannot easily recalculate partial correlations here,
+                        # so we note that they were computed
+                        warning(.("Partial correlations were computed by ggstatsplot. Summary statistics show correlation count only."))
+                    } else {
+                        # Zero-order correlations
+                        for (i in 1:(ncol(cor_data)-1)) {
+                            for (j in (i+1):ncol(cor_data)) {
+                                var1 <- names(cor_data)[i]
+                                var2 <- names(cor_data)[j]
 
-                        if (!is.null(test_result)) {
-                            cor_test_results[[paste(var1, var2, sep = "_")]] <- list(
-                                var1 = var1,
-                                var2 = var2,
-                                correlation = test_result$estimate,
-                                p_value = test_result$p.value
-                            )
+                                test_result <- tryCatch({
+                                    cor.test(cor_data[[i]], cor_data[[j]], method = method_name)
+                                }, error = function(e) NULL)
+
+                                if (!is.null(test_result)) {
+                                    cor_test_results[[paste(var1, var2, sep = "_")]] <- list(
+                                        var1 = var1,
+                                        var2 = var2,
+                                        correlation = test_result$estimate,
+                                        p_value = test_result$p.value
+                                    )
+                                }
+                            }
                         }
                     }
+                } else {
+                    # Robust and Bayesian methods computed by ggstatsplot
+                    # We cannot easily recalculate these, so just report method used
+                    warning(paste0(method_display, .(" correlations were computed by ggstatsplot. ",
+                                                     "Detailed statistics are shown in the plot only.")))
                 }
 
                 cor_test_results
@@ -459,56 +523,144 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # run ----
-        .run = function() {
+        
+.run = function() {
 
-            # Initial Message ----
-            if ( is.null(self$options$dep) || length(self$options$dep) < 2 ) {
+    # Initial Message ----
+    if ( is.null(self$options$dep) || length(self$options$dep) < 2 ) {
 
-                # TODO ----
+        # TODO ----
 
-                todo <- .("<br>Welcome to ClinicoPath Correlation Matrix Analysis
-                <br><br>
-                <strong>What this does:</strong> Analyzes relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)
-                <br><br>
-                <strong>When to use:</strong> When examining associations between 2+ continuous clinical variables
-                <br><br>
-                <strong>Quick Start:</strong>
-                <br>1. Select 2 or more continuous variables
-                <br>2. Choose correlation method (Pearson for normal data, Spearman for non-normal)
-                <br>3. Optionally group by categorical variable (e.g., tumor grade, treatment group)
-                <br>4. Use partial correlations (3+ variables) to control for confounding effects
-                <br><br>
-                <strong>Correlation Types:</strong>
-                <br>• <strong>Zero-order (regular):</strong> Direct relationship between two variables
-                <br>• <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
-                <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
-                <br>
-                Please cite jamovi and the packages as given below.
-                <br><hr>")
+        todo <- .("<br>Welcome to ClinicoPath Correlation Matrix Analysis
+        <br><br>
+        <strong>What this does:</strong> Analyzes relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)
+        <br><br>
+        <strong>When to use:</strong> When examining associations between 2+ continuous clinical variables
+        <br><br>
+        <strong>Quick Start:</strong>
+        <br>1. Select 2 or more continuous variables
+        <br>2. Choose correlation method (Pearson for normal data, Spearman for non-normal)
+        <br>3. Optionally group by categorical variable (e.g., tumor grade, treatment group)
+        <br>4. Use partial correlations (3+ variables) to control for confounding effects
+        <br><br>
+        <strong>Correlation Types:</strong>
+        <br>• <strong>Zero-order (regular):</strong> Direct relationship between two variables
+        <br>• <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
+        <br><br>
+        This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
+        <br>
+        Please cite jamovi and the packages as given below.
+        <br><hr>")
 
-                self$results$todo$setContent(todo)
+        self$results$todo$setContent(todo)
 
-                return()
+        return()
 
-            } else {
+    } else {
 
-                # Clear welcome message and show processing message
-                todo <- .("<br>You have selected to use a correlation matrix to compare continuous variables.<br><hr>")
+        # Clear welcome message and show processing message
+        todo <- .("<br>You have selected to use a correlation matrix to compare continuous variables.<br><hr>")
 
-                self$results$todo$setContent(todo)
+        self$results$todo$setContent(todo)
 
-                if (nrow(self$data) == 0)
-                    stop(.('Data contains no (complete) rows'))
+        if (nrow(self$data) == 0)
+            stop(.('Data contains no (complete) rows'))
 
-                # Pre-process data and options for performance
-                private$.prepareData()
-                private$.prepareOptions()
+        # Pre-process data and options for performance
+        mydata <- private$.prepareData()
+        options_data <- private$.prepareOptions()
 
-            }
-        },
+        if (self$options$showexplanations) {
+            private$.generateAboutContent()
+            private$.generateSummary(options_data)
+            private$.checkAssumptions(options_data)
+            private$.generateInterpretation(mydata, options_data)
+            private$.generateReport(options_data)
+        }
 
-        .plot = function(image, ggtheme, theme, ...) {
+    }
+},
+
+.generateAboutContent = function() {
+    about_content <- glue::glue("
+    <h3>About Correlation Matrix</h3>
+    <hr>
+    <p><b>Purpose:</b> This analysis creates a correlation matrix to visualize the
+    relationships between multiple continuous variables. It helps in understanding
+    the direction, magnitude, and significance of the associations between pairs of
+    variables.</p>
+
+    <p><b>When to Use:</b></p>
+    <ul>
+        <li><b>Exploratory Data Analysis:</b> To get a quick overview of the
+        relationships between a set of variables.</li>
+        <li><b>Feature Selection:</b> To identify highly correlated variables that
+        may be redundant in a predictive model.</li>
+        <li><b>Publication:</b> To create a publication-ready summary of the
+        associations between your variables of interest.</li>
+    </ul>
+
+    <p><b>Key Features:</b></p>
+    <ul>
+        <li>Supports Pearson, Spearman, robust, and Bayesian correlation methods.</li>
+        <li>Can be split by a grouping variable to compare correlations across
+        subgroups.</li>
+        <li>Can compute partial correlations to control for confounding variables.</li>
+        <li>Provides options for p-value adjustment, theming, and customizing the
+        plot.</li>
+    </ul>
+    <hr>
+    ")
+    self$results$about$setContent(about_content)
+},
+
+.generateSummary = function(options_data) {
+    
+    n_vars <- length(options_data$myvars)
+    n_obs <- nrow(private$.prepareData())
+    
+    summary_text <- glue::glue("
+    <h4>Analysis Summary</h4>
+    <p><b>Variables analyzed:</b> {n_vars}</p>
+    <p><b>Sample size:</b> {n_obs} observations</p>
+    <p><b>Method:</b> {options_data$typestatistics} correlation</p>
+    <p><b>Correlation type:</b> {if(options_data$partial && n_vars >= 3) 'Partial' else 'Zero-order'}</p>
+    ")
+    
+    self$results$summary$setContent(summary_text)
+},
+
+.checkAssumptions = function(options_data) {
+    
+    assumptions_content <- glue::glue("
+    <h3>Statistical Assumptions & Warnings</h3>
+    <hr>
+    <p><b>For {options_data$typestatistics} correlation:</b></p>
+    <ul>
+        <li><b>Parametric (Pearson):</b> Assumes that the variables are approximately
+        normally distributed and that their relationship is linear.</li>
+        <li><b>Nonparametric (Spearman):</b> Does not assume a specific distribution.
+        It is based on the ranks of the data and can detect monotonic (but not
+        necessarily linear) relationships.</li>
+        <li><b>Robust:</b> Less sensitive to outliers than Pearson correlation.</li>
+        <li><b>Bayesian:</b> Provides a measure of evidence for the presence of a
+        correlation, but the interpretation depends on the chosen prior.</li>
+    </ul>
+    <p><b>General Warnings:</b></p>
+    <ul>
+        <li>Correlation does not imply causation.</li>
+        <li>Outliers can have a large influence on the correlation coefficient,
+        especially for Pearson correlation.</li>
+        <li>Restricting the range of the variables can artificially lower the
+        correlation coefficient.</li>
+    </ul>
+    <hr>
+    ")
+    
+    self$results$assumptions$setContent(assumptions_content)
+},
+
+.plot = function(image, ggtheme, theme, ...) {
             # Check for sufficient variables before any processing
             if (is.null(self$options$dep) || length(self$options$dep) < 2)
                 return()
@@ -516,24 +668,24 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use shared validation ----
             if (!private$.validateInputs())
                 return()
-
+        
             # Add clinical validation warnings
             private$.validateClinicalInputs()
-
+        
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
-
+        
             typestatistics <- options_data$typestatistics
             myvars <- options_data$myvars
-
-
+        
+        
             # ggcorrmat ----
             # https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html
-
+        
             # Checkpoint before expensive correlation computation
             private$.checkpoint()
-
+        
             plot <- ggstatsplot::ggcorrmat(
                 data = mydata,
                 cor.vars = myvars,
@@ -557,16 +709,17 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 subtitle = options_data$subtitle,
                 caption = options_data$caption
             )
-
+        
             # Generate clinical interpretation ----
             private$.generateInterpretation(mydata, options_data)
-
+        
             # Print Plot ----
-
+        
             print(plot)
             TRUE
-
+        
         },
+        
 
         .plot2 = function(image, ggtheme, theme, ...) {
             # Check for sufficient variables before any processing

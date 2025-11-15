@@ -247,3 +247,10 @@ children:
     children:
       - type: CheckBox
         name: ggpubrAddSmooth
+      - type: CheckBox
+        name: showExplanations
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinicalPreset

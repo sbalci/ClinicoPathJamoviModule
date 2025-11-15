@@ -122,3 +122,13 @@ children:
             label: Height (pixels)
             format: number
             enable: (vars)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinicalPreset
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showExplanations

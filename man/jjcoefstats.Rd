@@ -13,11 +13,13 @@ jjcoefstats(
   confLow,
   confHigh,
   pValue,
+  degreesOfFreedom,
   outcome,
   predictors,
   modelType = "lm",
   survivalTime,
   eventStatus,
+  randomEffects,
   sortCoefs = FALSE,
   excludeIntercept = TRUE,
   showPValues = TRUE,
@@ -49,6 +51,11 @@ from raw data.}
 
 \item{pValue}{P-values for each coefficient.}
 
+\item{degreesOfFreedom}{Degrees of freedom for t-distribution. If provided,
+t-distribution will be used for confidence intervals and p-values instead
+of normal approximation. Typically n - p - 1 for regression models (n =
+sample size, p = number of predictors).}
+
 \item{outcome}{Outcome variable for model fitting.}
 
 \item{predictors}{Predictor variables for model fitting.}
@@ -58,6 +65,10 @@ from raw data.}
 \item{survivalTime}{Time variable for Cox proportional hazards model.}
 
 \item{eventStatus}{Event indicator for Cox model (0=censored, 1=event).}
+
+\item{randomEffects}{Grouping variable for random intercepts in mixed
+effects models (e.g., subject ID, cluster ID). Used to specify random
+effects term like (1|subject).}
 
 \item{sortCoefs}{Sort coefficients by estimate magnitude.}
 

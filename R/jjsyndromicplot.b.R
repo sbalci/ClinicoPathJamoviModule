@@ -64,9 +64,110 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     stop('Data contains no (complete) rows')
             }
 
+            # Apply clinical preset
+            private$.applyClinicalPreset()
+
             # Run PCA ----
             private$.runPCA()
 
+            # Generate explanations if requested
+            if (self$options$showExplanations) {
+                private$.generateExplanations()
+            }
+
+        },
+
+        # Apply clinical preset ----
+        .applyClinicalPreset = function() {
+            preset <- self$options$clinicalPreset
+
+            # CRITICAL FIX: Make preset mutations transparent
+            if (preset == "custom") {
+                return()  # No changes for custom
+            }
+
+            preset_message <- NULL
+
+            if (preset == "biomarker_discovery") {
+                preset_message <- paste0(
+                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Biomarker Discovery</h4>",
+                    "<p><strong>The following settings have been automatically configured:</strong></p>",
+                    "<ul>",
+                    "<li>Cutoff threshold: <strong>0.4</strong></li>",
+                    "<li>Arrow size: <strong>12</strong></li>",
+                    "<li>Text size: <strong>10</strong></li>",
+                    "<li>Variable order: <strong>By absolute loading (decreasing)</strong></li>",
+                    "<li>Color scheme: <strong>Blue-White-Red gradient</strong></li>",
+                    "</ul>",
+                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                    "</div>"
+                )
+                self$options$set("cutoff", 0.4)
+                self$options$set("arrowsize", 12)
+                self$options$set("textsize", 10)
+                self$options$set("varorder", "absdecreasing")
+                self$options$set("colorlow", "blue")
+                self$options$set("colormid", "white")
+                self$options$set("colorhigh", "red")
+
+            } else if (preset == "disease_subtyping") {
+                preset_message <- paste0(
+                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Disease Subtyping</h4>",
+                    "<p><strong>The following settings have been automatically configured:</strong></p>",
+                    "<ul>",
+                    "<li>Cutoff threshold: <strong>0.3</strong> (more variables shown)</li>",
+                    "<li>Arrow size: <strong>15</strong> (larger for clarity)</li>",
+                    "<li>Text size: <strong>8</strong> (smaller to fit more labels)</li>",
+                    "<li>Variable order: <strong>By loading value (decreasing)</strong></li>",
+                    "<li>Color scheme: <strong>Green-White-Purple gradient</strong></li>",
+                    "</ul>",
+                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                    "</div>"
+                )
+                self$options$set("cutoff", 0.3)
+                self$options$set("arrowsize", 15)
+                self$options$set("textsize", 8)
+                self$options$set("varorder", "decreasing")
+                self$options$set("colorlow", "green")
+                self$options$set("colormid", "white")
+                self$options$set("colorhigh", "purple")
+            }
+
+            # Display preset notification
+            if (!is.null(preset_message)) {
+                # Append to existing warnings if any
+                current_warnings <- self$results$warnings$state
+                if (is.null(current_warnings) || current_warnings == "") {
+                    self$results$warnings$setContent(preset_message)
+                } else {
+                    self$results$warnings$setContent(paste0(current_warnings, preset_message))
+                }
+                self$results$warnings$setVisible(TRUE)
+            }
+        },
+
+        # Generate explanations ----
+        .generateExplanations = function() {
+            self$results$explanations$setVisible(TRUE)
+            self$results$explanations$setContent(
+                "<h3>Explanations</h3>
+                <p>
+                    Principal Component Analysis (PCA) is a statistical technique used to reduce the dimensionality of a dataset while preserving as much of the original variance as possible.
+                    It does this by creating new, uncorrelated variables called principal components (PCs), which are linear combinations of the original variables.
+                </p>
+                <p>
+                    The syndromic plot is a visualization of the PCA loadings.
+                    The loadings represent the contribution of each original variable to the principal component.
+                    Variables with high absolute loadings are the most important for that component.
+                </p>
+                <p>
+                    In the syndromic plot, the arrows represent the variables.
+                    The width and color of the arrows represent the magnitude and direction of the loadings.
+                    Positive loadings are shown in one color, and negative loadings are shown in another.
+                </p>"
+            )
         },
 
         # Run PCA ----
@@ -82,7 +183,51 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Remove missing values
             pca_data <- na.omit(pca_data)
 
-            # Convert to numeric matrix
+            # CRITICAL FIX: Validate input types BEFORE coercion
+            # Check for categorical/factor variables
+            non_numeric_vars <- c()
+            for (var_name in names(pca_data)) {
+                col_data <- pca_data[[var_name]]
+                # Check if factor, character, or ordered
+                if (is.factor(col_data) || is.character(col_data) || is.ordered(col_data)) {
+                    non_numeric_vars <- c(non_numeric_vars, var_name)
+                }
+                # Also check if it's numeric but actually categorical (few unique values)
+                else if (is.numeric(col_data)) {
+                    unique_vals <- length(unique(col_data[!is.na(col_data)]))
+                    if (unique_vals <= 5 && unique_vals < nrow(pca_data) * 0.1) {
+                        warning_msg <- paste0(
+                            "⚠️ Variable '", var_name, "' has only ", unique_vals,
+                            " unique values. It may be categorical rather than continuous. ",
+                            "PCA assumes continuous variables."
+                        )
+                        self$results$warnings$setContent(
+                            paste0(self$results$warnings$state, "<p>", warning_msg, "</p>")
+                        )
+                        self$results$warnings$setVisible(TRUE)
+                    }
+                }
+            }
+
+            # If categorical variables found, stop with clear error
+            if (length(non_numeric_vars) > 0) {
+                error_msg <- paste0(
+                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#ff6f00; margin-top:0;'>❌ Categorical Variables Detected</h4>",
+                    "<p><strong>PCA requires continuous numeric variables only.</strong></p>",
+                    "<p>The following variables are categorical/non-numeric:</p>",
+                    "<ul>",
+                    paste0("<li><code>", non_numeric_vars, "</code></li>", collapse = ""),
+                    "</ul>",
+                    "<p><strong>Action required:</strong> Remove these variables or convert them to numeric if appropriate.</p>",
+                    "</div>"
+                )
+                self$results$warnings$setContent(error_msg)
+                self$results$warnings$setVisible(TRUE)
+                return()
+            }
+
+            # Convert to numeric matrix (now safe after validation)
             pca_matrix <- as.matrix(sapply(pca_data, as.numeric))
 
             # Check for sufficient data
@@ -92,6 +237,29 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Run PCA
             pca <- prcomp(pca_matrix, center = self$options$center, scale. = self$options$scale)
+
+            # CRITICAL FIX: Check component bounds
+            n_components <- ncol(pca$rotation)
+            requested_component <- self$options$component
+
+            if (requested_component > n_components) {
+                warning_msg <- paste0(
+                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Component Number Out of Bounds</h4>",
+                    "<p><strong>Requested component ", requested_component,
+                    " exceeds available components.</strong></p>",
+                    "<p>PCA with ", length(vars), " variables produced ", n_components,
+                    " components (PC1 through PC", n_components, ").</p>",
+                    "<p><strong>Action:</strong> Component has been reset to PC1. ",
+                    "Please select a component between 1 and ", n_components, ".</p>",
+                    "</div>"
+                )
+                self$results$warnings$setContent(warning_msg)
+                self$results$warnings$setVisible(TRUE)
+
+                # Reset to safe value
+                self$options$set("component", 1)
+            }
 
             # Store PCA results for plotting
             private$.pcaResults <- pca
@@ -136,10 +304,23 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Extract standardized loadings ----
         .stand_loadings = function(pca, pca_data) {
 
+            # CRITICAL FIX: Correct dimension alignment for unscaled PCA
+            # Original bug: Division recycled DOWN columns instead of across rows
+            # Matrix is (n_vars × n_components), SD vector has length n_vars
+            # Must divide each ROW (variable) by its SD, not recycle down columns
+
+            loadings_unscaled <- pca$rotation %*% diag(pca$sdev)
+
             if (is.numeric(pca$scale)) {
-                loadings <- as.data.frame((pca$rotation %*% diag(pca$sdev)))
+                # Data was scaled by prcomp, loadings already standardized
+                loadings <- as.data.frame(loadings_unscaled)
             } else {
-                loadings <- as.data.frame((pca$rotation %*% diag(pca$sdev)) / apply(pca_data, 2, sd))
+                # Data was NOT scaled - must standardize loadings manually
+                # Use sweep to divide each row by its corresponding SD
+                sd_vals <- apply(pca_data, 2, sd)
+                loadings <- as.data.frame(
+                    sweep(loadings_unscaled, 1, sd_vals, FUN = "/")
+                )
             }
 
             colnames(loadings) <- paste0('PC', 1:ncol(pca$x))

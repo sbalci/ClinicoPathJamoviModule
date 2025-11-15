@@ -237,4 +237,31 @@ options:
       default: ''
       description: Custom label for y-axis
 
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Show explanations of the statistical results
+          R: >
+            Show explanations of the statistical results
+
+    - name: clinicalPreset
+      title: Clinical Preset
+      type: List
+      options:
+        - title: Custom
+          name: custom
+        - title: Biomarker Distribution
+          name: biomarker_distribution
+        - title: Publication Ready
+          name: publication_ready
+      default: custom
+      description:
+          ui: >
+            Apply a preset for a specific clinical analysis
+          R: >
+            Clinical analysis preset
+
 ...

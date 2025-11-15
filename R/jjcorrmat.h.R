@@ -23,6 +23,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             title = "",
             subtitle = "",
             caption = "",
+            showexplanations = FALSE,
             plotwidth = 600,
             plotheight = 450, ...) {
 
@@ -138,6 +139,10 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "caption",
                 caption,
                 default="")
+            private$..showexplanations <- jmvcore::OptionBool$new(
+                "showexplanations",
+                showexplanations,
+                default=FALSE)
             private$..plotwidth <- jmvcore::OptionInteger$new(
                 "plotwidth",
                 plotwidth,
@@ -168,6 +173,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..title)
             self$.addOption(private$..subtitle)
             self$.addOption(private$..caption)
+            self$.addOption(private$..showexplanations)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
         }),
@@ -189,6 +195,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         title = function() private$..title$value,
         subtitle = function() private$..subtitle$value,
         caption = function() private$..caption$value,
+        showexplanations = function() private$..showexplanations$value,
         plotwidth = function() private$..plotwidth$value,
         plotheight = function() private$..plotheight$value),
     private = list(
@@ -209,6 +216,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..title = NA,
         ..subtitle = NA,
         ..caption = NA,
+        ..showexplanations = NA,
         ..plotwidth = NA,
         ..plotheight = NA)
 )
@@ -375,6 +383,8 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param title Title for the correlation matrix plot.
 #' @param subtitle Subtitle for the correlation matrix plot.
 #' @param caption Caption for the correlation matrix plot.
+#' @param showexplanations Show detailed explanations of the analysis,
+#'   including assumptions, interpretation, and a copy-ready report.
 #' @param plotwidth Width of the correlation matrix plot in pixels. Default is
 #'   600.
 #' @param plotheight Height of the correlation matrix plot in pixels. Default
@@ -407,6 +417,7 @@ jjcorrmat <- function(
     title = "",
     subtitle = "",
     caption = "",
+    showexplanations = FALSE,
     plotwidth = 600,
     plotheight = 450) {
 
@@ -441,6 +452,7 @@ jjcorrmat <- function(
         title = title,
         subtitle = subtitle,
         caption = caption,
+        showexplanations = showexplanations,
         plotwidth = plotwidth,
         plotheight = plotheight)
 

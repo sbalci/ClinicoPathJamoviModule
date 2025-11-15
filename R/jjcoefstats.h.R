@@ -13,11 +13,13 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             confLow = NULL,
             confHigh = NULL,
             pValue = NULL,
+            degreesOfFreedom = NULL,
             outcome = NULL,
             predictors = NULL,
             modelType = "lm",
             survivalTime = NULL,
             eventStatus = NULL,
+            randomEffects = NULL,
             sortCoefs = FALSE,
             excludeIntercept = TRUE,
             showPValues = TRUE,
@@ -86,6 +88,9 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..degreesOfFreedom <- jmvcore::OptionInteger$new(
+                "degreesOfFreedom",
+                degreesOfFreedom)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -122,6 +127,14 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 permitted=list(
                     "factor",
                     "numeric"))
+            private$..randomEffects <- jmvcore::OptionVariable$new(
+                "randomEffects",
+                randomEffects,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
             private$..sortCoefs <- jmvcore::OptionBool$new(
                 "sortCoefs",
                 sortCoefs,
@@ -190,11 +203,13 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..confLow)
             self$.addOption(private$..confHigh)
             self$.addOption(private$..pValue)
+            self$.addOption(private$..degreesOfFreedom)
             self$.addOption(private$..outcome)
             self$.addOption(private$..predictors)
             self$.addOption(private$..modelType)
             self$.addOption(private$..survivalTime)
             self$.addOption(private$..eventStatus)
+            self$.addOption(private$..randomEffects)
             self$.addOption(private$..sortCoefs)
             self$.addOption(private$..excludeIntercept)
             self$.addOption(private$..showPValues)
@@ -215,11 +230,13 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         confLow = function() private$..confLow$value,
         confHigh = function() private$..confHigh$value,
         pValue = function() private$..pValue$value,
+        degreesOfFreedom = function() private$..degreesOfFreedom$value,
         outcome = function() private$..outcome$value,
         predictors = function() private$..predictors$value,
         modelType = function() private$..modelType$value,
         survivalTime = function() private$..survivalTime$value,
         eventStatus = function() private$..eventStatus$value,
+        randomEffects = function() private$..randomEffects$value,
         sortCoefs = function() private$..sortCoefs$value,
         excludeIntercept = function() private$..excludeIntercept$value,
         showPValues = function() private$..showPValues$value,
@@ -239,11 +256,13 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..confLow = NA,
         ..confHigh = NA,
         ..pValue = NA,
+        ..degreesOfFreedom = NA,
         ..outcome = NA,
         ..predictors = NA,
         ..modelType = NA,
         ..survivalTime = NA,
         ..eventStatus = NA,
+        ..randomEffects = NA,
         ..sortCoefs = NA,
         ..excludeIntercept = NA,
         ..showPValues = NA,
@@ -420,11 +439,18 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param confLow Lower confidence interval bounds.
 #' @param confHigh Upper confidence interval bounds.
 #' @param pValue P-values for each coefficient.
+#' @param degreesOfFreedom Degrees of freedom for t-distribution. If provided,
+#'   t-distribution will be used for confidence intervals and p-values instead
+#'   of normal approximation. Typically n - p - 1 for regression models (n =
+#'   sample size, p = number of predictors).
 #' @param outcome Outcome variable for model fitting.
 #' @param predictors Predictor variables for model fitting.
 #' @param modelType Type of regression model to fit.
 #' @param survivalTime Time variable for Cox proportional hazards model.
 #' @param eventStatus Event indicator for Cox model (0=censored, 1=event).
+#' @param randomEffects Grouping variable for random intercepts in mixed
+#'   effects models (e.g., subject ID, cluster ID). Used to specify random
+#'   effects term like (1|subject).
 #' @param sortCoefs Sort coefficients by estimate magnitude.
 #' @param excludeIntercept Exclude intercept from the plot.
 #' @param showPValues Display p-values alongside coefficients.
@@ -463,11 +489,13 @@ jjcoefstats <- function(
     confLow,
     confHigh,
     pValue,
+    degreesOfFreedom,
     outcome,
     predictors,
     modelType = "lm",
     survivalTime,
     eventStatus,
+    randomEffects,
     sortCoefs = FALSE,
     excludeIntercept = TRUE,
     showPValues = TRUE,
@@ -493,6 +521,7 @@ jjcoefstats <- function(
     if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
     if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
     if ( ! missing(eventStatus)) eventStatus <- jmvcore::resolveQuo(jmvcore::enquo(eventStatus))
+    if ( ! missing(randomEffects)) randomEffects <- jmvcore::resolveQuo(jmvcore::enquo(randomEffects))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -505,9 +534,11 @@ jjcoefstats <- function(
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(predictors), predictors, NULL),
             `if`( ! missing(survivalTime), survivalTime, NULL),
-            `if`( ! missing(eventStatus), eventStatus, NULL))
+            `if`( ! missing(eventStatus), eventStatus, NULL),
+            `if`( ! missing(randomEffects), randomEffects, NULL))
 
     for (v in term) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in randomEffects) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- jjcoefstatsOptions$new(
         inputMode = inputMode,
@@ -517,11 +548,13 @@ jjcoefstats <- function(
         confLow = confLow,
         confHigh = confHigh,
         pValue = pValue,
+        degreesOfFreedom = degreesOfFreedom,
         outcome = outcome,
         predictors = predictors,
         modelType = modelType,
         survivalTime = survivalTime,
         eventStatus = eventStatus,
+        randomEffects = randomEffects,
         sortCoefs = sortCoefs,
         excludeIntercept = excludeIntercept,
         showPValues = showPValues,

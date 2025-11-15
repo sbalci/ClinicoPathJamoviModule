@@ -209,6 +209,39 @@ jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             
             image <- self$results$plot
             image$setState(plotData)
+
+            private$.applyClinicalPreset()
+            private$.generateExplanations()
+        },
+
+        .applyClinicalPreset = function() {
+            preset <- self$options$clinicalPreset
+            if (preset == "custom") {
+                return()
+            }
+
+            if (preset == "biomarker_distribution") {
+                self$options$add_boxplot <- TRUE
+                self$options$themex <- "bw"
+            } else if (preset == "publication_ready") {
+                self$options$themex <- "pubr"
+            }
+        },
+
+        .generateExplanations = function() {
+            if (self$options$showExplanations) {
+                self$results$explanations$setVisible(TRUE)
+                self$results$explanations$setContent(
+                    "<h3>Explanations</h3>
+                    <p>
+                        This violin plot shows the distribution of a continuous variable across different groups.
+                        The width of the violin represents the density of the data at different values.
+                        The white dot inside the violin represents the median.
+                        The black bar in the center of the violin represents the interquartile range.
+                        The thin black line extending from the bar represents the 95% confidence interval.
+                    </p>"
+                )
+            }
         },
 
         .plot = function(image, ggtheme, theme, ...) {

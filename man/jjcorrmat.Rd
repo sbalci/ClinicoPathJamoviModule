@@ -23,6 +23,7 @@ jjcorrmat(
   title = "",
   subtitle = "",
   caption = "",
+  showexplanations = FALSE,
   plotwidth = 600,
   plotheight = 450
 )
@@ -76,6 +77,9 @@ imaging metrics.}
 \item{subtitle}{Subtitle for the correlation matrix plot.}
 
 \item{caption}{Caption for the correlation matrix plot.}
+
+\item{showexplanations}{Show detailed explanations of the analysis,
+including assumptions, interpretation, and a copy-ready report.}
 
 \item{plotwidth}{Width of the correlation matrix plot in pixels. Default is
 600.}

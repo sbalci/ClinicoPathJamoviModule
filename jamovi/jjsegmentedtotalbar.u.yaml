@@ -12,41 +12,41 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: 'Category Variable (X-axis)'
+        label: Category Variable (X-axis)
         children:
           - type: VariablesListBox
             name: x_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-            label: 'Categories (e.g., Treatment Groups)'
+            label: Categories (e.g., Treatment Groups)
       - type: TargetLayoutBox
-        label: 'Value Variable (Y-axis)'
+        label: Value Variable (Y-axis)
         children:
           - type: VariablesListBox
             name: y_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-            label: 'Values (e.g., Patient Counts)'
+            label: Values (e.g., Patient Counts)
       - type: TargetLayoutBox
-        label: 'Segment Variable (Fill)'
+        label: Segment Variable (Fill)
         children:
           - type: VariablesListBox
             name: fill_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-            label: 'Segments (e.g., Response Type)'
+            label: Segments (e.g., Response Type)
       - type: TargetLayoutBox
-        label: 'Panel Variable (Optional)'
+        label: Panel Variable (Optional)
         children:
           - type: VariablesListBox
             name: facet_var
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-            label: 'Optional Panels (e.g., by Site)'
+            label: Optional Panels (e.g., by Site)
   - type: LayoutBox
     margin: large
     stretchFactor: 0
@@ -55,7 +55,9 @@ children:
         label: Segmented Total Bar Charts
         children:
           - type: Label
-            label: Select variables and configure your analysis using the options below.
+            label: >-
+              Select variables and configure your analysis using the options
+              below.
             margin: small
             style: list-inline
   - type: CollapseBox
@@ -68,7 +70,7 @@ children:
         children:
           - type: ComboBox
             name: analysis_preset
-            label: 'Clinical Analysis Template'
+            label: Clinical Analysis Template
           - type: Label
             label: Choose a template for common clinical analyses.
             margin: small
@@ -86,20 +88,20 @@ children:
             margin: small
           - type: CheckBox
             name: show_ggplot2_plot
-            label: 'Built-in ggplot2 Plot'
+            label: Built-in ggplot2 Plot
           - type: CheckBox
             name: show_ggsegmented_plot
-            label: 'ggsegmentedtotalbar Package Plot'
+            label: ggsegmentedtotalbar Package Plot
           - type: CheckBox
             name: ggsegmented_labels
             enable: (show_ggsegmented_plot)
-            label: 'Show Labels in ggsegmentedtotalbar'
+            label: Show Labels in ggsegmentedtotalbar
           - type: TextBox
             name: ggsegmented_alpha
             enable: (show_ggsegmented_plot)
             format: number
             suffix: ''
-            label: 'Background Transparency (0-1)'
+            label: Background Transparency (0-1)
   - type: CollapseBox
     label: Chart Options
     collapsed: false
@@ -110,16 +112,16 @@ children:
         children:
           - type: ComboBox
             name: chart_style
-            label: 'Chart Style'
+            label: Chart Style
           - type: ComboBox
             name: color_palette
-            label: 'Color Palette'
+            label: Color Palette
           - type: ComboBox
             name: orientation
-            label: 'Bar Orientation'
+            label: Bar Orientation
           - type: ComboBox
             name: sort_categories
-            label: 'Sort Categories'
+            label: Sort Categories
   - type: CollapseBox
     label: Labels and Statistics
     collapsed: false
@@ -130,34 +132,39 @@ children:
         children:
           - type: CheckBox
             name: show_percentages
-            label: 'Show Percentages'
+            label: Show Percentages
           - type: ComboBox
             name: percentage_format
             enable: (show_percentages)
-            label: 'Percentage Format'
+            label: Percentage Format
           - type: CheckBox
             name: show_counts
-            label: 'Show Raw Counts'
+            label: Show Raw Counts
           - type: TextBox
             name: label_threshold
             format: number
             suffix: '%'
-            label: 'Min Segment Size for Labels'
+            label: Min Segment Size for Labels
           - type: CheckBox
             name: show_statistical_tests
-            label: 'Statistical Tests (Chi-square)'
+            label: Statistical Tests (Chi-square)
           - type: TextBox
             name: confidence_level
             enable: (show_statistical_tests)
             format: number
-            label: 'Confidence Level'
+            label: Confidence Level
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: plot_title
         format: string
-        label: 'Chart Title'
+        label: Chart Title
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showExplanations
   - type: CollapseBox
     label: Layout and Styling
     collapsed: true
@@ -168,26 +175,26 @@ children:
         children:
           - type: ComboBox
             name: legend_position
-            label: 'Legend Position'
+            label: Legend Position
           - type: TextBox
             name: bar_width
             format: number
             suffix: ''
-            label: 'Bar Width'
+            label: Bar Width
           - type: CheckBox
             name: add_outline
-            label: 'Add Segment Outlines'
+            label: Add Segment Outlines
           - type: ComboBox
             name: outline_color
             enable: (add_outline)
-            label: 'Outline Color'
+            label: Outline Color
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: x_title
         format: string
-        label: 'X-axis Title'
+        label: X-axis Title
   - type: CollapseBox
     label: Plot Dimensions
     collapsed: true
@@ -200,26 +207,26 @@ children:
             name: plot_width
             format: number
             suffix: ' inches'
-            label: 'Plot Width (inches)'
+            label: Plot Width (inches)
           - type: TextBox
             name: plot_height
             format: number
             suffix: ' inches'
-            label: 'Plot Height (inches)'
+            label: Plot Height (inches)
           - type: CheckBox
             name: export_ready
-            label: 'Export Ready'
+            label: Export Ready
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: y_title
         format: string
-        label: 'Y-axis Title'
+        label: Y-axis Title
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: legend_title
         format: string
-        label: 'Legend Title'
+        label: Legend Title

@@ -72,7 +72,89 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
             }
+
+            private$.applyClinicalPreset()
+            private$.generateExplanations()
         },
+
+        .applyClinicalPreset = function() {
+            preset <- self$options$clinicalPreset
+            if (preset == "custom") {
+                return()
+            }
+
+            # CRITICAL FIX: Make preset mutations transparent with warnings
+            preset_message <- NULL
+
+            if (preset == "biomarker_correlation") {
+                preset_message <- paste0(
+                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Biomarker Correlation</h4>",
+                    "<p><strong>The following settings have been automatically configured:</strong></p>",
+                    "<ul>",
+                    "<li>Statistical test: <strong>Nonparametric (Spearman correlation)</strong></li>",
+                    "<li>Additional plot: <strong>ggpubr scatter plot enabled</strong></li>",
+                    "<li>Color palette: <strong>JCO (Journal of Clinical Oncology)</strong></li>",
+                    "</ul>",
+                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                    "</div>"
+                )
+                self$options$typestatistics <- "nonparametric"
+                self$options$addGGPubrPlot <- TRUE
+                self$options$ggpubrPalette <- "jco"
+
+            } else if (preset == "treatment_response_analysis") {
+                preset_message <- paste0(
+                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Treatment Response Analysis</h4>",
+                    "<p><strong>The following settings have been automatically configured:</strong></p>",
+                    "<ul>",
+                    "<li>Statistical test: <strong>Robust (trimmed mean correlation)</strong></li>",
+                    "<li>Marginal distributions: <strong>Enabled</strong></li>",
+                    "</ul>",
+                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                    "</div>"
+                )
+                self$options$typestatistics <- "robust"
+                self$options$marginal <- TRUE
+
+            } else if (preset == "publication_ready") {
+                preset_message <- paste0(
+                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Publication Ready</h4>",
+                    "<p><strong>The following settings have been automatically configured:</strong></p>",
+                    "<ul>",
+                    "<li>Theme: <strong>Original ggstatsplot theme</strong></li>",
+                    "<li>Results subtitle: <strong>Enabled (shows statistics on plot)</strong></li>",
+                    "</ul>",
+                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                    "</div>"
+                )
+                self$options$originaltheme <- TRUE
+                self$options$resultssubtitle <- TRUE
+            }
+
+            # Display preset notification
+            if (!is.null(preset_message)) {
+                self$results$presetInfo$setContent(preset_message)
+                self$results$presetInfo$setVisible(TRUE)
+            }
+        },
+
+        .generateExplanations = function() {
+            if (self$options$showExplanations) {
+                self$results$explanations$setVisible(TRUE)
+                self$results$explanations$setContent(
+                    "<h3>Explanations</h3>
+                    <p>
+                        This scatter plot shows the relationship between two continuous variables.
+                        The correlation coefficient (r) measures the strength and direction of the linear relationship between the two variables.
+                        The p-value indicates the statistical significance of the correlation.
+                    </p>"
+                )
+            }
+        },
+
 
         # plot ----
 
@@ -119,7 +201,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 bf.message = self$options$bfmessage,
                 k = self$options$k,
                 marginal = self$options$marginal,
-                marginal.type = "histogram",
+                marginal.type = self$options$marginalType,  # CRITICAL FIX: Use actual option value
                 point.size = self$options$pointsize,
                 point.alpha = self$options$pointalpha,
                 smooth.line.args = list(
@@ -193,7 +275,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     bf.message = !!self$options$bfmessage,
                     k = !!self$options$k,
                     marginal = !!self$options$marginal,
-                    marginal.type = "histogram",
+                    marginal.type = !!self$options$marginalType,  # CRITICAL FIX: Use actual option value
                     point.size = !!self$options$pointsize,
                     point.alpha = !!self$options$pointalpha,
                     smooth.line.args = !!list(
@@ -361,21 +443,81 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Add correlation annotation
+            # CRITICAL FIX: Add correlation annotation with proper method handling
             tryCatch({
+                test_type <- self$options$typestatistics
+                cor_method <- "pearson"  # Default
+                method_label <- "Pearson"
+                warning_msg <- NULL
+
+                if (test_type == "parametric") {
+                    cor_method <- "pearson"
+                    method_label <- "Pearson"
+                } else if (test_type == "nonparametric") {
+                    cor_method <- "spearman"
+                    method_label <- "Spearman"
+                } else if (test_type == "robust") {
+                    # Robust correlation requires special packages
+                    if (requireNamespace("WRS2", quietly = TRUE)) {
+                        # Could use WRS2::pbcor for robust correlation
+                        # For now, fall back to Spearman with warning
+                        cor_method <- "spearman"
+                        method_label <- "Spearman (robust unavailable)"
+                        warning_msg <- paste0(
+                            "⚠️ Robust correlation not fully implemented for enhanced plot. ",
+                            "Falling back to Spearman correlation. ",
+                            "For robust analysis, use the main ggstatsplot plot (plot 1)."
+                        )
+                    } else {
+                        cor_method <- "pearson"
+                        method_label <- "Pearson (robust unavailable)"
+                        warning_msg <- paste0(
+                            "⚠️ Robust correlation requires WRS2 package which is not available. ",
+                            "Falling back to Pearson correlation."
+                        )
+                    }
+                } else if (test_type == "bayes" || test_type == "bayesian") {
+                    # Bayesian correlation requires BayesFactor package
+                    cor_method <- "pearson"
+                    method_label <- "Pearson (Bayesian unavailable)"
+                    warning_msg <- paste0(
+                        "⚠️ Bayesian correlation not implemented for enhanced plot. ",
+                        "Falling back to Pearson correlation. ",
+                        "For Bayesian analysis, use the main ggstatsplot plot (plot 1)."
+                    )
+                } else {
+                    # Unknown method, default to Pearson with warning
+                    cor_method <- "pearson"
+                    method_label <- "Pearson (default)"
+                    warning_msg <- paste0(
+                        "⚠️ Unknown correlation method '", test_type, "'. ",
+                        "Falling back to Pearson correlation."
+                    )
+                }
+
+                # Show warning if method was changed
+                if (!is.null(warning_msg)) {
+                    current_warnings <- self$results$warnings$state
+                    if (is.null(current_warnings)) {
+                        current_warnings <- ""
+                    }
+                    new_warning <- paste0(
+                        current_warnings,
+                        "<p style='color:#856404;'>", warning_msg, "</p>"
+                    )
+                    self$results$warnings$setContent(new_warning)
+                    self$results$warnings$setVisible(TRUE)
+                }
+
                 cor_result <- stats::cor.test(
                     plotData[[self$options$dep]],
                     plotData[[self$options$group]],
-                    method = switch(
-                        self$options$typestatistics,
-                        "parametric" = "pearson",
-                        "nonparametric" = "spearman",
-                        "pearson"
-                    )
+                    method = cor_method
                 )
 
                 cor_text <- sprintf(
-                    "r = %.3f, p %s %.3f",
+                    "%s: r = %.3f, p %s %.3f",
+                    method_label,
                     cor_result$estimate,
                     ifelse(cor_result$p.value < 0.001, "<", "="),
                     ifelse(cor_result$p.value < 0.001, 0.001, cor_result$p.value)
@@ -384,6 +526,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p <- p + ggplot2::labs(subtitle = cor_text)
             }, error = function(e) {
                 # If correlation fails, continue without it
+                warning_msg <- paste0("⚠️ Correlation calculation failed: ", e$message)
+                self$results$warnings$setContent(warning_msg)
+                self$results$warnings$setVisible(TRUE)
             })
 
             # Add labels
@@ -438,12 +583,24 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 palette = self$options$ggpubrPalette
             )
 
-            # Add correlation if requested
+            # CRITICAL FIX: Implement ggpubrAddSmooth option
+            # Build the 'add' parameter based on user selections
+            add_elements <- c()
+
             if (self$options$ggpubrAddCorr) {
-                args$add <- "reg.line"
+                add_elements <- c(add_elements, "reg.line")
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
+            }
+
+            if (self$options$ggpubrAddSmooth) {
+                add_elements <- c(add_elements, "loess")
+            }
+
+            # Combine add elements if any are selected
+            if (length(add_elements) > 0) {
+                args$add <- add_elements
             }
 
             # Create scatter plot
@@ -481,12 +638,24 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 facet.by = grvar
             )
 
-            # Add correlation if requested
+            # CRITICAL FIX: Implement ggpubrAddSmooth option
+            # Build the 'add' parameter based on user selections
+            add_elements <- c()
+
             if (self$options$ggpubrAddCorr) {
-                args$add <- "reg.line"
+                add_elements <- c(add_elements, "reg.line")
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
+            }
+
+            if (self$options$ggpubrAddSmooth) {
+                add_elements <- c(add_elements, "loess")
+            }
+
+            # Combine add elements if any are selected
+            if (length(add_elements) > 0) {
+                args$add <- add_elements
             }
 
             # Create scatter plot

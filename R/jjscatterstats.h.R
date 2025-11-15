@@ -39,7 +39,9 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             ggpubrPalette = "jco",
             ggpubrAddCorr = TRUE,
             ggpubrCorrMethod = "pearson",
-            ggpubrAddSmooth = TRUE, ...) {
+            ggpubrAddSmooth = TRUE,
+            showExplanations = TRUE,
+            clinicalPreset = "custom", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -257,6 +259,19 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "ggpubrAddSmooth",
                 ggpubrAddSmooth,
                 default=TRUE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=TRUE)
+            private$..clinicalPreset <- jmvcore::OptionList$new(
+                "clinicalPreset",
+                clinicalPreset,
+                options=list(
+                    "custom",
+                    "biomarker_correlation",
+                    "treatment_response_analysis",
+                    "publication_ready"),
+                default="custom")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -292,6 +307,8 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..ggpubrAddCorr)
             self$.addOption(private$..ggpubrCorrMethod)
             self$.addOption(private$..ggpubrAddSmooth)
+            self$.addOption(private$..showExplanations)
+            self$.addOption(private$..clinicalPreset)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -327,7 +344,9 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ggpubrPalette = function() private$..ggpubrPalette$value,
         ggpubrAddCorr = function() private$..ggpubrAddCorr$value,
         ggpubrCorrMethod = function() private$..ggpubrCorrMethod$value,
-        ggpubrAddSmooth = function() private$..ggpubrAddSmooth$value),
+        ggpubrAddSmooth = function() private$..ggpubrAddSmooth$value,
+        showExplanations = function() private$..showExplanations$value,
+        clinicalPreset = function() private$..clinicalPreset$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -362,7 +381,9 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..ggpubrPalette = NA,
         ..ggpubrAddCorr = NA,
         ..ggpubrCorrMethod = NA,
-        ..ggpubrAddSmooth = NA)
+        ..ggpubrAddSmooth = NA,
+        ..showExplanations = NA,
+        ..clinicalPreset = NA)
 )
 
 jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -608,6 +629,8 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param ggpubrAddCorr Add correlation statistics to ggpubr scatter plot.
 #' @param ggpubrCorrMethod Method for correlation in ggpubr plot.
 #' @param ggpubrAddSmooth Add smoothed trend line to ggpubr scatter plot.
+#' @param showExplanations Show explanations of the statistical results
+#' @param clinicalPreset Clinical analysis preset
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -654,7 +677,9 @@ jjscatterstats <- function(
     ggpubrPalette = "jco",
     ggpubrAddCorr = TRUE,
     ggpubrCorrMethod = "pearson",
-    ggpubrAddSmooth = TRUE) {
+    ggpubrAddSmooth = TRUE,
+    showExplanations = TRUE,
+    clinicalPreset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjscatterstats requires jmvcore to be installed (restart may be required)")
@@ -716,7 +741,9 @@ jjscatterstats <- function(
         ggpubrPalette = ggpubrPalette,
         ggpubrAddCorr = ggpubrAddCorr,
         ggpubrCorrMethod = ggpubrCorrMethod,
-        ggpubrAddSmooth = ggpubrAddSmooth)
+        ggpubrAddSmooth = ggpubrAddSmooth,
+        showExplanations = showExplanations,
+        clinicalPreset = clinicalPreset)
 
     analysis <- jjscatterstatsClass$new(
         options = options,

@@ -38,7 +38,8 @@ jjwithinstats(
   ggpubrPalette = "jco",
   ggpubrAddStats = TRUE,
   ggpubrShowLines = TRUE,
-  ggpubrAddPoints = FALSE
+  ggpubrAddPoints = FALSE,
+  showExplanations = TRUE
 )
 }
 \arguments{
@@ -123,6 +124,8 @@ plot shows individual trajectories.}
 plot.}
 
 \item{ggpubrAddPoints}{Overlay individual data points on ggpubr plot.}
+
+\item{showExplanations}{Show explanations of the statistical results.}
 }
 \value{
 A results object containing:

@@ -1,7 +1,7 @@
 ---
 name:  jjcoefstats
 title: Coefficient Forest Plot (ggcoefstats)
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Regression Plots
 version: '0.0.32'
 jas: '1.2'
@@ -100,6 +100,14 @@ options:
       description: >
         P-values for each coefficient.
 
+    - name: degreesOfFreedom
+      title: Degrees of Freedom (Optional)
+      type: Integer
+      description: >
+        Degrees of freedom for t-distribution. If provided, t-distribution will be used
+        for confidence intervals and p-values instead of normal approximation.
+        Typically n - p - 1 for regression models (n = sample size, p = number of predictors).
+
     # Fit model mode
     - name: outcome
       title: Outcome Variable
@@ -146,6 +154,15 @@ options:
       permitted: [factor, numeric]
       description: >
         Event indicator for Cox model (0=censored, 1=event).
+
+    - name: randomEffects
+      title: Random Effects Grouping (for Mixed)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description: >
+        Grouping variable for random intercepts in mixed effects models (e.g., subject ID, cluster ID).
+        Used to specify random effects term like (1|subject).
 
     # Plot customization
     - name: sortCoefs

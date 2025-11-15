@@ -415,12 +415,43 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- self$data
 
-            # Exclude NA with checkpoint
+            # Selective NA omission - only remove rows with NAs in relevant variables
+            # Build list of relevant columns
+            relevant_cols <- c(self$options$dep)
+            if (!is.null(self$options$group) && self$options$group != "") {
+                relevant_cols <- c(relevant_cols, self$options$group)
+            }
+            if (!is.null(self$options$grvar) && self$options$grvar != "") {
+                relevant_cols <- c(relevant_cols, self$options$grvar)
+            }
+            if (!is.null(self$options$counts) && self$options$counts != "") {
+                relevant_cols <- c(relevant_cols, self$options$counts)
+            }
+
+            # Remove rows with NAs only in relevant columns
+            n_before <- nrow(mydata)
             private$.checkpoint()
-            mydata <- jmvcore::naOmit(mydata)
-            
+            mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
+            n_after <- nrow(mydata)
+
+            # Report dropped rows
+            if (n_before > n_after) {
+                n_dropped <- n_before - n_after
+                pct_dropped <- round(100 * n_dropped / n_before, 1)
+                self$results$todo$setContent(
+                    glue::glue(
+                        "<br>ℹ️ <b>{info_title}:</b> {n_dropped} {rows_msg} ({pct_dropped}%) {excluded_msg} {vars_msg}: {var_list}.<br><hr>",
+                        info_title = .('Info'),
+                        rows_msg = ngettext(n_dropped, 'row', 'rows'),
+                        excluded_msg = .('excluded due to missing values in'),
+                        vars_msg = .('analysis variables'),
+                        var_list = paste(relevant_cols, collapse = ', ')
+                    )
+                )
+            }
+
             if (nrow(mydata) == 0) {
-                stop(.('No complete data rows available after handling missing values. Please check your data.'))
+                stop(.('No complete data rows available after handling missing values. Please check your data for the selected variables.'))
             }
 
             return(mydata)

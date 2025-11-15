@@ -35,7 +35,8 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             outline_color = "white",
             export_ready = TRUE,
             show_statistical_tests = FALSE,
-            confidence_level = 0.95, ...) {
+            confidence_level = 0.95,
+            showExplanations = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -240,6 +241,10 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 min=0.8,
                 max=0.99,
                 default=0.95)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=TRUE)
 
             self$.addOption(private$..analysis_preset)
             self$.addOption(private$..x_var)
@@ -271,6 +276,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..export_ready)
             self$.addOption(private$..show_statistical_tests)
             self$.addOption(private$..confidence_level)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         analysis_preset = function() private$..analysis_preset$value,
@@ -302,7 +308,8 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         outline_color = function() private$..outline_color$value,
         export_ready = function() private$..export_ready$value,
         show_statistical_tests = function() private$..show_statistical_tests$value,
-        confidence_level = function() private$..confidence_level$value),
+        confidence_level = function() private$..confidence_level$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..analysis_preset = NA,
         ..x_var = NA,
@@ -333,7 +340,8 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..outline_color = NA,
         ..export_ready = NA,
         ..show_statistical_tests = NA,
-        ..confidence_level = NA)
+        ..confidence_level = NA,
+        ..showExplanations = NA)
 )
 
 jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -580,6 +588,7 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param show_statistical_tests Whether to perform chi-square tests for
 #'   proportion differences.
 #' @param confidence_level Confidence level for statistical tests (0.80-0.99).
+#' @param showExplanations Show explanations of the statistical results
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -632,7 +641,8 @@ jjsegmentedtotalbar <- function(
     outline_color = "white",
     export_ready = TRUE,
     show_statistical_tests = FALSE,
-    confidence_level = 0.95) {
+    confidence_level = 0.95,
+    showExplanations = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjsegmentedtotalbar requires jmvcore to be installed (restart may be required)")
@@ -683,7 +693,8 @@ jjsegmentedtotalbar <- function(
         outline_color = outline_color,
         export_ready = export_ready,
         show_statistical_tests = show_statistical_tests,
-        confidence_level = confidence_level)
+        confidence_level = confidence_level,
+        showExplanations = showExplanations)
 
     analysis <- jjsegmentedtotalbarClass$new(
         options = options,

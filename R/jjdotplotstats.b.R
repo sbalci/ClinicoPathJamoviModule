@@ -125,50 +125,69 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 group_means <- tapply(mydata[[dep_var]], mydata[[group_var]], mean, na.rm = TRUE)
                 group_medians <- tapply(mydata[[dep_var]], mydata[[group_var]], median, na.rm = TRUE)
                 group_ns <- table(mydata[[group_var]])
-                
+
                 groups <- names(group_means)
-                if (length(groups) != 2) {
-                    groups <- groups[1:min(2, length(groups))]
+                n_groups <- length(groups)
+
+                # CORRECTLY IDENTIFY ANALYSIS TYPE based on number of groups
+                test_description <- if (n_groups == 2) {
+                    switch(test_type,
+                        "parametric" = "independent samples t-test for comparing means",
+                        "nonparametric" = "Mann-Whitney U test for comparing distributions",
+                        "robust" = "Yuen's test using trimmed means",
+                        "bayes" = "Bayesian t-test for group comparison",
+                        "two-group comparison"
+                    )
+                } else {
+                    switch(test_type,
+                        "parametric" = "one-way ANOVA for comparing means across groups",
+                        "nonparametric" = "Kruskal-Wallis test for comparing distributions across groups",
+                        "robust" = "robust ANOVA using trimmed means",
+                        "bayes" = "Bayesian ANOVA for group comparison",
+                        "multi-group comparison"
+                    )
                 }
                 
-                # Generate interpretation based on test type
-                test_description <- switch(test_type,
-                    "parametric" = "t-test for comparing means",
-                    "nonparametric" = "Mann-Whitney U test for comparing distributions",
-                    "robust" = "robust test using trimmed means",
-                    "bayes" = "Bayesian comparison of groups",
-                    "comparison of groups"
-                )
-                
+                # Generate sample description based on number of groups
+                sample_desc <- if (n_groups == 2) {
+                    paste0("Group '", groups[1], "' (n=", group_ns[groups[1]], ") vs ",
+                           "Group '", groups[2], "' (n=", group_ns[groups[2]], ")")
+                } else {
+                    paste0(n_groups, " groups: ",
+                           paste(sapply(names(group_ns), function(g) paste0("'", g, "' (n=", group_ns[g], ")")),
+                                collapse = ", "))
+                }
+
+                # Generate results description based on number of groups
+                results_desc <- if (n_groups == 2) {
+                    paste0("Group '", groups[1], "' shows a ",
+                           switch(test_type,
+                                 "parametric" = paste0("mean of ", round(group_means[groups[1]], 2)),
+                                 "nonparametric" = paste0("median of ", round(group_medians[groups[1]], 2)),
+                                 paste0("central value of ", round(group_means[groups[1]], 2))),
+                           " vs Group '", groups[2], "' with a ",
+                           switch(test_type,
+                                 "parametric" = paste0("mean of ", round(group_means[groups[2]], 2)),
+                                 "nonparametric" = paste0("median of ", round(group_medians[groups[2]], 2)),
+                                 paste0("central value of ", round(group_means[groups[2]], 2))),
+                           ".")
+                } else {
+                    central_measure <- if (test_type %in% c("parametric", "bayes")) "means" else "medians"
+                    central_values <- if (test_type %in% c("parametric", "bayes")) group_means else group_medians
+                    paste0("The ", n_groups, " groups show ", central_measure, " ranging from ",
+                           round(min(central_values, na.rm = TRUE), 2), " to ",
+                           round(max(central_values, na.rm = TRUE), 2), ". ",
+                           "The plot visualizes the complete distribution across all groups.")
+                }
+
                 interpretation <- glue::glue(
                     "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
                     "<h4 style='color: #007bff; margin-top: 0;'>📊 Clinical Interpretation</h4>",
-                    "<p><strong>Analysis:</strong> This dot plot shows the distribution of {dep_var} across different {group_var} categories using a {test_description}.</p>",
-                    "<p><strong>Sample:</strong> ",
-                    if(length(groups) >= 2) {
-                        paste0("Group '", groups[1], "' (n=", group_ns[groups[1]], "), ",
-                               "Group '", groups[2], "' (n=", group_ns[groups[2]], ")")
-                    } else {
-                        paste0("Total n = ", sum(group_ns))
-                    },
-                    "</p>",
-                    "<p><strong>Results:</strong> ",
-                    if(length(groups) >= 2) {
-                        paste0("Group '", groups[1], "' shows a ",
-                               switch(test_type,
-                                     "parametric" = paste0("mean of ", round(group_means[groups[1]], 2)),
-                                     "nonparametric" = paste0("median of ", round(group_medians[groups[1]], 2)),
-                                     paste0("central value of ", round(group_means[groups[1]], 2))),
-                               " vs Group '", groups[2], "' with a ",
-                               switch(test_type,
-                                     "parametric" = paste0("mean of ", round(group_means[groups[2]], 2)),
-                                     "nonparametric" = paste0("median of ", round(group_medians[groups[2]], 2)),
-                                     paste0("central value of ", round(group_means[groups[2]], 2))),
-                               ".")
-                    } else {
-                        paste0("The analysis shows the distribution pattern of ", dep_var, " across groups.")
-                    },
-                    "</p>",
+                    "<p><strong>Analysis:</strong> This dot plot shows the distribution of {dep_var} across {n_groups} {group_var} ",
+                    if (n_groups == 2) "groups" else "groups",
+                    " using a {test_description}.</p>",
+                    "<p><strong>Sample:</strong> {sample_desc}</p>",
+                    "<p><strong>Results:</strong> {results_desc}</p>",
                     "<p><em>💡 Tip: The statistical significance and effect size will be displayed in the plot subtitle when the analysis completes.</em></p>",
                     "</div>"
                 )
@@ -260,24 +279,32 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Clinical preset application
         .applyClinicalPreset = function() {
-            preset <- if (!is.null(self$options$clinicalPreset)) self$options$clinicalPreset else "basic"
-            
-            # Store preset for use in interpretation methods
+            preset <- self$options$clinicalPreset
+            if (is.null(preset) || preset == "custom") {
+                private$.currentPreset <- "custom"
+                private$.accumulateMessage("<br>📋 Using custom analysis settings.<br>")
+                return()
+            }
+
             private$.currentPreset <- preset
-            
-            # Modify welcome message based on preset
-            if (!is.null(self$options$dep) && !is.null(self$options$group)) {
-                preset_message <- switch(preset,
-                    "basic" = "Using basic analysis settings optimized for straightforward comparisons.",
-                    "publication" = "Using publication-ready settings with comprehensive statistical reporting.",
-                    "clinical" = "Using clinical settings optimized for medical decision-making.",
-                    "custom" = "Using your custom analysis configuration.",
-                    "Basic analysis settings applied."
-                )
-                
-                private$.accumulateMessage(
-                    glue::glue("<br>📋 {preset_message}<br>")
-                )
+            preset_message <- ""
+
+            # Apply settings based on preset
+            if (preset == "basic") {
+                self$options$resultssubtitle <- TRUE
+                preset_message <- "Using basic analysis settings optimized for straightforward comparisons."
+            } else if (preset == "publication") {
+                self$options$resultssubtitle <- TRUE
+                self$options$originaltheme <- TRUE
+                preset_message <- "Using publication-ready settings with comprehensive statistical reporting."
+            } else if (preset == "clinical") {
+                self$options$centralityplotting <- TRUE
+                self$options$centralitytype <- "median"
+                preset_message <- "Using clinical settings optimized for medical decision-making."
+            }
+
+            if (nchar(preset_message) > 0) {
+                private$.accumulateMessage(glue::glue("<br>📋 {preset_message}<br>"))
             }
         },
         
@@ -286,27 +313,52 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep_var <- self$options$dep
             group_var <- self$options$group
             test_type <- self$options$typestatistics
-            
-            test_name <- switch(test_type,
-                "parametric" = "independent samples t-test",
-                "nonparametric" = "Mann-Whitney U test", 
-                "robust" = "robust comparison test",
-                "bayes" = "Bayesian group comparison",
-                "statistical comparison"
-            )
-            
+
+            # Determine number of groups from data
+            mydata <- private$.prepareData()
+            if (is.null(mydata) || is.null(group_var) || !(group_var %in% names(mydata))) {
+                return()  # Cannot generate report without data
+            }
+
+            n_groups <- length(unique(mydata[[group_var]]))
+
+            # CORRECTLY IDENTIFY TEST NAME based on number of groups
+            test_name <- if (n_groups == 2) {
+                switch(test_type,
+                    "parametric" = "independent samples t-test",
+                    "nonparametric" = "Mann-Whitney U test",
+                    "robust" = "Yuen's robust test for trimmed means",
+                    "bayes" = "Bayesian t-test",
+                    "two-group comparison test"
+                )
+            } else {
+                switch(test_type,
+                    "parametric" = "one-way analysis of variance (ANOVA)",
+                    "nonparametric" = "Kruskal-Wallis H test",
+                    "robust" = "robust one-way ANOVA",
+                    "bayes" = "Bayesian ANOVA",
+                    "multi-group comparison test"
+                )
+            }
+
+            comparison_phrase <- if (n_groups == 2) {
+                "between two groups"
+            } else {
+                paste0("across ", n_groups, " groups")
+            }
+
             report_template <- glue::glue(
                 "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
                 "<h4 style='color: #0066cc; margin-top: 0;'>📝 Copy-Ready Report Sentence</h4>",
                 "<div style='background-color: white; padding: 10px; border: 1px dashed #0066cc; font-family: \"Times New Roman\", serif;'>",
-                "<p>A <strong>{test_name}</strong> was performed to compare <em>{dep_var}</em> between <em>{group_var}</em> groups. ",
+                "<p>A <strong>{test_name}</strong> was performed to compare <em>{dep_var}</em> {comparison_phrase} of <em>{group_var}</em>. ",
                 "The dot plot visualization shows the distribution and central tendencies across groups, ",
                 "with statistical results displayed in the plot subtitle including effect size and significance testing.</p>",
                 "</div>",
                 "<p><em>💡 Click to select the text above and copy to your report. Statistical values will be automatically filled when the analysis completes.</em></p>",
                 "</div>"
             )
-            
+
             self$results$reportSentence$setContent(report_template)
         },
         
@@ -462,16 +514,39 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             start_time <- Sys.time()
 
             mydata <- self$data
-            
+
             # Convert dependent variable to numeric (single variable)
             dep_var <- self$options$dep
             if (!is.null(dep_var)) {
                 mydata[[dep_var]] <- jmvcore::toNumeric(mydata[[dep_var]])
             }
 
-            # Exclude NA with checkpoint
-            private$.checkpoint()
-            mydata <- jmvcore::naOmit(mydata)
+            # SELECTIVE NA OMISSION - only remove rows with NAs in analysis variables
+            # This prevents dropping patients with NAs in unused columns
+            if (!is.null(dep_var) && !is.null(self$options$group)) {
+                relevant_cols <- c(dep_var, self$options$group)
+
+                # Add grouping variable if present
+                if (!is.null(self$options$grvar)) {
+                    relevant_cols <- c(relevant_cols, self$options$grvar)
+                }
+
+                private$.checkpoint()
+
+                # Count rows before and after NA removal
+                n_before <- nrow(mydata)
+                mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
+                n_after <- nrow(mydata)
+
+                # Report NA removal if any occurred
+                if (n_before > n_after) {
+                    n_dropped <- n_before - n_after
+                    private$.accumulateMessage(
+                        glue::glue("<br>ℹ️ Info: {n_dropped} rows excluded due to missing values in analysis variables.<br>",
+                                  "Rows with data: {n_after} of {n_before} ({round(100 * n_after / n_before, 1)}%)<br>")
+                    )
+                }
+            }
             
             # Validate data quality
             if (!is.null(dep_var)) {

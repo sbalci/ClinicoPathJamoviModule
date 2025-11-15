@@ -16,6 +16,24 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .processedOptions = NULL,
         .data_hash = NULL,
         .options_hash = NULL,
+        .accumulated_messages = NULL,  # For accumulating diagnostic messages
+
+        # Helper to accumulate messages instead of overwriting
+        .appendMessage = function(message) {
+            if (is.null(private$.accumulated_messages)) {
+                private$.accumulated_messages <- character()
+            }
+            private$.accumulated_messages <- c(private$.accumulated_messages, message)
+        },
+
+        # Helper to flush accumulated messages to todo panel
+        .flushMessages = function() {
+            if (!is.null(private$.accumulated_messages) && length(private$.accumulated_messages) > 0) {
+                combined_message <- paste(private$.accumulated_messages, collapse = "")
+                self$results$todo$setContent(combined_message)
+                private$.accumulated_messages <- NULL  # Clear after flushing
+            }
+        },
 
         # init ----
         .init = function() {
@@ -88,14 +106,16 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (var in vars) {
                 num_vals <- jmvcore::toNumeric(mydata[[var]])
                 num_vals <- num_vals[!is.na(num_vals)]
-                
+
                 if (length(num_vals) < 3) {
-                    self$results$todo$setContent(
+                    # ACCUMULATE instead of overwrite
+                    private$.appendMessage(
                         glue::glue(.("<br>⚠️ Warning: {var} has less than 3 valid observations<br>"))
                     )
                 }
                 if (length(unique(num_vals)) < 2) {
-                    self$results$todo$setContent(
+                    # ACCUMULATE instead of overwrite
+                    private$.appendMessage(
                         glue::glue(.("<br>⚠️ Warning: {var} has no variation (all values are the same)<br>"))
                     )
                 }
@@ -266,17 +286,38 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
             }
 
-            # Exclude NA
-            mydata <- jmvcore::naOmit(mydata)
-            
+            # SELECTIVE NA OMISSION: Only drop rows with NAs in variables actually used
+            # Build list of columns relevant to this analysis
+            relevant_cols <- c(vars, self$options$group)
+            if (!is.null(self$options$grvar)) {
+                relevant_cols <- c(relevant_cols, self$options$grvar)
+            }
+
+            # Count rows before NA removal for reporting
+            n_before <- nrow(mydata)
+
+            # Filter to complete cases ONLY for relevant columns
+            mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
+
+            n_after <- nrow(mydata)
+
+            # Report NA removal for auditability
+            if (n_before > n_after) {
+                n_dropped <- n_before - n_after
+                na_message <- glue::glue(.("<br>ℹ️ Info: {n_dropped} rows with missing values in analysis variables were excluded.<br>"))
+                # ACCUMULATE instead of overwrite
+                private$.appendMessage(na_message)
+            }
+
             # Validate data quality
             private$.validateDataQuality(mydata, vars)
-            
+
             # Check statistical assumptions
             assumption_warnings <- private$.checkAssumptions(mydata, vars, self$options$group, self$options$typestatistics)
             if (length(assumption_warnings) > 0) {
                 warning_text <- paste(assumption_warnings, collapse = "<br>")
-                self$results$todo$setContent(glue::glue("<br>{warning_text}<br>"))
+                # ACCUMULATE instead of overwrite
+                private$.appendMessage(glue::glue("<br>{warning_text}<br>"))
             }
             
             # Detect outliers if large dataset - checkpoint before expensive outlier detection
@@ -293,13 +334,17 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # For smaller datasets, we have the actual indices
                             n_outliers <- length(outliers[[var]])
                         }
-                        self$results$todo$setContent(
+                        # ACCUMULATE instead of overwrite
+                        private$.appendMessage(
                             glue::glue(.("<br>ℹ️ {var} has {n_outliers} potential outlier(s) detected<br>"))
                         )
                     }
                 }
             }
-            
+
+            # FLUSH all accumulated messages to the todo panel
+            private$.flushMessages()
+
             # Cache the processed data with hash
             private$.processedData <- mydata
             private$.data_hash <- current_hash
@@ -390,44 +435,251 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # run ----
         ,
-        .run = function() {
-            # Initial Message ----
-            if (is.null(self$options$dep) || is.null(self$options$group)) {
-                todo <- .(
-                    "<br>Welcome to ClinicoPath
-                <br><br>
-                This tool creates optimized Box-Violin Plots for comparing continuous variables between groups.
-                <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>here</a>.
-                <br>
-                Please cite jamovi and the packages as given below.
-                <br><hr>"
-                )
 
-                self$results$todo$setContent(todo)
-                return()
+.run = function() {
+    # Always generate About content
+    private$.generateAboutContent()
 
-            } else {
-                todo <- glue::glue(
-                    .("<br>Violin plot analysis comparing {vars} by {group}{grouped}.<br><hr>"),
-                    vars = paste(self$options$dep, collapse=', '),
-                    group = self$options$group,
-                    grouped = if(!is.null(self$options$grvar)) paste0(', grouped by ', self$options$grvar) else ''
-                )
+    # Generate summary if requested
+    if (self$options$showexplanations) {
+        private$.generateSummary()
+        private$.generateAssumptionsContent()
+        private$.generateInterpretationGuide()
+        private$.generateCopyReadyReport()
+    }
 
-                self$results$todo$setContent(todo)
+    # Initial Message ----
+    if (is.null(self$options$dep) || is.null(self$options$group)) {
+        todo <- .(
+            "<br>Welcome to ClinicoPath
+        <br><br>
+        This tool creates optimized Box-Violin Plots for comparing continuous variables between groups.
+        <br><br>
+        This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>here</a>.
+        <br>
+        Please cite jamovi and the packages as given below.
+        <br><hr>"
+        )
 
-                # Data validation
-                if (nrow(self$data) == 0)
-                    stop(.('Data contains no (complete) rows'))
-                    
-                # Add checkpoint for user feedback
-                private$.checkpoint()
-            }
-        }
+        self$results$todo$setContent(todo)
+        return()
 
-        ,
-        .plot = function(image, ggtheme, theme, ...) {
+    } else {
+        todo <- glue::glue(
+            .("<br>Violin plot analysis comparing {vars} by {group}{grouped}.<br><hr>"),
+            vars = paste(self$options$dep, collapse=', '),
+            group = self$options$group,
+            grouped = if(!is.null(self$options$grvar)) paste0(', grouped by ', self$options$grvar) else ''
+        )
+
+        self$results$todo$setContent(todo)
+
+        # Data validation
+        if (nrow(self$data) == 0)
+            stop(.('Data contains no (complete) rows'))
+            
+        # Add checkpoint for user feedback
+        private$.checkpoint()
+    }
+},
+.generateAboutContent = function() {
+    about_content <- paste0(
+        "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>",
+        "<h4 style='color: #007bff; margin-top: 0;'>📊 About Between-Group Comparison</h4>",
+        "<p><strong>Purpose:</strong> Compare a continuous variable across different groups to identify significant differences.</p>",
+        "<p><strong>When to Use:</strong></p>",
+        "<ul>",
+        "<li><strong>Clinical Trials:</strong> Compare treatment outcomes (e.g., blood pressure) between a drug and a placebo group.</li>",
+        "<li><strong>Biomarker Analysis:</strong> Assess if a biomarker level differs between healthy and diseased patients.</li>",
+        "<li><strong>Pathology:</strong> Compare tumor sizes across different cancer grades.</li>",
+        "</ul>",
+        "<p><strong>Output Includes:</strong></p>",
+        "<ul>",
+        "<li>Box-violin plots for visualizing data distribution.</li>",
+        "<li>Statistical test results (e.g., t-test, ANOVA, or non-parametric alternatives).</li>",
+        "<li>Effect size measures (e.g., Cohen's d, eta-squared) to quantify the magnitude of differences.</li>",
+        "<li>Post-hoc pairwise comparisons to identify which specific groups differ.</li>",
+        "</ul>",
+        "</div>"
+    )
+    
+    self$results$about$setContent(about_content)
+},
+.generateSummary = function() {
+    if (is.null(self$options$dep) || is.null(self$options$group)) {
+        return()
+    }
+    
+    mydata <- private$.prepareData()
+    n_total <- nrow(mydata)
+    n_groups <- length(unique(mydata[[self$options$group]]))
+    dep_vars <- paste(self$options$dep, collapse = ", ")
+    
+    test_method <- switch(self$options$typestatistics,
+        "parametric" = if (self$options$varequal) "ANOVA" else "Welch's ANOVA",
+        "nonparametric" = "Kruskal-Wallis test", 
+        "robust" = "Robust ANOVA",
+        "bayes" = "Bayesian ANOVA",
+        "ANOVA"
+    )
+    
+    # MULTI-ENDPOINT CLARITY: Distinguish single vs multiple variables
+    if (length(self$options$dep) == 1) {
+        multi_var_note <- ""
+    } else {
+        multi_var_note <- paste0(
+            "<p><strong>⚠️ Note:</strong> ", length(self$options$dep),
+            " dependent variables analyzed. Each variable is tested separately. ",
+            "Results in plots show statistics for each individual variable.</p>"
+        )
+    }
+
+    summary_content <- paste0(
+        "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>",
+        "<h4 style='color: #28a745; margin-top: 0;'>📋 Analysis Summary</h4>",
+        "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", self$options$group, "</p>",
+        multi_var_note,  # Add multi-variable clarification
+        "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
+        "<p><strong>Statistical Method:</strong> ", test_method, "</p>",
+        if (self$options$pairwisecomparisons && n_groups > 2) paste0(
+            "<p><strong>Post-hoc Analysis:</strong> Pairwise comparisons with ",
+            self$options$padjustmethod, " correction</p>"
+        ) else "",
+        if (!is.null(self$options$grvar)) paste0(
+            "<p><strong>Subgroup Analysis:</strong> Results stratified by ", self$options$grvar, "</p>"
+        ) else "",
+        "<p><strong>Confidence Level:</strong> ", (self$options$conflevel * 100), "%</p>",
+        "</div>"
+    )
+    
+    self$results$summary$setContent(summary_content)
+},
+.generateAssumptionsContent = function() {
+    if (is.null(self$options$dep) || is.null(self$options$group)) {
+        return()
+    }
+
+    mydata <- private$.prepareData()
+    warnings <- private$.checkAssumptions(mydata, self$options$dep, self$options$group, self$options$typestatistics)
+    
+    assumptions_content <- paste0(
+        "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+        "<h4 style='color: #856404; margin-top: 0;'>⚠️ Statistical Assumptions & Warnings</h4>",
+        
+        "<p><strong>General Assumptions:</strong></p>",
+        "<ul>",
+        "<li>Dependent variable is continuous.</li>",
+        "<li>Observations are independent.</li>",
+        "<li>Groups are independent.</li>",
+        if (self$options$typestatistics == "parametric") "<li>Residuals are normally distributed.</li>",
+        if (self$options$typestatistics == "parametric" && self$options$varequal) "<li>Homogeneity of variances (equal variances).</li>",
+        "</ul>",
+        
+        if (length(warnings) > 0) paste0(
+            "<p><strong>Detected Issues:</strong></p>",
+            "<ul><li>", paste(warnings, collapse = "</li><li>"), "</li></ul>"
+        ) else "<p>No major issues detected with statistical assumptions.</p>",
+        
+        "</div>"
+    )
+    
+    self$results$assumptions$setContent(assumptions_content)
+},
+.generateInterpretationGuide = function() {
+    interpretation_content <- paste0(
+        "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; margin: 10px 0;'>",
+        "<h4 style='color: #0c5460; margin-top: 0;'>📖 How to Interpret Results</h4>",
+        
+        "<p><strong>Statistical Significance:</strong></p>",
+        "<ul>",
+        "<li><strong>p < 0.05:</strong> Significant difference between groups.</li>",
+        "<li><strong>p ≥ 0.05:</strong> No significant difference detected.</li>",
+        "</ul>",
+        
+        "<p><strong>Effect Size Interpretation:</strong></p>",
+        "<ul>",
+        "<li><strong>Cohen's d:</strong> 0.2 (small), 0.5 (medium), 0.8 (large) effect.</li>",
+        "<li><strong>Eta-squared (η²):</strong> 0.01 (small), 0.06 (medium), 0.14 (large) effect.</li>",
+        "</ul>",
+        
+        "<p><strong>Clinical Context:</strong></p>",
+        "<ul>",
+        "<li>Consider if the observed difference is clinically meaningful, not just statistically significant.</li>",
+        "<li>Look at the confidence intervals to understand the precision of the effect size estimate.</li>",
+        "<li>Examine the plots to understand the distribution and overlap between groups.</li>",
+        "</ul>",
+        "</div>"
+    )
+    
+    self$results$interpretation$setContent(interpretation_content)
+},
+.generateCopyReadyReport = function() {
+    if (is.null(self$options$dep) || is.null(self$options$group)) {
+        return()
+    }
+
+    mydata <- private$.prepareData()
+    n_total <- nrow(mydata)
+    n_groups <- length(unique(mydata[[self$options$group]]))
+
+    # MULTI-ENDPOINT CLARITY: Distinguish single vs multiple variables
+    if (length(self$options$dep) == 1) {
+        dep_vars <- self$options$dep[1]
+        multi_var_note <- ""
+    } else {
+        dep_vars <- paste(self$options$dep, collapse = ", ")
+        multi_var_note <- paste0(
+            "<p><strong>⚠️ Note:</strong> ", length(self$options$dep),
+            " dependent variables analyzed. Each variable is tested separately. ",
+            "Results in plots show statistics for each individual variable.</p>"
+        )
+    }
+    
+    test_method <- switch(self$options$typestatistics,
+        "parametric" = if (self$options$varequal) "ANOVA" else "Welch's ANOVA",
+        "nonparametric" = "Kruskal-Wallis test", 
+        "robust" = "Robust ANOVA",
+        "bayes" = "Bayesian ANOVA",
+        "ANOVA"
+    )
+    
+    report_template <- paste0(
+        "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; margin: 10px 0;'>",
+        "<h4 style='color: #495057; margin-top: 0;'>📄 Copy-Ready Report Template</h4>",
+        
+        "<div style='background-color: #ffffff; padding: 15px; border: 1px dashed #6c757d; margin: 10px 0;'>",
+        "<h5>Methods:</h5>",
+        "<p>A between-groups analysis was conducted to compare the levels of ", dep_vars, 
+        " across ", n_groups, " groups of ", self$options$group, ". A ", test_method, 
+        " was used to test for significant differences. ",
+        
+        if (self$options$pairwisecomparisons && n_groups > 2) {
+            paste0("Post-hoc pairwise comparisons were conducted with ", 
+                  self$options$padjustmethod, " correction for multiple testing. ")
+        } else "",
+        
+        "Statistical significance was assessed at the α = ", (1 - self$options$conflevel), " level.",
+        "</p>",
+        
+        "<h5>Results:</h5>",
+        "<p>[Insert specific results here: test statistic, p-value, effect size with 95% CI]</p>",
+        "<p>Example: \"The analysis revealed a statistically significant difference in [dependent variable] between the groups (",
+        "F(", n_groups - 1, ", ", n_total - n_groups, ") = [value], p = [value], η² = [value], 95% CI [lower, upper]). ",
+        "Post-hoc tests showed that Group A had significantly higher levels than Group B (p = [value]).\"</p>",
+        
+        "<h5>Conclusion:</h5>",
+        "<p>[Interpret findings in clinical context, considering both statistical significance and clinical relevance]</p>",
+        "</div>",
+        
+        "<button onclick='navigator.clipboard.writeText(this.parentElement.querySelector(\"div\").innerText)' ",
+        "style='background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
+        "📋 Copy Template to Clipboard</button>",
+        "</div>"
+    )
+    
+    self$results$report$setContent(report_template)
+},
+.plot = function(image, ggtheme, theme, ...) {
             # Use shared validation helper ----
             if (!private$.validateInputs())
                 return()
@@ -562,9 +814,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Print Plot ----
             print(plot)
             TRUE
-        }
-
-        ,
+        },
         .plot2 = function(image, ggtheme, theme, ...) {
             # Use shared validation helper with additional grouping check ----
             if (!private$.validateInputs() || is.null(self$options$grvar))
@@ -717,9 +967,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Print Plot ----
             print(plot2)
             TRUE
-        }
-
-        ,
+        },
         .plotGGPubr = function(image, ggtheme, theme, ...) {
             # Validate inputs
             if (!private$.validateInputs())
@@ -813,9 +1061,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             TRUE
-        }
-
-        ,
+        },
         .plotGGPubr2 = function(image, ggtheme, theme, ...) {
             # Validate inputs
             if (!private$.validateInputs())

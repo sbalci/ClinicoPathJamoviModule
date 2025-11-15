@@ -257,14 +257,22 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Checkpoint before expensive hash computation for large datasets
             private$.checkpoint(flush = FALSE)
-            
-            # Create robust hash of current data to detect changes
-            vars <- Filter(Negate(is.null), c(self$options$dep1, self$options$dep2, 
+
+            # CRITICAL FIX: Create robust hash including ACTUAL DATA VALUES
+            # Bug: Old code only hashed variable names and dimensions
+            # Result: Editing data values didn't invalidate cache, showing outdated results
+            vars <- Filter(Negate(is.null), c(self$options$dep1, self$options$dep2,
                                              self$options$dep3, self$options$dep4))
+
+            # Extract actual data for selected variables
+            data_subset <- self$data[, vars, drop = FALSE]
+
             current_hash <- digest::digest(list(
                 dep1 = self$options$dep1, dep2 = self$options$dep2,
                 dep3 = self$options$dep3, dep4 = self$options$dep4,
-                data_dim = dim(self$data), col_names = names(self$data)
+                data_dim = dim(self$data), col_names = names(self$data),
+                # CRITICAL FIX: Include actual data content in hash
+                data_content = data_subset
             ), algo = "md5")
             
             # Only reprocess if data has changed or forced refresh
@@ -317,7 +325,48 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$dep4) && is.null(self$options$dep3)) {
                 stop('Third measurement required when fourth is specified')
             }
-            
+
+            # CRITICAL FIX: Validate paired design structure
+            # Within-subjects analysis requires complete data for all subjects across measurements
+            # Check for excessive missing data that would break paired tests
+            n_rows <- nrow(mydata)
+            complete_cases <- sum(complete.cases(mydata[, vars, drop = FALSE]))
+            missing_pct <- (1 - complete_cases/n_rows) * 100
+
+            if (complete_cases < 3) {
+                warning_msg <- paste0(
+                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Insufficient Complete Cases for Paired Analysis</h4>",
+                    "<p><strong>Within-subjects analysis requires complete data across all measurements.</strong></p>",
+                    "<p>Current status:</p>",
+                    "<ul>",
+                    "<li>Total subjects: ", n_rows, "</li>",
+                    "<li>Complete cases (all measurements present): ", complete_cases, "</li>",
+                    "<li>Missing data: ", round(missing_pct, 1), "%</li>",
+                    "</ul>",
+                    "<p><strong>Minimum required:</strong> At least 3 subjects with complete data across all measurements.</p>",
+                    "</div>"
+                )
+                private$.accumulateMessage(warning_msg)
+                private$.prepared_data <- NULL
+                return(NULL)
+            }
+
+            if (missing_pct > 50) {
+                warning_msg <- paste0(
+                    "<div style='background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:10px 0;'>",
+                    "<h4 style='color:#ff9800; margin-top:0;'>⚠️ High Missing Data Rate</h4>",
+                    "<p><strong>Warning:</strong> ", round(missing_pct, 1), "% of subjects have incomplete measurements.</p>",
+                    "<p>Paired analysis will only use the ", complete_cases, " subjects with complete data.</p>",
+                    "<p>Consider investigating why so much data is missing.</p>",
+                    "</div>"
+                )
+                self$results$warnings$setContent(
+                    paste0(self$results$warnings$state, warning_msg)
+                )
+                self$results$warnings$setVisible(TRUE)
+            }
+
             # Validate data quality before processing
             private$.validateDataQuality(mydata, vars)
             
@@ -621,6 +670,11 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(self$data) == 0)
                     stop(.("Data contains no (complete) rows"))
 
+                # Generate explanations if requested
+                if (self$options$showExplanations) {
+                    private$.generateExplanations()
+                }
+
             }
         }
 
@@ -801,9 +855,24 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     plot <- do.call(ggpubr::ggline, args)
                 }
 
-                # Add statistical comparisons if requested
+                # CRITICAL FIX: Add statistical comparisons with PAIRED tests
+                # Bug: Old code used default independent-sample tests
+                # Result: Wrong p-values for within-subjects design
                 if (self$options$ggpubrAddStats && self$options$ggpubrPlotType != "line") {
-                    plot <- plot + ggpubr::stat_compare_means()
+                    # Determine appropriate paired test method based on user's test type
+                    test_method <- switch(
+                        self$options$testType,
+                        "parametric" = "t.test",
+                        "nonparametric" = "wilcox.test",
+                        "robust" = "t.test",  # Fallback for robust
+                        "t.test"  # Default
+                    )
+
+                    plot <- plot + ggpubr::stat_compare_means(
+                        method = test_method,
+                        paired = TRUE,  # CRITICAL: This is a within-subjects design
+                        label = "p.signif"
+                    )
                 }
 
                 # Apply theme

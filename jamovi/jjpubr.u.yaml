@@ -156,3 +156,13 @@ children:
         name: plotHeight
         label: Height (px)
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showExplanations
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinicalPreset

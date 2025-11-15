@@ -172,6 +172,30 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             if (self$options$show_statistical_tests) {
                 private$.performStatisticalTests()
             }
+
+            # Generate explanations if requested
+            if (self$options$showExplanations) {
+                private$.generateExplanations()
+            }
+        },
+
+        .generateExplanations = function() {
+            self$results$explanations$setVisible(TRUE)
+            self$results$explanations$setContent(
+                "<h3>Explanations</h3>
+                <p>
+                    This segmented total bar chart shows the proportional breakdown of a continuous variable across different categories.
+                    Each bar represents 100% of the total for that category, and the segments within each bar show the relative proportions of the different fill variable levels.
+                </p>
+                <p>
+                    The chi-square test is used to determine if there is a significant association between the categorical variables.
+                    A significant p-value suggests that the proportions of the fill variable levels are not the same across all categories of the x-variable.
+                </p>
+                <p>
+                    Standardized residuals are used to identify which cells contribute most to a significant chi-square result.
+                    A standardized residual greater than 2 or less than -2 is considered to be a major contributor to the chi-square value.
+                </p>"
+            )
         },
 
         .processData = function(data, x_var, y_var, fill_var, facet_var) {
@@ -219,13 +243,17 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 data[[facet_var]] <- as.factor(data[[facet_var]])
             }
 
-            # Group and summarize data
+            # CRITICAL FIX: Group and summarize data
+            # For aggregated data (one row per category), n() returns 1, which is wrong
+            # The y_var already contains the counts/values we need to sum
             if (!is.null(facet_var)) {
                 processed_data <- data %>%
                     dplyr::group_by(!!rlang::sym(x_var), !!rlang::sym(fill_var), !!rlang::sym(facet_var)) %>%
                     dplyr::summarise(
                         value = sum(!!rlang::sym(y_var), na.rm = TRUE),
-                        count = dplyr::n(),
+                        # CRITICAL FIX: count should equal value for count data
+                        # This ensures correct N reporting for both raw and aggregated data
+                        count = sum(!!rlang::sym(y_var), na.rm = TRUE),
                         .groups = 'drop'
                     )
             } else {
@@ -233,7 +261,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     dplyr::group_by(!!rlang::sym(x_var), !!rlang::sym(fill_var)) %>%
                     dplyr::summarise(
                         value = sum(!!rlang::sym(y_var), na.rm = TRUE),
-                        count = dplyr::n(),
+                        # CRITICAL FIX: count should equal value for count data
+                        # This ensures correct N reporting for both raw and aggregated data
+                        count = sum(!!rlang::sym(y_var), na.rm = TRUE),
                         .groups = 'drop'
                     )
             }
@@ -892,10 +922,13 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             x_var <- self$options$x_var
             fill_var <- self$options$fill_var
             
-            # Prepare data for ggsegmentedtotalbar with optimized single transformation
+            # CRITICAL FIX: Prepare data for ggsegmentedtotalbar
+            # Preserve original counts before converting to percentages
             plot_data_pct <- df %>%
                 dplyr::group_by(!!rlang::sym(x_var)) %>%
                 dplyr::mutate(
+                    # CRITICAL FIX: Store original count before converting to percentage
+                    original_count = .data$value,
                     value = (.data$value / sum(.data$value)) * 100,
                     total = 100
                 ) %>%
@@ -904,7 +937,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     group = !!rlang::sym(x_var),
                     segment = !!rlang::sym(fill_var)
                 ) %>%
-                dplyr::select(group, segment, value, total)
+                dplyr::select(group, segment, value, original_count, total)
             
             # Apply sorting if requested (using original data totals)
             if (self$options$sort_categories != "none") {
@@ -1008,12 +1041,14 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                             function(z) paste0(round(z), "%")
                         )
                         label_data$formatted_label <- fmt(label_data$value)
-                        
-                        # Add counts if requested
+
+                        # CRITICAL FIX: Add ACTUAL counts if requested
                         if (isTRUE(self$options$show_counts)) {
-                            # Calculate raw counts from percentages and totals for display
-                            # This is approximate since we converted to percentages
-                            label_data$formatted_label <- paste0(label_data$formatted_label, "\n(~", round(label_data$value), ")")
+                            # Use the preserved original_count, not the percentage value
+                            label_data$formatted_label <- paste0(
+                                label_data$formatted_label,
+                                "\n(n=", round(label_data$original_count), ")"
+                            )
                         }
                         
                         # Add custom labels on top of the ggsegmentedtotalbar plot

@@ -6,10 +6,10 @@
 \usage{
 stagemigration(
   data,
-  oldStage,
-  newStage,
-  survivalTime,
-  event,
+  oldStage = NULL,
+  newStage = NULL,
+  survivalTime = NULL,
+  event = NULL,
   eventLevel,
   clinicalPreset = "routine_clinical",
   enableGuidedMode = TRUE,
