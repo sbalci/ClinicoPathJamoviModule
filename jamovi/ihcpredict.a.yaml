@@ -1,7 +1,7 @@
 ---
 name: ihcpredict
 title: IHC Diagnostic Prediction
-menuGroup: OncoPathT2
+menuGroup: OncoPathD
 menuSubgroup: IHC Analysis
 menuSubtitle: 'Predict diagnoses from IHC markers using trained model'
 version: '1.0.0'

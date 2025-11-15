@@ -1551,9 +1551,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           private$.calculate_nomogram()
         }
 
-        if (self$options$use_tree) {
-          private$.calculate_survivaldecisiontree()
+        # AFT Model Analysis
+        if (self$options$use_aft) {
+          private$.calculate_aft()
         }
+
+        # SurvMetrics - Model Performance Metrics
+        if (self$options$show_survmetrics) {
+          private$.calculate_survmetrics()
+        }
+
+        # EXPERIMENTAL:         if (self$options$use_tree) {
+        # EXPERIMENTAL:           private$.calculate_survivaldecisiontree()
+        # EXPERIMENTAL:         }
 
         # Return success indicator
         return(TRUE)
@@ -1670,87 +1680,87 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         all_labels <- labelled::var_label(mydata_labelled)
 
         # Handle Time-Dependent Covariates
-        if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
-
-          # Get time-dependent variable names
-          time_dep_vars <- names(all_labels)[match(self$options$time_dep_vars, all_labels)]
-
-          if (self$options$td_format == "wide") {
-            # Handle wide format data - convert to long format
-            mydata <- private$.convertWideToLong(mydata, time_dep_vars, all_labels)
-
-            # Update formula for time-dependent covariates (long format)
-            td_predictors <- c(formula_parts, time_dep_vars)
-            coxformula <- .buildSurvivalFormula(
-              time_var = "tstart",
-              outcome_var = myoutcome,
-              predictors = td_predictors,
-              survival_type = "counting",
-              start_var = "tstart",
-              stop_var = "tstop"
-            )
-
-          } else if (self$options$td_format == "long") {
-            # Handle long format data
-            if (!is.null(self$options$start_time_var) && !is.null(self$options$stop_time_var)) {
-              start_time_var <- names(all_labels)[all_labels == self$options$start_time_var]
-              stop_time_var <- names(all_labels)[all_labels == self$options$stop_time_var]
-
-              # Update formula for time-dependent covariates
-              long_predictors <- c(formula_parts, time_dep_vars)
-              coxformula <- .buildSurvivalFormula(
-                time_var = start_time_var,
-                outcome_var = myoutcome,
-                predictors = long_predictors,
-                survival_type = "counting",
-                start_var = start_time_var,
-                stop_var = stop_time_var
-              )
-            }
-          }
-        }
-
-        # Handle Frailty Models
-        if (self$options$use_frailty && !is.null(self$options$frailty_var)) {
-          frailty_var <- names(all_labels)[all_labels == self$options$frailty_var]
-
-          # Add frailty term based on distribution
-          frailty_term <- switch(self$options$frailty_distribution,
-            "gamma" = paste0("frailty(", frailty_var, ", distribution='gamma')"),
-            "gaussian" = paste0("frailty(", frailty_var, ", distribution='gaussian')"),
-            "logt" = paste0("frailty(", frailty_var, ", distribution='logt')")
-          )
-
-          formula_parts <- c(formula_parts, frailty_term)
-          RHT <- paste(formula_parts, collapse = " + ")
-          coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
-        }
-
-        # Handle Splines for Non-Proportional Hazards
-        if (self$options$use_splines && !is.null(self$options$spline_vars)) {
-          spline_vars <- names(all_labels)[match(self$options$spline_vars, all_labels)]
-
-          # Create spline terms
-          for (var in spline_vars) {
-            spline_term <- switch(self$options$spline_type,
-              "pspline" = paste0("pspline(", var, ", df=", self$options$spline_df, ")"),
-              "ns" = paste0("ns(", var, ", df=", self$options$spline_df, ")"),
-              "bs" = paste0("bs(", var, ", df=", self$options$spline_df, ")")
-            )
-
-            # Replace the linear term with spline term
-            formula_parts <- formula_parts[formula_parts != var]
-            formula_parts <- c(formula_parts, spline_term)
-          }
-
-          RHT <- paste(formula_parts, collapse = " + ")
-          coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
-
-          # Load splines package if needed
-          if (self$options$spline_type %in% c("ns", "bs")) {
-            requireNamespace("splines", quietly = TRUE)
-          }
-        }
+        # EXPERIMENTAL:         if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Get time-dependent variable names
+        # EXPERIMENTAL:           time_dep_vars <- names(all_labels)[match(self$options$time_dep_vars, all_labels)]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           if (self$options$td_format == "wide") {
+        # EXPERIMENTAL:             # Handle wide format data - convert to long format
+        # EXPERIMENTAL:             mydata <- private$.convertWideToLong(mydata, time_dep_vars, all_labels)
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:             # Update formula for time-dependent covariates (long format)
+        # EXPERIMENTAL:             td_predictors <- c(formula_parts, time_dep_vars)
+        # EXPERIMENTAL:             coxformula <- .buildSurvivalFormula(
+        # EXPERIMENTAL:               time_var = "tstart",
+        # EXPERIMENTAL:               outcome_var = myoutcome,
+        # EXPERIMENTAL:               predictors = td_predictors,
+        # EXPERIMENTAL:               survival_type = "counting",
+        # EXPERIMENTAL:               start_var = "tstart",
+        # EXPERIMENTAL:               stop_var = "tstop"
+        # EXPERIMENTAL:             )
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           } else if (self$options$td_format == "long") {
+        # EXPERIMENTAL:             # Handle long format data
+        # EXPERIMENTAL:             if (!is.null(self$options$start_time_var) && !is.null(self$options$stop_time_var)) {
+        # EXPERIMENTAL:               start_time_var <- names(all_labels)[all_labels == self$options$start_time_var]
+        # EXPERIMENTAL:               stop_time_var <- names(all_labels)[all_labels == self$options$stop_time_var]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:               # Update formula for time-dependent covariates
+        # EXPERIMENTAL:               long_predictors <- c(formula_parts, time_dep_vars)
+        # EXPERIMENTAL:               coxformula <- .buildSurvivalFormula(
+        # EXPERIMENTAL:                 time_var = start_time_var,
+        # EXPERIMENTAL:                 outcome_var = myoutcome,
+        # EXPERIMENTAL:                 predictors = long_predictors,
+        # EXPERIMENTAL:                 survival_type = "counting",
+        # EXPERIMENTAL:                 start_var = start_time_var,
+        # EXPERIMENTAL:                 stop_var = stop_time_var
+        # EXPERIMENTAL:               )
+        # EXPERIMENTAL:             }
+        # EXPERIMENTAL:           }
+        # EXPERIMENTAL:         }
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:         # Handle Frailty Models
+        # EXPERIMENTAL:         if (self$options$use_frailty && !is.null(self$options$frailty_var)) {
+        # EXPERIMENTAL:           frailty_var <- names(all_labels)[all_labels == self$options$frailty_var]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Add frailty term based on distribution
+        # EXPERIMENTAL:           frailty_term <- switch(self$options$frailty_distribution,
+        # EXPERIMENTAL:             "gamma" = paste0("frailty(", frailty_var, ", distribution='gamma')"),
+        # EXPERIMENTAL:             "gaussian" = paste0("frailty(", frailty_var, ", distribution='gaussian')"),
+        # EXPERIMENTAL:             "logt" = paste0("frailty(", frailty_var, ", distribution='logt')")
+        # EXPERIMENTAL:           )
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           formula_parts <- c(formula_parts, frailty_term)
+        # EXPERIMENTAL:           RHT <- paste(formula_parts, collapse = " + ")
+        # EXPERIMENTAL:           coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+        # EXPERIMENTAL:         }
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:         # Handle Splines for Non-Proportional Hazards
+        # EXPERIMENTAL:         if (self$options$use_splines && !is.null(self$options$spline_vars)) {
+        # EXPERIMENTAL:           spline_vars <- names(all_labels)[match(self$options$spline_vars, all_labels)]
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Create spline terms
+        # EXPERIMENTAL:           for (var in spline_vars) {
+        # EXPERIMENTAL:             spline_term <- switch(self$options$spline_type,
+        # EXPERIMENTAL:               "pspline" = paste0("pspline(", var, ", df=", self$options$spline_df, ")"),
+        # EXPERIMENTAL:               "ns" = paste0("ns(", var, ", df=", self$options$spline_df, ")"),
+        # EXPERIMENTAL:               "bs" = paste0("bs(", var, ", df=", self$options$spline_df, ")")
+        # EXPERIMENTAL:             )
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:             # Replace the linear term with spline term
+        # EXPERIMENTAL:             formula_parts <- formula_parts[formula_parts != var]
+        # EXPERIMENTAL:             formula_parts <- c(formula_parts, spline_term)
+        # EXPERIMENTAL:           }
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           RHT <- paste(formula_parts, collapse = " + ")
+        # EXPERIMENTAL:           coxformula <- as.formula(paste0(LHT, " ~ ", RHT))
+        # EXPERIMENTAL: 
+        # EXPERIMENTAL:           # Load splines package if needed
+        # EXPERIMENTAL:           if (self$options$spline_type %in% c("ns", "bs")) {
+        # EXPERIMENTAL:             requireNamespace("splines", quietly = TRUE)
+        # EXPERIMENTAL:           }
+        # EXPERIMENTAL:         }
 
         cox_model <- survival::coxph(coxformula, data = mydata)
 
@@ -1915,6 +1925,417 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         self$results$personTimeSummary$setContent(summary_html)
       }
+
+      ,
+      # AFT Model (Accelerated Failure Time) ----
+      .calculate_aft = function() {
+        # Early return if AFT not requested
+        if (!self$options$use_aft) {
+          return()
+        }
+
+        private$.checkpoint()
+
+        # Get cleaned data
+        cleaneddata <- private$.cleandata()
+        mydata <- cleaneddata$cleanData
+
+        # Extract variable names
+        myexplanatory <- NULL
+        if (!is.null(self$options$explanatory)) {
+          myexplanatory <- as.vector(cleaneddata$myexplanatory_labelled)
+        }
+
+        mycontexpl <- NULL
+        if (!is.null(self$options$contexpl)) {
+          mycontexpl <- as.vector(cleaneddata$mycontexpl_labelled)
+        }
+
+        # Build formula for AFT model
+        formula_parts <- c(myexplanatory, mycontexpl)
+        aft_formula <- paste("survival::Surv(mytime, myoutcome) ~",
+                            paste(formula_parts, collapse = " + "))
+        aft_formula <- as.formula(aft_formula)
+
+        # Get distribution
+        distribution <- self$options$aft_distribution
+
+        private$.checkpoint()
+
+        # Fit AFT model using survreg
+        aft_model <- tryCatch({
+          survival::survreg(aft_formula, data = mydata, dist = distribution)
+        }, error = function(e) {
+          error_msg <- paste0("<p style='color:red;'>AFT Model Error: ", e$message, "</p>")
+          self$results$aftModelInfo$setContent(error_msg)
+          return(NULL)
+        })
+
+        if (is.null(aft_model)) {
+          return()
+        }
+
+        private$.checkpoint()
+
+        # Extract coefficients and statistics
+        aft_summary <- summary(aft_model)
+        coef_table <- aft_summary$table
+
+        # Populate AFT results table
+        row_num <- 1
+        for (i in 1:nrow(coef_table)) {
+          var_name <- rownames(coef_table)[i]
+
+          # Skip intercept for the table
+          if (var_name == "(Intercept)") {
+            next
+          }
+
+          coefficient <- coef_table[i, "Value"]
+          se <- coef_table[i, "Std. Error"]
+          z_stat <- coef_table[i, "z"]
+          p_value <- coef_table[i, "p"]
+
+          # Calculate Time Ratio (TR) = exp(coefficient)
+          # In AFT models, positive coefficient means longer survival time
+          time_ratio <- exp(coefficient)
+          tr_lower <- exp(coefficient - 1.96 * se)
+          tr_upper <- exp(coefficient + 1.96 * se)
+
+          # Generate natural language interpretation
+          interpretation <- ""
+          if (self$options$aft_show_interpretation) {
+            if (time_ratio > 1) {
+              pct_increase <- round((time_ratio - 1) * 100, 1)
+              interpretation <- paste0("Associated with ", pct_increase, "% longer survival time")
+            } else {
+              pct_decrease <- round((1 - time_ratio) * 100, 1)
+              interpretation <- paste0("Associated with ", pct_decrease, "% shorter survival time")
+            }
+
+            if (p_value < 0.05) {
+              interpretation <- paste0(interpretation, " (significant)")
+            } else {
+              interpretation <- paste0(interpretation, " (not significant)")
+            }
+          }
+
+          # Add row to table
+          self$results$aftModelTable$addRow(rowKey = row_num, values = list(
+            variable = var_name,
+            coefficient = coefficient,
+            time_ratio = time_ratio,
+            tr_lower = tr_lower,
+            tr_upper = tr_upper,
+            se = se,
+            z_stat = z_stat,
+            p_value = p_value,
+            interpretation = interpretation
+          ))
+
+          row_num <- row_num + 1
+        }
+
+        # Generate AFT Summary HTML
+        if (self$options$showSummaries) {
+          n_significant <- sum(coef_table[-1, "p"] < 0.05, na.rm = TRUE)  # Exclude intercept
+          n_total <- nrow(coef_table) - 1
+
+          summary_html <- glue::glue("
+<h4>AFT Model Summary ({distribution} distribution)</h4>
+<p><b>Model Type:</b> Accelerated Failure Time (AFT) Regression</p>
+<p><b>Distribution:</b> {tools::toTitleCase(distribution)}</p>
+<p><b>Number of observations:</b> {aft_model$df[1] + aft_model$df[2]}</p>
+<p><b>Number of events:</b> {sum(mydata$myoutcome)}</p>
+<p><b>Significant predictors:</b> {n_significant} out of {n_total}</p>
+<p><b>Log-likelihood:</b> {round(aft_model$loglik[2], 2)}</p>
+<p><b>AIC:</b> {round(AIC(aft_model), 2)}</p>
+<p style='margin-top:15px;'><i>Note: Time Ratios (TR) > 1 indicate longer survival times; TR < 1 indicate shorter survival times.</i></p>
+")
+          self$results$aftSummary$setContent(summary_html)
+        }
+
+        # Generate AFT Model Info
+        info_html <- glue::glue("
+<h4>AFT Model Information</h4>
+<p><b>Distribution:</b> {tools::toTitleCase(distribution)}</p>
+<p><b>Scale parameter:</b> {round(aft_model$scale, 4)}</p>
+<p><b>Log-likelihood:</b> {round(aft_model$loglik[2], 2)}</p>
+<p><b>AIC:</b> {round(AIC(aft_model), 2)}</p>
+<p><b>BIC:</b> {round(BIC(aft_model), 2)}</p>
+")
+
+        # Add HR equivalent if requested
+        if (self$options$aft_show_hr_equivalent && distribution == "weibull") {
+          info_html <- paste0(info_html, "
+<p style='margin-top:10px;'><i>For Weibull AFT models, Hazard Ratio ≈ 1/Time Ratio. This is only an approximation.</i></p>
+")
+        }
+
+        self$results$aftModelInfo$setContent(info_html)
+      }
+
+      ,
+      # SurvMetrics - Model Performance Metrics ----
+      .calculate_survmetrics = function() {
+        # Early return if SurvMetrics not requested
+        if (!self$options$show_survmetrics) {
+          return()
+        }
+
+        private$.checkpoint()
+
+        # Check for SurvMetrics package
+        if (!requireNamespace('SurvMetrics', quietly = TRUE)) {
+          warning_msg <- paste0(
+            "<h4>SurvMetrics Package Required</h4>",
+            "<p>The SurvMetrics package is not installed. Install it using:</p>",
+            "<pre>install.packages('SurvMetrics')</pre>"
+          )
+          self$results$survMetricsSummary$setContent(warning_msg)
+          return()
+        }
+
+        # Get Cox model from private storage
+        cox_model <- private$.cox_model()
+        if (is.null(cox_model)) {
+          return()
+        }
+
+        private$.checkpoint()
+
+        # Get cleaned data
+        cleaneddata <- private$.cleandata()
+        mydata <- cleaneddata$cleanData
+
+        tryCatch({
+          # Extract predictions
+          pred_risk <- predict(cox_model, type = "risk")
+          
+          # Get actual survival information
+          actual_time <- mydata$mytime
+          actual_status <- mydata$myoutcome
+
+          # Create Surv object
+          surv_obj <- survival::Surv(actual_time, actual_status)
+
+          private$.checkpoint()
+
+          # 1. Concordance Index (C-index)
+          cindex_result <- tryCatch({
+            SurvMetrics::Cindex(
+              Surv.rsp = surv_obj,
+              Surv.rsp.new = NULL,
+              lpnew = log(pred_risk),
+              ties = "average"
+            )
+          }, error = function(e) {
+            list(cindex = summary(cox_model)$concordance[1],
+                 lower = NA, upper = NA)
+          })
+
+          # Add C-index to table
+          self$results$survMetricsTable$addRow(rowKey = "cindex", values = list(
+            metric = "Concordance Index (C-index)",
+            value = cindex_result$cindex %||% cindex_result,
+            ci_lower = cindex_result$lower,
+            ci_upper = cindex_result$upper,
+            interpretation = ifelse(
+              (cindex_result$cindex %||% cindex_result) > 0.7,
+              "Good discrimination",
+              ifelse((cindex_result$cindex %||% cindex_result) > 0.6,
+                     "Acceptable discrimination",
+                     "Poor discrimination")
+            )
+          ))
+
+          private$.checkpoint()
+
+          # 2. Brier Score at time points
+          time_points_str <- self$options$survmetrics_timepoints
+          time_points <- as.numeric(unlist(strsplit(time_points_str, ",")))
+          time_points <- time_points[!is.na(time_points)]
+
+          if (length(time_points) > 0) {
+            # Filter time points within data range
+            max_time <- max(actual_time, na.rm = TRUE)
+            time_points <- time_points[time_points <= max_time]
+
+            if (length(time_points) > 0) {
+              brier_result <- tryCatch({
+                # Note: SurvMetrics::Brier may have different API
+                # Fallback to pec package if available
+                if (requireNamespace('pec', quietly = TRUE)) {
+                  pec_result <- pec::pec(
+                    object = list(model = cox_model),
+                    formula = surv_obj ~ 1,
+                    data = mydata,
+                    times = time_points,
+                    exact = FALSE
+                  )
+                  mean(pec_result$AppErr$model, na.rm = TRUE)
+                } else {
+                  NA
+                }
+              }, error = function(e) NA)
+
+              if (!is.na(brier_result)) {
+                self$results$survMetricsTable$addRow(rowKey = "brier", values = list(
+                  metric = paste0("Brier Score (avg at t=", paste(round(time_points), collapse = ","), ")"),
+                  value = brier_result,
+                  ci_lower = NA,
+                  ci_upper = NA,
+                  interpretation = ifelse(
+                    brier_result < 0.15,
+                    "Excellent prediction accuracy",
+                    ifelse(brier_result < 0.25,
+                           "Good prediction accuracy",
+                           "Poor prediction accuracy")
+                  )
+                ))
+              }
+            }
+          }
+
+          private$.checkpoint()
+
+          # 3. Integrated Brier Score (IBS)
+          ibs_points <- self$options$survmetrics_ibs_points
+          ibs_times <- seq(0, max(actual_time, na.rm = TRUE), length.out = ibs_points)
+
+          ibs_result <- tryCatch({
+            if (requireNamespace('pec', quietly = TRUE)) {
+              pec_result <- pec::pec(
+                object = list(model = cox_model),
+                formula = surv_obj ~ 1,
+                data = mydata,
+                times = ibs_times,
+                exact = FALSE
+              )
+              pec::crps(pec_result)$model
+            } else {
+              NA
+            }
+          }, error = function(e) NA)
+
+          if (!is.na(ibs_result)) {
+            self$results$survMetricsTable$addRow(rowKey = "ibs", values = list(
+              metric = "Integrated Brier Score (IBS)",
+              value = ibs_result,
+              ci_lower = NA,
+              ci_upper = NA,
+              interpretation = ifelse(
+                ibs_result < 0.15,
+                "Excellent overall prediction",
+                ifelse(ibs_result < 0.25,
+                       "Good overall prediction",
+                       "Poor overall prediction")
+              )
+            ))
+          }
+
+          # Generate summary
+          if (self$options$showSummaries) {
+            c_value <- cindex_result$cindex %||% cindex_result
+            discrimination_quality <- ifelse(
+              c_value > 0.7, "good", ifelse(c_value > 0.6, "acceptable", "limited")
+            )
+
+            summary_html <- glue::glue("
+<h4>Model Performance Summary</h4>
+<p><b>Discrimination:</b> C-index = {round(c_value, 3)} ({discrimination_quality})</p>
+<p><b>Interpretation:</b></p>
+<ul>
+  <li>C-index > 0.7: Good ability to discriminate between high and low risk patients</li>
+  <li>C-index 0.6-0.7: Acceptable discrimination</li>
+  <li>C-index < 0.6: Limited predictive ability</li>
+</ul>
+<p><b>Calibration:</b> Brier Score measures prediction accuracy (lower is better)</p>
+<ul>
+  <li>Brier Score < 0.15: Excellent calibration</li>
+  <li>Brier Score < 0.25: Good calibration</li>
+  <li>Brier Score > 0.25: Poor calibration</li>
+</ul>
+")
+            self$results$survMetricsSummary$setContent(summary_html)
+          }
+
+        }, error = function(e) {
+          error_msg <- paste0(
+            "<h4>SurvMetrics Calculation Error</h4>",
+            "<p>Error: ", e$message, "</p>",
+            "<p>Note: SurvMetrics calculation requires a valid Cox model with sufficient events.</p>"
+          )
+          self$results$survMetricsSummary$setContent(error_msg)
+        })
+      }
+
+      ,
+      .plotSurvMetrics = function(image, ...) {
+        # Early return if plots not requested
+        if (!self$options$show_survmetrics || !self$options$survmetrics_show_plots) {
+          return(FALSE)
+        }
+
+        # Get Cox model
+        cox_model <- private$.cox_model()
+        if (is.null(cox_model)) {
+          return(FALSE)
+        }
+
+        # Get cleaned data
+        cleaneddata <- private$.cleandata()
+        mydata <- cleaneddata$cleanData
+
+        tryCatch({
+          if (!requireNamespace('pec', quietly = TRUE)) {
+            return(FALSE)
+          }
+
+          # Create survival object
+          surv_obj <- survival::Surv(mydata$mytime, mydata$myoutcome)
+
+          # Calculate Brier scores over time
+          time_seq <- seq(0, max(mydata$mytime, na.rm = TRUE), length.out = 100)
+          pec_result <- pec::pec(
+            object = list(Model = cox_model),
+            formula = surv_obj ~ 1,
+            data = mydata,
+            times = time_seq,
+            exact = FALSE
+          )
+
+          # Create plot
+          plot_data <- data.frame(
+            time = time_seq,
+            brier = pec_result$AppErr$Model
+          )
+
+          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = brier)) +
+            ggplot2::geom_line(color = "#2E8B57", size = 1.2) +
+            ggplot2::geom_hline(yintercept = 0.25, linetype = "dashed", color = "red",
+                               alpha = 0.5) +
+            ggplot2::labs(
+              title = "Brier Score Over Time",
+              x = "Time",
+              y = "Brier Score",
+              caption = "Lower values indicate better prediction accuracy\nRed line: threshold for acceptable performance"
+            ) +
+            ggplot2::theme_minimal() +
+            ggplot2::theme(
+              plot.title = ggplot2::element_text(face = "bold", size = 14),
+              axis.text = ggplot2::element_text(size = 11),
+              axis.title = ggplot2::element_text(size = 12)
+            )
+
+          print(p)
+          TRUE
+
+        }, error = function(e) {
+          FALSE
+        })
+      }
+
 
 
 

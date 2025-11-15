@@ -1,0 +1,935 @@
+#' @title Enhanced Outcome Organizer for Survival Analysis
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#'
+
+outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "outcomeorganizerClass",
+    inherit = outcomeorganizerBase,
+    private = list(
+        .init = function() {
+            # Initialize table structures
+            if (self$options$outputTable) {
+                table <- self$results$outputTable
+                if (is.null(table$rowKeys) || length(table$rowKeys) == 0) {
+                    # Table will be populated in the .run() method
+                }
+            }
+
+            # Initialize diagnostics table if enabled
+            if (self$options$diagnostics) {
+                table <- self$results$diagnosticsTable
+                if (is.null(table$rowKeys) || length(table$rowKeys) == 0) {
+                    # Will be populated with validation checks
+                }
+            }
+        },
+
+        # getData function to properly handle the data labels
+        .getData = function() {
+            # Get the data
+            mydata <- self$data
+
+            # Add row names if missing
+            if (is.null(rownames(mydata))) {
+                mydata$row_names <- seq_len(nrow(mydata))
+            } else {
+                mydata$row_names <- rownames(mydata)
+            }
+
+            # Get original names
+            original_names <- names(mydata)
+
+            # Create labels vector
+            labels <- stats::setNames(original_names, original_names)
+
+            # Clean names safely
+            mydata_cleaned <- try({
+                janitor::clean_names(mydata)
+            }, silent = TRUE)
+
+            if (inherits(mydata_cleaned, "try-error")) {
+                stop('Error cleaning variable names. Please check column names.')
+            }
+
+            # Create corrected labels
+            corrected_labels <- stats::setNames(original_names, names(mydata_cleaned))
+
+            # Apply labels
+            mydata_labelled <- try({
+                labelled::set_variable_labels(.data = mydata_cleaned, .labels = corrected_labels)
+            }, silent = TRUE)
+
+            if (inherits(mydata_labelled, "try-error")) {
+                stop('Error setting variable labels')
+            }
+
+            # Get all labels
+            all_labels <- labelled::var_label(mydata_labelled)
+
+            # Get variable names from labels
+            outcome_var <- try({
+                names(all_labels)[all_labels == self$options$outcome]
+            }, silent = TRUE)
+
+            # Get recurrence/progression variable if specified
+            recurrence_var <- NULL
+            if (!is.null(self$options$recurrence)) {
+                recurrence_var <- try({
+                    names(all_labels)[all_labels == self$options$recurrence]
+                }, silent = TRUE)
+            }
+
+            # Get patient ID variable if specified
+            id_var <- NULL
+            if (!is.null(self$options$patientID)) {
+                id_var <- try({
+                    names(all_labels)[all_labels == self$options$patientID]
+                }, silent = TRUE)
+            }
+
+            return(list(
+                "mydata_labelled" = mydata_labelled,
+                "outcome_var" = outcome_var,
+                "recurrence_var" = recurrence_var,
+                "id_var" = id_var
+            ))
+        },
+
+        # Enhanced input validation for outcome organization
+        # Returns validation results with errors, warnings, and informational messages
+        .validateInputs = function(mydata, outcome_var, recurrence_var = NULL, id_var = NULL, analysistype = "os") {
+            validation_results <- list(
+                errors = character(0),
+                warnings = character(0),
+                info = character(0),
+                should_stop = FALSE
+            )
+            
+            # 1. Check if required variables exist in data
+            if (!is.null(outcome_var) && !outcome_var %in% names(mydata)) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Outcome variable '", outcome_var, "' not found in dataset.", sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # 2. Check recurrence variable if specified
+            if (!is.null(recurrence_var) && !recurrence_var %in% names(mydata)) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Recurrence variable '", recurrence_var, "' not found in dataset.", sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # 3. Check patient ID variable if specified
+            if (!is.null(id_var) && !id_var %in% names(mydata)) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Patient ID variable '", id_var, "' not found in dataset.", sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # Stop here if variables don't exist
+            if (validation_results$should_stop) {
+                return(validation_results)
+            }
+            
+            # 4. Validate outcome variable
+            if (!is.null(outcome_var) && outcome_var %in% names(mydata)) {
+                outcome_data <- mydata[[outcome_var]]
+                outcome_data_clean <- outcome_data[!is.na(outcome_data)]
+                
+                if (length(outcome_data_clean) == 0) {
+                    validation_results$errors <- c(validation_results$errors,
+                        "Outcome variable contains no non-missing values.")
+                    validation_results$should_stop <- TRUE
+                } else {
+                    # Check unique values
+                    unique_outcomes <- unique(outcome_data_clean)
+                    outcome_count <- length(unique_outcomes)
+                    
+                    if (outcome_count < 2) {
+                        validation_results$errors <- c(validation_results$errors,
+                            "Outcome variable must have at least 2 different values.")
+                        validation_results$should_stop <- TRUE
+                    } else {
+                        validation_results$info <- c(validation_results$info,
+                            paste("Outcome variable has ", outcome_count, " unique values: ", 
+                                  paste(unique_outcomes, collapse=", "), sep=""))
+                    }
+                }
+            }
+            
+            # 5. Validate analysis type compatibility
+            valid_analysis_types <- c("os", "cause", "compete", "rfs", "pfs", "dfs", "ttp", "multistate")
+            if (!analysistype %in% valid_analysis_types) {
+                validation_results$errors <- c(validation_results$errors,
+                    paste("Invalid analysis type '", analysistype, "'. Must be one of: ", 
+                          paste(valid_analysis_types, collapse=", "), sep=""))
+                validation_results$should_stop <- TRUE
+            }
+            
+            # 6. Check analysis type requirements
+            if (analysistype %in% c("rfs", "pfs", "dfs", "ttp") && is.null(recurrence_var)) {
+                validation_results$warnings <- c(validation_results$warnings,
+                    paste("Analysis type '", analysistype, "' typically requires a recurrence/progression variable.", sep=""))
+            }
+            
+            # 7. Combined data quality checks
+            if (!validation_results$should_stop) {
+                total_rows <- nrow(mydata)
+
+                # Check for minimum sample size
+                if (total_rows < 10) {
+                    validation_results$warnings <- c(validation_results$warnings,
+                        paste("Very small sample size: ", total_rows, " observations. Results may be unreliable.", sep=""))
+                } else if (total_rows < 30) {
+                    validation_results$warnings <- c(validation_results$warnings,
+                        paste("Small sample size: ", total_rows, " observations. Consider larger sample for more reliable estimates.", sep=""))
+                }
+
+                # Check for missing data patterns
+                if (!is.null(outcome_var) && outcome_var %in% names(mydata)) {
+                    missing_outcome <- sum(is.na(mydata[[outcome_var]]))
+                    missing_proportion <- missing_outcome / total_rows
+
+                    if (missing_proportion > 0.1) {
+                        validation_results$warnings <- c(validation_results$warnings,
+                            paste("Large amount of missing outcome data: ", round(missing_proportion * 100, 1),
+                                  "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
+                    } else if (missing_proportion > 0) {
+                        validation_results$info <- c(validation_results$info,
+                            paste("Missing outcome data: ", round(missing_proportion * 100, 1),
+                                  "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
+                    }
+                }
+            }
+
+            # 8. Contextual warnings for potential misuse
+            if (analysistype == "cause" && !multievent) {
+                validation_results$warnings <- c(validation_results$warnings,
+                    "Cause-specific survival typically requires distinguishing between disease deaths and other deaths. Consider enabling 'Multiple Event Types' or switch to 'Overall Survival'.")
+            }
+
+            if (analysistype == "compete" && !multievent) {
+                validation_results$warnings <- c(validation_results$warnings,
+                    "Competing risks analysis requires multiple event types. Please enable 'Multiple Event Types' and specify event levels.")
+            }
+
+            if (analysistype %in% c("rfs", "pfs", "dfs") && is.null(recurrence_var)) {
+                validation_results$warnings <- c(validation_results$warnings,
+                    paste0(toupper(analysistype), " analysis typically requires both a recurrence/progression variable AND an outcome variable. Currently only outcome is specified."))
+            }
+
+            if (analysistype == "multistate" && !multievent) {
+                validation_results$errors <- c(validation_results$errors,
+                    "Multistate models require multiple event types. Please enable 'Multiple Event Types'.")
+                validation_results$should_stop <- TRUE
+            }
+            
+            return(validation_results)
+        },
+
+        # Main function to organize outcomes with enhanced functionality
+        .organizeOutcomes = function() {
+            # Get data and variables
+            labelled_data <- private$.getData()
+            mydata <- labelled_data$mydata_labelled
+            outcome_var <- labelled_data$outcome_var
+            recurrence_var <- labelled_data$recurrence_var
+            id_var <- labelled_data$id_var
+
+            # Check if required variables exist
+            if (length(outcome_var) == 0 && !is.null(self$options$outcome)) {
+                stop('Could not find outcome variable')
+            }
+
+            # Get parameters from UI options
+            analysistype <- self$options$analysistype
+            multievent <- self$options$multievent
+            outcomeLevel <- self$options$outcomeLevel
+
+            # Validation diagnostics - will be used if diagnostics are enabled
+            diagnostics <- list()
+
+            # Create a new outcome variable based on the analysis type
+            if (!multievent) {
+                # Check for simple binary outcome coding (0/1)
+                outcome1 <- mydata[[outcome_var]]
+                contin <- c("integer", "numeric", "double")
+
+                if (inherits(outcome1, contin)) {
+                    # Check if it's binary (0 and 1)
+                    unique_vals <- unique(outcome1[!is.na(outcome1)])
+                    if (!((length(unique_vals) == 2) && (sum(unique_vals) == 1))) {
+                        warning_msg <- 'Continuous outcome variable does not contain only 0s and 1s. This may lead to incorrect analysis.'
+                        warning(warning_msg)
+                        diagnostics$binary_check <- warning_msg
+                    }
+
+                    # Simply copy the outcome as it's already coded
+                    mydata[["myoutcome"]] <- mydata[[outcome_var]]
+
+                } else if (inherits(outcome1, c("factor", "character"))) {
+                    # Convert to 1s and 0s based on the event level
+                    mydata[["myoutcome"]] <- ifelse(
+                        test = outcome1 == outcomeLevel,
+                        yes = 1,
+                        no = 0
+                    )
+
+                    # Add diagnostic information
+                    diagnostics$event_levels <- paste("Event level:", outcomeLevel)
+                    diagnostics$conversion <- "Factor converted to binary (0/1) coding"
+
+                } else {
+                    stop('Outcome variable must be numeric, factor, or character')
+                }
+
+                # Special handling for RFS/PFS/DFS if selected
+                if (analysistype %in% c('rfs', 'pfs', 'dfs') && !is.null(recurrence_var)) {
+                    # For these analyses, also consider recurrence/progression as events
+                    recurrence_outcome <- mydata[[recurrence_var]]
+                    recurrence_level <- self$options$recurrenceLevel
+
+                    # Mark recurrences as events (1)
+                    recurrence_events <- ifelse(
+                        test = recurrence_outcome == recurrence_level,
+                        yes = 1,
+                        no = 0
+                    )
+
+                    # Combine with death events based on analysis type
+                    if (analysistype == 'rfs') {
+                        # Recurrence-free survival: event is recurrence or death from disease
+                        mydata[["myoutcome"]] <- pmax(recurrence_events, mydata[["myoutcome"]], na.rm = TRUE)
+                        diagnostics$rfs_handling <- "RFS: Events include recurrence and death"
+                    } else if (analysistype == 'pfs') {
+                        # Progression-free survival: event is progression or death from any cause
+                        mydata[["myoutcome"]] <- pmax(recurrence_events, mydata[["myoutcome"]], na.rm = TRUE)
+                        diagnostics$pfs_handling <- "PFS: Events include progression and death"
+                    } else if (analysistype == 'dfs') {
+                        # Disease-free survival: event is recurrence, second primary, or death from any cause
+                        mydata[["myoutcome"]] <- pmax(recurrence_events, mydata[["myoutcome"]], na.rm = TRUE)
+                        diagnostics$dfs_handling <- "DFS: Events include disease events and death"
+                    }
+                } else if (analysistype == 'ttp' && !is.null(recurrence_var)) {
+                    # Time to progression: only progression counts as event, deaths are censored
+                    recurrence_outcome <- mydata[[recurrence_var]]
+                    recurrence_level <- self$options$recurrenceLevel
+
+                    # Only progression counts as an event
+                    mydata[["myoutcome"]] <- ifelse(
+                        test = recurrence_outcome == recurrence_level,
+                        yes = 1,
+                        no = 0
+                    )
+                    diagnostics$ttp_handling <- "TTP: Only progression events counted, deaths censored"
+                }
+
+            } else {
+                # Multiple event types
+                outcome1 <- mydata[[outcome_var]]
+                dod <- self$options$dod
+                dooc <- self$options$dooc
+                awd <- self$options$awd
+                awod <- self$options$awod
+
+                # Initialize all as NA
+                mydata[["myoutcome"]] <- NA_integer_
+
+                if (analysistype == 'os') {
+                    # Overall survival: Dead (any cause) vs Alive
+                    mydata[["myoutcome"]][outcome1 == awd] <- 0
+                    mydata[["myoutcome"]][outcome1 == awod] <- 0
+                    mydata[["myoutcome"]][outcome1 == dod] <- 1
+                    mydata[["myoutcome"]][outcome1 == dooc] <- 1
+
+                    diagnostics$overall_coding <- "Overall survival: All deaths coded as events (1)"
+
+                } else if (analysistype == 'cause') {
+                    # Cause-specific: Dead of disease vs Others
+                    mydata[["myoutcome"]][outcome1 == awd] <- 0
+                    mydata[["myoutcome"]][outcome1 == awod] <- 0
+                    mydata[["myoutcome"]][outcome1 == dod] <- 1
+                    mydata[["myoutcome"]][outcome1 == dooc] <- 0
+
+                    diagnostics$cause_coding <- "Cause-specific: Only disease-related deaths as events (1)"
+
+                } else if (analysistype == 'compete') {
+                    # Competing risks: Multiple event types
+                    mydata[["myoutcome"]][outcome1 == awd] <- 0
+                    mydata[["myoutcome"]][outcome1 == awod] <- 0
+                    mydata[["myoutcome"]][outcome1 == dod] <- 1
+                    mydata[["myoutcome"]][outcome1 == dooc] <- 2
+
+                    diagnostics$compete_coding <- "Competing risks: Disease deaths (1), other deaths (2)"
+
+                } else if (analysistype == 'multistate') {
+                    # Multistate model: Different states given different codes
+                    mydata[["myoutcome"]][outcome1 == awod] <- 0  # Baseline state
+                    mydata[["myoutcome"]][outcome1 == awd] <- 1   # Disease state
+                    mydata[["myoutcome"]][outcome1 == dod] <- 2   # Death from disease
+                    mydata[["myoutcome"]][outcome1 == dooc] <- 3  # Death from other causes
+
+                    diagnostics$multistate_coding <- "Multistate: Healthy (0), Disease (1), Death-disease (2), Death-other (3)"
+                }
+
+                # Apply event hierarchy if specified
+                if (self$options$useHierarchy) {
+                    # If multiple events could be coded for the same patient, apply hierarchy
+                    highest_priority <- self$options$eventPriority
+                    if (!is.null(id_var) && !is.null(highest_priority)) {
+                        # Validate that there are actually duplicate IDs
+                        duplicate_ids <- mydata %>%
+                            dplyr::group_by(!!dplyr::sym(id_var)) %>%
+                            dplyr::filter(dplyr::n() > 1) %>%
+                            dplyr::ungroup()
+
+                        if (nrow(duplicate_ids) == 0) {
+                            diagnostics$hierarchy <- "Event hierarchy requested but no duplicate patient IDs found. Each patient has only one record."
+                        } else {
+                            # Apply hierarchy
+                            mydata <- mydata %>%
+                                dplyr::group_by(!!dplyr::sym(id_var)) %>%
+                                dplyr::mutate(
+                                    myoutcome = ifelse(
+                                        any(myoutcome == highest_priority, na.rm = TRUE),
+                                        highest_priority,
+                                        myoutcome
+                                    )
+                                ) %>%
+                                dplyr::ungroup()
+
+                            n_affected <- duplicate_ids %>%
+                                dplyr::distinct(!!dplyr::sym(id_var)) %>%
+                                nrow()
+
+                            diagnostics$hierarchy <- sprintf(
+                                "Event hierarchy applied (priority: %s) to %d patients with multiple records.",
+                                highest_priority, n_affected
+                            )
+                        }
+                    }
+                }
+            }
+
+            # Cache labelled data lookups for efficiency (used multiple times)
+            all_labels_cache <- labelled::var_label(mydata)
+
+            # Apply interval censoring if specified
+            if (self$options$intervalCensoring && !is.null(self$options$intervalStart) && !is.null(self$options$intervalEnd)) {
+                # Get interval variables from cached labels
+                start_var <- names(all_labels_cache)[all_labels_cache == self$options$intervalStart]
+                end_var <- names(all_labels_cache)[all_labels_cache == self$options$intervalEnd]
+
+                if (length(start_var) > 0 && length(end_var) > 0) {
+                    # Add interval variables to output for use with survival::Surv()
+                    mydata[["interval_L"]] <- mydata[[start_var[1]]]
+                    mydata[["interval_R"]] <- mydata[[end_var[1]]]
+                    diagnostics$interval_censoring <- "Interval censoring enabled. Use Surv(interval_L, interval_R, myoutcome, type='interval2') in survival analysis."
+                } else {
+                    diagnostics$interval_censoring <- "Interval censoring: variables not found in dataset"
+                }
+            }
+
+            # Handle administrative censoring if specified
+            if (self$options$adminCensoring && !is.null(self$options$adminDate)) {
+                # Get admin date variable using cached labels
+                admin_date_var_name <- self$options$adminDate
+
+                # Find the admin date variable in cached labels
+                admin_date_var <- NULL
+                if (!is.null(admin_date_var_name)) {
+                    admin_date_var <- names(all_labels_cache)[all_labels_cache == admin_date_var_name]
+                }
+
+                if (length(admin_date_var) > 0) {
+                    # Store administrative censoring date for use in survival analysis
+                    mydata[["admin_censor_date"]] <- mydata[[admin_date_var[1]]]
+                    diagnostics$admin_censoring <- "Administrative censoring date stored. Apply in survival analysis: time_censored = pmin(time, admin_censor_date)"
+                } else {
+                    diagnostics$admin_censoring <- "Administrative censoring: date variable not found in dataset"
+                }
+            }
+
+            # Create a data frame with row names and recoded outcome
+            df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
+
+            return(list(
+                "df_outcome" = df_outcome,
+                "mydata" = mydata,
+                "diagnostics" = diagnostics
+            ))
+        },
+
+        .getOutcomeLabel = function(value, analysistype, multievent) {
+            val_str <- as.character(value)
+
+            if (multievent && analysistype == 'multistate') {
+                switch(val_str,
+                       "0" = "Disease-free (0)",
+                       "1" = "Disease state (1)",
+                       "2" = "Death from disease (2)",
+                       "3" = "Death from other causes (3)",
+                       paste0("Unknown (", value, ")"))
+            } else if (multievent && analysistype == 'compete') {
+                switch(val_str,
+                       "0" = "Censored (0)",
+                       "1" = "Disease event (1)",
+                       "2" = "Competing event (2)",
+                       paste0("Unknown (", value, ")"))
+            } else {
+                switch(val_str,
+                       "0" = "Censored (0)",
+                       "1" = "Event (1)",
+                       paste0("Unknown (", value, ")"))
+            }
+        },
+
+        .showGlossary = function() {
+            glossary_html <- "
+            <div style='background-color: #f9f9f9; padding: 15px; border-radius: 8px;'>
+            <h4>Survival Analysis Glossary</h4>
+            <dl>
+                <dt><b>Overall Survival (OS)</b></dt>
+                <dd>Time from diagnosis/treatment to death from any cause. Patients alive at last follow-up are censored.</dd>
+
+                <dt><b>Cause-Specific Survival</b></dt>
+                <dd>Time to death from the disease of interest. Deaths from other causes are censored (treated as non-events).</dd>
+
+                <dt><b>Competing Risks</b></dt>
+                <dd>Analysis accounting for multiple types of events (e.g., disease death vs. other death). Competing events prevent the event of interest from occurring.</dd>
+
+                <dt><b>Recurrence-Free Survival (RFS)</b></dt>
+                <dd>Time to disease recurrence or death from disease. Used for cancers after curative treatment.</dd>
+
+                <dt><b>Progression-Free Survival (PFS)</b></dt>
+                <dd>Time to disease progression or death from any cause. Common endpoint in oncology trials.</dd>
+
+                <dt><b>Disease-Free Survival (DFS)</b></dt>
+                <dd>Time to recurrence, second primary cancer, or death from any cause.</dd>
+
+                <dt><b>Time to Progression (TTP)</b></dt>
+                <dd>Time to disease progression only. Deaths without progression are censored.</dd>
+
+                <dt><b>Multistate Model</b></dt>
+                <dd>Models transitions between health states (e.g., healthy → disease → death).</dd>
+
+                <dt><b>Censoring</b></dt>
+                <dd>Incomplete observation of survival time (patient still alive, lost to follow-up, or event not observed).</dd>
+
+                <dt><b>Event Hierarchy</b></dt>
+                <dd>When multiple events occur for the same patient, prioritize one event type over others.</dd>
+            </dl>
+            </div>
+            "
+
+            self$results$glossary$setContent(glossary_html)
+        },
+
+        .todo = function() {
+            todo <- glue::glue(
+                "
+                <br>Welcome to Enhanced Outcome Organizer
+                <br><br>
+                This tool helps you prepare outcome variables for various types of survival analysis:
+                <br>
+                <ul>
+                <li><b>Overall Survival (OS):</b> All deaths are events</li>
+                <li><b>Cause-Specific Survival:</b> Only disease-related deaths are events</li>
+                <li><b>Competing Risks:</b> Different event types have different codes</li>
+                <li><b>Recurrence/Progression-Free Survival (RFS/PFS):</b> Events include disease recurrence and death</li>
+                <li><b>Disease-Free Survival (DFS):</b> Events include any disease-related event or death</li>
+                <li><b>Time to Progression (TTP):</b> Only disease progression events counted</li>
+                <li><b>Multistate Models:</b> Multiple outcome states coded separately</li>
+                </ul>
+                <br>
+                Advanced options allow for:
+                <br>
+                <ul>
+                <li>Event hierarchies when multiple events occur</li>
+                <li>Time-dependent outcomes</li>
+                <li>Interval censoring</li>
+                <li>Administrative censoring</li>
+                </ul>
+                <br>
+                Select your outcome variables and analysis type to begin.
+                "
+            )
+
+            html <- self$results$todo
+            html$setContent(todo)
+        },
+
+        .run = function() {
+            # Initial validation
+            if (is.null(self$options$outcome)) {
+                private$.todo()
+                return()
+            }
+
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+
+            # Create table if needed
+            private$.checkpoint()
+
+            # Perform input validation
+            labelled_data <- private$.getData()
+            mydata <- labelled_data$mydata_labelled
+            outcome_var <- labelled_data$outcome_var
+            recurrence_var <- labelled_data$recurrence_var
+            id_var <- labelled_data$id_var
+            
+            validation_results <- private$.validateInputs(
+                mydata, outcome_var, recurrence_var, id_var, self$options$analysistype
+            )
+            
+            # Handle validation errors - stop execution if critical errors found
+            if (validation_results$should_stop) {
+                error_msg <- paste(
+                    "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                    "<b>❌ Critical Error(s) Detected:</b><br>",
+                    paste(validation_results$errors, collapse = "<br>"),
+                    "<br><br><b>💡 Suggestions:</b><br>",
+                    "• Verify that selected variables exist in your dataset<br>",
+                    "• Ensure outcome variable contains multiple different values<br>",
+                    "• Check that analysis type is appropriate for your data<br>",
+                    "• For RFS/PFS/DFS/TTP analyses, consider adding recurrence variable",
+                    "</div>",
+                    collapse = ""
+                )
+                stop(error_msg)
+            }
+
+            # Organize outcomes
+            results <- private$.organizeOutcomes()
+            df_outcome <- results$df_outcome
+            mydata <- results$mydata
+            diagnostics <- results$diagnostics
+
+            # Create summary text describing the recoding
+            analysistype <- self$options$analysistype
+
+            # Generate appropriate summary text based on analysis type
+            summary_text <- ""
+
+            if (self$options$multievent) {
+                if (analysistype == 'os') {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Overall Survival Analysis</b><br>
+                        Recoded outcome:<br>
+                        - Dead of disease ({self$options$dod}): coded as 1<br>
+                        - Dead of other causes ({self$options$dooc}): coded as 1<br>
+                        - Alive with disease ({self$options$awd}): coded as 0<br>
+                        - Alive without disease ({self$options$awod}): coded as 0<br>
+                        <br>
+                        <i>This coding compares all deaths vs. alive status for standard Kaplan-Meier or Cox regression.</i>
+                        "
+                    )
+                } else if (analysistype == 'cause') {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Cause-Specific Survival Analysis</b><br>
+                        Recoded outcome:<br>
+                        - Dead of disease ({self$options$dod}): coded as 1<br>
+                        - Dead of other causes ({self$options$dooc}): coded as 0<br>
+                        - Alive with disease ({self$options$awd}): coded as 0<br>
+                        - Alive without disease ({self$options$awod}): coded as 0<br>
+                        <br>
+                        <i>This coding compares disease-specific deaths vs. other outcomes for cause-specific analyses.</i>
+                        "
+                    )
+                } else if (analysistype == 'compete') {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Competing Risks Survival Analysis</b><br>
+                        Recoded outcome:<br>
+                        - Dead of disease ({self$options$dod}): coded as 1<br>
+                        - Dead of other causes ({self$options$dooc}): coded as 2<br>
+                        - Alive with disease ({self$options$awd}): coded as 0<br>
+                        - Alive without disease ({self$options$awod}): coded as 0<br>
+                        <br>
+                        <i>This coding enables competing risk analysis between disease-specific deaths and other causes using cmprsk or other packages.</i>
+                        "
+                    )
+                } else if (analysistype == 'multistate') {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Multistate Model Analysis</b><br>
+                        Recoded outcome:<br>
+                        - Alive without disease ({self$options$awod}): coded as 0<br>
+                        - Alive with disease ({self$options$awd}): coded as 1<br>
+                        - Dead of disease ({self$options$dod}): coded as 2<br>
+                        - Dead of other causes ({self$options$dooc}): coded as 3<br>
+                        <br>
+                        <i>This coding allows for multistate modeling with transitions between health states.</i>
+                        "
+                    )
+                }
+            } else {
+                if (analysistype == 'os') {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Overall Survival (OS) Analysis</b><br>
+                        Recoded outcome:<br>
+                        - Death ({self$options$outcomeLevel}): coded as 1<br>
+                        - Alive (other levels): coded as 0<br>
+                        <br>
+                        <i>This is standard coding for overall survival using Cox regression or Kaplan-Meier analysis.</i>
+                        "
+                    )
+                } else if (analysistype %in% c('rfs', 'pfs', 'dfs') && !is.null(self$options$recurrence)) {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>{toupper(analysistype)} Analysis</b><br>
+                        Recoded outcome:<br>
+                        - Death ({self$options$outcomeLevel}): coded as 1<br>
+                        - Recurrence/Progression ({self$options$recurrenceLevel}): coded as 1<br>
+                        - Event-free (other): coded as 0<br>
+                        <br>
+                        <i>This coding treats both disease events and death as events for {toupper(analysistype)} analysis.</i>
+                        "
+                    )
+                } else if (analysistype == 'ttp' && !is.null(self$options$recurrence)) {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Time to Progression (TTP) Analysis</b><br>
+                        Recoded outcome:<br>
+                        - Progression ({self$options$recurrenceLevel}): coded as 1<br>
+                        - No progression (including deaths): coded as 0<br>
+                        <br>
+                        <i>This coding only treats disease progression as events; deaths without progression are censored.</i>
+                        "
+                    )
+                } else {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Binary Outcome Coding</b><br>
+                        Recoded outcome:<br>
+                        - Event ({self$options$outcomeLevel}): coded as 1<br>
+                        - Non-event (other levels): coded as 0<br>
+                        <br>
+                        <i>This is standard coding for Cox regression and Kaplan-Meier analysis.</i>
+                        "
+                    )
+                }
+            }
+
+            # Add information about special handling if applicable
+            if (self$options$useHierarchy) {
+                summary_text <- paste(summary_text, glue::glue(
+                    "<br><b>Event Hierarchy Applied:</b> If multiple events occur, priority is given to type {self$options$eventPriority}.<br>"
+                ))
+            }
+
+            if (self$options$intervalCensoring) {
+                summary_text <- paste(summary_text, "<br><b>Interval Censoring:</b> Events are known to occur within time intervals rather than at exact times.<br>")
+            }
+
+            if (self$options$adminCensoring) {
+                summary_text <- paste(summary_text, "<br><b>Administrative Censoring:</b> Observations are censored at a specified administrative date.<br>")
+            }
+
+            # Add recommendations for appropriate analyses
+            summary_text <- paste(summary_text, "<br><b>Recommended Analysis Approaches:</b><br>")
+
+            if (analysistype == 'os') {
+                summary_text <- paste(summary_text, "- Kaplan-Meier method for univariate analysis<br>- Cox proportional hazards for multivariable analysis<br>")
+            } else if (analysistype == 'cause') {
+                summary_text <- paste(summary_text, "- Cause-specific hazard models (standard Cox regression)<br>- Cumulative incidence function with competing risks<br>")
+            } else if (analysistype == 'compete') {
+                summary_text <- paste(summary_text, "- Fine-Gray subdistribution hazard model<br>- Cumulative incidence function accounting for competing risks<br>")
+            } else if (analysistype == 'multistate') {
+                summary_text <- paste(summary_text, "- Multi-state models (e.g., illness-death model)<br>- Transition probabilities between states<br>")
+            } else if (analysistype %in% c('rfs', 'pfs', 'dfs')) {
+                summary_text <- paste(summary_text, "- Standard survival analysis (Kaplan-Meier, Cox)<br>- Consider competing risks if appropriate<br>")
+            } else if (analysistype == 'ttp') {
+                summary_text <- paste(summary_text, "- Standard survival analysis with death as censoring<br>- Consider sensitivity analysis treating death as competing risk<br>")
+            }
+
+            # Add validation summary to output
+            validation_summary <- ""
+            if (length(validation_results$warnings) > 0) {
+                validation_summary <- paste0(validation_summary, 
+                    "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
+                    "<b>⚠️ Warnings:</b><br>", 
+                    paste(validation_results$warnings, collapse = "<br>"),
+                    "</div>")
+            }
+            if (length(validation_results$info) > 0) {
+                validation_summary <- paste0(validation_summary,
+                    "<div style='background-color: #d1ecf1; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
+                    "<b>ℹ️ Information:</b><br>", 
+                    paste(validation_results$info, collapse = "<br>"),
+                    "</div>")
+            }
+            
+            # Combine summary text with validation results
+            final_summary <- paste0(summary_text, validation_summary)
+            self$results$summary$setContent(final_summary)
+
+            # Add data table if requested
+            if (self$options$outputTable) {
+                # Create frequency table of new outcomes
+                outcome_counts <- table(mydata$myoutcome)
+                outcome_table <- self$results$outputTable
+
+                # Add rows for each unique outcome value
+                for (i in seq_along(outcome_counts)) {
+                    value <- names(outcome_counts)[i]
+                    count <- outcome_counts[i]
+                    label <- private$.getOutcomeLabel(value, analysistype, self$options$multievent)
+
+                    outcome_table$addRow(rowKey=i, values=list(
+                        outcome = value,
+                        label = label,
+                        count = count,
+                        percentage = round(count / sum(outcome_counts) * 100, 1)
+                    ))
+                }
+            }
+
+            # Add diagnostics table if requested
+            if (self$options$diagnostics && length(diagnostics) > 0) {
+                diagnostics_table <- self$results$diagnosticsTable
+
+                # Add each diagnostic as a row
+                i <- 1
+                for (key in names(diagnostics)) {
+                    diagnostics_table$addRow(rowKey=i, values=list(
+                        check = key,
+                        result = diagnostics[[key]]
+                    ))
+                    i <- i + 1
+                }
+            }
+
+            # Add visualization if requested
+            if (self$options$visualization) {
+                # Store outcome distribution data for the visualization
+                image <- self$results$outcomeViz
+                image$setState(list(
+                    "table" = outcome_counts,
+                    "analysis_type" = analysistype,
+                    "multi_event" = self$options$multievent
+                ))
+            }
+
+            # Add recoded outcome to data if requested
+            if (self$options$addOutcome) {
+                self$results$addOutcome$setRowNums(df_outcome$row_names)
+                self$results$addOutcome$setValues(df_outcome$myoutcome)
+            }
+
+            # Natural language summary for reports (if requested)
+            if (self$options$showNaturalSummary) {
+                # Analysis type labels
+                analysis_type_labels <- list(
+                    os = "Overall Survival",
+                    cause = "Cause-Specific Survival",
+                    compete = "Competing Risks",
+                    rfs = "Recurrence-Free Survival",
+                    pfs = "Progression-Free Survival",
+                    dfs = "Disease-Free Survival",
+                    ttp = "Time to Progression",
+                    multistate = "Multistate Model"
+                )
+
+                # Event description based on analysis type
+                event_desc <- if (analysistype == "os") "death from any cause"
+                    else if (analysistype == "cause") "death from the disease of interest"
+                    else if (analysistype == "compete") "disease-specific death (competing events coded as 2)"
+                    else if (analysistype %in% c("rfs", "pfs", "dfs")) "recurrence/progression or death"
+                    else if (analysistype == "ttp") "disease progression only"
+                    else "the selected event type"
+
+                # Censor description
+                censor_desc <- if (analysistype == "ttp") "patients who died without progression or remain event-free"
+                    else "patients who remain alive or event-free"
+
+                # Calculate frequencies
+                n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
+                n_censored <- sum(mydata$myoutcome == 0, na.rm = TRUE)
+                total_n <- n_events + n_censored
+                event_pct <- if (total_n > 0) round(n_events / total_n * 100, 1) else 0
+                censor_pct <- if (total_n > 0) round(n_censored / total_n * 100, 1) else 0
+
+                natural_summary <- sprintf(
+                    "<div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
+                    <b>📋 Copy-Ready Report Text:</b><br><br>
+                    The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis.
+                    Events (coded as 1) represent %s.
+                    Non-events (coded as 0) represent %s.
+                    The recoded variable '<b>myoutcome</b>' contains <b>%d events (%.1f%%)</b> and <b>%d non-events (%.1f%%)</b>.
+                    </div>",
+                    self$options$outcome,
+                    analysis_type_labels[[analysistype]],
+                    event_desc,
+                    censor_desc,
+                    n_events, event_pct,
+                    n_censored, censor_pct
+                )
+
+                self$results$naturalSummary$setContent(natural_summary)
+            }
+
+            # Show glossary if requested
+            if (self$options$showGlossary) {
+                private$.showGlossary()
+            }
+        },
+
+        # Plot function for outcome distribution visualization
+        .plotOutcome = function(image, ggtheme, theme, ...) {
+            if (!self$options$visualization)
+                return()
+
+            plotData <- image$state
+
+            if (is.null(plotData))
+                return()
+
+            tryCatch({
+                # Create data frame from outcome counts
+                plot_df <- data.frame(
+                    Outcome = names(plotData$table),
+                    Count = as.numeric(plotData$table)
+                )
+
+                # Add proper labels based on analysis type using private method
+                plot_df$Label <- sapply(plot_df$Outcome, function(val) {
+                    private$.getOutcomeLabel(val, plotData$analysis_type, plotData$multi_event)
+                })
+
+                # Color-blind safe palette
+                cb_palette <- c("#0072B2", "#E69F00", "#009E73", "#F0E442", "#CC79A7", "#56B4E9")
+
+                # Create the plot
+                plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = Label, y = Count, fill = Label)) +
+                    ggplot2::geom_bar(stat = "identity") +
+                    ggplot2::geom_text(ggplot2::aes(label = Count), vjust = -0.5, size = 5) +
+                    ggplot2::labs(
+                        title = "Distribution of Recoded Outcome Values",
+                        x = "Outcome Category",
+                        y = "Count"
+                    ) +
+                    ggtheme +
+                    ggplot2::scale_fill_manual(values = cb_palette) +
+                    ggplot2::theme(
+                        legend.position = "none",
+                        axis.text = ggplot2::element_text(size = 12),
+                        axis.title = ggplot2::element_text(size = 13, face = "bold"),
+                        plot.title = ggplot2::element_text(size = 14, face = "bold")
+                    )
+
+                print(plot)
+                TRUE
+            }, error = function(e) {
+                # Log error but don't crash the analysis
+                warning("Failed to render outcome visualization: ", e$message)
+                FALSE
+            })
+        }
+    )
+)

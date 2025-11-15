@@ -457,6 +457,49 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Retrieve the variable name from the label
                 dependent_variable_name_from_label <- names(all_labels)[all_labels == self$options$outcome]
 
+                # FIX: Relevel outcome variable to match user's selected positive outcome level
+                # This ensures logistic regression models the correct event
+                if (!is.null(self$options$outcomeLevel) && !is.null(dependent_variable_name_from_label)) {
+                    outcome_var <- mydata[[dependent_variable_name_from_label]]
+
+                    # Convert to factor if not already
+                    if (!is.factor(outcome_var)) {
+                        outcome_var <- as.factor(outcome_var)
+                    }
+
+                    # Get the user's selected positive level
+                    positive_level <- self$options$outcomeLevel
+
+                    # Verify the positive level exists in the data
+                    if (positive_level %in% levels(outcome_var)) {
+                        # Relevel so positive outcome is the second level (what glm models as "1")
+                        # Get all levels except the positive one
+                        other_levels <- setdiff(levels(outcome_var), positive_level)
+
+                        # Create new level order: reference levels first, then positive level
+                        new_levels <- c(other_levels, positive_level)
+
+                        # Relevel the outcome
+                        mydata[[dependent_variable_name_from_label]] <- factor(
+                            outcome_var,
+                            levels = new_levels
+                        )
+
+                        # Add info message to inform user
+                        outcome_releveling_message <- paste0(
+                            "Outcome variable releveled: '", positive_level,
+                            "' is now modeled as the positive outcome (event)."
+                        )
+                    } else {
+                        # Warn if selected level doesn't exist
+                        warning_msg <- paste0(
+                            "Warning: Selected positive outcome level '", positive_level,
+                            "' not found in data. Available levels: ",
+                            paste(levels(outcome_var), collapse = ", ")
+                        )
+                    }
+                }
+
                 # Retrieve the variable names vector from the label vector
                 labels <- self$options$explanatory
 
@@ -587,9 +630,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Include statistical warnings and recommendations if present
                     statistical_warnings <- if (!is.null(lr_results$statistical_warnings) && lr_results$statistical_warnings != "") lr_results$statistical_warnings else ""
                     statistical_recommendations <- if (!is.null(lr_results$statistical_recommendations) && lr_results$statistical_recommendations != "") lr_results$statistical_recommendations else ""
-                    
+
+                    # FIX: Include predictor level warning in display
+                    predictor_warning <- if (!is.null(lr_results$predictor_level_warning)) lr_results$predictor_level_warning else ""
+
                     metrics_text <- glue::glue("
                     <br>
+                    {predictor_warning}
+
                     <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>
                         <b>Diagnostic Metrics:</b><br>
                         Sensitivity: {format(lr_results$sensitivity * 100, digits=2)}%<br>
@@ -597,7 +645,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         Positive LR: {format(lr_results$positive_lr, digits=2)}<br>
                         Negative LR: {format(lr_results$negative_lr, digits=2)}<br>
                     </div>
-                    
+
                     {statistical_warnings}
                     {statistical_recommendations}
                     
@@ -744,10 +792,24 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             outcome_determination_method <- "User-specified"
             
             # Determine positive predictor level using configurable detection
+            # FIX: Add warning that this is automatically detected and may be wrong
             detection_result <- private$.detectPositiveLevels(predictor_levels)
             positive_predictor_level <- detection_result$level
             predictor_determination_method <- detection_result$method
             positive_predictor_idx <- which(predictor_levels == positive_predictor_level)
+
+            # Create warning message for automatic predictor level detection
+            predictor_level_warning <- paste0(
+                "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px;'>",
+                "<h4 style='margin-top: 0; color: #856404;'>⚠️ Automatic Predictor Level Detection</h4>",
+                "<p><strong>The positive predictor level was automatically detected as: '", positive_predictor_level, "'</strong></p>",
+                "<p>Method: ", predictor_determination_method, "</p>",
+                "<p style='color: #856404;'><strong>Important:</strong> This automatic detection may be incorrect. ",
+                "Please verify that '", positive_predictor_level, "' is the correct positive level for your predictor.</p>",
+                "<p>If this is wrong, your diagnostic metrics (sensitivity, specificity, likelihood ratios) will be inverted!</p>",
+                "<p><strong>Available predictor levels:</strong> ", paste(predictor_levels, collapse = ", "), "</p>",
+                "</div>"
+            )
             
             # Calculate 2x2 table components
             tp <- cont_table[positive_predictor_idx, positive_outcome_idx]
@@ -818,19 +880,21 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "Positive outcome level: '", positive_outcome_level, "' (", outcome_determination_method, ")\n",
                 "Positive predictor level: '", positive_predictor_level, "' (", predictor_determination_method, ")\n",
                 "Contingency table:\n",
-                "  ", predictor_levels[1], " → ", outcome_levels[1], ": ", cont_table[1,1], 
+                "  ", predictor_levels[1], " → ", outcome_levels[1], ": ", cont_table[1,1],
                 " | ", outcome_levels[2], ": ", cont_table[1,2], "\n",
-                "  ", predictor_levels[2], " → ", outcome_levels[1], ": ", cont_table[2,1], 
+                "  ", predictor_levels[2], " → ", outcome_levels[1], ": ", cont_table[2,1],
                 " | ", outcome_levels[2], ": ", cont_table[2,2], "\n",
                 "True Positives: ", tp, ", False Positives: ", fp, ", False Negatives: ", fn, ", True Negatives: ", tn
             )
-            
+
+            # FIX: Include predictor level warning in the return
             return(list(
                 positive_lr = positive_lr,
                 negative_lr = negative_lr,
                 sensitivity = sensitivity,
                 specificity = specificity,
                 diagnostic_info = diagnostic_info,
+                predictor_level_warning = predictor_level_warning,  # Add warning to return value
                 positive_outcome_used = positive_outcome_level,
                 positive_predictor_used = positive_predictor_level,
                 outcome_determination_method = outcome_determination_method,

@@ -1,7 +1,7 @@
 ---
 name: roc2d
 title: Two-Dimensional ROC Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: ROC Analysis
 menuSubtitle: Joint ROC for dual biomarker combinations
 version: '0.0.32'

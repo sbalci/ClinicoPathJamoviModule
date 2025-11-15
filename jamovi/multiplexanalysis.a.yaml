@@ -1,7 +1,7 @@
 ---
 name: multiplexanalysis
 title: Multiplex Immunofluorescence Analysis
-menuGroup: OncoPathT2
+menuGroup: OncoPathD
 menuSubgroup: IHC Analysis
 version: '1.0.0'
 jas: '1.2'

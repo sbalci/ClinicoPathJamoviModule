@@ -148,6 +148,50 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Private fields for storing analysis results
             residuals_data = NULL,
 
+            # Competing Risk Helper Functions ----
+            .isCompetingRisk = function() {
+                # Check if competing risk analysis is active
+                return(self$options$multievent && self$options$analysistype == "compete")
+            },
+
+            .competingRiskCumInc = function(mydata, mytime, myoutcome) {
+                # Proper competing risk analysis using cmprsk::cuminc()
+                # Returns cumulative incidence estimates for the event of interest
+
+                # Ensure time is numeric
+                mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+
+                # For competing risk: outcome is 0=censored, 1=event of interest, 2=competing event
+                tryCatch({
+                    # Run cumulative incidence analysis
+                    cuminc_fit <- cmprsk::cuminc(
+                        ftime = mydata[[mytime]],
+                        fstatus = mydata[[myoutcome]],
+                        cencode = 0  # 0 is censored
+                    )
+
+                    return(cuminc_fit)
+
+                }, error = function(e) {
+                    stop(glue::glue(
+                        "Competing risk analysis failed: {e$message}\n",
+                        "Please ensure your data has events coded as: 0=censored, 1=event of interest, 2=competing event"
+                    ))
+                })
+            },
+
+            .getDefaultCutpoints = function() {
+                # Return time-unit aware default cutpoints (like singlearm)
+                time_unit <- self$options$timetypeoutput
+                switch(time_unit,
+                    "days" = c(365, 1095, 1825),      # 1, 3, 5 years in days
+                    "weeks" = c(52, 156, 260),        # 1, 3, 5 years in weeks
+                    "months" = c(12, 36, 60),         # 1, 3, 5 years in months
+                    "years" = c(1, 3, 5),             # 1, 3, 5 years
+                    c(12, 36, 60)  # default to months if unknown
+                )
+            },
+
             # Helper function to escape variable names with special characters for formulas
             .escapeVariableNames = function(var_names) {
                 # Check if variable names contain special characters that need escaping
@@ -1803,8 +1847,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Get total observed time
                 total_time <- sum(mydata[[mytime]])
 
-                # Get total events
-                total_events <- sum(mydata[[myoutcome]])
+                # FIX: Count events properly - any non-zero value is an event (handles competing risk with code 2)
+                total_events <- sum(mydata[[myoutcome]] >= 1, na.rm = TRUE)
 
                 # Get time unit
                 time_unit <- self$options$timetypeoutput
@@ -1852,8 +1896,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             interval_data <- mydata
                             # But truncate follow-up time to the interval end
                             follow_up_times <- pmin(mydata[[mytime]], end_time)
-                            # Count only events that occurred within this interval
-                            events_in_interval <- sum(mydata[[myoutcome]] == 1 & mydata[[mytime]] <= end_time)
+                            # FIX: Count events consistently with overall count
+                            # For competing risk, this counts all events (both event of interest and competing)
+                            # Consider using == 1 if you want event-of-interest-specific rates
+                            events_in_interval <- sum(mydata[[myoutcome]] >= 1 & mydata[[mytime]] <= end_time, na.rm = TRUE)
                         } else {
                             # For later intervals, include only patients who survived past the previous cutpoint
                             survivors <- mydata[[mytime]] > start_time
@@ -1869,10 +1915,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             adjusted_exit_time <- pmin(interval_data[[mytime]], end_time)
                             follow_up_times <- adjusted_exit_time - adjusted_entry_time
 
-                            # Count only events that occurred within this interval
-                            events_in_interval <- sum(interval_data[[myoutcome]] == 1 &
+                            # FIX: Count events consistently with overall count
+                            events_in_interval <- sum(interval_data[[myoutcome]] >= 1 &
                                                           interval_data[[mytime]] <= end_time &
-                                                          interval_data[[mytime]] > start_time)
+                                                          interval_data[[mytime]] > start_time, na.rm = TRUE)
                         }
 
                         # Sum person-time in this interval
@@ -2974,10 +3020,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             time_diffs <- diff(times)
                             surv_avg <- (surv_probs[-length(surv_probs)] + surv_probs[-1]) / 2
                             rmst <- sum(time_diffs * surv_avg)
-                            
-                            # Estimate standard error (simplified approach)
+
+                            # FIX WARNING: Simplified standard error approach
+                            # This is an approximate variance estimate, not the Greenwood-based
+                            # variance used in survRM2::rmst2(). For rigorous RMST inference,
+                            # consider using the survRM2 package directly.
+                            # The fallback of 10% of RMST is arbitrary.
                             se_rmst <- sqrt(sum(km_fit$std.err^2, na.rm = TRUE)) * tau / max(km_fit$time, na.rm = TRUE)
-                            se_rmst <- ifelse(is.na(se_rmst) || se_rmst == 0, rmst * 0.1, se_rmst)
+                            se_rmst <- ifelse(is.na(se_rmst) || se_rmst == 0, rmst * 0.1, se_rmst)  # 10% fallback is ad-hoc
                             
                             # Calculate confidence intervals
                             ci_lower <- max(0, rmst - 1.96 * se_rmst)

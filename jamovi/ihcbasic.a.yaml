@@ -1,7 +1,7 @@
 ---
 name: ihcbasic
 title: Basic IHC Analysis
-menuGroup: OncoPathT2
+menuGroup: OncoPathD
 menuSubgroup: IHC Analysis
 menuTitle: Basic Analysis
 version: '1.0.0'

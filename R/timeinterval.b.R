@@ -107,24 +107,65 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(TRUE)
         },
         
-        .detectDateFormat = function(date_vector, specified_format = NULL) {
-            # Automatic date format detection if not specified
+        .detectDateFormat = function(start_vector, end_vector = NULL, specified_format = NULL) {
+            # FIX: Enhanced date format detection that validates BOTH columns
+            # @param start_vector Start date column for format detection
+            # @param end_vector End date column for format validation (optional)
+            # @param specified_format User-specified format or "auto"
+
+            # If format explicitly specified, validate it works for both columns
             if (!is.null(specified_format) && specified_format != "auto") {
+                # Validate specified format works for both columns
+                if (!is.null(end_vector)) {
+                    start_sample <- start_vector[!is.na(start_vector)]
+                    end_sample <- end_vector[!is.na(end_vector)]
+
+                    if (length(start_sample) > 0 && length(end_sample) > 0) {
+                        # Test the specified format on both columns
+                        parser <- switch(specified_format,
+                            "ymdhms" = lubridate::ymd_hms,
+                            "ymd" = lubridate::ymd,
+                            "ydm" = lubridate::ydm,
+                            "mdy" = lubridate::mdy,
+                            "myd" = lubridate::myd,
+                            "dmy" = lubridate::dmy,
+                            "dym" = lubridate::dym,
+                            stop(paste("Unsupported date format:", specified_format))
+                        )
+
+                        start_parsed <- parser(head(start_sample, 10), quiet = TRUE)
+                        end_parsed <- parser(head(end_sample, 10), quiet = TRUE)
+
+                        start_success_rate <- sum(!is.na(start_parsed)) / length(start_parsed)
+                        end_success_rate <- sum(!is.na(end_parsed)) / length(end_parsed)
+
+                        if (start_success_rate < 0.8 || end_success_rate < 0.8) {
+                            stop(paste0(
+                                "Specified date format '", specified_format, "' does not work for both columns.\n",
+                                "Start column parse rate: ", round(start_success_rate * 100, 1), "%\n",
+                                "End column parse rate: ", round(end_success_rate * 100, 1), "%\n",
+                                "Please verify your date format setting matches your data."
+                            ))
+                        }
+                    }
+                }
                 return(specified_format)
             }
-            
+
+            # Auto-detect format using start column
             # Remove missing values for format detection
-            sample_dates <- date_vector[!is.na(date_vector)]
+            sample_dates <- start_vector[!is.na(start_vector)]
             if (length(sample_dates) == 0) {
-                stop("No valid dates found for format detection")
+                stop("No valid dates found in start column for format detection")
             }
-            
+
             # Take a sample for format detection
             sample_dates <- head(sample_dates, min(10, length(sample_dates)))
-            
+
             # Test common formats
             formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
-            
+
+            detected_format <- NULL
             for (fmt in formats_to_try) {
                 parser <- switch(fmt,
                     "ymdhms" = lubridate::ymd_hms,
@@ -135,21 +176,62 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dmy" = lubridate::dmy,
                     "dym" = lubridate::dym
                 )
-                
+
                 tryCatch({
                     parsed_dates <- parser(sample_dates, quiet = TRUE)
-                    # If most dates parse successfully, use this format
+                    # If most dates parse successfully, consider this format
                     if (sum(!is.na(parsed_dates)) / length(sample_dates) > 0.8) {
-                        return(fmt)
+                        # FIX: CRITICAL - Validate this format also works for END column
+                        if (!is.null(end_vector)) {
+                            end_sample <- end_vector[!is.na(end_vector)]
+                            if (length(end_sample) > 0) {
+                                end_parsed <- parser(head(end_sample, 10), quiet = TRUE)
+                                end_success_rate <- sum(!is.na(end_parsed)) / length(end_parsed)
+
+                                # Only accept format if it works for BOTH columns
+                                if (end_success_rate > 0.8) {
+                                    detected_format <- fmt
+                                    break  # Found a format that works for both!
+                                } else {
+                                    # Format works for start but NOT end - CRITICAL ERROR
+                                    warning(paste0(
+                                        "Format '", fmt, "' works for start column (",
+                                        round(sum(!is.na(parsed_dates)) / length(sample_dates) * 100, 1),
+                                        "% success) but NOT for end column (",
+                                        round(end_success_rate * 100, 1), "% success). ",
+                                        "Trying other formats..."
+                                    ))
+                                }
+                            } else {
+                                detected_format <- fmt
+                                break
+                            }
+                        } else {
+                            detected_format <- fmt
+                            break
+                        }
                     }
                 }, error = function(e) {
                     # Continue to next format
                 })
             }
-            
-            # If no format works well, default to ymd
-            warning("Could not reliably detect date format. Using YMD format. Please specify format manually if incorrect.")
-            return("ymd")
+
+            if (is.null(detected_format)) {
+                # No format worked for both columns
+                stop(paste0(
+                    "Could not find a date format that works for BOTH start and end columns.\n",
+                    "This suggests:\n",
+                    "  - Start and end columns use different date formats (CRITICAL ERROR)\n",
+                    "  - Dates are stored inconsistently within columns\n",
+                    "  - Date format is not standard (ymd, dmy, mdy, etc.)\n\n",
+                    "Action required:\n",
+                    "  1. Review both date columns for format consistency\n",
+                    "  2. Ensure all dates in a column use the same format\n",
+                    "  3. Manually specify the correct format if auto-detection fails"
+                ))
+            }
+
+            return(detected_format)
         },
         
         .parseDate = function(date_vector, format, tz = "") {
@@ -299,8 +381,12 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Comprehensive input validation
             private$.validateInputData(data, dx_date, fu_date)
 
-            # Detect date format if needed
-            detected_format <- private$.detectDateFormat(data[[dx_date]], time_format)
+            # FIX: Detect date format validating BOTH columns
+            detected_format <- private$.detectDateFormat(
+                data[[dx_date]],
+                data[[fu_date]],  # Pass BOTH columns for validation
+                time_format
+            )
 
             # Convert timezone setting to lubridate format
             tz <- if (timezone_setting == "utc") "UTC" else ""
@@ -323,12 +409,58 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Calculate time intervals
             calculated_time <- private$.calculateTimeIntervals(start_dates, end_dates, output_unit)
 
+            # FIX: CRITICAL - Validate for negative intervals BEFORE proceeding
+            # Negative intervals (end before start) indicate data errors and corrupt person-time calculations
+            n_negative <- sum(calculated_time < 0, na.rm = TRUE)
+            if (n_negative > 0) {
+                # Find examples of negative intervals for error message
+                neg_idx <- which(calculated_time < 0)
+                n_examples <- min(3, length(neg_idx))
+                example_rows <- head(neg_idx, n_examples)
+
+                # Build detailed error message
+                error_msg <- paste0(
+                    "CRITICAL: ", n_negative, " negative time interval(s) detected (end date before start date).\n\n",
+                    "This indicates data entry errors that would corrupt person-time calculations and survival analysis.\n\n",
+                    "Example(s):\n"
+                )
+
+                for (i in 1:n_examples) {
+                    row_idx <- example_rows[i]
+                    error_msg <- paste0(
+                        error_msg,
+                        "  Row ", row_idx, ": ",
+                        "Start = ", start_dates[row_idx], ", ",
+                        "End = ", end_dates[row_idx], ", ",
+                        "Interval = ", round(calculated_time[row_idx], 2), " ", output_unit, "\n"
+                    )
+                }
+
+                error_msg <- paste0(
+                    error_msg,
+                    "\nPossible causes:\n",
+                    "  - Start and end date columns were swapped\n",
+                    "  - Dates entered in wrong format (e.g., month/day confusion)\n",
+                    "  - Typos in year, month, or day values\n",
+                    "  - Mixed date formats in the same column\n\n",
+                    "Action required:\n",
+                    "  1. Review your date columns for errors\n",
+                    "  2. Ensure start dates occur before or on the same day as end dates\n",
+                    "  3. Check date format consistency\n\n",
+                    "Only after fixing the data errors, you may optionally enable 'Remove Negative Intervals' to filter them."
+                )
+
+                stop(error_msg)
+            }
+
             # Apply data quality filters if requested (combined for performance)
             original_data <- data
             valid_idx <- rep(TRUE, length(calculated_time))
             filter_applied <- FALSE
 
             if (self$options$remove_negative) {
+                # User explicitly requested to remove any remaining negatives (defensive programming)
+                # Note: Should not reach here due to validation above, but kept for safety
                 valid_idx <- valid_idx & (calculated_time >= 0 | is.na(calculated_time))
                 filter_applied <- TRUE
             }

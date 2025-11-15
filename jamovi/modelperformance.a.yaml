@@ -1,7 +1,7 @@
 ---
 name:  modelperformance
 title: Multi-Model Performance Comparison
-menuGroup: OncoPathT2
+menuGroup: OncoPathD
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: 'Compare Multiple Models Side-by-Side'
 version: '0.0.31'

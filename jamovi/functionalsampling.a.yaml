@@ -1,7 +1,7 @@
 ---
 name: functionalsampling
 title: Functional Sampling - Rare Event Analysis
-menuGroup: OncoPathT2
+menuGroup: OncoPathD
 menuSubgroup: Spatial Analysis
 menuTitle: Functional Sampling
 menuSubtitle: Identify rare cells with catalyst function (Kayser 2009)

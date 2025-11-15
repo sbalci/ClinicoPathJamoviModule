@@ -98,7 +98,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Enhanced input validation for outcome organization
         # Returns validation results with errors, warnings, and informational messages
-        .validateInputs = function(mydata, outcome_var, recurrence_var = NULL, id_var = NULL, analysistype = "os") {
+        .validateInputs = function(mydata, outcome_var, recurrence_var = NULL, id_var = NULL, analysistype = "os", multievent = FALSE) {
             validation_results <- list(
                 errors = character(0),
                 warnings = character(0),
@@ -257,16 +257,55 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 contin <- c("integer", "numeric", "double")
 
                 if (inherits(outcome1, contin)) {
-                    # Check if it's binary (0 and 1)
-                    unique_vals <- unique(outcome1[!is.na(outcome1)])
-                    if (!((length(unique_vals) == 2) && (sum(unique_vals) == 1))) {
-                        warning_msg <- 'Continuous outcome variable does not contain only 0s and 1s. This may lead to incorrect analysis.'
-                        warning(warning_msg)
-                        diagnostics$binary_check <- warning_msg
+                    # FIX: Properly validate and recode binary outcomes
+                    # Check unique values
+                    unique_vals <- sort(unique(outcome1[!is.na(outcome1)]))
+
+                    # Validate that we have exactly 2 values for binary analysis
+                    if (length(unique_vals) < 2) {
+                        stop('Outcome variable must have at least 2 different values. Found: ',
+                             paste(unique_vals, collapse = ", "))
+                    } else if (length(unique_vals) > 2) {
+                        stop('Binary outcome variable must have exactly 2 unique values for non-multievent analysis. Found ',
+                             length(unique_vals), ' values: ', paste(unique_vals, collapse = ", "),
+                             '. Enable "Multiple Event Types" if you have more than 2 outcome categories.')
                     }
 
-                    # Simply copy the outcome as it's already coded
-                    mydata[["myoutcome"]] <- mydata[[outcome_var]]
+                    # Check if already properly coded as 0/1
+                    if ((length(unique_vals) == 2) && all(unique_vals == c(0, 1))) {
+                        # Perfect - already 0/1 coded
+                        mydata[["myoutcome"]] <- mydata[[outcome_var]]
+                        diagnostics$binary_check <- "Outcome already properly coded as 0/1"
+                    } else {
+                        # NOT 0/1 - need to recode based on outcomeLevel
+                        # This prevents the critical bug where 1=alive, 2=dead gets passed through as-is
+                        if (is.null(outcomeLevel)) {
+                            stop('Outcome variable is not coded as 0/1 (found values: ',
+                                 paste(unique_vals, collapse = ", "),
+                                 '). Please select which value represents the event using the "Outcome Level" option.')
+                        }
+
+                        # Verify outcomeLevel exists in data
+                        if (!outcomeLevel %in% unique_vals) {
+                            stop('Selected outcome level "', outcomeLevel,
+                                 '" not found in data. Available values: ',
+                                 paste(unique_vals, collapse = ", "))
+                        }
+
+                        # Recode: outcomeLevel becomes 1, other value becomes 0
+                        mydata[["myoutcome"]] <- ifelse(
+                            test = outcome1 == outcomeLevel,
+                            yes = 1,
+                            no = 0
+                        )
+
+                        # Add diagnostic information about the recoding
+                        other_val <- setdiff(unique_vals, outcomeLevel)
+                        diagnostics$binary_check <- sprintf(
+                            "Outcome recoded: '%s' (event) → 1, '%s' (non-event) → 0. Original coding was NOT 0/1.",
+                            outcomeLevel, other_val
+                        )
+                    }
 
                 } else if (inherits(outcome1, c("factor", "character"))) {
                     # Convert to 1s and 0s based on the event level
@@ -333,6 +372,39 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 awd <- self$options$awd
                 awod <- self$options$awod
 
+                # FIX: Validate that all required level selections are provided
+                # This prevents the critical bug where NULL comparisons create all-NA outcomes
+                missing_levels <- character(0)
+                if (is.null(dod)) missing_levels <- c(missing_levels, "Dead of Disease (dod)")
+                if (is.null(dooc)) missing_levels <- c(missing_levels, "Dead of Other Causes (dooc)")
+                if (is.null(awd)) missing_levels <- c(missing_levels, "Alive with Disease (awd)")
+                if (is.null(awod)) missing_levels <- c(missing_levels, "Alive without Disease (awod)")
+
+                if (length(missing_levels) > 0) {
+                    stop('Multiple Event Types analysis requires all outcome level selections. Missing: ',
+                         paste(missing_levels, collapse = ", "),
+                         '. Please select all four outcome levels from the "Dead of Disease", "Dead of Other Causes", ',
+                         '"Alive with Disease", and "Alive without Disease" dropdowns.')
+                }
+
+                # Validate that selected levels actually exist in the data
+                outcome_levels_in_data <- unique(outcome1[!is.na(outcome1)])
+                selected_levels <- c(dod, dooc, awd, awod)
+                missing_in_data <- selected_levels[!selected_levels %in% outcome_levels_in_data]
+
+                if (length(missing_in_data) > 0) {
+                    stop('Selected outcome levels not found in data: ',
+                         paste(missing_in_data, collapse = ", "),
+                         '. Available values in outcome variable: ',
+                         paste(outcome_levels_in_data, collapse = ", "))
+                }
+
+                # Check for duplicate selections (same level selected for multiple categories)
+                if (length(unique(selected_levels)) != 4) {
+                    stop('Each outcome level must be unique. You have selected the same level for multiple categories. ',
+                         'Selected levels: dod="', dod, '", dooc="', dooc, '", awd="', awd, '", awod="', awod, '"')
+                }
+
                 # Initialize all as NA
                 mydata[["myoutcome"]] <- NA_integer_
 
@@ -371,6 +443,26 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mydata[["myoutcome"]][outcome1 == dooc] <- 3  # Death from other causes
 
                     diagnostics$multistate_coding <- "Multistate: Healthy (0), Disease (1), Death-disease (2), Death-other (3)"
+                }
+
+                # FIX: Verify that recoding actually worked (not all NAs)
+                # This catches cases where selected levels don't match any data values
+                n_recoded <- sum(!is.na(mydata[["myoutcome"]]))
+                if (n_recoded == 0) {
+                    stop('Outcome recoding failed: all values are NA. This usually means the selected outcome levels ',
+                         '("', dod, '", "', dooc, '", "', awd, '", "', awod, '") do not match the actual values in your data. ',
+                         'Available values in outcome variable: ',
+                         paste(unique(outcome1[!is.na(outcome1)]), collapse = ", "),
+                         '. Please verify your level selections are correct.')
+                } else if (n_recoded < length(outcome1) * 0.5) {
+                    # Warn if more than 50% are NA (likely wrong level selection)
+                    warning('More than 50% of outcomes are NA after recoding (',
+                            round((1 - n_recoded/length(outcome1)) * 100, 1),
+                            '%). This suggests your selected levels may not fully match your data. ',
+                            'Check that all four level selections are correct.')
+                    diagnostics$recoding_warning <- sprintf("Only %d/%d (%.1f%%) outcomes successfully recoded",
+                                                             n_recoded, length(outcome1),
+                                                             n_recoded/length(outcome1) * 100)
                 }
 
                 # Apply event hierarchy if specified
@@ -581,7 +673,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             id_var <- labelled_data$id_var
             
             validation_results <- private$.validateInputs(
-                mydata, outcome_var, recurrence_var, id_var, self$options$analysistype
+                mydata, outcome_var, recurrence_var, id_var, self$options$analysistype, self$options$multievent
             )
             
             # Handle validation errors - stop execution if critical errors found

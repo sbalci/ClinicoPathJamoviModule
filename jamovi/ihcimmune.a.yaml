@@ -1,7 +1,7 @@
 ---
 name: ihcimmune
 title: IHC Immune Analysis
-menuGroup: OncoPathT2
+menuGroup: OncoPathD
 menuSubgroup: IHC Analysis
 menuTitle: TIL & Immune Analysis
 version: '1.0.0'

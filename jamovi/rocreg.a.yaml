@@ -1,7 +1,7 @@
 ---
 name: rocreg
 title: ROC Regression (Covariate-Adjusted ROC)
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: ROC Analysis
 menuSubtitle: Covariate-adjusted ROC curves for confounder control
 version: '0.0.32'

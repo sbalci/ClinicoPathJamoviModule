@@ -156,19 +156,57 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .createTimeDependentDataset = function(id, time, event, timedep_time, timedep_status, exposed_level) {
             # Create time-dependent dataset in counting process format
-            
+
+            # LIMITATION WARNING: Current implementation handles AT MOST ONE exposure change per patient
+            # If your data has patients with multiple exposure changes (e.g., Unexposed → Exposed → Unexposed),
+            # only the FIRST change will be captured. This is a known architectural limitation.
+            # For proper handling of multiple changes, consider using survival::tmerge() directly.
+
             # Initialize result
             result_list <- list()
-            
+
+            # Validation: Check for potential multiple exposure changes
+            # (This is a heuristic check - can't be perfect without full longitudinal data)
+            if (length(unique(timedep_time[timedep_time > 0 & !is.na(timedep_time)])) > 1) {
+                # Multiple different change times detected
+                warning(
+                    "\n╔══════════════════════════════════════════════════════════════════╗\n",
+                    "║ IMPORTANT LIMITATION: Multiple Exposure Change Times Detected   ║\n",
+                    "╠══════════════════════════════════════════════════════════════════╣\n",
+                    "║                                                                  ║\n",
+                    "║ Your data contains patients with different exposure change      ║\n",
+                    "║ times. The current implementation assumes AT MOST ONE exposure   ║\n",
+                    "║ change per patient (scalar change time).                        ║\n",
+                    "║                                                                  ║\n",
+                    "║ If individual patients have MULTIPLE exposure changes           ║\n",
+                    "║ (e.g., start treatment → stop treatment → restart), only the    ║\n",
+                    "║ FIRST change will be captured, and subsequent changes will be   ║\n",
+                    "║ IGNORED. This will produce INCORRECT results.                   ║\n",
+                    "║                                                                  ║\n",
+                    "║ RECOMMENDATION:                                                  ║\n",
+                    "║ • If patients have single exposure changes at different times:  ║\n",
+                    "║   → Proceed (this is expected and properly handled)             ║\n",
+                    "║                                                                  ║\n",
+                    "║ • If individual patients have multiple exposure changes:        ║\n",
+                    "║   → DO NOT USE THIS FUNCTION                                     ║\n",
+                    "║   → Use survival::tmerge() to create counting-process data      ║\n",
+                    "║   → Manually fit time-dependent Cox models                      ║\n",
+                    "║                                                                  ║\n",
+                    "╚══════════════════════════════════════════════════════════════════╝\n",
+                    call. = FALSE
+                )
+            }
+
             for (i in seq_along(id)) {
                 person_id <- id[i]
                 person_time <- time[i]
                 person_event <- event[i]
                 person_timedep_time <- timedep_time[i]
                 person_timedep_status <- timedep_status[i]
-                
+
                 if (is.na(person_time) || is.na(person_event)) next
-                
+
+                # CURRENT IMPLEMENTATION: Handles only ONE exposure change per patient
                 # Create time intervals for this person
                 if (is.na(person_timedep_time) || person_timedep_time <= 0) {
                     # No time-dependent change or change at baseline
@@ -189,7 +227,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         exposed = 0  # Unexposed throughout
                     )
                 } else {
-                    # Change occurs during follow-up - create two intervals
+                    # Change occurs during follow-up - create TWO intervals (MAXIMUM)
                     # Before exposure
                     result_list[[length(result_list) + 1]] <- data.frame(
                         id = person_id,
@@ -198,7 +236,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         event = 0,  # No event in this interval
                         exposed = 0
                     )
-                    # After exposure
+                    # After exposure (LIMITATION: assumes exposure remains constant after change)
                     result_list[[length(result_list) + 1]] <- data.frame(
                         id = person_id,
                         tstart = person_timedep_time,
@@ -208,22 +246,22 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     )
                 }
             }
-            
+
             # Combine all intervals
             if (length(result_list) == 0) return(NULL)
-            
+
             result <- do.call(rbind, result_list)
             result$exposed <- factor(result$exposed, levels = c(0, 1), labels = c("Unexposed", "Exposed"))
-            
+
             return(result)
         },
         
         .populateWelcomeMessage = function() {
-            
+
             html_content <- "
             <h2>Simon-Makuch Time-Dependent Survival Analysis</h2>
             <p>This analysis performs survival analysis with time-dependent variables using the Simon-Makuch method.</p>
-            
+
             <h3>Required Variables:</h3>
             <ul>
                 <li><strong>Survival Time:</strong> Time to event or censoring</li>
@@ -232,7 +270,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Time of Change:</strong> When the time-dependent variable changes status</li>
                 <li><strong>Time-Dependent Status:</strong> The status of the variable at each time point</li>
             </ul>
-            
+
             <h3>Key Features:</h3>
             <ul>
                 <li>Simon-Makuch plots (modified Kaplan-Meier curves)</li>
@@ -241,10 +279,26 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li>Immortal time bias assessment</li>
                 <li>Proper handling of exposure timing</li>
             </ul>
-            
+
+            <div class='alert alert-warning' style='background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin: 10px 0;'>
+                <h4 style='margin-top: 0; color: #856404;'>⚠️ Current Implementation Limitations</h4>
+                <p style='margin-bottom: 5px;'><strong>Single Exposure Change Only:</strong></p>
+                <ul style='margin-bottom: 5px;'>
+                    <li>This implementation handles <strong>at most ONE exposure change per patient</strong></li>
+                    <li>Suitable for: Patients who start treatment once, biomarker conversion, single disease progression event</li>
+                    <li><strong>NOT suitable for:</strong> Multiple treatment starts/stops, repeated biomarker changes, multiple exposure transitions</li>
+                </ul>
+                <p style='margin-bottom: 5px;'><strong>If your data has patients with multiple exposure changes:</strong></p>
+                <ul style='margin-bottom: 0;'>
+                    <li>Use <code>survival::tmerge()</code> in R to create proper counting-process data</li>
+                    <li>Manually fit time-dependent Cox models using <code>coxph()</code></li>
+                    <li>Consider consulting with a biostatistician for complex exposure patterns</li>
+                </ul>
+            </div>
+
             <p><em>Configure your analysis options in the panels to the left.</em></p>
             "
-            
+
             self$results$welcomeMessage$setContent(html_content)
         },
         
@@ -851,10 +905,10 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .assessImmortalTimeBias = function(survData) {
             # Compare naive vs. proper time-dependent analysis
-            
+
             tryCatch({
                 table <- self$results$immortalTimeBias
-                
+
                 # Proper Simon-Makuch analysis (already done)
                 if (!is.null(private$.cox_model)) {
                     proper_summary <- summary(private$.cox_model)
@@ -868,22 +922,71 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     proper_ci_upper <- NA
                     proper_p <- NA
                 }
-                
-                # Naive analysis (treat as baseline exposure)
-                # This would require creating a naive dataset - simplified for now
-                naive_hr <- NA
-                naive_ci_lower <- NA
-                naive_ci_upper <- NA
-                naive_p <- NA
-                
-                # Determine bias direction
-                bias_direction <- if (!is.na(proper_hr) && !is.na(naive_hr)) {
-                    if (naive_hr > proper_hr) "Naive analysis overestimates benefit"
-                    else "Naive analysis underestimates benefit"
+
+                # FIX: CRITICAL - Implement actual naive analysis
+                # Naive analysis treats exposure as baseline characteristic (ignoring timing)
+                # This creates immortal time bias by attributing all time based on eventual exposure
+
+                # Create naive dataset: one row per person with final exposure status
+                naive_data <- survData %>%
+                    dplyr::group_by(id) %>%
+                    dplyr::summarise(
+                        time = max(tstop),  # Total follow-up time
+                        event = max(event),  # Event status (1 if any interval has event)
+                        # Exposure status: use final status (creates immortal time bias!)
+                        exposed_final = dplyr::last(exposed),
+                        .groups = "drop"
+                    )
+
+                # Fit naive Cox model (treats exposure as fixed at baseline)
+                naive_formula <- survival::Surv(time, event) ~ exposed_final
+                naive_cox <- survival::coxph(naive_formula, data = naive_data)
+                naive_summary <- summary(naive_cox)
+
+                # Extract naive results
+                if ("exposed_finalExposed" %in% rownames(naive_summary$coefficients)) {
+                    naive_hr <- naive_summary$coefficients["exposed_finalExposed", "exp(coef)"]
+                    naive_ci_lower <- naive_summary$conf.int["exposed_finalExposed", "lower .95"]
+                    naive_ci_upper <- naive_summary$conf.int["exposed_finalExposed", "upper .95"]
+                    naive_p <- naive_summary$coefficients["exposed_finalExposed", "Pr(>|z|)"]
                 } else {
-                    "Cannot determine"
+                    # No variation in exposure or model failed
+                    naive_hr <- NA
+                    naive_ci_lower <- NA
+                    naive_ci_upper <- NA
+                    naive_p <- NA
                 }
-                
+
+                # Determine bias direction and magnitude
+                bias_direction <- if (!is.na(proper_hr) && !is.na(naive_hr)) {
+                    bias_ratio <- naive_hr / proper_hr
+                    bias_pct <- abs((naive_hr - proper_hr) / proper_hr * 100)
+
+                    if (proper_hr < 1) {
+                        # Exposure is protective in proper analysis
+                        if (naive_hr < proper_hr) {
+                            sprintf("Naive OVERESTIMATES benefit by %.1f%% (bias ratio: %.2f)", bias_pct, bias_ratio)
+                        } else if (naive_hr > proper_hr) {
+                            sprintf("Naive UNDERESTIMATES benefit by %.1f%% (bias ratio: %.2f)", bias_pct, bias_ratio)
+                        } else {
+                            "No substantial bias detected"
+                        }
+                    } else if (proper_hr > 1) {
+                        # Exposure is harmful in proper analysis
+                        if (naive_hr > proper_hr) {
+                            sprintf("Naive OVERESTIMATES harm by %.1f%% (bias ratio: %.2f)", bias_pct, bias_ratio)
+                        } else if (naive_hr < proper_hr) {
+                            sprintf("Naive UNDERESTIMATES harm by %.1f%% (bias ratio: %.2f)", bias_pct, bias_ratio)
+                        } else {
+                            "No substantial bias detected"
+                        }
+                    } else {
+                        "Effect close to null in both analyses"
+                    }
+                } else {
+                    "Cannot determine (missing comparison data)"
+                }
+
                 # Add rows
                 table$addRow(rowKey = 1, values = list(
                     Analysis = "Simon-Makuch (Proper)",
@@ -893,7 +996,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     p_value = proper_p,
                     BiasDirection = "Reference (unbiased)"
                 ))
-                
+
                 table$addRow(rowKey = 2, values = list(
                     Analysis = "Naive (Baseline exposure)",
                     HazardRatio = naive_hr,
@@ -902,7 +1005,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     p_value = naive_p,
                     BiasDirection = bias_direction
                 ))
-                
+
             }, error = function(e) {
                 table <- self$results$immortalTimeBias
                 table$addRow(rowKey = 1, values = list(

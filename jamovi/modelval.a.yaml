@@ -1,7 +1,7 @@
 ---
 name:  modelval
 title: Model Validation Dashboard
-menuGroup: meddecideT2
+menuGroup: meddecideD
 menuSubgroup: Prediction Models
 version: '0.0.32'
 jas: '1.2'

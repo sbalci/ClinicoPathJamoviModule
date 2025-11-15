@@ -1,7 +1,7 @@
 ---
 name:  survivalcalibration
 title: Time-Dependent Survival Calibration
-menuGroup: SurvivalT2
+menuGroup: SurvivalD
 menuSubgroup: Model Validation
 version: '1.0.0'
 jas: '1.2'

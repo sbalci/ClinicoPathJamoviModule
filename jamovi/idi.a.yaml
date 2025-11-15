@@ -1,7 +1,7 @@
 ---
 name: idi
 title: Integrated Discrimination Improvement (IDI)
-menuGroup: meddecideT2
+menuGroup: meddecideD
 menuSubgroup: Performance Metrics
 menuSubtitle: Model improvement assessment through discrimination analysis
 version: '0.0.32'

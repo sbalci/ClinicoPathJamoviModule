@@ -1,7 +1,7 @@
 ---
 name: ordinalroc
 title: Ordinal ROC Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: ROC Analysis
 menuSubtitle: ROC curves for ordered categorical outcomes (tumor grading, staging)
 version: '0.0.32'

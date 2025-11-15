@@ -671,6 +671,53 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (exists('.large_objects', envir = private)) {
                     rm(.large_objects, envir = private)
                 }
+            },
+
+            # FIX: Helper functions for competing risk analysis ----
+            # These functions provide proper cumulative incidence function (CIF)
+            # support for competing risk scenarios (analysistype = "compete")
+
+            .isCompetingRisk = function() {
+                # Check if current analysis is competing risk mode
+                return(self$options$multievent && self$options$analysistype == "compete")
+            },
+
+            .competingRiskCumInc = function(mydata, mytime, myoutcome) {
+                # Calculate cumulative incidence function for competing risks
+                # Uses cmprsk package for proper handling of competing events
+                #
+                # Args:
+                #   mydata: cleaned data frame
+                #   mytime: time variable name
+                #   myoutcome: outcome variable name (0=censored, 1=event, 2=competing)
+                # Returns:
+                #   cuminc object from cmprsk package
+
+                mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+
+                cuminc_fit <- cmprsk::cuminc(
+                    ftime = mydata[[mytime]],
+                    fstatus = mydata[[myoutcome]],
+                    cencode = 0
+                )
+                return(cuminc_fit)
+            },
+
+            .getDefaultCutpoints = function() {
+                # Get default time cutpoints based on selected time unit
+                # This ensures cutpoints are appropriate for the time scale
+                #
+                # Returns:
+                #   Numeric vector of default cutpoints (1, 3, 5 year equivalents)
+
+                time_unit <- self$options$timetypeoutput
+                switch(time_unit,
+                    "days" = c(365, 1095, 1825),
+                    "weeks" = c(52, 156, 260),
+                    "months" = c(12, 36, 60),
+                    "years" = c(1, 3, 5),
+                    c(12, 36, 60)  # default to months
+                )
             }
 
             # Define Survival Time ----
@@ -1353,21 +1400,112 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Median Survival Table ----
 
-                formula <-
-                    paste('survival::Surv(',
-                          mytime,
-                          ',',
-                          myoutcome,
-                          ') ~ ',
-                          myfactor)
+                # FIX: Branch logic for competing risk vs standard survival
+                if (private$.isCompetingRisk()) {
+                    # COMPETING RISK MODE: Use cumulative incidence function
+                    # This provides proper handling of competing events
 
-                formula <- as.formula(formula)
+                    cuminc_fit <- private$.competingRiskCumInc(mydata, mytime, myoutcome)
 
-                private$.checkpoint()
+                    # Process cumulative incidence by group if factor exists
+                    if (!is.null(myfactor) && myfactor %in% names(mydata)) {
+                        # Get unique groups
+                        groups <- unique(mydata[[myfactor]])
+                        groups <- groups[!is.na(groups)]
 
-                km_fit <- survival::survfit(formula, data = mydata)
+                        # Create results table manually from CIF
+                        results2table <- data.frame(
+                            factor = character(0),
+                            records = numeric(0),
+                            events = numeric(0),
+                            median = numeric(0),
+                            x0_95lcl = numeric(0),
+                            x0_95ucl = numeric(0),
+                            stringsAsFactors = FALSE
+                        )
 
-                km_fit_median_df <- summary(km_fit)
+                        for (group in groups) {
+                            # Get CIF for this group and event type 1
+                            cif_name <- paste(group, "1", sep = " ")
+
+                            if (cif_name %in% names(cuminc_fit)) {
+                                cif_est <- cuminc_fit[[cif_name]]$est
+                                cif_times <- cuminc_fit[[cif_name]]$time
+
+                                # Calculate median: time when CIF reaches 0.5
+                                median_time <- NA
+                                ci_lower <- NA
+                                ci_upper <- NA
+
+                                if (max(cif_est, na.rm = TRUE) >= 0.5) {
+                                    median_idx <- which(cif_est >= 0.5)[1]
+                                    median_time <- cif_times[median_idx]
+
+                                    # Approximate CI using variance
+                                    if (!is.null(cuminc_fit[[cif_name]]$var)) {
+                                        median_var <- cuminc_fit[[cif_name]]$var[median_idx]
+                                        median_se <- sqrt(median_var)
+                                        ci_lower <- median_time - 1.96 * median_se
+                                        ci_upper <- median_time + 1.96 * median_se
+                                    }
+                                }
+
+                                # Count events and records for this group
+                                group_data <- mydata[mydata[[myfactor]] == group, ]
+                                n_records <- nrow(group_data)
+                                n_events <- sum(group_data[[myoutcome]] == 1, na.rm = TRUE)  # Event of interest only
+
+                                results2table <- rbind(results2table, data.frame(
+                                    factor = as.character(group),
+                                    records = n_records,
+                                    events = n_events,
+                                    median = median_time,
+                                    x0_95lcl = ci_lower,
+                                    x0_95ucl = ci_upper,
+                                    stringsAsFactors = FALSE
+                                ))
+                            }
+                        }
+                    } else {
+                        # No grouping variable - overall CIF
+                        cif_est <- cuminc_fit[["1"]]$est  # Event type 1
+                        cif_times <- cuminc_fit[["1"]]$time
+
+                        median_time <- NA
+                        if (max(cif_est, na.rm = TRUE) >= 0.5) {
+                            median_idx <- which(cif_est >= 0.5)[1]
+                            median_time <- cif_times[median_idx]
+                        }
+
+                        results2table <- data.frame(
+                            factor = "Overall",
+                            records = nrow(mydata),
+                            events = sum(mydata[[myoutcome]] == 1, na.rm = TRUE),
+                            median = median_time,
+                            x0_95lcl = NA,
+                            x0_95ucl = NA,
+                            stringsAsFactors = FALSE
+                        )
+                    }
+
+                } else {
+                    # STANDARD SURVIVAL MODE: Use Kaplan-Meier
+
+                    formula <-
+                        paste('survival::Surv(',
+                              mytime,
+                              ',',
+                              myoutcome,
+                              ') ~ ',
+                              myfactor)
+
+                    formula <- as.formula(formula)
+
+                    private$.checkpoint()
+
+                    km_fit <- survival::survfit(formula, data = mydata)
+
+                    km_fit_median_df <- summary(km_fit)
 
 
 
@@ -1394,9 +1532,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 results2table$factor <- gsub(pattern = paste0(myexplanatory_labelled,"="),
                                              replacement = "",
                                              x = results1table$factor)
+                }
 
-
-
+                # At this point, results2table exists for both competing risk and standard survival
 
                 medianTable <- self$results$medianTable
                 data_frame <- results2table
@@ -2186,7 +2324,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 total_time <- sum(mydata[[mytime]])
 
                 # Get total events
-                total_events <- sum(mydata[[myoutcome]])
+                # FIX: Count events properly - any non-zero value is an event
+                # In competing risk (0/1/2), this counts both event of interest and competing events
+                total_events <- sum(mydata[[myoutcome]] >= 1, na.rm = TRUE)
 
                 # Get time unit
                 time_unit <- self$options$timetypeoutput
@@ -2210,6 +2350,54 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     rate_ci_lower=round(ci_lower, 2),
                     rate_ci_upper=round(ci_upper, 2)
                 ))
+
+                # FIX: Add group-stratified person-time analysis
+                # If explanatory variable exists, calculate person-time for each group
+                myexplanatory <- results$name3explanatory
+                if (!is.null(myexplanatory) && myexplanatory %in% names(mydata)) {
+                    # Get unique groups
+                    groups <- unique(mydata[[myexplanatory]])
+                    groups <- groups[!is.na(groups)]  # Remove NA groups
+
+                    rowKey_counter <- 2  # Start after overall row
+
+                    for (group in groups) {
+                        # Filter data for this group
+                        group_data <- mydata[mydata[[myexplanatory]] == group, ]
+
+                        if (nrow(group_data) > 0) {
+                            # Calculate group-specific metrics
+                            group_time <- sum(group_data[[mytime]], na.rm = TRUE)
+                            group_events <- sum(group_data[[myoutcome]] >= 1, na.rm = TRUE)
+
+                            # Calculate group incidence rate
+                            if (group_time > 0) {
+                                group_rate <- (group_events / group_time) * rate_multiplier
+
+                                # Calculate confidence intervals using Poisson exact method
+                                if (group_events > 0) {
+                                    group_ci_lower <- (stats::qchisq(0.025, 2*group_events) / 2) / group_time * rate_multiplier
+                                    group_ci_upper <- (stats::qchisq(0.975, 2*(group_events + 1)) / 2) / group_time * rate_multiplier
+                                } else {
+                                    group_ci_lower <- 0
+                                    group_ci_upper <- (stats::qchisq(0.975, 2) / 2) / group_time * rate_multiplier
+                                }
+
+                                # Add to personTimeTable with group label
+                                self$results$personTimeTable$addRow(rowKey=rowKey_counter, values=list(
+                                    interval=paste0("Group: ", as.character(group)),
+                                    events=group_events,
+                                    person_time=round(group_time, 2),
+                                    rate=round(group_rate, 2),
+                                    rate_ci_lower=round(group_ci_lower, 2),
+                                    rate_ci_upper=round(group_ci_upper, 2)
+                                ))
+
+                                rowKey_counter <- rowKey_counter + 1
+                            }
+                        }
+                    }
+                }
 
                 # Parse time intervals for stratified analysis
                 time_intervals <- as.numeric(unlist(strsplit(self$options$time_intervals, ",")))
@@ -2236,7 +2424,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             # But truncate follow-up time to the interval end
                             follow_up_times <- pmin(mydata[[mytime]], end_time)
                             # Count only events that occurred within this interval
-                            events_in_interval <- sum(mydata[[myoutcome]] == 1 & mydata[[mytime]] <= end_time)
+                            # FIX: Count events consistently with overall count
+                            # For competing risk, this counts all events (both event of interest and competing)
+                            events_in_interval <- sum(mydata[[myoutcome]] >= 1 & mydata[[mytime]] <= end_time, na.rm = TRUE)
                         } else {
                             # For later intervals, include only patients who survived past the previous cutpoint
                             survivors <- mydata[[mytime]] > start_time
@@ -2253,9 +2443,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             follow_up_times <- adjusted_exit_time - adjusted_entry_time
 
                             # Count only events that occurred within this interval
-                            events_in_interval <- sum(interval_data[[myoutcome]] == 1 &
+                            # FIX: Count events consistently with overall count
+                            events_in_interval <- sum(interval_data[[myoutcome]] >= 1 &
                                                           interval_data[[mytime]] <= end_time &
-                                                          interval_data[[mytime]] > start_time)
+                                                          interval_data[[mytime]] > start_time, na.rm = TRUE)
                         }
 
                         # Sum person-time in this interval

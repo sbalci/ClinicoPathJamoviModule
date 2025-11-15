@@ -1001,7 +1001,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1018,7 +1018,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -1035,7 +1035,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -1044,7 +1044,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1063,7 +1063,7 @@ analyses:
   - title: Survival Feature Ranking
     name: survivalfeaturerank
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Feature Ranking
     menuSubtitle: Univariate Cox Screening, Biomarker Discovery
@@ -1079,7 +1079,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: ClinicoPathD
+    menuGroup: SurvivalT
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
@@ -1089,7 +1089,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -1207,7 +1207,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1292,7 +1292,7 @@ analyses:
   - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Drafts
     menuTitle: Overall, Cause Specific, and Competing Survival
     menuSubtitle: Survival for Different Outcomes
@@ -2350,7 +2350,7 @@ analyses:
     name: simonmakuch
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Simon-Makuch Time-Dependent Survival Analysis
     menuSubtitle: Time-Dependent Variables, Simon-Makuch Plots, Landmark Analysis
@@ -5653,7 +5653,7 @@ analyses:
     name: survivalcalibration
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalD
     menuSubgroup: Model Validation
     menuTitle: Time-Dependent Survival Calibration
     description: >
@@ -5690,7 +5690,7 @@ analyses:
     name: finegray
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Competing Risks
     menuTitle: Fine-Gray Competing Risks Regression
     menuSubtitle: Subdistribution Hazard Regression

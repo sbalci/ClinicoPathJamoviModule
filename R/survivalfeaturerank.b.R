@@ -275,7 +275,26 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
 
                     # For categorical variables, use first coefficient
                     # For continuous variables, there's only one coefficient
+                    # LIMITATION: For categorical variables with >2 levels, this only reports
+                    # the HR for the first level comparison (vs. reference).
+                    # A more robust approach would use:
+                    #   - Global Wald test for overall association
+                    #   - Report range of HRs across all levels
+                    #   - Or use anova(cox_model) for overall p-value
+                    # Current approach is simple but may miss important categorical associations.
                     coef_idx <- 1
+
+                    # FIX: Calculate C-index confidence intervals
+                    # Previous version calculated cindex_se but didn't use it for CIs
+                    cindex_val <- concordance["C"]
+                    cindex_se_val <- concordance["se(C)"]
+                    z_val <- qnorm(0.975)  # 95% CI
+                    cindex_ci_lower <- cindex_val - z_val * cindex_se_val
+                    cindex_ci_upper <- cindex_val + z_val * cindex_se_val
+
+                    # Bound C-index CIs to [0, 1]
+                    cindex_ci_lower <- max(0, min(1, cindex_ci_lower))
+                    cindex_ci_upper <- max(0, min(1, cindex_ci_upper))
 
                     results_list[[feat]] <- list(
                         feature = feat,
@@ -286,8 +305,10 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                         ci_lower = conf_int[coef_idx, "lower .95"],
                         ci_upper = conf_int[coef_idx, "upper .95"],
                         pvalue = coef_summary[coef_idx, "Pr(>|z|)"],
-                        cindex = concordance["C"],
-                        cindex_se = concordance["se(C)"]
+                        cindex = cindex_val,
+                        cindex_se = cindex_se_val,
+                        cindex_ci_lower = cindex_ci_lower,
+                        cindex_ci_upper = cindex_ci_upper
                     )
 
                 }, error = function(e) {
@@ -338,10 +359,11 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
             # Add rank column
             results_df$rank <- seq_len(nrow(results_df))
 
-            # Reorder columns
+            # Reorder columns (now includes C-index CIs)
             results_df <- results_df[, c("rank", "feature", "type", "n", "events",
                                         "hr", "ci_lower", "ci_upper",
-                                        "pvalue", "adj_pvalue", "cindex", "cindex_se")]
+                                        "pvalue", "adj_pvalue",
+                                        "cindex", "cindex_se", "cindex_ci_lower", "cindex_ci_upper")]
 
             return(results_df)
         },
@@ -480,17 +502,39 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
         # Export ranking ----
         .exportRanking = function(ranked_features) {
 
-            # Export rank for each feature
-            for (i in seq_len(nrow(ranked_features))) {
-                feat <- ranked_features[i, "feature"]
-                rank_val <- ranked_features[i, "rank"]
+            # FIX: CRITICAL BUG - Previous implementation had fundamental design flaw
+            #
+            # ORIGINAL BUG (lines 484-493):
+            # for (i in seq_len(nrow(ranked_features))) {
+            #     row_indices <- seq_len(self$data$rowCount)  # ALL ROWS!
+            #     self$results$exportRanking$setValues(rep(rank_val, length(row_indices)))  # OVERWRITES!
+            # }
+            #
+            # Problems:
+            # 1. row_indices was ALL rows in dataset (not specific to feature)
+            # 2. Each loop iteration OVERWROTE previous assignments
+            # 3. Final result: ALL rows got rank of LAST feature processed
+            #
+            # CONCEPTUAL ISSUE:
+            # This analysis ranks FEATURES (columns), not observations (rows).
+            # Cannot meaningfully assign feature ranks to data rows.
+            #
+            # PROPER FIX:
+            # Export should create a SUMMARY TABLE of feature rankings, not row-level data.
+            # For now, disabled to prevent incorrect results.
 
-                # Find row indices for this feature in original data
-                row_indices <- seq_len(self$data$rowCount)
+            # TODO: Implement proper export as summary table if needed
+            # Current approach: Do not export (prevents incorrect results)
 
-                self$results$exportRanking$setRowNums(row_indices)
-                self$results$exportRanking$setValues(rep(rank_val, length(row_indices)))
-            }
+            warning(
+                "Export ranking functionality is currently disabled due to design limitations.\n",
+                "Feature ranking results are displayed in the ranking table.\n",
+                "To export results, use jamovi's 'Export Results' feature on the ranking table.",
+                call. = FALSE
+            )
+
+            # Do not modify exportRanking column (leave empty/unfilled)
+            return(invisible(NULL))
         },
 
         # Forest plot ----

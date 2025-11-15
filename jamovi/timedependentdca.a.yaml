@@ -1,7 +1,7 @@
 ---
 name: timedependentdca
 title: Time-Dependent Decision Curve Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: Medical Decision Analysis
 menuTitle: Time-Dependent DCA
 menuSubtitle: Net benefit for survival and longitudinal data

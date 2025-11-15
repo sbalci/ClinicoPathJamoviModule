@@ -1,7 +1,7 @@
 ---
 name: trichotomousroc
 title: Trichotomous (Three-way) ROC Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT
 menuSubgroup: ROC Analysis
 menuSubtitle: Three-category diagnostic test evaluation with indeterminate zone
 version: '0.0.32'

@@ -1,7 +1,7 @@
 ---
 name:  patientsimilarity
 title: Patient Similarity Clustering
-menuGroup: OncoPathT2
+menuGroup: OncoPathT
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: 't-SNE, UMAP, PCA - Discover Patient Subgroups'
 version: '0.0.31'

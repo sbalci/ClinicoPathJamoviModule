@@ -552,6 +552,53 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         return(do.call(rbind, results))
       },
 
+      # FIX: Helper functions for competing risk analysis ----
+      # These functions provide proper cumulative incidence function (CIF)
+      # support for competing risk scenarios (analysistype = "compete")
+
+      .isCompetingRisk = function() {
+        # Check if current analysis is competing risk mode
+        return(self$options$multievent && self$options$analysistype == "compete")
+      },
+
+      .competingRiskCumInc = function(mydata, mytime, myoutcome) {
+        # Calculate cumulative incidence function for competing risks
+        # Uses cmprsk package for proper handling of competing events
+        #
+        # Args:
+        #   mydata: cleaned data frame
+        #   mytime: time variable name
+        #   myoutcome: outcome variable name (0=censored, 1=event, 2=competing)
+        # Returns:
+        #   cuminc object from cmprsk package
+
+        mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+
+        cuminc_fit <- cmprsk::cuminc(
+          ftime = mydata[[mytime]],
+          fstatus = mydata[[myoutcome]],
+          cencode = 0
+        )
+        return(cuminc_fit)
+      },
+
+      .getDefaultCutpoints = function() {
+        # Get default time cutpoints based on selected time unit
+        # This ensures cutpoints are appropriate for the time scale
+        #
+        # Returns:
+        #   Numeric vector of default cutpoints (1, 3, 5 year equivalents)
+
+        time_unit <- self$options$timetypeoutput
+        switch(time_unit,
+               "days" = c(365, 1095, 1825),
+               "weeks" = c(52, 156, 260),
+               "months" = c(12, 36, 60),
+               "years" = c(1, 3, 5),
+               c(12, 36, 60)  # default to months
+        )
+      },
+
       # init ----
       .init = function() {
         # Validate inputs using helper functions
@@ -1795,7 +1842,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         total_time <- sum(mydata[["mytime"]])
 
         # Get total events
-        total_events <- sum(mydata[["myoutcome"]])
+        # FIX: Count events properly - any non-zero value is an event
+        # In competing risk (0/1/2), this counts both event of interest and competing events
+        total_events <- sum(mydata[["myoutcome"]] >= 1, na.rm = TRUE)
 
         # Get time unit
         time_unit <- self$options$timetypeoutput
@@ -1838,6 +1887,58 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           rate_ci_upper=round(ci_upper, 2)
         ))
 
+        # FIX: Add group-stratified person-time analysis
+        # If explanatory variables exist, calculate person-time for each group
+        if (!is.null(self$options$explanatory) && length(self$options$explanatory) > 0) {
+          # Use the first explanatory variable for grouping
+          group_var <- self$options$explanatory[[1]]
+
+          if (group_var %in% names(mydata)) {
+            # Get unique groups
+            groups <- unique(mydata[[group_var]])
+            groups <- groups[!is.na(groups)]  # Remove NA groups
+
+            rowKey_counter <- 2  # Start after overall row
+
+            for (group in groups) {
+              # Filter data for this group
+              group_data <- mydata[mydata[[group_var]] == group, ]
+
+              if (nrow(group_data) > 0) {
+                # Calculate group-specific metrics
+                group_time <- sum(group_data[["mytime"]], na.rm = TRUE)
+                group_events <- sum(group_data[["myoutcome"]] >= 1, na.rm = TRUE)
+
+                # Calculate group incidence rate
+                if (group_time > 0) {
+                  group_rate <- (group_events / group_time) * rate_multiplier
+
+                  # Calculate confidence intervals using Poisson exact method
+                  if (group_events > 0) {
+                    group_ci_lower <- (stats::qchisq(0.025, 2*group_events) / 2) / group_time * rate_multiplier
+                    group_ci_upper <- (stats::qchisq(0.975, 2*(group_events + 1)) / 2) / group_time * rate_multiplier
+                  } else {
+                    group_ci_lower <- 0
+                    group_ci_upper <- (stats::qchisq(0.975, 2) / 2) / group_time * rate_multiplier
+                  }
+
+                  # Add to personTimeTable with group label
+                  self$results$personTimeTable$addRow(rowKey=rowKey_counter, values=list(
+                    interval=paste0("Group: ", as.character(group)),
+                    events=group_events,
+                    person_time=round(group_time, 2),
+                    rate=round(group_rate, 2),
+                    rate_ci_lower=round(group_ci_lower, 2),
+                    rate_ci_upper=round(group_ci_upper, 2)
+                  ))
+
+                  rowKey_counter <- rowKey_counter + 1
+                }
+              }
+            }
+          }
+        }
+
         # Parse time intervals for stratified analysis
         time_intervals <- as.numeric(unlist(strsplit(self$options$time_intervals, ",")))
         time_intervals <- sort(unique(time_intervals))
@@ -1863,7 +1964,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               # But truncate follow-up time to the interval end
               follow_up_times <- pmin(mydata[["mytime"]], end_time)
               # Count only events that occurred within this interval
-              events_in_interval <- sum(mydata[["myoutcome"]] == 1 & mydata[["mytime"]] <= end_time)
+              # FIX: Count events consistently with overall count
+              # For competing risk, this counts all events (both event of interest and competing)
+              events_in_interval <- sum(mydata[["myoutcome"]] >= 1 & mydata[["mytime"]] <= end_time, na.rm = TRUE)
             } else {
               # For later intervals, include only patients who survived past the previous cutpoint
               survivors <- mydata[["mytime"]] > start_time
@@ -1880,9 +1983,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               follow_up_times <- adjusted_exit_time - adjusted_entry_time
 
               # Count only events that occurred within this interval
-              events_in_interval <- sum(interval_data[["myoutcome"]] == 1 &
+              # FIX: Count events consistently with overall count
+              events_in_interval <- sum(interval_data[["myoutcome"]] >= 1 &
                                           interval_data[["mytime"]] <= end_time &
-                                          interval_data[["mytime"]] > start_time)
+                                          interval_data[["mytime"]] > start_time, na.rm = TRUE)
             }
 
             # Sum person-time in this interval
