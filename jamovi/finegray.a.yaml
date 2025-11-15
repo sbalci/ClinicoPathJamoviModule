@@ -1,7 +1,7 @@
 ---
 name: finegray
 title: Fine-Gray Competing Risks Regression
-menuGroup: jsurvivalT2
+menuGroup: SurvivalT
 menuSubgroup: Competing Risks
 menuSubtitle: Subdistribution Hazard Regression
 version: '0.0.32'
@@ -69,14 +69,16 @@ options:
             Predictor variables for the regression model.
             Can include continuous and categorical variables.
 
-    - name: strata
-      title: Stratification Variable
-      type: Variable
-      suggested: [ nominal ]
-      permitted: [ factor ]
-      description:
-          R: >
-            Optional stratification variable for stratified Fine-Gray models.
+    # REMOVED: strata option - cmprsk::crr() does not support stratification
+    # If stratification is needed, use the grouping variable or add strata as a covariate
+    # - name: strata
+    #   title: Stratification Variable
+    #   type: Variable
+    #   suggested: [ nominal ]
+    #   permitted: [ factor ]
+    #   description:
+    #       R: >
+    #         Optional stratification variable for stratified Fine-Gray models.
 
     - name: groupVar
       title: Grouping Variable (for CIF plots)
@@ -163,37 +165,38 @@ options:
             Comma-separated time points for CIF plot risk table.
             If empty, automatically determined.
 
-    - name: showStackedCIF
-      title: Show Stacked CIF Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display stacked cumulative incidence plot showing all competing events.
-
-    - name: show1KMvsCIF
-      title: Show 1-KM vs CIF Comparison
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show comparison plot demonstrating bias in 1-KM approach.
-
-    - name: showCauseSpecific
-      title: Show Cause-Specific Hazards
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display cause-specific hazard ratios alongside subdistribution HRs.
-
-    - name: causeSpecificComparison
-      title: Subdistribution vs Cause-Specific Table
-      type: Bool
-      default: false
-      description:
-          R: >
-            Side-by-side comparison table of sHR and csHR.
+    # REMOVED: Unimplemented features - hiding from UI to prevent user confusion
+    # - name: showStackedCIF
+    #   title: Show Stacked CIF Plot
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Display stacked cumulative incidence plot showing all competing events.
+    #
+    # - name: show1KMvsCIF
+    #   title: Show 1-KM vs CIF Comparison
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Show comparison plot demonstrating bias in 1-KM approach.
+    #
+    # - name: showCauseSpecific
+    #   title: Show Cause-Specific Hazards
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Display cause-specific hazard ratios alongside subdistribution HRs.
+    #
+    # - name: causeSpecificComparison
+    #   title: Subdistribution vs Cause-Specific Table
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Side-by-side comparison table of sHR and csHR.
 
     - name: showRiskTable
       title: Show Risk Table
@@ -275,47 +278,48 @@ options:
             Custom covariate values for predictions (comma-separated).
             Format: "age=65,stage=III,treatment=chemo"
 
-    - name: showPredictionTable
-      title: Show Prediction Table
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display table of predicted cumulative incidence at specified times.
-
-    - name: diagnosticPlots
-      title: Diagnostic Plots
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display diagnostic plots (residuals, influence).
-
-    - name: showInfluence
-      title: Influence Diagnostics
-      type: Bool
-      default: false
-      description:
-          R: >
-            Identify influential observations.
-
-    - name: bootstrapCI
-      title: Bootstrap Confidence Intervals
-      type: Bool
-      default: false
-      description:
-          R: >
-            Calculate bootstrap confidence intervals for sHR.
-
-    - name: nBootstrap
-      title: Bootstrap Samples
-      type: Number
-      default: 500
-      min: 100
-      max: 2000
-      description:
-          R: >
-            Number of bootstrap samples for confidence intervals.
+    # REMOVED: Unimplemented features - hiding from UI to prevent user confusion
+    # - name: showPredictionTable
+    #   title: Show Prediction Table
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Display table of predicted cumulative incidence at specified times.
+    #
+    # - name: diagnosticPlots
+    #   title: Diagnostic Plots
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Display diagnostic plots (residuals, influence).
+    #
+    # - name: showInfluence
+    #   title: Influence Diagnostics
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Identify influential observations.
+    #
+    # - name: bootstrapCI
+    #   title: Bootstrap Confidence Intervals
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Calculate bootstrap confidence intervals for sHR.
+    #
+    # - name: nBootstrap
+    #   title: Bootstrap Samples
+    #   type: Number
+    #   default: 500
+    #   min: 100
+    #   max: 2000
+    #   description:
+    #       R: >
+    #         Number of bootstrap samples for confidence intervals.
 
     - name: showInterpretation
       title: Show Clinical Interpretation
@@ -325,12 +329,13 @@ options:
           R: >
             Display interpretation guidance for Fine-Gray results.
 
-    - name: compareToKM
-      title: Compare to Kaplan-Meier
-      type: Bool
-      default: false
-      description:
-          R: >
-            Show why 1-KM overestimates cumulative incidence.
+    # REMOVED: Unimplemented compareToKM feature
+    # - name: compareToKM
+    #   title: Compare to Kaplan-Meier
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Show why 1-KM overestimates cumulative incidence.
 
 ...

@@ -1,7 +1,7 @@
 ---
 name: outlierdetection
 title: Advanced Outlier Detection
-menuGroup: ExplorationT2
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'
@@ -153,7 +153,7 @@ options:
     - name: show_outlier_table
       title: Show Outlier Summary Table
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display a comprehensive table of outlier detection results including
@@ -162,7 +162,7 @@ options:
     - name: show_method_comparison
       title: Show Method Comparison
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Compare results across different detection methods when using composite approach.
@@ -170,7 +170,7 @@ options:
     - name: show_exclusion_summary
       title: Show Exclusion Recommendations
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Provide summary of observations recommended for exclusion and impact analysis.
@@ -178,7 +178,7 @@ options:
     - name: show_visualization
       title: Show Outlier Visualization
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Generate plots showing outlier detection results and distribution of outlier scores.
@@ -186,7 +186,7 @@ options:
     - name: show_interpretation
       title: Show Analysis Interpretation
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display detailed interpretation of outlier detection results and methodological notes.

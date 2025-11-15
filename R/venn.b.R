@@ -343,13 +343,11 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (nrow(self$data) == 0)
                         stop(.("Data contains no (complete) rows"))
 
-                    # Read and clean the data.
+                    # CRITICAL FIX: Capture original data BEFORE any filtering
+                    # This ensures we report actual missingness, not post-exclusion stats
                     private$.checkpoint()
-                    full_data <- jmvcore::naOmit(self$data)
-                    row_numbers <- suppressWarnings(as.integer(rownames(full_data)))
-                    if (length(row_numbers) != nrow(full_data) || any(is.na(row_numbers))) {
-                        row_numbers <- seq_len(nrow(full_data))
-                    }
+                    original_data <- self$data
+                    original_n <- nrow(original_data)
 
                     # Retrieve variable names and their corresponding "true" level selections.
                     var1 <- self$options$var1
@@ -381,6 +379,50 @@ vennClass <- if (requireNamespace('jmvcore'))
                             "</div>"
                         )
                         self$results$todo$setContent(warning_html)
+                    }
+
+                    # CRITICAL FIX: Select ONLY the variables needed for analysis
+                    # This prevents dropping cases with NAs in unrelated columns
+                    selected_data <- original_data[, selected_vars, drop = FALSE]
+
+                    # CRITICAL FIX: Calculate missingness BEFORE exclusion for transparency
+                    original_complete <- sum(complete.cases(selected_data))
+
+                    # Apply naOmit ONLY to selected variables, not entire dataset
+                    full_data <- jmvcore::naOmit(selected_data)
+                    excluded_n <- original_n - nrow(full_data)
+
+                    # CRITICAL WARNING: Report case loss if any exclusions occurred
+                    private$.excluded_warning <- NULL
+                    if (excluded_n > 0) {
+                        excluded_pct <- round(100 * excluded_n / original_n, 1)
+                        warning_msg <- paste0(
+                            "<div style='background-color: #fff3cd; padding: 12px; border-left: 4px solid #ff9800; margin: 10px 0; border-radius: 4px;'>",
+                            "<h6 style='margin: 0 0 8px 0; color: #856404;'>⚠️ Case Exclusion Warning</h6>",
+                            "<p style='margin: 0 0 8px 0;'><strong>", excluded_n, " cases (", excluded_pct, "%)</strong> ",
+                            "excluded due to missing values in selected variables.</p>",
+                            "<p style='margin: 0 0 8px 0;'><strong>Original N:</strong> ", original_n, " | ",
+                            "<strong>Final N:</strong> ", nrow(full_data), "</p>",
+                            "<p style='margin: 0; font-size: 0.9em;'><em>Note: Venn diagram counts and percentages ",
+                            "reflect the ", nrow(full_data), " complete cases only.</em></p>",
+                            "</div>"
+                        )
+                        private$.excluded_warning <- warning_msg
+
+                        # Display the exclusion warning
+                        # Append to existing warnings if any
+                        current_todo <- self$results$todo$state
+                        if (!is.null(current_todo) && nchar(current_todo) > 0) {
+                            self$results$todo$setContent(paste0(current_todo, warning_msg))
+                        } else {
+                            self$results$todo$setContent(warning_msg)
+                        }
+                    }
+
+                    # Restore row numbers for tracking
+                    row_numbers <- suppressWarnings(as.integer(rownames(full_data)))
+                    if (length(row_numbers) != nrow(full_data) || any(is.na(row_numbers))) {
+                        row_numbers <- seq_len(nrow(full_data))
                     }
 
                     # Collect only selected variables and convert to logical values
@@ -1471,19 +1513,40 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (length(calculations) > 0) {
                         if (!is.null(calculations$overlaps)) {
                             html_content <- paste0(html_content, "<h4>Overlapping Members:</h4>")
-                            if (!is.null(calculations$overlaps) && is.list(calculations$overlaps) && length(calculations$overlaps) > 0) {
-                                for (i in seq_along(calculations$overlaps)) {
-                                    set_name <- names(calculations$overlaps)[i]
-                                    # Use original name for display if available
-                                    display_name <- set_name
-                                    if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
-                                        display_name <- private$.name_mapping[[set_name]]
+                            # CRITICAL FIX: overlap() returns a NAMED VECTOR, not a list
+                            overlaps <- calculations$overlaps
+                            if (!is.null(overlaps) && length(overlaps) > 0) {
+                                # Check if it's a named vector or list
+                                overlap_names <- names(overlaps)
+                                if (!is.null(overlap_names) && length(overlap_names) > 0) {
+                                    # It's a named vector - process as vector
+                                    for (i in seq_along(overlaps)) {
+                                        set_name <- overlap_names[i]
+                                        count <- overlaps[i]
+                                        # Use original name for display if available
+                                        display_name <- set_name
+                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
+                                            display_name <- private$.name_mapping[[set_name]]
+                                        }
+                                        html_content <- paste0(html_content,
+                                            "<p><strong>", display_name, ":</strong> ",
+                                            count, " members (",
+                                            round(count/total_observations*100, 1), "%)</p>")
                                     }
-                                    members <- calculations$overlaps[[i]]
-                                    html_content <- paste0(html_content,
-                                        "<p><strong>", display_name, ":</strong> ",
-                                        length(members), " members (",
-                                        round(length(members)/total_observations*100, 1), "%)</p>")
+                                } else if (is.list(overlaps)) {
+                                    # It's a list - process as list
+                                    for (i in seq_along(overlaps)) {
+                                        set_name <- names(overlaps)[i]
+                                        display_name <- set_name
+                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
+                                            display_name <- private$.name_mapping[[set_name]]
+                                        }
+                                        members <- overlaps[[i]]
+                                        html_content <- paste0(html_content,
+                                            "<p><strong>", display_name, ":</strong> ",
+                                            length(members), " members (",
+                                            round(length(members)/total_observations*100, 1), "%)</p>")
+                                    }
                                 }
                             } else {
                                 html_content <- paste0(html_content, "<p>No overlaps found.</p>")
@@ -1492,19 +1555,40 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                         if (!is.null(calculations$unique_members)) {
                             html_content <- paste0(html_content, "<h4>Unique Members per Set:</h4>")
-                            if (!is.null(calculations$unique_members) && is.list(calculations$unique_members) && length(calculations$unique_members) > 0) {
-                                for (i in seq_along(calculations$unique_members)) {
-                                    set_name <- names(calculations$unique_members)[i]
-                                    # Use original name for display if available
-                                    display_name <- set_name
-                                    if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
-                                        display_name <- private$.name_mapping[[set_name]]
+                            # CRITICAL FIX: discern() returns a NAMED VECTOR or LIST - handle both
+                            unique_members <- calculations$unique_members
+                            if (!is.null(unique_members) && length(unique_members) > 0) {
+                                # Check if it's a named vector or list
+                                member_names <- names(unique_members)
+                                if (!is.null(member_names) && length(member_names) > 0 && !is.list(unique_members)) {
+                                    # It's a named vector - process as vector
+                                    for (i in seq_along(unique_members)) {
+                                        set_name <- member_names[i]
+                                        count <- unique_members[i]
+                                        # Use original name for display if available
+                                        display_name <- set_name
+                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
+                                            display_name <- private$.name_mapping[[set_name]]
+                                        }
+                                        html_content <- paste0(html_content,
+                                            "<p><strong>", display_name, ":</strong> ",
+                                            count, " unique members (",
+                                            round(count/total_observations*100, 1), "%)</p>")
                                     }
-                                    members <- calculations$unique_members[[i]]
-                                    html_content <- paste0(html_content,
-                                        "<p><strong>", display_name, ":</strong> ",
-                                        length(members), " unique members (",
-                                        round(length(members)/total_observations*100, 1), "%)</p>")
+                                } else if (is.list(unique_members)) {
+                                    # It's a list - process as list
+                                    for (i in seq_along(unique_members)) {
+                                        set_name <- names(unique_members)[i]
+                                        display_name <- set_name
+                                        if (!is.null(private$.name_mapping) && set_name %in% names(private$.name_mapping)) {
+                                            display_name <- private$.name_mapping[[set_name]]
+                                        }
+                                        members <- unique_members[[i]]
+                                        html_content <- paste0(html_content,
+                                            "<p><strong>", display_name, ":</strong> ",
+                                            length(members), " unique members (",
+                                            round(length(members)/total_observations*100, 1), "%)</p>")
+                                    }
                                 }
                             } else {
                                 html_content <- paste0(html_content, "<p>No unique members found.</p>")
@@ -1820,6 +1904,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                 )
 
                 self$results$glossary$setContent(glossary_content)
-            }
+            },
+
+            # Private field to store exclusion warning message
+            .excluded_warning = NULL
         )
     )

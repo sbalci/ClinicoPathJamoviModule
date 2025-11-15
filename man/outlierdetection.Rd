@@ -14,11 +14,11 @@ outlierdetection(
   zscore_threshold = 3.29,
   iqr_multiplier = 1.7,
   confidence_level = 0.999,
-  show_outlier_table = TRUE,
-  show_method_comparison = TRUE,
-  show_exclusion_summary = TRUE,
-  show_visualization = TRUE,
-  show_interpretation = TRUE
+  show_outlier_table = FALSE,
+  show_method_comparison = FALSE,
+  show_exclusion_summary = FALSE,
+  show_visualization = FALSE,
+  show_interpretation = FALSE
 )
 }
 \arguments{

@@ -16,7 +16,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -367,7 +367,7 @@ analyses:
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Advanced Outlier Detection
     menuSubtitle: easystats Performance Package
@@ -729,7 +729,7 @@ analyses:
   - title: Hull Plot
     name: hullplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Continuous vs Continuous
     menuTitle: Hull Plot
     menuSubtitle: Cluster Visualization with ggforce
@@ -2253,17 +2253,6 @@ analyses:
       Kendall  correlations with significance tests, confidence intervals, and
       natural language  reporting. Suitable for exploring relationships between
       continuous variables.
-  - title: Table One Draft 2
-    name: tableone2
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationT2
-    menuSubgroup: ClinicoPath Descriptives
-    menuTitle: Table One Draft 2
-    description: >
-      This function generates a "Table One", a descriptive summary table
-      frequently used in  clinicopathological research manuscripts. It supports
-      multiple output styles for flexible formatting.
   - title: Benford Analysis 2
     name: benford2
     ns: ClinicoPath
@@ -4752,13 +4741,13 @@ analyses:
     name: pcacomponenttest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Component Significance Test
     menuSubtitle: Permutation-based component selection
     description: >-
-      Performs permutation-based significance testing to determine which
-      principal
+      Performs SEQUENTIAL permutation-based significance testing to determine
+      which principal
 
       components explain more variance than expected by random chance. This
       provides
@@ -4768,7 +4757,7 @@ analyses:
     name: pcaloadingtest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Significance Test
     menuSubtitle: Permutation-based loading thresholds
@@ -4786,7 +4775,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -5531,7 +5520,7 @@ analyses:
     name: entropyanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT
     menuSubgroup: Medical Decision Analysis
     menuTitle: Entropy Analysis
     menuSubtitle: AI uncertainty quantification and information metrics
@@ -5664,7 +5653,7 @@ analyses:
     name: survivalcalibration
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalT2
+    menuGroup: SurvivalT2
     menuSubgroup: Model Validation
     menuTitle: Time-Dependent Survival Calibration
     description: >
@@ -5701,7 +5690,7 @@ analyses:
     name: finegray
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalT2
+    menuGroup: SurvivalT
     menuSubgroup: Competing Risks
     menuTitle: Fine-Gray Competing Risks Regression
     menuSubtitle: Subdistribution Hazard Regression

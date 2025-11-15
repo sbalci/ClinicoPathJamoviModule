@@ -16,6 +16,15 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         .data_prepared = NULL,
         .entropy_results = NULL,
         .mi_results = NULL,
+        .conditional_entropy_results = NULL,
+
+        # Variable name escaping utility
+        .escapeVar = function(x) {
+            if (is.character(x)) {
+                x <- gsub("[^A-Za-z0-9_]", "_", make.names(x))
+            }
+            return(x)
+        },
 
         #---------------------------------------------
         # INIT
@@ -72,6 +81,9 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         #---------------------------------------------
         .run = function() {
 
+            # CRITICAL FIX: Set random seed for reproducibility
+            set.seed(self$options$random_seed)
+
             # Check requirements
             if (is.null(self$options$outcome) || self$options$outcome == "") {
                 return()
@@ -102,12 +114,22 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 private$.calculateMutualInformation()
             }
 
+            # CRITICAL FIX: Calculate conditional entropy if enabled
+            if (self$options$calculate_conditional_entropy) {
+                private$.calculateConditionalEntropy()
+            }
+
             # Populate results
             private$.populateSummary()
             private$.populateEntropyByClass()
 
             if (self$options$calculate_mutual_information) {
                 private$.populateMutualInfo()
+            }
+
+            # CRITICAL FIX: Populate conditional entropy table
+            if (self$options$calculate_conditional_entropy) {
+                private$.populateConditionalEntropy()
             }
 
             if (self$options$show_case_level) {
@@ -142,19 +164,77 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # Check dimensions
             if (ncol(probs_matrix) != n_classes) {
-                warning(paste("Number of probability variables (", ncol(probs_matrix),
-                              ") does not match number of outcome classes (", n_classes, ")",
-                              sep = ""))
+                stop(paste("Number of probability variables (", ncol(probs_matrix),
+                          ") does not match number of outcome classes (", n_classes, "). ",
+                          "Please provide one probability column per class.", sep = ""))
             }
+
+            # CRITICAL FIX: Align probability columns with class order
+            # Try to match column names to class names
+            prob_var_names <- prob_vars
+            matched_indices <- integer(n_classes)
+            alignment_failed <- FALSE
+
+            for (i in seq_along(classes)) {
+                # Try exact match first
+                match_idx <- which(prob_var_names == classes[i])
+
+                # Try case-insensitive match
+                if (length(match_idx) == 0) {
+                    match_idx <- which(tolower(prob_var_names) == tolower(classes[i]))
+                }
+
+                # Try pattern match (e.g., "prob_A" matches "A")
+                if (length(match_idx) == 0) {
+                    pattern <- paste0(".*", classes[i], ".*")
+                    match_idx <- which(grepl(pattern, prob_var_names, ignore.case = TRUE))
+                }
+
+                if (length(match_idx) == 1) {
+                    matched_indices[i] <- match_idx
+                } else if (length(match_idx) > 1) {
+                    warning(paste("Multiple probability variables match class '", classes[i],
+                                "'. Using first match: ", prob_var_names[match_idx[1]], sep = ""))
+                    matched_indices[i] <- match_idx[1]
+                } else {
+                    alignment_failed <- TRUE
+                    warning(paste("Could not match probability variable to class '", classes[i], "'", sep = ""))
+                }
+            }
+
+            # If alignment failed, assume columns are in class order (backward compatibility)
+            if (alignment_failed || any(matched_indices == 0)) {
+                warning(paste("Could not match all probability column names to class names. ",
+                             "Assuming columns are in the same order as factor levels: ",
+                             paste(classes, collapse = ", "), ". ",
+                             "For safety, name your columns to match class names (e.g., 'prob_", classes[1], "').",
+                             sep = ""))
+                matched_indices <- seq_along(classes)
+            }
+
+            # Reorder probs_matrix to match class order
+            probs_matrix <- probs_matrix[, matched_indices, drop = FALSE]
 
             # Normalize probabilities to sum to 1 for each case
             row_sums <- rowSums(probs_matrix, na.rm = TRUE)
+
+            # CRITICAL FIX: Handle zero row sums before division
+            row_sums[row_sums == 0] <- 1  # Prevent division by zero
             probs_matrix_norm <- probs_matrix / row_sums
 
-            # Handle any remaining NA or invalid probabilities
-            probs_matrix_norm[is.na(probs_matrix_norm)] <- 1 / n_classes
+            # CRITICAL FIX: Handle invalid probabilities and re-normalize
+            # Replace NA with uniform probability
+            na_mask <- is.na(probs_matrix_norm)
+            probs_matrix_norm[na_mask] <- 1 / n_classes
+
+            # Clip to [0, 1]
             probs_matrix_norm[probs_matrix_norm < 0] <- 0
             probs_matrix_norm[probs_matrix_norm > 1] <- 1
+
+            # Re-normalize after clipping to ensure probabilities sum to 1
+            row_sums_final <- rowSums(probs_matrix_norm)
+            row_sums_final[row_sums_final == 0] <- 1
+            probs_matrix_norm <- probs_matrix_norm / row_sums_final
 
             private$.data_prepared <- list(
                 y = y,
@@ -257,6 +337,68 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         },
 
         #---------------------------------------------
+        # CALCULATE CONDITIONAL ENTROPY H(Y|X)
+        #---------------------------------------------
+        .calculateConditionalEntropy = function() {
+
+            y <- private$.data_prepared$y
+            predictor_var <- self$options$predictor_var
+
+            if (is.null(predictor_var) || predictor_var == "") {
+                # Use predicted class as predictor
+                if (!is.null(private$.entropy_results)) {
+                    x <- factor(private$.entropy_results$predicted_class)
+                } else {
+                    return()
+                }
+            } else {
+                # Use specified predictor
+                data <- self$data
+                x <- data[[predictor_var]]
+
+                if (is.numeric(x)) {
+                    x <- private$.discretizeVariable(x)
+                } else {
+                    x <- as.factor(x)
+                }
+            }
+
+            # Calculate H(Y) - marginal entropy of outcome
+            h_y <- private$.entropyDiscrete(y)
+
+            # Calculate H(Y|X) - conditional entropy
+            joint_counts <- table(x, y)
+            x_counts <- table(x)
+
+            h_y_given_x <- 0
+            for (x_val in names(x_counts)) {
+                p_x <- x_counts[x_val] / sum(x_counts)
+
+                # Get conditional distribution P(Y|X=x_val)
+                y_given_x_counts <- joint_counts[x_val, ]
+                if (sum(y_given_x_counts) > 0) {
+                    y_given_x_probs <- y_given_x_counts / sum(y_given_x_counts)
+                    y_given_x_probs <- y_given_x_probs[y_given_x_probs > 0]
+
+                    # Entropy of Y given X=x_val
+                    h_y_given_x_val <- -sum(y_given_x_probs * log2(y_given_x_probs))
+                    h_y_given_x <- h_y_given_x + p_x * h_y_given_x_val
+                }
+            }
+
+            # Uncertainty reduction = H(Y) - H(Y|X) = I(X;Y)
+            uncertainty_reduction <- h_y - h_y_given_x
+
+            # Store results
+            private$.conditional_entropy_results <- list(
+                h_y = h_y,
+                h_y_given_x = h_y_given_x,
+                uncertainty_reduction = uncertainty_reduction,
+                variable = if (is.null(predictor_var) || predictor_var == "") "Predicted Class" else predictor_var
+            )
+        },
+
+        #---------------------------------------------
         # MUTUAL INFORMATION (DISCRETE)
         #---------------------------------------------
         .mutualInformationDiscrete = function(x, y) {
@@ -275,8 +417,20 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Mutual information
             mi <- h_x + h_y - h_xy
 
-            # Normalized MI
-            normalized_mi <- mi / min(h_x, h_y)
+            # CRITICAL FIX: Normalized MI with proper handling of zero entropy
+            # When either variable is deterministic (entropy = 0), MI is undefined or 0
+            min_entropy <- min(h_x, h_y)
+
+            if (min_entropy < 1e-10) {
+                # One variable is deterministic (entropy ≈ 0)
+                # MI is 0 (no information shared) or undefined
+                normalized_mi <- 0  # Conservative: no dependence
+            } else {
+                normalized_mi <- mi / min_entropy
+            }
+
+            # Clip normalized MI to [0, 1] to handle numerical errors
+            normalized_mi <- max(0, min(1, normalized_mi))
 
             return(list(
                 mi = mi,
@@ -406,6 +560,26 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             )
 
             table$addRow(rowKey = "mi1", values = row)
+        },
+
+        #---------------------------------------------
+        # POPULATE CONDITIONAL ENTROPY TABLE
+        #---------------------------------------------
+        .populateConditionalEntropy = function() {
+
+            if (is.null(private$.conditional_entropy_results)) return()
+
+            table <- self$results$conditionalEntropyTable
+
+            results <- private$.conditional_entropy_results
+
+            row <- list(
+                condition = paste("Y given", results$variable),
+                entropy = results$h_y_given_x,
+                uncertainty_reduction = results$uncertainty_reduction
+            )
+
+            table$addRow(rowKey = "cond1", values = row)
         },
 
         #---------------------------------------------

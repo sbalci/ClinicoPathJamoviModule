@@ -55,23 +55,32 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             # Prepare the data using user-selected variables.
             selected_vars <- self$options$vars  # Improved variable naming.
-            
+
             # Checkpoint before data preparation (potentially expensive for large datasets)
             private$.checkpoint()
-            
+
             data <- jmvcore::select(self$data, selected_vars)
 
+            # CRITICAL FIX: Capture original data stats BEFORE naOmit
+            # This ensures we report actual missingness, not post-exclusion stats
+            original_data <- data
+            original_n <- nrow(original_data)
+            original_complete <- sum(complete.cases(original_data))
+
             # Optionally exclude rows with missing values.
+            excluded_n <- 0
             if (isTRUE(self$options$excl)) {
                 data <- jmvcore::naOmit(data)
+                excluded_n <- original_n - nrow(data)
             }
 
             # Retrieve the table style selected by the user.
             table_style <- self$options$sty
 
             # Generate clinical summaries and data quality checks
-            private$.generateSummary(data, selected_vars)
-            private$.checkDataQuality(data, selected_vars)
+            # Pass BOTH original and filtered data for accurate reporting
+            private$.generateSummary(data, selected_vars, original_data, excluded_n)
+            private$.checkDataQuality(data, selected_vars, original_data)
 
             # Generate the table based on the chosen style.
             if (table_style == "t1") {
@@ -246,28 +255,67 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             self$results$about$setContent(about_text)
         },
         
-        .generateSummary = function(data, vars) {
-            n_total <- nrow(data)
+        .generateSummary = function(data, vars, original_data, excluded_n) {
+            # CRITICAL FIX: Report statistics from ORIGINAL data to show true missingness
+            n_original <- nrow(original_data)
+            n_final <- nrow(data)
             n_vars <- length(vars)
-            n_complete <- sum(complete.cases(data))
-            missing_pct <- round(100 * (1 - n_complete / n_total), 1)
-            
-            # Variable type analysis
+
+            # Calculate missing data from ORIGINAL dataset
+            n_complete_original <- sum(complete.cases(original_data))
+            missing_pct_original <- round(100 * (1 - n_complete_original / n_original), 1)
+
+            # Variable type analysis (on final data for consistency)
             var_types <- sapply(data, function(x) {
-                if (is.numeric(x)) "Numeric" 
+                if (is.numeric(x)) "Numeric"
                 else if (is.factor(x)) "Categorical"
                 else if (is.logical(x)) "Logical"
                 else "Other"
             })
             type_summary <- table(var_types)
             type_text <- paste(names(type_summary), ":", type_summary, collapse = "; ")
-            
+
+            # Per-variable missing counts (from ORIGINAL data)
+            var_missing <- sapply(vars, function(v) sum(is.na(original_data[[v]])))
+            high_missing_vars <- vars[var_missing > n_original * 0.2]  # >20% missing
+
+            # Build summary text with transparent reporting
             summary_text <- paste0(
                 "<div style='background-color: #e8f4fd; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
                 "<h4>Analysis Summary</h4>",
-                "<p><strong>Dataset:</strong> ", n_total, " cases with ", n_vars, " selected variables</p>",
-                "<p><strong>Complete cases:</strong> ", n_complete, " (", round(100 * n_complete / n_total, 1), "%)</p>",
-                if (missing_pct > 0) paste0("<p><strong>Missing data:</strong> ", missing_pct, "% - consider checking data quality</p>") else "",
+
+                # Original dataset info
+                "<p><strong>Original dataset:</strong> ", n_original, " cases with ", n_vars, " selected variables</p>",
+                "<p><strong>Complete cases (original):</strong> ", n_complete_original, " (",
+                round(100 * n_complete_original / n_original, 1), "%)</p>",
+
+                # Missing data transparency
+                if (missing_pct_original > 0) {
+                    paste0("<p><strong>Missing data (original):</strong> ", missing_pct_original,
+                           "% of cases have at least one missing value",
+                           if (length(high_missing_vars) > 0) {
+                               paste0(" <br><em>Variables with >20% missing: ",
+                                      paste(high_missing_vars, collapse = ", "), "</em>")
+                           } else "",
+                           "</p>")
+                } else "",
+
+                # Exclusion warning if applicable
+                if (excluded_n > 0) {
+                    paste0("<p style='color: #d9534f;'><strong>⚠️ Case exclusion:</strong> ",
+                           excluded_n, " cases (", round(100 * excluded_n / n_original, 1),
+                           "%) excluded due to missing values. <strong>Final N = ", n_final,
+                           "</strong></p>",
+                           "<p style='color: #856404; background-color: #fff3cd; padding: 8px; border-radius: 4px;'>",
+                           "<em>Note: Listwise deletion was applied. The table below shows statistics for the ",
+                           n_final, " complete cases only. Per-variable denominators may differ if variables have different missing patterns.</em></p>")
+                } else {
+                    paste0("<p><strong>Analysis sample:</strong> ", n_final, " cases (no exclusions applied)</p>",
+                           if (missing_pct_original > 0) {
+                               "<p style='color: #856404; background-color: #fff3cd; padding: 8px; border-radius: 4px;'><em>⚠️ Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling 'Exclude Missing Values' for consistent denominators.</em></p>"
+                           } else "")
+                },
+
                 "<p><strong>Variable types:</strong> ", type_text, "</p>",
                 "<p><em>This Table One summarizes baseline characteristics commonly reported in clinical research manuscripts.</em></p>",
                 "</div>"
@@ -275,24 +323,36 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             self$results$summary$setContent(summary_text)
         },
         
-        .checkDataQuality = function(data, vars) {
+        .checkDataQuality = function(data, vars, original_data) {
             warnings <- c()
             recommendations <- c()
-            
-            # Check sample size
-            n_total <- nrow(data)
-            if (n_total < 10) {
-                warnings <- c(warnings, "Very small sample size (N < 10). Results may be unreliable.")
-            } else if (n_total < 30) {
-                recommendations <- c(recommendations, "Small sample size (N < 30). Consider reporting exact values rather than summary statistics.")
+
+            # CRITICAL FIX: Check sample size on FINAL data (after exclusions)
+            n_final <- nrow(data)
+            n_original <- nrow(original_data)
+
+            if (n_final < 10) {
+                warnings <- c(warnings, paste0("Very small final sample size (N = ", n_final, "). Results may be unreliable."))
+            } else if (n_final < 30) {
+                recommendations <- c(recommendations, paste0("Small final sample size (N = ", n_final, "). Consider reporting exact values rather than summary statistics."))
             }
-            
-            # Check missing data
-            missing_pct <- round(100 * (1 - sum(complete.cases(data)) / n_total), 1)
-            if (missing_pct > 50) {
-                warnings <- c(warnings, paste0("High missing data rate (", missing_pct, "%). Consider data cleaning or imputation."))
-            } else if (missing_pct > 20) {
-                recommendations <- c(recommendations, paste0("Moderate missing data (", missing_pct, "%). Consider reporting missing data patterns."))
+
+            # Check missing data from ORIGINAL dataset
+            missing_pct_original <- round(100 * (1 - sum(complete.cases(original_data)) / n_original), 1)
+            if (missing_pct_original > 50) {
+                warnings <- c(warnings, paste0("High missing data rate in original dataset (", missing_pct_original, "%). Consider data cleaning or imputation."))
+            } else if (missing_pct_original > 20) {
+                recommendations <- c(recommendations, paste0("Moderate missing data in original dataset (", missing_pct_original, "%). Consider reporting missing data patterns or using multiple imputation."))
+            }
+
+            # Warn if large proportion excluded
+            if (n_original > n_final) {
+                excluded_pct <- round(100 * (n_original - n_final) / n_original, 1)
+                if (excluded_pct > 30) {
+                    warnings <- c(warnings, paste0("Large case loss due to missing data (", excluded_pct, "% excluded). Results may not be representative of the full sample. Consider multiple imputation or sensitivity analyses."))
+                } else if (excluded_pct > 10) {
+                    recommendations <- c(recommendations, paste0("Notable case loss (", excluded_pct, "% excluded). Compare characteristics of excluded vs. included cases to assess potential bias."))
+                }
             }
             
             # Check variable types and unusual patterns

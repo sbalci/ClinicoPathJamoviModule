@@ -74,23 +74,29 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$results)}
 }
 \description{
-Performs permutation-based significance testing to determine which
-principal
+Performs SEQUENTIAL permutation-based significance testing to determine
+which principal
 components explain more variance than expected by random chance. This
 provides
 an objective, hypothesis-tested approach to component retention.
 }
 \details{
-The test uses nonparametric permutation where variables are shuffled
-independently
-to break data structure, generating a null distribution of variance
-accounted for (VAF).
-Components with VAF significantly higher than the null distribution are
-retained.
+The test uses the Buja & Eyuboglu (1992) sequential method where:
+\enumerate{
+\item Each component is tested against a permutation null distribution
+\item Significant components have their variance REMOVED before testing the
+next component
+\item Testing STOPS when the first non-significant component is found
+}
 
-This implements the method described in Buja & Eyuboglu (1992) and is based
-on
-the syndRomics package approach.
+This sequential approach prevents inflated Type I errors that occur when
+all components
+are tested against the same null distribution (batch testing).
+
+CRITICAL: Requires centered and scaled data for valid correlation-based
+interpretation.
+Without centering/scaling, the test compares raw variance instead of
+correlation structure.
 }
 \section{References}{
 

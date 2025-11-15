@@ -43,19 +43,25 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue(
                 "<br>Welcome to ClinicoPath
                 <br><br>
-                This tool performs permutation-based significance testing for PCA loadings.
+                This tool performs permutation-based significance testing for PCA loadings using the
+                <b>permV method</b> (Linting et al., 2011).
                 <br><br>
                 <b>How it works:</b>
                 <ul>
-                <li>Uses permV method: permutes ONE variable at a time</li>
+                <li><b>permV method:</b> Permutes ONE variable at a time (not all variables simultaneously)</li>
                 <li>Provides variable-specific and component-specific significance thresholds</li>
-                <li>Higher statistical power than traditional permutation methods</li>
-                <li>Proper Type I error control</li>
+                <li>Higher statistical power than full-matrix permutation</li>
+                <li>Proper Type I error control with Procrustes rotation</li>
                 </ul>
                 <br>
-                Based on Linting et al. (2011) and syndRomics package methods.
-                <br><br>
-                <b>Required:</b> Select at least 3 continuous variables for PCA.
+                <b>⚠️ CRITICAL REQUIREMENTS:</b>
+                <ul>
+                <li><b>Numeric variables only:</b> Factors and characters will be REJECTED (no silent coercion)</li>
+                <li><b>Enable centering/scaling:</b> Required for correlation-based loading interpretation</li>
+                <li>Without centering/scaling: Test compares RAW VARIANCE loadings, not correlation structure</li>
+                </ul>
+                <br>
+                <b>Required:</b> Select at least 3 continuous numeric variables for PCA.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -97,12 +103,44 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Remove missing values
             pca_data <- na.omit(pca_data)
 
+            # CRITICAL FIX: Validate numeric inputs (prevent silent factor coercion)
+            non_numeric <- sapply(pca_data, function(x) !is.numeric(x))
+            if (any(non_numeric)) {
+                non_numeric_vars <- names(pca_data)[non_numeric]
+                stop(paste0(
+                    'ERROR: Non-numeric variables detected: ',
+                    paste(non_numeric_vars, collapse = ', '),
+                    '\\n\\nPCA Loading Test requires numeric variables only. ',
+                    'Factors and character variables cannot be used. ',
+                    'Please select only continuous numeric variables.'
+                ))
+            }
+
             # Convert to numeric matrix
             pca_matrix <- as.matrix(sapply(pca_data, as.numeric))
 
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
                 stop('Insufficient data for PCA. Need at least 3 complete observations.')
+            }
+
+            # CRITICAL FIX: Warn if centering/scaling disabled
+            if (!self$options$center || !self$options$scale) {
+                # Check if variables have different scales
+                var_ranges <- apply(pca_matrix, 2, function(x) diff(range(x, na.rm = TRUE)))
+                var_means <- apply(pca_matrix, 2, mean, na.rm = TRUE)
+
+                if (max(var_ranges) / min(var_ranges) > 10 || max(abs(var_means)) > 1e-6) {
+                    jmvcore::reject(paste0(
+                        'WARNING: Centering and/or scaling are disabled, but variables have different scales.\\n\\n',
+                        '⚠️ CRITICAL: Without centering/scaling, the permutation test for loadings ',
+                        'compares RAW VARIANCE contributions, not standardized correlation-based loadings. ',
+                        'Variables with larger variance will dominate the loadings.\\n\\n',
+                        'RECOMMENDATION: Enable \"Center Variables\" and \"Scale Variables\" options for valid results.\\n\\n',
+                        'If you proceed without centering/scaling, interpret loadings as reflecting raw variance, ',
+                        'NOT standardized correlation structure (which is the standard interpretation of PCA loadings).'
+                    ))
+                }
             }
 
             # Run original PCA
@@ -141,13 +179,28 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                          center = self$options$center)
                         temp_loading <- private$.stand_loadings(pca_per, perm_data)[, 1:ndim, drop = FALSE]
 
-                        # Apply Procrustes rotation
+                        # CRITICAL FIX: Apply Procrustes rotation to align permuted loadings
                         if (requireNamespace('pracma', quietly = TRUE)) {
+                            # pracma::procrustes returns:
+                            # - $Q: rotated matrix (aligned temp_loading)
+                            # - $P: rotation matrix (NOT what we want)
                             r <- pracma::procrustes(as.matrix(original_loadings[, 1:ndim]),
                                                    as.matrix(temp_loading))
-                            perm_loadings_list[[v]] <- r$P[v, ]
+                            # CRITICAL FIX: Use r$Q (rotated loadings), NOT r$P (rotation matrix)
+                            perm_loadings_list[[v]] <- r$Q[v, ]
                         } else {
-                            perm_loadings_list[[v]] <- temp_loading[v, ]
+                            # CRITICAL WARNING: pracma not available, sign correction disabled
+                            # This degrades to sign-unstable comparison with inflated Type I errors
+                            jmvcore::reject(paste0(
+                                'ERROR: The pracma package is required for Procrustes rotation ',
+                                'in the permV method but is not installed.\n\n',
+                                '⚠️ CRITICAL: Without Procrustes rotation, PCA loading significance tests ',
+                                'suffer from sign indeterminacy. Different permutations can flip signs, ',
+                                'causing grossly inflated Type I error rates.\n\n',
+                                'SOLUTION: Install pracma with: install.packages("pracma")\n\n',
+                                'The permV method (Linting et al., 2011) requires Procrustes alignment ',
+                                'to handle rotation and reflection indeterminacy in PCA solutions.'
+                            ))
                         }
                     }, error = function(e) {
                         perm_loadings_list[[v]] <- rep(NA, ndim)

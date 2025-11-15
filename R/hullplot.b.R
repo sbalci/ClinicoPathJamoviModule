@@ -23,8 +23,42 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .data_cache_key = NULL,
 
         .prepare_data = function() {
-            # Create a cache key based on relevant options
+            # CRITICAL FIX: Create cache key including data CONTENT hash
+            # This prevents stale data after filtering/editing
             data_size <- if (is.null(self$data)) 0 else nrow(self$data)
+
+            # Calculate hash of relevant data columns to detect content changes
+            data_hash <- ""
+            if (!is.null(self$data) && data_size > 0) {
+                # Select only the columns that will be used in the plot
+                relevant_cols <- c(
+                    self$options$x_var,
+                    self$options$y_var,
+                    self$options$group_var,
+                    self$options$color_var,
+                    self$options$size_var
+                )
+                relevant_cols <- relevant_cols[!sapply(relevant_cols, is.null)]
+                relevant_cols <- relevant_cols[relevant_cols != ""]
+                relevant_cols <- relevant_cols[relevant_cols %in% names(self$data)]
+
+                if (length(relevant_cols) > 0) {
+                    relevant_data <- self$data[, relevant_cols, drop = FALSE]
+                    # Use digest for fast, reliable hashing
+                    if (requireNamespace("digest", quietly = TRUE)) {
+                        data_hash <- digest::digest(relevant_data, algo = "xxhash64")
+                    } else {
+                        # Fallback: use a simple hash based on first/last rows
+                        # Not perfect but better than nothing
+                        data_hash <- paste(
+                            digest::digest(head(relevant_data, 10)),
+                            digest::digest(tail(relevant_data, 10)),
+                            sep = ":"
+                        )
+                    }
+                }
+            }
+
             cache_key <- paste(
                 self$options$x_var,
                 self$options$y_var,
@@ -32,6 +66,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 self$options$color_var,
                 self$options$size_var,
                 data_size,
+                data_hash,  # ✅ Now includes actual data content
                 sep = "|"
             )
 
@@ -359,10 +394,31 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 )
             }
             
-            # Apply color palette - fix transparency application
-            colors <- private$.get_color_palette(length(levels(plot_data[[group_var]])))
-            p <- p + ggplot2::scale_fill_manual(values = colors)
-            p <- p + ggplot2::scale_color_manual(values = colors)
+            # CRITICAL FIX: Calculate correct number of levels for each aesthetic
+            # - Hulls (fill) use group_var levels
+            # - Points (color) use color_mapping levels (could be different variable)
+            n_groups <- length(levels(plot_data[[group_var]]))
+            n_colors <- length(levels(plot_data[[color_mapping]]))
+
+            # Generate color palettes with correct sizes
+            fill_palette <- private$.get_color_palette(n_groups)
+            color_palette <- if (color_mapping == group_var) {
+                fill_palette  # Same variable - reuse palette
+            } else {
+                private$.get_color_palette(n_colors)  # Different variable - separate palette
+            }
+
+            # Apply fill scale for hulls (always based on group_var)
+            p <- p + ggplot2::scale_fill_manual(
+                values = fill_palette,
+                name = group_var
+            )
+
+            # Apply colour scale for points (based on color_mapping)
+            p <- p + ggplot2::scale_colour_manual(
+                values = color_palette,
+                name = if (color_mapping == group_var) group_var else self$options$color_var
+            )
             
             # Apply theme
             p <- p + private$.get_plot_theme()
@@ -607,10 +663,28 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     .groups = 'drop'
                 )
 
-            # Determine separation quality
-            mean_distances <- stats::dist(group_stats[c("x_mean", "y_mean")])
-            avg_distance <- mean(mean_distances)
-            separation_quality <- if (avg_distance > 2) "well-separated" else if (avg_distance > 1) "moderately separated" else "overlapping"
+            # CRITICAL FIX: Determine separation quality (handle single-group case)
+            # When only 1 group exists, dist() returns length-0 vector → mean() = NaN → crash
+            if (n_groups < 2) {
+                # Single group - no inter-group distances to calculate
+                avg_distance <- NA
+                separation_quality <- "single cohort (no comparison available)"
+            } else {
+                # Multiple groups - calculate distances between group means
+                mean_distances <- stats::dist(group_stats[c("x_mean", "y_mean")])
+                avg_distance <- mean(mean_distances)
+
+                # Determine separation based on average distance
+                separation_quality <- if (is.na(avg_distance)) {
+                    "unable to calculate"
+                } else if (avg_distance > 2) {
+                    "well-separated"
+                } else if (avg_distance > 1) {
+                    "moderately separated"
+                } else {
+                    "overlapping"
+                }
+            }
 
             # Generate copy-ready summary
             summary_html <- paste0(

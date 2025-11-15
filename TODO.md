@@ -49,6 +49,12 @@ echo "/document-function FUNC_NAME" | claude
 (menuGroup:\s.*)T2$
 $1D
 
+gemini: /chat share log.json 
+gemini: ctrl+s copy mode
+
+use gemini to make Readiness for Clinicians and Pathologists assessment and Use Case Example Generation for each function.
+
+
 
 you are an expert R-package and jamovi developer and an expert in biostatistics. critically evaluate decisioncombine function. is it mathematically and statistically accurate. is it ready to be used by clinicians and pathologists. is it ready for release?
 

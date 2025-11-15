@@ -11,7 +11,6 @@ finegray(
   eventOfInterest,
   censorLevel,
   covariates,
-  strata,
   groupVar,
   showCoefficientTable = TRUE,
   exponentiate = TRUE,
@@ -21,10 +20,6 @@ finegray(
   showCIFPlot = TRUE,
   cifPlotBy = "group",
   cifPlotTimes = "",
-  showStackedCIF = FALSE,
-  show1KMvsCIF = FALSE,
-  showCauseSpecific = FALSE,
-  causeSpecificComparison = FALSE,
   showRiskTable = TRUE,
   colorScheme = "default",
   cifConfInt = FALSE,
@@ -32,13 +27,7 @@ finegray(
   predictAt = "",
   predictCovariatePattern = "mean",
   customCovariateValues = "",
-  showPredictionTable = FALSE,
-  diagnosticPlots = FALSE,
-  showInfluence = FALSE,
-  bootstrapCI = FALSE,
-  nBootstrap = 500,
-  showInterpretation = TRUE,
-  compareToKM = FALSE
+  showInterpretation = TRUE
 )
 }
 \arguments{
@@ -57,9 +46,6 @@ interest. Other non-censored levels are treated as competing events.}
 
 \item{covariates}{Predictor variables for the regression model. Can include
 continuous and categorical variables.}
-
-\item{strata}{Optional stratification variable for stratified Fine-Gray
-models.}
 
 \item{groupVar}{Optional grouping variable for cumulative incidence plots.}
 
@@ -83,18 +69,6 @@ functions between groups (requires grouping variable).}
 \item{cifPlotTimes}{Comma-separated time points for CIF plot risk table. If
 empty, automatically determined.}
 
-\item{showStackedCIF}{Display stacked cumulative incidence plot showing all
-competing events.}
-
-\item{show1KMvsCIF}{Show comparison plot demonstrating bias in 1-KM
-approach.}
-
-\item{showCauseSpecific}{Display cause-specific hazard ratios alongside
-subdistribution HRs.}
-
-\item{causeSpecificComparison}{Side-by-side comparison table of sHR and
-csHR.}
-
 \item{showRiskTable}{Display numbers at risk below CIF plot.}
 
 \item{colorScheme}{Color palette for plots.}
@@ -111,21 +85,8 @@ predicted CIF at these times for covariate patterns.}
 \item{customCovariateValues}{Custom covariate values for predictions
 (comma-separated). Format: "age=65,stage=III,treatment=chemo"}
 
-\item{showPredictionTable}{Display table of predicted cumulative incidence
-at specified times.}
-
-\item{diagnosticPlots}{Display diagnostic plots (residuals, influence).}
-
-\item{showInfluence}{Identify influential observations.}
-
-\item{bootstrapCI}{Calculate bootstrap confidence intervals for sHR.}
-
-\item{nBootstrap}{Number of bootstrap samples for confidence intervals.}
-
 \item{showInterpretation}{Display interpretation guidance for Fine-Gray
 results.}
-
-\item{compareToKM}{Show why 1-KM overestimates cumulative incidence.}
 }
 \value{
 A results object containing:

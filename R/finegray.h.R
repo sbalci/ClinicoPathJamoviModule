@@ -11,7 +11,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             eventOfInterest = NULL,
             censorLevel = NULL,
             covariates = NULL,
-            strata = NULL,
             groupVar = NULL,
             showCoefficientTable = TRUE,
             exponentiate = TRUE,
@@ -21,10 +20,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showCIFPlot = TRUE,
             cifPlotBy = "group",
             cifPlotTimes = "",
-            showStackedCIF = FALSE,
-            show1KMvsCIF = FALSE,
-            showCauseSpecific = FALSE,
-            causeSpecificComparison = FALSE,
             showRiskTable = TRUE,
             colorScheme = "default",
             cifConfInt = FALSE,
@@ -32,13 +27,7 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             predictAt = "",
             predictCovariatePattern = "mean",
             customCovariateValues = "",
-            showPredictionTable = FALSE,
-            diagnosticPlots = FALSE,
-            showInfluence = FALSE,
-            bootstrapCI = FALSE,
-            nBootstrap = 500,
-            showInterpretation = TRUE,
-            compareToKM = FALSE, ...) {
+            showInterpretation = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -78,13 +67,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
-            private$..strata <- jmvcore::OptionVariable$new(
-                "strata",
-                strata,
-                suggested=list(
-                    "nominal"),
-                permitted=list(
                     "factor"))
             private$..groupVar <- jmvcore::OptionVariable$new(
                 "groupVar",
@@ -131,22 +113,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "cifPlotTimes",
                 cifPlotTimes,
                 default="")
-            private$..showStackedCIF <- jmvcore::OptionBool$new(
-                "showStackedCIF",
-                showStackedCIF,
-                default=FALSE)
-            private$..show1KMvsCIF <- jmvcore::OptionBool$new(
-                "show1KMvsCIF",
-                show1KMvsCIF,
-                default=FALSE)
-            private$..showCauseSpecific <- jmvcore::OptionBool$new(
-                "showCauseSpecific",
-                showCauseSpecific,
-                default=FALSE)
-            private$..causeSpecificComparison <- jmvcore::OptionBool$new(
-                "causeSpecificComparison",
-                causeSpecificComparison,
-                default=FALSE)
             private$..showRiskTable <- jmvcore::OptionBool$new(
                 "showRiskTable",
                 showRiskTable,
@@ -188,43 +154,16 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "customCovariateValues",
                 customCovariateValues,
                 default="")
-            private$..showPredictionTable <- jmvcore::OptionBool$new(
-                "showPredictionTable",
-                showPredictionTable,
-                default=FALSE)
-            private$..diagnosticPlots <- jmvcore::OptionBool$new(
-                "diagnosticPlots",
-                diagnosticPlots,
-                default=FALSE)
-            private$..showInfluence <- jmvcore::OptionBool$new(
-                "showInfluence",
-                showInfluence,
-                default=FALSE)
-            private$..bootstrapCI <- jmvcore::OptionBool$new(
-                "bootstrapCI",
-                bootstrapCI,
-                default=FALSE)
-            private$..nBootstrap <- jmvcore::OptionNumber$new(
-                "nBootstrap",
-                nBootstrap,
-                default=500,
-                min=100,
-                max=2000)
             private$..showInterpretation <- jmvcore::OptionBool$new(
                 "showInterpretation",
                 showInterpretation,
                 default=TRUE)
-            private$..compareToKM <- jmvcore::OptionBool$new(
-                "compareToKM",
-                compareToKM,
-                default=FALSE)
 
             self$.addOption(private$..survivalTime)
             self$.addOption(private$..status)
             self$.addOption(private$..eventOfInterest)
             self$.addOption(private$..censorLevel)
             self$.addOption(private$..covariates)
-            self$.addOption(private$..strata)
             self$.addOption(private$..groupVar)
             self$.addOption(private$..showCoefficientTable)
             self$.addOption(private$..exponentiate)
@@ -234,10 +173,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showCIFPlot)
             self$.addOption(private$..cifPlotBy)
             self$.addOption(private$..cifPlotTimes)
-            self$.addOption(private$..showStackedCIF)
-            self$.addOption(private$..show1KMvsCIF)
-            self$.addOption(private$..showCauseSpecific)
-            self$.addOption(private$..causeSpecificComparison)
             self$.addOption(private$..showRiskTable)
             self$.addOption(private$..colorScheme)
             self$.addOption(private$..cifConfInt)
@@ -245,13 +180,7 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..predictAt)
             self$.addOption(private$..predictCovariatePattern)
             self$.addOption(private$..customCovariateValues)
-            self$.addOption(private$..showPredictionTable)
-            self$.addOption(private$..diagnosticPlots)
-            self$.addOption(private$..showInfluence)
-            self$.addOption(private$..bootstrapCI)
-            self$.addOption(private$..nBootstrap)
             self$.addOption(private$..showInterpretation)
-            self$.addOption(private$..compareToKM)
         }),
     active = list(
         survivalTime = function() private$..survivalTime$value,
@@ -259,7 +188,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         eventOfInterest = function() private$..eventOfInterest$value,
         censorLevel = function() private$..censorLevel$value,
         covariates = function() private$..covariates$value,
-        strata = function() private$..strata$value,
         groupVar = function() private$..groupVar$value,
         showCoefficientTable = function() private$..showCoefficientTable$value,
         exponentiate = function() private$..exponentiate$value,
@@ -269,10 +197,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showCIFPlot = function() private$..showCIFPlot$value,
         cifPlotBy = function() private$..cifPlotBy$value,
         cifPlotTimes = function() private$..cifPlotTimes$value,
-        showStackedCIF = function() private$..showStackedCIF$value,
-        show1KMvsCIF = function() private$..show1KMvsCIF$value,
-        showCauseSpecific = function() private$..showCauseSpecific$value,
-        causeSpecificComparison = function() private$..causeSpecificComparison$value,
         showRiskTable = function() private$..showRiskTable$value,
         colorScheme = function() private$..colorScheme$value,
         cifConfInt = function() private$..cifConfInt$value,
@@ -280,20 +204,13 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         predictAt = function() private$..predictAt$value,
         predictCovariatePattern = function() private$..predictCovariatePattern$value,
         customCovariateValues = function() private$..customCovariateValues$value,
-        showPredictionTable = function() private$..showPredictionTable$value,
-        diagnosticPlots = function() private$..diagnosticPlots$value,
-        showInfluence = function() private$..showInfluence$value,
-        bootstrapCI = function() private$..bootstrapCI$value,
-        nBootstrap = function() private$..nBootstrap$value,
-        showInterpretation = function() private$..showInterpretation$value,
-        compareToKM = function() private$..compareToKM$value),
+        showInterpretation = function() private$..showInterpretation$value),
     private = list(
         ..survivalTime = NA,
         ..status = NA,
         ..eventOfInterest = NA,
         ..censorLevel = NA,
         ..covariates = NA,
-        ..strata = NA,
         ..groupVar = NA,
         ..showCoefficientTable = NA,
         ..exponentiate = NA,
@@ -303,10 +220,6 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showCIFPlot = NA,
         ..cifPlotBy = NA,
         ..cifPlotTimes = NA,
-        ..showStackedCIF = NA,
-        ..show1KMvsCIF = NA,
-        ..showCauseSpecific = NA,
-        ..causeSpecificComparison = NA,
         ..showRiskTable = NA,
         ..colorScheme = NA,
         ..cifConfInt = NA,
@@ -314,13 +227,7 @@ finegrayOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..predictAt = NA,
         ..predictCovariatePattern = NA,
         ..customCovariateValues = NA,
-        ..showPredictionTable = NA,
-        ..diagnosticPlots = NA,
-        ..showInfluence = NA,
-        ..bootstrapCI = NA,
-        ..nBootstrap = NA,
-        ..showInterpretation = NA,
-        ..compareToKM = NA)
+        ..showInterpretation = NA)
 )
 
 finegrayResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -686,8 +593,6 @@ finegrayBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param censorLevel Which level of status represents censoring.
 #' @param covariates Predictor variables for the regression model. Can include
 #'   continuous and categorical variables.
-#' @param strata Optional stratification variable for stratified Fine-Gray
-#'   models.
 #' @param groupVar Optional grouping variable for cumulative incidence plots.
 #' @param showCoefficientTable Display table of sub-hazard ratios with
 #'   confidence intervals.
@@ -701,14 +606,6 @@ finegrayBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cifPlotBy How to display the CIF plot.
 #' @param cifPlotTimes Comma-separated time points for CIF plot risk table. If
 #'   empty, automatically determined.
-#' @param showStackedCIF Display stacked cumulative incidence plot showing all
-#'   competing events.
-#' @param show1KMvsCIF Show comparison plot demonstrating bias in 1-KM
-#'   approach.
-#' @param showCauseSpecific Display cause-specific hazard ratios alongside
-#'   subdistribution HRs.
-#' @param causeSpecificComparison Side-by-side comparison table of sHR and
-#'   csHR.
 #' @param showRiskTable Display numbers at risk below CIF plot.
 #' @param colorScheme Color palette for plots.
 #' @param cifConfInt Display confidence bands around CIF curves.
@@ -718,15 +615,8 @@ finegrayBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param predictCovariatePattern Covariate pattern for predictions.
 #' @param customCovariateValues Custom covariate values for predictions
 #'   (comma-separated). Format: "age=65,stage=III,treatment=chemo"
-#' @param showPredictionTable Display table of predicted cumulative incidence
-#'   at specified times.
-#' @param diagnosticPlots Display diagnostic plots (residuals, influence).
-#' @param showInfluence Identify influential observations.
-#' @param bootstrapCI Calculate bootstrap confidence intervals for sHR.
-#' @param nBootstrap Number of bootstrap samples for confidence intervals.
 #' @param showInterpretation Display interpretation guidance for Fine-Gray
 #'   results.
-#' @param compareToKM Show why 1-KM overestimates cumulative incidence.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -760,7 +650,6 @@ finegray <- function(
     eventOfInterest,
     censorLevel,
     covariates,
-    strata,
     groupVar,
     showCoefficientTable = TRUE,
     exponentiate = TRUE,
@@ -770,10 +659,6 @@ finegray <- function(
     showCIFPlot = TRUE,
     cifPlotBy = "group",
     cifPlotTimes = "",
-    showStackedCIF = FALSE,
-    show1KMvsCIF = FALSE,
-    showCauseSpecific = FALSE,
-    causeSpecificComparison = FALSE,
     showRiskTable = TRUE,
     colorScheme = "default",
     cifConfInt = FALSE,
@@ -781,13 +666,7 @@ finegray <- function(
     predictAt = "",
     predictCovariatePattern = "mean",
     customCovariateValues = "",
-    showPredictionTable = FALSE,
-    diagnosticPlots = FALSE,
-    showInfluence = FALSE,
-    bootstrapCI = FALSE,
-    nBootstrap = 500,
-    showInterpretation = TRUE,
-    compareToKM = FALSE) {
+    showInterpretation = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("finegray requires jmvcore to be installed (restart may be required)")
@@ -795,7 +674,6 @@ finegray <- function(
     if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
     if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
-    if ( ! missing(strata)) strata <- jmvcore::resolveQuo(jmvcore::enquo(strata))
     if ( ! missing(groupVar)) groupVar <- jmvcore::resolveQuo(jmvcore::enquo(groupVar))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -803,11 +681,9 @@ finegray <- function(
             `if`( ! missing(survivalTime), survivalTime, NULL),
             `if`( ! missing(status), status, NULL),
             `if`( ! missing(covariates), covariates, NULL),
-            `if`( ! missing(strata), strata, NULL),
             `if`( ! missing(groupVar), groupVar, NULL))
 
     for (v in status) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in strata) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in groupVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- finegrayOptions$new(
@@ -816,7 +692,6 @@ finegray <- function(
         eventOfInterest = eventOfInterest,
         censorLevel = censorLevel,
         covariates = covariates,
-        strata = strata,
         groupVar = groupVar,
         showCoefficientTable = showCoefficientTable,
         exponentiate = exponentiate,
@@ -826,10 +701,6 @@ finegray <- function(
         showCIFPlot = showCIFPlot,
         cifPlotBy = cifPlotBy,
         cifPlotTimes = cifPlotTimes,
-        showStackedCIF = showStackedCIF,
-        show1KMvsCIF = show1KMvsCIF,
-        showCauseSpecific = showCauseSpecific,
-        causeSpecificComparison = causeSpecificComparison,
         showRiskTable = showRiskTable,
         colorScheme = colorScheme,
         cifConfInt = cifConfInt,
@@ -837,13 +708,7 @@ finegray <- function(
         predictAt = predictAt,
         predictCovariatePattern = predictCovariatePattern,
         customCovariateValues = customCovariateValues,
-        showPredictionTable = showPredictionTable,
-        diagnosticPlots = diagnosticPlots,
-        showInfluence = showInfluence,
-        bootstrapCI = bootstrapCI,
-        nBootstrap = nBootstrap,
-        showInterpretation = showInterpretation,
-        compareToKM = compareToKM)
+        showInterpretation = showInterpretation)
 
     analysis <- finegrayClass$new(
         options = options,

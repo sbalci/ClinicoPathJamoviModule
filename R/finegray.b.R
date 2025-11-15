@@ -18,6 +18,15 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .fgModel = NULL,
         .cifData = NULL,
         .grayTestResults = NULL,
+        .competingEventMap = NULL,  # Stores mapping of competing event names to codes
+
+        # Variable name escaping utility
+        .escapeVar = function(x) {
+            if (is.character(x)) {
+                x <- gsub("[^A-Za-z0-9_]", "_", make.names(x))
+            }
+            return(x)
+        },
 
         # Initialize analysis
         .init = function() {
@@ -93,9 +102,9 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             tryCatch({
 
-                # Get variables
-                timeVar <- self$options$survivalTime
-                statusVar <- self$options$status
+                # Get variables (with escaping for special characters)
+                timeVar <- private$.escapeVar(self$options$survivalTime)
+                statusVar <- private$.escapeVar(self$options$status)
 
                 # Extract data
                 time <- jmvcore::toNumeric(self$data[[timeVar]])
@@ -120,39 +129,54 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 eventLevel <- self$options$eventOfInterest
                 censorLevel <- self$options$censorLevel
 
-                # Create numeric status for Fine-Gray
-                # 0 = censored, 1 = event of interest, 2 = competing event
+                # CRITICAL FIX: Create numeric status for Fine-Gray with DISTINCT competing causes
+                # 0 = censored, 1 = event of interest, 2, 3, 4... = distinct competing events
+                # Previous code collapsed all competing events into 2, which is mathematically invalid
                 status_numeric <- rep(NA, length(status))
                 status_numeric[status == censorLevel] <- 0
                 status_numeric[status == eventLevel] <- 1
-                # All other levels are competing events
+
+                # Assign DISTINCT codes to each competing event (2, 3, 4, ...)
                 other_levels <- setdiff(levels(status), c(censorLevel, eventLevel))
-                for (lev in other_levels) {
-                    status_numeric[status == lev] <- 2
+                for (i in seq_along(other_levels)) {
+                    lev <- other_levels[i]
+                    status_numeric[status == lev] <- i + 1  # 2, 3, 4, ... for each competing cause
                 }
+
+                # Store competing event mapping for later reference
+                competing_event_map <- setNames(2:(length(other_levels) + 1), other_levels)
+                private$.competingEventMap <- competing_event_map
 
                 # Create data frame
                 data <- data.frame(
                     time = time,
                     status = status,
-                    status_numeric = status_numeric
+                    status_numeric = status_numeric,
+                    status_label = status  # Keep original labels for plotting
                 )
 
-                # Add covariates if specified
+                # Add covariates if specified (with escaping)
                 if (!is.null(self$options$covariates) && length(self$options$covariates) > 0) {
                     for (cov in self$options$covariates) {
-                        data[[cov]] <- self$data[[cov]]
+                        cov_escaped <- private$.escapeVar(cov)
+                        data[[cov]] <- self$data[[cov_escaped]]
                     }
                 }
 
-                # Add grouping variable if specified
+                # Add grouping variable if specified (with escaping)
                 if (!is.null(self$options$groupVar)) {
-                    data$group <- self$data[[self$options$groupVar]]
+                    groupVar_escaped <- private$.escapeVar(self$options$groupVar)
+                    data$group <- self$data[[groupVar_escaped]]
                 }
 
-                # Add strata variable if specified
+                # CRITICAL FIX: Strata option removed - cmprsk::crr() does not support stratification
+                # Warn if user has strata option set (backward compatibility)
                 if (!is.null(self$options$strata)) {
-                    data$strata <- self$data[[self$options$strata]]
+                    jmvcore::warning(paste(
+                        "Stratification is not supported by Fine-Gray models (cmprsk::crr).",
+                        "Consider using the stratification variable as a covariate instead,",
+                        "or fitting separate models for each stratum."
+                    ))
                 }
 
                 # Remove rows with NA
@@ -231,7 +255,9 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 p <- 2 * (1 - pnorm(abs(z)))
 
                 # Calculate confidence intervals
-                conf_level <- self$options$confLevel
+                # CRITICAL FIX: Convert percentage to proportion before qnorm
+                # confLevel is stored as percentage (e.g., 95), must convert to 0.95
+                conf_level <- self$options$confLevel / 100
                 z_crit <- qnorm((1 + conf_level) / 2)
 
                 ci_lower <- coef - z_crit * se
@@ -319,12 +345,24 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     value = n_events
                 ))
 
-                # Number of competing events
-                n_competing <- sum(model$fstatus == 2)
-                fitTable$addRow(rowKey = "competing", values = list(
-                    statistic = "Competing Events",
-                    value = n_competing
-                ))
+                # CRITICAL FIX: Report each competing event separately
+                if (!is.null(private$.competingEventMap) && length(private$.competingEventMap) > 0) {
+                    for (event_name in names(private$.competingEventMap)) {
+                        event_code <- private$.competingEventMap[event_name]
+                        n_competing <- sum(model$fstatus == event_code)
+                        fitTable$addRow(rowKey = paste0("competing_", event_code), values = list(
+                            statistic = paste0("Competing: ", event_name),
+                            value = n_competing
+                        ))
+                    }
+                } else {
+                    # Fallback for backward compatibility (if no mapping stored)
+                    n_competing_total <- sum(model$fstatus >= 2)
+                    fitTable$addRow(rowKey = "competing", values = list(
+                        statistic = "Competing Events (total)",
+                        value = n_competing_total
+                    ))
+                }
 
             }, error = function(e) {
                 jmvcore::warning(paste("Error creating model fit table:", e$message))
@@ -390,19 +428,37 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         ))
                     }
 
-                    # Competing events
-                    if ("2" %in% rownames(tests)) {
-                        test_result <- tests["2", ]
+                    # CRITICAL FIX: Report Gray's test for EACH distinct competing event
+                    if (!is.null(private$.competingEventMap) && length(private$.competingEventMap) > 0) {
+                        for (event_name in names(private$.competingEventMap)) {
+                            event_code <- as.character(private$.competingEventMap[event_name])
+                            if (event_code %in% rownames(tests)) {
+                                test_result <- tests[event_code, ]
 
-                        grayTable$addRow(rowKey = "competing", values = list(
-                            event_type = "Competing Event",
-                            chisq = test_result["stat"],
-                            df = test_result["df"],
-                            p_value = test_result["pv"]
-                        ))
+                                grayTable$addRow(rowKey = paste0("competing_", event_code), values = list(
+                                    event_type = paste0("Competing: ", event_name),
+                                    chisq = test_result["stat"],
+                                    df = test_result["df"],
+                                    p_value = test_result["pv"]
+                                ))
+                            }
+                        }
+                    } else {
+                        # Fallback: check for any competing events in tests
+                        for (row_name in rownames(tests)) {
+                            if (row_name != "1" && row_name != "0") {
+                                test_result <- tests[row_name, ]
+                                grayTable$addRow(rowKey = paste0("competing_", row_name), values = list(
+                                    event_type = paste0("Competing Event ", row_name),
+                                    chisq = test_result["stat"],
+                                    df = test_result["df"],
+                                    p_value = test_result["pv"]
+                                ))
+                            }
+                        }
                     }
 
-                    grayTable$setNote("gray", "Gray's test compares cumulative incidence curves between groups")
+                    grayTable$setNote("gray", "Gray's test compares cumulative incidence curves between groups for each event type")
                 }
 
             }, error = function(e) {
@@ -431,9 +487,20 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                             event_type <- gsub(".*\\s", "", group_name)
                             group_label <- gsub("\\s.*", "", group_name)
 
+                            # CRITICAL FIX: Extract confidence bounds from cuminc object
                             df <- data.frame(
                                 time = cifData[[i]]$time,
                                 cif = cifData[[i]]$est,
+                                ci_lower = if (!is.null(cifData[[i]]$var)) {
+                                    pmax(0, cifData[[i]]$est - 1.96 * sqrt(cifData[[i]]$var))
+                                } else {
+                                    NA
+                                },
+                                ci_upper = if (!is.null(cifData[[i]]$var)) {
+                                    pmin(1, cifData[[i]]$est + 1.96 * sqrt(cifData[[i]]$var))
+                                } else {
+                                    NA
+                                },
                                 group = group_label,
                                 event = event_type
                             )
@@ -447,9 +514,20 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         if (is.list(cifData[[i]])) {
                             event_type <- names(cifData)[i]
 
+                            # CRITICAL FIX: Extract confidence bounds from cuminc object
                             df <- data.frame(
                                 time = cifData[[i]]$time,
                                 cif = cifData[[i]]$est,
+                                ci_lower = if (!is.null(cifData[[i]]$var)) {
+                                    pmax(0, cifData[[i]]$est - 1.96 * sqrt(cifData[[i]]$var))
+                                } else {
+                                    NA
+                                },
+                                ci_upper = if (!is.null(cifData[[i]]$var)) {
+                                    pmin(1, cifData[[i]]$est + 1.96 * sqrt(cifData[[i]]$var))
+                                } else {
+                                    NA
+                                },
                                 event = event_type
                             )
 
@@ -460,16 +538,35 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 if (is.null(plot_data)) return()
 
-                # Filter for event of interest
-                plot_data <- plot_data[plot_data$event == "1", ]
+                # CRITICAL FIX: Show ALL competing event CIFs, not just event of interest
+                # Old code filtered to event == "1", hiding all competing risks
+                # Now we show all events and distinguish them by color/linetype
 
-                # Create plot
-                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = cif)) +
+                # Add readable event labels using the mapping
+                plot_data$event_label <- plot_data$event
+                if (!is.null(private$.competingEventMap)) {
+                    plot_data$event_label[plot_data$event == "1"] <- "Event of Interest"
+                    for (event_name in names(private$.competingEventMap)) {
+                        event_code <- as.character(private$.competingEventMap[event_name])
+                        plot_data$event_label[plot_data$event == event_code] <- paste0("Competing: ", event_name)
+                    }
+                } else {
+                    # Fallback labels
+                    plot_data$event_label[plot_data$event == "1"] <- "Event of Interest"
+                    plot_data$event_label[plot_data$event != "1"] <- "Competing Event"
+                }
+
+                # Create plot with event type distinguished by color and linetype
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = cif,
+                                                             color = event_label,
+                                                             linetype = event_label)) +
                     ggplot2::geom_step(size = 1.2) +
                     ggplot2::labs(
                         x = "Time",
                         y = "Cumulative Incidence",
-                        title = "Cumulative Incidence Function"
+                        title = "Cumulative Incidence Functions",
+                        color = "Event Type",
+                        linetype = "Event Type"
                     ) +
                     ggplot2::theme_minimal() +
                     ggplot2::theme(
@@ -479,11 +576,13 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     ) +
                     ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent)
 
-                # Add grouping if specified
+                # Add grouping if specified (facet by group)
                 if (!is.null(self$options$groupVar)) {
-                    p <- p + ggplot2::aes(color = group)
-                    p <- p + private$.getColorScale()
+                    p <- p + ggplot2::facet_wrap(~ group)
                 }
+
+                # Apply color scheme
+                p <- p + private$.getColorScale()
 
                 # Add confidence intervals if requested
                 if (self$options$cifConfInt && !is.null(plot_data$ci_lower)) {
@@ -721,9 +820,24 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Event counts
             event_counts <- table(data$status_numeric)
             html <- paste0(html, "<p><b>Events of interest:</b> ", event_counts["1"], "</p>")
-            if ("2" %in% names(event_counts)) {
-                html <- paste0(html, "<p><b>Competing events:</b> ", event_counts["2"], "</p>")
+
+            # CRITICAL FIX: Report each competing event separately
+            if (!is.null(private$.competingEventMap) && length(private$.competingEventMap) > 0) {
+                for (event_name in names(private$.competingEventMap)) {
+                    event_code <- as.character(private$.competingEventMap[event_name])
+                    if (event_code %in% names(event_counts)) {
+                        html <- paste0(html, "<p><b>Competing (", event_name, "):</b> ",
+                                     event_counts[event_code], "</p>")
+                    }
+                }
+            } else {
+                # Fallback: report total competing events
+                if ("2" %in% names(event_counts)) {
+                    competing_total <- sum(event_counts[names(event_counts) >= "2"])
+                    html <- paste0(html, "<p><b>Competing events (total):</b> ", competing_total, "</p>")
+                }
             }
+
             html <- paste0(html, "<p><b>Censored:</b> ", event_counts["0"], "</p>")
 
             # Model type

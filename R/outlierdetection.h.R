@@ -14,11 +14,11 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             zscore_threshold = 3.29,
             iqr_multiplier = 1.7,
             confidence_level = 0.999,
-            show_outlier_table = TRUE,
-            show_method_comparison = TRUE,
-            show_exclusion_summary = TRUE,
-            show_visualization = TRUE,
-            show_interpretation = TRUE, ...) {
+            show_outlier_table = FALSE,
+            show_method_comparison = FALSE,
+            show_exclusion_summary = FALSE,
+            show_visualization = FALSE,
+            show_interpretation = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -89,23 +89,23 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..show_outlier_table <- jmvcore::OptionBool$new(
                 "show_outlier_table",
                 show_outlier_table,
-                default=TRUE)
+                default=FALSE)
             private$..show_method_comparison <- jmvcore::OptionBool$new(
                 "show_method_comparison",
                 show_method_comparison,
-                default=TRUE)
+                default=FALSE)
             private$..show_exclusion_summary <- jmvcore::OptionBool$new(
                 "show_exclusion_summary",
                 show_exclusion_summary,
-                default=TRUE)
+                default=FALSE)
             private$..show_visualization <- jmvcore::OptionBool$new(
                 "show_visualization",
                 show_visualization,
-                default=TRUE)
+                default=FALSE)
             private$..show_interpretation <- jmvcore::OptionBool$new(
                 "show_interpretation",
                 show_interpretation,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..method_category)
@@ -351,11 +351,11 @@ outlierdetection <- function(
     zscore_threshold = 3.29,
     iqr_multiplier = 1.7,
     confidence_level = 0.999,
-    show_outlier_table = TRUE,
-    show_method_comparison = TRUE,
-    show_exclusion_summary = TRUE,
-    show_visualization = TRUE,
-    show_interpretation = TRUE) {
+    show_outlier_table = FALSE,
+    show_method_comparison = FALSE,
+    show_exclusion_summary = FALSE,
+    show_visualization = FALSE,
+    show_interpretation = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("outlierdetection requires jmvcore to be installed (restart may be required)")

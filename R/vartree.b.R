@@ -218,10 +218,37 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 sline <- TRUE
             }
 
-            # Exclude NA handling - Enhanced data preprocessing
+            # CRITICAL FIX: Missing Value Handling with Transparency
+            # Capture original counts BEFORE exclusion
+            original_n <- nrow(mydata)
+            original_complete <- sum(complete.cases(mydata[, myvars, drop = FALSE]))
+
             excl <- self$options$excl
+            excluded_n <- 0
+
             if (excl) {
                 mydata <- jmvcore::naOmit(mydata)
+                excluded_n <- original_n - nrow(mydata)
+
+                # CRITICAL WARNING: Report case loss to user
+                if (excluded_n > 0) {
+                    excluded_pct <- round(100 * excluded_n / original_n, 1)
+                    warning_msg <- paste0(
+                        "\n\n⚠️ CASE EXCLUSION: ",
+                        excluded_n, " cases (", excluded_pct, "%) ",
+                        "excluded due to missing values.\n",
+                        "Original N = ", original_n, ", ",
+                        "Final N = ", nrow(mydata), "\n",
+                        "Tree counts and percentages reflect the ",
+                        nrow(mydata), " complete cases only."
+                    )
+                    # Store for display in interpretation
+                    private$.excluded_warning <- warning_msg
+                } else {
+                    private$.excluded_warning <- NULL
+                }
+            } else {
+                private$.excluded_warning <- NULL
             }
 
             # Prepare Data
@@ -241,12 +268,26 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare Variables - Use cleaned variable names for processing
             myvars1 <- myvars
 
-            # Handle Percentage Variable - Enhanced percentage handling
+            # CRITICAL FIX: Handle Summary Variables Correctly
+            # Initialize xsummary as NULL
+            xsummary <- NULL
+
+            # Handle Percentage Variable - FIXED: Now properly passed to vtree
             if (!is.null(percvar) && !is.null(self$options$percvarLevel)) {
-                xsummary <- paste0(percvar, "=", self$options$percvarLevel)
+                # Build percentage summary spec following vtree syntax
+                # Format: "varname=level" tells vtree to show % for that level
+                perc_spec <- paste0(percvar, "=", self$options$percvarLevel)
+
+                # If we already have a summary, combine them; otherwise use perc spec
+                if (!is.null(xsummary)) {
+                    xsummary <- paste0(xsummary, "\n", perc_spec)
+                } else {
+                    xsummary <- perc_spec
+                }
             }
 
             # Handle Summary Variable - Enhanced statistical summaries
+            # CRITICAL FIX: Don't overwrite percvar summary, append instead
             if (!is.null(summaryvar)) {
                 summarylocation <- self$options$summarylocation
 
@@ -256,13 +297,20 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     summarylocation1 <- "%allnodes%"
                 }
 
-                xsummary <- paste0(
+                summ_spec <- paste0(
                     summaryvar, " \\n\\n",
                     summaryvar, "\\n",
                     "mean=%mean%", "\\n",
                     "SD=%SD%", "\\n",
                     summarylocation1, "\\n"
                 )
+
+                # CRITICAL FIX: Combine with percvar summary if it exists
+                if (!is.null(xsummary)) {
+                    xsummary <- paste0(xsummary, "\n", summ_spec)
+                } else {
+                    xsummary <- summ_spec
+                }
             }
 
             # Handle Prune Below - Enhanced pruning controls
@@ -368,42 +416,81 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste0("• ", .("The tree displays hierarchical relationships between categorical variables"), "<br>"),
                 paste0("• ", .("Each node shows counts and percentages for variable combinations"), "<br>")
             )
-            
+
+            # CRITICAL FIX: Display missing value exclusion warning if applicable
+            if (!is.null(private$.excluded_warning)) {
+                interp_parts <- c(interp_parts,
+                    paste0("<br><div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ff9800; margin: 10px 0;'>",
+                           "<pre>", private$.excluded_warning, "</pre>",
+                           "</div><br>"))
+            }
+
             if (self$options$pct) {
                 interp_parts <- c(interp_parts, paste0("• ", .("Percentages are calculated relative to parent nodes"), "<br>"))
             }
-            
+
             if (!is.null(self$options$summaryvar)) {
                 interp_parts <- c(interp_parts, paste0("• ", .("Statistical summaries (mean, SD) are shown for the continuous variable"), "<br>"))
             }
-            
+
+            # CRITICAL FIX: Only claim percvar works if it's actually wired
+            if (!is.null(self$options$percvar) && !is.null(self$options$percvarLevel)) {
+                interp_parts <- c(interp_parts, paste0("• ", .("Percentage calculated for '"), self$options$percvarLevel,
+                                                       .("' level of '"), self$options$percvar, .("'"), "<br>"))
+            }
+
             # Style-specific notes
             style_note <- switch(self$options$style,
                 "clean" = paste0("• ", .("Clean style applied: minimal colors, focus on data structure"), "<br>"),
                 "minimal" = paste0("• ", .("Minimal style applied: simplified layout with same-line presentation"), "<br>"),
                 NULL
             )
-            
+
             if (!is.null(style_note)) {
                 interp_parts <- c(interp_parts, style_note)
             }
-            
+
             interp_parts <- c(interp_parts, paste0("• ", .("Tree structure helps identify patterns and relationships in categorical data"), "<br>"))
-            
+
             return(paste(interp_parts, collapse = ""))
         },
         
-        # Helper function to build conditional options for pruning/following
+        # CRITICAL FIX: Helper function to build conditional options for pruning/following
+        # Fixed to avoid composeTerm() on level values and allow single-level pruning
         .buildConditionalOption = function(variable, level1, level2) {
-            if (is.null(variable) || is.null(level1) || is.null(level2)) {
+            # If no variable selected, return NULL
+            if (is.null(variable)) {
                 return(NULL)
             }
-            
+
+            # CRITICAL FIX: Only use composeTerm() on the VARIABLE name
+            # Do NOT use it on level values - they should be passed as-is
             variable_term <- jmvcore::composeTerm(variable)
-            level1_term <- jmvcore::composeTerm(level1)
-            level2_term <- jmvcore::composeTerm(level2)
-            
-            return(paste0("list(", variable_term, "=c('", level1_term, "','", level2_term, "'))"))
+
+            # Build level vector based on what's provided
+            levels_to_use <- c()
+
+            # CRITICAL FIX: Allow single-level pruning (level1 only)
+            if (!is.null(level1) && nchar(as.character(level1)) > 0) {
+                # Don't wrap level1 in composeTerm - use raw value
+                levels_to_use <- c(levels_to_use, level1)
+            }
+
+            if (!is.null(level2) && nchar(as.character(level2)) > 0) {
+                # Don't wrap level2 in composeTerm - use raw value
+                levels_to_use <- c(levels_to_use, level2)
+            }
+
+            # If no levels specified, return NULL
+            if (length(levels_to_use) == 0) {
+                return(NULL)
+            }
+
+            # Build the list spec correctly:
+            # list(varname = c("Level1", "Level2"))
+            # NOT list(`varname` = c('`Level1`', '`Level2`'))
+            levels_quoted <- paste0("'", levels_to_use, "'", collapse = ",")
+            return(paste0("list(", variable_term, "=c(", levels_quoted, "))"))
         },
         
         # Custom R syntax generation to handle variable names with spaces
@@ -459,15 +546,13 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add specific guidance based on analysis setup
             if (!is.null(self$options$summaryvar)) {
-                summary_parts <- c(summary_parts, 
+                summary_parts <- c(summary_parts,
                     paste0("• ", .("Statistical summaries show mean and standard deviation for continuous measures"), "<br>"))
             }
-            
-            if (!is.null(self$options$percvar)) {
-                summary_parts <- c(summary_parts, 
-                    paste0("• ", .("Percentages calculated for the selected outcome variable"), "<br>"))
-            }
-            
+
+            # CRITICAL FIX: Removed false percvar claim
+            # Accurate percvar message now in .generateInterpretation() only when actually working
+
             summary_parts <- c(summary_parts, "</div>")
             return(paste(summary_parts, collapse = ""))
         },
@@ -492,6 +577,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             about_parts <- c(about_parts, "</div>")
             return(paste(about_parts, collapse = ""))
-        }
+        },
+
+        # Private field to store exclusion warning message
+        .excluded_warning = NULL
     )
 )

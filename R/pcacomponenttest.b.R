@@ -45,18 +45,24 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 todo <- glue::glue(
                 "<br>Welcome to ClinicoPath
                 <br><br>
-                This tool performs permutation-based significance testing for Principal Components.
+                This tool performs <b>SEQUENTIAL</b> permutation-based significance testing for Principal Components.
                 <br><br>
-                <b>How it works:</b>
+                <b>How it works (Buja & Eyuboglu 1992 method):</b>
                 <ul>
-                <li>Tests which principal components explain more variance than random</li>
-                <li>Uses nonparametric permutation to generate null distribution</li>
+                <li><b>Sequential testing:</b> Each component tested after removing variance from previous significant components</li>
+                <li><b>Stops early:</b> Testing stops at first non-significant component (prevents Type I error inflation)</li>
+                <li>Uses nonparametric permutation to generate null distribution for each component</li>
                 <li>Provides p-values for objective component selection</li>
                 </ul>
                 <br>
-                Based on Buja & Eyuboglu (1992) and syndRomics package methods.
-                <br><br>
-                <b>Required:</b> Select at least 3 continuous variables for PCA.
+                <b>⚠️ CRITICAL REQUIREMENTS:</b>
+                <ul>
+                <li><b>Numeric variables only:</b> Factors and characters will be REJECTED (no silent coercion)</li>
+                <li><b>Enable centering/scaling:</b> Required for correlation-based interpretation (standard parallel analysis)</li>
+                <li>Without centering/scaling: Test compares RAW VARIANCE, not correlation structure</li>
+                </ul>
+                <br>
+                <b>Required:</b> Select at least 3 continuous numeric variables for PCA.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -98,12 +104,43 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Remove missing values
             pca_data <- na.omit(pca_data)
 
+            # CRITICAL FIX: Validate numeric inputs (prevent silent factor coercion)
+            non_numeric <- sapply(pca_data, function(x) !is.numeric(x))
+            if (any(non_numeric)) {
+                non_numeric_vars <- names(pca_data)[non_numeric]
+                stop(paste0(
+                    'ERROR: Non-numeric variables detected: ',
+                    paste(non_numeric_vars, collapse = ', '),
+                    '\n\nPCA requires numeric variables only. ',
+                    'Factors and character variables cannot be used. ',
+                    'Please select only continuous numeric variables.'
+                ))
+            }
+
             # Convert to numeric matrix
             pca_matrix <- as.matrix(sapply(pca_data, as.numeric))
 
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
                 stop('Insufficient data for PCA. Need at least 3 complete observations.')
+            }
+
+            # CRITICAL FIX: Warn if centering/scaling disabled
+            if (!self$options$center || !self$options$scale) {
+                # Check if variables have different scales
+                var_ranges <- apply(pca_matrix, 2, function(x) diff(range(x, na.rm = TRUE)))
+                var_means <- apply(pca_matrix, 2, mean, na.rm = TRUE)
+
+                if (max(var_ranges) / min(var_ranges) > 10 || max(abs(var_means)) > 1e-6) {
+                    jmvcore::reject(paste0(
+                        'WARNING: Centering and/or scaling are disabled, but variables have different scales.\n\n',
+                        '⚠️ CRITICAL: Without centering/scaling, the permutation test compares RAW VARIANCE, ',
+                        'not correlation structure. Variables with larger variance will dominate the analysis.\n\n',
+                        'RECOMMENDATION: Enable "Center Variables" and "Scale Variables" options for valid results.\n\n',
+                        'If you proceed without centering/scaling, interpret results as testing raw variance contributions, ',
+                        'NOT correlation-based structure (which is the standard interpretation of parallel analysis).'
+                    ))
+                }
             }
 
             # Run original PCA
@@ -118,49 +155,90 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint
             private$.checkpoint()
 
-            # Run permutations
-            P <- self$options$nperm
-            per_list <- list()
+            # CRITICAL FIX: Implement sequential permutation test (Buja-Eyuboglu method)
+            # For each component, remove variance from previously significant components
+            # before generating null distribution
 
-            for (i in 1:P) {
+            P <- self$options$nperm
+            mean_VAF <- numeric(ndim)
+            ci_low <- numeric(ndim)
+            ci_high <- numeric(ndim)
+            pvalue <- numeric(ndim)
+            conf <- self$options$conflevel
+
+            # Track residual data after removing significant components
+            residual_data <- pca_matrix
+            components_removed <- 0
+
+            for (comp_idx in 1:ndim) {
                 # Checkpoint periodically
-                if (i %% 50 == 0) {
+                if (comp_idx %% 2 == 0) {
                     private$.checkpoint()
                 }
 
-                # Permute each variable independently
-                perm_data <- as.data.frame(pca_matrix)
-                perm_data <- perm_data %>% mutate_all(.funs = sample)
+                # Run permutations on residual data
+                per_vaf <- numeric(P)
 
-                # Run PCA on permuted data
-                tryCatch({
-                    pca_per <- prcomp(perm_data, scale. = self$options$scale, center = self$options$center)
-                    VAF_per <- pca_per$sdev^2 / sum(pca_per$sdev^2)
-                    per_list[[i]] <- VAF_per[1:ndim]
-                }, error = function(e) {
-                    # Skip this permutation if error
-                    per_list[[i]] <- rep(NA, ndim)
-                })
+                for (i in 1:P) {
+                    # Checkpoint every 50 permutations
+                    if (i %% 50 == 0) {
+                        private$.checkpoint()
+                    }
+
+                    # Permute each variable independently in residual space
+                    perm_data <- as.data.frame(residual_data)
+                    perm_data <- perm_data %>% mutate_all(.funs = sample)
+
+                    # Run PCA on permuted residual data
+                    tryCatch({
+                        pca_per <- prcomp(perm_data, scale. = FALSE, center = FALSE)  # Already preprocessed
+                        VAF_per <- pca_per$sdev^2 / sum(pca_per$sdev^2)
+                        # Take FIRST component of permuted residual (this is the null for current component)
+                        per_vaf[i] <- VAF_per[1]
+                    }, error = function(e) {
+                        # Skip this permutation if error
+                        per_vaf[i] <- NA
+                    })
+                }
+
+                # Calculate statistics for this component
+                mean_VAF[comp_idx] <- mean(per_vaf, na.rm = TRUE)
+                ci_low[comp_idx] <- quantile(per_vaf, (1 - conf) / 2, na.rm = TRUE)
+                ci_high[comp_idx] <- quantile(per_vaf, 1 - (1 - conf) / 2, na.rm = TRUE)
+
+                # Calculate p-value: proportion of permuted VAFs >= observed VAF
+                pvalue[comp_idx] <- (sum(per_vaf >= original_VAF[comp_idx], na.rm = TRUE) + 1) / (P + 1)
+
+                # Sequential step: If component is significant, remove it before testing next
+                # Use alpha = 0.05 as sequential cutoff (before multiple testing adjustment)
+                if (pvalue[comp_idx] < 0.05 && comp_idx < ndim) {
+                    # Project out this component's variance from residual data
+                    # residual_data = residual_data - (residual_data %*% loading) %*% t(loading)
+                    loading <- pca$rotation[, comp_idx, drop = FALSE]
+                    projection <- residual_data %*% loading %*% t(loading)
+                    residual_data <- residual_data - projection
+                    components_removed <- components_removed + 1
+                } else if (comp_idx < ndim) {
+                    # If component not significant, STOP sequential testing
+                    # Set remaining components to NA (conservative approach)
+                    for (remaining in (comp_idx + 1):ndim) {
+                        mean_VAF[remaining] <- NA
+                        ci_low[remaining] <- NA
+                        ci_high[remaining] <- NA
+                        pvalue[remaining] <- NA
+                    }
+                    break
+                }
             }
 
             # Checkpoint
             private$.checkpoint()
 
-            # Convert to data frame
-            df_per <- as.data.frame(do.call(rbind, per_list))
+            # Store permuted results as data frame (for compatibility with existing plot code)
+            # Note: This is simplified for sequential testing - each component tested against its own null
+            df_per <- data.frame(matrix(NA, nrow = P, ncol = ndim))
             colnames(df_per) <- paste0('PC', 1:ndim)
-
-            # Calculate statistics
-            mean_VAF <- colMeans(df_per, na.rm = TRUE)
-            conf <- self$options$conflevel
-
-            ci_low <- apply(df_per, 2, function(x) quantile(x, (1 - conf) / 2, na.rm = TRUE))
-            ci_high <- apply(df_per, 2, function(x) quantile(x, 1 - (1 - conf) / 2, na.rm = TRUE))
-
-            # Calculate p-values
-            pvalue <- sapply(1:ndim, function(x) {
-                (sum(df_per[, x] > original_VAF[x], na.rm = TRUE) + 1) / (P + 1)
-            })
+            # Store only mean/CI since full permutation matrix not meaningful in sequential test
 
             # Adjust p-values
             if (self$options$adjustmethod != 'none') {
