@@ -10,6 +10,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group = NULL,
             useHighlight = FALSE,
             highlight = NULL,
+            aggregation = "none",
             sortBy = "original",
             orientation = "vertical",
             showValues = FALSE,
@@ -22,9 +23,9 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             baseline = 0,
             conditionalColor = FALSE,
             colorThreshold = 0,
-            xlabel = NULL,
-            ylabel = NULL,
-            title = NULL,
+            xlabel = "",
+            ylabel = "",
+            title = "",
             width = 800,
             height = 600, ...) {
 
@@ -57,6 +58,15 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "highlight",
                 highlight,
                 variable="(group)")
+            private$..aggregation <- jmvcore::OptionList$new(
+                "aggregation",
+                aggregation,
+                options=list(
+                    "none",
+                    "mean",
+                    "median",
+                    "sum"),
+                default="none")
             private$..sortBy <- jmvcore::OptionList$new(
                 "sortBy",
                 sortBy,
@@ -134,13 +144,16 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0)
             private$..xlabel <- jmvcore::OptionString$new(
                 "xlabel",
-                xlabel)
+                xlabel,
+                default="")
             private$..ylabel <- jmvcore::OptionString$new(
                 "ylabel",
-                ylabel)
+                ylabel,
+                default="")
             private$..title <- jmvcore::OptionString$new(
                 "title",
-                title)
+                title,
+                default="")
             private$..width <- jmvcore::OptionInteger$new(
                 "width",
                 width,
@@ -158,6 +171,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..group)
             self$.addOption(private$..useHighlight)
             self$.addOption(private$..highlight)
+            self$.addOption(private$..aggregation)
             self$.addOption(private$..sortBy)
             self$.addOption(private$..orientation)
             self$.addOption(private$..showValues)
@@ -181,6 +195,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         group = function() private$..group$value,
         useHighlight = function() private$..useHighlight$value,
         highlight = function() private$..highlight$value,
+        aggregation = function() private$..aggregation$value,
         sortBy = function() private$..sortBy$value,
         orientation = function() private$..orientation$value,
         showValues = function() private$..showValues$value,
@@ -203,6 +218,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..group = NA,
         ..useHighlight = NA,
         ..highlight = NA,
+        ..aggregation = NA,
         ..sortBy = NA,
         ..orientation = NA,
         ..showValues = NA,
@@ -369,6 +385,9 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the plot.
 #' @param highlight Specific level to highlight in the plot with different
 #'   color/style.
+#' @param aggregation How to aggregate multiple values per group. Use 'Mean'
+#'   or 'Median' for typical clinical measurements, 'Sum' for counts. 'No
+#'   Aggregation' will over-plot if multiple rows per group exist.
 #' @param sortBy How to sort the lollipops in the chart.
 #' @param orientation Chart orientation (vertical or horizontal lollipops).
 #' @param showValues Whether to display value labels on the lollipops.
@@ -407,6 +426,7 @@ lollipop <- function(
     group,
     useHighlight = FALSE,
     highlight,
+    aggregation = "none",
     sortBy = "original",
     orientation = "vertical",
     showValues = FALSE,
@@ -419,9 +439,9 @@ lollipop <- function(
     baseline = 0,
     conditionalColor = FALSE,
     colorThreshold = 0,
-    xlabel,
-    ylabel,
-    title,
+    xlabel = "",
+    ylabel = "",
+    title = "",
     width = 800,
     height = 600) {
 
@@ -443,6 +463,7 @@ lollipop <- function(
         group = group,
         useHighlight = useHighlight,
         highlight = highlight,
+        aggregation = aggregation,
         sortBy = sortBy,
         orientation = orientation,
         showValues = showValues,

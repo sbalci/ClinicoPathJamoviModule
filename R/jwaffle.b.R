@@ -62,42 +62,32 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$data) || nrow(self$data) == 0) {
                 return(NULL)
             }
-            
+
             # Determine relevant variables
             relevant_vars <- c()
             if (!is.null(self$options$groups)) relevant_vars <- c(relevant_vars, self$options$groups)
             if (!is.null(self$options$counts)) relevant_vars <- c(relevant_vars, self$options$counts)
             if (!is.null(self$options$facet)) relevant_vars <- c(relevant_vars, self$options$facet)
-            
+
             # Remove NULLs and ensure variables exist
             relevant_vars <- relevant_vars[!sapply(relevant_vars, is.null)]
             relevant_vars <- relevant_vars[relevant_vars %in% names(self$data)]
-            
+
             if (length(relevant_vars) == 0) {
                 return(NULL)
             }
-            
-            # Create hash string including data summary
-            data_summary <- paste(
-                nrow(self$data),
-                ncol(self$data),
-                paste(relevant_vars, collapse = "_"),
-                paste(sapply(relevant_vars, function(var) {
-                    if (is.numeric(self$data[[var]])) {
-                        paste(range(self$data[[var]], na.rm = TRUE), collapse = "_")
-                    } else {
-                        paste(length(unique(self$data[[var]])), "levels")
-                    }
-                }), collapse = "_"),
-                sep = "_"
-            )
-            
-            # Use digest for robust hashing if available
+
+            # Extract only relevant columns for hashing
+            relevant_data <- self$data[, relevant_vars, drop = FALSE]
+
+            # Use digest to hash actual data values, not just metadata
+            # This ensures cache invalidation when data values change
             if (requireNamespace("digest", quietly = TRUE)) {
-                return(digest::digest(data_summary, algo = "md5"))
+                return(digest::digest(relevant_data, algo = "md5"))
             }
-            
-            return(data_summary)
+
+            # Fallback: create hash from serialized data
+            return(paste(serialize(relevant_data, NULL), collapse = ""))
         },
         
         .calculateOptionsHash = function() {
@@ -134,24 +124,52 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .prepareData = function() {
             current_hash <- private$.calculateDataHash()
-            
+
             if (is.null(private$.data_hash) || private$.data_hash != current_hash) {
                 # Data has changed, prepare new data
                 mydata <- self$data
-                
+
                 if (is.null(mydata) || nrow(mydata) == 0) {
                     private$.prepared_data <- NULL
                     private$.data_hash <- current_hash
                     return(NULL)
                 }
-                
-                # Clean data
-                mydata <- jmvcore::naOmit(mydata)
-                
+
+                # Clean data - only remove NA in relevant columns
+                # Determine relevant variables
+                relevant_vars <- c()
+                if (!is.null(self$options$groups) && self$options$groups != "") {
+                    relevant_vars <- c(relevant_vars, self$options$groups)
+                }
+                if (!is.null(self$options$counts) && self$options$counts != "") {
+                    relevant_vars <- c(relevant_vars, self$options$counts)
+                }
+                if (!is.null(self$options$facet) && self$options$facet != "") {
+                    relevant_vars <- c(relevant_vars, self$options$facet)
+                }
+
+                # Only remove rows with NA in relevant columns, not all columns
+                if (length(relevant_vars) > 0) {
+                    original_nrow <- nrow(mydata)
+
+                    # Identify complete rows in relevant columns only
+                    complete_rows <- complete.cases(mydata[, relevant_vars, drop = FALSE])
+                    mydata <- mydata[complete_rows, , drop = FALSE]
+
+                    rows_removed <- original_nrow - nrow(mydata)
+
+                    if (rows_removed > 0) {
+                        message(sprintf(
+                            "Note: %d row(s) removed due to missing values in analysis variables (%s). %d row(s) remaining.",
+                            rows_removed, paste(relevant_vars, collapse = ", "), nrow(mydata)
+                        ))
+                    }
+                }
+
                 private$.prepared_data <- mydata
                 private$.data_hash <- current_hash
             }
-            
+
             return(private$.prepared_data)
         },
         
@@ -205,22 +223,41 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(private$.cached_palette)
         },
         
-        .generateCaption = function(plotdata, total_cases) {
+        .generateCaption = function(plotdata, total_cases, is_weighted = FALSE, facet_var = NULL, facet_level = NULL) {
             # Handle edge case where there's no data
             if (total_cases == 0 || is.na(total_cases) || is.null(total_cases)) {
                 return("No data available for waffle chart")
             }
-            
+
             # Calculate waffle chart statistics for caption
             n_squares <- 100  # Total number of squares in waffle chart
-            cases_per_square <- total_cases / n_squares
-            squares_per_case <- 100 / total_cases  # Each square represents this percentage
-            
-            caption_text <- sprintf(
-                "Each square represents %.1f cases (approximately %.1f%%) (total n=%d)",
-                cases_per_square, squares_per_case, total_cases
-            )
-            
+            units_per_square <- total_cases / n_squares
+            squares_per_unit <- 100 / total_cases  # Each square represents this percentage
+
+            # Choose appropriate terminology
+            unit_label <- if (is_weighted) "weighted units" else "cases"
+
+            # Generate base caption
+            if (!is.null(facet_var) && !is.null(facet_level)) {
+                # Facet-specific caption
+                caption_text <- sprintf(
+                    "%s = %s: Each square ≈ %.1f %s (%.1f%%) (total = %d)",
+                    facet_var, facet_level, units_per_square, unit_label, squares_per_unit, total_cases
+                )
+            } else if (!is.null(facet_var)) {
+                # General faceted caption (when not specific to a level)
+                caption_text <- sprintf(
+                    "Each square ≈ %.1f %s per facet group (values vary by %s)",
+                    units_per_square, unit_label, facet_var
+                )
+            } else {
+                # Simple caption
+                caption_text <- sprintf(
+                    "Each square represents %.1f %s (approximately %.1f%%) (total n=%d)",
+                    units_per_square, unit_label, squares_per_unit, total_cases
+                )
+            }
+
             return(caption_text)
         },
         
@@ -307,11 +344,15 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$counts) && self$options$counts != "") {
                 counts_data <- self$data[[self$options$counts]]
                 if (!is.numeric(counts_data)) {
-                    stop(paste("Counts variable '", self$options$counts, 
+                    stop(paste("Counts variable '", self$options$counts,
                               "' must be numeric, not ", class(counts_data)[1]))
                 }
                 if (any(counts_data < 0, na.rm = TRUE)) {
-                    warning("Counts variable contains negative values which will be treated as zero.")
+                    n_negative <- sum(counts_data < 0, na.rm = TRUE)
+                    stop(sprintf(
+                        "Counts variable '%s' contains %d negative value(s). All counts must be non-negative for waffle charts. Please check your data.",
+                        self$options$counts, n_negative
+                    ))
                 }
             }
         },
@@ -349,11 +390,14 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
         
-        .generateSummary = function(plotdata, groups_var, facet_var = NULL, total_cases) {
+        .generateSummary = function(plotdata, groups_var, facet_var = NULL, total_cases, is_weighted = FALSE) {
             # Generate natural language summary of waffle chart results
             if (is.null(plotdata) || nrow(plotdata) == 0 || total_cases == 0) {
                 return("<b>No data available for analysis summary.</b>")
             }
+
+            # Choose appropriate terminology
+            unit_label <- if (is_weighted) "weighted units" else "cases"
             
             if (!is.null(facet_var) && facet_var != "" && facet_var %in% names(plotdata)) {
                 # Faceted summary
@@ -384,19 +428,19 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     max_proportion <- proportions[max_prop_idx]
                     
                     summary_parts[[facet_level]] <- sprintf(
-                        "<b>Among %s %s</b> (n=%d): %s → <i>%s %s predominates (%.1f%%)</i>", 
-                        facet_var, facet_level, facet_total, category_breakdown, 
+                        "<b>Among %s %s</b> (n=%d): %s → <i>%s %s predominates (%.1f%%)</i>",
+                        facet_var, facet_level, facet_total, category_breakdown,
                         groups_var, dominant_category, max_proportion
                     )
                 }
-                
+
                 summary_text <- paste0(
                     "<b>📊 Waffle Chart Summary by ", facet_var, ":</b><br><br>",
                     paste(summary_parts, collapse = "<br><br>"),
-                    "<br><br><b>🔍 Overall Sample:</b> ", total_cases, " cases showing ", groups_var, 
+                    "<br><br><b>🔍 Overall Sample:</b> ", total_cases, " ", unit_label, " showing ", groups_var,
                     " distribution across ", length(unique(plotdata[[facet_var]])), " ", facet_var, " groups.",
-                    "<br><br><b>💡 Clinical Note:</b> Compare how ", groups_var, 
-                    " patterns differ between ", facet_var, " groups. Each square represents a fixed proportion of cases."
+                    "<br><br><b>💡 Clinical Note:</b> Compare how ", groups_var,
+                    " patterns differ between ", facet_var, " groups. Each square represents a fixed proportion of ", unit_label, "."
                 )
                 
             } else {
@@ -417,12 +461,12 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 summary_text <- sprintf(
                     "<b>📊 Waffle Chart Summary:</b><br><br>
-                    The sample contains %d cases distributed as: %s.<br><br>
-                    <b>Key Finding:</b> %s represents the largest proportion (%.1f%% of cases).<br><br>
+                    The sample contains %d %s distributed as: %s.<br><br>
+                    <b>Key Finding:</b> %s represents the largest proportion (%.1f%% of %s).<br><br>
                     <b>💡 Report Template:</b><br>
-                    <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%d) in our sample of %d cases.\"</i>",
-                    total_cases, breakdown_list, dominant_category, max_proportion,
-                    dominant_category, max_proportion, plotdata$count[max_prop_idx], total_cases
+                    <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%d) in our sample of %d %s.\"</i>",
+                    total_cases, unit_label, breakdown_list, dominant_category, max_proportion, unit_label,
+                    dominant_category, max_proportion, plotdata$count[max_prop_idx], total_cases, unit_label
                 )
             }
             
@@ -526,10 +570,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 plotdata <- private$.aggregateData(mydata, groups_var, facet_var, counts_var)
                 total_cases <- sum(plotdata$count)
-                
+                is_weighted <- !is.null(counts_var) && counts_var != ""
+
                 # Generate summary if requested
                 if (self$options$showSummaries) {
-                    summary_content <- private$.generateSummary(plotdata, groups_var, facet_var, total_cases)
+                    summary_content <- private$.generateSummary(plotdata, groups_var, facet_var, total_cases, is_weighted)
                     self$results$analysisSummary$setContent(summary_content)
                 }
                 
@@ -572,7 +617,8 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Calculate values for caption using helper method
             total_cases <- sum(plotdata$count)
-            caption_text <- private$.generateCaption(plotdata, total_cases)
+            is_weighted <- !is.null(counts_var) && counts_var != ""
+            caption_text <- private$.generateCaption(plotdata, total_cases, is_weighted, facet_var)
 
             # Get number of unique groups
             n_groups <- length(unique(plotdata[[groups_var]]))

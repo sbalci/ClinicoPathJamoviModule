@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -749,7 +749,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -1677,7 +1677,7 @@ analyses:
   - title: PCA Loading Heatmap & Barmap
     name: pcaloadingheatmap
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Heatmap & Barmap
     menuSubtitle: Heatmap and Barmap Visualizations
@@ -1771,7 +1771,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >
@@ -1786,7 +1786,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-
@@ -1819,7 +1819,7 @@ analyses:
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Lines
     menuTitle: Line Chart
     menuSubtitle: Time Series and Trend Analysis
@@ -1832,7 +1832,7 @@ analyses:
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Lollipop Chart
     ribbon: analyses
@@ -1941,7 +1941,7 @@ analyses:
   - title: Comprehensive Tidy Plots
     name: tidyplots
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT
     menuTitle: Comprehensive Tidy Plots
     ribbon: analyses
     category: analyses
@@ -2488,7 +2488,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation

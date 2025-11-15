@@ -10,6 +10,7 @@ lollipop(
   group,
   useHighlight = FALSE,
   highlight,
+  aggregation = "none",
   sortBy = "original",
   orientation = "vertical",
   showValues = FALSE,
@@ -22,9 +23,9 @@ lollipop(
   baseline = 0,
   conditionalColor = FALSE,
   colorThreshold = 0,
-  xlabel,
-  ylabel,
-  title,
+  xlabel = "",
+  ylabel = "",
+  title = "",
   width = 800,
   height = 600
 )
@@ -41,6 +42,10 @@ the plot.}
 
 \item{highlight}{Specific level to highlight in the plot with different
 color/style.}
+
+\item{aggregation}{How to aggregate multiple values per group. Use 'Mean'
+or 'Median' for typical clinical measurements, 'Sum' for counts. 'No
+Aggregation' will over-plot if multiple rows per group exist.}
 
 \item{sortBy}{How to sort the lollipops in the chart.}
 

@@ -94,19 +94,17 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             titleAlignment = "left",
             captionAlignment = "right",
             showMedianLine = FALSE,
-            connectPairedData = FALSE,
-            highlightSubset = FALSE,
             maxDataPoints = 10000,
             errorBarWidth = 0.1,
             violinScale = "area",
-            boxplotOutliers = TRUE,
+            boxplotOutliers = FALSE,
             boxplotNotch = FALSE,
             addSmoother = FALSE,
             smootherMethod = "loess",
-            smootherSE = TRUE,
+            smootherSE = FALSE,
             plotWidth = 150,
             plotHeight = 100,
-            useAutoSize = TRUE, ...) {
+            useAutoSize = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -632,14 +630,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showMedianLine",
                 showMedianLine,
                 default=FALSE)
-            private$..connectPairedData <- jmvcore::OptionBool$new(
-                "connectPairedData",
-                connectPairedData,
-                default=FALSE)
-            private$..highlightSubset <- jmvcore::OptionBool$new(
-                "highlightSubset",
-                highlightSubset,
-                default=FALSE)
             private$..maxDataPoints <- jmvcore::OptionInteger$new(
                 "maxDataPoints",
                 maxDataPoints,
@@ -663,7 +653,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..boxplotOutliers <- jmvcore::OptionBool$new(
                 "boxplotOutliers",
                 boxplotOutliers,
-                default=TRUE)
+                default=FALSE)
             private$..boxplotNotch <- jmvcore::OptionBool$new(
                 "boxplotNotch",
                 boxplotNotch,
@@ -683,7 +673,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..smootherSE <- jmvcore::OptionBool$new(
                 "smootherSE",
                 smootherSE,
-                default=TRUE)
+                default=FALSE)
             private$..plotWidth <- jmvcore::OptionInteger$new(
                 "plotWidth",
                 plotWidth,
@@ -699,7 +689,7 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..useAutoSize <- jmvcore::OptionBool$new(
                 "useAutoSize",
                 useAutoSize,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..xvar)
             self$.addOption(private$..yvar)
@@ -789,8 +779,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..titleAlignment)
             self$.addOption(private$..captionAlignment)
             self$.addOption(private$..showMedianLine)
-            self$.addOption(private$..connectPairedData)
-            self$.addOption(private$..highlightSubset)
             self$.addOption(private$..maxDataPoints)
             self$.addOption(private$..errorBarWidth)
             self$.addOption(private$..violinScale)
@@ -892,8 +880,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         titleAlignment = function() private$..titleAlignment$value,
         captionAlignment = function() private$..captionAlignment$value,
         showMedianLine = function() private$..showMedianLine$value,
-        connectPairedData = function() private$..connectPairedData$value,
-        highlightSubset = function() private$..highlightSubset$value,
         maxDataPoints = function() private$..maxDataPoints$value,
         errorBarWidth = function() private$..errorBarWidth$value,
         violinScale = function() private$..violinScale$value,
@@ -994,8 +980,6 @@ tidyplotsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..titleAlignment = NA,
         ..captionAlignment = NA,
         ..showMedianLine = NA,
-        ..connectPairedData = NA,
-        ..highlightSubset = NA,
         ..maxDataPoints = NA,
         ..errorBarWidth = NA,
         ..violinScale = NA,
@@ -1145,8 +1129,6 @@ tidyplotsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "titleAlignment",
                     "captionAlignment",
                     "showMedianLine",
-                    "connectPairedData",
-                    "highlightSubset",
                     "maxDataPoints",
                     "errorBarWidth",
                     "violinScale",
@@ -1277,8 +1259,6 @@ tidyplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param titleAlignment .
 #' @param captionAlignment .
 #' @param showMedianLine .
-#' @param connectPairedData .
-#' @param highlightSubset .
 #' @param maxDataPoints .
 #' @param errorBarWidth .
 #' @param violinScale .
@@ -1390,19 +1370,17 @@ tidyplots <- function(
     titleAlignment = "left",
     captionAlignment = "right",
     showMedianLine = FALSE,
-    connectPairedData = FALSE,
-    highlightSubset = FALSE,
     maxDataPoints = 10000,
     errorBarWidth = 0.1,
     violinScale = "area",
-    boxplotOutliers = TRUE,
+    boxplotOutliers = FALSE,
     boxplotNotch = FALSE,
     addSmoother = FALSE,
     smootherMethod = "loess",
-    smootherSE = TRUE,
+    smootherSE = FALSE,
     plotWidth = 150,
     plotHeight = 100,
-    useAutoSize = TRUE) {
+    useAutoSize = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tidyplots requires jmvcore to be installed (restart may be required)")
@@ -1511,8 +1489,6 @@ tidyplots <- function(
         titleAlignment = titleAlignment,
         captionAlignment = captionAlignment,
         showMedianLine = showMedianLine,
-        connectPairedData = connectPairedData,
-        highlightSubset = highlightSubset,
         maxDataPoints = maxDataPoints,
         errorBarWidth = errorBarWidth,
         violinScale = violinScale,

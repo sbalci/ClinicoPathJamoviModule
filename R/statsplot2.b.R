@@ -30,40 +30,99 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 data <- prepared_data$data
                 x_var <- prepared_data$group
                 y_var <- prepared_data$dep
-                
+
                 # Basic data validation
                 if (nrow(data) < 2) {
-                    stop(glue::glue("Insufficient data for {plot_type} comparing {y_var} by {x_var}. Need at least 2 observations, got {nrow(data)}. Please check your data filtering."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientData',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(glue::glue(
+                        "Insufficient data for {plot_type}.\n",
+                        "• Variables: {y_var} by {x_var}\n",
+                        "• Found: {nrow(data)} observation(s)\n",
+                        "• Required: ≥2 observations\n",
+                        "• Check your data filtering."
+                    ))
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
-                
+
                 # Variable-specific validation based on expected types
                 y_data_clean <- data[[y_var]][!is.na(data[[y_var]])]
                 x_data_clean <- data[[x_var]][!is.na(data[[x_var]])]
-                
+
                 # Check for sufficient non-missing values
                 if (length(y_data_clean) < 2) {
-                    stop(glue::glue("Dependent variable '{y_var}' has insufficient non-missing values for {plot_type}. Found {length(y_data_clean)} valid values (need ≥2). Check for missing data."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientDepValues',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(glue::glue(
+                        "Dependent variable '{y_var}' has insufficient non-missing values for {plot_type}.\n",
+                        "• Found: {length(y_data_clean)} valid value(s)\n",
+                        "• Required: ≥2 valid values\n",
+                        "• Check for missing data in '{y_var}'."
+                    ))
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
-                
+
                 if (length(x_data_clean) < 2) {
-                    stop(glue::glue("Grouping variable '{x_var}' has insufficient non-missing values for {plot_type}. Found {length(x_data_clean)} valid values (need ≥2). Check for missing data."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientGroupValues',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(glue::glue(
+                        "Grouping variable '{x_var}' has insufficient non-missing values for {plot_type}.\n",
+                        "• Found: {length(x_data_clean)} valid value(s)\n",
+                        "• Required: ≥2 valid values\n",
+                        "• Check for missing data in '{x_var}'."
+                    ))
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
-                
+
                 # Factor-specific validation
                 if (is.factor(data[[y_var]])) {
                     y_levels <- length(unique(y_data_clean))
                     if (y_levels < 1) {
-                        stop(glue::glue("Factor variable '{y_var}' has no valid levels after removing missing values for {plot_type}. Check data for: {paste(unique(data[[y_var]]), collapse=', ')}"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'noValidDepLevels',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(glue::glue(
+                            "Factor variable '{y_var}' has no valid levels for {plot_type}.\n",
+                            "• All values are missing after data cleaning\n",
+                            "• Check data for: {paste(unique(data[[y_var]]), collapse=', ')}"
+                        ))
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
                 }
-                
+
                 if (is.factor(data[[x_var]])) {
                     x_levels <- length(unique(x_data_clean))
                     if (x_levels < 1) {
-                        stop(glue::glue("Factor variable '{x_var}' has no valid levels after removing missing values for {plot_type}. Check data for: {paste(unique(data[[x_var]]), collapse=', ')}"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'noValidGroupLevels',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(glue::glue(
+                            "Factor variable '{x_var}' has no valid levels for {plot_type}.\n",
+                            "• All values are missing after data cleaning\n",
+                            "• Check data for: {paste(unique(data[[x_var]]), collapse=', ')}"
+                        ))
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
                 }
-                
+
                 return(TRUE)
             },
             
@@ -236,17 +295,28 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Check statistical assumptions and provide warnings
             .checkAssumptions = function(analysis_info, data) {
-                warnings <- character()
-                
+                notices <- list()
+
                 dep_data <- data[[analysis_info$dep_var]]
                 group_data <- data[[analysis_info$group_var]]
-                
+
                 # Sample size checks
                 total_n <- sum(!is.na(dep_data) & !is.na(group_data))
                 if (total_n < 30) {
-                    warnings <- c(warnings, glue::glue("Small sample size (n={total_n}). Consider nonparametric approaches for more reliable results."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallSample',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(glue::glue(
+                        "Small sample size detected (n={total_n}).\n",
+                        "• Nonparametric approaches recommended for n<30\n",
+                        "• Consider robust statistical methods\n",
+                        "• Results may have reduced statistical power"
+                    ))
+                    notices <- append(notices, list(notice))
                 }
-                
+
                 # Parametric assumption checks
                 if (analysis_info$distribution == "p" && analysis_info$dep_type == "continuous") {
                     # Check for extreme outliers (beyond 3.5 IQR)
@@ -256,43 +326,101 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         IQR_val <- Q3 - Q1
                         extreme_outliers <- sum(dep_data < (Q1 - 3.5 * IQR_val) | dep_data > (Q3 + 3.5 * IQR_val), na.rm = TRUE)
                         if (extreme_outliers > 0) {
-                            warnings <- c(warnings, glue::glue("Detected {extreme_outliers} extreme outlier(s) in {analysis_info$dep_var}. Consider robust statistical approach."))
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'extremeOutliers',
+                                type = jmvcore::NoticeType$STRONG_WARNING
+                            )
+                            notice$setContent(glue::glue(
+                                "Extreme outliers detected in {analysis_info$dep_var}.\n",
+                                "• Found: {extreme_outliers} extreme outlier(s) (>3.5 IQR)\n",
+                                "• Consider robust statistical approach (distribution='r')\n",
+                                "• Outliers may unduly influence parametric results"
+                            ))
+                            notices <- append(notices, list(notice))
                         }
                     }
-                    
+
                     # Basic normality warning for small samples
                     if (total_n < 100) {
-                        warnings <- c(warnings, "With smaller samples, check data distribution visually. Consider nonparametric approach if data appears skewed.")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'normalityCheck',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(glue::glue(
+                            "Consider checking distribution visually (n={total_n}).\n",
+                            "• For samples <100, normality assumptions are critical\n",
+                            "• Consider nonparametric approach if data appears skewed\n",
+                            "• Inspect violin plot shape for distributional form"
+                        ))
+                        notices <- append(notices, list(notice))
                     }
                 }
-                
+
                 # Group size balance check for between-subjects designs
                 if (analysis_info$direction == "independent" && is.factor(group_data)) {
                     group_sizes <- table(group_data)
                     min_group <- min(group_sizes)
                     max_group <- max(group_sizes)
                     if (max_group / min_group > 4) {
-                        warnings <- c(warnings, glue::glue("Unbalanced group sizes (smallest: {min_group}, largest: {max_group}). Results may be less reliable."))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'unbalancedGroups',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(glue::glue(
+                            "Unbalanced group sizes detected.\n",
+                            "• Smallest group: {min_group}\n",
+                            "• Largest group: {max_group}\n",
+                            "• Ratio: {round(max_group/min_group, 1)}:1\n",
+                            "• Results may be less reliable with imbalanced designs"
+                        ))
+                        notices <- append(notices, list(notice))
                     }
-                    
+
                     # Very small group sizes
                     if (min_group < 5) {
-                        warnings <- c(warnings, glue::glue("Very small group size(s) detected (minimum: {min_group}). Consider combining groups or using exact statistical methods."))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'verySmallGroups',
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(glue::glue(
+                            "Very small group size(s) detected.\n",
+                            "• Minimum group size: {min_group}\n",
+                            "• Consider combining groups if scientifically appropriate\n",
+                            "• Consider exact statistical methods for small samples\n",
+                            "• Statistical power may be severely limited"
+                        ))
+                        notices <- append(notices, list(notice))
                     }
                 }
-                
+
                 # Repeated measures specific checks
                 if (analysis_info$direction == "repeated") {
                     # Check for complete pairs
                     if (is.factor(group_data) && length(levels(group_data)) == 2) {
                         complete_pairs <- sum(complete.cases(dep_data, group_data))
                         if (complete_pairs < total_n) {
-                            warnings <- c(warnings, glue::glue("Missing paired observations detected. {complete_pairs} complete pairs out of {total_n} total observations."))
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'incompletePairs',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(glue::glue(
+                                "Missing paired observations detected.\n",
+                                "• Complete pairs: {complete_pairs}\n",
+                                "• Total observations: {total_n}\n",
+                                "• Missing: {total_n - complete_pairs}\n",
+                                "• Only complete pairs will be used in paired analysis"
+                            ))
+                            notices <- append(notices, list(notice))
                         }
                     }
                 }
-                
-                return(warnings)
+
+                return(notices)
             },
 
             .run = function() {
@@ -329,33 +457,74 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 # Clear todo message
                 self$results$todo$setVisible(FALSE)
-                
+
                 # Enhanced data validation with context
                 if (nrow(self$data) == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'emptyDataset',
+                        type = jmvcore::NoticeType$ERROR
+                    )
                     dep_name <- self$options$dep %||% "not selected"
                     group_name <- self$options$group %||% "not selected"
-                    stop(glue::glue("No data available for analysis. Variables selected: dependent='{dep_name}', grouping='{group_name}'. Check data loading and variable selection."))
+                    notice$setContent(glue::glue(
+                        "No data available for analysis.\n",
+                        "• Variables selected: dependent='{dep_name}', grouping='{group_name}'\n",
+                        "• Check data loading and variable selection\n",
+                        "• Verify dataset is not empty"
+                    ))
+                    self$results$insert(1, notice)
+                    return()
                 }
 
-                
+                # Check assumptions and insert notices
+                assumption_notices <- private$.checkAssumptions(analysis_info, self$data)
+                if (length(assumption_notices) > 0) {
+                    # Insert assumption notices at top positions (after any ERROR notices)
+                    # STRONG_WARNING notices first, then WARNING notices
+                    strong_warnings <- Filter(function(n) identical(n$type, jmvcore::NoticeType$STRONG_WARNING), assumption_notices)
+                    warnings <- Filter(function(n) identical(n$type, jmvcore::NoticeType$WARNING), assumption_notices)
+
+                    position <- 1
+                    for (notice in strong_warnings) {
+                        self$results$insert(position, notice)
+                        position <- position + 1
+                    }
+                    for (notice in warnings) {
+                        self$results$insert(position, notice)
+                        position <- position + 1
+                    }
+                }
+
                 # Generate explanation message using the new function
                 stat_exp <- private$.generateExplanationMessage(analysis_info)
-                
+
                 # Generate clinical interpretation
                 clinical_interpretation <- private$.generateClinicalInterpretation(analysis_info)
-                
-                # Check assumptions and generate warnings
-                assumption_warnings <- private$.checkAssumptions(analysis_info, self$data)
-                warning_text <- ""
-                if (length(assumption_warnings) > 0) {
-                    warning_text <- paste("\n\n⚠️ STATISTICAL WARNINGS:\n", paste(assumption_warnings, collapse = "\n"), sep = "")
-                }
-                
-                # Combine all explanations
-                combined_explanation <- paste(stat_exp, "\n\n", clinical_interpretation, warning_text, sep = "")
-                
+
+                # Combine explanations (without warnings - those are now separate Notices)
+                combined_explanation <- paste(stat_exp, "\n\n", clinical_interpretation, sep = "")
+
                 # Set the explanation message in results
                 self$results$ExplanationMessage$setContent(combined_explanation)
+
+                # Add success summary at the end
+                success <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+                n_total <- nrow(self$data)
+                n_used <- n_total  # Will be updated if sampling occurred
+
+                success$setContent(glue::glue(
+                    "Analysis completed successfully.\n",
+                    "• Plot type: {analysis_info$plot_type}\n",
+                    "• Observations: {n_used:,} of {n_total:,}\n",
+                    "• Statistical approach: {analysis_info$distribution}\n",
+                    "• Study design: {analysis_info$direction}"
+                ))
+                self$results$insert(999, success)
 
             },
             
@@ -364,7 +533,19 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 required_packages <- c("ggstatsplot", "ggalluvial", "dplyr", "easyalluvial", "patchwork", "cowplot")
                 missing_packages <- required_packages[!sapply(required_packages, function(pkg) requireNamespace(pkg, quietly = TRUE))]
                 if (length(missing_packages) > 0) {
-                    warning(glue::glue("Optional packages missing for full functionality: {paste(missing_packages, collapse = ', ')}. Install with: install.packages(c({paste(shQuote(missing_packages), collapse = ', ')})). Basic functionality will still work."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'missingPackages',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(glue::glue(
+                        "Optional packages missing for full functionality.\n",
+                        "• Missing: {paste(missing_packages, collapse = ', ')}\n",
+                        "• Install with: install.packages(c({paste(shQuote(missing_packages), collapse = ', ')}))\n",
+                        "• Basic functionality will still work\n",
+                        "• Some plot types may fall back to simpler visualizations"
+                    ))
+                    self$results$insert(1, notice)
                 }
                 
                 # Initialize and set option visibility based on selected variables
@@ -585,11 +766,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Plot function for between-subjects comparisons (factor vs continuous)
             .plotBetweenStats = function(prepared_data) {
-                private$.validatePlotData(prepared_data, "violin plot")
-                
+                # Validate data and return NULL if validation fails
+                if (!private$.validatePlotData(prepared_data, "violin plot")) {
+                    return(NULL)
+                }
+
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
-                
+
                 plot <- ggstatsplot::ggbetweenstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$group),
@@ -601,11 +785,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Plot function for scatter plots (continuous vs continuous)
             .plotScatterStats = function(prepared_data) {
-                private$.validatePlotData(prepared_data, "scatter plot")
-                
+                # Validate data and return NULL if validation fails
+                if (!private$.validatePlotData(prepared_data, "scatter plot")) {
+                    return(NULL)
+                }
+
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
-                
+
                 plot <- ggstatsplot::ggscatterstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$group),
@@ -614,14 +801,17 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 )
                 return(plot)
             },
-            
+
             # Plot function for bar charts (factor vs factor)
             .plotBarStats = function(prepared_data) {
-                private$.validatePlotData(prepared_data, "bar chart")
-                
+                # Validate data and return NULL if validation fails
+                if (!private$.validatePlotData(prepared_data, "bar chart")) {
+                    return(NULL)
+                }
+
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
-                
+
                 plot <- ggstatsplot::ggbarstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$dep),
@@ -629,21 +819,24 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 )
                 return(plot)
             },
-            
+
             # Plot function for dot plots (continuous vs factor)
             .plotDotplotStats = function(prepared_data) {
                 # For ggdotplotstats: x = continuous, y = factor
                 # The combination is "independent_continuous_factor" meaning:
                 # group is continuous, dep is factor
-                
-                private$.validatePlotData(prepared_data, "dot plot")
-                
+
+                # Validate data and return NULL if validation fails
+                if (!private$.validatePlotData(prepared_data, "dot plot")) {
+                    return(NULL)
+                }
+
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
-                
+
                 x_var <- prepared_data$group  # continuous variable
                 y_var <- prepared_data$dep    # factor variable
-                
+
                 plot <- ggstatsplot::ggdotplotstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(x_var),  # continuous variable
@@ -651,14 +844,17 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 )
                 return(plot)
             },
-            
+
             # Plot function for within-subjects comparisons (repeated measures)
             .plotWithinStats = function(prepared_data) {
-                private$.validatePlotData(prepared_data, "within-subjects violin plot")
-                
+                # Validate data and return NULL if validation fails
+                if (!private$.validatePlotData(prepared_data, "within-subjects violin plot")) {
+                    return(NULL)
+                }
+
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
-                
+
                 plot <- ggstatsplot::ggwithinstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$group),
@@ -668,10 +864,13 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 )
                 return(plot)
             },
-            
+
             # Plot function for alluvial diagrams (factor vs factor, repeated)
             .plotAlluvial = function(prepared_data) {
-                private$.validatePlotData(prepared_data, "alluvial diagram")
+                # Validate data and return NULL if validation fails
+                if (!private$.validatePlotData(prepared_data, "alluvial diagram")) {
+                    return(NULL)
+                }
                 
                 if (prepared_data$alluvsty == "t1") {
                     # Use ggalluvial
@@ -860,10 +1059,22 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (is.null(analysis_info)) {
                     return()
                 }
-                
+
                 # Enhanced data validation with context
                 if (nrow(self$data) == 0) {
-                    stop(glue::glue("No data available for plotting with variables: '{analysis_info$dep_var}' vs '{analysis_info$group_var}'. Verify data is loaded and variables exist."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'emptyDatasetPlot',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(glue::glue(
+                        "No data available for plotting.\n",
+                        "• Variables: '{analysis_info$dep_var}' vs '{analysis_info$group_var}'\n",
+                        "• Verify data is loaded and variables exist\n",
+                        "• Check that dataset contains observations"
+                    ))
+                    self$results$insert(1, notice)
+                    return()
                 }
                 
                 # Check if plot type is supported

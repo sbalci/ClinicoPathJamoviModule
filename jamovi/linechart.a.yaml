@@ -1,7 +1,7 @@
 ---
 name: linechart
 title: Line Chart
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Lines
 menuSubtitle: 'Time Series and Trend Analysis'
 version: '0.0.31'
@@ -58,6 +58,7 @@ options:
       type: Variable
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
+      default: NULL
       description:
           R: >
             Optional grouping variable to create multiple lines (e.g., treatment groups, patient categories).
@@ -146,6 +147,7 @@ options:
     - name: xlabel
       title: 'X-axis Label'
       type: String
+      default: ''
       description:
           R: >
             Custom label for the x-axis.
@@ -153,6 +155,7 @@ options:
     - name: ylabel
       title: 'Y-axis Label'
       type: String
+      default: ''
       description:
           R: >
             Custom label for the y-axis.
@@ -160,6 +163,7 @@ options:
     - name: title
       title: 'Plot Title'
       type: String
+      default: ''
       description:
           R: >
             Custom title for the plot.

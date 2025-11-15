@@ -115,8 +115,6 @@ items:
           - titleAlignment
           - captionAlignment
           - showMedianLine
-          - connectPairedData
-          - highlightSubset
           - maxDataPoints
           - errorBarWidth
           - violinScale

@@ -245,6 +245,18 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
+            # CRITICAL FIX: Sort data by x-variable to prevent zig-zag lines
+            # For longitudinal data, observations must be ordered by time/sequence
+            # to correctly connect points chronologically
+            if (!is.null(groupby)) {
+                # Sort by grouping variable first, then by x-variable
+                # This ensures each group's points are connected in correct order
+                data <- data[order(data[[groupby]], data[[xvar]]), ]
+            } else {
+                # Sort by x-variable only for ungrouped data
+                data <- data[order(data[[xvar]]), ]
+            }
+
             return(data)
         },
 
@@ -288,6 +300,35 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             groupby <- self$options$groupby
 
             correlation_stats <- list()
+
+            # CRITICAL FIX: Check for grouped data or repeated measures
+            # and warn that statistics ignore clustering structure
+            n_unique_x <- length(unique(data[[xvar]]))
+            n_observations <- nrow(data)
+            avg_obs_per_x <- n_observations / n_unique_x
+
+            # Flag if likely repeated measures (multiple obs per x-value)
+            has_repeated_measures <- avg_obs_per_x > 1.5  # More than 1.5 obs per x on average
+
+            # Issue warnings for statistical validity
+            if (!is.null(groupby)) {
+                warning(paste0(
+                    "Correlation statistics treat all observations as independent, ",
+                    "which may not be appropriate for grouped data. ",
+                    "For more rigorous analysis of grouped longitudinal data, ",
+                    "consider mixed-effects models using additional software."
+                ))
+                correlation_stats$has_grouping <- TRUE
+            }
+
+            if (has_repeated_measures) {
+                warning(paste0(
+                    "Data appears to have repeated measures (multiple observations per time point). ",
+                    "Correlation statistics assume independence and may overstate significance. ",
+                    "Consider aggregating data or using methods that account for repeated measures."
+                ))
+                correlation_stats$has_repeated_measures <- TRUE
+            }
 
             # Overall correlation (if X is numeric)
             x_data <- data[[xvar]]

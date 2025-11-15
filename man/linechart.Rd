@@ -8,7 +8,7 @@ linechart(
   data,
   xvar,
   yvar,
-  groupby,
+  groupby = NULL,
   confidence = FALSE,
   trendline = FALSE,
   points = TRUE,
@@ -17,9 +17,9 @@ linechart(
   reflineLabel = "Reference",
   colorPalette = "default",
   theme = "default",
-  xlabel,
-  ylabel,
-  title,
+  xlabel = "",
+  ylabel = "",
+  title = "",
   width = 800,
   height = 600
 )

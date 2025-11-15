@@ -529,4 +529,74 @@ describe("lollipop Helper Functions", {
   })
 })
 
+# Aggregation functionality tests
+describe("lollipop Aggregation Functions", {
+
+  test_that("lollipop data can be aggregated by mean", {
+    
+    # Create data with multiple entries per group
+    set.seed(1)
+    unaggregated_data <- data.frame(
+        group = rep(c("A", "B"), each = 5),
+        value = c(1:5, 6:10)
+    )
+
+    # Manually calculate expected means
+    expected_means <- unaggregated_data %>%
+        group_by(group) %>%
+        summarise(value = mean(value, na.rm = TRUE))
+
+    # Create an instance of the class to test the private method
+    # This requires a bit of setup to mimic the jamovi environment
+    options <- jmvcore::Options$new(aggregation = "mean")
+    analysis <- lollipopClass$new(options = options, data = unaggregated_data)
+    
+    # Call the internal aggregation function
+    aggregated_data <- analysis$.__enclos_env__$private$.aggregateData(
+        unaggregated_data, 
+        "value", 
+        "group", 
+        "mean"
+    )
+    
+    # Compare results
+    expect_equal(aggregated_data$value[aggregated_data$group == "A"], 3)
+    expect_equal(aggregated_data$value[aggregated_data$group == "B"], 8)
+    expect_equal(nrow(aggregated_data), 2)
+  })
+
+  test_that("lollipop data can be aggregated by median", {
+    
+    # Create data with multiple entries per group
+    set.seed(1)
+    unaggregated_data <- data.frame(
+        group = rep(c("A", "B"), each = 5),
+        value = c(1:5, 6:10)
+    )
+
+    # Manually calculate expected medians
+    expected_medians <- unaggregated_data %>%
+        group_by(group) %>%
+        summarise(value = median(value, na.rm = TRUE))
+
+    # Create an instance of the class
+    options <- jmvcore::Options$new(aggregation = "median")
+    analysis <- lollipopClass$new(options = options, data = unaggregated_data)
+    
+    # Call the internal aggregation function
+    aggregated_data <- analysis$.__enclos_env__$private$.aggregateData(
+        unaggregated_data, 
+        "value", 
+        "group", 
+        "median"
+    )
+    
+    # Compare results
+    expect_equal(aggregated_data$value[aggregated_data$group == "A"], 3)
+    expect_equal(aggregated_data$value[aggregated_data$group == "B"], 8)
+    expect_equal(nrow(aggregated_data), 2)
+  })
+
+})
+
 print("All lollipop tests completed successfully!")

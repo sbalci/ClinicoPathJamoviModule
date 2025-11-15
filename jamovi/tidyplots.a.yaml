@@ -1,7 +1,7 @@
 ---
 name: tidyplots
 title: Comprehensive Tidy Plots
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: All-In-One
 version: '0.0.32'
 jas: '1.2'
@@ -753,16 +753,6 @@ options:
       type: Bool
       default: false
 
-    - name: connectPairedData
-      title: Connect Paired Data Points
-      type: Bool
-      default: false
-
-    - name: highlightSubset
-      title: Highlight Data Subset
-      type: Bool
-      default: false
-
     - name: maxDataPoints
       title: Maximum Data Points to Display
       type: Integer
@@ -795,7 +785,7 @@ options:
     - name: boxplotOutliers
       title: Show Boxplot Outliers
       type: Bool
-      default: true
+      default: false
 
     - name: boxplotNotch
       title: Show Notch in Boxplot
@@ -823,7 +813,7 @@ options:
     - name: smootherSE
       title: Show Smoother Confidence Band
       type: Bool
-      default: true
+      default: false
 
     # === PLOT SIZE OPTIONS ===
     - name: plotWidth
@@ -843,5 +833,5 @@ options:
     - name: useAutoSize
       title: Use Automatic Size
       type: Bool
-      default: true
+      default: false
 ...

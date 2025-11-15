@@ -18,7 +18,7 @@ children:
             fitToGrid: true
       - type: TargetLayoutBox
         label: Grouping Variable
-        children:          
+        children:
           - type: VariablesListBox
             name: group
             maxItemCount: 1
@@ -26,14 +26,13 @@ children:
             fitToGrid: true
           - type: CheckBox
             name: useHighlight
-            label: "Use Highlighting"
+            label: Use Highlighting
           - type: LevelSelector
             name: highlight
             enable: (group && useHighlight)
-            label: "Highlight Level"
-
+            label: Highlight Level
   - type: CollapseBox
-    label: "Chart Configuration"
+    label: Chart Configuration
     collapsed: false
     children:
       - type: LayoutBox
@@ -41,19 +40,23 @@ children:
         children:
           - type: ComboBox
             name: sortBy
-            label: "Sort Order"
+            label: Sort Order
           - type: ComboBox
             name: orientation
-            label: "Chart Orientation"
+            label: Chart Orientation
           - type: CheckBox
             name: showValues
-            label: "Show Value Labels on Points"
+            label: Show Value Labels on Points
           - type: CheckBox
             name: showMean
-            label: "Show Mean Reference Line"
-
+            label: Show Mean Reference Line
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: aggregation
   - type: CollapseBox
-    label: "Visual Appearance"
+    label: Visual Appearance
     collapsed: true
     children:
       - type: LayoutBox
@@ -61,34 +64,33 @@ children:
         children:
           - type: ComboBox
             name: colorScheme
-            label: "Color Scheme"
+            label: Color Scheme
           - type: ComboBox
             name: theme
-            label: "Plot Theme"
+            label: Plot Theme
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: pointSize
             format: number
-            label: "Point Size (1-10)"
+            label: Point Size (1-10)
           - type: TextBox
             name: lineWidth
             format: number
-            label: "Line Width (0.5-5)"
+            label: Line Width (0.5-5)
       - type: LayoutBox
         margin: large
         children:
           - type: ComboBox
             name: lineType
-            label: "Line Type"
+            label: Line Type
           - type: TextBox
             name: baseline
             format: number
-            label: "Baseline Value"
-
+            label: Baseline Value
   - type: CollapseBox
-    label: "Advanced Coloring"
+    label: Advanced Coloring
     collapsed: true
     children:
       - type: LayoutBox
@@ -96,15 +98,14 @@ children:
         children:
           - type: CheckBox
             name: conditionalColor
-            label: "Use Conditional Coloring"
+            label: Use Conditional Coloring
           - type: TextBox
             name: colorThreshold
             format: number
             enable: (conditionalColor)
-            label: "Color Threshold"
-
+            label: Color Threshold
   - type: CollapseBox
-    label: "Labels & Titles"
+    label: Labels & Titles
     collapsed: true
     children:
       - type: LayoutBox
@@ -113,21 +114,20 @@ children:
           - type: TextBox
             name: title
             format: string
-            label: "Chart Title"
+            label: Chart Title
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: xlabel
             format: string
-            label: "X-axis Label"
+            label: X-axis Label
           - type: TextBox
             name: ylabel
             format: string
-            label: "Y-axis Label"
-
+            label: Y-axis Label
   - type: CollapseBox
-    label: "Plot Size"
+    label: Plot Size
     collapsed: true
     children:
       - type: LayoutBox
@@ -136,8 +136,8 @@ children:
           - type: TextBox
             name: width
             format: number
-            label: "Width (pixels)"
+            label: Width (pixels)
           - type: TextBox
             name: height
             format: number
-            label: "Height (pixels)"
+            label: Height (pixels)

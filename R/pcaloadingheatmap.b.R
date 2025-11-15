@@ -5,6 +5,7 @@
 #' @import ggplot2
 #' @import dplyr
 #' @import tidyr
+#' @import stats
 #'
 
 pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -34,7 +35,9 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
             # Initial Message ----
-            if (length(self$options$vars) < 3) {
+            vars <- self$options$vars
+
+            if (is.null(vars) || length(vars) < 3) {
 
                 # todo ----
                 todo <- glue::glue(
@@ -46,7 +49,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <ul>
                 <li>Heatmap: Color-coded matrix of all loadings</li>
                 <li>Barmap: Bar charts showing loading patterns across components</li>
-                <li>Optional significance stars for loadings above cutoff</li>
+                <li>Optional highlight stars for loadings above cutoff</li>
                 <li>Publication-ready formatting</li>
                 </ul>
                 <br>
@@ -62,6 +65,21 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             } else {
+
+                # Validate variable availability ----
+                missing_vars <- setdiff(vars, names(self$data))
+                if (length(missing_vars) > 0) {
+                    stop(paste0('The following variables are not in the data: ',
+                                paste(missing_vars, collapse = ', ')))
+                }
+
+                # Ensure numeric inputs ----
+                var_data <- self$data[, vars, drop = FALSE]
+                non_numeric <- vars[!vapply(var_data, is.numeric, logical(1))]
+                if (length(non_numeric) > 0) {
+                    stop(paste0('All selected variables must be numeric. Non-numeric variables detected: ',
+                                paste(non_numeric, collapse = ', ')))
+                }
 
                 # todo ----
                 todo <- glue::glue(
@@ -108,21 +126,6 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         },
 
-        # Extract standardized loadings ----
-        .stand_loadings = function(pca, pca_data) {
-
-            if (is.numeric(pca$scale)) {
-                loadings <- as.data.frame((pca$rotation %*% diag(pca$sdev)))
-            } else {
-                loadings <- as.data.frame((pca$rotation %*% diag(pca$sdev)) / apply(pca_data, 2, sd))
-            }
-
-            colnames(loadings) <- paste0('PC', 1:ncol(pca$x))
-            rownames(loadings) <- colnames(pca_data)
-
-            return(loadings)
-        },
-
         # Heatmap plot ----
 
         .heatmap = function(image, ggtheme, theme, ...) {
@@ -151,7 +154,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check ndim
             if (max(ndim) > ncol(load_df)) {
-                stop('Number of components exceeds available components')
+                ndim <- 1:ncol(load_df)
             }
 
             # Prepare data
@@ -220,7 +223,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check ndim
             if (max(ndim) > ncol(load_df)) {
-                stop('Number of components exceeds available components')
+                ndim <- 1:ncol(load_df)
             }
 
             # Prepare data
@@ -293,6 +296,40 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(b_plot)
             TRUE
 
+        },
+
+        # helper to extract standardized/correlation loadings ----
+        .stand_loadings = function(pca, pca_data) {
+            loadings <- pcaloadingheatmap_normalized_loadings(pca, pca_data, self$options$scale)
+            colnames(loadings) <- paste0('PC', seq_len(ncol(pca$rotation)))
+            rownames(loadings) <- colnames(pca_data)
+            return(as.data.frame(loadings))
         }
     )
 )
+
+#' Normalize PCA loadings for visualization
+#'
+#' Converts PCA rotation matrices to correlation-style loadings that are
+#' comparable across different `scale` settings. Values are clipped within the
+#' [-1, 1] range to avoid small numerical drifts outside the unit interval.
+#'
+#' @param pca A `prcomp` object.
+#' @param pca_data Numeric matrix used to fit the PCA.
+#' @param scaled Logical; whether the PCA was run with `scale.=TRUE`.
+#'
+#' @keywords internal
+pcaloadingheatmap_normalized_loadings <- function(pca, pca_data, scaled) {
+    loadings <- sweep(pca$rotation, 2, pca$sdev, `*`)
+
+    if (!scaled) {
+        var_sds <- apply(pca_data, 2, stats::sd)
+        if (any(is.na(var_sds) | var_sds == 0)) {
+            stop('Unable to compute loadings because one or more variables have zero variance.')
+        }
+        loadings <- sweep(loadings, 1, var_sds, `/`)
+    }
+
+    loadings <- pmax(pmin(loadings, 1), -1)
+    loadings
+}

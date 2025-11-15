@@ -1,7 +1,7 @@
 ---
 name: lollipop
 title: Lollipop Chart
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
 version: '0.0.31'
 jas: '1.2'
@@ -116,6 +116,23 @@ options:
       description:
           R: >
             Specific level to highlight in the plot with different color/style.
+
+    - name: aggregation
+      title: 'Data Aggregation'
+      type: List
+      options:
+        - title: No Aggregation (Plot All Points)
+          name: none
+        - title: Mean
+          name: mean
+        - title: Median
+          name: median
+        - title: Sum
+          name: sum
+      default: none
+      description:
+          R: >
+            How to aggregate multiple values per group. Use 'Mean' or 'Median' for typical clinical measurements, 'Sum' for counts. 'No Aggregation' will over-plot if multiple rows per group exist.
 
     - name: sortBy
       title: 'Sort Order'
@@ -261,6 +278,7 @@ options:
     - name: xlabel
       title: 'X-axis Label'
       type: String
+      default: ''
       description:
           R: >
             Custom label for the x-axis.
@@ -268,6 +286,7 @@ options:
     - name: ylabel
       title: 'Y-axis Label'
       type: String
+      default: ''
       description:
           R: >
             Custom label for the y-axis.
@@ -275,6 +294,7 @@ options:
     - name: title
       title: 'Plot Title'
       type: String
+      default: ''
       description:
           R: >
             Custom title for the plot.

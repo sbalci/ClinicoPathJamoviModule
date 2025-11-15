@@ -546,8 +546,6 @@ children:
         enable: (addSmoother)
       - type: CheckBox
         name: showMedianLine
-      - type: CheckBox
-        name: connectPairedData
   - type: CollapseBox
     label: Plot Size
     collapsed: true
@@ -568,8 +566,3 @@ children:
             name: plotHeight
             format: number
             enable: (!useAutoSize)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: highlightSubset

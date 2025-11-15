@@ -618,10 +618,188 @@ test_that("Complex real-world scenario works", {
 })
 
 # ============================================================================
+# VARIABLE NAME ESCAPING TESTS (.escapeVar)
+# ============================================================================
+
+test_that(".escapeVar() handles variables with spaces", {
+  # Test that variables with spaces are properly escaped
+  test_data <- data.frame(
+    `Group Name` = c("A", "B", "C", "A", "B", "C"),
+    `Response Value` = rnorm(6, 10, 2),
+    check.names = FALSE
+  )
+
+  # This should work without error despite spaces in variable names
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "Group Name",
+      yvar = "Response Value",
+      plotType = "points"
+    )
+  })
+})
+
+test_that(".escapeVar() handles variables with special characters", {
+  # Test variables with dashes, parentheses, etc.
+  test_data <- data.frame(
+    `Response-Value (mg/dL)` = rnorm(6, 10, 2),
+    `Time-Point (hours)` = 1:6,
+    `Subject#ID` = c("A", "B", "C", "A", "B", "C"),
+    check.names = FALSE
+  )
+
+  # Should handle special characters
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "Time-Point (hours)",
+      yvar = "Response-Value (mg/dL)",
+      color = "Subject#ID",
+      plotType = "points"
+    )
+  })
+})
+
+test_that(".escapeVar() handles variables with Unicode characters", {
+  # Test Greek letters and other Unicode
+  test_data <- data.frame(
+    `α-Level` = c("Low", "Medium", "High", "Low", "Medium", "High"),
+    `Measurement (μg/mL)` = rnorm(6, 10, 2),
+    check.names = FALSE
+  )
+
+  # Should handle Unicode
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "α-Level",
+      yvar = "Measurement (μg/mL)",
+      plotType = "boxplot"
+    )
+  })
+})
+
+test_that(".escapeVar() handles variables with multiple spaces and punctuation", {
+  # Test edge cases with multiple spaces and various punctuation
+  test_data <- data.frame(
+    `Treatment   Response` = rnorm(6, 50, 10),
+    `Risk & Benefit` = c("Low", "High", "Medium", "Low", "High", "Medium"),
+    `Change+Baseline` = rnorm(6, 5, 2),
+    `Ratio (A/B)` = rnorm(6, 1.5, 0.3),
+    check.names = FALSE
+  )
+
+  # Should handle complex variable names
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "Risk & Benefit",
+      yvar = "Treatment   Response",
+      color = "Change+Baseline",
+      plotType = "points"
+    )
+  })
+})
+
+test_that(".escapeVar() handles variables starting with numbers", {
+  # Test variables that start with numbers (edge case)
+  test_data <- data.frame(
+    `2nd-Measurement` = rnorm(6, 20, 5),
+    group = c("A", "B", "C", "A", "B", "C"),
+    check.names = FALSE
+  )
+
+  # Should handle number-starting variables
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "group",
+      yvar = "2nd-Measurement",
+      plotType = "points"
+    )
+  })
+})
+
+test_that(".escapeVar() handles NULL and empty strings", {
+  # Create a minimal tidyplot instance to access .escapeVar
+  # Note: .escapeVar is a private method, so we test it indirectly
+  # by verifying that NULL/empty optional variables don't cause errors
+
+  test_data <- create_test_data(6)
+
+  # With no color variable (NULL)
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "x_categorical",
+      yvar = "y_numeric",
+      color = NULL,  # NULL should be handled
+      plotType = "points"
+    )
+  })
+
+  # With no group variable
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "x_categorical",
+      yvar = "y_numeric",
+      group = NULL,  # NULL should be handled
+      plotType = "points"
+    )
+  })
+})
+
+test_that("tidyplots works with comprehensive test data (all special chars)", {
+  # Load the comprehensive test data we generated
+  test_csv <- file.path(
+    dirname(dirname(dirname(getwd()))),
+    "data",
+    "tidyplots_testdata.csv"
+  )
+
+  # Skip if test data doesn't exist
+  skip_if_not(file.exists(test_csv), "Test data file not found")
+
+  test_data <- read.csv(test_csv, check.names = FALSE)
+
+  # Test with various challenging variable names
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "Group Name",
+      yvar = "Response-Value (mg/dL)",
+      color = "Category_Type-I",
+      plotType = "boxplot"
+    )
+  })
+
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "α-Level",
+      yvar = "Efficacy%",
+      color = "Risk & Benefit",
+      plotType = "violin"
+    )
+  })
+
+  expect_silent({
+    result <- ClinicoPath::tidyplots(
+      data = test_data,
+      xvar = "Time-Point (hours)",
+      yvar = "Treatment   Response",
+      plotType = "line"
+    )
+  })
+})
+
+# ============================================================================
 # CLEANUP
 # ============================================================================
 
 # Clean up any temporary objects
 rm(create_test_data, create_test_data_with_na)
 
-cat("All tidyplots tests completed successfully!\n")
+cat("All tidyplots tests completed successfully (including .escapeVar tests)!\n")

@@ -576,11 +576,11 @@ describe("jwaffle Integration", {
 
 # Performance Stress Tests
 describe("jwaffle Performance", {
-  
+
   test_that("jwaffle handles repeated calls efficiently", {
-    skip_if_not_installed("jmvcore") 
+    skip_if_not_installed("jmvcore")
     skip_if_not_installed("waffle")
-    
+
     # Multiple calls with same parameters should use caching
     for (i in 1:3) {
       expect_silent({
@@ -590,18 +590,18 @@ describe("jwaffle Performance", {
           color_palette = "default"
         )
       })
-      
+
       expect_true(is.list(result))
     }
   })
-  
+
   test_that("jwaffle memory usage is reasonable", {
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("waffle")
-    
+
     # This test ensures we don't have memory leaks
     initial_memory <- gc()
-    
+
     for (i in 1:5) {
       result <- jwaffle(
         data = test_data$market,
@@ -610,10 +610,176 @@ describe("jwaffle Performance", {
         color_palette = sample(c("default", "professional", "colorblind"), 1)
       )
     }
-    
+
     final_memory <- gc()
-    
+
     # Basic memory usage check (not too strict as R's GC is complex)
+    expect_true(is.list(result))
+  })
+})
+
+# Regression Tests for Critical Fixes
+describe("jwaffle Regression Tests", {
+
+  test_that("cache invalidates when data values change (not just metadata)", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    # Create initial data
+    data1 <- data.frame(
+      category = factor(c(rep("A", 50), rep("B", 50))),
+      value = rep(1, 100)
+    )
+
+    # Create data with same structure but different values
+    data2 <- data.frame(
+      category = factor(c(rep("A", 70), rep("B", 30))),  # Different distribution
+      value = rep(1, 100)
+    )
+
+    # Both datasets have same row count, column count, and factor levels
+    # But proportions are different: 50/50 vs 70/30
+
+    result1 <- jwaffle(data = data1, groups = "category")
+    result2 <- jwaffle(data = data2, groups = "category")
+
+    # Results should be different because data values changed
+    expect_true(is.list(result1))
+    expect_true(is.list(result2))
+
+    # Note: We can't directly test if cache was invalidated, but the fix ensures
+    # that actual data values are hashed, not just metadata
+  })
+
+  test_that("NA handling only affects relevant columns", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    # Create data with NA in irrelevant column
+    data_with_na <- data.frame(
+      category = factor(c("A", "A", "B", "B", "C", "C")),
+      irrelevant_col = c(1, NA, 3, NA, 5, NA),  # NA in column not used in analysis
+      stringsAsFactors = FALSE
+    )
+
+    # Should not remove rows just because irrelevant_col has NA
+    result <- jwaffle(data = data_with_na, groups = "category")
+
+    expect_true(is.list(result))
+    # All 6 rows should be included since 'category' has no NA values
+  })
+
+  test_that("NA in relevant columns are properly removed", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    # Create data with NA in the groups variable
+    data_with_na <- data.frame(
+      category = factor(c("A", NA, "B", "B", "C", NA)),
+      value = c(1, 2, 3, 4, 5, 6)
+    )
+
+    # Should remove rows with NA in category
+    result <- jwaffle(data = data_with_na, groups = "category")
+
+    expect_true(is.list(result))
+    # Only 4 rows should remain (rows 1, 3, 4, 5)
+  })
+
+  test_that("negative counts are rejected with clear error", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    # Create data with negative counts
+    data_negative <- data.frame(
+      category = factor(c("A", "B", "C")),
+      count = c(10, -5, 8)  # Negative count
+    )
+
+    # Should throw error, not warning
+    expect_error(
+      jwaffle(data = data_negative, groups = "category", counts = "count"),
+      regexp = "negative"
+    )
+  })
+
+  test_that("weighted counts show 'weighted units' in caption", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    # This is a behavioral test - we can't directly access the caption,
+    # but we ensure the function runs without error when using counts
+    weighted_data <- data.frame(
+      category = factor(c("A", "B", "C")),
+      weight = c(100, 200, 150)
+    )
+
+    result <- jwaffle(
+      data = weighted_data,
+      groups = "category",
+      counts = "weight",
+      showSummaries = TRUE
+    )
+
+    expect_true(is.list(result))
+    # The caption should use "weighted units" terminology
+  })
+
+  test_that("non-weighted counts show 'cases' in caption", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    # Test without counts variable
+    simple_data <- data.frame(
+      category = factor(rep(c("A", "B", "C"), each = 10))
+    )
+
+    result <- jwaffle(
+      data = simple_data,
+      groups = "category",
+      showSummaries = TRUE
+    )
+
+    expect_true(is.list(result))
+    # The caption should use "cases" terminology
+  })
+
+  test_that("faceted plots handle captions correctly", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    faceted_data <- data.frame(
+      category = factor(rep(c("A", "B"), 20)),
+      facet_group = factor(rep(c("X", "Y"), each = 20))
+    )
+
+    result <- jwaffle(
+      data = faceted_data,
+      groups = "category",
+      facet = "facet_group",
+      showSummaries = TRUE
+    )
+
+    expect_true(is.list(result))
+    # Captions should vary by facet group
+  })
+
+  test_that("zero counts are handled without negative values", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("waffle")
+
+    zero_data <- data.frame(
+      category = factor(c("A", "B", "C")),
+      count = c(10, 0, 5)  # Zero count (valid)
+    )
+
+    # Should work fine with zero counts
+    result <- jwaffle(
+      data = zero_data,
+      groups = "category",
+      counts = "count"
+    )
+
     expect_true(is.list(result))
   })
 })

@@ -292,7 +292,27 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 warning(paste(.("Highlight level"), "'", highlight_level, "'", .("not found in grouping variable. Highlight will be ignored.")))
                 highlight_level <- NULL  # Disable highlighting for this case
             }
-            
+
+            # CRITICAL FIX: Check for duplicates and aggregate if requested
+            # Without aggregation, multiple rows per group will over-plot
+            group_counts <- table(data[[group_var]])
+            has_duplicates <- any(group_counts > 1)
+
+            if (has_duplicates && self$options$aggregation == "none") {
+                max_count <- max(group_counts)
+                groups_with_dups <- names(group_counts[group_counts > 1])
+                warning(sprintf(
+                    "Multiple observations per group detected (max=%d per group). Groups with duplicates: %s. Consider using aggregation (mean/median/sum) to avoid over-plotting and misleading visualization.",
+                    max_count,
+                    paste(head(groups_with_dups, 5), collapse = ", ")
+                ))
+            }
+
+            # Apply aggregation if requested
+            if (self$options$aggregation != "none") {
+                data <- private$.aggregateData(data, dep_var, group_var, self$options$aggregation)
+            }
+
             # Apply sorting if requested
             data <- private$.applySorting(data, dep_var, group_var)
             
@@ -305,19 +325,56 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Apply sorting based on user selection
         .applySorting = function(data, dep_var, group_var) {
             sort_method <- self$options$sortBy
-            
+
+            # CRITICAL FIX: Must relevel factor, not just reorder rows
+            # ggplot2 uses factor levels order, not data frame row order
             if (sort_method == "value_asc") {
+                # Sort by ascending values
                 data <- data[order(data[[dep_var]]), ]
+                # Relevel factor to match sorted order
+                data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
             } else if (sort_method == "value_desc") {
+                # Sort by descending values
                 data <- data[order(-data[[dep_var]]), ]
+                # Relevel factor to match sorted order
+                data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
             } else if (sort_method == "group_alpha") {
+                # Sort alphabetically by group
                 data <- data[order(data[[group_var]]), ]
+                # Relevel factor to match sorted order
+                data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
             }
-            # "original" keeps the original order
-            
+            # "original" keeps the original order (no releveling needed)
+
             return(data)
         },
-        
+
+        # Aggregate data by group to prevent over-plotting
+        .aggregateData = function(data, dep_var, group_var, method) {
+            # Use dplyr-style aggregation
+            agg_func <- switch(method,
+                "mean" = function(x) mean(x, na.rm = TRUE),
+                "median" = function(x) median(x, na.rm = TRUE),
+                "sum" = function(x) sum(x, na.rm = TRUE),
+                function(x) mean(x, na.rm = TRUE)  # Default to mean
+            )
+
+            # Aggregate by group
+            agg_data <- aggregate(
+                data[[dep_var]],
+                by = list(group = data[[group_var]]),
+                FUN = agg_func
+            )
+
+            # Rename columns to match original
+            colnames(agg_data) <- c(group_var, dep_var)
+
+            # Ensure group column is factor with same levels
+            agg_data[[group_var]] <- factor(agg_data[[group_var]], levels = levels(data[[group_var]]))
+
+            return(agg_data)
+        },
+
         # Calculate summary statistics
         .calculateSummary = function(data) {
             summary_stats <- list()

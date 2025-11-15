@@ -17,9 +17,9 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             reflineLabel = "Reference",
             colorPalette = "default",
             theme = "default",
-            xlabel = NULL,
-            ylabel = NULL,
-            title = NULL,
+            xlabel = "",
+            ylabel = "",
+            title = "",
             width = 800,
             height = 600, ...) {
 
@@ -52,7 +52,8 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..confidence <- jmvcore::OptionBool$new(
                 "confidence",
                 confidence,
@@ -96,13 +97,16 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="default")
             private$..xlabel <- jmvcore::OptionString$new(
                 "xlabel",
-                xlabel)
+                xlabel,
+                default="")
             private$..ylabel <- jmvcore::OptionString$new(
                 "ylabel",
-                ylabel)
+                ylabel,
+                default="")
             private$..title <- jmvcore::OptionString$new(
                 "title",
-                title)
+                title,
+                default="")
             private$..width <- jmvcore::OptionInteger$new(
                 "width",
                 width,
@@ -325,7 +329,7 @@ linechart <- function(
     data,
     xvar,
     yvar,
-    groupby,
+    groupby = NULL,
     confidence = FALSE,
     trendline = FALSE,
     points = TRUE,
@@ -334,9 +338,9 @@ linechart <- function(
     reflineLabel = "Reference",
     colorPalette = "default",
     theme = "default",
-    xlabel,
-    ylabel,
-    title,
+    xlabel = "",
+    ylabel = "",
+    title = "",
     width = 800,
     height = 600) {
 
