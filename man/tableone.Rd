@@ -4,7 +4,15 @@
 \alias{tableone}
 \title{Table One}
 \usage{
-tableone(data, vars, sty = "t1", excl = FALSE)
+tableone(
+  data,
+  vars,
+  sty = "t1",
+  excl = FALSE,
+  showSummary = FALSE,
+  showAbout = FALSE,
+  showReportSentence = FALSE
+)
 }
 \arguments{
 \item{data}{The input data as a data frame.}
@@ -20,11 +28,21 @@ simple frequency tables for categorical variables.}
 
 \item{excl}{Boolean option to exclude missing values (NA) from the
 analysis. Note: Exclusion may remove entire cases.}
+
+\item{showSummary}{Show detailed summary including sample size, missing
+data patterns, and data quality metrics.}
+
+\item{showAbout}{Show educational content explaining Table One, when to use
+it, and how to interpret results.}
+
+\item{showReportSentence}{Generate a copy-ready sentence summarizing the
+table for manuscript reporting.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr

@@ -8,7 +8,10 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             sty = "t1",
-            excl = FALSE, ...) {
+            excl = FALSE,
+            showSummary = FALSE,
+            showAbout = FALSE,
+            showReportSentence = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -32,19 +35,40 @@ tableoneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "excl",
                 excl,
                 default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showAbout <- jmvcore::OptionBool$new(
+                "showAbout",
+                showAbout,
+                default=FALSE)
+            private$..showReportSentence <- jmvcore::OptionBool$new(
+                "showReportSentence",
+                showReportSentence,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sty)
             self$.addOption(private$..excl)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showAbout)
+            self$.addOption(private$..showReportSentence)
         }),
     active = list(
         vars = function() private$..vars$value,
         sty = function() private$..sty$value,
-        excl = function() private$..excl$value),
+        excl = function() private$..excl$value,
+        showSummary = function() private$..showSummary$value,
+        showAbout = function() private$..showAbout$value,
+        showReportSentence = function() private$..showReportSentence$value),
     private = list(
         ..vars = NA,
         ..sty = NA,
-        ..excl = NA)
+        ..excl = NA,
+        ..showSummary = NA,
+        ..showAbout = NA,
+        ..showReportSentence = NA)
 )
 
 tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -52,6 +76,7 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        reportSentence = function() private$.items[["reportSentence"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
         assumptions = function() private$.items[["assumptions"]],
@@ -79,8 +104,18 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Instructions"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="reportSentence",
+                title="\uD83D\uDCCB Copy to Manuscript",
+                visible="(showReportSentence)",
+                clearWith=list(
+                    "vars",
+                    "excl"),
+                refs="ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="summary",
                 title="Summary",
+                visible="(showSummary)",
                 clearWith=list(
                     "vars",
                     "excl")))
@@ -88,6 +123,7 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="about",
                 title="About This Analysis",
+                visible="(showAbout)",
                 clearWith=list(
                     "vars")))
             self$add(jmvcore::Html$new(
@@ -142,7 +178,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "tableone",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = tableoneResults$new(options=options),
                 data = data,
@@ -183,9 +219,16 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   simple frequency tables for categorical variables.
 #' @param excl Boolean option to exclude missing values (NA) from the
 #'   analysis. Note: Exclusion may remove entire cases.
+#' @param showSummary Show detailed summary including sample size, missing
+#'   data patterns, and data quality metrics.
+#' @param showAbout Show educational content explaining Table One, when to use
+#'   it, and how to interpret results.
+#' @param showReportSentence Generate a copy-ready sentence summarizing the
+#'   table for manuscript reporting.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
@@ -200,7 +243,10 @@ tableone <- function(
     data,
     vars,
     sty = "t1",
-    excl = FALSE) {
+    excl = FALSE,
+    showSummary = FALSE,
+    showAbout = FALSE,
+    showReportSentence = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tableone requires jmvcore to be installed (restart may be required)")
@@ -215,7 +261,10 @@ tableone <- function(
     options <- tableoneOptions$new(
         vars = vars,
         sty = sty,
-        excl = excl)
+        excl = excl,
+        showSummary = showSummary,
+        showAbout = showAbout,
+        showReportSentence = showReportSentence)
 
     analysis <- tableoneClass$new(
         options = options,

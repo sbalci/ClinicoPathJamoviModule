@@ -127,7 +127,8 @@
       "Bash(/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/multisurvival.b.R)",
       "Bash(git tag:*)",
       "WebFetch(domain:dev.jamovi.org)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(wait)"
     ],
     "deny": [],
     "ask": [],

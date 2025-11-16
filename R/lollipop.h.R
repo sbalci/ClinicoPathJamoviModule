@@ -291,7 +291,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lollipop",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = lollipopResults$new(options=options),
                 data = data,

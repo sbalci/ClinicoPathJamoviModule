@@ -710,7 +710,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="cumProb", 
-                        `title`="Cumulative Detection Probability", 
+                        `title`="Sensitivity (P(detect | present))", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -745,7 +745,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bootstrapTable",
-                title="Bootstrap Sensitivity Estimates",
+                title="Bootstrap Sensitivity Estimates (Conditional)",
                 visible="(showBootstrap)",
                 clearWith=list(
                     "totalSamples",
@@ -759,7 +759,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="meanSens", 
-                        `title`="Mean Sensitivity", 
+                        `title`="Mean Sensitivity (given present)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -1305,7 +1305,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Table$new(
                 options=options,
                 name="hypergeometricTable",
-                title="Hypergeometric Model Predictions",
+                title="Hypergeometric Model Predictions (Finite Population)",
                 visible="(showHypergeometric)",
                 clearWith=list(
                     "totalPopulation",
@@ -1319,7 +1319,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="cumProb", 
-                        `title`="P(detect \u2265k)", 
+                        `title`="P(detect \u2265k | present in finite population)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -1359,7 +1359,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Table$new(
                 options=options,
                 name="betaBinomialTable",
-                title="Beta-Binomial Model Predictions",
+                title="Beta-Binomial Model Predictions (Overdispersed)",
                 visible="(showBetaBinomial)",
                 clearWith=list(
                     "totalPopulation",
@@ -1372,7 +1372,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="cumProb", 
-                        `title`="P(detect \u2265k)", 
+                        `title`="P(detect \u2265k | heterogeneous population)", 
                         `type`="number", 
                         `format`="pc"),
                     list(

@@ -26,5 +26,22 @@ children:
     children:
       - type: CheckBox
         name: excl
-        label: "Exclude Missing Values (NA)"  
+        label: "Exclude Missing Values (NA)"
+  - type: CollapseBox
+    label: "Output Options"
+    collapsed: true
+    margin: large
+    children:
+      - type: Label
+        label: "Control which supplementary outputs are displayed:"
+        margin: small
+      - type: CheckBox
+        name: showSummary
+        label: "Analysis Summary (sample size, missing data report)"
+      - type: CheckBox
+        name: showAbout
+        label: "About This Analysis (educational content)"
+      - type: CheckBox
+        name: showReportSentence
+        label: "Copy-Ready Report Sentence (for manuscripts)"
 ...

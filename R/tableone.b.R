@@ -16,6 +16,7 @@
 #' @importFrom rlang sym
 #' @importFrom stats as.formula
 #' @importFrom grDevices rgb
+#' @importFrom htmltools htmlEscape
 #'
 #' @export tableoneClass
 #'
@@ -24,28 +25,31 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     inherit = tableoneBase,
     private = list(
         .run = function() {
+            # NOTE: This function uses HTML outputs for messages instead of jmvcore::Notice
+            # due to serialization constraints in jamovi's protobuf system.
+            # When jamovi framework supports Notice serialization, migrate to:
+            # - NoticeType$ERROR for missing data/variables
+            # - NoticeType$STRONG_WARNING for data quality issues
+            # - NoticeType$WARNING for recommendations
+            # - NoticeType$INFO for confirmations
+
             # Check that the input data has at least one complete row.
             if (is.null(self$data) || nrow(self$data) == 0) {
-                self$results$todo$setContent("No data available. Please load a dataset first.")
+                self$results$todo$setContent("
+                    <br><strong>No Data Available</strong>
+                    <br><br>
+                    <ul>
+                        <li>Please load a dataset before using Table One.</li>
+                        <li>Check that your data file is properly imported.</li>
+                    </ul>
+                ")
                 private$.setAboutContent()
                 return(invisible(NULL))
             }
 
             # If no variables are selected, show a welcome/instructions message.
             if (is.null(self$options$vars)) {
-                todo_message <- "
-                <br><strong>Welcome to the ClinicoPath Table One Generator</strong>
-                <br><br>
-                <strong>Instructions:</strong>
-                <ul>
-                    <li>Select the <em>Variables</em> to include in the Table One. (Numeric, Ordinal, or Categorical)</li>
-                    <li>Choose a <em>Table Style</em> for the output format.</li>
-                    <li>If needed, check the option to <em>Exclude Missing Values</em> (NA). (Exclusion may remove entire cases.)</li>
-                </ul>
-                <br>
-                Please ensure you cite the packages and jamovi as referenced below.
-                "
-                self$results$todo$setContent(todo_message)
+                self$results$todo$setContent(private$.buildWelcomeMessage())
                 private$.setAboutContent()
                 return(invisible(NULL))  # Stop further processing until variables are selected.
             } else {
@@ -77,9 +81,25 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Retrieve the table style selected by the user.
             table_style <- self$options$sty
 
+            # Control visibility of educational outputs based on user options
+            self$results$summary$setVisible(isTRUE(self$options$showSummary))
+            self$results$about$setVisible(isTRUE(self$options$showAbout))
+            self$results$reportSentence$setVisible(isTRUE(self$options$showReportSentence))
+
             # Generate clinical summaries and data quality checks
-            # Pass BOTH original and filtered data for accurate reporting
-            private$.generateSummary(data, selected_vars, original_data, excluded_n)
+            # Only populate if visible (saves computation)
+            if (isTRUE(self$options$showSummary)) {
+                private$.generateSummary(data, selected_vars, original_data, excluded_n)
+            }
+
+            if (isTRUE(self$options$showAbout)) {
+                private$.setAboutContent()
+            }
+
+            if (isTRUE(self$options$showReportSentence)) {
+                private$.setReportSentence(data, selected_vars, original_data, excluded_n)
+            }
+
             private$.checkDataQuality(data, selected_vars, original_data)
 
             # Generate the table based on the chosen style.
@@ -87,36 +107,42 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 # --- Using tableone package ---
                 # Checkpoint before expensive statistical computation
                 private$.checkpoint()
-                
+
                 mytable <- tryCatch({
                     tableone::CreateTableOne(data = data)
                 }, error = function(e) {
                     if (grepl("insufficient", tolower(e$message))) {
-                        stop("Insufficient data for analysis. Ensure you have at least 2 complete cases and check for missing values. Try selecting different variables or checking data quality.")
+                        stop("Insufficient data for Table One analysis. Ensure you have at least 2 complete cases and check for missing values. Try selecting different variables or disabling 'Exclude Missing Values'.")
                     } else {
-                        stop("Error creating Table One: ", e$message, ". Try selecting different variables or checking your data format.")
+                        stop("Error creating Table One: ", e$message, ". Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers.")
                     }
                 })
+
+                # Checkpoint after expensive operation to allow UI update
+                private$.checkpoint()
                 self$results$tablestyle1$setContent(mytable)
 
             } else if (table_style == "t2") {
                 # --- Using gtsummary package ---
                 # Checkpoint before expensive gtsummary computation
                 private$.checkpoint()
-                
+
                 mytable <- tryCatch({
                     tbl <- gtsummary::tbl_summary(data = data)
                     gtsummary::as_kable_extra(tbl)
                 }, error = function(e) {
-                    stop("Error creating gtsummary table: ", e$message, ". Check that your variables have valid data and appropriate types for statistical summarization.")
+                    stop("Error creating gtsummary table: ", e$message, ". Check that variables have valid data and appropriate types. gtsummary requires properly formatted variables for summarization.")
                 })
+
+                # Checkpoint after expensive operation to allow UI update
+                private$.checkpoint()
                 self$results$tablestyle2$setContent(mytable)
 
             } else if (table_style == "t3") {
                 # --- Using arsenal package ---
                 # Checkpoint before expensive arsenal computation
                 private$.checkpoint()
-                
+
                 formula_str <- jmvcore::constructFormula(terms = selected_vars)
                 formula_obj <- as.formula(paste('~', formula_str))
                 mytable <- tryCatch({
@@ -131,28 +157,33 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 }, error = function(e) {
                     stop("Error creating arsenal table: ", e$message, ". Arsenal requires properly formatted variables. Check that categorical variables are factors and numeric variables contain valid numbers.")
                 })
+
+                # Checkpoint after expensive operation to allow UI update
+                private$.checkpoint()
                 self$results$tablestyle3$setContent(mytable)
 
             } else if (table_style == "t4") {
                 # --- Using janitor package for frequency tables with improved spacing & styling ---
                 # Checkpoint before starting the variable loop
                 private$.checkpoint()
-                
-                table_list <- lapply(selected_vars, function(var) {
+
+                # Wrap entire janitor operation in tryCatch for error handling
+                result <- tryCatch({
+                    table_list <- lapply(selected_vars, function(var) {
                     # Checkpoint for each variable processing (for incremental results)
                     private$.checkpoint(flush = FALSE)
                     
                     freq_table <- tryCatch({
                         # Check if variable exists and has data
                         if (!var %in% names(data)) {
-                            stop("Variable '", var, "' not found in data")
+                            stop("Variable '", htmltools::htmlEscape(var), "' not found in data")
                         }
-                        
+
                         # Remove missing values for this variable to avoid issues
                         var_data <- data[!is.na(data[[var]]), ]
-                        
+
                         if (nrow(var_data) == 0) {
-                            stop("Variable '", var, "' has no non-missing values")
+                            stop("Variable '", htmltools::htmlEscape(var), "' has no non-missing values")
                         }
                         
                         # Create tabyl table
@@ -187,13 +218,16 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         table
                     }, error = function(e) {
                         # Provide more detailed error information
-                        stop("Error processing variable '", var, "' with janitor: ", e$message, 
-                             " (Variable type: ", class(data[[var]])[1], 
+                        safe_var <- htmltools::htmlEscape(var)
+                        stop("Error processing variable '", safe_var, "' with janitor: ", e$message,
+                             " (Variable type: ", class(data[[var]])[1],
                              ", Non-missing values: ", sum(!is.na(data[[var]])), ")")
                     })
 
                     # Add a header for clarity for each variable's table, plus a top margin.
-                    header <- paste0("<h4 style='margin-top:20px;'>Frequency Table for '", var, "'</h4>")
+                    # Use escaped variable name for safe HTML rendering
+                    safe_var_name <- htmltools::htmlEscape(var)
+                    header <- paste0("<h4 style='margin-top:20px;'>Frequency Table for '", safe_var_name, "'</h4>")
 
                     # Convert to an HTML table with columns centered from the second column onward:
                     # The first column (variable level) is left-aligned, and columns 2-4 are centered.
@@ -211,17 +245,88 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             position = "center"
                         )
 
-                    # Combine the header and the table with spacing (hr).
-                    paste0(header, styled_table, "<br><hr style='margin:20px 0;'>")
+                        # Combine the header and the table with spacing (hr).
+                        paste0(header, styled_table, "<br><hr style='margin:20px 0;'>")
+                    })
+
+                    # Join all the tables together
+                    paste(table_list, collapse = "")
+                }, error = function(e) {
+                    stop("Error creating frequency tables with janitor: ", e$message, ". Check that variables have valid data. Janitor works best with categorical or discrete variables.")
                 })
 
-                # Join all the tables together
-                mytable <- paste(table_list, collapse = "")
-                self$results$tablestyle4$setContent(mytable)
+                # Checkpoint after expensive operation to allow UI update
+                private$.checkpoint()
+                self$results$tablestyle4$setContent(result)
             } else {
-                stop("Error: Invalid table style selected. Please choose a valid style.")
+                stop("Invalid table style selected. Please choose a valid table style from the options (tableone, gtsummary, arsenal, janitor).")
             }
         }, # End of .run function.
+
+        # ========================================================================
+        # HTML Builder Helper Functions
+        # ========================================================================
+        # These helpers extract HTML string building logic for maintainability.
+        # When jamovi supports Notice serialization, these can be migrated to
+        # Notice objects with appropriate NoticeType.
+
+        .buildWelcomeMessage = function() {
+            "
+            <br><strong>Welcome to the ClinicoPath Table One Generator</strong>
+            <br><br>
+            <strong>Instructions:</strong>
+            <ul>
+                <li>Select the <em>Variables</em> to include in the Table One. (Numeric, Ordinal, or Categorical)</li>
+                <li>Choose a <em>Table Style</em> for the output format.</li>
+                <li>If needed, check the option to <em>Exclude Missing Values</em> (NA). (Exclusion may remove entire cases.)</li>
+            </ul>
+            <br>
+            Please ensure you cite the packages and jamovi as referenced below.
+            "
+        },
+
+        .buildDataQualityHtml = function(warnings, recommendations) {
+            # Build HTML for data quality warnings and recommendations
+            # Returns empty string if no issues detected
+            if (length(warnings) == 0 && length(recommendations) == 0) {
+                return("")
+            }
+
+            html <- paste0(
+                "<div style='background-color: #fff8dc; padding: 15px; border-left: 4px solid #ffa500; margin: 10px 0;'>",
+                "<h4>Data Quality & Assumptions</h4>"
+            )
+
+            if (length(warnings) > 0) {
+                html <- paste0(html,
+                    "<p><strong>Warnings:</strong></p><ul>",
+                    paste0("<li>", warnings, "</li>", collapse = ""),
+                    "</ul>"
+                )
+            }
+
+            if (length(recommendations) > 0) {
+                html <- paste0(html,
+                    "<p><strong>Recommendations:</strong></p><ul>",
+                    paste0("<li>", recommendations, "</li>", collapse = ""),
+                    "</ul>"
+                )
+            }
+
+            paste0(html, "</div>")
+        },
+
+        .buildDataQualityOkHtml = function(n_final, missing_pct_original) {
+            # Build HTML for successful data quality check
+            paste0(
+                "<div style='background-color: #e8f5e9; padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0;'>",
+                "<h4>Data Quality Check ✓</h4>",
+                "<p><strong>Sample size:</strong> N = ", n_final, "</p>",
+                "<p><strong>Complete cases:</strong> ", round(100 - missing_pct_original, 1), "%</p>",
+                "<p><em>No major data quality issues detected.</em></p>",
+                "</div>"
+            )
+        },
         
         .setAboutContent = function() {
             about_text <- "
@@ -278,6 +383,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Per-variable missing counts (from ORIGINAL data)
             var_missing <- sapply(vars, function(v) sum(is.na(original_data[[v]])))
             high_missing_vars <- vars[var_missing > n_original * 0.2]  # >20% missing
+            # Escape variable names for safe HTML display
+            high_missing_vars_safe <- sapply(high_missing_vars, htmltools::htmlEscape)
 
             # Build summary text with transparent reporting
             summary_text <- paste0(
@@ -293,9 +400,9 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 if (missing_pct_original > 0) {
                     paste0("<p><strong>Missing data (original):</strong> ", missing_pct_original,
                            "% of cases have at least one missing value",
-                           if (length(high_missing_vars) > 0) {
+                           if (length(high_missing_vars_safe) > 0) {
                                paste0(" <br><em>Variables with >20% missing: ",
-                                      paste(high_missing_vars, collapse = ", "), "</em>")
+                                      paste(high_missing_vars_safe, collapse = ", "), "</em>")
                            } else "",
                            "</p>")
                 } else "",
@@ -324,88 +431,140 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         },
         
         .checkDataQuality = function(data, vars, original_data) {
-            warnings <- c()
-            recommendations <- c()
+            # NOTE: Data quality thresholds align with clinical research standards:
+            # - STRONG_WARNING thresholds: N<10, missing>50%, exclusion>30%
+            # - WARNING thresholds: N<30, missing>20%, exclusion>10%
+            # These would map to NoticeType when Notice serialization is supported.
 
             # CRITICAL FIX: Check sample size on FINAL data (after exclusions)
             n_final <- nrow(data)
             n_original <- nrow(original_data)
 
+            warnings <- c()
+            recommendations <- c()
+
+            # Check sample size (clinical thresholds)
             if (n_final < 10) {
-                warnings <- c(warnings, paste0("Very small final sample size (N = ", n_final, "). Results may be unreliable."))
+                # STRONG_WARNING: Very small sample
+                warnings <- c(warnings, paste0("<strong>⚠️ Very small final sample size (N = ", n_final, ").</strong> Results may be unreliable with fewer than 10 cases. Consider collecting more data or using exact tests."))
             } else if (n_final < 30) {
-                recommendations <- c(recommendations, paste0("Small final sample size (N = ", n_final, "). Consider reporting exact values rather than summary statistics."))
+                # WARNING: Small sample
+                recommendations <- c(recommendations, paste0("<em>Small final sample size (N = ", n_final, ").</em> Consider reporting exact values rather than summary statistics. Confidence intervals may be wide."))
             }
 
             # Check missing data from ORIGINAL dataset
             missing_pct_original <- round(100 * (1 - sum(complete.cases(original_data)) / n_original), 1)
             if (missing_pct_original > 50) {
-                warnings <- c(warnings, paste0("High missing data rate in original dataset (", missing_pct_original, "%). Consider data cleaning or imputation."))
+                # STRONG_WARNING: High missing data
+                warnings <- c(warnings, paste0("<strong>⚠️ High missing data rate in original dataset (", missing_pct_original, "%).</strong> More than half of cases have at least one missing value. Results may not be representative of the full population. Consider data cleaning, imputation, or reporting missing data patterns."))
             } else if (missing_pct_original > 20) {
-                recommendations <- c(recommendations, paste0("Moderate missing data in original dataset (", missing_pct_original, "%). Consider reporting missing data patterns or using multiple imputation."))
+                # WARNING: Moderate missing data
+                recommendations <- c(recommendations, paste0("<em>Moderate missing data in original dataset (", missing_pct_original, "%).</em> Consider reporting missing data patterns or using multiple imputation. Compare characteristics of complete vs. incomplete cases."))
             }
 
             # Warn if large proportion excluded
             if (n_original > n_final) {
                 excluded_pct <- round(100 * (n_original - n_final) / n_original, 1)
                 if (excluded_pct > 30) {
-                    warnings <- c(warnings, paste0("Large case loss due to missing data (", excluded_pct, "% excluded). Results may not be representative of the full sample. Consider multiple imputation or sensitivity analyses."))
+                    # STRONG_WARNING: Large exclusion
+                    warnings <- c(warnings, paste0("<strong>⚠️ Large case loss due to missing data (", excluded_pct, "% excluded).</strong> Excluded: ", n_original - n_final, " cases | Retained: ", n_final, " cases. Results may not be representative of the full sample. Consider multiple imputation or sensitivity analyses."))
                 } else if (excluded_pct > 10) {
-                    recommendations <- c(recommendations, paste0("Notable case loss (", excluded_pct, "% excluded). Compare characteristics of excluded vs. included cases to assess potential bias."))
+                    # WARNING: Notable exclusion
+                    recommendations <- c(recommendations, paste0("<em>Notable case loss (", excluded_pct, "% excluded).</em> Excluded: ", n_original - n_final, " cases | Retained: ", n_final, " cases. Compare characteristics of excluded vs. included cases to assess potential bias."))
                 }
             }
-            
+
             # Check variable types and unusual patterns
             for (var in vars) {
                 if (var %in% names(data)) {
                     var_data <- data[[var]]
                     n_unique <- length(unique(var_data[!is.na(var_data)]))
                     n_valid <- sum(!is.na(var_data))
-                    
+
                     if (is.numeric(var_data) && n_unique < 5 && n_valid > 10) {
-                        recommendations <- c(recommendations, paste0("Variable '", var, "' has few unique values (", n_unique, "). Consider treating as categorical."))
+                        # INFO: Variable type recommendation
+                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' has few unique values (%d).</em> Consider treating as categorical.", htmltools::htmlEscape(var), n_unique))
                     }
-                    
+
                     if (is.character(var_data) && n_unique > n_valid * 0.8) {
-                        recommendations <- c(recommendations, paste0("Variable '", var, "' has many unique text values. Consider grouping categories."))
+                        # INFO: Variable type recommendation
+                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' has many unique text values.</em> Consider grouping categories.", htmltools::htmlEscape(var)))
                     }
                 }
             }
-            
-            # Generate output
+
+            # Build and set assumptions HTML output using helper
             if (length(warnings) > 0 || length(recommendations) > 0) {
-                quality_text <- "<div style='margin: 10px 0;'>"
-                
-                if (length(warnings) > 0) {
-                    quality_text <- paste0(quality_text, 
-                        "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 4px; margin-bottom: 10px;'>",
-                        "<h5 style='color: #856404; margin-top: 0;'>⚠️ Data Quality Warnings</h5>",
-                        "<ul style='margin-bottom: 0; color: #856404;'>",
-                        paste0("<li>", warnings, "</li>", collapse = ""),
-                        "</ul></div>"
-                    )
-                }
-                
-                if (length(recommendations) > 0) {
-                    quality_text <- paste0(quality_text,
-                        "<div style='background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 10px; border-radius: 4px;'>",
-                        "<h5 style='color: #0c5460; margin-top: 0;'>💡 Recommendations</h5>",
-                        "<ul style='margin-bottom: 0; color: #0c5460;'>",
-                        paste0("<li>", recommendations, "</li>", collapse = ""),
-                        "</ul></div>"
-                    )
-                }
-                
-                quality_text <- paste0(quality_text, "</div>")
-                self$results$assumptions$setContent(quality_text)
+                assumptions_html <- private$.buildDataQualityHtml(warnings, recommendations)
+                self$results$assumptions$setContent(assumptions_html)
             } else {
-                self$results$assumptions$setContent(
-                    "<div style='background-color: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 4px; margin: 10px 0;'>
-                     <h5 style='color: #155724; margin-top: 0;'>✅ Data Quality Check</h5>
-                     <p style='margin-bottom: 0; color: #155724;'>Data quality looks good. No major issues detected.</p>
-                     </div>"
-                )
+                # INFO: All good - data quality check passed
+                if (n_final >= 30 && missing_pct_original <= 20 && n_original == n_final) {
+                    ok_html <- private$.buildDataQualityOkHtml(n_final, missing_pct_original)
+                    self$results$assumptions$setContent(ok_html)
+                } else {
+                    self$results$assumptions$setContent("")
+                }
             }
+        },
+
+        .setReportSentence = function(data, vars, original_data, excluded_n) {
+            n_final <- nrow(data)
+            n_original <- nrow(original_data)
+            n_vars <- length(vars)
+
+            missing_pct <- round(100 * (1 - sum(complete.cases(original_data)) / n_original), 1)
+
+            # Build variable list description
+            var_list <- if (n_vars <= 3) {
+                paste(vars, collapse = ", ")
+            } else {
+                paste0(paste(head(vars, 3), collapse = ", "), ", and ", n_vars - 3, " other variable", if (n_vars - 3 > 1) "s" else "")
+            }
+
+            # Build missing data clause
+            missing_clause <- if (missing_pct == 0) {
+                "Complete data were available for all cases."
+            } else if (missing_pct < 5) {
+                sprintf("Minimal missing data were detected (%.1f%% of cases with at least one missing value).", missing_pct)
+            } else if (missing_pct < 20) {
+                sprintf("Moderate missing data were observed (%.1f%% of cases incomplete).", missing_pct)
+            } else {
+                sprintf("Substantial missing data were present (%.1f%% of cases with at least one missing value).", missing_pct)
+            }
+
+            # Build exclusion clause
+            exclusion_clause <- if (excluded_n > 0) {
+                excluded_pct <- round(100 * excluded_n / n_original, 1)
+                sprintf(" After listwise deletion, %d cases (%.1f%%) were analyzed.", n_final, 100 - excluded_pct)
+            } else {
+                ""
+            }
+
+            # Construct final sentence
+            report_text <- sprintf(
+                "Table One summarizes baseline characteristics of %d %s. Variables included %s. %s%s",
+                n_original,
+                if (n_original == 1) "patient" else "patients",
+                var_list,
+                missing_clause,
+                exclusion_clause
+            )
+
+            # Format with copy button styling
+            html_output <- paste0(
+                "<div style='background-color: #f0f8ff; border: 2px solid #4682b4; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
+                "<h4 style='margin-top: 0; color: #2c5aa0;'>📋 Copy-Ready Report Sentence</h4>",
+                "<p style='font-family: Georgia, serif; font-size: 14px; line-height: 1.6; color: #333;'>",
+                htmltools::htmlEscape(report_text),
+                "</p>",
+                "<p style='margin-bottom: 0; font-size: 12px; color: #666;'>",
+                "<em>Select and copy the text above for your manuscript. Edit as needed for your specific reporting requirements.</em>",
+                "</p>",
+                "</div>"
+            )
+
+            self$results$reportSentence$setContent(html_output)
         }
-    ) # End of private list.
+  ) # End of private list.
 ) # End of R6Class definition.

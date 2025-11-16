@@ -50,17 +50,25 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
    - Required options referenced without guards (e.g., `self$options$time` used without precheck)
    - Early returns lacking a user-visible notice
    - Clinical edge-cases: EPV, AUC, prevalence, complete separation, NA inflation
-4. **Synthesize notices** with correct `NoticeType`, wording, and **insert band** based on `insert_position` (or `auto`).
+4. **Synthesize notices** with correct `NoticeType`, wording, and **insert band** based on `insert_position` (or `auto`), ensuring that each notice message is a **single-line, plain-text string** (no `\n` or other newline characters).
 5. **Generate patches** (unified diff) that:
    - Insert `jmvcore::Notice$new(...)` with deterministic, unique names
    - Add `self$results$insert(1|mid|999, notice)` calls
+   - Never remove or downgrade existing Html results; Html blocks remain the place for rich, multi-line explanations, while notices act as concise, single-line banners pointing to them
    - Keep code idempotent by guarding with minimal helper blocks if needed
-6. If `apply=true`, write the patches; otherwise, emit patch text only.
+6. If `apply=true`, write the patches; otherwise, emit patch text only. Patches **must not** introduce newline characters inside `notice$setContent()` strings.
 
 ## Output
 - **Audit summary** (counts by severity; missing vs present)
 - **Proposed patches** as a single diff to `R/SANITIZED_FN.b.R` (and `.r.yaml` if needed)
 - **Post-patch checklist**
+
+## Content & co-existence rules
+
+- Notices must be **plain text only** (no HTML markup).
+- Notices are currently **single-line only**: do not include `\n` or any other newline characters inside `notice$setContent()`.
+- Keep messages specific, numeric where possible, and actionable, but compact enough to fit on one line. If you need a “bullet-like” structure, emulate it within one string using separators such as ` • `, commas, or semicolons.
+- Do **not** delete or replace existing Html results. Keep Html outputs for detailed, multi-line explanations and use notices as concise, single-line banners that reference or summarize those Html sections.
 
 ## Patch templates
 

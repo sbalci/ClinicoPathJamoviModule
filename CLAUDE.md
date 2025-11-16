@@ -234,3 +234,10 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 - private$.checkpoint() is internal jamovi function we do not define it
 - jmvtools::check() does not evaluate functions. it checks the presence of jamovi program. To evaluate functions use jmvtools::prepare and devtools::document()
 - use relevant guides under vignettes folder when generating codes and features. *_guide.md
+- The notices feature does not allow new lines for the time being. So we need to update the implementation. For the
+  time being we need to have both previous html and the new notices features to be present at the same time.
+- you are an expert R-package and jamovi developer. you are an expert in biostatistics working with pathologists and clinicians.
+critically evaluate functions. is it mathematically and statistically accurate? is it ready to be used by clinicians and pathologists? is it ready for release?
+- The error "attempt to apply non-function" during serialization was caused by using jmvcore::Notice objects that
+  were dynamically inserted with self$results$insert(). These Notice objects contain function references that
+  cannot be serialized by jamovi's protobuf system.

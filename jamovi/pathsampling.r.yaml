@@ -77,7 +77,7 @@ items:
           title: 'Number of Samples'
           type: integer
         - name: cumProb
-          title: 'Cumulative Detection Probability'
+          title: 'Sensitivity (P(detect | present))'
           type: number
           format: 'pc'
         - name: marginalGain
@@ -109,7 +109,7 @@ items:
       visible: (showBootstrap)
 
     - name: bootstrapTable
-      title: Bootstrap Sensitivity Estimates
+      title: Bootstrap Sensitivity Estimates (Conditional)
       type: Table
       visible: (showBootstrap)
       clearWith:
@@ -122,7 +122,7 @@ items:
           title: 'Number of Samples'
           type: integer
         - name: meanSens
-          title: 'Mean Sensitivity'
+          title: 'Mean Sensitivity (given present)'
           type: number
           format: 'pc'
         - name: ciLower
@@ -617,7 +617,7 @@ items:
       visible: (showHypergeometric)
 
     - name: hypergeometricTable
-      title: Hypergeometric Model Predictions
+      title: Hypergeometric Model Predictions (Finite Population)
       type: Table
       visible: (showHypergeometric)
       clearWith:
@@ -630,7 +630,7 @@ items:
           title: 'Number of Samples'
           type: integer
         - name: cumProb
-          title: 'P(detect ≥k)'
+          title: 'P(detect ≥k | present in finite population)'
           type: number
           format: 'pc'
         - name: marginalGain
@@ -666,7 +666,7 @@ items:
       visible: (showBetaBinomial)
 
     - name: betaBinomialTable
-      title: Beta-Binomial Model Predictions
+      title: Beta-Binomial Model Predictions (Overdispersed)
       type: Table
       visible: (showBetaBinomial)
       clearWith:
@@ -678,7 +678,7 @@ items:
           title: 'Number of Samples'
           type: integer
         - name: cumProb
-          title: 'P(detect ≥k)'
+          title: 'P(detect ≥k | heterogeneous population)'
           type: number
           format: 'pc'
         - name: marginalGain

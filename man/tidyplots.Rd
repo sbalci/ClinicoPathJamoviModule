@@ -94,19 +94,17 @@ tidyplots(
   titleAlignment = "left",
   captionAlignment = "right",
   showMedianLine = FALSE,
-  connectPairedData = FALSE,
-  highlightSubset = FALSE,
   maxDataPoints = 10000,
   errorBarWidth = 0.1,
   violinScale = "area",
-  boxplotOutliers = TRUE,
+  boxplotOutliers = FALSE,
   boxplotNotch = FALSE,
   addSmoother = FALSE,
   smootherMethod = "loess",
-  smootherSE = TRUE,
+  smootherSE = FALSE,
   plotWidth = 150,
   plotHeight = 100,
-  useAutoSize = TRUE
+  useAutoSize = FALSE
 )
 }
 \arguments{
@@ -287,10 +285,6 @@ tidyplots(
 \item{captionAlignment}{.}
 
 \item{showMedianLine}{.}
-
-\item{connectPairedData}{.}
-
-\item{highlightSubset}{.}
 
 \item{maxDataPoints}{.}
 

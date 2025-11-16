@@ -9,23 +9,34 @@ items:
     type: Html
     # Displays welcome and instruction text when no variables are selected.
 
+  - name: reportSentence
+    title: "📋 Copy to Manuscript"
+    type: Html
+    visible: (showReportSentence)
+    clearWith:
+      - vars
+      - excl
+    refs: ClinicoPathJamoviModule
+
   - name: summary
     title: "Summary"
     type: Html
+    visible: (showSummary)
     clearWith:
       - vars
       - excl
     # Clinical summary and data quality information
-    
+
   - name: about
     title: "About This Analysis"
     type: Html
+    visible: (showAbout)
     clearWith:
       - vars
     # Educational content about Table One
-    
+
   - name: assumptions
-    title: "Data Quality & Assumptions" 
+    title: "Data Quality & Assumptions"
     type: Html
     clearWith:
       - vars

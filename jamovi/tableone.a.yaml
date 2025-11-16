@@ -1,9 +1,9 @@
 ---
 name: tableone
 title: "Table One"
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: "ClinicoPath Descriptives"
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -68,4 +68,34 @@ options:
         Boolean option to exclude missing values (NA) from the analysis. Note: Exclusion may remove entire cases.
       jamovi: >
         Check to exclude missing values.
+
+  - name: showSummary
+    title: "Show Analysis Summary"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Show detailed summary including sample size, missing data patterns, and data quality metrics.
+      jamovi: >
+        Display analysis summary with sample size and missing data information.
+
+  - name: showAbout
+    title: "Show About This Analysis"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Show educational content explaining Table One, when to use it, and how to interpret results.
+      jamovi: >
+        Display educational information about Table One analysis.
+
+  - name: showReportSentence
+    title: "Show Copy-Ready Report Text"
+    type: Bool
+    default: false
+    description:
+      R: >
+        Generate a copy-ready sentence summarizing the table for manuscript reporting.
+      jamovi: >
+        Display ready-to-copy text for your manuscript.
 ...

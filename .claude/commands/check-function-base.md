@@ -162,8 +162,9 @@ Respect `$ARG_notices_mode` and `$ARG_notice_insert_position`:
 ### C. Content rules
 
 - Plain text only (no HTML).  
-- Specific, measurable, and **actionable**: quantify counts/percentages, state implications, and list next steps.  
-- Use bullet points via `\n•` for clarity.  
+- **Single-line content only**: do not use `\n` or any other newline characters inside a notice; each notice must fit on a single line.  
+- Specific, measurable, and **actionable**: quantify counts/percentages, state implications, and list next steps, but keep everything in one sentence where possible.  
+- If you need a “bullet-like” structure, emulate it within a single line using separators such as ` • ` or `; ` instead of real line breaks.  
 - Keep names unique (`name='...'`) and deterministic.
 
 ### D. Clinical profile (if `$ARG_clinical_profile`)
@@ -196,7 +197,9 @@ ok$setContent(sprintf('Analysis completed using %d observations.', nrow(self$dat
 self$results$insert(999, ok)
 ```
 
-> Use these patterns consistently across modules. (See the internal guide for phrasing templates and thresholds.)
+
+> **Current limitation & co-existence with Html outputs:**  
+> Notices are currently **single-line only** and cannot contain line breaks. For rich, multi-line explanations, keep using your existing Html results (e.g., summary paragraphs, detailed interpretation blocks) **in addition to** Notices. Use Notices as concise, single-line banners (errors, strong warnings, key info) that point to the more detailed Html content instead of trying to replace it.
 
 ---
 

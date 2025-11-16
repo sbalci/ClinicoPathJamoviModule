@@ -14,7 +14,7 @@ _Note: This command intentionally avoids emoji and uses UI toggles to control vi
 
 # Detailed Jamovi Function Code Review
 
-You are conducting a thorough code review of the jamovi function `$ARGUMENTS`. Focus on code quality, best practices, performance, and maintainability.
+You are an expert R package and jamovi developer, and an expert biostatistician working closely with pathologists and clinicians. You are conducting a thorough, critical review of the jamovi function `$ARGUMENTS`, focusing on mathematical and statistical correctness, clinical readiness, code quality, best practices, performance, and maintainability.
 
 ## Review Target
 
@@ -61,6 +61,26 @@ Function: **`$ARGUMENTS`**
 - Large dataset handling
 - Optimization opportunities
 
+### Mathematical & Statistical Correctness
+
+- Correctness of formulas, test statistics, and estimators (e.g., OR/HR/RR, AUC, ICC, kappa, RMST, DeLong, Fine–Gray).
+- Appropriate choice of statistical methods for the intended design (paired vs independent, one‑sided vs two‑sided, parametric vs non‑parametric, survival vs binary, etc.).
+- Proper handling of assumptions (normality, homoscedasticity, proportional hazards, independence, expected cell counts, etc.) and use of robust alternatives where needed.
+- Correct construction and interpretation of confidence intervals, p‑values, and effect sizes (including direction and units).
+- Treatment of ties, censoring, competing risks, and clustering when applicable.
+- Handling of missing data (complete‑case vs imputation vs weighting) and clear communication of what is done.
+- Alignment with reference implementations (e.g., base R, survival, pROC, irr, cmprsk, lme4, etc.) for the same inputs.
+
+### Clinical & Release Readiness
+
+- Are defaults clinically sensible for pathologists and oncologists (e.g., common cut‑offs, scales, and summaries)?
+- Are outputs interpretable and safe to use in pathology/oncology reports (no misleading labels, correct units, clear directions of effect)?
+- Are misuse risks mitigated (e.g., chi‑square with low expected counts, overfitted models, too few events per variable) with strong warnings or errors?
+- Are explanatory texts and help sufficient for clinicians without advanced statistics training?
+- Has the function behavior been validated against reference analyses and edge cases (documented test set or verification script)?
+- Is the function stable and predictable across a range of dataset sizes and realistic clinical scenarios?
+- Based on the above, is the function **ready for clinical-facing use and public release**, or does it require further validation/refinement?
+
 ### Clinician‑Friendly (Pathologist/Oncologist) Additions
 
 - Plain‑language labels and tooltips for each option (avoid jargon; show examples: e.g., “Select tumor grade (G1/G2/G3)”).
@@ -105,6 +125,10 @@ Function: **`$ARGUMENTS`**
 
 **User Experience**: EXCELLENT/GOOD/NEEDS_WORK  
 
+**Mathematical/Statistical Correctness**: CORRECT / MINOR_ISSUES / MAJOR_ISSUES  
+
+**Clinical & Release Readiness**: READY / NEEDS_VALIDATION / NOT_READY  
+
 #### STRENGTHS
 
 1. [Specific positive findings with code references]
@@ -113,9 +137,9 @@ Function: **`$ARGUMENTS`**
 
 #### CRITICAL ISSUES
 
-1. [Security/reliability concerns with file:line references]
-2. [Performance bottlenecks]
-3. [Major design flaws]
+1. [Mathematical/statistical correctness problems (wrong formulas, tests, CI/p‑value calculations) with file:line references]
+2. [Clinical safety or misuse risks (e.g., misleading defaults, lack of guards for low n/events, incorrect labels/units)]
+3. [Performance bottlenecks and major design flaws impacting reliability or maintainability]
 
 #### IMPROVEMENT OPPORTUNITIES
 
@@ -153,6 +177,18 @@ Function: **`$ARGUMENTS`**
 ```r
 # Suggested refactoring
 ```
+
+**Mathematical/Statistical:**
+
+```r
+# Corrections to formulas, test choices, CI/p-value computation, or assumptions handling
+```
+
+**Clinical & Release Readiness:**
+
+- [What must change before clinicians/pathologists can safely rely on this function]
+- [What validation (comparisons, simulations, unit tests) is still required]
+- [A clear recommendation: READY / NEEDS_VALIDATION / NOT_READY, with justification]
 
 #### ACTION ITEMS
 

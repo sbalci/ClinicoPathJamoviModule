@@ -595,6 +595,37 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 firstDetectionData[invalidNonPositive] <- NA
             }
 
+            # Check for negative total samples
+            negativeTotal <- totalSamplesData < 0
+            if (any(negativeTotal, na.rm = TRUE)) {
+                nNegativeTotal <- sum(negativeTotal, na.rm = TRUE)
+                dataWarnings <- c(dataWarnings,
+                    sprintf("%d cases with negative total samples removed", nNegativeTotal))
+                totalSamplesData <- totalSamplesData[!negativeTotal]
+                firstDetectionData <- firstDetectionData[!negativeTotal]
+                if (!is.null(positiveCountData)) {
+                    positiveCountData <- positiveCountData[!negativeTotal]
+                }
+                if (!is.null(positiveSamplesListData)) {
+                    positiveSamplesListData <- positiveSamplesListData[!negativeTotal]
+                }
+                if (!is.null(sampleTypeData)) {
+                    sampleTypeData <- sampleTypeData[!negativeTotal]
+                }
+            }
+
+            # Check for invalid positive counts (negative or exceeds total)
+            if (!is.null(positiveCountData)) {
+                invalidPositiveCount <- positiveCountData < 0 | positiveCountData > totalSamplesData
+                if (any(invalidPositiveCount, na.rm = TRUE)) {
+                    nInvalidPosCount <- sum(invalidPositiveCount, na.rm = TRUE)
+                    dataWarnings <- c(dataWarnings,
+                        sprintf("%d cases with invalid positive count (negative or > total samples) excluded from empirical estimation", nInvalidPosCount))
+                    # Set to NA rather than removing cases, to preserve other analyses
+                    positiveCountData[invalidPositiveCount] <- NA
+                }
+            }
+
             # Recalculate detected cases after cleaning
             detectedCases <- !is.na(firstDetectionData)
             nDetected <- sum(detectedCases)
@@ -784,6 +815,25 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (total_samples_positive > 0) {
                         pEstimate <- total_positive_samples / total_samples_positive
                         estimationMethod <- "Empirical Proportion (uses all positive samples)"
+
+                        # Store heterogeneity info for later warning (after dataQualityWarnings is initialized)
+                        private$.empiricalHeterogeneity <- NULL
+                        case_proportions <- positiveCountData[positive_idx] / totalSamplesData[positive_idx]
+                        case_proportions <- case_proportions[is.finite(case_proportions)]
+
+                        if (length(case_proportions) >= 3) {
+                            cv <- sd(case_proportions, na.rm = TRUE) / mean(case_proportions, na.rm = TRUE)
+
+                            if (!is.na(cv) && is.finite(cv)) {
+                                if (cv > 0.5) {
+                                    # High heterogeneity
+                                    private$.empiricalHeterogeneity <- sprintf("⚠️ HIGH HETEROGENEITY: Detection probability varies substantially across cases (CV=%.2f). Pooled estimate may not represent any individual case well. Consider stratified analysis or reporting case-specific estimates.", cv)
+                                } else if (cv > 0.3) {
+                                    # Moderate heterogeneity
+                                    private$.empiricalHeterogeneity <- sprintf("⚠️ MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -811,6 +861,11 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 pForCalc <- pEstimate
                 dataQualityWarnings <- character(0)
 
+                # Add heterogeneity warning if detected during empirical estimation
+                if (!is.null(private$.empiricalHeterogeneity)) {
+                    dataQualityWarnings <- c(dataQualityWarnings, private$.empiricalHeterogeneity)
+                }
+
                 if (is.na(pForCalc)) {
                     pForCalc <- NA_real_
                     dataQualityWarnings <- c(dataQualityWarnings,
@@ -818,11 +873,22 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else if (pForCalc <= 0) {
                     dataQualityWarnings <- c(dataQualityWarnings,
                         "⚠️ DATA QUALITY ISSUE: Estimated probability ≤ 0. Check for data entry errors or insufficient positive cases.")
-                    pForCalc <- 0
+                    # Set to NA instead of 0 to avoid log(0) errors in downstream calculations
+                    pForCalc <- NA_real_
                 } else if (pForCalc >= 1) {
                     dataQualityWarnings <- c(dataQualityWarnings,
                         "⚠️ DATA QUALITY ISSUE: Estimated probability ≥ 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity.")
-                    pForCalc <- 1 - 1e-12
+                    # Cap at 0.9999 instead of 1 - 1e-12 to avoid extreme log calculations
+                    # This represents practical certainty while maintaining numeric stability
+                    pForCalc <- 0.9999
+                } else if (pForCalc < 0.0001) {
+                    # Warn about very low probabilities that may cause numeric issues
+                    dataQualityWarnings <- c(dataQualityWarnings,
+                        sprintf("⚠️ CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc))
+                } else if (pForCalc > 0.99) {
+                    # Warn about very high probabilities
+                    dataQualityWarnings <- c(dataQualityWarnings,
+                        sprintf("⚠️ CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc))
                 }
 
                 # Check for impossible positive counts
@@ -904,7 +970,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     %s
                     %s
                     <div style='%s'>
-                        <h4 style='%s'>Binomial Probability Model</h4>
+                        <h4 style='%s'>Binomial Probability Model (Conditional Sensitivity)</h4>
                         <p style='%s'>
                             Estimated per-sample detection probability: <b style='%s'>q = %s</b>
                         </p>
@@ -915,7 +981,10 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             %s
                         </p>
                         <p style='%s'>
-                            <b>Formula:</b> P(detect ≥ 1 in n samples) = 1 - (1-q)<sup>n</sup>
+                            <b>Formula:</b> P(detect ≥ 1 in n samples | lesion present) = 1 - (1-q)<sup>n</sup>
+                        </p>
+                        <p style='%s'>
+                            <em>Note: This estimates sensitivity (detection given lesion is present), not population-level detection rate.</em>
                         </p>
                     </div>
                 </div>",
@@ -955,6 +1024,11 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.buildStyle(
                     private$.styleConstants$fontSize14,
                     private$.styleConstants$colorPrimary,
+                    "margin: 0 0 10px 0;"
+                ),
+                private$.buildStyle(
+                    private$.styleConstants$fontSize13,
+                    private$.styleConstants$colorSecondary,
                     "margin: 0;"
                 ))
                 if (self$options$showBinomialModel) {
@@ -1007,10 +1081,18 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     conf <- confLevels[i]
                     if (is.na(pForCalc) || pForCalc <= 0) {
                         nMin <- NA
-                    } else if (pForCalc >= 1 - 1e-12) {
+                    } else if (pForCalc >= 0.9999) {
+                        # For very high probabilities, minimum samples is effectively 1
                         nMin <- 1
                     } else {
-                        nMin <- ceiling(log(1 - conf) / log(1 - pForCalc))
+                        # Use log1p for better numerical stability
+                        # Formula: n = log(1-conf) / log(1-p) = log1p(-conf) / log1p(-p)
+                        nMin <- ceiling(log1p(-conf) / log1p(-pForCalc))
+
+                        # Sanity check: if result is negative or extremely large, set to NA
+                        if (!is.finite(nMin) || nMin < 1 || nMin > 10000) {
+                            nMin <- NA
+                        }
                     }
 
                     recommendTable$addRow(rowKey=paste0("conf_", conf), values=list(
@@ -2608,62 +2690,100 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     alpha <- NA_real_
                     beta <- NA_real_
+                    modelRejected <- FALSE
 
                     if (length(p) < 2 || is.na(mu) || is.na(var)) {
-                        betaBinomNotes <- c(betaBinomNotes, "Insufficient variability; defaulting to Beta(1,1)")
-                        alpha <- 1
-                        beta <- 1
+                        betaBinomNotes <- c(betaBinomNotes, "⚠️ Insufficient cases for variance estimation (need ≥2)")
+                        modelRejected <- TRUE
                     } else {
                         theoreticalMaxVar <- mu * (1 - mu)
 
-                        if (var <= 0 || var >= theoreticalMaxVar) {
-                            # Overdispersion beyond beta-binomial support or zero variance
-                            epsilon <- 1e-6
-                            if (var <= 0) {
-                                betaBinomNotes <- c(betaBinomNotes, "Zero variance in detection rates; defaulting to Beta(1,1)")
-                                alpha <- 1
-                                beta <- 1
-                            } else {
-                                betaBinomNotes <- c(betaBinomNotes,
-                                    "Observed variance exceeds binomial limit; applying ridge adjustment")
-                                varAdj <- min(var, theoreticalMaxVar - epsilon)
-                                term <- (mu * (1 - mu) / varAdj) - 1
-                                alpha <- max(mu * term, epsilon)
-                                beta <- max((1 - mu) * term, epsilon)
-                            }
+                        if (var <= 0) {
+                            # Zero variance - all cases have same detection rate
+                            betaBinomNotes <- c(betaBinomNotes,
+                                "⚠️ Zero variance detected: All cases have identical detection rates. Beta-binomial model is unnecessary; use simple binomial model instead.")
+                            modelRejected <- TRUE
+                        } else if (var >= theoreticalMaxVar * 0.99) {
+                            # Variance exceeds or approaches theoretical maximum
+                            # This indicates model misspecification - beta-binomial cannot fit this data
+                            betaBinomNotes <- c(betaBinomNotes,
+                                sprintf("⚠️ MODEL REJECTION: Observed variance (%.4f) exceeds theoretical binomial maximum (%.4f). This indicates extreme overdispersion that violates beta-binomial assumptions. Consider alternative models (e.g., finite mixture models) or stratified analysis.", var, theoreticalMaxVar))
+                            modelRejected <- TRUE
                         } else {
+                            # Valid beta-binomial parameter estimation
                             term <- (mu * (1 - mu) / var) - 1
+
+                            # Method-of-moments estimators
                             alpha <- mu * term
                             beta <- (1 - mu) * term
+
+                            # Validate estimated parameters
+                            if (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0) {
+                                betaBinomNotes <- c(betaBinomNotes,
+                                    "⚠️ Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution.")
+                                modelRejected <- TRUE
+                            } else {
+                                # Check for extremely skewed parameters that suggest poor fit
+                                if (alpha < 0.01 || beta < 0.01) {
+                                    betaBinomNotes <- c(betaBinomNotes,
+                                        sprintf("⚠️ CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit. Results should be interpreted with caution.", alpha, beta))
+                                }
+                            }
                         }
                     }
 
-                    if (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0) {
-                        betaBinomNotes <- c(betaBinomNotes, "Fallback to Beta(1,1) due to invalid parameter estimates")
-                        alpha <- 1
-                        beta <- 1
+                    # If model is rejected, skip beta-binomial analysis
+                    if (modelRejected) {
+                        betaBinomialText <- self$results$betaBinomialText
+                        betaBinomialTable <- self$results$betaBinomialTable
+                        betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+
+                        errorHtml <- sprintf("<div style='%s %s %s %s'>
+                            <p style='margin: 0; %s'><strong>⚠️ Beta-Binomial Model Not Applicable</strong></p>
+                            <p style='margin: 10px 0 0 0; %s'>%s</p>
+                            <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong> Use alternative approaches:</p>
+                            <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
+                                <li>If variance = 0: Use standard binomial model</li>
+                                <li>If variance > theoretical max: Use stratified analysis or finite mixture models</li>
+                                <li>For heterogeneous populations: Consider bootstrap or empirical methods</li>
+                            </ul>
+                        </div>",
+                        private$.styleConstants$font, private$.styleConstants$bgLight,
+                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                        private$.styleConstants$fontSize15,
+                        private$.styleConstants$fontSize14, paste(betaBinomNotes, collapse = " "),
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontSize14)
+
+                        if (self$options$showBetaBinomial) {
+                            betaBinomialText$setContent(errorHtml)
+                        }
+                        betaBinomialTable$clearRows()
+                        betaBinomialRecommendTable$clearRows()
+                        betaProceed <- FALSE
                     }
 
-                    # Beta-Binomial Text
-                    betaBinomialText <- self$results$betaBinomialText
-                    extraText <- if (length(betaBinomNotes) > 0) {
-                        sprintf("<p><b>Estimation notes:</b> %s.</p>", paste(betaBinomNotes, collapse = "; "))
-                    } else ""
+                    # Beta-Binomial Text (only if model is valid)
+                    if (!modelRejected) {
+                        betaBinomialText <- self$results$betaBinomialText
+                        extraText <- if (length(betaBinomNotes) > 0) {
+                            sprintf("<p><b>Estimation notes:</b> %s.</p>", paste(betaBinomNotes, collapse = "; "))
+                        } else ""
 
-                    html <- sprintf("<h4>Beta-Binomial Probability Model</h4>
-                <p>For <b>finite population sampling with overdispersion</b> (e.g., lymph node dissection where positivity varies between cases).</p>
-                <p>This model is more robust than the hypergeometric model when there is case-by-case variability in the number of positive items.</p>
-                <p><b>Model parameters (estimated from data):</b></p>
-                <ul>
-                    <li>Alpha (α): %.3f</li>
-                    <li>Beta (β): %.3f</li>
-                </ul>
-                %s
-                <p><b>Reference:</b> Zhou J, et al. Beta-binomial model for lymph node yield. <i>Front Oncol.</i> 2022;12:872527.</p>",
-                alpha, beta, extraText)
-                    if (self$options$showBetaBinomial) {
-                        betaBinomialText$setContent(html)
-                    }
+                        html <- sprintf("<h4>Beta-Binomial Probability Model</h4>
+                    <p>For <b>finite population sampling with overdispersion</b> (e.g., lymph node dissection where positivity varies between cases).</p>
+                    <p>This model is more robust than the hypergeometric model when there is case-by-case variability in the number of positive items.</p>
+                    <p><b>Model parameters (estimated from data):</b></p>
+                    <ul>
+                        <li>Alpha (α): %.3f</li>
+                        <li>Beta (β): %.3f</li>
+                    </ul>
+                    %s
+                    <p><b>Reference:</b> Zhou J, et al. Beta-binomial model for lymph node yield. <i>Front Oncol.</i> 2022;12:872527.</p>",
+                    alpha, beta, extraText)
+                        if (self$options$showBetaBinomial) {
+                            betaBinomialText$setContent(html)
+                        }
 
                     # Calculate beta-binomial probabilities
                     betaBinomialTable <- self$results$betaBinomialTable
@@ -2749,6 +2869,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             expectedYield = expectedYield
                         ))
                     }
+                    }  # End if (!modelRejected)
                 }
             }
 

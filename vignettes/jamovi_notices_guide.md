@@ -14,6 +14,8 @@ This is the comprehensive guide to implementing user notices and alerts in jamov
 8. [Error Communication Patterns](#8-error-communication-patterns)
 9. [Integration with jamovi Module Architecture](#9-integration-with-jamovi-module-architecture)
 10. [Complete Examples](#10-complete-examples)
+11. [Real-World Patterns from jamovi Core](#11-real-world-patterns-from-jamovi-core)
+12. [References and Additional Resources](#12-references-and-additional-resources)
 
 ---
 
@@ -62,6 +64,48 @@ Notices are integrated into the jamovi results framework:
 - R console debugging (use `cat()` or `message()`)
 - Logging (use proper logging frameworks)
 - Progress indicators (use different mechanisms)
+
+### Quick Reference: Common Patterns
+
+**Basic Notice Creation:**
+```r
+notice <- jmvcore::Notice$new(
+    options = self$options,
+    name = 'noticeName',
+    type = jmvcore::NoticeType$WARNING
+)
+notice$setContent('Your message here')
+self$results$insert(1, notice)
+```
+
+**With Internationalization:**
+```r
+notice$setContent(
+    jmvcore::format(.("Found {} issues in {}"), n_issues, var_name)
+)
+```
+
+**Accumulating Warnings:**
+```r
+warnings <- ""
+if (issue1) warnings <- paste(warnings, "Issue 1", sep = "\n")
+if (issue2) warnings <- paste(warnings, "Issue 2", sep = "\n")
+if (warnings != "") {
+    notice <- jmvcore::Notice$new(self$options, name = 'warnings',
+                                  type = jmvcore::NoticeType$WARNING,
+                                  content = warnings)
+    self$results$insert(1, notice)
+}
+```
+
+**Helper Function Pattern:**
+```r
+setAnalysisNotice <- function(self, message, name, type) {
+    notice <- jmvcore::Notice$new(options = self$options, name = name, type = type)
+    notice$setContent(message)
+    self$results$insert(1, notice)
+}
+```
 
 ---
 
@@ -171,7 +215,7 @@ jamovi provides four distinct notice types through `jmvcore::NoticeType`:
 
 ### Core Notice Syntax
 
-The basic structure for creating any notice:
+The basic structure for creating any notice (from jamovi/jmv official implementation):
 
 ```r
 # Create notice object
@@ -187,6 +231,33 @@ notice$setContent('Your message to the user')
 # Add to results (position 1 = top of results)
 self$results$insert(1, notice)
 ```
+
+### Real-World Example from jamovi/jmv
+
+From the official jamovi `conttables.b.R` implementation:
+
+```r
+# From jamovi/jmv/R/conttables.b.R
+weightsNotice <- jmvcore::Notice$new(
+    self$options,
+    name = '.weights',
+    type = jmvcore::NoticeType$WARNING
+)
+
+# Set the content with informative message
+weightsNotice$setContent(
+    jmvcore::format(.("The data is weighted by the variable {}"),
+                    self$options$counts)
+)
+
+# Insert at top of results
+self$results$insert(1, weightsNotice)
+```
+
+**Key points from this example:**
+- Notice name starts with `.` to indicate internal/system notice
+- Uses `jmvcore::format()` with `..()` for internationalization
+- Inserts dynamic content (variable name) into the message
 
 ### Step-by-Step Implementation
 
@@ -229,6 +300,8 @@ dataValidationNotice$setContent(message)
 
 #### Step 3: Add Notice to Results
 
+**Method 1: Insert into main results**
+
 ```r
 # Insert at top of results (position 1)
 self$results$insert(1, dataValidationNotice)
@@ -239,6 +312,39 @@ self$results$insert(999, dataValidationNotice)
 # Insert before specific table
 # (Use position just before that table)
 self$results$insert(2, dataValidationNotice)
+```
+
+**Method 2: Attach to specific result element (from descriptives.b.R)**
+
+```r
+# From jamovi/jmv/R/descriptives.b.R
+notice <- jmvcore::Notice$new(
+    options = self$options,
+    name = 'warningMessage',
+    type = jmvcore::NoticeType$WARNING
+)
+notice$setContent('Plots are not yet supported for weighted descriptives')
+
+# Attach notice to plots header
+plots$setHeader(notice)
+```
+
+**Method 3: Insert into result group (from linreg.b.R)**
+
+```r
+# From jamovi/jmv/R/linreg.b.R
+mahalNote <- jmvcore::Notice$new(
+    options = self$options,
+    name = 'warningMessage',
+    type = jmvcore::NoticeType$WARNING
+)
+
+mahalNote$setContent(
+    .("Mahalanobis distance can only be calculated for models with two or more covariates")
+)
+
+# Insert into a specific result group
+group$insert(1, mahalNote)
 ```
 
 ### Complete Basic Example
@@ -428,7 +534,9 @@ steps <- paste(
 
 #### Avoid HTML in Notices
 
-**Important**: According to jamovi best practices, notices should avoid HTML formatting.
+**Important**: According to jamovi best practices and official documentation, notices should avoid HTML formatting.
+
+**From dev.jamovi.org:** "Avoid using HTML in the content of your notices."
 
 **Don't do this**:
 ```r
@@ -444,9 +552,180 @@ notice$setContent('Error: Invalid data detected')
 notice$setContent('Important points:\n• Item 1\n• Item 2')
 ```
 
+### Internationalization Support
+
+For modules that support multiple languages, use the `..()` function and `jmvcore::format()`:
+
+```r
+# From jamovi/jmv examples
+
+# Simple internationalized message
+notice$setContent(.("The data is weighted"))
+
+# With dynamic content using format
+notice$setContent(
+    jmvcore::format(.("The data is weighted by the variable {}"),
+                    self$options$counts)
+)
+
+# Multiple placeholders
+notice$setContent(
+    jmvcore::format(.("Found {} observations with {} events"),
+                    n_total, n_events)
+)
+
+# Complex message with paste
+message <- paste(
+    .("Model fit issue detected!"),
+    .("It appears that your model has a singularity problem."),
+    .("This usually means you have too many variables for your sample size."),
+    sep = "\n"
+)
+notice$setContent(message)
+```
+
+**Benefits:**
+- Messages automatically translated based on user locale
+- Maintains consistency with jamovi interface language
+- Supports parameterized messages with dynamic content
+
+### Alternative Constructor Parameters
+
+The Notice constructor accepts parameters in different orders:
+
+```r
+# Full parameter names (most explicit)
+notice <- jmvcore::Notice$new(
+    options = self$options,
+    name = 'myNotice',
+    type = jmvcore::NoticeType$WARNING
+)
+
+# Positional parameters (from conttables.b.R)
+notice <- jmvcore::Notice$new(
+    self$options,           # options (first parameter)
+    name = 'myNotice',
+    type = jmvcore::NoticeType$WARNING
+)
+
+# With content in constructor (from principal.b.R)
+notice <- jmvcore::Notice$new(
+    self$options,
+    type = jmvcore::NoticeType$WARNING,
+    name = '.weights',
+    content = warningMsg    # Set content directly
+)
+```
+
+**Recommendation:** Use the explicit named parameter style for clarity, unless content is known at creation time.
+
 ---
 
 ## 5. Advanced Notice Patterns
+
+### Helper Function Pattern (from jamovi/jmv)
+
+The jamovi core team uses helper functions to standardize notice creation. This pattern is recommended for consistency:
+
+```r
+# From jamovi/jmv/R/utils.R
+setAnalysisNotice <- function(self, message, name, type) {
+    notice <- jmvcore::Notice$new(
+        options = self$options,
+        name = name,
+        type = type
+    )
+    notice$setContent(message)
+    self$results$insert(1, notice)
+}
+
+# Usage in your analysis
+.run = function() {
+    if (some_error_condition) {
+        setAnalysisNotice(
+            self,
+            message = "Your error message here",
+            name = "errorNotice",
+            type = jmvcore::NoticeType$ERROR
+        )
+        return()
+    }
+}
+```
+
+### Specific Warning Functions (from utilsanova.R)
+
+Create specific helper functions for common warnings:
+
+```r
+# From jamovi/jmv/R/utilsanova.R
+setSingularityWarning <- function(self) {
+    message <- paste(
+        .("Model fit issue detected!"),
+        .("It appears that your model has a 'singularity' problem. This usually means...")
+    )
+
+    setAnalysisNotice(
+        self,
+        message = message,
+        name = "refLevelWarning",
+        type = jmvcore::NoticeType$STRONG_WARNING
+    )
+}
+
+# Usage
+.run = function() {
+    if (is_singular_design) {
+        setSingularityWarning(self)
+        return()
+    }
+}
+```
+
+**Benefits of Helper Functions:**
+- Consistent notice creation across your module
+- Easier to update notice behavior module-wide
+- More readable code in `.run()` function
+- Centralized message management
+- Easier internationalization
+
+### Conditional Notice Creation (from principal.b.R)
+
+Always check conditions before creating notices to avoid empty or unnecessary messages:
+
+```r
+# From vijPlots/R/principal.b.R
+warningMsg <- ""
+
+# Accumulate warnings during analysis
+if (has_correlation_issue) {
+    warningMsg <- paste(warningMsg,
+        "The correlation matrix is not positive definite. Computations may not be accurate.",
+        sep = "\n")
+}
+
+if (rotation_failed) {
+    warningMsg <- paste(warningMsg,
+        "Rotation method failed. Using unrotated solution.",
+        sep = "\n")
+}
+
+# Only create notice if there are warnings
+if (warningMsg != "") {
+    weightsNotice <- jmvcore::Notice$new(
+        self$options,
+        type = jmvcore::NoticeType$WARNING,
+        name = '.weights',
+        content = warningMsg
+    )
+    self$results$insert(1, weightsNotice)
+}
+```
+
+**Key Pattern:**
+- Build up warning messages as you encounter issues
+- Check if message is non-empty before creating notice
+- This avoids creating empty notices that confuse users
 
 ### Conditional Notices
 
@@ -2168,6 +2447,210 @@ sampleSizeClass <- R6::R6Class(
 
 ---
 
+## 11. Real-World Patterns from jamovi Core
+
+This section summarizes key patterns discovered from examining the official jamovi/jmv codebase.
+
+### Pattern 1: Helper Function Architecture
+
+**Source:** `jamovi/jmv/R/utils.R`
+
+Create centralized helper functions for notice management:
+
+```r
+# utils.R
+setAnalysisNotice <- function(self, message, name, type) {
+    notice <- jmvcore::Notice$new(
+        options = self$options,
+        name = name,
+        type = type
+    )
+    notice$setContent(message)
+    self$results$insert(1, notice)
+}
+
+# Specific warning helpers
+setSingularityWarning <- function(self) {
+    message <- .("Model has singularity problem...")
+    setAnalysisNotice(self, message, "singularityWarning",
+                     jmvcore::NoticeType$STRONG_WARNING)
+}
+```
+
+### Pattern 2: Multiple Insertion Methods
+
+Different situations require different insertion approaches:
+
+```r
+# 1. Main results insertion (most common)
+self$results$insert(1, notice)
+
+# 2. Attach to specific element header (descriptives.b.R)
+plots$setHeader(notice)
+
+# 3. Insert into result group (linreg.b.R)
+group$insert(1, notice)
+```
+
+**Use Cases:**
+- **Main results:** General errors, warnings, or information
+- **Element header:** Warnings specific to plots, tables, or other result items
+- **Result group:** Notices that apply to a subset of results
+
+### Pattern 3: Accumulating Warnings
+
+**Source:** `vijPlots/R/principal.b.R`
+
+Build warning messages as issues are discovered:
+
+```r
+warningMsg <- ""
+
+# Check multiple conditions
+if (condition1) {
+    warningMsg <- paste(warningMsg, "Issue 1 detected", sep = "\n")
+}
+
+if (condition2) {
+    warningMsg <- paste(warningMsg, "Issue 2 detected", sep = "\n")
+}
+
+if (condition3) {
+    warningMsg <- paste(warningMsg, "Issue 3 detected", sep = "\n")
+}
+
+# Create single notice with all warnings
+if (warningMsg != "") {
+    notice <- jmvcore::Notice$new(
+        self$options,
+        type = jmvcore::NoticeType$WARNING,
+        name = 'accumulatedWarnings',
+        content = warningMsg
+    )
+    self$results$insert(1, notice)
+}
+```
+
+**Benefits:**
+- Single notice instead of multiple cluttered notices
+- User sees all issues at once
+- Cleaner results presentation
+
+### Pattern 4: Internationalization with jmvcore::format
+
+**Source:** `jamovi/jmv/R/conttables.b.R`
+
+Use format placeholders for dynamic content:
+
+```r
+# Template with placeholder {}
+notice$setContent(
+    jmvcore::format(
+        .("The data is weighted by the variable {}"),
+        self$options$counts
+    )
+)
+
+# Multiple placeholders
+notice$setContent(
+    jmvcore::format(
+        .("Analysis used {} observations with {} events ({} censored)"),
+        n_total, n_events, n_censored
+    )
+)
+```
+
+### Pattern 5: Notice Naming Conventions
+
+From examining jamovi/jmv codebase:
+
+```r
+# System/internal notices: prefix with '.'
+name = '.weights'
+name = '.variableType'
+
+# User-facing notices: descriptive camelCase
+name = 'warningMessage'
+name = 'validationError'
+name = 'assumptionViolation'
+
+# Specific warnings: combine type + context
+name = 'refLevelWarning'
+name = 'singularityWarning'
+name = 'sampleSizeWarning'
+```
+
+### Pattern 6: Variable Type Checking
+
+**Source:** `jamovi/jmv/R/descriptives.b.R`
+
+Check variable types and provide helpful guidance:
+
+```r
+# Check if variables can be treated as numeric
+nonNumericVars <- c()
+
+for (var in selected_vars) {
+    if (!is.numeric(data[[var]])) {
+        nonNumericVars <- c(nonNumericVars, var)
+    }
+}
+
+if (length(nonNumericVars) > 0) {
+    notice <- jmvcore::Notice$new(
+        options = self$options,
+        name = 'variableTypeWarning',
+        type = jmvcore::NoticeType$WARNING
+    )
+
+    notice$setContent(
+        jmvcore::format(
+            .("The variable(s) {} cannot be treated as numeric. Plots that expect numeric data will not be created."),
+            paste(nonNumericVars, collapse = ", ")
+        )
+    )
+
+    plots$setHeader(notice)
+}
+```
+
+### Pattern 7: Conditional Method Availability
+
+**Source:** `jamovi/jmv/R/linreg.b.R`
+
+Inform users when features require specific conditions:
+
+```r
+# Check prerequisites for advanced features
+if (self$options$calculateMahalanobis && n_covariates < 2) {
+    notice <- jmvcore::Notice$new(
+        options = self$options,
+        name = 'warningMessage',
+        type = jmvcore::NoticeType$WARNING
+    )
+
+    notice$setContent(
+        .("Mahalanobis distance can only be calculated for models with two or more covariates")
+    )
+
+    group$insert(1, notice)
+    return()  # Skip this calculation
+}
+```
+
+### Key Takeaways from Real-World Code
+
+1. **Consistency:** Use helper functions like `setAnalysisNotice()` for uniform behavior
+2. **Clarity:** Use `jmvcore::format()` with `..()` for internationalization
+3. **Efficiency:** Accumulate multiple warnings into single notices
+4. **Placement:** Choose insertion method based on notice scope (main results, element header, or group)
+5. **Naming:** Follow conventions (`.name` for internal, `descriptiveName` for user-facing)
+6. **Content:** Set content directly in constructor when known, or use `setContent()` for dynamic messages
+7. **HTML:** Never use HTML formatting in notices (official recommendation)
+8. **Positioning:** Always use `insert(1, notice)` for top placement
+
+---
+
 ## Conclusion
 
 Effective use of notices enhances the user experience of jamovi modules by:
@@ -2207,3 +2690,88 @@ For clinical and pathology modules:
 - Document methodological decisions transparently
 
 This comprehensive guide provides the foundation for implementing professional, user-friendly notices in jamovi modules. Well-crafted notices transform statistical software into an educational tool that guides users toward appropriate analysis and valid interpretation of results.
+
+---
+
+## 12. References and Additional Resources
+
+### Official Documentation
+
+**jamovi Developer Hub - Notices API**
+- URL: https://dev.jamovi.org/api_notices.html
+- Official API documentation for the notices system
+- Core reference for all notice implementations
+
+### Source Code References
+
+This guide incorporates real-world patterns from the following repositories:
+
+**jamovi/jmv (Official jamovi Analyses)**
+- Repository: https://github.com/jamovi/jmv
+- Key files examined:
+  - `R/conttables.b.R` - Weighted data notices
+  - `R/descriptives.b.R` - Variable type warnings and plot limitations
+  - `R/linreg.b.R` - Prerequisite checking for advanced features
+  - `R/utils.R` - Helper functions for notice management
+  - `R/utilsanova.R` - Singularity warnings and model fit issues
+
+**vijPlots (Community Module)**
+- Repository: https://github.com/vjalby/vijPlots
+- Key files examined:
+  - `R/principal.b.R` - Accumulating warning pattern
+  - `R/corresp.b.R` - Similar warning accumulation approach
+
+### Key Patterns Documented
+
+1. **Helper Function Architecture** - Centralized notice creation via `setAnalysisNotice()`
+2. **Multiple Insertion Methods** - `insert()`, `setHeader()`, and group insertion
+3. **Accumulating Warnings** - Building composite warning messages
+4. **Internationalization** - Using `..()` and `jmvcore::format()`
+5. **Naming Conventions** - System notices (`.name`) vs user-facing notices
+6. **Conditional Creation** - Check before creating to avoid empty notices
+7. **Variable Type Checking** - Informing users about incompatible data types
+
+### Best Practice Summary from Real-World Code
+
+**From jamovi/jmv codebase analysis:**
+
+✅ **DO:**
+- Use helper functions for consistency
+- Implement internationalization with `..()` and `jmvcore::format()`
+- Accumulate multiple warnings into single notices
+- Choose appropriate insertion method (results, header, or group)
+- Follow naming conventions (`.internal` or `descriptiveName`)
+- Always avoid HTML in notice content
+- Position critical notices at top with `insert(1, notice)`
+
+❌ **DON'T:**
+- Create empty notices (check conditions first)
+- Use HTML formatting in content
+- Create multiple notices for related issues
+- Hard-code messages without internationalization support
+
+### Implementation Checklist
+
+When implementing notices in your jamovi module:
+
+- [ ] Create helper functions in a utils file (e.g., `setAnalysisNotice()`)
+- [ ] Use appropriate notice type (ERROR, STRONG_WARNING, WARNING, INFO)
+- [ ] Implement internationalization with `..()` for all messages
+- [ ] Check conditions before creating notices
+- [ ] Accumulate related warnings into single notices
+- [ ] Use plain text formatting (no HTML)
+- [ ] Choose correct insertion method for your use case
+- [ ] Follow naming conventions for notice identifiers
+- [ ] Provide actionable guidance in notice content
+- [ ] Test notices with different data scenarios
+
+### Contributing
+
+This guide is part of the ClinicoPath jamovi module project. Contributions and improvements are welcome. If you discover additional patterns or best practices from other jamovi modules, please consider contributing them to this guide.
+
+---
+
+**Document Version:** 2.0
+**Last Updated:** Based on jamovi/jmv commit 8aa8270 and official API documentation
+**Author:** ClinicoPath Development Team
+**License:** Follow jamovi module licensing guidelines

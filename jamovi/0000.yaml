@@ -16,7 +16,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
