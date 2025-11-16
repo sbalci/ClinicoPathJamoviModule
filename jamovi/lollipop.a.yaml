@@ -3,7 +3,7 @@ name: lollipop
 title: Lollipop Chart
 menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

@@ -907,7 +907,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             "Please ensure your data has events coded as: 0=censored, 1=event of interest, 2=competing event"
           ))
         })
-      },
+      }
 
       # Median Survival Function ----
       ,

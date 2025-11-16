@@ -288,9 +288,22 @@ survivalPowerClass <- R6::R6Class(
             # Ensure effect size resolution info is current
             resolved_hr <- private$.get_effect_hr()
 
+            # VERSION 0.3.0 LIMITATIONS WARNING - Added to prevent misleading users
             instructions <- paste0(
+                "<div style='background-color: #fff3cd; border: 2px solid #ff9800; border-radius: 5px; padding: 15px; margin-bottom: 15px;'>",
+                "<h4 style='color: #ff6f00; margin-top: 0;'>⚠️ Beta Version 0.3.0 - Known Limitations</h4>",
+                "<p><strong>Current Implementation Status:</strong></p>",
+                "<ul style='margin-bottom: 10px;'>",
+                "<li><strong>✅ WORKING:</strong> Log-rank test, Cox regression, Non-inferiority designs</li>",
+                "<li><strong>⛔ NOT AVAILABLE:</strong> Competing risks, RMST-based tests, SNP survival, Weighted log-rank</li>",
+                "<li><strong>⛔ DISTRIBUTION:</strong> Only exponential survival distribution supported</li>",
+                "<li><strong>⛔ ACCRUAL:</strong> Only uniform accrual pattern fully validated</li>",
+                "</ul>",
+                "<p style='margin-bottom: 0;'><strong>Important:</strong> This is a beta version with core features functional but incomplete. ",
+                "For production clinical trials, verify calculations with independent biostatistician review.</p>",
+                "</div>",
                 "<p><strong>Power Analysis & Sample Size Calculation</strong></p>",
-                "<p>This module provides comprehensive power analysis and sample size calculations for survival studies and clinical trials.</p>",
+                "<p>This module provides power analysis and sample size calculations for survival studies and clinical trials.</p>",
                 "<p><strong>Current Configuration:</strong><br>",
                 "• Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
                 "• Statistical Test: ", private$.format_test_type(test_type), "</p>",

@@ -3,8 +3,8 @@
 #' @import jmvcore
 #'
 
-tumorGrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
-    "tumorGrowthClass",
+tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "tumorgrowthClass",
     inherit = tumorgrowthBase,
     private = list(
         
