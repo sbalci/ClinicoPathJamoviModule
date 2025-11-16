@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -43,7 +43,7 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >

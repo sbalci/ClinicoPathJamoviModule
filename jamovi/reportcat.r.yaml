@@ -33,7 +33,8 @@ items:
     - name:  text1
       title: 'Summary Table'
       type:  Html
-      
+      visible: (vars)
+
     - name:  reportSentences
       title: 'Copy-Ready Clinical Summary'
       type:  Html

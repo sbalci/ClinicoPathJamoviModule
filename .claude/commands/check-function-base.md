@@ -1,6 +1,6 @@
 ---
 name: check-function-base
-description: Perform systematic quality check of a jamovi function (with jamovi Notices audit & enforcement)
+description: Perform systematic quality check of a jamovi function 
 interactive: true
 args:
   function_name:
@@ -21,7 +21,7 @@ args:
     description: Upstream function name if it differs from SANITIZED_FN
     required: false
   notices_mode:
-    description: Notices check mode — enforce (create & require), audit-only (report only), or off
+    description: Notices check mode — (create), audit-only (report only), or off
     required: false
     default: enforce
     enum: [enforce, audit-only, off]

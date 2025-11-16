@@ -16,7 +16,8 @@ items:
     - name:  text1
       title: 'Continuous Data Plots'
       type:  Html
-      
+      visible: (vars)
+
     - name:  clinicalInterpretation
       title: 'Clinical Interpretation'
       type:  Html

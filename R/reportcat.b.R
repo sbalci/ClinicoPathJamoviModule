@@ -147,7 +147,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Create overall summary sentences with HTML tags for styling.
                     sentence1 <- glue::glue("<strong>{var}</strong> {has_obs} {obs} {observations} {and} {levels} {levels_text}.",
-                        var = myvar,
+                        var = htmltools::htmlEscape(myvar),
                         has_obs = .("has"),
                         obs = total_obs,
                         observations = .("observations"),
@@ -170,52 +170,43 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot_dataset <- tryCatch({
                     # Primary approach: Use gtExtras with proper categorical data handling
                     cat_vars <- myvars[sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
-                    
+
                     if (length(cat_vars) > 0) {
                         clean_data <- mydata[cat_vars]
-                        
+
                         # Convert character to factor for better handling
                         clean_data <- as.data.frame(lapply(clean_data, function(x) {
                             if (is.character(x)) as.factor(x) else x
                         }))
-                        
+
                         # Use gtExtras::gt_plt_summary with proper configuration for categorical data
-                        gt_table <- clean_data %>% 
+                        gt_table <- clean_data %>%
                             gtExtras::gt_plt_summary() %>%
                             gt::tab_header(
                                 title = gt::md(glue::glue("**{title}**", title = .("Categorical Variables Summary"))),
                                 subtitle = .("Distribution and missing value analysis")
                             ) %>%
-                            # Hide irrelevant numeric columns for categorical data (if they exist)
-                            {
-                                tryCatch({
-                                    . %>% gt::cols_hide(columns = dplyr::any_of(c("mean", "sd", "p0", "p25", "p50", "p75", "p100")))
-                                }, error = function(e) {
-                                    # If cols_hide fails, return table as is
-                                    .
-                                })
-                            } %>%
                             gt::tab_options(
                                 table.font.size = 12,
                                 heading.title.font.size = 14,
                                 heading.subtitle.font.size = 11,
                                 table.width = gt::pct(100)
                             )
-                        
+
                         # Convert to HTML using proper gt method
                         html_output <- gt::as_raw_html(gt_table)
-                        return(htmltools::HTML(html_output))
+                        htmltools::HTML(html_output)
                     } else {
-                        return(htmltools::HTML(glue::glue("<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;'><p>{msg}</p></div>", 
-                            msg = .("No categorical variables found."))))
+                        htmltools::HTML(glue::glue("<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;'><p>{msg}</p></div>",
+                            msg = .("No categorical variables found.")))
                     }
                 }, error = function(e) {
                     # Enhanced fallback with better styling
                     tryCatch({
-                        return(private$.gtExtras_style_fallback_cat(mydata, myvars))
+                        private$.gtExtras_style_fallback_cat(mydata, myvars)
                     }, error = function(e2) {
                         # Final fallback to simple table
-                        return(private$.create_simple_cat_summary_table(mydata, myvars))
+                        private$.create_simple_cat_summary_table(mydata, myvars)
                     })
                 })
                 
@@ -284,7 +275,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_missing <- sum(is.na(data_col))
                 
                 html <- paste0(html, "<tr>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", var, "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", htmltools::htmlEscape(var), "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", levels_count, "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", n_valid, "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", n_missing, "</td>")
@@ -353,8 +344,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     sentence <- glue::glue(
                         .("For {variable}, the most common category was '{category}' (n = {n}, {percent}% of valid cases)."),
-                        variable = var,
-                        category = most_common,
+                        variable = htmltools::htmlEscape(var),
+                        category = htmltools::htmlEscape(most_common),
                         n = most_common_n,
                         percent = most_common_pct
                     )

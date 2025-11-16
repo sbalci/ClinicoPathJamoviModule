@@ -14,23 +14,20 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
     children:
       - type: CheckBox
         name: distr
-  - type: LayoutBox
-    margin: large
-    children:
       - type: TextBox
         name: decimal_places
         format: number
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Additional Outputs
+    collapsed: true
     children:
       - type: CheckBox
         name: outliers
       - type: CheckBox
         name: report_sentences
-      - type: CheckBox
-        name: showRCode

@@ -10,8 +10,7 @@ summarydata(
   distr = FALSE,
   decimal_places = 1,
   outliers = FALSE,
-  report_sentences = FALSE,
-  showRCode = FALSE
+  report_sentences = FALSE
 )
 }
 \arguments{
@@ -31,11 +30,6 @@ method. Helpful for quality control and identifying data entry errors.}
 
 \item{report_sentences}{If TRUE, generate copy-ready clinical report
 sentences for direct use in medical documentation.}
-
-\item{showRCode}{Generate copy-ready R code using upstream packages (stats,
-mixOmics, MASS) instead of jamovi wrappers. Useful for reproducing analysis
-in R scripts, learning the underlying implementation, and sharing code with
-non-jamovi users.}
 }
 \value{
 A results object containing:

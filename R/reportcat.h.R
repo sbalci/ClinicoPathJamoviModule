@@ -82,7 +82,8 @@ reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Summary Table"))
+                title="Summary Table",
+                visible="(vars)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentences",

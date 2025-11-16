@@ -10,6 +10,11 @@
 #' @import moments
 #' @importFrom utils packageVersion
 
+# Variable name escaping utility for handling special characters
+.escapeVar <- function(x) {
+    gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+}
+
 summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataClass",
     inherit = summarydataBase, private = list(
         
@@ -30,9 +35,38 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             if (nrow(self$data) == 0) {
                 stop(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
             }
+            
+            vars <- self$options$vars
+
+            # Remove non-numeric variables and variables with all NAs
+            vars_to_remove <- c()
+            warning_msgs <- c()
+
+            for (var in vars) {
+                if (!is.numeric(self$data[[var]])) {
+                    vars_to_remove <- c(vars_to_remove, var)
+                    warning_msgs <- c(warning_msgs, paste0("Variable '", var, "' is not numeric"))
+                } else if (all(is.na(self$data[[var]]))) {
+                    vars_to_remove <- c(vars_to_remove, var)
+                    warning_msgs <- c(warning_msgs, paste0("Variable '", var, "' contains only missing values"))
+                }
+            }
+
+            if (length(warning_msgs) > 0) {
+                self$results$todo$setContent(paste0("<div style='color: #856404; background: #fff3cd; padding: 10px; border-radius: 4px;'>",
+                    paste(warning_msgs, collapse="<br>"),
+                    "</div>"))
+            }
+
+            vars <- setdiff(vars, vars_to_remove)
+
+            if (length(vars) == 0) {
+                return()
+            }
+
             # Retrieve the data and construct the list of variables.
             dataset <- self$data
-            var_formula <- jmvcore::constructFormula(terms = self$options$vars)
+            var_formula <- jmvcore::constructFormula(terms = vars)
             var_list <- unlist(jmvcore::decomposeFormula(formula = var_formula))
             # mysummary function with optimized calculations
             mysummary <- function(myvar) {
@@ -77,13 +111,13 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         .("Normality test not applicable due to sample size")
                     }
                     dist_text <- paste0(
-                        "<br><em>", .("Distribution Diagnostics for"), " ", myvar ,":</em> ", .("Shapiro-Wilk p-value"), " = ", p_val,
+                        "<br><em>", .("Distribution Diagnostics for"), " ", htmltools::htmlEscape(myvar) ,":</em> ", .("Shapiro-Wilk p-value"), " = ", p_val,
                         "; ", .("Skewness"), " = ", skew_val, "; ", .("Kurtosis"), " = ", kurt_val,
                         " (", .("Data"), " ", norm_status, ")."
                     )
                 }
                     # Return the summary text with distribution diagnostics.
-                    paste0(.("Mean of"), " <strong>", myvar, "</strong> ", .("is"), ": ", mean_x, " &plusmn; ", sd_x,
+                    paste0(.("Mean of"), " <strong>", htmltools::htmlEscape(myvar), "</strong> ", .("is"), ": ", mean_x, " &plusmn; ", sd_x,
                            ". (", .("Median"), ": ", median_x, " [", .("Min"), ": ", min_x, " - ", .("Max"), ": ",
                            max_x, "]) <br>", dist_text, "<br><br>", collapse = " ")
             }
@@ -94,21 +128,21 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             plot_dataset <- tryCatch({
                 # Filter to numeric variables for gtExtras
                 numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
-                
+
                 # Filter and validate numeric variables
-                
+
                 if (length(numeric_vars) > 0) {
                     clean_data <- dataset[numeric_vars]
-                    
+
                     # Ensure proper data types
                     clean_data <- as.data.frame(lapply(clean_data, function(x) {
                         if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
                     }))
-                    
+
                     # Use gtExtras with default styling as intended
-                    summary_table <- clean_data %>% 
+                    summary_table <- clean_data %>%
                         gtExtras::gt_plt_summary()
-                    
+
                     # Convert to HTML with improved compatibility
                     html_result <- tryCatch({
                         # Primary method: as_raw_html for clean HTML output
@@ -122,21 +156,21 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                             as.character(private$.create_summary_table(dataset, var_list))
                         })
                     })
-                    
-                    return(htmltools::HTML(html_result))
+
+                    htmltools::HTML(html_result)
                 } else {
-                    return(htmltools::HTML(paste0("<p>", .("No numeric variables selected for summary table."), "</p>")))
+                    htmltools::HTML(paste0("<p>", .("No numeric variables selected for summary table."), "</p>"))
                 }
             }, error = function(e) {
                 # Debug information and fallback to simple table if gtExtras fails
                 warning_msg <- paste0(
                     "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 3px;'>",
                     "<strong>", .("Note"), ":</strong> ", .("Using fallback table format"), ". ",
-                    .("Error"), ": ", e$message, 
+                    .("Error"), ": ", e$message,
                     "</div>"
                 )
                 simple_table <- private$.create_simple_summary_table(dataset, var_list)
-                return(htmltools::HTML(paste0(warning_msg, as.character(simple_table))))
+                htmltools::HTML(paste0(warning_msg, as.character(simple_table)))
             })
             
             
@@ -165,11 +199,6 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             # Generate statistical glossary
             glossary_content <- private$.generateGlossary()
             self$results$glossary$setContent(glossary_content)
-
-            # Generate R code if enabled
-            if (self$options$showRCode) {
-                private$.generateRCode(var_list, dataset)
-            }
         }
         },
         # Simple summary table without resource-intensive gtExtras
@@ -195,9 +224,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             for (var in numeric_vars) {
                 data_col <- dataset[[var]]
                 data_col <- as.numeric(data_col[!is.na(data_col)])
-                
+
                 html <- paste0(html, "<tr>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", var, "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", htmltools::htmlEscape(var), "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", length(data_col), "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(mean(data_col, na.rm = TRUE), 2), "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(sd(data_col, na.rm = TRUE), 2), "</td>")
@@ -338,11 +367,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             # Assess data completeness
             completeness_info <- sapply(variables, function(var) {
                 var_data <- dataset[[var]]
-                missing_pct <- round(sum(is.na(var_data)) / length(var_data) * 100, 1)
-                list(missing_pct = missing_pct)
+                round(sum(is.na(var_data)) / length(var_data) * 100, 1)
             })
-            
-            avg_missing <- round(mean(sapply(completeness_info, function(x) x$missing_pct)), 1)
+
+            avg_missing <- round(mean(completeness_info), 1)
             
             # Generate clinical context
             clinical_text <- paste0(
@@ -460,17 +488,18 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             
             for (var in variables) {
                 result <- outlier_results[[var]]
-                
+                safe_var <- htmltools::htmlEscape(var)
+
                 if (result$method == "insufficient_data") {
-                    report_html <- paste0(report_html, 
-                        "<p><strong>", var, ":</strong> ", .("Insufficient data for outlier detection"), "</p>")
+                    report_html <- paste0(report_html,
+                        "<p><strong>", safe_var, ":</strong> ", .("Insufficient data for outlier detection"), "</p>")
                 } else if (length(result$outliers) == 0) {
                     report_html <- paste0(report_html,
-                        "<p><strong>", var, ":</strong> ", .("No outliers detected"), 
+                        "<p><strong>", safe_var, ":</strong> ", .("No outliers detected"),
                         " (", .("Range"), ": ", result$lower_bound, " - ", result$upper_bound, ")</p>")
                 } else {
                     report_html <- paste0(report_html,
-                        "<p><strong>", var, ":</strong> ", length(result$outliers), " ", .("outliers detected"), 
+                        "<p><strong>", safe_var, ":</strong> ", length(result$outliers), " ", .("outliers detected"), 
                         " (", .("Values"), ": ", paste(round(result$values, 2), collapse = ", "), ") ",
                         "<br><span style='color: #856404; font-size: 0.9em;'>",
                         .("Expected range"), ": ", result$lower_bound, " - ", result$upper_bound, "</span></p>")
@@ -496,9 +525,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             for (var in variables) {
                 var_data <- as.numeric(dataset[[var]])
                 var_clean <- var_data[!is.na(var_data)]
-                
+
                 if (length(var_clean) == 0) next
-                
+
                 # Calculate statistics
                 n <- length(var_clean)
                 mean_val <- round(mean(var_clean), 2)
@@ -506,8 +535,8 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 median_val <- round(median(var_clean), 2)
                 min_val <- round(min(var_clean), 2)
                 max_val <- round(max(var_clean), 2)
-                
-                # Basic descriptive sentence
+
+                # Basic descriptive sentence (use plain text var name for clinical reports)
                 sentence <- paste0(
                     "For ", var, ", analysis of ", n, " observations showed mean ", 
                     mean_val, " ± ", sd_val, " (median ", median_val, 
@@ -593,103 +622,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             return(glossary_html)
         }
 
-#         .generateRCode = function(var_list, dataset) {
-
-#             # Build variable string
-#             var_str <- paste0("c(\"", paste(var_list, collapse = "\", \""), "\")")
-
-#             # Generate R code for descriptive statistics
-#             r_code <- sprintf(
-# '# ============================================
-# # Reproducible R Code for Summary Statistics
-# # ============================================
-# # This code uses base R stats package
-
-# # Load required packages
-# library(moments)  # for skewness and kurtosis
-
-# # Assuming your data is in a data frame called "mydata"
-# variables <- %s
-
-# # Function to calculate comprehensive summaries
-# summary_stats <- function(var_name, data) {
-#     x <- data[[var_name]]
-#     x_clean <- x[!is.na(x)]
-
-#     # Basic statistics
-#     n <- length(x_clean)
-#     mean_val <- mean(x_clean)
-#     sd_val <- sd(x_clean)
-#     median_val <- median(x_clean)
-#     min_val <- min(x_clean)
-#     max_val <- max(x_clean)
-
-#     # Distribution diagnostics
-#     if (n >= 3 && n <= 5000) {
-#         sw_test <- shapiro.test(x_clean)
-#         p_val <- sw_test$p.value
-#     } else {
-#         p_val <- NA
-#     }
-
-#     skew_val <- moments::skewness(x_clean)
-#     kurt_val <- moments::kurtosis(x_clean)
-
-#     # Create result
-#     result <- data.frame(
-#         Variable = var_name,
-#         N = n,
-#         Mean = round(mean_val, %d),
-#         SD = round(sd_val, %d),
-#         Median = round(median_val, %d),
-#         Min = round(min_val, %d),
-#         Max = round(max_val, %d),
-#         Shapiro_p = ifelse(is.na(p_val), NA, round(p_val, 3)),
-#         Skewness = round(skew_val, 2),
-#         Kurtosis = round(kurt_val, 2),
-#         stringsAsFactors = FALSE
-#     )
-
-#     return(result)
-# }
-
-# # Calculate summaries for all variables
-# results <- do.call(rbind, lapply(variables, summary_stats, data = mydata))
-
-# # Print results
-# print(results)
-
-# # Generate narrative summaries
-# for (var in variables) {
-#     stats <- results[results$Variable == var, ]
-#     cat(sprintf("%%s: Mean = %%.2f ± %%.2f (Median = %%.2f, Range: %%.2f - %%.2f)\\n",
-#                 var, stats$Mean, stats$SD, stats$Median, stats$Min, stats$Max))
-# }',
-#                 var_str,
-#                 self$options$decimal_places,
-#                 self$options$decimal_places,
-#                 self$options$decimal_places,
-#                 self$options$decimal_places,
-#                 self$options$decimal_places
-#             )
-
-#             # Wrap in HTML
-#             r_code_html <- paste0(
-#                 "<div style='background:#f5f5f5;padding:1em;border:1px solid #ddd;border-radius:4px;'>",
-#                 "<h4>Copy-Ready R Code</h4>",
-#                 "<p>This code replicates the descriptive statistics analysis using base R and the moments package.</p>",
-#                 "<ul>",
-#                 "<li>Replace <code>mydata</code> with your actual data frame name</li>",
-#                 "<li>Install moments package if needed: <code>install.packages('moments')</code></li>",
-#                 "<li><b>Copy:</b> Click and drag to select all text, then Ctrl+C (Cmd+C on Mac)</li>",
-#                 "</ul>",
-#                 "<pre style='background:white;padding:1em;overflow-x:auto;border:1px solid #ccc;'><code>",
-#                 htmltools::htmlEscape(r_code),
-#                 "</code></pre>",
-#                 "<p style='margin-top:1em;'><i>💡 Tip: This code is fully reproducible and can be shared with colleagues who don't use jamovi.</i></p>",
-#                 "</div>"
-#             )
-
-#             self$results$rCode$setContent(r_code_html)
-#         }
+        # NOTE: R code generation feature deferred to future release
+        # See SUMMARYDATA_FIXES.md for details
+        # Implementation can be restored from git history if needed
     ))

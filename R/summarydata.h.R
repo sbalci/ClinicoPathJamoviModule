@@ -8,10 +8,9 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         initialize = function(
             vars = NULL,
             distr = FALSE,
-            decimal_places = 1,
+            decimal_places = 2,
             outliers = FALSE,
-            report_sentences = FALSE,
-            showRCode = FALSE, ...) {
+            report_sentences = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -35,7 +34,7 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 decimal_places,
                 min=0,
                 max=5,
-                default=1)
+                default=2)
             private$..outliers <- jmvcore::OptionBool$new(
                 "outliers",
                 outliers,
@@ -44,32 +43,25 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "report_sentences",
                 report_sentences,
                 default=FALSE)
-            private$..showRCode <- jmvcore::OptionBool$new(
-                "showRCode",
-                showRCode,
-                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..distr)
             self$.addOption(private$..decimal_places)
             self$.addOption(private$..outliers)
             self$.addOption(private$..report_sentences)
-            self$.addOption(private$..showRCode)
         }),
     active = list(
         vars = function() private$..vars$value,
         distr = function() private$..distr$value,
         decimal_places = function() private$..decimal_places$value,
         outliers = function() private$..outliers$value,
-        report_sentences = function() private$..report_sentences$value,
-        showRCode = function() private$..showRCode$value),
+        report_sentences = function() private$..report_sentences$value),
     private = list(
         ..vars = NA,
         ..distr = NA,
         ..decimal_places = NA,
         ..outliers = NA,
-        ..report_sentences = NA,
-        ..showRCode = NA)
+        ..report_sentences = NA)
 )
 
 summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -105,7 +97,8 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Continuous Data Plots"))
+                title="Continuous Data Plots",
+                visible="(vars)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
@@ -175,15 +168,11 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param distr If TRUE, additional distribution diagnostics (Shapiro-Wilk
 #'   test, skewness, and kurtosis) will be computed and explained.
 #' @param decimal_places Number of decimal places to display for statistical
-#'   measures.
+#'   measures. Default of 2 aligns with standard laboratory reporting.
 #' @param outliers If TRUE, detect and report potential outliers using IQR
 #'   method. Helpful for quality control and identifying data entry errors.
 #' @param report_sentences If TRUE, generate copy-ready clinical report
 #'   sentences for direct use in medical documentation.
-#' @param showRCode Generate copy-ready R code using upstream packages (stats,
-#'   mixOmics, MASS) instead of jamovi wrappers. Useful for reproducing analysis
-#'   in R scripts, learning the underlying implementation, and sharing code with
-#'   non-jamovi users.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -201,10 +190,9 @@ summarydata <- function(
     data,
     vars,
     distr = FALSE,
-    decimal_places = 1,
+    decimal_places = 2,
     outliers = FALSE,
-    report_sentences = FALSE,
-    showRCode = FALSE) {
+    report_sentences = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("summarydata requires jmvcore to be installed (restart may be required)")
@@ -221,8 +209,7 @@ summarydata <- function(
         distr = distr,
         decimal_places = decimal_places,
         outliers = outliers,
-        report_sentences = report_sentences,
-        showRCode = showRCode)
+        report_sentences = report_sentences)
 
     analysis <- summarydataClass$new(
         options = options,
