@@ -4,7 +4,14 @@
 \alias{reportcat}
 \title{Summary of Categorical Variables}
 \usage{
-reportcat(data, vars)
+reportcat(
+  data,
+  vars,
+  showClinicalSummary = TRUE,
+  showAboutAnalysis = TRUE,
+  showAssumptions = TRUE,
+  showReportSentences = TRUE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -12,6 +19,18 @@ reportcat(data, vars)
 \item{vars}{Select the variables from your data frame that you wish to
 summarize. Only categorical variables (nominal, ordinal, or factors) are
 allowed.}
+
+\item{showClinicalSummary}{Display clinical interpretation section with
+data quality metrics}
+
+\item{showAboutAnalysis}{Display explanatory section about what the
+analysis does and when to use it}
+
+\item{showAssumptions}{Display data quality requirements and statistical
+considerations}
+
+\item{showReportSentences}{Generate copy-ready sentences suitable for
+clinical reports}
 }
 \value{
 A results object containing:
@@ -23,7 +42,6 @@ A results object containing:
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
-\code{results$error} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

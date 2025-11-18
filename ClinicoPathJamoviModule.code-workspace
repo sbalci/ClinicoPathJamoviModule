@@ -4,22 +4,13 @@
 			"path": "."
 		},
 		{
-			"path": "../OncoPath"
+			"path": "../../../Desktop/omentum"
 		},
 		{
-			"path": "../ClinicoPathDescriptives"
+			"path": "../aiforiabreast"
 		},
 		{
-			"path": "../jsurvival"
-		},
-		{
-			"path": "../jjstatsplot"
-		},
-		{
-			"path": "../meddecide"
-		},
-		{
-			"path": "../JamoviTest"
+			"path": "../paige-prostate"
 		}
 	],
 	"settings": {}

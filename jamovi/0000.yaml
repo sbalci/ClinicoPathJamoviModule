@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.26
+version: 0.0.32.27
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-11-16'
+date: '2025-11-18'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -2253,13 +2253,6 @@ analyses:
       Kendall  correlations with significance tests, confidence intervals, and
       natural language  reporting. Suitable for exploring relationships between
       continuous variables.
-  - title: Benford Analysis 2
-    name: benford2
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationD
-    menuSubgroup: ClinicoPath Descriptives
-    menuTitle: Benford Analysis 2
   - title: Alluvial Diagrams
     name: alluvial2
     ns: ClinicoPath

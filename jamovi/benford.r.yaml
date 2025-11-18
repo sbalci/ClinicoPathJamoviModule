@@ -5,6 +5,12 @@ jrs:   '1.1'
 
 items:
 
+    - name: welcome
+      title: 'Getting Started'
+      type: Html
+      visible: (!var)
+      clearWith: []
+
     - name:  explanation
       title: "About Benford's Law in Clinical Data"
       type:  Html

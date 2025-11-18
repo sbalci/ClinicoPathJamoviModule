@@ -189,12 +189,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "female",
                     "male",
                     "bin_width",
-                    "plot_title",
-                    "color1",
-                    "color2",
-                    "color_palette",
-                    "age_groups",
-                    "plot_engine")))
+                    "age_groups")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -209,11 +204,11 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "female",
                     "male",
                     "bin_width",
+                    "age_groups",
                     "plot_title",
                     "color1",
                     "color2",
                     "color_palette",
-                    "age_groups",
                     "plot_engine")))}))
 
 agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -224,7 +219,7 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agepyramid",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = agepyramidResults$new(options=options),
                 data = data,

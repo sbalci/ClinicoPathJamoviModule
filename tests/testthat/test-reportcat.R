@@ -1,176 +1,325 @@
-testthat::test_that("reportcat works", {
-  
-  # Skip if required packages are not available
-  testthat::skip_if_not_installed("ClinicoPath")
-  
-  # Create test data with categorical variables
-  test_data <- data.frame(
-    treatment = factor(c("A", "B", "A", "C", "B", "A", NA)),
-    grade = factor(c("Low", "High", "Medium", "Low", "High", "Medium", "Low")),
-    status = factor(c("Complete", "Partial", "Complete", "None", "Partial", "Complete", "None")),
-    stringsAsFactors = FALSE
-  )
-  
-  # Test 1: Basic functionality with multiple variables
-  testthat::expect_no_error({
+# Test suite for reportcat function
+# Tests the current implementation with Notice API and modern architecture
+
+testthat::test_that("reportcat works with standard categorical data", {
+    # Skip if required packages are not available
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    # Create test data with categorical variables
+    test_data <- data.frame(
+        Gender = factor(c("Male", "Female", "Male", "Female", "Male", "Female", "Male", "Female")),
+        Grade = factor(c("I", "II", "III", "I", "II", "III", "I", "II")),
+        Stage = factor(c("A", "B", "A", "B", "C", "A", "B", "C"))
+    )
+
+    # Test basic functionality
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = c("Gender", "Grade", "Stage")
+        )
+    })
+
+    # Run and check structure
     result <- ClinicoPath::reportcat(
-      data = test_data,
-      vars = c("treatment", "grade")
+        data = test_data,
+        vars = c("Gender", "Grade")
     )
-  })
-  
-  # Test 2: Single variable analysis
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data,
-      vars = "grade"
-    )
-  })
-  
-  # Test 3: Enhanced sumvar style format
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data,
-      vars = c("treatment", "grade"),
-      sumvar_style = TRUE
-    )
-  })
-  
-  # Test 4: Sort by frequency option
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data,
-      vars = "status",
-      sort_by_frequency = TRUE
-    )
-  })
-  
-  # Test 5: Hide proportions option
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data,
-      vars = "grade",
-      show_proportions = FALSE
-    )
-  })
-  
-  # Test 6: Edge case - all missing values
-  test_data_missing <- data.frame(
-    all_missing = factor(c(NA, NA, NA, NA))
-  )
-  
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data_missing,
-      vars = "all_missing"
-    )
-  })
-  
-  # Test 7: Edge case - single category
-  test_data_single <- data.frame(
-    single_cat = factor(c("A", "A", "A", "A"))
-  )
-  
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data_single,
-      vars = "single_cat"
-    )
-  })
-  
-  # Test 8: Empty data frame should produce error
-  empty_data <- data.frame()
-  
-  testthat::expect_error({
-    ClinicoPath::reportcat(
-      data = empty_data,
-      vars = character(0)
-    )
-  })
-  
-  # Test 9: Character variables should be converted to factors
-  test_data_char <- data.frame(
-    char_var = c("cat", "dog", "cat", "bird", "dog"),
-    stringsAsFactors = FALSE
-  )
-  
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data_char,
-      vars = "char_var"
-    )
-  })
-  
-  # Test 10: Multiple edge cases combined
-  complex_data <- data.frame(
-    mixed = factor(c("A", "B", NA, "A", "C", "B", NA, "A")),
-    uniform = factor(rep("Same", 8)),
-    all_na = factor(rep(NA, 8))
-  )
-  
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = complex_data,
-      vars = c("mixed", "uniform", "all_na"),
-      sumvar_style = TRUE,
-      sort_by_frequency = TRUE
-    )
-  })
+
+    # Verify result structure
+    testthat::expect_true("todo" %in% names(result))
+    testthat::expect_true("text" %in% names(result))
+    testthat::expect_true("text1" %in% names(result))
+    testthat::expect_true("clinicalSummary" %in% names(result))
+    testthat::expect_true("aboutAnalysis" %in% names(result))
+    testthat::expect_true("assumptions" %in% names(result))
+    testthat::expect_true("reportSentences" %in% names(result))
 })
 
-testthat::test_that("reportcat results structure", {
-  
-  # Skip if required packages are not available
-  testthat::skip_if_not_installed("ClinicoPath")
-  
-  # Create simple test data
-  test_data <- data.frame(
-    category = factor(c("A", "B", "A", "C"))
-  )
-  
-  # Run analysis
-  result <- ClinicoPath::reportcat(
-    data = test_data,
-    vars = "category"
-  )
-  
-  # Test that result has expected structure
-  testthat::expect_true("todo" %in% names(result))
-  testthat::expect_true("text" %in% names(result))
-  testthat::expect_true("text1" %in% names(result))
-  
-  # Test that results are not NULL
-  testthat::expect_false(is.null(result$text))
-  testthat::expect_false(is.null(result$text1))
+testthat::test_that("reportcat shows welcome message with no variables", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        Gender = factor(c("Male", "Female", "Male", "Female"))
+    )
+
+    # Test with empty variable selection
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = character(0)
+        )
+    })
 })
 
-testthat::test_that("reportcat handles invalid inputs", {
-  
-  # Skip if required packages are not available
-  testthat::skip_if_not_installed("ClinicoPath")
-  
-  # Create test data
-  test_data <- data.frame(
-    valid_var = factor(c("A", "B", "C"))
-  )
-  
-  # Test with non-existent variable
-  testthat::expect_no_error({
-    result <- ClinicoPath::reportcat(
-      data = test_data,
-      vars = "nonexistent_var"
+testthat::test_that("reportcat handles sparse categories", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    # Create data with many sparse categories (8 categories with n=1 each)
+    test_data <- data.frame(
+        Sparse = factor(c("A", "A", "B", "C", "D", "E", "F", "G", "H", "I"))
     )
-  })
-  
-  # Test with numeric variable (should be converted to factor)
-  test_data_numeric <- data.frame(
-    numeric_var = c(1, 2, 1, 3, 2)
-  )
-  
-  testthat::expect_no_error({
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = "Sparse"
+        )
+    })
+
+    # Should generate output despite warnings
     result <- ClinicoPath::reportcat(
-      data = test_data_numeric,
-      vars = "numeric_var"
+        data = test_data,
+        vars = "Sparse"
     )
-  })
+    testthat::expect_false(is.null(result$text))
+})
+
+testthat::test_that("reportcat warns for too many categories", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    # Create data with >20 categories
+    many_levels <- paste0("Cat", 1:25)
+    test_data <- data.frame(
+        ManyCategories = factor(sample(many_levels, 100, replace = TRUE))
+    )
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = "ManyCategories"
+        )
+    })
+})
+
+testthat::test_that("reportcat handles high missing data", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    # Create data with >20% missing (7 out of 10)
+    test_data <- data.frame(
+        HighMissing = factor(c("Active", "Inactive", NA, NA, NA, "Active", NA, NA, "Inactive", NA))
+    )
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = "HighMissing"
+        )
+    })
+})
+
+testthat::test_that("reportcat handles special character variable names", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        "Grade (I/II/III)" = factor(c("I", "II", "III", "I", "II", "III", "I", "II")),
+        "Status ($)" = factor(c("Active", "Inactive", "Active", "Inactive", "Active", "Inactive", "Active", "Inactive")),
+        check.names = FALSE
+    )
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = c("Grade (I/II/III)", "Status ($)")
+        )
+    })
+})
+
+testthat::test_that("reportcat errors on empty dataset", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    # Empty dataframe should trigger error Notice
+    test_data <- data.frame(
+        Gender = factor(character(0))
+    )
+
+    # Should handle gracefully with Notice (no R error)
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = "Gender"
+        )
+    })
+})
+
+testthat::test_that("reportcat handles non-categorical variables", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        NumericVar = c(1, 2, 3, 4, 5),
+        Gender = factor(c("Male", "Female", "Male", "Female", "Male"))
+    )
+
+    # Should handle gracefully - numeric will be treated as factor or filtered out
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = c("NumericVar", "Gender")
+        )
+    })
+})
+
+testthat::test_that("reportcat handles variables with all missing values", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        EmptyLevels = factor(c(NA, NA, NA, NA)),
+        ValidVar = factor(c("A", "B", "A", "B"))
+    )
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = c("EmptyLevels", "ValidVar")
+        )
+    })
+
+    # Should continue with valid variable only
+    result <- ClinicoPath::reportcat(
+        data = test_data,
+        vars = c("EmptyLevels", "ValidVar")
+    )
+    testthat::expect_false(is.null(result$text))
+})
+
+testthat::test_that("reportcat works with single variable", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        Status = factor(c("Active", "Inactive", "Active", "Inactive", "Active", "Inactive"))
+    )
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = "Status"
+        )
+    })
+})
+
+testthat::test_that("reportcat handles character variables", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        CharVar = c("Type1", "Type2", "Type1", "Type2", "Type1", "Type2"),
+        stringsAsFactors = FALSE
+    )
+
+    # Character variables should be treated as categorical
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = "CharVar"
+        )
+    })
+})
+
+testthat::test_that("reportcat handles large datasets efficiently", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    # Create dataset with 1000 rows
+    test_data <- data.frame(
+        Var1 = factor(sample(c("A", "B", "C", "D", "E"), 1000, replace = TRUE)),
+        Var2 = factor(sample(c("Low", "Medium", "High"), 1000, replace = TRUE)),
+        Var3 = factor(sample(c("Yes", "No"), 1000, replace = TRUE))
+    )
+
+    # Measure execution time
+    start_time <- Sys.time()
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = c("Var1", "Var2", "Var3")
+        )
+    })
+    end_time <- Sys.time()
+
+    execution_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
+
+    # Should complete in reasonable time (<5 seconds)
+    testthat::expect_true(execution_time < 5)
+})
+
+testthat::test_that("reportcat handles unbalanced categories", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        Unbalanced = factor(c(rep("Common", 90), rep("Rare", 10)))
+    )
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = "Unbalanced"
+        )
+    })
+})
+
+testthat::test_that("reportcat handles missing variable names gracefully", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        Gender = factor(c("Male", "Female", "Male", "Female"))
+    )
+
+    # Should handle gracefully with Notice
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = c("Gender", "NonExistent")
+        )
+    })
+})
+
+testthat::test_that("reportcat handles mixed valid and invalid variables", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        EmptyVar = factor(c(NA, NA, NA, NA)),
+        ValidCat1 = factor(c("A", "B", "A", "B")),
+        ValidCat2 = factor(c("X", "Y", "Z", "X"))
+    )
+
+    testthat::expect_no_error({
+        result <- ClinicoPath::reportcat(
+            data = test_data,
+            vars = c("EmptyVar", "ValidCat1", "ValidCat2")
+        )
+    })
+
+    # Should continue with valid variables
+    result <- ClinicoPath::reportcat(
+        data = test_data,
+        vars = c("EmptyVar", "ValidCat1", "ValidCat2")
+    )
+    testthat::expect_false(is.null(result$text))
+})
+
+testthat::test_that("reportcat result structure is complete", {
+    testthat::skip_if_not_installed("ClinicoPath")
+
+    test_data <- data.frame(
+        Category = factor(c("A", "B", "A", "C", "B", "A"))
+    )
+
+    result <- ClinicoPath::reportcat(
+        data = test_data,
+        vars = "Category"
+    )
+
+    # Check all expected output sections exist
+    testthat::expect_true("todo" %in% names(result))
+    testthat::expect_true("clinicalSummary" %in% names(result))
+    testthat::expect_true("aboutAnalysis" %in% names(result))
+    testthat::expect_true("assumptions" %in% names(result))
+    testthat::expect_true("text" %in% names(result))
+    testthat::expect_true("text1" %in% names(result))
+    testthat::expect_true("reportSentences" %in% names(result))
+
+    # Results should not be NULL
+    testthat::expect_false(is.null(result$text))
+    testthat::expect_false(is.null(result$clinicalSummary))
+    testthat::expect_false(is.null(result$aboutAnalysis))
+    testthat::expect_false(is.null(result$assumptions))
+    testthat::expect_false(is.null(result$reportSentences))
 })

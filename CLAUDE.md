@@ -138,6 +138,73 @@ library(ClinicoPath)  # Always loads as ClinicoPath
 
 The confusion comes from folder/repository naming vs package naming, which is a common and acceptable practice in R package development.
 
+## Reference Materials and Learning Resources
+
+### jmvbaseR Example Module
+
+**Location:** `/Users/serdarbalci/Documents/GitHub/jmvbaseR`
+
+This is an official jamovi example module designed for teaching R syntax. It demonstrates:
+- Clean 4-file architecture patterns
+- Formula building (`.formula()` and `.ff()` methods)
+- Syntax generation (`.asSource()` and `.sourcifyOption()` methods)
+- Preformatted R output display
+- Model terms handling with `jmvcore::composeTerms()`
+
+**Available Analyses:**
+1. One Sample T-Test (`ttestones`)
+2. Independent Samples T-Test (`ttestis`)
+3. Paired Samples T-Test (`ttestps`)
+4. ANOVA (`anova`)
+5. Correlation (`correlation`)
+6. Linear Regression (`regression`)
+
+**Note:** This module uses `jmvcore::Preformatted` for all outputs (shows raw R console output) rather than structured tables. It's excellent for learning basic patterns but ClinicoPath uses more sophisticated result presentation.
+
+### Development Guides
+
+Comprehensive guides are available in `vignettes/`:
+
+1. **`jamovi_module_patterns_guide.md`** - NEW comprehensive guide covering:
+   - Module structure and 4-file architecture
+   - Data handling patterns (jmvcore functions)
+   - State management for plots (serialization solutions)
+   - Formula building patterns
+   - Syntax generation (asSource methods)
+   - Output patterns (Preformatted, Tables, Plots, HTML)
+   - Best practices and common pitfalls
+   - Reference examples from jmvbaseR
+
+2. **Other guides** (use when relevant):
+   - `*_guide.md` files for specific feature implementations
+
+### Quick Reference: Key Patterns
+
+**State Management for Plots:**
+```r
+# Include visual options in state to trigger updates
+plotState <- list(
+    data = plotData,
+    plot_title = self$options$plot_title,
+    color_palette = self$options$color_palette
+)
+image$setState(plotState)
+```
+
+**Data Frame Serialization Fix:**
+```r
+# Convert to base data.frame before setState() to avoid protobuf issues
+plotData <- private$.ensureDataFrame(plotData)
+```
+
+**Formula Building:**
+```r
+# Use jmvcore helpers for safe variable names
+lhs <- jmvcore::composeTerm(self$options$dep)
+rhs <- jmvcore::composeTerms(modelTerms)
+formula <- paste0(lhs, ' ~ ', paste(rhs, collapse=' + '))
+```
+
 ## Development Memories
 
 ### Vignette Management System
@@ -193,6 +260,56 @@ This replaces the previous manual approach where vignette files had to be indivi
 
 ## Development Memories
 
+### Using Guide Files
+
+**IMPORTANT:** When working on jamovi module development, implementing features, or troubleshooting issues, **always consult the relevant guide files** in the `vignettes/` directory:
+
+#### Guide Index
+
+**`vignettes/README_GUIDES.md`** - Complete guide index with descriptions and use cases for all 11 available guides.
+
+#### Primary Guides
+
+1. **`vignettes/jamovi_module_patterns_guide.md`** - **START HERE** - Comprehensive jamovi development guide
+   - **Use when:** Creating new analyses, debugging state management, implementing plots, building formulas
+   - **Contains:** Module structure, 4-file architecture, data handling, state management, formula building, output patterns, best practices
+   - **Based on:** jmvbaseR official example + ClinicoPath production code
+
+2. **File-specific guides** (`.a.yaml`, `.b.R`, `.r.yaml`, `.u.yaml`)
+   - `jamovi_a_yaml_guide.md` - Analysis definitions (options)
+   - `jamovi_b_R_guide.md` - Backend implementation (R6 classes)
+   - `jamovi_r_yaml_guide.md` - Results definitions (outputs)
+   - `jamovi_u_yaml_guide.md` - User interface definitions
+
+3. **Feature-specific guides**
+   - `jamovi_tables_guide.md` - Table output
+   - `jamovi_plots_guide.md` - Plot/image output
+   - `jamovi_notices_guide.md` - User notices (ERROR/WARNING/INFO)
+   - `jamovi_formula_guide.md` - Statistical formulas
+   - `jamovi_js_guide.md` - Custom JavaScript
+   - `jamovi_actions_guide.md` - UI actions & events
+
+#### When to Use Guides
+
+✅ **Before** implementing a new jamovi analysis → Read `jamovi_module_patterns_guide.md`
+✅ **When** encountering state serialization errors → Check State Management section
+✅ **When** building statistical models → Reference Formula Building patterns
+✅ **When** plots don't update with option changes → Check State Management
+✅ **When** variables have special characters/spaces → Reference Data Handling patterns
+✅ **When** implementing syntax generation → Check Syntax Generation section
+
+#### How to Use
+
+```bash
+# List all available guides
+ls vignettes/*_guide.md
+
+# Read a specific guide
+cat vignettes/jamovi_module_patterns_guide.md
+```
+
+**Note:** These guides are based on analysis of official jamovi examples (jmvbaseR) and production ClinicoPath implementations. They contain validated patterns and solutions to common problems.
+
 ### Documentation Structure
 
 #### Submodule Documentation Links
@@ -233,7 +350,10 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 - errors or warnings with jmvtools::prepare() means that the module cannot function in jamovi. there should be no errors.
 - private$.checkpoint() is internal jamovi function we do not define it
 - jmvtools::check() does not evaluate functions. it checks the presence of jamovi program. To evaluate functions use jmvtools::prepare and devtools::document()
-- use relevant guides under vignettes folder when generating codes and features. *_guide.md
+- **ALWAYS consult guides** under `vignettes/` folder when generating codes and features:
+  - Primary: `vignettes/jamovi_module_patterns_guide.md` (comprehensive jamovi development guide)
+  - Specific features: `vignettes/*_guide.md` (targeted implementation guides)
+  - See "Using Guide Files" section above for when and how to use these guides
 - The notices feature does not allow new lines for the time being. So we need to update the implementation. For the
   time being we need to have both previous html and the new notices features to be present at the same time.
 - you are an expert R-package and jamovi developer. you are an expert in biostatistics working with pathologists and clinicians.
@@ -241,3 +361,4 @@ critically evaluate functions. is it mathematically and statistically accurate? 
 - The error "attempt to apply non-function" during serialization was caused by using jmvcore::Notice objects that
   were dynamically inserted with self$results$insert(). These Notice objects contain function references that
   cannot be serialized by jamovi's protobuf system.
+- jmvtools::check() only locates jamovi program bin file location. it does not check anything regarding module structure or code.

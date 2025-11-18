@@ -8,7 +8,7 @@ summarydata(
   data,
   vars,
   distr = FALSE,
-  decimal_places = 1,
+  decimal_places = 2,
   outliers = FALSE,
   report_sentences = FALSE
 )
@@ -23,7 +23,7 @@ the continuous values used for the report}
 test, skewness, and kurtosis) will be computed and explained.}
 
 \item{decimal_places}{Number of decimal places to display for statistical
-measures.}
+measures. Default of 2 aligns with standard laboratory reporting.}
 
 \item{outliers}{If TRUE, detect and report potential outliers using IQR
 method. Helpful for quality control and identifying data entry errors.}

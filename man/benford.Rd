@@ -17,6 +17,7 @@ continuous values used for the report}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr

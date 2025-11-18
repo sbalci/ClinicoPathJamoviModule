@@ -44,6 +44,7 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "benfordResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
         explanation = function() private$.items[["explanation"]],
         dataWarning = function() private$.items[["dataWarning"]],
         summary = function() private$.items[["summary"]],
@@ -62,6 +63,12 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "benford.analysis",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="Getting Started",
+                visible="(!var)",
+                clearWith=list()))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanation",
@@ -148,6 +155,7 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param digits Number of first digits to analyze (default: 2)
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr

@@ -83,14 +83,28 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Convert age to numeric and gender to factor with validation
             age_numeric <- jmvcore::toNumeric(mydata[[age]])
-            if (any(is.na(age_numeric)) && !all(is.na(mydata[[age]]))) {
+
+            # Track how many rows failed numeric conversion
+            n_before_age_filter <- nrow(mydata)
+            n_age_conversion_failed <- sum(is.na(age_numeric) & !is.na(mydata[[age]]))
+
+            if (n_age_conversion_failed > 0) {
                 private$.data_info_messages$age_conversion <- list(
                     type = "warning",
-                    message = .("Some age values could not be converted to numeric and will be excluded")
+                    message = sprintf(
+                        .("Excluded %d observations with non-numeric age values"),
+                        n_age_conversion_failed
+                    )
                 )
             }
+
             mydata[["Age"]] <- age_numeric
             mydata[["Gender"]] <- as.factor(mydata[[gender]])
+
+            # CRITICAL: Remove rows with NA ages BEFORE calculating final counts
+            # This ensures reported sample size matches actual analyzed data
+            mydata <- mydata %>% dplyr::filter(!is.na(Age))
+            n_after_age_filter <- nrow(mydata)
 
             # Create a standardized gender variable based on selected levels
             female_level <- self$options$female
@@ -123,7 +137,20 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Validate that female and male levels are different
             if (!is.null(female_level) && !is.null(male_level) && female_level == male_level) {
-                stop(.("Female and Male levels cannot be the same. Please select different gender categories."))
+                self$results$dataInfo$setContent(paste0(
+                    "<div style='background-color: #ffebee; padding: 15px; border-radius: 8px; border-left: 4px solid #f44336;'>",
+                    "<h4 style='margin: 0 0 10px 0; color: #c62828;'>❌ Invalid Gender Level Selection</h4>",
+                    "<p style='margin: 0 0 10px 0; font-size: 14px;'>Female and Male levels cannot be the same.</p>",
+                    "<h5 style='margin: 10px 0 5px 0; color: #c62828;'>Current selection:</h5>",
+                    "<ul style='font-size: 14px; line-height: 1.6; margin: 0 0 10px 0;'>",
+                    "<li><strong>Female level:</strong> ", female_level, "</li>",
+                    "<li><strong>Male level:</strong> ", male_level, "</li>",
+                    "</ul>",
+                    "<h5 style='margin: 10px 0 5px 0; color: #c62828;'>Action required:</h5>",
+                    "<p style='font-size: 14px; margin: 0;'>Please select different gender categories for Female and Male levels. Each level must be unique to create a valid age pyramid.</p>",
+                    "</div>"
+                ))
+                return()
             }
 
             # Check for single-gender cohort
@@ -172,20 +199,22 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Filter out rows with missing or unrecognized gender values
-            n_before <- nrow(mydata)
+            n_before_gender_filter <- nrow(mydata)
             n_initial <- nrow(self$data)
             mydata <- mydata %>% dplyr::filter(!is.na(Gender2))
-            n_after <- nrow(mydata)
+            n_after_gender_filter <- nrow(mydata)
 
-            # Store exclusion info
-            if (n_after < n_before) {
-                n_excluded <- n_before - n_after
-                private$.data_info_messages$excluded <- list(
+            # Calculate total exclusions (including age conversion failures)
+            n_excluded_gender <- n_before_gender_filter - n_after_gender_filter
+            n_excluded_total <- n_initial - n_after_gender_filter
+
+            # Store gender exclusion info
+            if (n_excluded_gender > 0) {
+                private$.data_info_messages$excluded_gender <- list(
                     type = "info",
                     message = sprintf(
-                        .("Excluded %d observations with missing or unrecognized gender values (%d remaining)"),
-                        n_excluded,
-                        n_after
+                        .("Excluded %d observations with missing or unrecognized gender values"),
+                        n_excluded_gender
                     )
                 )
             }
@@ -197,23 +226,25 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     message = sprintf(
                         .("Single-gender cohort detected: %s (N = %d). Displaying age distribution bar chart instead of pyramid."),
                         single_gender_label,
-                        n_after
+                        n_after_gender_filter
                     )
                 )
             }
 
-            # Store data summary
+            # Store comprehensive data summary with accurate counts
             private$.data_info_messages$summary <- list(
                 type = "summary",
                 n_initial = n_initial,
-                n_final = n_after,
-                n_excluded_total = n_initial - n_after,
+                n_final = n_after_gender_filter,  # This now accurately reflects analyzed data
+                n_excluded_total = n_excluded_total,
+                n_excluded_age = n_age_conversion_failed,
+                n_excluded_gender = n_excluded_gender,
                 female_level = female_level,
                 male_level = male_level,
                 is_single_gender = is_single_gender
             )
 
-            if (n_after == 0) {
+            if (n_after_gender_filter == 0) {
                 self$results$dataInfo$setContent(
                     "<div style='background-color: #ffebee; padding: 15px; border-radius: 8px; border-left: 4px solid #f44336;'>
                     <h4 style='margin: 0 0 10px 0; color: #c62828;'>❌ No Valid Data</h4>
@@ -238,13 +269,11 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Store single-gender status for plot rendering
-            private$.is_single_gender <- is_single_gender
-            private$.single_gender_label <- single_gender_label
+            # Note: single-gender status is passed to plot via state, not private fields
 
             # Determine age binning strategy ----
             age_groups_preset <- self$options$age_groups %||% "custom"
-            
+
             if (age_groups_preset == "custom") {
                 # Use custom bin width (default to 5 years if not provided)
                 bin_width <- self$options$bin_width %||% 5
@@ -257,52 +286,95 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Use preset clinical age groups
                 breaks_seq <- switch(age_groups_preset,
                     "pediatric" = c(0, 1, 2, 5, 10, 15, 18, Inf),
-                    "reproductive" = c(0, 15, 20, 25, 30, 35, 40, 45, 50, Inf), 
+                    "reproductive" = c(0, 15, 20, 25, 30, 35, 40, 45, 50, Inf),
                     "geriatric" = c(0, 65, 70, 75, 80, 85, 90, 95, Inf),
                     "lifecourse" = c(0, 5, 15, 25, 45, 65, 75, 85, Inf),
                     # Fallback to custom if unknown
                     {
                         bin_width <- self$options$bin_width %||% 5
                         max_age <- max(mydata[["Age"]], na.rm = TRUE)
-                        c(seq(from = 0, to = max_age, by = bin_width), 
+                        c(seq(from = 0, to = max_age, by = bin_width),
                           if (max_age > max(seq(from = 0, to = max_age, by = bin_width))) max_age)
                     }
                 )
             }
+
+            # Create user-friendly labels for the age bins
+            labels <- private$.create_age_labels(breaks_seq)
+
             mydata[["Pop"]] <- cut(mydata[["Age"]],
                                    include.lowest = TRUE,
                                    right = TRUE,
                                    breaks = breaks_seq,
+                                   labels = labels,
                                    ordered_result = TRUE)
 
             # Checkpoint before data aggregation (expensive operation)
             private$.checkpoint()
 
             # Prepare data for plotting and table output ----
+            # Ensure we create a proper data.frame (not tibble) for jamovi state serialization
             plotData <- mydata %>%
                 dplyr::select(Gender = Gender2, Pop) %>%
                 dplyr::group_by(Gender, Pop) %>%
                 dplyr::count() %>%
                 dplyr::ungroup()
 
-            # Save state for plot rendering; ensures plot gets updated when bin_width changes
+            # Convert to base data.frame to avoid serialization issues
+            plotData <- private$.ensureDataFrame(plotData)
+
+            # Ensure factor columns are preserved as characters for serialization
+            if (!is.null(plotData$Gender)) {
+                plotData$Gender <- as.character(plotData$Gender)
+            }
+            if (!is.null(plotData$Pop)) {
+                plotData$Pop <- as.character(plotData$Pop)
+            }
+
+            # Save state for plot rendering with data and metadata
+            # NOTE: Visual options (colors, title, engine) are read from self$options
+            # in .plot() to allow instant updates without re-running data preparation.
+            # clearWith in .r.yaml ensures plot re-renders when options change.
             image <- self$results$plot
-            image$setState(plotData)
+            plotState <- list(
+                data = plotData,
+                is_single_gender = is_single_gender,
+                single_gender_label = if(is_single_gender) single_gender_label else NULL
+            )
+            image$setState(plotState)
+
+            # Check plot engine availability and add notice if needed ----
+            if (!is.null(self$options$plot_engine) && self$options$plot_engine == "ggcharts") {
+                if (!requireNamespace("ggcharts", quietly = TRUE)) {
+                    private$.data_info_messages$plot_engine_fallback <- list(
+                        type = "warning",
+                        message = .("ggcharts package is not installed. Plot will use ggplot2 engine instead. Install ggcharts for enhanced pyramid visualizations.")
+                    )
+                }
+            }
 
             # Generate and populate data quality HTML ----
             info_html <- private$.build_data_info_html()
             self$results$dataInfo$setContent(info_html)
 
             # Pivot data for table output ----
+            # Create wide-format table with Female/Male columns
             plotData2 <- plotData %>%
                 tidyr::pivot_wider(names_from = Gender,
                                    values_from = n,
                                    values_fill = list(n = 0)) %>%  # Fill missing counts with 0
                 dplyr::arrange(dplyr::desc(Pop))
 
-            plotData2 <- as.data.frame(plotData2) %>%
+            # Convert to base data.frame using helper function
+            plotData2 <- private$.ensureDataFrame(plotData2)
+
+            # Remove any NA age groups and ensure Pop is character
+            plotData2 <- plotData2 %>%
                 dplyr::filter(!is.na(Pop)) %>%
                 dplyr::mutate(Pop = as.character(Pop))
+
+            # Final conversion to ensure clean data.frame
+            plotData2 <- private$.ensureDataFrame(plotData2)
 
             # Handle single-gender cohort column schema ----
             # For single-gender cohorts, ensure table columns match expected Female/Male schema
@@ -382,16 +454,60 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop(.("Data contains no (complete) rows"))
 
-            # Retrieve the prepared plot data
-            plotData <- image$state
+            # Retrieve the prepared plot state
+            # NOTE: State may be null if visual options changed (clearWith cleared it)
+            # In that case, we rebuild the aggregated data from self$data
+            plotState <- image$state
+
+            # Extract data and metadata from state, or rebuild if missing
+            if (is.list(plotState) && !is.null(plotState$data)) {
+                # State exists - use cached data
+                plotData <- plotState$data
+                is_single_gender <- plotState$is_single_gender %||% FALSE
+                single_gender_label <- plotState$single_gender_label %||% "Unknown"
+            } else {
+                # State was cleared by visual option change - rebuild data
+                # This allows visual options to update without re-running .run()
+                rebuilt_data <- private$.rebuildPlotData()
+                if (is.null(rebuilt_data)) {
+                    return()  # Failed to rebuild
+                }
+                plotData <- rebuilt_data$data
+                is_single_gender <- rebuilt_data$is_single_gender
+                single_gender_label <- rebuilt_data$single_gender_label
+
+                # CRITICAL: Save rebuilt data back to state so subsequent renders can use it
+                # This also ensures jamovi detects state changes for re-rendering
+                image$setState(rebuilt_data)
+            }
+
+            # Convert from state (which may be serialized as list) back to data.frame
+            plotData <- private$.ensureDataFrame(plotData)
+
+            # Validate essential columns exist
+            if (is.null(plotData) || nrow(plotData) == 0) {
+                return()
+            }
+
+            if (!all(c("Gender", "Pop", "n") %in% names(plotData))) {
+                stop(.("Plot data is missing required columns. Please re-run the analysis."))
+            }
+
+            # Ensure proper data types for plotting
+            # Convert Gender to character (will be converted to factor by ggplot if needed)
+            plotData$Gender <- as.character(plotData$Gender)
+
+            # Ensure count is numeric
+            plotData$n <- as.numeric(plotData$n)
 
             # Ensure that the age bins (Pop) reflect the latest bin width:
-            # Convert 'Pop' to character then back to factor with the order of appearance.
-            plotData$Pop <- factor(as.character(plotData$Pop), levels = unique(as.character(plotData$Pop)))
+            # Convert 'Pop' to character then back to factor with proper levels
+            plotData$Pop <- as.character(plotData$Pop)
 
-            # Check if this is a single-gender cohort
-            is_single_gender <- private$.is_single_gender %||% FALSE
-            single_gender_label <- private$.single_gender_label %||% "Unknown"
+            # Preserve the order of age groups (for proper pyramid display)
+            # NOTE: Use regular factor, not ordered=TRUE, for ggcharts compatibility
+            unique_pops <- unique(plotData$Pop)
+            plotData$Pop <- factor(plotData$Pop, levels = unique_pops, ordered = FALSE)
 
             # Set plot title (using user option if provided)
             if (is_single_gender) {
@@ -404,19 +520,16 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot_engine <- self$options$plot_engine %||% "ggcharts"
             
             # Get colors based on palette selection ----
+            # NOTE: Colors are engine-independent for consistency
             color_palette <- self$options$color_palette %||% "standard"
-            
+
             if (color_palette == "standard") {
-                if (plot_engine == "ggcharts") {
-                    female_color <- "#FF69B4"  # Hot pink for Female
-                    male_color <- "#4169E1"    # Royal blue for Male
-                } else {
-                    female_color <- "#F8766D"  # ggplot2 red/pink for Female
-                    male_color <- "#00BFC4"    # ggplot2 teal for Male
-                }
+                # Standard palette: pink/blue (works well for both engines)
+                female_color <- "#FF69B4"  # Hot pink for Female
+                male_color <- "#4169E1"    # Royal blue for Male
             } else if (color_palette == "accessible") {
                 # Colorblind-friendly Okabe-Ito palette
-                female_color <- "#E69F00"  # Orange for Female  
+                female_color <- "#E69F00"  # Orange for Female
                 male_color <- "#56B4E9"    # Sky blue for Male
             } else {
                 # Custom colors from user options
@@ -470,47 +583,69 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Create age pyramid plot based on selected engine ----
+            # Try ggcharts first if selected, with fallback to ggplot2
+            use_ggplot2 <- FALSE
+            plot <- NULL
+
             if (plot_engine == "ggcharts") {
                 # Check if ggcharts is available
+                # (User is already notified via dataInfo if package is missing)
                 if (!requireNamespace("ggcharts", quietly = TRUE)) {
-                    # Fall back to ggplot2 if ggcharts not available
-                    plot_engine <- "ggplot2"
-                    warning(.("ggcharts package not available, falling back to ggplot2"))
+                    use_ggplot2 <- TRUE
                 } else {
-                    # Create age pyramid plot using ggcharts ----
+                    # Prepare data specifically for ggcharts (needs factor for grouping)
+                    plotData_ggcharts <- plotData
+                    plotData_ggcharts$Gender <- factor(plotData_ggcharts$Gender)
+
                     # ggcharts expects colors in the order they appear in data
                     chart_colors <- c(female_color, male_color)
-                    plot <- ggcharts::pyramid_chart(
-                        data = plotData,
-                        x = Pop,
-                        y = n,
-                        group = Gender,
-                        bar_colors = chart_colors,
-                        title = plot_title,
-                        xlab = .("Population Count")
-                    )
+
+                    # Try to create ggcharts plot
+                    plot <- tryCatch({
+                        ggcharts::pyramid_chart(
+                            data = plotData_ggcharts,
+                            x = Pop,
+                            y = n,
+                            group = Gender,
+                            bar_colors = chart_colors,
+                            title = plot_title,
+                            xlab = .("Population Count")
+                        )
+                    }, error = function(e) {
+                        # ggcharts failed - fall back to ggplot2 silently
+                        # (Could log error for debugging: message("ggcharts error: ", e$message))
+                        NULL
+                    })
+
+                    # If ggcharts failed, use ggplot2
+                    if (is.null(plot)) {
+                        use_ggplot2 <- TRUE
+                    }
                 }
+            } else {
+                # User explicitly selected ggplot2
+                use_ggplot2 <- TRUE
             }
-            
-            if (plot_engine == "ggplot2") {
-                # Create a visually appealing age pyramid plot using ggplot2 ----
+
+            # Create ggplot2 plot if needed
+            if (use_ggplot2) {
                 plot <- ggplot2::ggplot(data = plotData,
                                         mapping = ggplot2::aes(
                                             x = Pop,
                                             y = ifelse(Gender == "Female", -n, n),
                                             fill = Gender
                                         )) +
-                    ggplot2::geom_col(width = 0.7, color = "black", show.legend = TRUE) +  # Added border for clarity
+                    ggplot2::geom_col(width = 0.7, color = "black", show.legend = TRUE) +
                     ggplot2::coord_flip() +
                     ggplot2::scale_y_continuous(labels = abs,
                                                 limits = c(-max(plotData$n, na.rm = TRUE), max(plotData$n, na.rm = TRUE))
                     ) +
-                    ggplot2::scale_fill_manual(values = bar_colors, name = .("Gender")) +  # Use named colors
+                    ggplot2::scale_fill_manual(values = bar_colors, name = .("Gender")) +
                     ggplot2::labs(x = .("Age Group"),
                                   y = .("Population Count"),
                                   title = plot_title,
                                   fill = .("Gender")) +
-                    ggplot2::theme_minimal() +  # Clean minimal theme for improved visuals
+                    ggplot2::theme_minimal() +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
                         axis.text = ggplot2::element_text(size = 10),
@@ -524,6 +659,49 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             print(plot)
             return(TRUE)
+        },
+
+        .create_age_labels = function(breaks) {
+            # Create labels that accurately reflect intervals created by cut(..., right=TRUE)
+            # With right=TRUE, intervals are (lower, upper], meaning:
+            # - Lower bound is EXCLUDED
+            # - Upper bound is INCLUDED
+            # For clinical interpretation, we label as "lower+1 to upper"
+            # Example: interval (0,5] contains ages > 0 and <= 5, labeled as "1-5"
+            labels <- c()
+            for (i in 1:(length(breaks) - 1)) {
+                lower <- breaks[i]
+                upper <- breaks[i+1]
+                if (is.infinite(upper)) {
+                    # Open-ended final category: e.g., "86+" for (85, Inf]
+                    labels[i] <- paste0(lower + 1, "+")
+                } else {
+                    # Closed intervals: e.g., "1-5" for (0,5], "6-10" for (5,10]
+                    labels[i] <- paste(lower + 1, upper, sep = "-")
+                }
+            }
+            return(labels)
+        },
+
+        .ensureDataFrame = function(data) {
+            # Ensure data is a proper base data.frame (not tibble or list)
+            # This prevents jamovi protobuf serialization issues
+
+            if (is.null(data)) {
+                return(NULL)
+            }
+
+            # Convert list to data.frame if needed
+            if (is.list(data) && !is.data.frame(data)) {
+                data <- as.data.frame(data, stringsAsFactors = FALSE)
+            }
+
+            # If already a data.frame but might be a tibble, convert to base
+            if (is.data.frame(data)) {
+                data <- as.data.frame(data, stringsAsFactors = FALSE)
+            }
+
+            return(data)
         },
 
         .build_data_info_html = function() {
@@ -552,6 +730,19 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<tr><td style='padding: 4px;'><strong>", .("Total excluded:"), "</strong></td><td style='padding: 4px; color: #d32f2f;'>",
                         s$n_excluded_total, " (", round(s$n_excluded_total / s$n_initial * 100, 1), "%)</td></tr>"
                     )
+                    # Show breakdown of exclusions if available
+                    if (!is.null(s$n_excluded_age) && s$n_excluded_age > 0) {
+                        html <- paste0(html,
+                            "<tr><td style='padding: 4px 4px 4px 20px;'><em>", .("- Non-numeric ages:"), "</em></td><td style='padding: 4px; color: #d32f2f;'>",
+                            s$n_excluded_age, "</td></tr>"
+                        )
+                    }
+                    if (!is.null(s$n_excluded_gender) && s$n_excluded_gender > 0) {
+                        html <- paste0(html,
+                            "<tr><td style='padding: 4px 4px 4px 20px;'><em>", .("- Missing/unrecognized gender:"), "</em></td><td style='padding: 4px; color: #d32f2f;'>",
+                            s$n_excluded_gender, "</td></tr>"
+                        )
+                    }
                 }
 
                 if (!s$is_single_gender) {
@@ -589,11 +780,11 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            if (!is.null(msgs$excluded)) {
+            if (!is.null(msgs$excluded_gender)) {
                 html <- paste0(html,
                     "<div style='background-color: #fff9c4; padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 4px solid #FFC107;'>",
-                    "<h4 style='margin: 0 0 6px 0; color: #f57f17;'>⚠️ ", .("Data Exclusions"), "</h4>",
-                    "<p style='margin: 0; font-size: 14px;'>", msgs$excluded$message, "</p>",
+                    "<h4 style='margin: 0 0 6px 0; color: #f57f17;'>⚠️ ", .("Gender Exclusions"), "</h4>",
+                    "<p style='margin: 0; font-size: 14px;'>", msgs$excluded_gender$message, "</p>",
                     "</div>"
                 )
             }
@@ -607,10 +798,163 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
+            # Plot Engine Fallback Warning
+            if (!is.null(msgs$plot_engine_fallback)) {
+                html <- paste0(html,
+                    "<div style='background-color: #fff3e0; padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 4px solid #FF9800;'>",
+                    "<h4 style='margin: 0 0 6px 0; color: #f57c00;'>ℹ️ ", .("Plot Engine"), "</h4>",
+                    "<p style='margin: 0; font-size: 14px;'>", msgs$plot_engine_fallback$message, "</p>",
+                    "</div>"
+                )
+            }
+
             # Close main container
             html <- paste0(html, "</div>")
 
             return(html)
+        },
+
+        .rebuildPlotData = function() {
+            # Rebuild aggregated plot data from self$data when state is cleared
+            # This allows visual option changes without re-running full analysis
+
+            # Check if required options are available
+            if (is.null(self$options$age) || is.null(self$options$gender)) {
+                return(NULL)
+            }
+
+            # Read data
+            mydata <- self$data
+            age <- self$options$age
+            gender <- self$options$gender
+
+            # Prepare data (similar to .run() but minimal)
+            mydata <- jmvcore::select(mydata, c(age, gender))
+            mydata <- jmvcore::naOmit(mydata)
+
+            # Convert to numeric/factor
+            age_numeric <- jmvcore::toNumeric(mydata[[age]])
+            mydata[["Age"]] <- age_numeric
+            mydata[["Gender"]] <- as.factor(mydata[[gender]])
+
+            # Remove NA ages
+            mydata <- mydata %>% dplyr::filter(!is.na(Age))
+
+            # Get gender levels
+            female_level <- self$options$female
+            male_level <- self$options$male
+            gender_levels <- levels(mydata[["Gender"]])
+
+            # Smart defaults (from .run())
+            if (is.null(female_level) && is.null(male_level)) {
+                if (length(gender_levels) >= 2) {
+                    female_level <- gender_levels[1]
+                    male_level <- gender_levels[2]
+                } else if (length(gender_levels) == 1) {
+                    female_level <- gender_levels[1]
+                    male_level <- NULL
+                }
+            } else if (is.null(female_level)) {
+                remaining <- gender_levels[gender_levels != male_level]
+                female_level <- if(length(remaining) > 0) remaining[1] else NULL
+            } else if (is.null(male_level)) {
+                remaining <- gender_levels[gender_levels != female_level]
+                male_level <- if(length(remaining) > 0) remaining[1] else NULL
+            }
+
+            # Check for single-gender cohort
+            is_single_gender <- is.null(male_level) || is.null(female_level)
+            single_gender_label <- if(!is.null(female_level)) female_level else male_level
+
+            # Create Gender2 variable
+            if (is_single_gender) {
+                mydata <- mydata %>%
+                    dplyr::mutate(
+                        Gender2 = dplyr::case_when(
+                            is.na(Gender) ~ NA_character_,
+                            Gender == single_gender_label ~ "Single Gender Cohort",
+                            TRUE ~ NA_character_
+                        )
+                    )
+            } else {
+                mydata <- mydata %>%
+                    dplyr::mutate(
+                        Gender2 = dplyr::case_when(
+                            is.na(Gender) ~ NA_character_,
+                            Gender == female_level ~ "Female",
+                            Gender == male_level ~ "Male",
+                            TRUE ~ NA_character_
+                        )
+                    )
+            }
+
+            # Filter out unrecognized genders
+            mydata <- mydata %>% dplyr::filter(!is.na(Gender2))
+
+            if (nrow(mydata) == 0) {
+                return(NULL)
+            }
+
+            # Create age bins
+            age_groups_preset <- self$options$age_groups %||% "custom"
+
+            if (age_groups_preset == "custom") {
+                bin_width <- self$options$bin_width %||% 5
+                max_age <- max(mydata[["Age"]], na.rm = TRUE)
+                breaks_seq <- seq(from = 0, to = max_age, by = bin_width)
+                if (max_age > tail(breaks_seq, n = 1)) {
+                    breaks_seq <- c(breaks_seq, max_age)
+                }
+            } else {
+                breaks_seq <- switch(age_groups_preset,
+                    "pediatric" = c(0, 1, 2, 5, 10, 15, 18, Inf),
+                    "reproductive" = c(0, 15, 20, 25, 30, 35, 40, 45, 50, Inf),
+                    "geriatric" = c(0, 65, 70, 75, 80, 85, 90, 95, Inf),
+                    "lifecourse" = c(0, 5, 15, 25, 45, 65, 75, 85, Inf),
+                    {
+                        bin_width <- self$options$bin_width %||% 5
+                        max_age <- max(mydata[["Age"]], na.rm = TRUE)
+                        c(seq(from = 0, to = max_age, by = bin_width),
+                          if (max_age > max(seq(from = 0, to = max_age, by = bin_width))) max_age)
+                    }
+                )
+            }
+
+            # Create labels
+            labels <- private$.create_age_labels(breaks_seq)
+
+            # Bin ages
+            mydata[["Pop"]] <- cut(mydata[["Age"]],
+                                   include.lowest = TRUE,
+                                   right = TRUE,
+                                   breaks = breaks_seq,
+                                   labels = labels,
+                                   ordered_result = TRUE)
+
+            # Aggregate data
+            plotData <- mydata %>%
+                dplyr::select(Gender = Gender2, Pop) %>%
+                dplyr::group_by(Gender, Pop) %>%
+                dplyr::count() %>%
+                dplyr::ungroup()
+
+            # Convert to data.frame
+            plotData <- private$.ensureDataFrame(plotData)
+
+            # Convert factors to characters for serialization
+            if (!is.null(plotData$Gender)) {
+                plotData$Gender <- as.character(plotData$Gender)
+            }
+            if (!is.null(plotData$Pop)) {
+                plotData$Pop <- as.character(plotData$Pop)
+            }
+
+            # Return rebuilt data
+            return(list(
+                data = plotData,
+                is_single_gender = is_single_gender,
+                single_gender_label = single_gender_label
+            ))
         }
     )
 )
