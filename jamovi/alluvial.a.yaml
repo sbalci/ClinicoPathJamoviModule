@@ -54,13 +54,6 @@ options:
           jamovi: >
             Include marginal plots.
 
-
-    # - name: verb
-    #   title: Print plot summary
-    #   type: Bool
-    #   default: false
-
-
     - name: fill
       title: Fill by
       type: List
@@ -82,6 +75,17 @@ options:
             A list for the argument fill for selecting the variable to be
             represented by color. Default is 'first_variable'.
 
+    - name: fillGgalluvial
+      title: Fill by (ggalluvial)
+      type: Variable
+      description:
+          R: >
+            A string naming the variable from `data` that will be used to
+            color the flows in the ggalluvial plot.
+          jamovi: >
+            A string naming the variable from `data` that will be used to
+            color the flows in the ggalluvial plot.
+
     - name: bin
       title: Bin labels
       type: List
@@ -94,14 +98,18 @@ options:
           name: median
         - title: Min-Max
           name: min_max
-        - title: Cuts
+        - title: Quantile
           name: cuts
       default: default
       description:
           R: >
-            labels for the bins from low to high
+            Display labels for bin categories. Note: This controls label text only,
+            not the binning method. easyalluvial uses its own internal binning algorithm.
+            For custom binning, create categorized variables before analysis.
           jamovi: >
-            labels for the bins from low to high
+            Display labels for bin categories (e.g., 'LL' for low-low, 'HH' for high-high).
+            Note: This controls label text only, not the actual binning method.
+            For custom categorization, use Data → Compute to create binned variables.
 
 
     - name: orient
@@ -118,16 +126,6 @@ options:
             Orientation of the plot. Default is 'vertical'.
           jamovi: >
             Orientation of the plot. Default is 'vertical'.
-
-
-
-
-#     - name: flip
-#       title: Flip plot
-#       type: Bool
-#       default: false
-
-
 
     - name: usetitle
       title: Custom title
@@ -167,54 +165,178 @@ options:
       default: ''
       description:
           R: >
-            Custom labels for bins, separated by commas (e.g., "Low,Medium,High"). 
+            Custom labels for bins, separated by commas (e.g., "Low,Medium,High").
             Leave empty to use bin option defaults.
           jamovi: >
-            Custom labels for bins, separated by commas (e.g., "Low,Medium,High"). 
+            Custom labels for bins, separated by commas (e.g., "Low,Medium,High").
             Leave empty to use bin option defaults.
 
+    # === Phase 1: Easy Additions ===
 
-    # - name: originaltheme
-    #   title: Easy Alluvial Theme
-    #   type: Bool
-    #   default: false
+    - name: colorPalette
+      title: Color Palette
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Viridis
+          name: viridis
+        - title: Plasma
+          name: plasma
+        - title: Set3
+          name: set3
+        - title: Pastel1
+          name: pastel1
+        - title: Dark2
+          name: dark2
+      default: default
+      description:
+          R: >
+            Color palette for the diagram flows.
+          jamovi: >
+            Color palette for the diagram flows.
 
+    - name: showCounts
+      title: Show Counts on Nodes
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display count values on nodes.
+          jamovi: >
+            Display count values on nodes.
 
-    # - name: themex
-    #   title: Theme
-    #   type: List
-    #   options:
-    #     - title: jamovi
-    #       name: jamovi
-    #     - title: easyalluvial
-    #       name: easyalluvial
-    #     # - title: ipsum
-    #     #   name: ipsum
-    #     - title: grey
-    #       name: grey
-    #     - title: gray
-    #       name: gray
-    #     - title: bw
-    #       name: bw
-    #     - title: linedraw
-    #       name: linedraw
-    #     - title: light
-    #       name: light
-    #     - title: dark
-    #       name: dark
-    #     - title: minimal
-    #       name: minimal
-    #     - title: classic
-    #       name: classic
-    #     - title: void
-    #       name: void
-    #     - title: test
-    #       name: test
-    #   default: easyalluvial
+    - name: themeStyle
+      title: Theme Style
+      type: List
+      options:
+        - title: Default (easyalluvial)
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+        - title: Grey
+          name: grey
+        - title: Black & White
+          name: bw
+      default: default
+      description:
+          R: >
+            Theme style for the plot background and elements.
+          jamovi: >
+            Theme style for the plot background and elements.
 
-# - name: inter
-#   title: Interactive
-#   type: Bool
-#   default: false
+    - name: enhancedGradients
+      title: Enhanced Edge Gradients
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply sophisticated color gradients to flow edges for better visual appeal.
+          jamovi: >
+            Apply sophisticated color gradients to flow edges for better visual appeal.
+
+    - name: plotSubtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+      description:
+          R: >
+            Subtitle for the plot (shown below the title).
+          jamovi: >
+            Subtitle for the plot (shown below the title).
+
+    # === Phase 2: Medium Additions ===
+
+    - name: weight
+      title: Weight Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Optional weight variable for flow thickness. If not provided, counts are used.
+          jamovi: >
+            Optional weight variable for flow thickness. If not provided, counts are used.
+
+    - name: sankeyStyle
+      title: Sankey Styling
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply Sankey diagram styling (narrow nodes, sigmoid curves).
+          jamovi: >
+            Apply Sankey diagram styling (narrow nodes, sigmoid curves).
+
+    - name: curveType
+      title: Curve Type
+      type: List
+      options:
+        - title: Cubic (smooth)
+          name: cubic
+        - title: Linear
+          name: linear
+        - title: Quintic (very smooth)
+          name: quintic
+        - title: Sine
+          name: sine
+        - title: Arctangent
+          name: arctangent
+        - title: Sigmoid (S-shaped)
+          name: sigmoid
+      default: cubic
+      description:
+          R: >
+            Curve style for flows. Requires ggalluvial engine.
+          jamovi: >
+            Curve style for flows. Requires ggalluvial engine.
+
+    - name: flowDirection
+      title: Flow Direction
+      type: List
+      options:
+        - title: Left to Right
+          name: left_right
+        - title: Top to Bottom
+          name: top_bottom
+        - title: Right to Left
+          name: right_left
+        - title: Bottom to Top
+          name: bottom_top
+      default: left_right
+      description:
+          R: >
+            Direction of flow in the diagram.
+          jamovi: >
+            Direction of flow in the diagram.
+
+    - name: engine
+      title: Plot Engine
+      type: List
+      options:
+        - title: Easy Alluvial (automatic)
+          name: easyalluvial
+        - title: GG Alluvial (manual control)
+          name: ggalluvial
+      default: easyalluvial
+      description:
+          R: >
+            Choose plotting engine: easyalluvial for automatic plots,
+            ggalluvial for manual control with curve types and Sankey styling.
+          jamovi: >
+            Choose plotting engine: easyalluvial for automatic plots,
+            ggalluvial for manual control with curve types and Sankey styling.
+
+    - name: labelNodes
+      title: Label Nodes
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show node labels (for ggalluvial engine).
+          jamovi: >
+            Show node labels (for ggalluvial engine).
 
 ...

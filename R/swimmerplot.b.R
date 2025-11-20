@@ -671,9 +671,25 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             event_data <- event_data[event_data$time >= event_data$start_time & event_data$time <= event_data$end_time, ]
                             event_data <- event_data[, c("patient_id", "time", "label")]
                         } else {
-                            event_data <- event_data[!is.na(event_data$time) & 
-                                                   !is.na(event_data$label) & 
+                            # For numeric times, filter by both lower (>= 0) and upper bounds (<= end_time)
+                            # This prevents events recorded after follow-up end from appearing on lanes
+                            event_data <- event_data[!is.na(event_data$time) &
+                                                   !is.na(event_data$label) &
                                                    event_data$time >= 0, ]
+
+                            # Get patient end times for upper bound filtering
+                            patient_end_times <- stats::setNames(
+                                private$.asNumericTime(patient_data$end_time),
+                                as.character(patient_data$patient_id)
+                            )
+
+                            # Filter events that occur after patient's follow-up end
+                            if (nrow(event_data) > 0) {
+                                event_data$patient_end <- patient_end_times[as.character(event_data$patient_id)]
+                                event_data <- event_data[!is.na(event_data$patient_end) &
+                                                       event_data$time <= event_data$patient_end, ]
+                                event_data$patient_end <- NULL
+                            }
                         }
                     }
                 }
@@ -733,14 +749,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             summary_list <- lapply(split_data, function(df) {
                 follow_up <- private$.calculateFollowUp(df$start_time, df$end_time)
-                person_time <- sum(df$segment_duration, na.rm = TRUE)
+
+                # Calculate person-time by merging overlapping intervals to avoid double-counting
+                # This ensures unique observation time is counted
+                person_time <- private$.mergeIntervalsAndSum(df$start_time, df$end_time)
                 if (is.na(person_time) || !is.finite(person_time)) person_time <- follow_up
 
+                # Get BEST response for ORR/DCR calculation (clinical standard in oncology)
+                # Hierarchy: CR > PR > SD > PD > NE/Other
                 response_value <- NA_character_
                 if ("response" %in% names(df)) {
                     non_missing <- as.character(df$response[!is.na(df$response)])
                     if (length(non_missing) > 0) {
-                        response_value <- non_missing[1]
+                        response_value <- private$.getBestResponse(non_missing)
                     }
                 }
 
@@ -762,6 +783,92 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             patient_data$segment_duration <- NULL
             dplyr::bind_rows(summary_list)
+        },
+
+        # Merge overlapping time intervals and sum unique observation time
+        # This prevents double-counting when a patient has overlapping segments
+        .mergeIntervalsAndSum = function(start_times, end_times) {
+            if (length(start_times) == 0 || length(end_times) == 0) {
+                return(NA_real_)
+            }
+
+            # Convert to numeric for interval operations
+            starts <- private$.asNumericTime(start_times)
+            ends <- private$.asNumericTime(end_times)
+
+            # Remove invalid intervals
+            valid <- !is.na(starts) & !is.na(ends) & is.finite(starts) & is.finite(ends) & ends >= starts
+            if (!any(valid)) return(NA_real_)
+
+            starts <- starts[valid]
+            ends <- ends[valid]
+
+            if (length(starts) == 0) return(NA_real_)
+
+            # Sort intervals by start time
+            ord <- order(starts)
+            starts <- starts[ord]
+            ends <- ends[ord]
+
+            # Merge overlapping intervals using sweep-line algorithm
+            merged_starts <- starts[1]
+            merged_ends <- ends[1]
+
+            if (length(starts) > 1) {
+                for (i in 2:length(starts)) {
+                    # Check if current interval overlaps or is adjacent to last merged interval
+                    if (starts[i] <= merged_ends[length(merged_ends)]) {
+                        # Extend the current merged interval
+                        merged_ends[length(merged_ends)] <- max(merged_ends[length(merged_ends)], ends[i])
+                    } else {
+                        # Start a new merged interval
+                        merged_starts <- c(merged_starts, starts[i])
+                        merged_ends <- c(merged_ends, ends[i])
+                    }
+                }
+            }
+
+            # Sum the lengths of merged intervals
+            total_time <- sum(merged_ends - merged_starts, na.rm = TRUE)
+            if (!is.finite(total_time)) return(NA_real_)
+
+            total_time
+        },
+
+        # Get best response based on oncology hierarchy
+        # CR (Complete Response) > PR (Partial Response) > SD (Stable Disease) > PD (Progressive Disease) > Other
+        .getBestResponse = function(responses) {
+            if (length(responses) == 0) return(NA_character_)
+
+            # Define response hierarchy (lower rank = better response)
+            response_hierarchy <- c(
+                "cr" = 1, "complete response" = 1, "complete" = 1,
+                "pr" = 2, "partial response" = 2, "partial" = 2,
+                "sd" = 3, "stable disease" = 3, "stable" = 3,
+                "pd" = 4, "progressive disease" = 4, "progression" = 4,
+                "ne" = 5, "not evaluable" = 5, "na" = 5
+            )
+
+            responses_lower <- tolower(trimws(responses))
+
+            # Find the best (lowest ranked) response
+            best_rank <- Inf
+            best_response <- responses[1]  # Default to first if no match
+
+            for (i in seq_along(responses_lower)) {
+                rank <- response_hierarchy[responses_lower[i]]
+                if (!is.na(rank) && rank < best_rank) {
+                    best_rank <- rank
+                    best_response <- responses[i]  # Keep original case
+                }
+            }
+
+            # If no recognized response, return the first one
+            if (is.infinite(best_rank)) {
+                return(responses[1])
+            }
+
+            best_response
         },
 
         # Compute follow-up duration between earliest start and latest end for one patient

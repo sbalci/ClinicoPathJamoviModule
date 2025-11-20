@@ -17,7 +17,7 @@ test_that("Test data can be loaded", {
 
 # Test basic functionality
 test_that("Basic stagemigration analysis works", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load small sample data for quick testing
   load("../../data/stagemigration_small_sample.rda")
@@ -44,7 +44,7 @@ test_that("Basic stagemigration analysis works", {
 
 # Test comprehensive analysis
 test_that("Comprehensive stagemigration analysis works", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load lung cancer data
   load("../../data/stagemigration_lung_cancer.rda")
@@ -82,7 +82,7 @@ test_that("Comprehensive stagemigration analysis works", {
 
 # Test NRI calculation
 test_that("NRI calculation works correctly", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load breast cancer data
   load("../../data/stagemigration_breast_cancer.rda")
@@ -120,7 +120,7 @@ test_that("NRI calculation works correctly", {
 
 # Test IDI calculation
 test_that("IDI calculation works correctly", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load colorectal cancer data
   load("../../data/stagemigration_colorectal_cancer.rda")
@@ -157,7 +157,7 @@ test_that("IDI calculation works correctly", {
 
 # Test ROC analysis
 test_that("Time-dependent ROC analysis works", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load lung cancer data
   load("../../data/stagemigration_lung_cancer.rda")
@@ -194,7 +194,7 @@ test_that("Time-dependent ROC analysis works", {
 
 # Test Decision Curve Analysis
 test_that("Decision Curve Analysis works", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load breast cancer data
   load("../../data/stagemigration_breast_cancer.rda")
@@ -230,7 +230,7 @@ test_that("Decision Curve Analysis works", {
 
 # Test bootstrap validation
 test_that("Bootstrap validation works", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load small sample data
   load("../../data/stagemigration_small_sample.rda")
@@ -264,7 +264,7 @@ test_that("Bootstrap validation works", {
 
 # Test clinical interpretation
 test_that("Clinical interpretation is generated", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load lung cancer data
   load("../../data/stagemigration_lung_cancer.rda")
@@ -303,7 +303,7 @@ test_that("Clinical interpretation is generated", {
 
 # Test cancer-specific guidance
 test_that("Cancer-specific guidance works", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Test different cancer types
   cancer_types <- c("lung", "breast", "colorectal", "general")
@@ -347,7 +347,7 @@ test_that("Cancer-specific guidance works", {
 
 # Test edge cases
 test_that("Edge cases are handled correctly", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Test with problematic data
   load("../../data/stagemigration_problematic.rda")
@@ -385,7 +385,7 @@ test_that("Edge cases are handled correctly", {
 
 # Test input validation
 test_that("Input validation works", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load test data
   load("../../data/stagemigration_small_sample.rda")
@@ -430,7 +430,7 @@ test_that("Input validation works", {
 
 # Test statistical method calculations
 test_that("Statistical calculations are mathematically correct", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Create simple test data with known properties
   set.seed(12345)
@@ -482,7 +482,7 @@ test_that("Statistical calculations are mathematically correct", {
 
 # Test performance with large datasets
 test_that("Performance is acceptable with large datasets", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load large performance data
   load("../../data/stagemigration_large_performance.rda")
@@ -515,7 +515,7 @@ test_that("Performance is acceptable with large datasets", {
 
 # Test visualization outputs
 test_that("Visualization outputs are generated", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load test data
   load("../../data/stagemigration_lung_cancer.rda")
@@ -550,7 +550,7 @@ test_that("Visualization outputs are generated", {
 
 # Test methodology notes and documentation
 test_that("Methodology notes are comprehensive", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load test data
   load("../../data/stagemigration_breast_cancer.rda")
@@ -589,7 +589,7 @@ test_that("Methodology notes are comprehensive", {
 
 # Test reproducibility
 test_that("Results are reproducible", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load test data
   load("../../data/stagemigration_small_sample.rda")
@@ -636,7 +636,7 @@ test_that("Results are reproducible", {
 
 # Test memory usage
 test_that("Memory usage is reasonable", {
-  skip_on_cran()
+  # skip_on_cran()
   
   # Load large performance data
   load("../../data/stagemigration_large_performance.rda")

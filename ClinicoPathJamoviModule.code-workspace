@@ -11,6 +11,12 @@
 		},
 		{
 			"path": "../paige-prostate"
+		},
+		{
+			"path": "../imageTypes"
+		},
+		{
+			"path": "../pathologyAnonymData"
 		}
 	],
 	"settings": {}

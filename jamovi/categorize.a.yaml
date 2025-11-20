@@ -1,0 +1,202 @@
+---
+name:  categorize
+title: Categorize Continuous Variables
+menuGroup: ExplorationT
+menuSubgroup: Data Preparation
+version: '0.0.1'
+jas: '1.2'
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
+
+    - name: var
+      title: Variable to Categorize
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            A numeric variable to be categorized into bins.
+          jamovi: >
+            Select the continuous variable you want to convert into categories.
+
+    - name: method
+      title: Binning Method
+      type: List
+      options:
+        - title: Equal Intervals
+          name: equal
+        - title: Quantiles
+          name: quantile
+        - title: Manual Breaks
+          name: manual
+        - title: Mean +/- SD
+          name: meansd
+        - title: Median Split
+          name: median
+        - title: Natural Breaks (Jenks)
+          name: jenks
+      default: quantile
+      description:
+          R: >
+            Method for creating bins. Options are 'equal' for equal-width intervals,
+            'quantile' for quantile-based bins, 'manual' for custom break points,
+            'meansd' for mean +/- standard deviation bins, 'median' for median split,
+            or 'jenks' for natural breaks clustering.
+          jamovi: >
+            Choose how to divide the variable into categories.
+
+    - name: nbins
+      title: Number of Categories
+      type: Integer
+      min: 2
+      max: 20
+      default: 4
+      description:
+          R: >
+            Number of categories to create (2-20). Used for equal, quantile, and jenks methods.
+          jamovi: >
+            Number of categories to create (2-20).
+
+    - name: breaks
+      title: Custom Break Points
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated break points for manual binning (e.g., "0, 25, 50, 75, 100").
+            Values should be in ascending order.
+          jamovi: >
+            For manual binning, enter comma-separated break points (e.g., "0, 25, 50, 75, 100").
+
+    - name: sdmult
+      title: SD Multiplier
+      type: Number
+      min: 0.5
+      max: 3
+      default: 1
+      description:
+          R: >
+            Multiplier for standard deviation when using meansd method (default = 1).
+          jamovi: >
+            How many standard deviations from mean to use for category boundaries.
+
+    - name: labels
+      title: Category Labels
+      type: List
+      options:
+        - title: Auto (numeric ranges)
+          name: auto
+        - title: Low/Medium/High
+          name: semantic
+        - title: Numbered (1, 2, 3...)
+          name: numbered
+        - title: Lettered (A, B, C...)
+          name: lettered
+        - title: Custom Labels
+          name: custom
+      default: auto
+      description:
+          R: >
+            How to label the resulting categories.
+          jamovi: >
+            Choose label style for the new categories.
+
+    - name: customlabels
+      title: Custom Label Names
+      type: String
+      default: ''
+      description:
+          R: >
+            Comma-separated custom labels (e.g., "Low, Medium, High").
+            Must match the number of categories.
+          jamovi: >
+            Enter custom labels separated by commas (must match number of categories).
+
+    - name: newvarname
+      title: New Variable Name
+      type: String
+      default: ''
+      description:
+          R: >
+            Name for the new categorized variable. Leave empty for automatic naming.
+          jamovi: >
+            Name for the new categorized variable. Leave empty for automatic naming.
+
+    - name: addtodata
+      title: Add Categorized Variable to Data
+      type: Output
+      description:
+          R: >
+            Add the new categorized variable directly to the dataset.
+          jamovi: >
+            Add the new categorized variable directly to the dataset.
+
+    - name: includelowest
+      title: Include lowest value in first bin
+      type: Bool
+      default: true
+      description:
+          R: >
+            If TRUE, the first interval will be left-closed (include.lowest in cut).
+          jamovi: >
+            Include the minimum value in the lowest category.
+
+    - name: rightclosed
+      title: Right-closed intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            If TRUE, intervals are right-closed (left-open). If FALSE, left-closed (right-open).
+          jamovi: >
+            Whether intervals include the right endpoint (e.g., (0,10] vs [0,10)).
+
+    - name: ordered
+      title: Create ordered factor
+      type: Bool
+      default: true
+      description:
+          R: >
+            If TRUE, creates an ordered factor to preserve category ordering.
+          jamovi: >
+            Create an ordered factor to preserve the natural ordering of categories.
+
+    - name: excl
+      title: Exclude missing values
+      type: Bool
+      default: true
+      description:
+          R: >
+            Exclude missing values from the analysis.
+          jamovi: >
+            Exclude missing values from the analysis.
+
+    - name: showcode
+      title: Show R code
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display R code to reproduce the categorization.
+          jamovi: >
+            Show R code to recreate this categorization in R.
+
+    - name: showplot
+      title: Show distribution plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display a histogram/density plot showing the original distribution and cut points.
+          jamovi: >
+            Display a plot showing the distribution and category boundaries.
+
+...

@@ -19,6 +19,9 @@ Features:
 \item Marginal histograms for additional context
 \item Flexible orientation (horizontal/vertical)
 \item Customizable bin labels and fill options
+\item Multiple plot engines (easyalluvial and ggalluvial)
+\item Color palettes and theme styling
+\item Sankey diagram styling with curve types
 \item Comprehensive data validation for optimal results
 }
 }

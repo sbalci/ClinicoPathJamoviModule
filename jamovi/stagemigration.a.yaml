@@ -317,6 +317,7 @@ options:
         multi-institutional validation. When provided, performs internal-external
         cross-validation using k-1 centers for development and remaining center
         for validation. Essential for multi-center staging validation studies.
+      default: null
 
     # Clinical Significance Options
     - name: clinicalSignificanceThreshold
@@ -821,6 +822,7 @@ options:
         outcome). If not specified, the analysis will attempt to detect competing 
         risks from multi-level event variables. For cancer studies, this typically 
         represents non-cancer deaths when primary outcome is cancer-specific death.
+      default: null
 
     # Optimal Cut-point Determination Options
     - name: performOptimalCutpoint
@@ -843,6 +845,7 @@ options:
         Continuous variable (e.g., tumor size, biomarker level, age) for optimal 
         cut-point determination. The analysis will find the cut-point that maximizes 
         the separation in survival outcomes while controlling for multiple testing.
+      default: null
 
     - name: cutpointMethod
       title: 'Cut-point Method'
@@ -968,6 +971,7 @@ options:
         Additional variables to include in SHAP interpretability analysis 
         alongside staging variables. Include key clinical variables that 
         might influence staging decisions or patient outcomes.
+      default: null
 
     - name: shapSampleSize
       title: 'SHAP Sample Size'
@@ -1143,6 +1147,7 @@ options:
         Additional variables to include in competing risks regression models. 
         Include important prognostic factors that may influence both primary 
         and competing events.
+      default: null
 
     - name: stratifyByStaging
       title: 'Stratify Analysis by Staging System'
@@ -1216,6 +1221,7 @@ options:
         Variable indicating patient disease states (e.g., stable, progressive, 
         deceased, remission). Should contain all possible states that patients 
         can transition between during follow-up.
+      default: null
 
     - name: transitionTimeVariable
       title: 'Transition Time Variable'
@@ -1226,6 +1232,7 @@ options:
         Time variable indicating when state transitions occurred. For multiple 
         transitions per patient, use comma-separated times or separate records 
         for each transition.
+      default: null
 
     - name: multiStateStates
       title: 'State Definitions'
@@ -1254,6 +1261,7 @@ options:
         Additional variables to include in multi-state models as covariates. 
         Include important prognostic factors that may influence transition 
         rates between states.
+      default: null
 
     - name: calculateTransitionProbabilities
       title: 'Calculate Transition Probabilities'
@@ -1388,6 +1396,7 @@ options:
         Additional variables to include in random forest models alongside 
         staging variables. Include important clinical variables for 
         comprehensive non-parametric survival modeling.
+      default: null
 
     - name: calculateVariableImportance
       title: 'Calculate Variable Importance'
@@ -1631,6 +1640,7 @@ options:
         Additional variables to include in cure model analysis alongside staging 
         variables. Can affect both cure probability and survival of susceptible 
         patients.
+      default: null
 
     - name: cureModelComparison
       title: 'Model Comparison Analysis'
@@ -1692,6 +1702,7 @@ options:
           Variable containing the left endpoint of the censoring interval.
           For exact observations, this should equal the right endpoint.
           For left-censored observations, use 0 or NA.
+      default: null
 
     - name: intervalCensoringRightTime
       title: 'Right Interval Time Variable'  
@@ -1705,6 +1716,7 @@ options:
           Variable containing the right endpoint of the censoring interval.
           For right-censored observations, use Inf or a large value.
           For exact observations, this should equal the left endpoint.
+      default: null
 
     - name: intervalCensoringDistribution
       title: 'Distribution for Parametric Model'
@@ -1830,6 +1842,7 @@ options:
           Additional variables to include in parametric interval-censored regression
           models for adjusted survival analysis. These will be included as covariates
           in the accelerated failure time model.
+      default: null
 
     - name: performInformativeCensoringAnalysis
       title: 'Informative Censoring Detection'
@@ -1881,6 +1894,7 @@ options:
           These could include clinical factors, treatment decisions, or
           administrative factors that might influence when patients are
           censored from the study.
+      default: null
 
     - name: informativeCensoringLandmarkTimes
       title: 'Landmark Time Points'
@@ -1928,6 +1942,7 @@ options:
           Variables to include in inverse probability weighting model for
           censoring probability estimation. Should include factors that
           predict censoring but are not affected by the outcome.
+      default: null
 
     - name: informativeCensoringSensitivityRange
       title: 'Sensitivity Analysis Range'
@@ -2124,6 +2139,7 @@ options:
           These variables will be included alongside staging in multivariable
           models to assess staging contribution to discrimination beyond
           other prognostic factors.
+      default: null
 
     - name: concordanceProbabilityRobustnessAnalysis
       title: 'Robustness Analysis'
@@ -2204,6 +2220,7 @@ options:
           Variable indicating death or primary endpoint occurrence (1 = event, 0 = no event).
           This is typically the most important outcome in the hierarchy and is
           compared first when evaluating patient pairs.
+      default: null
 
     - name: winRatioSecondaryEndpoint
       title: 'Secondary Endpoint Variable'
@@ -2219,6 +2236,7 @@ options:
           Variable for secondary endpoint (e.g., disease progression, recurrence).
           This endpoint is evaluated when the primary endpoint comparison is tied.
           Can be binary (event/no event) or continuous (time to event).
+      default: null
 
     - name: winRatioTertiaryEndpoint
       title: 'Tertiary Endpoint Variable'
@@ -2234,6 +2252,7 @@ options:
           Variable for tertiary endpoint (e.g., response, quality of life).
           This endpoint is evaluated when both primary and secondary comparisons
           are tied. Can be binary or continuous.
+      default: null
 
     - name: winRatioTimeVariables
       title: 'Time Variables for Endpoints'
@@ -2247,6 +2266,7 @@ options:
           Time variables corresponding to each endpoint in the hierarchy.
           Should be provided in the same order as the endpoints. Used for
           time-to-event comparisons when endpoints are not binary.
+      default: null
 
     - name: winRatioMatchingStrategy
       title: 'Matching Strategy'
@@ -2368,6 +2388,7 @@ options:
           Variable defining clusters/institutions for frailty modeling (e.g., 
           hospital, center, surgeon). Used to account for unobserved 
           heterogeneity and clustering effects in survival analysis.
+      default: null
 
     - name: frailtyDistribution
       title: 'Frailty Distribution'

@@ -11,12 +11,24 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             excl = FALSE,
             marg = FALSE,
             fill = "first_variable",
+            fillGgalluvial = NULL,
             bin = "default",
             orient = "vert",
             usetitle = FALSE,
             mytitle = "Alluvial Plot",
             maxvars = 8,
-            custombinlabels = "", ...) {
+            custombinlabels = "",
+            colorPalette = "default",
+            showCounts = FALSE,
+            themeStyle = "default",
+            enhancedGradients = FALSE,
+            plotSubtitle = "",
+            weight = NULL,
+            sankeyStyle = FALSE,
+            curveType = "cubic",
+            flowDirection = "left_right",
+            engine = "easyalluvial",
+            labelNodes = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -47,6 +59,9 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "all_flows",
                     "values"),
                 default="first_variable")
+            private$..fillGgalluvial <- jmvcore::OptionVariable$new(
+                "fillGgalluvial",
+                fillGgalluvial)
             private$..bin <- jmvcore::OptionList$new(
                 "bin",
                 bin,
@@ -82,18 +97,105 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "custombinlabels",
                 custombinlabels,
                 default="")
+            private$..colorPalette <- jmvcore::OptionList$new(
+                "colorPalette",
+                colorPalette,
+                options=list(
+                    "default",
+                    "viridis",
+                    "plasma",
+                    "set3",
+                    "pastel1",
+                    "dark2"),
+                default="default")
+            private$..showCounts <- jmvcore::OptionBool$new(
+                "showCounts",
+                showCounts,
+                default=FALSE)
+            private$..themeStyle <- jmvcore::OptionList$new(
+                "themeStyle",
+                themeStyle,
+                options=list(
+                    "default",
+                    "minimal",
+                    "classic",
+                    "grey",
+                    "bw"),
+                default="default")
+            private$..enhancedGradients <- jmvcore::OptionBool$new(
+                "enhancedGradients",
+                enhancedGradients,
+                default=FALSE)
+            private$..plotSubtitle <- jmvcore::OptionString$new(
+                "plotSubtitle",
+                plotSubtitle,
+                default="")
+            private$..weight <- jmvcore::OptionVariable$new(
+                "weight",
+                weight,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..sankeyStyle <- jmvcore::OptionBool$new(
+                "sankeyStyle",
+                sankeyStyle,
+                default=FALSE)
+            private$..curveType <- jmvcore::OptionList$new(
+                "curveType",
+                curveType,
+                options=list(
+                    "cubic",
+                    "linear",
+                    "quintic",
+                    "sine",
+                    "arctangent",
+                    "sigmoid"),
+                default="cubic")
+            private$..flowDirection <- jmvcore::OptionList$new(
+                "flowDirection",
+                flowDirection,
+                options=list(
+                    "left_right",
+                    "top_bottom",
+                    "right_left",
+                    "bottom_top"),
+                default="left_right")
+            private$..engine <- jmvcore::OptionList$new(
+                "engine",
+                engine,
+                options=list(
+                    "easyalluvial",
+                    "ggalluvial"),
+                default="easyalluvial")
+            private$..labelNodes <- jmvcore::OptionBool$new(
+                "labelNodes",
+                labelNodes,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..condensationvar)
             self$.addOption(private$..excl)
             self$.addOption(private$..marg)
             self$.addOption(private$..fill)
+            self$.addOption(private$..fillGgalluvial)
             self$.addOption(private$..bin)
             self$.addOption(private$..orient)
             self$.addOption(private$..usetitle)
             self$.addOption(private$..mytitle)
             self$.addOption(private$..maxvars)
             self$.addOption(private$..custombinlabels)
+            self$.addOption(private$..colorPalette)
+            self$.addOption(private$..showCounts)
+            self$.addOption(private$..themeStyle)
+            self$.addOption(private$..enhancedGradients)
+            self$.addOption(private$..plotSubtitle)
+            self$.addOption(private$..weight)
+            self$.addOption(private$..sankeyStyle)
+            self$.addOption(private$..curveType)
+            self$.addOption(private$..flowDirection)
+            self$.addOption(private$..engine)
+            self$.addOption(private$..labelNodes)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -101,24 +203,48 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         excl = function() private$..excl$value,
         marg = function() private$..marg$value,
         fill = function() private$..fill$value,
+        fillGgalluvial = function() private$..fillGgalluvial$value,
         bin = function() private$..bin$value,
         orient = function() private$..orient$value,
         usetitle = function() private$..usetitle$value,
         mytitle = function() private$..mytitle$value,
         maxvars = function() private$..maxvars$value,
-        custombinlabels = function() private$..custombinlabels$value),
+        custombinlabels = function() private$..custombinlabels$value,
+        colorPalette = function() private$..colorPalette$value,
+        showCounts = function() private$..showCounts$value,
+        themeStyle = function() private$..themeStyle$value,
+        enhancedGradients = function() private$..enhancedGradients$value,
+        plotSubtitle = function() private$..plotSubtitle$value,
+        weight = function() private$..weight$value,
+        sankeyStyle = function() private$..sankeyStyle$value,
+        curveType = function() private$..curveType$value,
+        flowDirection = function() private$..flowDirection$value,
+        engine = function() private$..engine$value,
+        labelNodes = function() private$..labelNodes$value),
     private = list(
         ..vars = NA,
         ..condensationvar = NA,
         ..excl = NA,
         ..marg = NA,
         ..fill = NA,
+        ..fillGgalluvial = NA,
         ..bin = NA,
         ..orient = NA,
         ..usetitle = NA,
         ..mytitle = NA,
         ..maxvars = NA,
-        ..custombinlabels = NA)
+        ..custombinlabels = NA,
+        ..colorPalette = NA,
+        ..showCounts = NA,
+        ..themeStyle = NA,
+        ..enhancedGradients = NA,
+        ..plotSubtitle = NA,
+        ..weight = NA,
+        ..sankeyStyle = NA,
+        ..curveType = NA,
+        ..flowDirection = NA,
+        ..engine = NA,
+        ..labelNodes = NA)
 )
 
 alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -126,6 +252,9 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        noticeError = function() private$.items[["noticeError"]],
+        noticeWarning = function() private$.items[["noticeWarning"]],
+        noticeInfo = function() private$.items[["noticeInfo"]],
         dataWarning = function() private$.items[["dataWarning"]],
         plot = function() private$.items[["plot"]],
         condensationWarning = function() private$.items[["condensationWarning"]],
@@ -139,6 +268,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Alluvial Diagrams",
                 refs=list(
                     "easyalluvial",
+                    "ggalluvial",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -148,11 +278,35 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars")))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="noticeError",
+                title="Error",
+                visible=FALSE,
+                clearWith=list(
+                    "vars",
+                    "condensationvar")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="noticeWarning",
+                title="Warning",
+                visible=FALSE,
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="noticeInfo",
+                title="Information",
+                visible=FALSE,
+                clearWith=list(
+                    "vars",
+                    "maxvars")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="dataWarning",
                 title="Data Validation",
                 visible=TRUE,
                 clearWith=list(
-                    "vars")))
+                    "vars",
+                    "maxvars")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Alluvial Diagrams",
@@ -171,7 +325,19 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "orient",
                     "usetitle",
                     "mytitle",
-                    "maxvars")))
+                    "maxvars",
+                    "colorPalette",
+                    "showCounts",
+                    "themeStyle",
+                    "enhancedGradients",
+                    "plotSubtitle",
+                    "weight",
+                    "fillGgalluvial",
+                    "sankeyStyle",
+                    "curveType",
+                    "flowDirection",
+                    "engine",
+                    "labelNodes")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="condensationWarning",
@@ -190,7 +356,10 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "condensationvar"),
+                    "condensationvar",
+                    "excl",
+                    "colorPalette",
+                    "themeStyle"),
                 visible="(condensationvar)"))}))
 
 alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -225,16 +394,39 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param marg Include marginal plots.
 #' @param fill A list for the argument fill for selecting the variable to be
 #'   represented by color. Default is 'first_variable'.
-#' @param bin labels for the bins from low to high
+#' @param fillGgalluvial A string naming the variable from \code{data} that
+#'   will be used to color the flows in the ggalluvial plot.
+#' @param bin Display labels for bin categories. Note: This controls label
+#'   text only, not the binning method. easyalluvial uses its own internal
+#'   binning algorithm. For custom binning, create categorized variables before
+#'   analysis.
 #' @param orient Orientation of the plot. Default is 'vertical'.
 #' @param usetitle Use a custom title for the plot.
 #' @param mytitle Title for the plot.
 #' @param maxvars Maximum number of variables to include in the alluvial plot.
 #' @param custombinlabels Custom labels for bins, separated by commas (e.g.,
-#'   "Low,Medium,High").  Leave empty to use bin option defaults.
+#'   "Low,Medium,High"). Leave empty to use bin option defaults.
+#' @param colorPalette Color palette for the diagram flows.
+#' @param showCounts Display count values on nodes.
+#' @param themeStyle Theme style for the plot background and elements.
+#' @param enhancedGradients Apply sophisticated color gradients to flow edges
+#'   for better visual appeal.
+#' @param plotSubtitle Subtitle for the plot (shown below the title).
+#' @param weight Optional weight variable for flow thickness. If not provided,
+#'   counts are used.
+#' @param sankeyStyle Apply Sankey diagram styling (narrow nodes, sigmoid
+#'   curves).
+#' @param curveType Curve style for flows. Requires ggalluvial engine.
+#' @param flowDirection Direction of flow in the diagram.
+#' @param engine Choose plotting engine: easyalluvial for automatic plots,
+#'   ggalluvial for manual control with curve types and Sankey styling.
+#' @param labelNodes Show node labels (for ggalluvial engine).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$noticeError} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$noticeWarning} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$noticeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr
@@ -249,23 +441,39 @@ alluvial <- function(
     excl = FALSE,
     marg = FALSE,
     fill = "first_variable",
+    fillGgalluvial,
     bin = "default",
     orient = "vert",
     usetitle = FALSE,
     mytitle = "Alluvial Plot",
     maxvars = 8,
-    custombinlabels = "") {
+    custombinlabels = "",
+    colorPalette = "default",
+    showCounts = FALSE,
+    themeStyle = "default",
+    enhancedGradients = FALSE,
+    plotSubtitle = "",
+    weight,
+    sankeyStyle = FALSE,
+    curveType = "cubic",
+    flowDirection = "left_right",
+    engine = "easyalluvial",
+    labelNodes = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("alluvial requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(condensationvar)) condensationvar <- jmvcore::resolveQuo(jmvcore::enquo(condensationvar))
+    if ( ! missing(fillGgalluvial)) fillGgalluvial <- jmvcore::resolveQuo(jmvcore::enquo(fillGgalluvial))
+    if ( ! missing(weight)) weight <- jmvcore::resolveQuo(jmvcore::enquo(weight))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
-            `if`( ! missing(condensationvar), condensationvar, NULL))
+            `if`( ! missing(condensationvar), condensationvar, NULL),
+            `if`( ! missing(fillGgalluvial), fillGgalluvial, NULL),
+            `if`( ! missing(weight), weight, NULL))
 
 
     options <- alluvialOptions$new(
@@ -274,12 +482,24 @@ alluvial <- function(
         excl = excl,
         marg = marg,
         fill = fill,
+        fillGgalluvial = fillGgalluvial,
         bin = bin,
         orient = orient,
         usetitle = usetitle,
         mytitle = mytitle,
         maxvars = maxvars,
-        custombinlabels = custombinlabels)
+        custombinlabels = custombinlabels,
+        colorPalette = colorPalette,
+        showCounts = showCounts,
+        themeStyle = themeStyle,
+        enhancedGradients = enhancedGradients,
+        plotSubtitle = plotSubtitle,
+        weight = weight,
+        sankeyStyle = sankeyStyle,
+        curveType = curveType,
+        flowDirection = flowDirection,
+        engine = engine,
+        labelNodes = labelNodes)
 
     analysis <- alluvialClass$new(
         options = options,

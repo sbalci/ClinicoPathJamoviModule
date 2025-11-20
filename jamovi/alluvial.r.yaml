@@ -5,11 +5,34 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
+    - name: todo
       title: To Do
-      type:  Html
+      type: Html
       clearWith:
           - vars
+
+    - name: noticeError
+      title: Error
+      type: Html
+      visible: false
+      clearWith:
+          - vars
+          - condensationvar
+
+    - name: noticeWarning
+      title: Warning
+      type: Html
+      visible: false
+      clearWith:
+          - vars
+
+    - name: noticeInfo
+      title: Information
+      type: Html
+      visible: false
+      clearWith:
+          - vars
+          - maxvars
 
     - name: dataWarning
       title: Data Validation
@@ -17,6 +40,7 @@ items:
       visible: true
       clearWith:
           - vars
+          - maxvars
 
     - title: Alluvial Diagrams
       name: plot
@@ -36,8 +60,18 @@ items:
           - usetitle
           - mytitle
           - maxvars
-          # - themex
-          # - originaltheme
+          - colorPalette
+          - showCounts
+          - themeStyle
+          - enhancedGradients
+          - plotSubtitle
+          - weight
+          - fillGgalluvial
+          - sankeyStyle
+          - curveType
+          - flowDirection
+          - engine
+          - labelNodes
 
 
     - name: condensationWarning
@@ -58,15 +92,16 @@ items:
       clearWith:
           - vars
           - condensationvar
-          # - themex
-          # - originaltheme
+          - excl
+          - colorPalette
+          - themeStyle
       visible: (condensationvar)
 
 
 refs:
     - easyalluvial
+    - ggalluvial
     - ClinicoPathJamoviModule
-    # - parcats
 
 
 ...

@@ -11,12 +11,24 @@ alluvial(
   excl = FALSE,
   marg = FALSE,
   fill = "first_variable",
+  fillGgalluvial,
   bin = "default",
   orient = "vert",
   usetitle = FALSE,
   mytitle = "Alluvial Plot",
   maxvars = 8,
-  custombinlabels = ""
+  custombinlabels = "",
+  colorPalette = "default",
+  showCounts = FALSE,
+  themeStyle = "default",
+  enhancedGradients = FALSE,
+  plotSubtitle = "",
+  weight,
+  sankeyStyle = FALSE,
+  curveType = "cubic",
+  flowDirection = "left_right",
+  engine = "easyalluvial",
+  labelNodes = FALSE
 )
 }
 \arguments{
@@ -34,7 +46,13 @@ the values used for the Alluvial Diagram.}
 \item{fill}{A list for the argument fill for selecting the variable to be
 represented by color. Default is 'first_variable'.}
 
-\item{bin}{labels for the bins from low to high}
+\item{fillGgalluvial}{A string naming the variable from \code{data} that
+will be used to color the flows in the ggalluvial plot.}
+
+\item{bin}{Display labels for bin categories. Note: This controls label
+text only, not the binning method. easyalluvial uses its own internal
+binning algorithm. For custom binning, create categorized variables before
+analysis.}
 
 \item{orient}{Orientation of the plot. Default is 'vertical'.}
 
@@ -45,12 +63,41 @@ represented by color. Default is 'first_variable'.}
 \item{maxvars}{Maximum number of variables to include in the alluvial plot.}
 
 \item{custombinlabels}{Custom labels for bins, separated by commas (e.g.,
-"Low,Medium,High").  Leave empty to use bin option defaults.}
+"Low,Medium,High"). Leave empty to use bin option defaults.}
+
+\item{colorPalette}{Color palette for the diagram flows.}
+
+\item{showCounts}{Display count values on nodes.}
+
+\item{themeStyle}{Theme style for the plot background and elements.}
+
+\item{enhancedGradients}{Apply sophisticated color gradients to flow edges
+for better visual appeal.}
+
+\item{plotSubtitle}{Subtitle for the plot (shown below the title).}
+
+\item{weight}{Optional weight variable for flow thickness. If not provided,
+counts are used.}
+
+\item{sankeyStyle}{Apply Sankey diagram styling (narrow nodes, sigmoid
+curves).}
+
+\item{curveType}{Curve style for flows. Requires ggalluvial engine.}
+
+\item{flowDirection}{Direction of flow in the diagram.}
+
+\item{engine}{Choose plotting engine: easyalluvial for automatic plots,
+ggalluvial for manual control with curve types and Sankey styling.}
+
+\item{labelNodes}{Show node labels (for ggalluvial engine).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$noticeError} \tab \tab \tab \tab \tab a html \cr
+\code{results$noticeWarning} \tab \tab \tab \tab \tab a html \cr
+\code{results$noticeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr

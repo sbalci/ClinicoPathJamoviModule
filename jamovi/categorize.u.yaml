@@ -1,0 +1,111 @@
+title: Categorize Continuous Variables
+name: categorize
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: true
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variable to Categorize
+        children:
+          - type: VariablesListBox
+            name: var
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Binning Method
+    stretchFactor: 1
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: ComboBox
+            name: method
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 1
+            children:
+              - type: TextBox
+                name: nbins
+                format: number
+                enable: (method:equal || method:quantile || method:jenks)
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 2
+            children:
+              - type: TextBox
+                name: breaks
+                format: string
+                width: large
+                enable: (method:manual)
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 3
+            children:
+              - type: TextBox
+                name: sdmult
+                format: number
+                enable: (method:meansd)
+  - type: CollapseBox
+    label: Labels
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: ComboBox
+            name: labels
+          - type: TextBox
+            name: customlabels
+            format: string
+            width: large
+            enable: (labels:custom)
+          - type: TextBox
+            name: newvarname
+            format: string
+            width: large
+  - type: CollapseBox
+    label: Options
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: includelowest
+          - type: CheckBox
+            name: rightclosed
+          - type: CheckBox
+            name: ordered
+          - type: CheckBox
+            name: excl
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Output
+        name: addtodata
+  - type: CollapseBox
+    label: Output
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: showcode
+          - type: CheckBox
+            name: showplot

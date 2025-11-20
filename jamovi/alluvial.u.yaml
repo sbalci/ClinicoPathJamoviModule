@@ -21,6 +21,20 @@ children:
             name: condensationvar
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Weight Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: weight
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Fill Variable (ggalluvial)
+        children:
+          - type: VariablesListBox
+            name: fillGgalluvial
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Options
     stretchFactor: 1
@@ -81,4 +95,88 @@ children:
                         format: string
                         width: large
                         enable: (usetitle)
+                  - type: TextBox
+                    name: plotSubtitle
+                    format: string
+                    width: large
+
+  - type: CollapseBox
+    label: Styling
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Colors & Theme
+                fitToGrid: true
+                children:
+                  - type: ComboBox
+                    name: colorPalette
+                  - type: ComboBox
+                    name: themeStyle
+                  - type: CheckBox
+                    name: enhancedGradients
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Labels
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: labelNodes
+                  - type: CheckBox
+                    name: showCounts
+
+  - type: CollapseBox
+    label: Advanced
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Plot Engine
+                fitToGrid: true
+                children:
+                  - type: ComboBox
+                    name: engine
+                  - type: CheckBox
+                    name: sankeyStyle
+                    enable: (engine:ggalluvial)
+                  - type: ComboBox
+                    name: curveType
+                    enable: (engine:ggalluvial)
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Flow Options
+                fitToGrid: true
+                children:
+                  - type: ComboBox
+                    name: flowDirection
 

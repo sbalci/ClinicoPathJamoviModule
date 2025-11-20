@@ -1,0 +1,143 @@
+---
+name:  categorize
+title: Categorize Continuous Variables
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: Instructions
+      type:  Html
+      clearWith:
+          - var
+
+    - name: summaryText
+      title: Variable Summary
+      type: Html
+      visible: (var)
+      clearWith:
+          - var
+          - excl
+
+    - name: freqTable
+      title: Category Frequencies
+      type: Table
+      visible: (var)
+      clearWith:
+          - var
+          - method
+          - nbins
+          - breaks
+          - sdmult
+          - labels
+          - customlabels
+          - includelowest
+          - rightclosed
+          - excl
+      columns:
+        - name: category
+          title: Category
+          type: text
+        - name: range
+          title: Range
+          type: text
+        - name: n
+          title: Count
+          type: integer
+        - name: percent
+          title: '%'
+          type: number
+          format: pc
+        - name: cumPercent
+          title: 'Cum %'
+          type: number
+          format: pc
+
+    - name: breakpointsTable
+      title: Break Points
+      type: Table
+      visible: (var)
+      clearWith:
+          - var
+          - method
+          - nbins
+          - breaks
+          - sdmult
+          - excl
+      columns:
+        - name: index
+          title: '#'
+          type: integer
+        - name: value
+          title: Break Value
+          type: number
+
+    - name: plot
+      title: Distribution Plot
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot
+      requiresData: true
+      visible: (showplot)
+      clearWith:
+          - var
+          - method
+          - nbins
+          - breaks
+          - sdmult
+          - excl
+
+    - name: rcode
+      title: R Code
+      type: Html
+      visible: (showcode)
+      clearWith:
+          - var
+          - method
+          - nbins
+          - breaks
+          - sdmult
+          - labels
+          - customlabels
+          - newvarname
+          - includelowest
+          - rightclosed
+          - ordered
+          - excl
+
+    - name: warnings
+      title: Messages
+      type: Html
+      visible: true
+      clearWith:
+          - var
+          - method
+          - nbins
+          - breaks
+          - customlabels
+
+    - name: addtodata
+      title: Categorized Variable
+      type: Output
+      varTitle: '`${ var }_cat`'
+      varDescription: '`Categorized version of ${ var } using ${ method } method`'
+      measureType: nominal
+      clearWith:
+          - var
+          - method
+          - nbins
+          - breaks
+          - sdmult
+          - labels
+          - customlabels
+          - newvarname
+          - includelowest
+          - rightclosed
+          - ordered
+          - excl
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

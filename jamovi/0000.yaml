@@ -43,7 +43,7 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
@@ -56,7 +56,7 @@ analyses:
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -97,6 +97,23 @@ analyses:
       variables. Supports current CRAN vtree package with advanced styling,
       statistical summaries, and interpretation features. Consolidates
       functionality from legacy versions with modern vtree capabilities.
+    ribbon: analyses
+    category: analyses
+  - title: Categorize Continuous Variables
+    name: categorize
+    ns: ClinicoPath
+    menuGroup: ExplorationT
+    menuSubgroup: Data Preparation
+    menuTitle: Categorize Continuous Variables
+    menuSubtitle: Bin numeric variables into categories
+    description: >
+      Convert continuous numeric variables into categorical variables using
+      various binning methods. Similar to questionr::icut but with multiple
+      automated options including equal intervals, quantiles, manual breaks,
+      mean +/- SD, median split, and natural breaks (Jenks). Provides frequency
+      tables, distribution plots, and R code for reproducibility. Perfect for
+      preparing variables for alluvial diagrams, cross-tables, and other
+      categorical analyses.
     ribbon: analyses
     category: analyses
   - title: Cross Tables
@@ -805,7 +822,7 @@ analyses:
   - title: Contingency Tables
     name: contTables
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: ExplorationD
     menuSubgroup: Frequencies Contingency Tables
     menuTitle: Independent Samples
     menuSubtitle: χ² test of association
@@ -2253,13 +2270,6 @@ analyses:
       Kendall  correlations with significance tests, confidence intervals, and
       natural language  reporting. Suitable for exploring relationships between
       continuous variables.
-  - title: Alluvial Diagrams
-    name: alluvial2
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationD
-    menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Alluvial Diagrams
   - title: Cross Tables
     name: crosstable2
     ns: ClinicoPath
@@ -5111,13 +5121,6 @@ analyses:
       complex study designs with accrual periods, variable follow-up, and
       dropout considerations. Essential for study planning, grant applications,
       and regulatory submissions.
-  - title: Alluvial & Sankey Diagrams
-    name: alluvial3
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationD
-    menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Alluvial & Sankey Diagrams
   - title: Simple Survival Power Analysis (Basic)
     name: simpleSurvivalPower
     ns: ClinicoPath
