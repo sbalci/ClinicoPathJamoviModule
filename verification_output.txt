@@ -1,0 +1,58 @@
+
+--- Summary Table ---
+Number of Observations: 8
+Number of X-axis Points: 8
+Number of Groups: 1
+Y Mean: 8.6375
+Y Median: 8.7
+Y Standard Deviation: 0.358319490319543
+Y Range: 8.1 - 9.1
+
+--- Correlation Table ---
+Pearson Correlation: -0.852724395680679 (very strong negative correlation (**) - This suggests a clinically meaningful relationship.)
+R-squared (Effect Size): 0.72713889498898 (72.7% of variance explained. Large effect size - clinically meaningful association.)
+Regression Slope: -0.0437134502923977 (Negative trend: Each unit increase in X corresponds to 0.0437134502923977 unit decrease in Y on average.)
+Copy-Ready Summary:  (Analysis revealed a strong negative correlation between the variables (r = -0.853, p < 0.01). The correlation explains 72.7% of the variance. This relationship is statistically significant. This finding may have clinical relevance.)
+Spearman Correlation (Rank-based): -0.886243433815812 (very strong negative correlation (**) - This suggests a clinically meaningful relationship. This non-parametric measure is robust to outliers.)
+
+--- Warnings/Messages ---
+Data Quality Alerts:Warning: Small sample size (Note: Unequal time intervals detected. Trend interpretation should account for irregular spacing.Analysis SummaryDataset: 8 observations across 8 time pointshemoglobin_g_dl ranges from 8.1 to 9.1 (mean: 8.6375, SD: 0.358319490319543)Trend: strong decreasing trend detected (R² = 0.727) 
+
+--- Summary Table ---
+Number of Observations: 924
+Number of X-axis Points: 8
+Number of Groups: 3
+Group Names: Control, EPO_High, EPO_Low
+Y Mean: 9.73874458874459
+Y Median: 9.6
+Y Standard Deviation: 1.27104300408223
+Y Range: 6.2 - 13.6
+
+--- Correlation Table ---
+Pearson Correlation: 0.100654793996337 (weak positive correlation (**) - Caution: Repeated measures detected. Standard correlation assumes independence and may overstate significance.)
+R-squared (Effect Size): 0.0101313875544454 (1% of variance explained. Very small effect size - minimal practical significance.)
+Regression Slope: 0.019866758214882 (Positive trend: Each unit increase in X corresponds to 0.019866758214882 unit increase in Y on average.)
+Copy-Ready Summary:  (Analysis revealed a weak positive correlation between the variables (r = 0.101, p < 0.01). The correlation explains 1% of the variance. This relationship is statistically significant. Note: Results should be interpreted with caution as repeated measures were detected, violating the independence assumption.)
+Spearman Correlation (Rank-based): 0.101734589549298 (weak positive correlation (**) - Caution: Repeated measures detected. Standard correlation assumes independence and may overstate significance. This non-parametric measure is robust to outliers.)
+
+--- Warnings/Messages ---
+Data Quality Alerts:Note: Unequal time intervals detected. Trend interpretation should account for irregular spacing.Analysis SummaryDataset: 924 observations across 8 time pointsGroups: 3 groups (Control, EPO_High, EPO_Low)hemoglobin_g_dl ranges from 6.2 to 13.6 (mean: 9.73874458874459, SD: 1.27104300408223)Trend: weak increasing trend detected (R² = 0.01) 
+
+--- Summary Table ---
+Number of Observations: 924
+Number of X-axis Points: 8
+Number of Groups: 1
+Y Mean: 9.73874458874459
+Y Median: 9.6
+Y Standard Deviation: 1.27104300408223
+Y Range: 6.2 - 13.6
+
+--- Correlation Table ---
+Pearson Correlation: 0.100654793996338 (weak positive correlation (**) - Caution: Repeated measures detected. Standard correlation assumes independence and may overstate significance.)
+R-squared (Effect Size): 0.0101313875544452 (1% of variance explained. Very small effect size - minimal practical significance.)
+Regression Slope: 0.019866758214882 (Positive trend: Each unit increase in X corresponds to 0.019866758214882 unit increase in Y on average.)
+Copy-Ready Summary:  (Analysis revealed a weak positive correlation between the variables (r = 0.101, p < 0.01). The correlation explains 1% of the variance. This relationship is statistically significant. Note: Results should be interpreted with caution as repeated measures were detected, violating the independence assumption.)
+Spearman Correlation (Rank-based): 0.101734589549298 (weak positive correlation (**) - Caution: Repeated measures detected. Standard correlation assumes independence and may overstate significance. This non-parametric measure is robust to outliers.)
+
+--- Warnings/Messages ---
+Data Quality Alerts:Note: Unequal time intervals detected. Trend interpretation should account for irregular spacing.Analysis SummaryDataset: 924 observations across 8 time pointshemoglobin_g_dl ranges from 6.2 to 13.6 (mean: 9.73874458874459, SD: 1.27104300408223)Trend: weak increasing trend detected (R² = 0.01) 

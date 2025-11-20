@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.32.27
-Date: 2025-11-18
+Version: 0.0.32.28
+Date: 2025-11-20
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -312,5 +312,6 @@ Suggests:
     flexsurvcure,
     cuRe,
     npcure,
+    concaveman,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

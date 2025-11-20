@@ -1,7 +1,7 @@
 ---
 name: jjpubr
 title: Publication-Ready Plots (ggpubr)
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: All-In-One
 menuTitle: ggpubr Plots
 menuSubtitle: Publication-ready visualizations
@@ -170,22 +170,23 @@ options:
       title: Statistical Test Method
       type: List
       options:
-        - title: Automatic (based on data)
+        - title: Automatic (t-test for 2 groups, pairwise t-tests for 3+)
           name: auto
-        - title: t-test
+        - title: Pairwise t-tests (parametric)
           name: t.test
-        - title: Wilcoxon test
+        - title: Pairwise Wilcoxon tests (non-parametric)
           name: wilcox.test
-        - title: ANOVA
-          name: anova
-        - title: Kruskal-Wallis
-          name: kruskal.test
       default: auto
       description:
           ui: >
-            Statistical test to use for comparisons
+            Select method for pairwise group comparisons. IMPORTANT: This module performs
+            pairwise tests only (not omnibus ANOVA/Kruskal-Wallis). For 3+ groups, all
+            pairs are tested with Bonferroni correction. t-tests assume normal distributions;
+            Wilcoxon tests are robust to skewness. Auto selects t-test by default.
+            For >2 groups, 'Show Pairwise Comparisons' must be enabled to see statistics.
           R: >
-            Method for statistical comparison
+            Method for pairwise statistical comparison. Only pairwise tests are performed, not omnibus tests.
+            For >2 groups, requires pairwiseComparisons = TRUE. Bonferroni correction applied automatically.
 
     - name: pairwiseComparisons
       title: Show Pairwise Comparisons
@@ -193,9 +194,12 @@ options:
       default: false
       description:
           ui: >
-            Show all pairwise comparisons between groups
+            Show all pairwise comparisons between groups. REQUIRED for statistical tests when
+            comparing >2 groups. When enabled, all pairs are tested with Bonferroni correction
+            for multiple comparisons.
           R: >
-            Whether to show all pairwise comparisons
+            Whether to show all pairwise comparisons. Required for >2 groups to display any
+            statistical tests.
 
     # === SCATTER PLOT SPECIFIC ===
     - name: addCorr

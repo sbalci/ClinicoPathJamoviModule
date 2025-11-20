@@ -93,6 +93,11 @@ children:
                   - type: ComboBox
                     name: centralitytype
                     enable: (centralityplotting)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: multiEndpointCorrection
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -112,6 +117,8 @@ children:
                 name: colorblindSafe
               - type: CheckBox
                 name: addGGPubrPlot
+              - type: CheckBox
+                name: showexplanations
       - type: Label
         label: Plot Labels
         fitToGrid: true

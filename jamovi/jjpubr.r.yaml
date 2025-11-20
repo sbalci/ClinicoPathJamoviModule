@@ -43,6 +43,7 @@ items:
         - ylab
         - legendPosition
         - theme
+        - clinicalPreset
       refs:
         - ggpubr
         - ggplot2
@@ -55,6 +56,9 @@ items:
       columns:
         - name: comparison
           title: Comparison
+          type: text
+        - name: method
+          title: Test Method
           type: text
         - name: statistic
           title: Statistic
@@ -142,5 +146,4 @@ refs:
     - ggplot2
     - ClinicoPathJamoviModule
 
-    - tools
 ...

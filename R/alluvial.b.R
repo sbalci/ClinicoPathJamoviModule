@@ -303,10 +303,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html <- self$results$todo
                 html$setContent(todo)
 
-                # Clear notices when no variables selected
+                # Clear all notices and warnings when no variables selected
                 self$results$noticeError$setVisible(FALSE)
                 self$results$noticeWarning$setVisible(FALSE)
                 self$results$noticeInfo$setVisible(FALSE)
+                self$results$dataWarning$setContent("")  # Clear old validation errors
 
             } else {
                 # Clear the to-do message
@@ -343,8 +344,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
                 }
 
-                # Clear error notice if validation passes
+                # Clear all error/warning notices if validation passes
                 self$results$noticeError$setVisible(FALSE)
+                self$results$dataWarning$setContent("")  # Explicitly clear old validation errors
 
                 # Add INFO notice for successful validation
                 n_vars <- length(self$options$vars)

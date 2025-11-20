@@ -434,6 +434,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table$deleteRows()
 
             row_num <- 1
+            
+            # Extract flags for repeated measures and grouping
+            has_repeated_measures <- isTRUE(correlation_stats$has_repeated_measures)
+            has_grouping <- isTRUE(correlation_stats$has_grouping)
 
             # Pearson correlation with enhanced interpretation
             if (!is.null(correlation_stats$pearson_r)) {
@@ -444,7 +448,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     measure = .("Pearson Correlation"),
                     value = correlation_stats$pearson_r,
                     interpretation = private$.interpretCorrelation(correlation_stats$pearson_r,
-                                                                   correlation_stats$pearson_p)
+                                                                   correlation_stats$pearson_p,
+                                                                   has_repeated_measures,
+                                                                   has_grouping)
                 ))
                 row_num <- row_num + 1
 
@@ -488,7 +494,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     measure = .("Spearman Correlation (Rank-based)"),
                     value = correlation_stats$spearman_r,
                     interpretation = paste0(private$.interpretCorrelation(correlation_stats$spearman_r,
-                                                                         correlation_stats$spearman_p),
+                                                                         correlation_stats$spearman_p,
+                                                                         has_repeated_measures,
+                                                                         has_grouping),
                                           " ", .("This non-parametric measure is robust to outliers."))
                 ))
                 row_num <- row_num + 1
@@ -517,6 +525,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             r <- correlation_stats$pearson_r
             p <- correlation_stats$pearson_p
             r_squared <- correlation_stats$r_squared
+            
+            has_repeated_measures <- isTRUE(correlation_stats$has_repeated_measures)
+            has_grouping <- isTRUE(correlation_stats$has_grouping)
 
             # Determine significance
             sig_level <- if (p < 0.001) "p < 0.001" else if (p < 0.01) "p < 0.01" else paste0("p = ", round(p, 3))
@@ -531,11 +542,20 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "(r = ", round(r, 3), ", ", sig_level, "). ",
                 .("The correlation explains "), round(r_squared * 100, 1), .("% of the variance. "),
                 if (is_significant) {
-                    .("This relationship is statistically significant and may have clinical relevance.")
+                    .("This relationship is statistically significant.")
                 } else {
                     .("This relationship is not statistically significant.")
                 }
             )
+            
+            # Add caution if needed
+            if (has_repeated_measures) {
+                copy_ready <- paste0(copy_ready, " ", .("Note: Results should be interpreted with caution as repeated measures were detected, violating the independence assumption."))
+            } else if (has_grouping) {
+                copy_ready <- paste0(copy_ready, " ", .("Note: Results should be interpreted with caution as grouped data may mask within-group patterns."))
+            } else if (is_significant) {
+                copy_ready <- paste0(copy_ready, " ", .("This finding may have clinical relevance."))
+            }
 
             return(copy_ready)
         },
@@ -554,7 +574,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Enhanced correlation interpretation with clinical context
-        .interpretCorrelation = function(r, p_value) {
+        .interpretCorrelation = function(r, p_value, has_repeated_measures = FALSE, has_grouping = FALSE) {
             if (is.na(r) || is.na(p_value)) return(.("Not available"))
 
             # Significance levels with clinical interpretation
@@ -574,12 +594,16 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             base_interpretation <- paste0(strength, " ", direction, " ", .("correlation"), " (", sig_text, ")")
 
             # Add clinical context
-            clinical_note <- if (abs_r >= 0.5) {
-                .("This suggests a clinically meaningful relationship.")
+            if (has_repeated_measures) {
+                clinical_note <- .("Caution: Repeated measures detected. Standard correlation assumes independence and may overstate significance.")
+            } else if (has_grouping) {
+                clinical_note <- .("Caution: Grouped data detected. Correlation across groups may mask within-group patterns (Simpson's paradox).")
+            } else if (abs_r >= 0.5) {
+                clinical_note <- .("This suggests a clinically meaningful relationship.")
             } else if (abs_r >= 0.3) {
-                .("This suggests a moderate association worth investigating.")
+                clinical_note <- .("This suggests a moderate association worth investigating.")
             } else {
-                .("This suggests a weak association with limited clinical significance.")
+                clinical_note <- .("This suggests a weak association with limited clinical significance.")
             }
 
             return(paste0(base_interpretation, " - ", clinical_note))

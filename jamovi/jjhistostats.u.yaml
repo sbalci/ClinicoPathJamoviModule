@@ -47,11 +47,15 @@ children:
                 name: typestatistics
                 events:
                   change: ./jjhistostats.events::onChange_typestatistics
-              - type: TextBox
-                name: test.value
-                format: number
-                events:
-                  change: ./jjhistostats.events::onChange_test_value
+              - type: CheckBox
+                name: enableOneSampleTest
+                children:
+                  - type: TextBox
+                    name: test.value
+                    format: number
+                    enable: (enableOneSampleTest)
+                    events:
+                      change: ./jjhistostats.events::onChange_test_value
               - type: TextBox
                 name: conf.level
                 format: number
@@ -78,19 +82,19 @@ children:
               - type: TextBox
                 name: title
                 format: string
-                width: large
+                width: largest
               - type: TextBox
                 name: subtitle
                 format: string
-                width: large
+                width: largest
               - type: TextBox
                 name: caption
                 format: string
-                width: large
+                width: largest
               - type: TextBox
                 name: xlab
                 format: string
-                width: large
+                width: largest
       - type: Label
         label: Results Display
         fitToGrid: true

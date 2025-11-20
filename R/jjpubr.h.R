@@ -102,9 +102,7 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "auto",
                     "t.test",
-                    "wilcox.test",
-                    "anova",
-                    "kruskal.test"),
+                    "wilcox.test"),
                 default="auto")
             private$..pairwiseComparisons <- jmvcore::OptionBool$new(
                 "pairwiseComparisons",
@@ -393,7 +391,8 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "xlab",
                     "ylab",
                     "legendPosition",
-                    "theme"),
+                    "theme",
+                    "clinicalPreset"),
                 refs=list(
                     "ggpubr",
                     "ggplot2")))
@@ -407,6 +406,10 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="comparison", 
                         `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="method", 
+                        `title`="Test Method", 
                         `type`="text"),
                     list(
                         `name`="statistic", 
@@ -584,8 +587,11 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param groupvar Grouping variable for coloring points/boxes
 #' @param facetvar Variable for faceting plots into panels
 #' @param addStats Whether to add statistical comparison p-values
-#' @param statMethod Method for statistical comparison
-#' @param pairwiseComparisons Whether to show all pairwise comparisons
+#' @param statMethod Method for pairwise statistical comparison. Only pairwise
+#'   tests are performed, not omnibus tests. For >2 groups, requires
+#'   pairwiseComparisons = TRUE. Bonferroni correction applied automatically.
+#' @param pairwiseComparisons Whether to show all pairwise comparisons.
+#'   Required for >2 groups to display any statistical tests.
 #' @param addCorr Whether to add correlation statistics
 #' @param corrMethod Correlation method
 #' @param addSmoothLine Whether to add smooth trend line

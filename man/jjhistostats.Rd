@@ -15,6 +15,7 @@ jjhistostats(
   resultssubtitle = FALSE,
   showInterpretation = FALSE,
   clinicalPreset = "custom",
+  enableOneSampleTest = FALSE,
   test.value = 0,
   conf.level = 0.95,
   bf.message = FALSE,
@@ -72,15 +73,25 @@ subtitle in the plot, including normality test results and descriptive
 statistics.}
 
 \item{showInterpretation}{Generate clinical interpretation of histogram
-results including distribution shape,  normality assessment, and practical
-implications for clinical data.}
+results including distribution shape, normality assessment, and practical
+implications for clinical data. Note: Uses simplified heuristics (skewness
+threshold and sample size) as initial screening guidance, not formal
+diagnostic criteria. Should be supplemented with formal normality tests and
+expert judgment.}
 
 \item{clinicalPreset}{Predefined configurations optimized for common
 clinical data types. Automatically sets appropriate statistical methods and
 visualization options.}
 
+\item{enableOneSampleTest}{Whether to enable and display one-sample
+hypothesis test against a specified test value. When disabled, only
+descriptive statistics and distribution visualization are shown.}
+
 \item{test.value}{Value to compare the sample against in one-sample test.
-Default is 0.}
+Only used when enableOneSampleTest is TRUE. Note: Testing against 0 is
+rarely clinically meaningful for most biomedical data. Consider using a
+clinically relevant threshold (e.g., reference range limit, treatment
+cutoff, or population norm) for meaningful hypothesis testing.}
 
 \item{conf.level}{Confidence level for confidence intervals (between 0 and
 1).}

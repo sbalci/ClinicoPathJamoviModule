@@ -296,7 +296,7 @@ survivalPowerClass <- R6::R6Class(
                 "<ul style='margin-bottom: 10px;'>",
                 "<li><strong>✅ WORKING:</strong> Log-rank test, Cox regression, Non-inferiority designs</li>",
                 "<li><strong>⛔ NOT AVAILABLE:</strong> Competing risks, RMST-based tests, SNP survival, Weighted log-rank</li>",
-                "<li><strong>⛔ DISTRIBUTION:</strong> Only exponential survival distribution supported</li>",
+                "&lt;li&gt;&lt;strong&gt;⛔ DISTRIBUTION:&lt;/strong&gt; Only exponential survival distribution supported (other distributions will be blocked)&lt;/li&gt;",
                 "<li><strong>⛔ ACCRUAL:</strong> Only uniform accrual pattern fully validated</li>",
                 "</ul>",
                 "<p style='margin-bottom: 0;'><strong>Important:</strong> This is a beta version with core features functional but incomplete. ",
@@ -696,13 +696,49 @@ survivalPowerClass <- R6::R6Class(
 
             tryCatch({
                 if (analysis_type == "sample_size") {
-                    # Calculate required sample size using gsDesign
-                    if (!requireNamespace("gsDesign", quietly = TRUE)) {
-                        # Fallback to basic calculation
-                        n_calc <- private$.basic_sample_size_calc(power, hr, alpha)
-                        return(paste("Total Sample Size:", ceiling(n_calc), "subjects (basic calculation)"))
+                    # Calculate required sample size using gsDesign if available
+                    if (requireNamespace("gsDesign", quietly = TRUE)) {
+                        tryCatch({
+                            # Map parameters to nSurv
+                            # alpha: one-sided alpha if not specified, but nSurv takes sidedness
+                            # beta: 1 - power
+                            # lambdaC: hazard rate for control
+                            # hr: hazard ratio
+                            # ratio: allocation ratio
+                            # R: accrual period
+                            # T: total study duration (accrual + follow-up)
+                            # minfup: follow-up period
+                            
+                            k <- self$options$interim_analyses + 1
+                            timing <- if (k > 1) seq(1, k) / k else 1
+                            sfu <- if (self$options$alpha_spending == "obrien_fleming") gsDesign::sfLDOF else gsDesign::sfLDPocock
+                            
+                            design <- gsDesign::nSurv(
+                                alpha = alpha,
+                                beta = 1 - power,
+                                lambdaC = lambda_control,
+                                hr = hr,
+                                ratio = allocation_ratio,
+                                R = accrual_period,
+                                T = accrual_period + follow_up,
+                                minfup = follow_up,
+                                sided = 2,
+                                k = k,
+                                timing = timing,
+                                sfu = sfu
+                            )
+                            
+                            n_total <- ceiling(design$n)
+                            events_needed <- ceiling(design$d)
+                            
+                            return(paste("Total Sample Size:", n_total, "subjects (", events_needed, "events needed) [Calculated via gsDesign]"))
+                        }, error = function(e) {
+                            # Fallback if gsDesign fails
+                            warning(paste("gsDesign calculation failed:", e$message, "- using standard log-rank formula"))
+                        })
                     }
 
+                    # Fallback / Standard calculation
                     events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
 
                     event_probs <- private$.overall_event_probability(
@@ -721,6 +757,40 @@ survivalPowerClass <- R6::R6Class(
                 } else if (analysis_type == "power") {
                     # Calculate power for Cox regression
                     n_total <- self$options$sample_size_input
+
+                    # Calculate power using gsDesign if available
+                    if (requireNamespace("gsDesign", quietly = TRUE)) {
+                        tryCatch({
+                            k <- self$options$interim_analyses + 1
+                            timing <- if (k > 1) seq(1, k) / k else 1
+                            sfu <- if (self$options$alpha_spending == "obrien_fleming") gsDesign::sfLDOF else gsDesign::sfLDPocock
+                            
+                            design <- gsDesign::nSurv(
+                                alpha = alpha,
+                                beta = NULL, # Calculate power
+                                lambdaC = lambda_control,
+                                hr = hr,
+                                ratio = allocation_ratio,
+                                R = accrual_period,
+                                T = accrual_period + follow_up,
+                                minfup = follow_up,
+                                sided = 2,
+                                k = k,
+                                timing = timing,
+                                sfu = sfu,
+                                n = n_total
+                            )
+                            
+                            power_calc <- design$power
+                            expected_events <- design$d
+                            
+                            return(paste("Statistical Power:", round(power_calc * 100, 1), "% (", ceiling(expected_events), "events expected) [Calculated via gsDesign]"))
+                        }, error = function(e) {
+                            warning(paste("gsDesign power calculation failed:", e$message, "- using standard log-rank formula"))
+                        })
+                    }
+
+                    # Fallback / Standard calculation
 
                     expected_events <- private$.expected_events_from_sample(
                         n_total = n_total,

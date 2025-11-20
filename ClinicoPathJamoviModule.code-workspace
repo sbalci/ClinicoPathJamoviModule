@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "../pathologyAnonymData"
+		},
+		{
+			"path": "../ParaPathology"
 		}
 	],
 	"settings": {}

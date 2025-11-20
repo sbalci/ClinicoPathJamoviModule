@@ -619,9 +619,10 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param cov_var Optional variable for remapping point colors based on
 #'   covariate values.
 #' @param rain_side Position of the raincloud relative to the data points.
-#'   Options include left (l), right (r), flanking both sides (f), 1x1 flanking
-#'   for paired comparisons (f1x1), and 2x2 flanking for grouped comparisons
-#'   (f2x2).
+#'   'Left' (l): Density on left, points on right. 'Right' (r): Density on
+#'   right, points on left. 'Flanking' (f): Density on both sides. 'Flanking
+#'   1x1' (f1x1): Paired flanking for 1x1 comparisons. 'Flanking 2x2' (f2x2):
+#'   Grouped flanking for 2x2 comparisons.
 #' @param likert_mode If TRUE, adds Y-axis jittering for Likert scale or
 #'   ordinal data.
 #' @param show_longitudinal If TRUE, connects repeated observations using the

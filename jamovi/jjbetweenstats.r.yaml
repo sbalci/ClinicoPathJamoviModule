@@ -18,6 +18,7 @@ clearWith:
     - k
     - conflevel
     - varequal
+    - multiEndpointCorrection
     - mytitle
     - xtitle
     - ytitle
@@ -26,6 +27,7 @@ clearWith:
     - plotwidth
     - plotheight
     - colorblindSafe
+    - showexplanations
 
 
 
@@ -34,6 +36,31 @@ items:
     - name:  todo
       title: To Do
       type:  Html
+
+    - name: about
+      title: About This Analysis
+      type: Html
+      visible: (showexplanations)
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showexplanations)
+
+    - name: assumptions
+      title: Statistical Assumptions
+      type: Html
+      visible: (showexplanations)
+
+    - name: interpretation
+      title: Interpretation Guide
+      type: Html
+      visible: (showexplanations)
+
+    - name: report
+      title: Copy-Ready Report Template
+      type: Html
+      visible: (showexplanations)
 
     - name: plot2
       title: '`Violin Plot by ${grvar}`'

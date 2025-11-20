@@ -85,6 +85,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     centralityline = self$options$centralityline,
                     centralitytype = self$options$centralitytype,
                     resultssubtitle = self$options$resultssubtitle,
+                    enableOneSampleTest = self$options$enableOneSampleTest,
                     test.value = self$options$test.value,
                     conf.level = self$options$conf.level,
                     bf.message = self$options$bf.message,
@@ -194,7 +195,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL, messages = TRUE) {
                 # Checkpoint before expensive statistical plot generation
                 private$.checkpoint(flush = FALSE)
-                
+
                 # Build base arguments common to all plots
                 base_args <- list(
                     data = data,
@@ -204,7 +205,6 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     results.subtitle = options_data$resultssubtitle,
                     centrality.plotting = options_data$centralityline,
                     binwidth = options_data$binwidth,
-                    test.value = options_data$test.value,
                     conf.level = options_data$conf.level,
                     bf.message = options_data$bf.message,
                     digits = options_data$digits,
@@ -215,23 +215,28 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     bin.args = aesthetics_data$bin.args,
                     centrality.line.args = aesthetics_data$centrality.line.args
                 )
-                
+
+                # Conditionally add test.value only if one-sample test is enabled
+                if (options_data$enableOneSampleTest) {
+                    base_args$test.value <- options_data$test.value
+                }
+
                 # Add grouping variable if provided
                 if (!is.null(grvar_sym)) {
                     base_args$grouping.var <- grvar_sym
                 }
-                
+
                 # Add centrality.type if specified
                 if (!is.null(options_data$centrality.type)) {
                     base_args$centrality.type <- options_data$centrality.type
                 }
-                
+
                 # Remove NULL arguments to prevent conflicts
                 base_args <- base_args[!sapply(base_args, is.null)]
-                
+
                 # Checkpoint before calling expensive ggstatsplot functions
                 private$.checkpoint(flush = FALSE)
-                
+
                 # Call appropriate function based on grouping
                 if (is.null(grvar_sym)) {
                     do.call(ggstatsplot::gghistostats, base_args)
@@ -275,9 +280,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .generateClinicalWarnings = function(data, variables) {
                 warnings <- c()
 
-                # WARN ABOUT DEFAULT TEST VALUE = 0
+                # WARN ABOUT TEST VALUE = 0 WHEN ONE-SAMPLE TEST IS ENABLED
                 # Testing "is mean = 0?" is almost never clinically relevant
-                if (!is.null(self$options$test.value) && self$options$test.value == 0) {
+                if (self$options$enableOneSampleTest &&
+                    !is.null(self$options$test.value) &&
+                    self$options$test.value == 0) {
                     # Check if any variable has all positive or all negative values
                     has_irrelevant_test <- FALSE
                     for (var in variables) {
@@ -293,9 +300,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     if (has_irrelevant_test) {
                         warnings <- c(warnings, paste0(
-                            "⚠️ <strong>TEST VALUE WARNING:</strong> Testing 'is the mean equal to 0?' is rarely clinically meaningful. ",
-                            "Consider setting a clinically relevant test value (e.g., normal reference range limit, ",
-                            "treatment threshold, or population mean) in the 'Test Value' option."
+                            "🚨 <strong>CRITICAL: TEST VALUE = 0 WARNING</strong> 🚨<br>",
+                            "Testing 'is the mean equal to 0?' is <strong>rarely clinically meaningful</strong> for biomedical data. ",
+                            "Your data contains only positive or only negative values, making a test against 0 inappropriate.<br>",
+                            "<strong>RECOMMENDED ACTION:</strong> Change the 'Test Value' to a clinically relevant threshold:<br>",
+                            "• Normal reference range limit (e.g., upper limit for cholesterol)<br>",
+                            "• Treatment decision threshold (e.g., cutoff for intervention)<br>",
+                            "• Population norm or expected value (e.g., established biomarker level)<br>",
+                            "• Or <strong>uncheck 'Enable One-Sample Test'</strong> if you only need descriptive statistics."
                         ))
                     }
                 }
@@ -465,6 +477,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     full_interpretation <- paste0(
                         "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0;'>",
                         "<h3>Clinical Interpretation</h3>",
+                        "<div style='background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0;'>",
+                        "<strong>⚠️ Note:</strong> This interpretation uses simplified heuristics (skewness &lt; 0.5 and n ≥ 30) ",
+                        "as initial screening guidance. These are <strong>rule-of-thumb approximations</strong>, not formal ",
+                        "diagnostic criteria. Always supplement with formal normality tests (Shapiro-Wilk, Anderson-Darling) ",
+                        "and expert clinical judgment before making analysis decisions.",
+                        "</div>",
                         paste(interpretation_parts, collapse = ""),
                         "<hr>",
                         "<h4>Recommendations:</h4>",
@@ -473,6 +491,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         "<li>Consider outliers and their clinical significance</li>",
                         "<li>For biomarker data, evaluate reference ranges and clinical cutoffs</li>",
                         "<li>Use grouped analysis to compare distributions between clinical subgroups</li>",
+                        "<li><strong>Verify normality assumptions</strong> with formal statistical tests before using parametric methods</li>",
                         "</ul>",
                         "</div>"
                     )
@@ -553,6 +572,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     binwidth = binwidth,
                     resultssubtitle = self$options$resultssubtitle,
                     centralityline = self$options$centralityline,
+                    enableOneSampleTest = self$options$enableOneSampleTest,
                     test.value = self$options$test.value,
                     conf.level = self$options$conf.level,
                     bf.message = self$options$bf.message,

@@ -523,11 +523,11 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             use_fallback <- FALSE
             
             # Known problematic combinations that cause ggrain NA issues
-            if (n_groups > 7 || 
-                (!is.null(fill_var) && fill_var != "" && length(unique(analysis_data[[fill_var]])) > 3) ||
-                any(table(analysis_data[[x_var]]) < 3)) {  # Groups with very few observations
+            # Relaxed constraints based on testing - ggrain is more robust than initially thought
+            if (n_groups > 15 || 
+                (!is.null(fill_var) && fill_var != "" && length(unique(analysis_data[[fill_var]])) > 5)) {
                 use_fallback <- TRUE
-                warning(.("Using standard geom fallback due to data structure that may cause ggrain issues."))
+                warning(.("Using standard geom fallback due to high data complexity."))
             }
             
             # Try ggrain first, with immediate fallback on any error
@@ -882,6 +882,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 y = y_label
             )
             
+            # Store plot object for testing and further modification
+            image$setState(p)
+            
             print(p)
             TRUE
         },
@@ -1013,8 +1016,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 # Multiple groups - use Kruskal-Wallis
                 formula_str <- paste(y_var, "~", group_var)
                 kw_result <- kruskal.test(as.formula(formula_str), data = data)
-                
-                test_name <- "Kruskal-Wallis test"
+
+                test_name <- "Kruskal-Wallis test (omnibus only)"
                 test_stat <- round(kw_result$statistic, 4)
                 raw_p <- kw_result$p.value
                 p_value <- round(raw_p, 4)
@@ -1023,10 +1026,23 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
             
             # Format results
-            significance <- if (p_value < 0.001) "Highly significant (***)" else 
+            significance <- if (p_value < 0.001) "Highly significant (***)" else
                           if (p_value < 0.01) "Very significant (**)" else
                           if (p_value < 0.05) "Significant (*)" else "Not significant"
-            
+
+            # Add warning for Kruskal-Wallis about missing post-hoc tests
+            post_hoc_warning <- ""
+            if (n_groups > 2) {
+                post_hoc_warning <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin-top: 10px;'>",
+                    "<p style='margin: 0;'><strong>⚠️ IMPORTANT:</strong> This is an <strong>omnibus test only</strong>. ",
+                    "A significant result indicates <em>at least one</em> group differs, but does NOT identify which specific groups differ. ",
+                    "For pairwise comparisons, use post-hoc tests with multiplicity adjustment (e.g., Dunn's test with Holm or Bonferroni correction) ",
+                    "in dedicated statistical software.</p>",
+                    "</div>"
+                )
+            }
+
             comparison_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
                 "<h3 style='color: #7b1fa2; margin-top: 0;'>📊 Group Comparison Results</h3>",
@@ -1036,6 +1052,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>P-value:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", p_value, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Result:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", significance, "</td></tr>",
                 "</table>",
+                post_hoc_warning,
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
                 "<em>* p < 0.05, ** p < 0.01, *** p < 0.001. Non-parametric tests used for robustness.</em>",
                 "</p></div>"
@@ -1195,23 +1212,42 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     effect_result <- private$.calculate_effect_size(
                         group1_data, group2_data, effect_type
                     )
-                    
-                    # Interpret effect size
-                    interpretation <- private$.interpret_effect_size(abs(effect_result$effect_size))
-                    
-                    html <- paste0(html,
-                        "<tr>",
-                        "<td style='padding: 8px; border: 1px solid #ddd;'>", 
-                        groups[i], " vs ", groups[j], "</td>",
-                        "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", 
-                        round(effect_result$effect_size, 3), "</td>",
-                        "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", 
-                        "[", round(effect_result$ci_lower, 3), ", ", 
-                        round(effect_result$ci_upper, 3), "]</td>",
-                        "<td style='padding: 8px; border: 1px solid #ddd;'>", 
-                        interpretation, "</td>",
-                        "</tr>"
-                    )
+
+                    # Handle errors in effect size calculation
+                    if (is.na(effect_result$effect_size)) {
+                        error_msg <- if (!is.null(effect_result$error)) effect_result$error else "Unable to calculate"
+                        html <- paste0(html,
+                            "<tr style='background-color: #fff3cd;'>",
+                            "<td style='padding: 8px; border: 1px solid #ddd;'>",
+                            groups[i], " vs ", groups[j], "</td>",
+                            "<td colspan='3' style='padding: 8px; border: 1px solid #ddd; text-align: center;'>",
+                            "⚠️ ", error_msg, "</td>",
+                            "</tr>"
+                        )
+                    } else {
+                        # Interpret effect size
+                        interpretation <- private$.interpret_effect_size(abs(effect_result$effect_size))
+
+                        # Format CI values safely
+                        ci_text <- if (is.na(effect_result$ci_lower) || is.na(effect_result$ci_upper)) {
+                            "N/A"
+                        } else {
+                            paste0("[", round(effect_result$ci_lower, 3), ", ", round(effect_result$ci_upper, 3), "]")
+                        }
+
+                        html <- paste0(html,
+                            "<tr>",
+                            "<td style='padding: 8px; border: 1px solid #ddd;'>",
+                            groups[i], " vs ", groups[j], "</td>",
+                            "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>",
+                            round(effect_result$effect_size, 3), "</td>",
+                            "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>",
+                            ci_text, "</td>",
+                            "<td style='padding: 8px; border: 1px solid #ddd;'>",
+                            interpretation, "</td>",
+                            "</tr>"
+                        )
+                    }
                 }
             }
             
@@ -1226,29 +1262,83 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             mean2 <- mean(group2, na.rm = TRUE)
             sd1 <- sd(group1, na.rm = TRUE)
             sd2 <- sd(group2, na.rm = TRUE)
-            
+
+            # Initialize effect_size and se
+            effect_size <- NA
+            se <- NA
+
             if (type == "cohens_d") {
-                # Pooled standard deviation
+                # Pooled standard deviation with zero guard
                 pooled_sd <- sqrt(((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))
+
+                if (pooled_sd == 0 || is.na(pooled_sd) || is.infinite(pooled_sd)) {
+                    # Return NA if pooled SD is invalid
+                    return(list(
+                        effect_size = NA,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        error = "Zero or invalid pooled standard deviation - groups may have no variation"
+                    ))
+                }
+
                 effect_size <- (mean1 - mean2) / pooled_sd
+                # Standard error for Cohen's d
+                se <- sqrt((n1 + n2) / (n1 * n2) + effect_size^2 / (2 * (n1 + n2)))
+
             } else if (type == "hedges_g") {
                 # Hedges' g includes small sample correction
                 pooled_sd <- sqrt(((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))
+
+                if (pooled_sd == 0 || is.na(pooled_sd) || is.infinite(pooled_sd)) {
+                    return(list(
+                        effect_size = NA,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        error = "Zero or invalid pooled standard deviation - groups may have no variation"
+                    ))
+                }
+
                 d <- (mean1 - mean2) / pooled_sd
                 # Small sample correction factor
                 J <- 1 - (3 / (4 * (n1 + n2 - 2) - 1))
                 effect_size <- d * J
+                # Standard error for Hedges' g (same as Cohen's d)
+                se <- sqrt((n1 + n2) / (n1 * n2) + effect_size^2 / (2 * (n1 + n2)))
+
             } else if (type == "glass_delta") {
-                # Glass's delta uses control group SD
+                # Glass's delta uses ONLY control group (group2) SD
+
+                if (sd2 == 0 || is.na(sd2) || is.infinite(sd2)) {
+                    return(list(
+                        effect_size = NA,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        error = "Zero or invalid control group standard deviation - control group may have no variation"
+                    ))
+                }
+
                 effect_size <- (mean1 - mean2) / sd2
+                # CORRECTED: Glass's delta uses different variance formula
+                # SE for Glass's delta: sqrt(n1/(n1*n2) + delta^2/(2*n2))
+                # Only uses control group (n2) for the second term
+                se <- sqrt(n1 / (n1 * n2) + effect_size^2 / (2 * n2))
             }
-            
+
             # Calculate confidence intervals using constants
             z_value <- qnorm(1 - (1 - private$.constants$CONFIDENCE_LEVEL) / 2)  # 1.96 for 95% CI
-            se <- sqrt((n1 + n2) / (n1 * n2) + effect_size^2 / (2 * (n1 + n2)))
+
+            if (is.na(se) || is.infinite(se)) {
+                return(list(
+                    effect_size = effect_size,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    error = "Invalid standard error calculation"
+                ))
+            }
+
             ci_lower <- effect_size - z_value * se
             ci_upper <- effect_size + z_value * se
-            
+
             return(list(
                 effect_size = effect_size,
                 ci_lower = ci_lower,

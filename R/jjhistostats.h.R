@@ -15,6 +15,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             resultssubtitle = FALSE,
             showInterpretation = FALSE,
             clinicalPreset = "custom",
+            enableOneSampleTest = FALSE,
             test.value = 0,
             conf.level = 0.95,
             bf.message = FALSE,
@@ -101,6 +102,10 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "patient_chars",
                     "pathology_scores"),
                 default="custom")
+            private$..enableOneSampleTest <- jmvcore::OptionBool$new(
+                "enableOneSampleTest",
+                enableOneSampleTest,
+                default=FALSE)
             private$..test.value <- jmvcore::OptionNumber$new(
                 "test.value",
                 test.value,
@@ -236,6 +241,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..resultssubtitle)
             self$.addOption(private$..showInterpretation)
             self$.addOption(private$..clinicalPreset)
+            self$.addOption(private$..enableOneSampleTest)
             self$.addOption(private$..test.value)
             self$.addOption(private$..conf.level)
             self$.addOption(private$..bf.message)
@@ -272,6 +278,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         resultssubtitle = function() private$..resultssubtitle$value,
         showInterpretation = function() private$..showInterpretation$value,
         clinicalPreset = function() private$..clinicalPreset$value,
+        enableOneSampleTest = function() private$..enableOneSampleTest$value,
         test.value = function() private$..test.value$value,
         conf.level = function() private$..conf.level$value,
         bf.message = function() private$..bf.message$value,
@@ -307,6 +314,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..resultssubtitle = NA,
         ..showInterpretation = NA,
         ..clinicalPreset = NA,
+        ..enableOneSampleTest = NA,
         ..test.value = NA,
         ..conf.level = NA,
         ..bf.message = NA,
@@ -550,13 +558,22 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   subtitle in the plot, including normality test results and descriptive
 #'   statistics.
 #' @param showInterpretation Generate clinical interpretation of histogram
-#'   results including distribution shape,  normality assessment, and practical
-#'   implications for clinical data.
+#'   results including distribution shape, normality assessment, and practical
+#'   implications for clinical data. Note: Uses simplified heuristics (skewness
+#'   threshold and sample size) as initial screening guidance, not formal
+#'   diagnostic criteria. Should be supplemented with formal normality tests and
+#'   expert judgment.
 #' @param clinicalPreset Predefined configurations optimized for common
 #'   clinical data types. Automatically sets appropriate statistical methods and
 #'   visualization options.
+#' @param enableOneSampleTest Whether to enable and display one-sample
+#'   hypothesis test against a specified test value. When disabled, only
+#'   descriptive statistics and distribution visualization are shown.
 #' @param test.value Value to compare the sample against in one-sample test.
-#'   Default is 0.
+#'   Only used when enableOneSampleTest is TRUE. Note: Testing against 0 is
+#'   rarely clinically meaningful for most biomedical data. Consider using a
+#'   clinically relevant threshold (e.g., reference range limit, treatment
+#'   cutoff, or population norm) for meaningful hypothesis testing.
 #' @param conf.level Confidence level for confidence intervals (between 0 and
 #'   1).
 #' @param bf.message Whether to display Bayes Factor in the subtitle when
@@ -615,6 +632,7 @@ jjhistostats <- function(
     resultssubtitle = FALSE,
     showInterpretation = FALSE,
     clinicalPreset = "custom",
+    enableOneSampleTest = FALSE,
     test.value = 0,
     conf.level = 0.95,
     bf.message = FALSE,
@@ -664,6 +682,7 @@ jjhistostats <- function(
         resultssubtitle = resultssubtitle,
         showInterpretation = showInterpretation,
         clinicalPreset = clinicalPreset,
+        enableOneSampleTest = enableOneSampleTest,
         test.value = test.value,
         conf.level = conf.level,
         bf.message = bf.message,

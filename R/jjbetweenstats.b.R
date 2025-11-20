@@ -221,33 +221,101 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Statistical assumption checker
         .checkAssumptions = function(data, variables, group_var, test_type) {
             warnings <- c()
-            
+
+            # CHECK FOR MULTIPLE ENDPOINT TESTING
+            num_endpoints <- length(variables)
+            if (num_endpoints > 1 && self$options$multiEndpointCorrection == "none") {
+                actual_alpha <- 1 - (1 - 0.05)^num_endpoints
+                warnings <- c(warnings, sprintf(
+                    .("🔴 <strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT CORRECTION</strong><br>You are testing %d dependent variables simultaneously without adjustment. This inflates your family-wise error rate from 5%% to approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a correction method below to see guidance, or interpret all p-values cautiously acknowledging this inflated error rate."),
+                    num_endpoints, actual_alpha * 100
+                ))
+            } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "bonferroni") {
+                adjusted_alpha <- 0.05 / num_endpoints
+                warnings <- c(warnings, sprintf(
+                    .("📊 <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = %.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT 0.05)<br>• Only results with p < %.4f should be considered statistically significant<br>• Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br>⚠️ <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
+                    num_endpoints, adjusted_alpha, adjusted_alpha, adjusted_alpha, adjusted_alpha
+                ))
+            } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "holm") {
+                warnings <- c(warnings, sprintf(
+                    .("📊 <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br>⚠️ <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
+                    num_endpoints, num_endpoints, 0.05/num_endpoints,
+                    num_endpoints - 1, 0.05/(num_endpoints - 1)
+                ))
+            } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "fdr") {
+                warnings <- c(warnings, sprintf(
+                    .("📊 <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ ≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br>⚠️ <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
+                    num_endpoints, num_endpoints, num_endpoints
+                ))
+            }
+
             for (var in variables) {
                 var_data <- data[[var]]
                 group_data <- data[[group_var]]
-                
+
                 # Check sample sizes
                 group_counts <- table(group_data, useNA = "no")
                 min_group_size <- min(group_counts)
-                
+
                 if (min_group_size < 3) {
                     warnings <- c(warnings, sprintf(.("⚠️ {var}: Minimum group size is {size} (recommend ≥3)"), var = var, size = min_group_size))
                 }
-                
+
                 if (test_type == "parametric" && min_group_size >= 3) {
-                    # Basic normality check using Shapiro-Wilk for small samples
+                    # HOMOGENEITY OF VARIANCE TEST (Levene's test)
+                    tryCatch({
+                        # Use car::leveneTest for homogeneity of variance
+                        if (requireNamespace("car", quietly = TRUE)) {
+                            levene_result <- car::leveneTest(var_data ~ group_data, center = median)
+                            levene_p <- levene_result$`Pr(>F)`[1]
+
+                            if (levene_p < 0.05 && !self$options$varequal) {
+                                warnings <- c(warnings, sprintf(
+                                    .("⚠️ {var}: Variances differ significantly between groups (Levene's test p = %.3f). Consider enabling 'Equal Variances = FALSE' or using non-parametric test."),
+                                    var, levene_p
+                                ))
+                            }
+                        }
+                    }, error = function(e) {
+                        # Silently continue if car package not available or test fails
+                    })
+
+                    # Basic normality check using Shapiro-Wilk for small-medium samples
                     for (level in names(group_counts)) {
                         group_subset <- var_data[group_data == level & !is.na(var_data)]
-                        if (length(group_subset) >= 3 && length(group_subset) <= 5000) {
+                        n_subset <- length(group_subset)
+
+                        if (n_subset >= 3 && n_subset <= 200) {
+                            # Use Shapiro-Wilk for small-medium samples (n ≤ 200)
                             p_val <- tryCatch(shapiro.test(group_subset)$p.value, error = function(e) 1)
                             if (p_val < 0.05) {
-                                warnings <- c(warnings, sprintf(.("⚠️ {var}: Data may not be normally distributed in group '{level}' (consider non-parametric)"), var = var, level = level))
+                                warnings <- c(warnings, sprintf(
+                                    .("⚠️ {var}: Data may not be normally distributed in group '{level}' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
+                                    var, level, p_val
+                                ))
+                            }
+                        } else if (n_subset > 200) {
+                            # For large samples (n > 200), Shapiro-Wilk is too sensitive
+                            # Instead, check skewness and kurtosis
+                            skewness <- tryCatch({
+                                mean_val <- mean(group_subset)
+                                sd_val <- sd(group_subset)
+                                if (sd_val > 0) {
+                                    sum((group_subset - mean_val)^3) / (n_subset * sd_val^3)
+                                } else 0
+                            }, error = function(e) 0)
+
+                            if (abs(skewness) > 1) {
+                                warnings <- c(warnings, sprintf(
+                                    .("⚠️ {var}: Large sample (n = %d) in group '{level}' shows substantial skewness (%.2f). Visual inspection recommended."),
+                                    var, n_subset, level, skewness
+                                ))
                             }
                         }
                     }
                 }
             }
-            
+
             return(warnings)
         },
 
@@ -371,6 +439,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 k = self$options$k,
                 conflevel = self$options$conflevel,
                 varequal = self$options$varequal,
+                multiEndpointCorrection = self$options$multiEndpointCorrection,
                 titles = list(self$options$mytitle, self$options$xtitle, self$options$ytitle),
                 display = list(self$options$resultssubtitle, self$options$originaltheme),
                 dimensions = list(self$options$plotwidth, self$options$plotheight),
@@ -561,11 +630,26 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     mydata <- private$.prepareData()
     warnings <- private$.checkAssumptions(mydata, self$options$dep, self$options$group, self$options$typestatistics)
-    
+
+    # Add note about multiple endpoints if applicable
+    multi_endpoint_note <- ""
+    if (length(self$options$dep) > 1) {
+        multi_endpoint_note <- paste0(
+            "<div style='background-color: #ffe5e5; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0;'>",
+            "<p><strong>⚠️ Multiple Endpoint Testing:</strong> You are analyzing ",
+            length(self$options$dep), " dependent variables. Each test uses the standard α = 0.05 threshold. ",
+            "The 'Multiple Endpoint Correction Guidance' option above provides instructions for manual p-value adjustment. ",
+            "<strong>Important:</strong> Corrections are NOT applied automatically by this analysis.</p>",
+            "</div>"
+        )
+    }
+
     assumptions_content <- paste0(
         "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;'>",
         "<h4 style='color: #856404; margin-top: 0;'>⚠️ Statistical Assumptions & Warnings</h4>",
-        
+
+        multi_endpoint_note,
+
         "<p><strong>General Assumptions:</strong></p>",
         "<ul>",
         "<li>Dependent variable is continuous.</li>",
@@ -574,15 +658,15 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (self$options$typestatistics == "parametric") "<li>Residuals are normally distributed.</li>",
         if (self$options$typestatistics == "parametric" && self$options$varequal) "<li>Homogeneity of variances (equal variances).</li>",
         "</ul>",
-        
+
         if (length(warnings) > 0) paste0(
-            "<p><strong>Detected Issues:</strong></p>",
+            "<p><strong>Detected Issues & Guidance:</strong></p>",
             "<ul><li>", paste(warnings, collapse = "</li><li>"), "</li></ul>"
         ) else "<p>No major issues detected with statistical assumptions.</p>",
-        
+
         "</div>"
     )
-    
+
     self$results$assumptions$setContent(assumptions_content)
 },
 .generateInterpretationGuide = function() {
@@ -812,8 +896,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Print Plot ----
-            print(plot)
-            TRUE
+                # Store plot object for testing
+                image$setState(plot)
+                
+                print(plot)
+                TRUE
         },
         .plot2 = function(image, ggtheme, theme, ...) {
             # Use shared validation helper with additional grouping check ----

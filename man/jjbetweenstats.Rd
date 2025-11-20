@@ -16,7 +16,7 @@ jjbetweenstats(
   pairwisedisplay = "significant",
   padjustmethod = "holm",
   effsizetype = "biased",
-  mytitle = "Within Group Comparison",
+  mytitle = "Between Group Comparison",
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
@@ -25,9 +25,11 @@ jjbetweenstats(
   k = 2,
   conflevel = 0.95,
   varequal = FALSE,
+  multiEndpointCorrection = "none",
   plotwidth = 650,
   plotheight = 450,
   colorblindSafe = FALSE,
+  showexplanations = FALSE,
   addGGPubrPlot = FALSE,
   ggpubrPlotType = "boxplot",
   ggpubrPalette = "jco",
@@ -79,12 +81,25 @@ subtitle.}
 \item{varequal}{Whether to assume equal variances across groups for
 parametric tests.}
 
+\item{multiEndpointCorrection}{Display guidance for multiple testing
+correction when analyzing multiple dependent variables. IMPORTANT: This
+option does NOT automatically adjust p-values. It provides instructions for
+manual correction. When testing multiple endpoints (e.g., cholesterol,
+glucose, triglycerides), the family-wise error rate increases. For example,
+testing 3 variables at alpha=0.05 gives actual error rate of ~14\\%. Select
+a correction method to see step-by-step instructions for manually applying
+that correction to the p-values shown in the plots.}
+
 \item{plotwidth}{Width of the plot in pixels. Default is 650.}
 
 \item{plotheight}{Height of the plot in pixels. Default is 450.}
 
 \item{colorblindSafe}{Whether to use colorblind-safe color palette for plot
 elements.}
+
+\item{showexplanations}{Display additional explanatory content including
+about section, summary, assumptions, interpretation guide, and copy-ready
+report template.}
 
 \item{addGGPubrPlot}{Add publication-ready plot using ggpubr package. This
 provides an alternative visualization with publication-quality aesthetics.}
@@ -102,6 +117,11 @@ enabled.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$report} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr

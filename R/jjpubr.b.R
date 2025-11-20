@@ -8,6 +8,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjpubrClass",
     inherit = jjpubrBase,
     private = list(
+        ..stats_df = NULL,
 
         # === Initialization ===
         .init = function() {
@@ -39,6 +40,12 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generatePlotInfo()
             private$.populateDescriptives()
             private$.populateCorrelation()
+
+            # Check assumptions before calculating statistics
+            private$.checkAssumptions()
+
+            # Calculate statistics once for both plot and table
+            private$.calculateStatistics()
             private$.populateStatistics()
         },
 
@@ -128,10 +135,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$groupvar)) {
                     group_data <- self$data[[self$options$groupvar]]
                     if (!is.factor(group_data) && !is.character(group_data)) {
-                        warning(paste0(
-                            "Grouping variable '", self$options$groupvar, "' is numeric. ",
-                            "Converting to factor for visualization. Ensure this is appropriate."
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'numericGroupingVariable',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(paste0(
+                            "Grouping variable '", self$options$groupvar, "' is numeric and will be converted to factor for visualization. ",
+                            "Ensure this is appropriate (e.g., not a continuous measurement)."
                         ))
+                        self$results$insert(100, notice)
                     }
                 }
 
@@ -268,6 +281,23 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (self$options$addCorr) {
                 p <- p + ggpubr::stat_cor(method = self$options$corrMethod)
+            }
+
+            # Add marginal density/histogram plots if requested
+            if (self$options$addMarginal) {
+                if (requireNamespace("ggExtra", quietly = TRUE)) {
+                    p <- ggExtra::ggMarginal(p, type = "density", fill = "lightgray", alpha = 0.5)
+                } else {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ggExtraNotAvailable',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(
+                        "Marginal plots require the 'ggExtra' package. Install with: install.packages('ggExtra')"
+                    )
+                    self$results$insert(100, notice)
+                }
             }
 
             return(p)
@@ -419,12 +449,24 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .addStatisticalComparisons = function(p) {
             method <- if (self$options$statMethod == "auto") NULL else self$options$statMethod
 
+            # Global test (ANOVA/Kruskal) if requested or default
+            # We can keep the global test using stat_compare_means if desired, 
+            # but for pairwise, we use the manual data.
+            
             if (self$options$pairwiseComparisons) {
-                comps <- private$.getPairwiseComparisons()
-                p + ggpubr::stat_compare_means(method = method, label = "p.signif", comparisons = comps)
+                if (!is.null(private$..stats_df) && nrow(private$..stats_df) > 0) {
+                    # Use the pre-calculated adjusted p-values
+                    p <- p + ggpubr::stat_pvalue_manual(
+                        private$..stats_df, 
+                        label = "p.adj.signif",
+                        tip.length = 0.01
+                    )
+                }
             } else {
-                p + ggpubr::stat_compare_means(method = method)
+                # Default behavior for global test or simple 2-group comparison without explicit pairwise
+                p <- p + ggpubr::stat_compare_means(method = method)
             }
+            return(p)
         },
 
         .getPairwiseComparisons = function() {
@@ -466,6 +508,89 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  median = median(x), min = min(x), max = max(x))
         },
 
+        .checkAssumptions = function() {
+            if (!self$options$addStats) return()
+            if (!(self$options$plotType %in% c("boxplot", "violin"))) return()
+
+            x_col <- self$options$xvar
+            y_col <- self$options$yvar
+            complete_data <- self$data[complete.cases(self$data[[x_col]], self$data[[y_col]]), ]
+            groups <- unique(complete_data[[x_col]])
+            groups <- groups[!is.na(groups)]
+
+            # Only check if using t-test
+            method <- self$options$statMethod
+            if (method == "auto") method <- if (length(groups) == 2) "t.test" else "t.test"
+            if (!(method %in% c("t.test", "auto"))) return()  # Skip for Wilcoxon
+
+            # Check normality for each group
+            for (g in groups) {
+                subset_data <- complete_data[[y_col]][complete_data[[x_col]] == g]
+                n <- length(subset_data)
+
+                if (n >= 3 && n <= 200) {
+                    # Shapiro-Wilk for small-medium samples
+                    sw_test <- tryCatch({
+                        shapiro.test(subset_data)
+                    }, error = function(e) NULL)
+
+                    if (!is.null(sw_test) && sw_test$p.value < 0.05) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('normalityViolation_', make.names(as.character(g))),
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(paste0(
+                            "Normality assumption violated for group '", g, "' (Shapiro-Wilk p = ",
+                            round(sw_test$p.value, 3), "). t-test results may be unreliable. ",
+                            "Consider using 'Pairwise Wilcoxon tests' for non-normal data."
+                        ))
+                        self$results$insert(1, notice)
+                    }
+                } else if (n > 200) {
+                    # Skewness check for large samples
+                    skew <- (mean(subset_data) - median(subset_data)) / sd(subset_data)
+                    if (abs(skew) > 1) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('skewnessWarning_', make.names(as.character(g))),
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(paste0(
+                            "Data for group '", g, "' appears skewed (skewness coefficient = ",
+                            round(skew, 2), "). Consider using 'Pairwise Wilcoxon tests'."
+                        ))
+                        self$results$insert(100, notice)
+                    }
+                }
+            }
+
+            # Check variance homogeneity (Levene's test)
+            if (length(groups) >= 2 && requireNamespace("car", quietly = TRUE)) {
+                formula_str <- paste(y_col, "~", x_col)
+                formula_obj <- as.formula(formula_str)
+
+                levene_result <- tryCatch({
+                    car::leveneTest(formula_obj, data = complete_data, center = median)
+                }, error = function(e) NULL)
+
+                if (!is.null(levene_result) && levene_result$`Pr(>F)`[1] < 0.05) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'varianceHeterogeneity',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(paste0(
+                        "Unequal variances detected across groups (Levene's test p = ",
+                        round(levene_result$`Pr(>F)`[1], 3), "). ",
+                        "Standard t-test assumes equal variances; results may be less reliable. ",
+                        "Consider Welch correction or non-parametric alternatives."
+                    ))
+                    self$results$insert(100, notice)
+                }
+            }
+        },
+
         .populateCorrelation = function() {
             if (self$options$plotType != "scatter" || !self$options$addCorr) return()
 
@@ -496,12 +621,17 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_complete <- sum(complete_idx)
 
                 if (n_total > n_complete) {
-                    warning(paste0(
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'correlationMissingData',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(paste0(
                         "Correlation: ", n_total - n_complete, " observations (",
                         round(100 * (n_total - n_complete) / n_total, 1),
-                        "%) excluded due to missing values. ",
-                        "Correlation is based on n=", n_complete, " complete pairs."
+                        "%) excluded due to missing values. Correlation is based on n=", n_complete, " complete pairs."
                     ))
+                    self$results$insert(100, notice)
                 }
 
                 if (n_complete < 3) {
@@ -522,11 +652,17 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Check if faceting is used (correlation may not match plot)
                 if (!is.null(self$options$facetvar)) {
-                    warning(paste0(
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'correlationWithFaceting',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(paste0(
                         "Note: Correlation is computed on the entire dataset (n=", n_complete, "). ",
                         "When using faceting, correlations may differ within each facet. ",
                         "Consider running separate analyses for each facet level."
                     ))
+                    self$results$insert(200, notice)
                 }
 
                 self$results$correlation$addRow(rowKey = 1, values = list(
@@ -538,174 +674,178 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
 
             }, error = function(e) {
-                warning(paste("Correlation analysis failed:", e$message))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'correlationFailed',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(paste("Correlation analysis failed:", e$message))
+                self$results$insert(1, notice)
             })
         },
 
-        .populateStatistics = function() {
+        .calculateStatistics = function() {
             if (!self$options$addStats) return()
             if (!(self$options$plotType %in% c("boxplot", "violin"))) return()
 
             tryCatch({
-                # Get complete data for statistical analysis
                 x_col <- self$options$xvar
                 y_col <- self$options$yvar
 
-                # Remove NAs explicitly for transparent sample size reporting
+                # Get complete data
                 complete_data <- self$data[complete.cases(self$data[[x_col]], self$data[[y_col]]), ]
-                n_total <- nrow(self$data)
-                n_complete <- nrow(complete_data)
-
-                if (n_total > n_complete) {
-                    warning(paste0(
-                        "Statistical tests: ", n_total - n_complete, " rows (",
-                        round(100 * (n_total - n_complete) / n_total, 1),
-                        "%) excluded due to missing values. ",
-                        "Tests are based on n=", n_complete, " complete observations."
-                    ))
-                }
-
-                if (n_complete < 3) {
-                    stop("Insufficient data for statistical testing (n < 3 after removing missing values)")
-                }
 
                 groups <- unique(complete_data[[x_col]])
                 groups <- groups[!is.na(groups)]
                 if (length(groups) < 2) return()
 
-                table <- self$results$statistics
                 method <- self$options$statMethod
                 if (method == "auto") method <- if (length(groups) == 2) "t.test" else "anova"
 
-                # Validate sample sizes by group
-                group_ns <- sapply(groups, function(g) {
-                    sum(complete_data[[x_col]] == g)
-                })
-
-                min_n <- min(group_ns)
-                if (min_n < 3) {
-                    warning(paste0(
-                        "Small sample size detected: minimum group has n=", min_n, ". ",
-                        "Statistical tests may be unreliable. Consider using nonparametric tests."
+                # CRITICAL LIMITATION: Only pairwise tests are computed, never omnibus ANOVA/Kruskal-Wallis
+                # For >2 groups, user MUST enable pairwiseComparisons to see any statistical tests
+                if (!self$options$pairwiseComparisons && length(groups) > 2) {
+                    # Warn user about missing statistics
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'pairwiseCompRequired',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(paste0(
+                        "Statistical comparisons for ", length(groups), " groups require 'Show Pairwise Comparisons' to be enabled. ",
+                        "No omnibus ANOVA or Kruskal-Wallis test is performed by this module. ",
+                        "Only pairwise tests with Bonferroni correction are available."
                     ))
+                    self$results$insert(1, notice)
+                    return()
+                }
+                
+                # Generate comparisons
+                comps <- combn(groups, 2, simplify = FALSE)
+                n_comparisons <- length(comps)
+                
+                # Determine actual test method used for pairwise comparisons
+                # NOTE: Even if user selects "ANOVA", we perform pairwise t-tests, not omnibus ANOVA
+                actual_method_name <- if (method %in% c("t.test", "auto", "anova")) {
+                    "t-test (pairwise)"
+                } else {
+                    "Wilcoxon (pairwise)"
                 }
 
-                # Pairwise comparisons with multiple testing correction
-                if (self$options$pairwiseComparisons && length(groups) > 2) {
-                    comps <- combn(groups, 2, simplify = FALSE)
-                    n_comparisons <- length(comps)
+                # Initialize results dataframe
+                stats_df <- data.frame(
+                    group1 = character(n_comparisons),
+                    group2 = character(n_comparisons),
+                    p = numeric(n_comparisons),
+                    statistic = numeric(n_comparisons),
+                    method = character(n_comparisons),  # Track which test was used
+                    stringsAsFactors = FALSE
+                )
 
-                    if (n_comparisons > 1) {
-                        warning(paste0(
-                            "Multiple testing: ", n_comparisons, " pairwise comparisons. ",
-                            "Consider Bonferroni correction (significance threshold: ",
-                            round(0.05 / n_comparisons, 4), ") or use p.adjust() for ",
-                            "multiple testing correction."
-                        ))
-                    }
+                # Calculate max Y for positioning
+                max_y <- max(complete_data[[y_col]], na.rm = TRUE)
+                y_range <- max_y - min(complete_data[[y_col]], na.rm = TRUE)
+                step_size <- y_range * 0.1
 
-                    p_values <- numeric(n_comparisons)
-
-                    for (i in seq_along(comps)) {
-                        g1 <- comps[[i]][1]
-                        g2 <- comps[[i]][2]
-                        data1 <- complete_data[[y_col]][complete_data[[x_col]] == g1]
-                        data2 <- complete_data[[y_col]][complete_data[[x_col]] == g2]
-
-                        # Check group-specific sample sizes
-                        n1 <- length(data1)
-                        n2 <- length(data2)
-
-                        if (n1 < 2 || n2 < 2) {
-                            stop(paste0("Insufficient sample size for comparison ", g1, " vs ", g2))
-                        }
-
-                        # Perform test based on method
-                        test_result <- if (method %in% c("t.test", "auto")) {
-                            # Check variance homogeneity for t-test
-                            if (n1 >= 3 && n2 >= 3) {
-                                var_test <- var.test(data1, data2)
-                                if (var_test$p.value < 0.05) {
-                                    warning(paste0(
-                                        "Comparison ", g1, " vs ", g2, ": Unequal variances detected (p=",
-                                        round(var_test$p.value, 4), "). Using Welch t-test."
-                                    ))
-                                }
-                            }
-                            t.test(data1, data2, na.action = na.omit)
-                        } else if (method == "wilcox.test") {
-                            wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
-                        } else if (method == "anova") {
-                            # For pairwise ANOVA, use t-test
-                            t.test(data1, data2, na.action = na.omit)
-                        } else if (method == "kruskal.test") {
-                            # For pairwise Kruskal, use Wilcoxon
-                            wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
-                        } else {
-                            t.test(data1, data2, na.action = na.omit)
-                        }
-
-                        p_values[i] <- test_result$p.value
-
-                        # Apply Bonferroni correction for display
-                        p_adj <- p_values[i] * n_comparisons
-                        p_adj <- min(p_adj, 1.0)  # Cap at 1.0
-
-                        sig <- if (p_values[i] < 0.001) "***" else
-                               if (p_values[i] < 0.01) "**" else
-                               if (p_values[i] < 0.05) "*" else "ns"
-
-                        sig_adj <- if (p_adj < 0.001) "***" else
-                                   if (p_adj < 0.01) "**" else
-                                   if (p_adj < 0.05) "*" else "ns"
-
-                        table$addRow(rowKey = i, values = list(
-                            comparison = paste(g1, "(n=", n1, ") vs", g2, "(n=", n2, ")"),
-                            statistic = test_result$statistic,
-                            pvalue = p_values[i],
-                            significance = paste0(sig, " (adj: ", sig_adj, ")")
-                        ))
-                    }
-                } else if (!self$options$pairwiseComparisons && length(groups) == 2) {
-                    # Single comparison between two groups
-                    g1 <- groups[1]
-                    g2 <- groups[2]
+                for (i in seq_along(comps)) {
+                    g1 <- comps[[i]][1]
+                    g2 <- comps[[i]][2]
                     data1 <- complete_data[[y_col]][complete_data[[x_col]] == g1]
                     data2 <- complete_data[[y_col]][complete_data[[x_col]] == g2]
 
-                    n1 <- length(data1)
-                    n2 <- length(data2)
+                    # Check sample sizes
+                    if (length(data1) < 2 || length(data2) < 2) {
+                        # Create descriptive notice for user
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('insufficientSampleSize_', i),
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(paste0(
+                            "Insufficient data for statistical test between '", g1, "' (n=", length(data1),
+                            ") and '", g2, "' (n=", length(data2), "). ",
+                            "At least 2 observations per group required for comparison."
+                        ))
+                        self$results$insert(1, notice)
 
-                    test_result <- if (method %in% c("t.test", "auto")) {
-                        # Check variance homogeneity
-                        if (n1 >= 3 && n2 >= 3) {
-                            var_test <- var.test(data1, data2)
-                            if (var_test$p.value < 0.05) {
-                                warning(paste0(
-                                    "Unequal variances detected (p=", round(var_test$p.value, 4),
-                                    "). Using Welch t-test."
-                                ))
-                            }
-                        }
+                        stats_df$p[i] <- NA
+                        next
+                    }
+
+                    # Perform pairwise test (NOT omnibus ANOVA/Kruskal-Wallis)
+                    # Even if method is "anova", we perform t-test for each pair
+                    test_result <- if (method %in% c("t.test", "auto", "anova")) {
                         t.test(data1, data2, na.action = na.omit)
                     } else {
                         wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
                     }
 
-                    sig <- if (test_result$p.value < 0.001) "***" else
-                           if (test_result$p.value < 0.01) "**" else
-                           if (test_result$p.value < 0.05) "*" else "ns"
-
-                    table$addRow(rowKey = 1, values = list(
-                        comparison = paste(g1, "(n=", n1, ") vs", g2, "(n=", n2, ")"),
-                        statistic = test_result$statistic,
-                        pvalue = test_result$p.value,
-                        significance = sig
-                    ))
+                    stats_df$group1[i] <- as.character(g1)
+                    stats_df$group2[i] <- as.character(g2)
+                    stats_df$p[i] <- test_result$p.value
+                    stats_df$statistic[i] <- test_result$statistic
+                    stats_df$method[i] <- actual_method_name
                 }
+                
+                # Adjust p-values
+                stats_df$p.adj <- p.adjust(stats_df$p, method = "bonferroni")
+                
+                # Add significance stars
+                stats_df$p.adj.signif <- symnum(stats_df$p.adj, corr = FALSE, na = FALSE, 
+                                              cutpoints = c(0, 0.001, 0.01, 0.05, 1), 
+                                              symbols = c("***", "**", "*", "ns"))
+                
+                # Add y positions for plotting
+                # Simple stacking: start above max_y and increment
+                stats_df$y.position <- max_y + (seq_len(n_comparisons) * step_size)
+                
+                private$..stats_df <- stats_df
+                
             }, error = function(e) {
-                warning(paste("Statistical testing failed:", e$message))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'statisticsCalculationFailed',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(paste("Statistics calculation failed:", e$message))
+                self$results$insert(1, notice)
             })
+        },
+
+        .populateStatistics = function() {
+            if (!self$options$addStats) return()
+            if (is.null(private$..stats_df)) return()
+            
+            table <- self$results$statistics
+            df <- private$..stats_df
+            
+            for (i in 1:nrow(df)) {
+                if (is.na(df$p[i])) next
+
+                row_vals <- list(
+                    comparison = paste(df$group1[i], "vs", df$group2[i]),
+                    method = df$method[i],  # Show which test was actually performed
+                    statistic = df$statistic[i],
+                    pvalue = df$p[i],
+                    significance = paste0(
+                        symnum(df$p[i], corr = FALSE, na = FALSE,
+                               cutpoints = c(0, 0.001, 0.01, 0.05, 1),
+                               symbols = c("***", "**", "*", "ns")),
+                        " (adj: ", df$p.adj.signif[i], ")"
+                    )
+                )
+                table$addRow(rowKey = i, values = row_vals)
+            }
+            
+            # Add notes about adjustment and pairwise-only nature
+            if (nrow(df) > 1) {
+                table$setNote("adj", "P-values adjusted for multiple comparisons (Bonferroni).")
+                table$setNote("pairwise", paste0(
+                    "IMPORTANT: Only pairwise tests are shown. ",
+                    "No omnibus ANOVA or Kruskal-Wallis test is performed. ",
+                    "For formal multi-group inference, use appropriate omnibus tests in dedicated statistical software."
+                ))
+            }
         },
 
         .generatePlotInfo = function() {
@@ -809,18 +949,21 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             )
 
-            # Display warning if settings were overridden
+            # Display notice if settings were overridden
             if (length(overrides) > 0) {
                 preset_name <- tools::toTitleCase(gsub("_", " ", preset))
-                warning(paste0(
-                    "\n⚠️ CLINICAL PRESET OVERRIDE WARNING ⚠️\n\n",
-                    "The '", preset_name, "' preset has automatically changed the following settings:\n",
-                    paste0("  • ", overrides, collapse = "\n"), "\n\n",
-                    "These changes override your manual selections. In regulated clinical settings, ",
-                    "ensure these preset configurations are appropriate for your analysis and documented ",
-                    "in your protocol.\n\n",
-                    "To use custom settings instead, select 'Custom' from the Clinical Preset dropdown.\n"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'clinicalPresetOverride',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(paste0(
+                    "Clinical preset '", preset_name, "' applied: ",
+                    paste(overrides, collapse = "; "), ". ",
+                    "In regulated clinical settings, ensure these preset configurations are appropriate for your analysis and documented in your protocol. ",
+                    "To use custom settings, select 'Custom' from the Clinical Preset dropdown."
                 ))
+                self$results$insert(200, notice)
             }
         },
 

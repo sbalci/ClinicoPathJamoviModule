@@ -1,7 +1,7 @@
 ---
 name:  jjbetweenstats
 title: Box-Violin Plots to Compare Between Groups
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
 version: '0.0.32'
@@ -113,13 +113,13 @@ options:
       title: 'Type of Statistic'
       type: List
       options:
-        - title: Parametric
+        - title: Parametric (t-test/ANOVA)
           name: parametric
-        - title: Nonparametric
+        - title: Nonparametric (Mann-Whitney/Kruskal-Wallis)
           name: nonparametric
-        - title: Robust
+        - title: Robust (Trimmed Means)
           name: robust
-        - title: Bayes
+        - title: Bayes (Bayesian Analysis)
           name: bayes
       default: parametric
 
@@ -180,7 +180,7 @@ options:
     - name: mytitle
       title: Title
       type: String
-      default: 'Within Group Comparison'
+      default: 'Between Group Comparison'
 
     - name: xtitle
       title: X-Title
@@ -239,6 +239,33 @@ options:
           R: >
             Whether to assume equal variances across groups for parametric tests.
 
+    - name: multiEndpointCorrection
+      title: Multiple Endpoint Correction Guidance
+      type: List
+      options:
+        - title: None (show warning only)
+          name: none
+        - title: Bonferroni (manual guidance)
+          name: bonferroni
+        - title: Holm (manual guidance)
+          name: holm
+        - title: Benjamini-Hochberg FDR (manual guidance)
+          name: fdr
+      default: none
+      description:
+          R: >
+            Display guidance for multiple testing correction when analyzing multiple dependent variables.
+            IMPORTANT: This option does NOT automatically adjust p-values. It provides instructions for
+            manual correction. When testing multiple endpoints (e.g., cholesterol, glucose, triglycerides),
+            the family-wise error rate increases. For example, testing 3 variables at α=0.05 gives actual
+            error rate of ~14%. Select a correction method to see step-by-step instructions for manually
+            applying that correction to the p-values shown in the plots.
+          ui: >
+            Get guidance for correcting multiple endpoint testing. IMPORTANT: Corrections are NOT applied
+            automatically - you must manually compare p-values to adjusted thresholds. Select 'None' to see
+            warning about inflated error rates, or select a correction method to see detailed instructions
+            for manual application.
+
 
 
     - name: plotwidth
@@ -268,6 +295,18 @@ options:
       description:
           R: >
             Whether to use colorblind-safe color palette for plot elements.
+
+    - name: showexplanations
+      title: Show Explanations and Guides
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display additional explanatory content including about section, summary,
+            assumptions, interpretation guide, and copy-ready report template.
+          ui: >
+            Show comprehensive explanations, statistical assumptions, interpretation guides,
+            and a copy-ready report template. Helpful for learning and preparing manuscripts.
 
     - name: addGGPubrPlot
       title: Add ggpubr Plot Variant
