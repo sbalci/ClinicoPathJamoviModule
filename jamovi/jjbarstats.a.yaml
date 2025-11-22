@@ -1,7 +1,7 @@
 ---
 name:  jjbarstats
 title: Bar Charts
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Bar Charts, Grouped Bar Charts'
 version: '0.0.32'
@@ -267,6 +267,34 @@ options:
           R: >
             Display detailed explanations of statistical methods, assumptions,
             and clinical interpretations to guide analysis and result interpretation.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display natural-language summary paragraph with key findings
+            suitable for copying into reports and publications.
+
+    - name: showAssumptions
+      title: Show Assumptions & Warnings
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display statistical assumptions panel with detected violations,
+            warnings about chi-square expected counts, and Fisher exact test
+            recommendations.
+
+    - name: showInterpretation
+      title: Show Interpretation Guide
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display effect size interpretation guidelines (Cramér's V thresholds),
+            clinical context based on analysis preset, and methodological notes.
 
     - name: addGGPubrBalloon
       title: Add Balloon Plot (ggpubr)

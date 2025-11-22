@@ -28,6 +28,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ratio = "",
             clinicalpreset = "custom",
             showexplanations = FALSE,
+            showSummary = TRUE,
+            showAssumptions = TRUE,
+            showInterpretation = FALSE,
             addGGPubrBalloon = FALSE,
             ggpubrBalloonPalette = "jco", ...) {
 
@@ -176,6 +179,18 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showexplanations",
                 showexplanations,
                 default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=TRUE)
+            private$..showAssumptions <- jmvcore::OptionBool$new(
+                "showAssumptions",
+                showAssumptions,
+                default=TRUE)
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
+                default=FALSE)
             private$..addGGPubrBalloon <- jmvcore::OptionBool$new(
                 "addGGPubrBalloon",
                 addGGPubrBalloon,
@@ -211,6 +226,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ratio)
             self$.addOption(private$..clinicalpreset)
             self$.addOption(private$..showexplanations)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showAssumptions)
+            self$.addOption(private$..showInterpretation)
             self$.addOption(private$..addGGPubrBalloon)
             self$.addOption(private$..ggpubrBalloonPalette)
         }),
@@ -237,6 +255,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ratio = function() private$..ratio$value,
         clinicalpreset = function() private$..clinicalpreset$value,
         showexplanations = function() private$..showexplanations$value,
+        showSummary = function() private$..showSummary$value,
+        showAssumptions = function() private$..showAssumptions$value,
+        showInterpretation = function() private$..showInterpretation$value,
         addGGPubrBalloon = function() private$..addGGPubrBalloon$value,
         ggpubrBalloonPalette = function() private$..ggpubrBalloonPalette$value),
     private = list(
@@ -262,6 +283,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ratio = NA,
         ..clinicalpreset = NA,
         ..showexplanations = NA,
+        ..showSummary = NA,
+        ..showAssumptions = NA,
+        ..showInterpretation = NA,
         ..addGGPubrBalloon = NA,
         ..ggpubrBalloonPalette = NA)
 )
@@ -312,7 +336,10 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "conflevel",
                     "ratio",
                     "clinicalpreset",
-                    "showexplanations"))
+                    "showexplanations",
+                    "showSummary",
+                    "showAssumptions",
+                    "showInterpretation"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -321,15 +348,18 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
-                title="Analysis Summary"))
+                title="Analysis Summary",
+                visible="(showSummary)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
-                title="Statistical Assumptions & Warnings"))
+                title="Statistical Assumptions & Warnings",
+                visible="(showAssumptions)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
-                title="Results Interpretation"))
+                title="Results Interpretation",
+                visible="(showInterpretation)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="report",
@@ -434,6 +464,14 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showexplanations Display detailed explanations of statistical
 #'   methods, assumptions, and clinical interpretations to guide analysis and
 #'   result interpretation.
+#' @param showSummary Display natural-language summary paragraph with key
+#'   findings suitable for copying into reports and publications.
+#' @param showAssumptions Display statistical assumptions panel with detected
+#'   violations, warnings about chi-square expected counts, and Fisher exact
+#'   test recommendations.
+#' @param showInterpretation Display effect size interpretation guidelines
+#'   (Cramér's V thresholds), clinical context based on analysis preset, and
+#'   methodological notes.
 #' @param addGGPubrBalloon Add balloon plot for contingency table
 #'   visualization using ggpubr.
 #' @param ggpubrBalloonPalette Color palette for balloon plot.
@@ -475,6 +513,9 @@ jjbarstats <- function(
     ratio = "",
     clinicalpreset = "custom",
     showexplanations = FALSE,
+    showSummary = TRUE,
+    showAssumptions = TRUE,
+    showInterpretation = FALSE,
     addGGPubrBalloon = FALSE,
     ggpubrBalloonPalette = "jco") {
 
@@ -520,6 +561,9 @@ jjbarstats <- function(
         ratio = ratio,
         clinicalpreset = clinicalpreset,
         showexplanations = showexplanations,
+        showSummary = showSummary,
+        showAssumptions = showAssumptions,
+        showInterpretation = showInterpretation,
         addGGPubrBalloon = addGGPubrBalloon,
         ggpubrBalloonPalette = ggpubrBalloonPalette)
 

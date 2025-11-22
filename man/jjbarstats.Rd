@@ -28,6 +28,9 @@ jjbarstats(
   ratio = "",
   clinicalpreset = "custom",
   showexplanations = FALSE,
+  showSummary = TRUE,
+  showAssumptions = TRUE,
+  showInterpretation = FALSE,
   addGGPubrBalloon = FALSE,
   ggpubrBalloonPalette = "jco"
 )
@@ -93,6 +96,17 @@ parameters.}
 \item{showexplanations}{Display detailed explanations of statistical
 methods, assumptions, and clinical interpretations to guide analysis and
 result interpretation.}
+
+\item{showSummary}{Display natural-language summary paragraph with key
+findings suitable for copying into reports and publications.}
+
+\item{showAssumptions}{Display statistical assumptions panel with detected
+violations, warnings about chi-square expected counts, and Fisher exact
+test recommendations.}
+
+\item{showInterpretation}{Display effect size interpretation guidelines
+(Cramér's V thresholds), clinical context based on analysis preset, and
+methodological notes.}
 
 \item{addGGPubrBalloon}{Add balloon plot for contingency table
 visualization using ggpubr.}

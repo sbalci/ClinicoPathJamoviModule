@@ -160,3 +160,23 @@ children:
                 name: digitsperc
                 label: Decimal Places (Percentages)
                 format: number
+  - type: CollapseBox
+    label: Report & Explanations
+    collapsed: true
+    children:
+      - type: Label
+        label: Educational Content
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummary
+                label: Show Analysis Summary
+              - type: CheckBox
+                name: showAssumptions
+                label: Show Assumptions & Warnings
+              - type: CheckBox
+                name: showInterpretation
+                label: Show Interpretation Guide

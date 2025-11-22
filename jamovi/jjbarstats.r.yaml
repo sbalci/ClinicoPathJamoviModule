@@ -26,6 +26,9 @@ clearWith:
     - ratio
     - clinicalpreset
     - showexplanations
+    - showSummary
+    - showAssumptions
+    - showInterpretation
 
 
 items:
@@ -38,14 +41,17 @@ items:
     - name: summary
       title: Analysis Summary
       type: Html
+      visible: (showSummary)
 
     - name: assumptions
       title: Statistical Assumptions & Warnings
-      type: Html  
+      type: Html
+      visible: (showAssumptions)
 
     - name: interpretation
       title: Results Interpretation
       type: Html
+      visible: (showInterpretation)
 
     - name: report
       title: Copy-Ready Report

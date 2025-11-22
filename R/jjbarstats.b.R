@@ -66,6 +66,26 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
             # Helper Methods ----
 
+            .escapeVar = function(x) {
+                # Handle variable names with spaces, special characters, or reserved words
+                # Provides safety layer beyond rlang::sym() for extreme edge cases
+                if (is.null(x) || length(x) == 0) return(x)
+
+                vapply(x, function(v) {
+                    if (is.character(v)) {
+                        # Check for problematic characters (non-alphanumeric except . and _)
+                        if (grepl("[^A-Za-z0-9._]", v)) {
+                            # Use make.names to convert to syntactically valid name
+                            make.names(v)
+                        } else {
+                            v
+                        }
+                    } else {
+                        as.character(v)
+                    }
+                }, character(1), USE.NAMES = FALSE)
+            },
+
             .validateVariables = function() {
                 dep_vars <- self$options$dep
                 group_var <- self$options$group
@@ -836,21 +856,55 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     use_pairwise <- FALSE
                 }
 
-                # Parse ratio if provided
+                # ENHANCEMENT 4: Parse ratio with enhanced notice-based feedback
                 ratio_vec <- NULL
                 if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
                     tryCatch({
                         ratio_parts <- strsplit(self$options$ratio, ",")[[1]]
                         ratio_vec <- as.numeric(trimws(ratio_parts))
+
                         if (any(is.na(ratio_vec))) {
-                            warning("Invalid ratio values provided. Using default equal proportions.")
+                            # Invalid non-numeric values
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'invalidRatioValues',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(sprintf(
+                                "Invalid ratio values in '%s'. Expected comma-separated numbers (e.g., '0.5,0.5'). Using equal proportions instead.",
+                                self$options$ratio
+                            ))
+                            self$results$insert(999, notice)
                             ratio_vec <- NULL
+
                         } else if (abs(sum(ratio_vec) - 1.0) > 0.001) {
-                            warning(paste("Ratio values sum to", sum(ratio_vec), "instead of 1. Normalizing."))
-                            ratio_vec <- ratio_vec / sum(ratio_vec)
+                            # Ratio doesn't sum to 1.0 - normalize
+                            normalized <- ratio_vec / sum(ratio_vec)
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'ratioNormalized',
+                                type = jmvcore::NoticeType$INFO
+                            )
+                            notice$setContent(sprintf(
+                                "Ratio values normalized to sum to 1.0 (original sum: %.3f). Using: %s",
+                                sum(ratio_vec),
+                                paste(round(normalized, 3), collapse = ", ")
+                            ))
+                            self$results$insert(999, notice)
+                            ratio_vec <- normalized
                         }
                     }, error = function(e) {
-                        warning(paste("Error parsing ratio:", e$message, ". Using default equal proportions."))
+                        # Parsing error
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'ratioParseError',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(sprintf(
+                            "Error parsing ratio '%s': %s. Using equal proportions.",
+                            self$options$ratio, e$message
+                        ))
+                        self$results$insert(999, notice)
                         ratio_vec <- NULL
                     })
                 }
@@ -1050,7 +1104,40 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             private$.generateInterpretationGuide()
                             private$.generateCopyReadyReport(prepared_data)
                         }
-                        
+
+                        # ENHANCEMENT 3: Clinical prevalence warning for diagnostic preset
+                        if (self$options$clinicalpreset == "diagnostic" &&
+                            !is.null(self$options$dep) &&
+                            length(self$options$dep) > 0) {
+
+                            # Check first dependent variable for 2-level disease status
+                            tryCatch({
+                                dep_table <- table(prepared_data[[self$options$dep[1]]])
+
+                                if (length(dep_table) == 2) {
+                                    # Calculate prevalence (proportion of less common outcome)
+                                    prevalence <- min(dep_table) / sum(dep_table)
+
+                                    # Warn about extreme prevalence (< 5% or > 95%)
+                                    if (prevalence < 0.05 || prevalence > 0.95) {
+                                        notice <- jmvcore::Notice$new(
+                                            options = self$options,
+                                            name = 'extremePrevalence',
+                                            type = jmvcore::NoticeType$STRONG_WARNING
+                                        )
+                                        notice$setContent(sprintf(
+                                            "Extreme disease prevalence detected (%.1f%%). Positive/negative predictive values are highly prevalence-dependent and may not generalize to populations with different baseline risk. Consider reporting likelihood ratios or conducting sensitivity analysis across prevalence ranges.",
+                                            prevalence * 100
+                                        ))
+                                        self$results$insert(2, notice)  # Insert after ERROR notices
+                                    }
+                                }
+                            }, error = function(e) {
+                                # Silently fail if prevalence check encounters issues
+                                # (e.g., non-standard data structure)
+                            })
+                        }
+
                     }, error = function(e) {
                         # Reset cache on error
                         private$.cached_data <- NULL
@@ -1178,6 +1265,26 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 mydata <- self$data
                 dep <- self$options$dep
                 group <- self$options$group
+
+                # BUG FIX: Handle multiple dependent variables
+                # Balloon plot only works with single dependent variable
+                if (length(dep) > 1) {
+                    # Use only the first dependent variable and notify user
+                    dep_first <- dep[1]
+
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'balloonPlotMultipleVars',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf(
+                        "Balloon plot created for first variable only (%s). Multiple dependent variables not supported for balloon plots.",
+                        dep_first
+                    ))
+                    self$results$insert(999, notice)
+
+                    dep <- dep_first
+                }
 
                 # Create contingency table
                 if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
