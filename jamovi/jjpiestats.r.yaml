@@ -79,6 +79,15 @@ items:
       requiresData: true
       visible: (dep)
 
+    - name: donutPlot
+      title: 'Donut Chart'
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plotDonut
+      requiresData: true
+      visible: (addGGPubrDonut)
+
 
 refs:
     - ggplot2

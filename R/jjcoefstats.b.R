@@ -63,7 +63,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private$.generateAboutContent()
 
     # Generate summary if requested
-    if (self$options$showexplanations) {
+    if (isTRUE(self$options$showexplanations)) {
         private$.generateSummary()
     }
 
@@ -138,7 +138,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     </ul>
     ")
 
-    self$results$summary$setContent(summary_text)
+    self$results$modelSummary$setContent(summary_text)
 },
 
 .runPrecomputed = function() {

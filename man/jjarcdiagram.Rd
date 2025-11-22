@@ -21,26 +21,44 @@ jjarcdiagram(
   arcWidthValue = 1,
   arcTransparency = 0.5,
   directed = FALSE,
+  aggregateEdges = TRUE,
+  weightMode = "strength",
+  arcColorMode = "source",
   colorByGroup = FALSE,
   showStats = FALSE,
   showLegend = FALSE,
   labelSize = 0.8,
-  plotTitle = ""
+  plotTitle = "",
+  showSummary = TRUE,
+  showAssumptions = TRUE,
+  showGlossary = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{source}{Starting point of each relationship or connection. Examples:
-Gene A regulating Gene B,  Patient X similar to Patient Y, or Disease A
-co-occurring with Disease B.}
+\item{source}{Starting entity in each relationship. Select the variable
+containing the "from" nodes. Clinical Examples: • Gene regulatory networks:
+Regulator gene (e.g., TP53, BRCA1) • Patient networks: First patient in
+similarity pair (Patient_ID) • Disease co-occurrence: Primary diagnosis
+(ICD10 code) • Protein interactions: Upstream protein • Treatment pathways:
+Initial intervention}
 
-\item{target}{Endpoint of each relationship or connection. This represents
-what is being regulated,  influenced, or connected to by the source entity.}
+\item{target}{Ending entity in each relationship. Select the variable
+containing the "to" nodes. Clinical Examples: • Gene regulatory networks:
+Target gene being regulated (e.g., CDK4, MYC) • Patient networks: Second
+patient in similarity pair • Disease co-occurrence: Secondary diagnosis or
+comorbidity • Protein interactions: Downstream protein • Treatment
+pathways: Next intervention in sequence}
 
-\item{weight}{Optional numeric measure of connection strength. Examples:
-Correlation coefficient,  interaction score, similarity index, or
-co-occurrence frequency. Higher values indicate  stronger relationships.}
+\item{weight}{Optional numeric measure of connection strength or
+importance. Clinical Examples: • Gene networks: Correlation coefficient
+(0-1), fold-change, or interaction score • Patient networks: Similarity
+score (e.g., Jaccard index, cosine similarity) • Disease co-occurrence:
+Number of co-occurrences or relative risk • Protein interactions: Binding
+affinity (Kd) or confidence score • Treatment pathways: Transition
+probability (0-1) Leave empty for unweighted networks (all edges treated
+equally).}
 
 \item{group}{Optional grouping variable for color-coding entities.
 Examples: Gene families,  patient subtypes, disease categories, or
@@ -87,6 +105,27 @@ clutter in dense networks.}
 direction from source to target) or undirected (edges represent
 bidirectional relationships).}
 
+\item{aggregateEdges}{✅ RECOMMENDED: Combine multiple edges between the
+same nodes by summing weights. Why it matters: • Ensures network density ≤
+1.0 (without aggregation, density can exceed 1.0) • Prevents inflated
+centrality measures • Provides accurate statistical summaries Example: If
+Gene A→Gene B appears 3 times with weights \link{2, 3, 5}, aggregation creates a
+single edge with weight 10. When to disable: Only if you specifically need
+to preserve parallel edges for specialized analyses.}
+
+\item{weightMode}{How edge weights should be interpreted for centrality
+calculations. • STRENGTH mode (default): Higher values = stronger
+connections   ✅ Use for: Correlations, interaction scores, similarity
+indices   Examples: r=0.8 (strong), binding affinity score=90  • DISTANCE
+mode: Higher values = longer paths/weaker connections   ⚠️ Use for: Costs,
+physical distances, dissimilarity measures   Examples: Euclidean distance,
+cost metrics  Most clinical/biological networks use STRENGTH mode.}
+
+\item{arcColorMode}{How to color arcs when nodes are grouped. 'Source'
+colors arcs by source node's group, 'Target' by target node's group,
+'Gradient' creates a gradient from source to target colors. Only applies
+when Color Nodes by Group is enabled.}
+
 \item{colorByGroup}{When a grouping variable is specified, whether to
 color-code nodes by their group membership. Requires a group variable.}
 
@@ -102,6 +141,19 @@ above 1.0 increase label size, below 1.0 decrease it. Range: 0.1 to 2.0.}
 
 \item{plotTitle}{Optional title to display above the arc diagram. Leave
 empty for no title.}
+
+\item{showSummary}{Whether to display a natural-language summary paragraph
+suitable for copying into reports or publications. Includes network
+overview, key findings, and grouping information.}
+
+\item{showAssumptions}{Whether to display detailed assumptions,
+interpretation guidelines, and common pitfalls panel. Includes network
+requirements, centrality measure explanations, and important notes for
+proper interpretation.}
+
+\item{showGlossary}{Whether to display a glossary panel with definitions of
+key network analysis terms (nodes, edges, centrality measures, density).
+Useful for users new to network analysis.}
 }
 \value{
 A results object containing:
@@ -112,6 +164,7 @@ A results object containing:
 \code{results$networkStats} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

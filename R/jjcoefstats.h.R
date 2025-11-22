@@ -30,7 +30,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             colorScheme = "default",
             plotTheme = "default",
             plotWidth = 700,
-            plotHeight = 500, ...) {
+            plotHeight = 500,
+            showexplanations = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -195,6 +196,10 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 default=500,
                 min=300,
                 max=2000)
+            private$..showexplanations <- jmvcore::OptionBool$new(
+                "showexplanations",
+                showexplanations,
+                default=TRUE)
 
             self$.addOption(private$..inputMode)
             self$.addOption(private$..term)
@@ -221,6 +226,7 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..plotTheme)
             self$.addOption(private$..plotWidth)
             self$.addOption(private$..plotHeight)
+            self$.addOption(private$..showexplanations)
         }),
     active = list(
         inputMode = function() private$..inputMode$value,
@@ -247,7 +253,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         colorScheme = function() private$..colorScheme$value,
         plotTheme = function() private$..plotTheme$value,
         plotWidth = function() private$..plotWidth$value,
-        plotHeight = function() private$..plotHeight$value),
+        plotHeight = function() private$..plotHeight$value,
+        showexplanations = function() private$..showexplanations$value),
     private = list(
         ..inputMode = NA,
         ..term = NA,
@@ -273,7 +280,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..colorScheme = NA,
         ..plotTheme = NA,
         ..plotWidth = NA,
-        ..plotHeight = NA)
+        ..plotHeight = NA,
+        ..showexplanations = NA)
 )
 
 jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -281,6 +289,7 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        about = function() private$.items[["about"]],
         coefPlot = function() private$.items[["coefPlot"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficientTable = function() private$.items[["coefficientTable"]],
@@ -306,6 +315,11 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="instructions",
                 title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About",
                 visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -464,9 +478,11 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotTheme ggplot2 theme for the plot.
 #' @param plotWidth Plot width in pixels.
 #' @param plotHeight Plot height in pixels.
+#' @param showexplanations Show explanations of the statistical results
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefficientTable} \tab \tab \tab \tab \tab a table \cr
@@ -506,7 +522,8 @@ jjcoefstats <- function(
     colorScheme = "default",
     plotTheme = "default",
     plotWidth = 700,
-    plotHeight = 500) {
+    plotHeight = 500,
+    showexplanations = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjcoefstats requires jmvcore to be installed (restart may be required)")
@@ -565,7 +582,8 @@ jjcoefstats <- function(
         colorScheme = colorScheme,
         plotTheme = plotTheme,
         plotWidth = plotWidth,
-        plotHeight = plotHeight)
+        plotHeight = plotHeight,
+        showexplanations = showexplanations)
 
     analysis <- jjcoefstatsClass$new(
         options = options,

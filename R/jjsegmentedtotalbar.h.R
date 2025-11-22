@@ -357,7 +357,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         interpretation = function() private$.items[["interpretation"]],
         clinical_summary = function() private$.items[["clinical_summary"]],
         statistical_tests = function() private$.items[["statistical_tests"]],
-        preset_guidance = function() private$.items[["preset_guidance"]]),
+        preset_guidance = function() private$.items[["preset_guidance"]],
+        explanations = function() private$.items[["explanations"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -517,7 +518,14 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Template Guidance",
                 visible=FALSE,
                 clearWith=list(
-                    "analysis_preset")))}))
+                    "analysis_preset")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="Explanations",
+                visible=FALSE,
+                clearWith=list(
+                    "showExplanations")))}))
 
 jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjsegmentedtotalbarBase",
@@ -601,6 +609,7 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

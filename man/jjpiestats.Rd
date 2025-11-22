@@ -109,6 +109,7 @@ A results object containing:
 \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+\code{results$donutPlot} \tab \tab \tab \tab \tab an image \cr
 }
 }
 \description{

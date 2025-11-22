@@ -138,6 +138,13 @@ items:
       clearWith:
         - analysis_preset
 
+    - name: explanations
+      title: 'Explanations'
+      type: Html
+      visible: false
+      clearWith:
+        - showExplanations
+
 refs:
     - ClinicoPathJamoviModule
     - ggsegmentedtotalbar

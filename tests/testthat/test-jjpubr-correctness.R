@@ -562,3 +562,253 @@ test_that("jjpubr warns when correlation used with faceting", {
     regexp = "facet"
   )
 })
+
+# ============================================================================
+# OMNIBUS TEST FUNCTIONALITY TESTS
+# ============================================================================
+
+# Test 31: Omnibus ANOVA Performed for 3+ Groups ----
+test_that("jjpubr performs omnibus ANOVA before pairwise tests for 3+ groups", {
+  set.seed(123)
+  test_data <- data.frame(
+    treatment = factor(rep(c("Control", "Drug A", "Drug B"), each = 20)),
+    outcome = c(
+      rnorm(20, mean = 100, sd = 10),  # Control
+      rnorm(20, mean = 110, sd = 10),  # Drug A (higher)
+      rnorm(20, mean = 115, sd = 10)   # Drug B (even higher)
+    )
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "treatment",
+    yvar = "outcome",
+    addStats = TRUE,
+    statMethod = "t.test"
+  )
+
+  # Check that statistics table exists and has rows
+  expect_true(!is.null(result$statistics))
+  stats_table <- result$statistics$asDF
+
+  # Should have omnibus test row
+  expect_true(nrow(stats_table) >= 1)
+
+  # First row should be omnibus ANOVA
+  expect_true(grepl("Overall F", stats_table$comparison[1]) ||
+              grepl("One-way ANOVA", stats_table$method[1]))
+})
+
+# Test 32: Omnibus Kruskal-Wallis for Non-parametric ----
+test_that("jjpubr performs Kruskal-Wallis omnibus test for non-parametric analysis", {
+  set.seed(456)
+  test_data <- data.frame(
+    group = factor(rep(c("A", "B", "C"), each = 15)),
+    value = c(
+      rexp(15, rate = 0.1),   # Skewed distributions
+      rexp(15, rate = 0.15),
+      rexp(15, rate = 0.2)
+    )
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "group",
+    yvar = "value",
+    addStats = TRUE,
+    statMethod = "wilcox.test"
+  )
+
+  stats_table <- result$statistics$asDF
+
+  # First row should be Kruskal-Wallis
+  expect_true(grepl("Overall H", stats_table$comparison[1]) ||
+              grepl("Kruskal-Wallis", stats_table$method[1]))
+})
+
+# Test 33: Two Groups - Direct Comparison (No Omnibus) ----
+test_that("jjpubr performs direct t-test for 2 groups without omnibus test", {
+  set.seed(789)
+  test_data <- data.frame(
+    group = factor(rep(c("Control", "Treatment"), each = 25)),
+    response = c(
+      rnorm(25, mean = 50, sd = 8),
+      rnorm(25, mean = 55, sd = 8)
+    )
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "group",
+    yvar = "response",
+    addStats = TRUE,
+    statMethod = "auto"
+  )
+
+  stats_table <- result$statistics$asDF
+
+  # For 2 groups, should have direct comparison (no "Overall F")
+  expect_false(any(grepl("Overall F", stats_table$comparison)))
+
+  # Should have one comparison row
+  expect_true(grepl("vs", stats_table$comparison[1]))
+})
+
+# Test 34: Post-hoc Only if Omnibus Significant ----
+test_that("jjpubr shows post-hoc tests only when omnibus is significant", {
+  set.seed(111)
+  # Create data where groups are NOT different (omnibus should be non-significant)
+  test_data <- data.frame(
+    group = factor(rep(c("A", "B", "C", "D"), each = 20)),
+    value = rnorm(80, mean = 100, sd = 15)  # Same mean for all groups
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "group",
+    yvar = "value",
+    addStats = TRUE,
+    statMethod = "auto",
+    pairwiseComparisons = FALSE  # Don't request pairwise
+  )
+
+  stats_table <- result$statistics$asDF
+
+  # Should have only omnibus test row (no pairwise)
+  expect_equal(nrow(stats_table), 1)
+  expect_true(grepl("Overall", stats_table$comparison[1]))
+})
+
+# Test 35: Pairwise Tests Labeled as Post-hoc ----
+test_that("jjpubr correctly labels pairwise tests as post-hoc for 3+ groups", {
+  set.seed(222)
+  test_data <- data.frame(
+    treatment = factor(rep(c("Placebo", "Low", "High"), each = 20)),
+    score = c(
+      rnorm(20, 50, 10),
+      rnorm(20, 60, 10),
+      rnorm(20, 70, 10)
+    )
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "treatment",
+    yvar = "score",
+    addStats = TRUE,
+    statMethod = "t.test",
+    pairwiseComparisons = TRUE
+  )
+
+  stats_table <- result$statistics$asDF
+
+  # Check that pairwise tests are labeled as post-hoc
+  pairwise_rows <- stats_table[grepl("vs", stats_table$comparison), ]
+  expect_true(any(grepl("post-hoc", pairwise_rows$method, ignore.case = TRUE)))
+})
+
+# Test 36: Omnibus Test Statistic is Numeric ----
+test_that("jjpubr omnibus test returns valid F or H statistic", {
+  set.seed(333)
+  test_data <- data.frame(
+    category = factor(rep(c("Cat1", "Cat2", "Cat3"), each = 15)),
+    measurement = c(rnorm(15, 20), rnorm(15, 25), rnorm(15, 30))
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "category",
+    yvar = "measurement",
+    addStats = TRUE,
+    statMethod = "auto"
+  )
+
+  stats_table <- result$statistics$asDF
+  omnibus_row <- stats_table[1, ]
+
+  # Statistic should be numeric and positive
+  expect_true(is.numeric(omnibus_row$statistic))
+  expect_true(omnibus_row$statistic > 0)
+
+  # P-value should be between 0 and 1
+  expect_true(omnibus_row$pvalue >= 0 && omnibus_row$pvalue <= 1)
+})
+
+# Test 37: Bonferroni Correction Applied to Pairwise ----
+test_that("jjpubr applies Bonferroni correction to post-hoc pairwise tests", {
+  set.seed(444)
+  test_data <- data.frame(
+    group = factor(rep(c("A", "B", "C"), each = 20)),
+    value = c(
+      rnorm(20, 100, 15),
+      rnorm(20, 110, 15),
+      rnorm(20, 120, 15)
+    )
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "group",
+    yvar = "value",
+    addStats = TRUE,
+    statMethod = "t.test",
+    pairwiseComparisons = TRUE
+  )
+
+  stats_table <- result$statistics$asDF
+
+  # Check for adjusted p-values in significance column
+  pairwise_rows <- stats_table[grepl("vs", stats_table$comparison), ]
+  expect_true(any(grepl("adj", pairwise_rows$significance)))
+})
+
+# Test 38: Hierarchical Testing for Clinical Trial Data ----
+test_that("jjpubr hierarchical testing works for realistic clinical trial scenario", {
+  set.seed(555)
+  # Simulate clinical trial with 4 dose groups
+  test_data <- data.frame(
+    dose_group = factor(
+      rep(c("Placebo", "Low Dose", "Medium Dose", "High Dose"), each = 30),
+      levels = c("Placebo", "Low Dose", "Medium Dose", "High Dose")
+    ),
+    tumor_reduction = c(
+      rnorm(30, mean = 10, sd = 5),   # Placebo
+      rnorm(30, mean = 15, sd = 5),   # Low dose
+      rnorm(30, mean = 22, sd = 5),   # Medium dose
+      rnorm(30, mean = 28, sd = 5)    # High dose (best)
+    )
+  )
+
+  result <- jjpubr(
+    data = test_data,
+    plotType = "boxplot",
+    xvar = "dose_group",
+    yvar = "tumor_reduction",
+    addStats = TRUE,
+    statMethod = "auto",
+    pairwiseComparisons = TRUE,
+    palette = "jco"
+  )
+
+  stats_table <- result$statistics$asDF
+
+  # Should have omnibus + pairwise comparisons
+  expect_true(nrow(stats_table) > 1)
+
+  # First row should be omnibus ANOVA
+  expect_true(grepl("Overall", stats_table$comparison[1]))
+
+  # Omnibus should be significant (large dose effect)
+  expect_true(stats_table$pvalue[1] < 0.05)
+
+  # Should have 6 pairwise comparisons (4 choose 2)
+  pairwise_count <- sum(grepl("vs", stats_table$comparison))
+  expect_equal(pairwise_count, 6)
+})

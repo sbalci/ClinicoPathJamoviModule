@@ -55,7 +55,7 @@ test_that("jjarcdiagram works with different network datasets", {
   
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_social_network,
+      data = social_network_data,
       source = "source",
       target = "target",
       weight = "weight",
@@ -71,7 +71,7 @@ test_that("jjarcdiagram works with different network datasets", {
   
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_academic_network,
+      data = academic_network_data,
       source = "author1",
       target = "author2",
       weight = "publications",
@@ -87,7 +87,7 @@ test_that("jjarcdiagram works with different network datasets", {
   
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_org_hierarchy,
+      data = org_hierarchy_data,
       source = "employee",
       target = "reports_to",
       weight = "relationship_strength",
@@ -110,7 +110,7 @@ test_that("jjarcdiagram works with different node sorting options", {
     test_that(paste("jjarcdiagram works with", method, "sorting"), {
       expect_error(
         jjarcdiagram(
-          data = jjarcdiagram_social_network,
+          data = social_network_data,
           source = "source",
           target = "target",
           weight = "weight",
@@ -126,7 +126,7 @@ test_that("jjarcdiagram works with different node sorting options", {
   # Test descending sort
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_social_network,
+      data = social_network_data,
       source = "source",
       target = "target",
       weight = "weight",
@@ -144,7 +144,7 @@ test_that("jjarcdiagram works with different node sizing options", {
   # Test fixed node size
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_academic_network,
+      data = academic_network_data,
       source = "author1",
       target = "author2",
       nodeSize = "fixed",
@@ -156,7 +156,7 @@ test_that("jjarcdiagram works with different node sizing options", {
   # Test degree-based node size
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_academic_network,
+      data = academic_network_data,
       source = "author1",
       target = "author2",
       nodeSize = "degree",
@@ -172,7 +172,7 @@ test_that("jjarcdiagram works with different node sizing options", {
     test_that(paste("jjarcdiagram works with node size", size), {
       expect_error(
         jjarcdiagram(
-          data = jjarcdiagram_academic_network,
+          data = academic_network_data,
           source = "author1",
           target = "author2",
           nodeSize = "fixed",
@@ -191,7 +191,7 @@ test_that("jjarcdiagram works with different arc width options", {
   # Test fixed arc width
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_supply_chain,
+      data = supply_chain_data,
       source = "supplier",
       target = "customer",
       arcWidth = "fixed",
@@ -203,7 +203,7 @@ test_that("jjarcdiagram works with different arc width options", {
   # Test weight-based arc width
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_supply_chain,
+      data = supply_chain_data,
       source = "supplier",
       target = "customer",
       weight = "volume",
@@ -220,7 +220,7 @@ test_that("jjarcdiagram works with different arc width options", {
     test_that(paste("jjarcdiagram works with transparency", alpha), {
       expect_error(
         jjarcdiagram(
-          data = jjarcdiagram_supply_chain,
+          data = supply_chain_data,
           source = "supplier",
           target = "customer",
           weight = "volume",
@@ -239,7 +239,7 @@ test_that("jjarcdiagram works with layout options", {
   # Test horizontal layout
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_gene_network,
+      data = gene_network_data,
       source = "regulator",
       target = "target",
       weight = "regulation_score",
@@ -252,7 +252,7 @@ test_that("jjarcdiagram works with layout options", {
   # Test vertical layout
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_gene_network,
+      data = gene_network_data,
       source = "regulator",
       target = "target",
       weight = "regulation_score",
@@ -270,7 +270,7 @@ test_that("jjarcdiagram works with directed and undirected networks", {
   # Test directed network
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_org_hierarchy,
+      data = org_hierarchy_data,
       source = "employee",
       target = "reports_to",
       weight = "relationship_strength",
@@ -282,7 +282,7 @@ test_that("jjarcdiagram works with directed and undirected networks", {
   # Test undirected network
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_org_hierarchy,
+      data = org_hierarchy_data,
       source = "employee",
       target = "reports_to",
       weight = "relationship_strength",
@@ -299,7 +299,7 @@ test_that("jjarcdiagram works with group coloring and legends", {
   # Test with group coloring enabled
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_social_network,
+      data = social_network_data,
       source = "source",
       target = "target",
       weight = "weight",
@@ -313,7 +313,7 @@ test_that("jjarcdiagram works with group coloring and legends", {
   # Test with group coloring disabled
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_social_network,
+      data = social_network_data,
       source = "source",
       target = "target",
       weight = "weight",
@@ -332,7 +332,7 @@ test_that("jjarcdiagram works with network statistics", {
   # Test with statistics enabled
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_academic_network,
+      data = academic_network_data,
       source = "author1",
       target = "author2",
       weight = "publications",
@@ -345,7 +345,7 @@ test_that("jjarcdiagram works with network statistics", {
   # Test with statistics disabled
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_academic_network,
+      data = academic_network_data,
       source = "author1",
       target = "author2",
       weight = "publications",
@@ -363,7 +363,7 @@ test_that("jjarcdiagram works with custom labels and titles", {
   # Test with custom title and label size
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_simple_weighted,
+      data = simple_weighted_network,
       source = "from_node",
       target = "to_node",
       weight = "connection_weight",
@@ -381,7 +381,7 @@ test_that("jjarcdiagram works with custom labels and titles", {
     test_that(paste("jjarcdiagram works with label size", size), {
       expect_error(
         jjarcdiagram(
-          data = jjarcdiagram_simple_weighted,
+          data = simple_weighted_network,
           source = "from_node",
           target = "to_node",
           labelSize = size
@@ -399,7 +399,7 @@ test_that("jjarcdiagram works with edge case datasets", {
   
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_minimal_network,
+      data = minimal_network_data,
       source = "from",
       target = "to",
       weight = "strength",
@@ -413,7 +413,7 @@ test_that("jjarcdiagram works with edge case datasets", {
   
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_selfloop_network,
+      data = selfloop_network_data,
       source = "node1",
       target = "node2",
       weight = "weight",
@@ -431,7 +431,7 @@ test_that("jjarcdiagram works with large networks", {
   
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_large_network,
+      data = large_network_data,
       source = "source",
       target = "target",
       weight = "weight",
@@ -451,7 +451,7 @@ test_that("jjarcdiagram works without optional variables", {
   # Test without weight variable
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_simple_weighted,
+      data = simple_weighted_network,
       source = "from_node",
       target = "to_node",
       showNodes = TRUE,
@@ -463,7 +463,7 @@ test_that("jjarcdiagram works without optional variables", {
   # Test without group variable
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_simple_weighted,
+      data = simple_weighted_network,
       source = "from_node",
       target = "to_node",
       weight = "connection_weight",
@@ -478,23 +478,33 @@ test_that("jjarcdiagram works with different variable combinations", {
   data("jjarcdiagram_gene_network", package = "ClinicoPath")
   
   # Test different grouping variables
-  grouping_vars <- c("pathway", "effect_type")
-  
-  for (var in grouping_vars) {
-    test_that(paste("jjarcdiagram works with", var, "as grouping variable"), {
+    test_that("jjarcdiagram works with pathway as grouping variable", {
       expect_error(
         jjarcdiagram(
-          data = jjarcdiagram_gene_network,
+          data = gene_network_data,
           source = "regulator",
           target = "target",
           weight = "regulation_score",
-          group = var,
+          group = "pathway",
           colorByGroup = TRUE
         ),
         NA
       )
     })
-  }
+
+    test_that("jjarcdiagram works with effect_type as grouping variable", {
+      expect_error(
+        jjarcdiagram(
+          data = gene_network_data,
+          source = "regulator",
+          target = "target",
+          weight = "regulation_score",
+          group = "effect_type",
+          colorByGroup = TRUE
+        ),
+        NA
+      )
+    })
 })
 
 test_that("jjarcdiagram handles show/hide node options", {
@@ -504,7 +514,7 @@ test_that("jjarcdiagram handles show/hide node options", {
   # Test with nodes shown
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_academic_network,
+      data = academic_network_data,
       source = "author1",
       target = "author2",
       weight = "publications",
@@ -516,7 +526,7 @@ test_that("jjarcdiagram handles show/hide node options", {
   # Test with nodes hidden
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_academic_network,
+      data = academic_network_data,
       source = "author1",
       target = "author2",
       weight = "publications",
@@ -533,7 +543,7 @@ test_that("jjarcdiagram works with supply chain hierarchical data", {
   # Test supply chain network with industry grouping
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_supply_chain,
+      data = supply_chain_data,
       source = "supplier",
       target = "customer",
       weight = "volume",
@@ -554,7 +564,7 @@ test_that("jjarcdiagram works with comprehensive feature combinations", {
   # Test with all features enabled
   expect_error(
     jjarcdiagram(
-      data = jjarcdiagram_social_network,
+      data = social_network_data,
       source = "source",
       target = "target",
       weight = "weight",

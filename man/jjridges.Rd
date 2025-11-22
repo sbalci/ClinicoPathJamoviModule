@@ -72,8 +72,7 @@ comparing ridge plots across another dimension.}
 
 \item{plot_type}{Type of ridge plot. 'density_ridges' for smooth curves,
 'density_ridges_gradient' adds color gradients, 'histogram_ridges' for
-discrete bins, 'violin_ridges' for violin-style plots, 'double_ridges' for
-comparing two distributions.}
+discrete bins, 'violin_ridges' for violin-style plots.}
 
 \item{scale}{Controls ridge height and overlap. Values > 1 create
 overlapping ridges, < 1 creates more separation between ridges.}
@@ -105,7 +104,8 @@ lines.}
 \item{add_median}{Add vertical line at the median of each distribution.}
 
 \item{show_stats}{Display statistical annotations including p-values and
-effect sizes using ggstatsplot functionality.}
+effect sizes. WARNING: Assumes independent observations. Not valid for
+repeated measures data.}
 
 \item{test_type}{Type of statistical test for group comparisons when
 show_stats is TRUE.}
@@ -171,7 +171,7 @@ is specified.}
 
 \item{dpi}{Resolution for plot export.}
 
-\item{clinicalPreset}{Clinical analysis preset}
+\item{clinicalPreset}{Clinical analysis preset for ridge plots}
 }
 \value{
 A results object containing:

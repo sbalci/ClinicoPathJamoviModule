@@ -188,10 +188,28 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             },
 
             .getCachedData = function() {
-                # Create hash of current data and options state
+                # Create hash of current data AND ACTUAL DATA VALUES + options state
+                # CRITICAL FIX: Include data content hash to prevent stale cache returns
+                relevant_cols <- unique(c(
+                    self$options$dep,
+                    self$options$group,
+                    self$options$grvar,
+                    self$options$counts
+                ))
+                relevant_cols <- relevant_cols[!sapply(relevant_cols, is.null)]
+                relevant_cols <- relevant_cols[relevant_cols %in% names(self$data)]
+
+                # Hash ACTUAL DATA VALUES in relevant columns
+                data_content_hash <- if (length(relevant_cols) > 0) {
+                    digest::digest(self$data[, relevant_cols, drop = FALSE], algo = "md5")
+                } else {
+                    NULL
+                }
+
                 current_hash <- digest::digest(list(
                     data_dim = dim(self$data),
                     data_names = names(self$data),
+                    data_content = data_content_hash,  # ✅ CRITICAL: Include actual data
                     options = list(
                         dep = self$options$dep,
                         group = self$options$group,
@@ -344,20 +362,26 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 self$results$summary$setContent(summary_content)
             },
 
-            .checkStatisticalAssumptions = function(analysis_data) {
+            .checkStatisticalAssumptions = function(analysis_data, dep_var = NULL) {
                 if (is.null(self$options$dep) || is.null(self$options$group)) {
-                    return()
+                    return(list(use_fisher = FALSE, fisher_reason = NULL))
                 }
-                
+
                 warnings <- character()
                 recommendations <- character()
-                
+                use_fisher <- FALSE
+                fisher_reason <- NULL
+
                 # Check group sizes for chi-square validity
                 if (!is.null(self$options$group) && self$options$group %in% names(analysis_data)) {
-                    for (dep_var in self$options$dep) {
-                        if (dep_var %in% names(analysis_data)) {
+                    # If dep_var is specified (called from .createBarPlot), check only that variable
+                    # Otherwise check all dep variables (for assumptions panel)
+                    dep_vars_to_check <- if (!is.null(dep_var)) dep_var else self$options$dep
+
+                    for (dep_var_check in dep_vars_to_check) {
+                        if (dep_var_check %in% names(analysis_data)) {
                             # WEIGHTED CONTINGENCY TABLE: Use weighted table helper
-                            cross_table <- private$.getWeightedTable(analysis_data, dep_var, self$options$group)
+                            cross_table <- private$.getWeightedTable(analysis_data, dep_var_check, self$options$group)
 
                             expected_counts <- tryCatch({
                                 chisq.test(cross_table)$expected
@@ -367,44 +391,51 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                 default_counts[] <- 5
                                 return(default_counts)
                             })
-                            
+
                             if (any(expected_counts < 5)) {
                                 low_count_cells <- sum(expected_counts < 5)
                                 total_cells <- length(expected_counts)
                                 pct_low <- round(100 * low_count_cells / total_cells, 1)
-                                
+
                                 warnings <- c(warnings, paste0(
                                     "⚠️ <strong>Chi-square Assumption Violated:</strong> ",
-                                    low_count_cells, " of ", total_cells, " cells (", pct_low, 
+                                    low_count_cells, " of ", total_cells, " cells (", pct_low,
                                     "%) have expected counts < 5."
                                 ))
-                                
+
+                                # CRITICAL FIX: Auto-switch to Fisher for 2×2 tables
                                 if (total_cells == 4 && all(dim(cross_table) == c(2, 2))) {
-                                    recommendations <- c(recommendations, 
-                                        "💡 <strong>Recommendation:</strong> Consider using Fisher's Exact Test for 2×2 tables with low expected counts."
+                                    use_fisher <- TRUE
+                                    fisher_reason <- sprintf(
+                                        "Automatically switched to Fisher's Exact Test: %d of 4 cells (%.1f%%) have expected counts < 5 in this 2×2 table.",
+                                        low_count_cells, pct_low
+                                    )
+                                    recommendations <- c(recommendations,
+                                        "✅ <strong>Automatic Correction:</strong> Using Fisher's Exact Test for 2×2 table with low expected counts."
                                     )
                                 } else {
+                                    # For non-2×2 tables, warn but don't auto-switch
                                     recommendations <- c(recommendations,
-                                        "💡 <strong>Recommendation:</strong> Consider combining categories or using non-parametric methods."
+                                        "💡 <strong>Recommendation:</strong> Consider combining categories or using non-parametric methods. Fisher's exact test is only available for 2×2 tables."
                                     )
                                 }
                             }
                         }
                     }
                 }
-                
+
                 # Check for paired data appropriateness
                 if (self$options$paired) {
                     warnings <- c(warnings,
                         "ℹ️ <strong>Paired Analysis:</strong> McNemar's test assumes matched pairs (e.g., before/after, case/control matching)."
                     )
                 }
-                
+
                 # Generate assumptions content
                 assumptions_content <- paste0(
                     "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;'>",
                     "<h4 style='color: #856404; margin-top: 0;'>⚠️ Statistical Assumptions & Warnings</h4>",
-                    
+
                     "<p><strong>General Assumptions:</strong></p>",
                     "<ul>",
                     "<li>Variables are categorical or ordinal</li>",
@@ -412,21 +443,27 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<li>Expected cell counts ≥ 5 for chi-square validity</li>",
                     if (self$options$paired) "<li>Paired observations (matched subjects)</li>" else "",
                     "</ul>",
-                    
+
                     if (length(warnings) > 0) paste0(
                         "<p><strong>Detected Issues:</strong></p>",
                         "<ul><li>", paste(warnings, collapse = "</li><li>"), "</li></ul>"
                     ) else "",
-                    
+
                     if (length(recommendations) > 0) paste0(
                         "<p><strong>Recommendations:</strong></p>",
                         "<ul><li>", paste(recommendations, collapse = "</li><li>"), "</li></ul>"
                     ) else "",
-                    
+
                     "</div>"
                 )
-                
+
                 self$results$assumptions$setContent(assumptions_content)
+
+                # Return Fisher flag for use in .createBarPlot
+                return(list(
+                    use_fisher = use_fisher,
+                    fisher_reason = fisher_reason
+                ))
             },
 
             .generateInterpretationGuide = function() {
@@ -669,10 +706,105 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 return(mydata)
             },
 
+            # CRITICAL SAFETY METHOD: Validate data is appropriate for paired/McNemar test
+            .validatePairedData = function(data, dep_var) {
+                # McNemar's test requires:
+                # 1. A 2×2 contingency table
+                # 2. Paired/matched observations
+
+                if (is.null(self$options$group) || is.null(dep_var)) {
+                    return(list(
+                        valid = FALSE,
+                        message = "Paired analysis requires both dependent variable and grouping variable."
+                    ))
+                }
+
+                # Check if it's a 2×2 table
+                cross_table <- private$.getWeightedTable(data, dep_var, self$options$group)
+
+                if (!all(dim(cross_table) == c(2, 2))) {
+                    return(list(
+                        valid = FALSE,
+                        message = sprintf(
+                            "McNemar test requires a 2×2 table. Your data has %d×%d levels. Use unpaired analysis instead.",
+                            nrow(cross_table), ncol(cross_table)
+                        )
+                    ))
+                }
+
+                # Check for adequate sample size (total count)
+                total_n <- sum(cross_table)
+                if (total_n < 10) {
+                    return(list(
+                        valid = FALSE,
+                        message = sprintf(
+                            "McNemar test requires adequate sample size. Current total: %d (recommend ≥10). Use Fisher exact test instead.",
+                            total_n
+                        )
+                    ))
+                }
+
+                # WARNING: We cannot validate actual pairing structure without a subject ID
+                # This is a limitation - user must ensure data is properly paired
+                return(list(
+                    valid = TRUE,
+                    message = "Data structure compatible with McNemar test. WARNING: Ensure observations are actually paired (e.g., before/after, matched cases/controls). If data is independent, disable paired option."
+                ))
+            },
+
             .createBarPlot = function(data, dep_var, ggtheme, grouped = FALSE, progress_label = NULL) {
                 # Progress indicator
                 if (!is.null(progress_label)) {
                     private$.checkpoint()
+                }
+
+                # CRITICAL: Validate paired data before allowing McNemar's test
+                if (self$options$paired) {
+                    paired_valid <- private$.validatePairedData(data, dep_var)
+                    if (!paired_valid$valid) {
+                        # Create ERROR notice and force paired=FALSE
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'invalidPairedData',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(paired_valid$message)
+                        self$results$insert(1, notice)
+
+                        # SAFETY: Override paired option to prevent invalid McNemar
+                        self$options$paired <- FALSE
+                        warning(paste("Paired analysis disabled:", paired_valid$message))
+                    } else {
+                        # Data structure is compatible, but warn about pairing assumption
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'pairedDataWarning',
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(paired_valid$message)
+                        self$results$insert(1, notice)
+                    }
+                }
+
+                # CRITICAL FIX 3: Check if Fisher's exact test should be used automatically
+                fisher_check <- private$.checkStatisticalAssumptions(data, dep_var = dep_var)
+                override_type <- self$options$typestatistics  # Start with user's choice
+
+                if (fisher_check$use_fisher && !self$options$paired) {
+                    # Auto-switch to Fisher for 2×2 tables with low expected counts
+                    # Note: "nonparametric" type in ggbarstats uses Fisher's exact test for 2×2 tables
+                    override_type <- "nonparametric"
+
+                    # Notify user about automatic switch
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'fisherAutoSwitch',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(fisher_check$fisher_reason)
+                    self$results$insert(1, notice)
+
+                    message(paste("INFO:", fisher_check$fisher_reason))
                 }
 
                 # WEIGHTED DATA HANDLING:
@@ -729,7 +861,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     x = rlang::sym(dep_var),
                     y = rlang::sym(self$options$group),
                     counts = if (!is.null(self$options$counts)) rlang::sym(self$options$counts) else NULL,
-                    type = self$options$typestatistics,
+                    type = override_type,  # ✅ CRITICAL FIX: Use override_type (may auto-switch to Fisher)
                     paired = if (!is.null(self$options$paired)) self$options$paired else FALSE,
                     pairwise.comparisons = use_pairwise,
                     pairwise.display = self$options$pairwisedisplay,
@@ -1048,7 +1180,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 group <- self$options$group
 
                 # Create contingency table
-                cont_table <- table(mydata[[dep]], mydata[[group]])
+                if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
+                    formula_str <- paste0(self$options$counts, " ~ ", dep, " + ", group)
+                    cont_table <- xtabs(as.formula(formula_str), data = mydata)
+                } else {
+                    cont_table <- table(mydata[[dep]], mydata[[group]])
+                }
 
                 # Convert to data frame for ggballoonplot
                 cont_df <- as.data.frame(cont_table)

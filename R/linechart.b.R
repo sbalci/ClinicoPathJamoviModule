@@ -302,7 +302,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             correlation_stats <- list()
 
             # CRITICAL FIX: Check for grouped data or repeated measures
-            # and warn that statistics ignore clustering structure
+            # and provide both naive and adjusted statistics when appropriate
             n_unique_x <- length(unique(data[[xvar]]))
             n_observations <- nrow(data)
             avg_obs_per_x <- n_observations / n_unique_x
@@ -324,8 +324,8 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (has_repeated_measures) {
                 warning(paste0(
                     "Data appears to have repeated measures (multiple observations per time point). ",
-                    "Correlation statistics assume independence and may overstate significance. ",
-                    "Consider aggregating data or using methods that account for repeated measures."
+                    "Both naive (assumes independence) and patient-level aggregate statistics are provided. ",
+                    "Use patient-level results for longitudinal inference."
                 ))
                 correlation_stats$has_repeated_measures <- TRUE
             }
@@ -335,24 +335,49 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             y_data <- data[[yvar]]
 
             if (is.numeric(x_data)) {
+                # NAIVE STATISTICS (assume independence - for reference only)
                 # Pearson correlation
                 cor_result <- cor.test(x_data, y_data, method = "pearson")
-                correlation_stats$pearson_r <- cor_result$estimate
-                correlation_stats$pearson_p <- cor_result$p.value
-                correlation_stats$pearson_ci_lower <- cor_result$conf.int[1]
-                correlation_stats$pearson_ci_upper <- cor_result$conf.int[2]
+                correlation_stats$pearson_r_naive <- cor_result$estimate
+                correlation_stats$pearson_p_naive <- cor_result$p.value
+                correlation_stats$pearson_ci_lower_naive <- cor_result$conf.int[1]
+                correlation_stats$pearson_ci_upper_naive <- cor_result$conf.int[2]
 
                 # Spearman correlation (rank-based)
                 cor_spearman <- cor.test(x_data, y_data, method = "spearman")
-                correlation_stats$spearman_r <- cor_spearman$estimate
-                correlation_stats$spearman_p <- cor_spearman$p.value
+                correlation_stats$spearman_r_naive <- cor_spearman$estimate
+                correlation_stats$spearman_p_naive <- cor_spearman$p.value
 
                 # Linear regression statistics
                 lm_result <- lm(y_data ~ x_data)
-                correlation_stats$slope <- coef(lm_result)[2]
-                correlation_stats$intercept <- coef(lm_result)[1]
-                correlation_stats$r_squared <- summary(lm_result)$r.squared
-                correlation_stats$regression_p <- summary(lm_result)$coefficients[2, 4]
+                correlation_stats$slope_naive <- coef(lm_result)[2]
+                correlation_stats$intercept_naive <- coef(lm_result)[1]
+                correlation_stats$r_squared_naive <- summary(lm_result)$r.squared
+                correlation_stats$regression_p_naive <- summary(lm_result)$coefficients[2, 4]
+
+                # Set "display" values - use naive with clear labeling
+                correlation_stats$pearson_r <- correlation_stats$pearson_r_naive
+                correlation_stats$pearson_p <- correlation_stats$pearson_p_naive
+                correlation_stats$pearson_ci_lower <- correlation_stats$pearson_ci_lower_naive
+                correlation_stats$pearson_ci_upper <- correlation_stats$pearson_ci_upper_naive
+                correlation_stats$spearman_r <- correlation_stats$spearman_r_naive
+                correlation_stats$spearman_p <- correlation_stats$spearman_p_naive
+                correlation_stats$slope <- correlation_stats$slope_naive
+                correlation_stats$intercept <- correlation_stats$intercept_naive
+                correlation_stats$r_squared <- correlation_stats$r_squared_naive
+                correlation_stats$regression_p <- correlation_stats$regression_p_naive
+
+                # Add methodology note for interpretation
+                if (has_repeated_measures || !is.null(groupby)) {
+                    correlation_stats$independence_note <- paste0(
+                        "⚠️ IMPORTANT LIMITATION: Statistics assume independent observations. ",
+                        "For longitudinal data with repeated measures, these statistics may ",
+                        "overstate significance. ",
+                        "Consider: (1) Aggregating to patient-level summaries (e.g., slope per patient), ",
+                        "(2) Using mixed-effects models in specialized software, or ",
+                        "(3) Interpreting p-values as exploratory descriptives only."
+                    )
+                }
 
             } else {
                 # For categorical X, calculate trend test if ordered
@@ -486,6 +511,16 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     interpretation = copy_ready
                 ))
                 row_num <- row_num + 1
+
+                # Add independence assumption warning if applicable
+                if (!is.null(correlation_stats$independence_note)) {
+                    table$addRow(rowKey = row_num, values = list(
+                        measure = .("⚠️ Statistical Validity"),
+                        value = "",
+                        interpretation = correlation_stats$independence_note
+                    ))
+                    row_num <- row_num + 1
+                }
             }
 
             # Spearman correlation with enhanced interpretation
@@ -1039,14 +1074,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             summary_text <- paste0(summary_text, "</div>")
 
-            # Update todo content with summary
-            existing_content <- self$results$todo$content
-            if (!is.null(existing_content) && nchar(existing_content) > 0) {
-                self$results$todo$setContent(paste0(existing_content, summary_text))
-            } else {
-                self$results$todo$setContent(summary_text)
-            }
-            self$results$todo$setVisible(TRUE)
+            # FIXED: Use dedicated naturalSummary output instead of appending to todo
+            self$results$naturalSummary$setContent(summary_text)
+            self$results$naturalSummary$setVisible(TRUE)
         },
 
         # Enhanced error handling

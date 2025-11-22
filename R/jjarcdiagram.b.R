@@ -82,22 +82,29 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.generateNetworkStats(network_data)
             }
             
-            # Generate copy-ready report sentence with error handling
-            tryCatch({
-                private$.generateReportSentence(network_data)
-            }, error = function(e) {
-                warning(paste("Report generation failed:", e$message))
-                # Set fallback content
-                fallback_html <- paste(
-                    .("<h3>📄 Analysis Summary</h3>"),
-                    "<div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;'>",
-                    .("<p><strong>Status:</strong> Network analysis completed successfully.</p>"),
-                    .("<p><strong>Note:</strong> Detailed summary generation encountered an issue. Basic network visualization is available above.</p>"),
-                    "</div>",
-                    sep = "\n"
-                )
-                self$results$reportSentence$setContent(fallback_html)
-            })
+            # Generate copy-ready report sentence with error handling (visible only when showSummary=TRUE)
+            if (self$options$showSummary) {
+                tryCatch({
+                    private$.generateReportSentence(network_data)
+                }, error = function(e) {
+                    warning(paste("Report generation failed:", e$message))
+                    # Set fallback content
+                    fallback_html <- paste(
+                        .("<h3>📄 Analysis Summary</h3>"),
+                        "<div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;'>",
+                        .("<p><strong>Status:</strong> Network analysis completed successfully.</p>"),
+                        .("<p><strong>Note:</strong> Detailed summary generation encountered an issue. Basic network visualization is available above.</p>"),
+                        "</div>",
+                        sep = "\n"
+                    )
+                    self$results$reportSentence$setContent(fallback_html)
+                })
+            }
+
+            # Generate glossary if requested (visible only when showGlossary=TRUE)
+            if (self$options$showGlossary) {
+                private$.generateGlossary()
+            }
 
             # Update todo with processing status
             todo <- glue::glue(
@@ -131,15 +138,27 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 private$.createArcPlot(network_data)
             }, error = function(e) {
-                self$results$todo$setContent(
-                    paste(.("<br><b>Error creating plot:</b>"), e$message, "<br><hr>")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'plotCreationError',
+                    type = jmvcore::NoticeType$ERROR
                 )
+                notice$setContent(paste('Error creating plot:', e$message))
+                self$results$insert(1, notice)
                 stop(e$message)
             })
 
             TRUE
         },
-        
+
+        # Helper method to escape variable names for safe igraph handling
+        .escapeVar = function(x) {
+            x_char <- as.character(x)
+            safe <- make.names(x_char, unique = TRUE)
+            safe <- gsub("\\.", "_", safe)
+            return(safe)
+        },
+
         # Helper method to create user instructions
         .createInstructions = function() {
             # Get preset-specific guidance
@@ -266,41 +285,18 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         },
         
-        # Helper method to validate network structure
-        .validateNetworkStructure = function(edgelist, network_data) {
-            warnings <- c()
-            
-            # Check for self-loops
-            self_loops <- sum(edgelist[,1] == edgelist[,2])
-            if (self_loops > 0) {
-                warnings <- c(warnings, sprintf(.("Warning: %d self-loop(s) detected and will be ignored"), self_loops))
-                edgelist <- edgelist[edgelist[,1] != edgelist[,2], , drop = FALSE]
-            }
-            
-            # Check for small networks
-            if (network_data$n_nodes < 10) {
-                warnings <- c(warnings, .("Warning: Small networks (< 10 nodes) may not provide reliable centrality measures"))
-            }
-            
-            # Check for very large networks
-            if (nrow(edgelist) > 10000) {
-                warnings <- c(warnings, .("Note: Large network detected. Analysis may take longer"))
-            }
-            
-            # Memory usage warning for massive datasets
-            if (nrow(edgelist) > 50000) {
-                stop(.("Network too large (> 50,000 edges). Consider filtering or sampling data first"))
-            }
-            
-            return(list(edgelist = edgelist, warnings = warnings))
-        },
-        
         # Helper method to prepare network data
         .prepareNetworkData = function() {
             mydata <- self$data
 
             if (nrow(mydata) == 0) {
-                self$results$todo$setContent(.("<br><b>Error:</b> No data available<br><hr>"))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noDataAvailable',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No data available. Please load a dataset and re-run the analysis.')
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
@@ -312,7 +308,13 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Validate required columns exist
             if (!source_var %in% names(mydata) || !target_var %in% names(mydata)) {
-                self$results$todo$setContent(.("<br><b>Error:</b> Source or target variables not found<br><hr>"))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'variablesNotFound',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Source or target variables not found in the dataset.')
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
@@ -330,66 +332,234 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata_clean <- mydata[complete_rows, , drop = FALSE]
 
             if (nrow(mydata_clean) == 0) {
-                self$results$todo$setContent(.("<br><b>Error:</b> No complete rows in source/target/weight/group columns<br><hr>"))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noCompleteRows',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No complete rows after removing missing values. Check your data for NA values in source, target, weight, or group variables.')
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
-            # Create edge list matrix
-            edgelist <- as.matrix(mydata_clean[c(source_var, target_var)])
+            # Create edge data frame with escaped names + original labels
+            edge_df <- data.frame(
+                source = private$.escapeVar(mydata_clean[[source_var]]),
+                target = private$.escapeVar(mydata_clean[[target_var]]),
+                source_label = as.character(mydata_clean[[source_var]]),
+                target_label = as.character(mydata_clean[[target_var]]),
+                stringsAsFactors = FALSE
+            )
 
-            if (nrow(edgelist) == 0) {
-                self$results$todo$setContent(.("<br><b>Error:</b> No complete edge data available<br><hr>"))
+            # Add weights if specified
+            if (!is.null(weight_var) && weight_var %in% names(mydata_clean)) {
+                edge_df$weight <- as.numeric(mydata_clean[[weight_var]])
+                edge_df$weight[is.na(edge_df$weight)] <- 1
+            } else {
+                edge_df$weight <- 1
+            }
+
+            if (nrow(edge_df) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noEdgeData',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No valid edge data available after processing. Ensure source and target variables have overlapping values.')
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
-            # Calculate initial network metrics for validation
+            # Calculate initial metrics before aggregation
+            vlabels_initial <- unique(c(edge_df$source, edge_df$target))
+            vlabels_display <- unique(c(edge_df$source_label, edge_df$target_label))
+            n_edges_raw <- nrow(edge_df)
+
+            # Remove self-loops before aggregation
+            self_loops <- sum(edge_df$source == edge_df$target)
+            if (self_loops > 0) {
+                edge_df <- edge_df[edge_df$source != edge_df$target, , drop = FALSE]
+            }
+
+            # AGGREGATE DUPLICATE EDGES if option enabled
+            aggregation_warnings <- c()
+            if (self$options$aggregateEdges) {
+                # Count duplicates before aggregation
+                edge_pairs <- paste(edge_df$source, edge_df$target, sep = "->")
+                if (!self$options$directed) {
+                    # For undirected, normalize pairs (A-B same as B-A)
+                    edge_pairs_sorted <- apply(edge_df[, c("source", "target")], 1, function(x) paste(sort(x), collapse = "->"))
+                    duplicates <- sum(duplicated(edge_pairs_sorted))
+                } else {
+                    duplicates <- sum(duplicated(edge_pairs))
+                }
+
+                if (duplicates > 0) {
+                    aggregation_warnings <- c(aggregation_warnings,
+                        sprintf(.("Note: %d duplicate edge(s) aggregated by summing weights"), duplicates))
+                }
+
+                # Aggregate by summing weights for duplicate edges
+                if (!self$options$directed) {
+                    # For undirected networks, treat A->B and B->A as the same edge
+                    edge_df$edge_key <- apply(edge_df[, c("source", "target")], 1, function(x) paste(sort(x), collapse = "~~~"))
+                    edge_agg <- aggregate(weight ~ edge_key, data = edge_df, FUN = sum)
+
+                    # Split edge_key back into source and target
+                    edge_split <- strsplit(edge_agg$edge_key, "~~~")
+                    edge_df <- data.frame(
+                        source = sapply(edge_split, `[`, 1),
+                        target = sapply(edge_split, `[`, 2),
+                        weight = edge_agg$weight,
+                        stringsAsFactors = FALSE
+                    )
+                } else {
+                    # For directed networks, only aggregate identical source->target pairs
+                    edge_agg <- aggregate(weight ~ source + target, data = edge_df, FUN = sum)
+                    edge_df <- edge_agg
+                }
+            } else {
+                # Warn if there are duplicates but aggregation is disabled
+                edge_pairs <- paste(edge_df$source, edge_df$target, sep = "->")
+                duplicates <- sum(duplicated(edge_pairs))
+                if (duplicates > 0) {
+                    aggregation_warnings <- c(aggregation_warnings,
+                        sprintf(.("Warning: %d duplicate edge(s) detected but not aggregated. Network metrics may be inflated. Enable 'Aggregate Duplicate Edges' for accurate statistics."), duplicates))
+                }
+            }
+
+            # Create edge list matrix from aggregated data
+            edgelist <- as.matrix(edge_df[, c("source", "target")])
+            weights <- edge_df$weight
+
+            # Calculate network metrics after aggregation
             vlabels <- unique(c(edgelist[,1], edgelist[,2]))
             n_nodes <- length(vlabels)
             n_edges <- nrow(edgelist)
 
-            # Validate network structure
-            validation <- private$.validateNetworkStructure(edgelist, list(n_nodes = n_nodes, n_edges = n_edges))
-            edgelist <- validation$edgelist
-
-            # Update edge count after validation
-            n_edges <- nrow(edgelist)
-
-            # Display warnings if any
-            if (length(validation$warnings) > 0) {
-                warning_text <- paste(validation$warnings, collapse = "<br>")
-                self$results$todo$setContent(paste0("<br>", warning_text, "<br><hr>"))
+            # Display self-loops warning as Notice
+            if (self_loops > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'selfLoopsDetected',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('%d self-loop(s) detected and removed from the network.', self_loops))
+                self$results$insert(2, notice)
             }
 
-            # Get edge weights if specified
-            if (!is.null(weight_var) && weight_var %in% names(mydata_clean)) {
-                weights <- as.numeric(mydata_clean[[weight_var]])
-                # If any weights are still NA after filtering, replace with 1
-                weights[is.na(weights)] <- 1
-            } else {
-                weights <- rep(1, nrow(edgelist))
+            # Display aggregation warnings as Notices
+            if (length(aggregation_warnings) > 0) {
+                for (i in seq_along(aggregation_warnings)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('aggregationWarning', i),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    # Remove the "Warning: " prefix from the message since NoticeType already indicates it's a warning
+                    msg <- sub("^Warning: ", "", aggregation_warnings[i])
+                    notice$setContent(msg)
+                    self$results$insert(2, notice)
+                }
             }
 
-            # NODE-LEVEL GROUP HANDLING: Build proper node-to-group mapping
-            # Groups should be node attributes, not edge attributes
+            # Check for small/large networks with tiered warnings
+            if (n_nodes < 3) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'trivialNetwork',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent('Network has fewer than 3 nodes. Centrality measures are not meaningful for networks this small. Consider adding more entities or combining data.')
+                self$results$insert(1, notice)
+            } else if (n_nodes < 5) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'verySmallNetwork',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent('Network has fewer than 5 nodes. Centrality measures may be unreliable. Interpret with caution and consider qualitative assessment instead of quantitative metrics.')
+                self$results$insert(1, notice)
+            } else if (n_nodes < 10) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallNetwork',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent('Small network (< 10 nodes). Centrality measures may show limited variation. Results should be interpreted cautiously.')
+                self$results$insert(2, notice)
+            }
+
+            if (n_edges > 10000) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'largeNetwork',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent('Large network detected. Analysis may take longer.')
+                self$results$insert(999, notice)
+            }
+
+            if (n_edges > 50000) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'networkTooLarge',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Network too large (> 50,000 edges after aggregation). Consider filtering or sampling data first.')
+                self$results$insert(1, notice)
+                stop('Network too large (> 50,000 edges after aggregation). Consider filtering or sampling data first.')
+            }
+
+            # NODE-LEVEL GROUP HANDLING: Build proper node-to-group mapping with conflict detection
+            # Groups should be node attributes, not edge-level
+            # Create reverse mapping: escaped names -> original labels
+            label_to_escaped <- setNames(vlabels, vlabels_display)
+            escaped_to_label <- setNames(vlabels_display, vlabels)
+
             node_groups <- NULL
+            group_conflicts <- c()
             if (!is.null(group_var) && group_var %in% names(mydata_clean)) {
-                # Create a mapping from node labels to groups
-                # For each node, find its group by looking at source or target columns
+                # Create a mapping from ESCAPED node labels to groups
                 node_groups <- setNames(rep(NA, length(vlabels)), vlabels)
 
                 for (i in seq_along(vlabels)) {
-                    node <- vlabels[i]
-                    # Look for this node in source column
-                    source_match <- which(mydata_clean[[source_var]] == node)
-                    if (length(source_match) > 0) {
-                        # Use the first occurrence's group
-                        node_groups[node] <- as.character(mydata_clean[[group_var]][source_match[1]])
-                    } else {
-                        # Look in target column
-                        target_match <- which(mydata_clean[[target_var]] == node)
-                        if (length(target_match) > 0) {
-                            node_groups[node] <- as.character(mydata_clean[[group_var]][target_match[1]])
+                    node_escaped <- vlabels[i]
+                    node_original <- escaped_to_label[node_escaped]
+                    # Look for this node's ORIGINAL name in both source and target columns
+                    source_match <- which(as.character(mydata_clean[[source_var]]) == node_original)
+                    target_match <- which(as.character(mydata_clean[[target_var]]) == node_original)
+                    all_matches <- c(source_match, target_match)
+
+                    if (length(all_matches) > 0) {
+                        # Get all unique groups for this node
+                        groups_for_node <- unique(as.character(mydata_clean[[group_var]][all_matches]))
+                        groups_for_node <- groups_for_node[!is.na(groups_for_node)]
+
+                        if (length(groups_for_node) > 1) {
+                            # CONFLICT DETECTED: Node appears with multiple groups
+                            group_conflicts <- c(group_conflicts,
+                                sprintf(.("Warning: Node '%s' has conflicting groups (%s). Using first occurrence: '%s'"),
+                                    node_original, paste(groups_for_node, collapse = ", "), groups_for_node[1]))
+                            node_groups[node_escaped] <- groups_for_node[1]
+                        } else if (length(groups_for_node) == 1) {
+                            node_groups[node_escaped] <- groups_for_node[1]
                         }
+                    }
+                }
+
+                # Display group conflict warnings as Notices
+                if (length(group_conflicts) > 0) {
+                    for (i in seq_along(group_conflicts)) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('groupConflict', i),
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        # Remove the "Warning: " prefix from the message
+                        msg <- sub("^Warning: ", "", group_conflicts[i])
+                        notice$setContent(msg)
+                        self$results$insert(2, notice)
                     }
                 }
             }
@@ -399,7 +569,13 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             g <- tryCatch({
                 igraph::graph_from_edgelist(edgelist, directed = self$options$directed)
             }, error = function(e) {
-                self$results$todo$setContent(.("<br><b>Error creating network:</b> Invalid edge structure<br><hr>"))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'invalidEdgeStructure',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Invalid edge structure detected. Check for duplicate or self-referencing edges.')
+                self$results$insert(1, notice)
                 return(NULL)
             })
 
@@ -427,12 +603,35 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.checkpoint(flush = FALSE)  # Before density calculation
             density <- igraph::edge_density(g)
 
+            # Domain-specific network density warnings
+            if (density > 0.7) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'highNetworkDensity',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent('Network density is very high (>70%). Consider filtering weak connections or using different visualization methods for clearer interpretation.')
+                self$results$insert(2, notice)
+            }
+
+            # Info for sparse networks (helpful guidance, not a problem)
+            if (density < 0.05 && n_nodes > 20) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'sparseNetwork',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent('Network is sparse (density <5%). Arc diagram is well-suited for visualizing sparse network structures.')
+                self$results$insert(999, notice)
+            }
+
             return(list(
                 edgelist = edgelist,
                 weights = weights,
-                node_groups = node_groups,  # Now node-level, not edge-level
+                node_groups = node_groups,
                 g = g,
-                vlabels = vlabels,
+                vlabels = vlabels,              # Escaped names for igraph
+                vlabels_display = vlabels_display,  # Original for plotting
                 degrees = degrees,
                 n_nodes = n_nodes,
                 n_edges = n_edges,
@@ -465,7 +664,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 network_data$edgelist,
                 ordering = ord,
                 horizontal = self$options$horizontal,
-                labels = network_data$vlabels,
+                labels = network_data$vlabels_display,
                 show.nodes = self$options$showNodes,
                 col.nodes = colors$node_border,
                 bg.nodes = colors$node_fill,
@@ -491,12 +690,13 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to calculate node ordering
         .calculateNodeOrdering = function(network_data) {
             vlabels <- network_data$vlabels
+            vlabels_display <- network_data$vlabels_display
             degrees <- network_data$degrees
-            node_groups <- network_data$node_groups  # Now using node-level groups
+            node_groups <- network_data$node_groups
 
             ord <- switch(self$options$sortNodes,
                 "none" = seq_along(vlabels),
-                "name" = order(vlabels, decreasing = self$options$sortDecreasing),
+                "name" = order(vlabels_display, decreasing = self$options$sortDecreasing),
                 "degree" = order(degrees, decreasing = self$options$sortDecreasing),
                 "group" = {
                     if (!is.null(node_groups)) {
@@ -555,13 +755,20 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 unique_groups <- unique_groups[!is.na(unique_groups)]
                 n_groups <- length(unique_groups)
 
-                # Get color palette
-                if (n_groups <= 3) {
-                    group_colors <- RColorBrewer::brewer.pal(max(3, n_groups), "Set1")[1:n_groups]
-                } else if (n_groups <= 8) {
-                    group_colors <- RColorBrewer::brewer.pal(n_groups, "Set1")
+                # Get color palette (color-blind safe)
+                # Use viridis-based palettes for better accessibility
+                if (n_groups <= 8) {
+                    # viridis "turbo" palette - excellent for categorical data, CB-safe
+                    group_colors <- viridisLite::turbo(n_groups, begin = 0.1, end = 0.9)
+                } else if (n_groups <= 12) {
+                    # Extend to 12 colors with viridis
+                    group_colors <- viridisLite::viridis(n_groups, option = "H")
+                } else if (n_groups <= 24) {
+                    # Use HCL-based palette for many groups
+                    group_colors <- grDevices::hcl.colors(n_groups, palette = "Dark 3")
                 } else {
-                    group_colors <- rainbow(n_groups)
+                    # For very large number of groups, use polychrome approach
+                    group_colors <- grDevices::hcl.colors(n_groups, palette = "Zissou 1")
                 }
                 names(group_colors) <- unique_groups
 
@@ -571,11 +778,47 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 node_fill[is.na(node_fill)] <- "lightgray"
                 node_border <- "black"
 
-                # Arc colors: Color edges based on SOURCE node's group
+                # Arc colors: Support multiple coloring modes
                 edgelist <- network_data$edgelist
                 source_groups <- node_groups[edgelist[, 1]]
-                arc_colors <- group_colors[source_groups]
-                arc_colors[is.na(arc_colors)] <- "gray50"
+                target_groups <- node_groups[edgelist[, 2]]
+
+                arc_color_mode <- self$options$arcColorMode
+
+                if (arc_color_mode == "source") {
+                    # Color arcs by SOURCE node's group
+                    arc_colors <- group_colors[source_groups]
+                    arc_colors[is.na(arc_colors)] <- "gray50"
+                } else if (arc_color_mode == "target") {
+                    # Color arcs by TARGET node's group
+                    arc_colors <- group_colors[target_groups]
+                    arc_colors[is.na(arc_colors)] <- "gray50"
+                } else if (arc_color_mode == "gradient") {
+                    # Gradient: Blend source and target colors
+                    arc_colors <- character(nrow(edgelist))
+                    for (i in seq_len(nrow(edgelist))) {
+                        src_color <- group_colors[source_groups[i]]
+                        tgt_color <- group_colors[target_groups[i]]
+
+                        if (!is.na(src_color) && !is.na(tgt_color)) {
+                            # Blend the two colors (simple average in RGB space)
+                            src_rgb <- col2rgb(src_color) / 255
+                            tgt_rgb <- col2rgb(tgt_color) / 255
+                            blended_rgb <- (src_rgb + tgt_rgb) / 2
+                            arc_colors[i] <- rgb(blended_rgb[1], blended_rgb[2], blended_rgb[3])
+                        } else if (!is.na(src_color)) {
+                            arc_colors[i] <- src_color
+                        } else if (!is.na(tgt_color)) {
+                            arc_colors[i] <- tgt_color
+                        } else {
+                            arc_colors[i] <- "gray50"
+                        }
+                    }
+                } else {
+                    # Default to source mode
+                    arc_colors <- group_colors[source_groups]
+                    arc_colors[is.na(arc_colors)] <- "gray50"
+                }
 
                 # Apply transparency to arc colors
                 arc_color <- adjustcolor(arc_colors, alpha.f = self$options$arcTransparency)
@@ -648,12 +891,29 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (network_data$n_nodes > 1) {
                 private$.checkpoint(flush = FALSE)  # Before expensive centrality calculations
 
-                # WEIGHTED CENTRALITY: Use edge weights if available
-                if (!is.null(igraph::E(g)$weight) && any(igraph::E(g)$weight != 1)) {
-                    # Network has meaningful weights - use weighted centrality
-                    betweenness <- igraph::betweenness(g, weights = igraph::E(g)$weight)
-                    closeness <- igraph::closeness(g, weights = igraph::E(g)$weight)
-                    degree_label <- .("connections/strength")
+                # WEIGHTED CENTRALITY: Handle weight semantics correctly
+                has_weights <- !is.null(igraph::E(g)$weight) && any(igraph::E(g)$weight != 1)
+
+                if (has_weights) {
+                    # Determine weight interpretation
+                    if (self$options$weightMode == "strength") {
+                        # STRENGTH MODE: Higher weights = stronger connections
+                        # Invert weights for centrality calculations (igraph treats weights as distances)
+                        max_weight <- max(igraph::E(g)$weight, na.rm = TRUE)
+                        min_weight <- min(igraph::E(g)$weight, na.rm = TRUE)
+
+                        # Invert: strong connections (high weight) become short distances (low weight)
+                        inv_weights <- max_weight - igraph::E(g)$weight + min_weight
+
+                        betweenness <- igraph::betweenness(g, weights = inv_weights)
+                        closeness <- igraph::closeness(g, weights = inv_weights)
+                        degree_label <- .("weighted strength")
+                    } else {
+                        # DISTANCE MODE: Higher weights = longer paths (igraph default)
+                        betweenness <- igraph::betweenness(g, weights = igraph::E(g)$weight)
+                        closeness <- igraph::closeness(g, weights = igraph::E(g)$weight)
+                        degree_label <- .("weighted distance")
+                    }
                 } else {
                     # Unweighted network
                     betweenness <- igraph::betweenness(g)
@@ -661,11 +921,41 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     degree_label <- .("connections")
                 }
 
-                # Get key nodes for clinical interpretation
-                highest_degree_node <- names(which.max(network_data$degrees))
-                highest_betweenness_node <- names(which.max(betweenness))
-                max_degree <- max(network_data$degrees)
-                max_betweenness <- max(betweenness)
+                # HANDLE DISCONNECTED GRAPHS: Filter out Inf/NA values
+                betweenness[is.infinite(betweenness) | is.na(betweenness)] <- 0
+                closeness[is.infinite(closeness) | is.na(closeness)] <- 0
+
+                # Check if graph is connected and warn if not
+                is_connected <- igraph::is_connected(g)
+                if (!is_connected) {
+                    stats_text <- paste(stats_text,
+                        "<div style='background-color: #fff3cd; padding: 8px; margin: 8px 0; border-left: 4px solid #ffc107;'>",
+                        .("<p><strong>⚠️ Disconnected Network:</strong> This network contains isolated components. Centrality measures (betweenness, closeness) may be less meaningful. Nodes unreachable from others are assigned zero centrality.</p>"),
+                        "</div>",
+                        sep = "\n"
+                    )
+                }
+
+                # Get key nodes for clinical interpretation (after filtering invalid values)
+                valid_degrees <- network_data$degrees[is.finite(network_data$degrees) & !is.na(network_data$degrees)]
+                valid_betweenness <- betweenness[is.finite(betweenness) & !is.na(betweenness)]
+
+                if (length(valid_degrees) > 0 && length(valid_betweenness) > 0) {
+                    highest_degree_node <- names(which.max(network_data$degrees))
+                    highest_betweenness_node <- names(which.max(betweenness))
+                    max_degree <- max(network_data$degrees)
+                    max_betweenness <- max(betweenness)
+                } else {
+                    # Fallback if no valid centrality values
+                    stats_text <- paste(stats_text,
+                        "<div style='background-color: #f8d7da; padding: 8px; margin: 8px 0; border-left: 4px solid #dc3545;'>",
+                        .("<p><strong>❌ Error:</strong> Could not calculate valid centrality measures. Network may be too disconnected or contain invalid data.</p>"),
+                        "</div>",
+                        sep = "\n"
+                    )
+                    self$results$networkStats$setContent(stats_text)
+                    return()
+                }
 
                 stats_text <- paste(stats_text,
                     .("<h4>Centrality Measures:</h4>"),
@@ -715,7 +1005,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             assumptions <- paste(
                 .("<h3>📋 Network Analysis Assumptions & Guidelines</h3>"),
                 "<div style='background-color: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px;'>",
-                
+
                 .("<h4>📊 Data Requirements:</h4>"),
                 "<ul style='margin-left: 20px;'>",
                 .("<li><strong>Data Format:</strong> Each row represents one relationship/connection</li>"),
@@ -723,31 +1013,37 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("<li><strong>Edge Weights:</strong> Optional numeric values for connection strength</li>"),
                 .("<li><strong>Missing Data:</strong> Rows with missing source/target values are automatically excluded</li>"),
                 "</ul>",
-                
+
                 .("<h4>🎯 Network Analysis Guidelines:</h4>"),
                 "<ul style='margin-left: 20px;'>",
                 .("<li><strong>Network Size:</strong> Optimal range is 10-1000 nodes for meaningful analysis</li>"),
-                .("<li><strong>Self-loops:</strong> Connections from a node to itself are detected and removed</li>"),
-                .("<li><strong>Multiple Edges:</strong> Duplicate connections are preserved but may be aggregated</li>"),
-                .("<li><strong>Isolated Nodes:</strong> Entities with no connections appear only if referenced</li>"),
+                .("<li><strong>Self-loops:</strong> Connections from a node to itself are automatically detected and removed</li>"),
+                .("<li><strong>Duplicate Edges:</strong> When 'Aggregate Duplicate Edges' is enabled (recommended), parallel edges are combined by summing weights for accurate density/centrality calculations</li>"),
+                .("<li><strong>Edge Weight Mode:</strong> 'Strength' mode (default) treats higher weights as stronger connections, suitable for correlations/scores. 'Distance' mode treats higher weights as longer paths, suitable for costs/distances</li>"),
+                .("<li><strong>Isolated Nodes:</strong> Entities with no connections appear only if referenced; unreachable nodes get zero centrality</li>"),
                 "</ul>",
-                
+
                 .("<h4>📈 Interpretation Notes:</h4>"),
                 "<ul style='margin-left: 20px;'>",
-                .("<li><strong>Network Density:</strong> 0-0.2 (sparse), 0.2-0.5 (moderate), >0.5 (dense)</li>"),
-                .("<li><strong>Degree Centrality:</strong> Number of direct connections (hub identification)</li>"),
-                .("<li><strong>Betweenness Centrality:</strong> Importance as a bridge between network regions</li>"),
-                .("<li><strong>Connected Components:</strong> Isolated subnetworks may indicate distinct functional modules</li>"),
+                .("<li><strong>Network Density:</strong> 0-0.2 (sparse), 0.2-0.5 (moderate), >0.5 (dense). Aggregating duplicate edges ensures density ≤ 1.0</li>"),
+                .("<li><strong>Degree Centrality:</strong> Number of direct connections (hub identification). For weighted networks, uses strength (sum of weights)</li>"),
+                .("<li><strong>Betweenness Centrality:</strong> Importance as a bridge between network regions. Accounts for weight interpretation mode</li>"),
+                .("<li><strong>Closeness Centrality:</strong> Average distance to all other nodes. May be Inf for disconnected graphs (auto-filtered)</li>"),
+                .("<li><strong>Connected Components:</strong> Isolated subnetworks may indicate distinct functional modules. Warnings issued for disconnected graphs</li>"),
                 "</ul>",
-                
-                .("<h4>⚠️ Common Pitfalls:</h4>"),
+
+                .("<h4>⚠️ Common Pitfalls & Important Notes:</h4>"),
                 "<ul style='margin-left: 20px;'>",
-                .("<li><strong>Small Networks:</strong> Centrality measures less reliable with < 10 nodes</li>"),
-                .("<li><strong>Threshold Effects:</strong> Edge weight filtering can dramatically alter network structure</li>"),
-                .("<li><strong>Directed Networks:</strong> When 'Directed Network' is enabled, statistics respect edge direction but the arc diagram visualization does NOT display arrows. Consider this a limitation of the arc plot style.</li>"),
-                .("<li><strong>Clinical Relevance:</strong> High connectivity doesn't always imply biological significance</li>"),
+                .("<li><strong>Small Networks:</strong> Centrality measures less reliable with < 10 nodes (warning issued)</li>"),
+                .("<li><strong>Duplicate Edges:</strong> If not aggregated, density can exceed 1.0 and centrality measures may be inflated. Enable 'Aggregate Duplicate Edges' to fix this</li>"),
+                .("<li><strong>Weight Interpretation:</strong> Ensure 'Edge Weight Interpretation' matches your data. Most biological/clinical networks use 'Strength' mode</li>"),
+                .("<li><strong>Group Conflicts:</strong> If a node appears with multiple group labels, warnings are issued and the first occurrence is used</li>"),
+                .("<li><strong>Arc Coloring:</strong> Choose 'Source', 'Target', or 'Gradient' mode to control how arcs are colored when grouping is enabled</li>"),
+                .("<li><strong>Directed Networks:</strong> When 'Directed Network' is enabled, statistics respect edge direction but the arc diagram visualization does NOT display arrows. This is a limitation of the arc plot style</li>"),
+                .("<li><strong>Disconnected Graphs:</strong> Closeness/betweenness may be unreliable. Inf/NA values are auto-filtered and warnings are issued</li>"),
+                .("<li><strong>Clinical Relevance:</strong> High connectivity doesn't always imply biological significance. Consider domain knowledge when interpreting results</li>"),
                 "</ul>",
-                
+
                 "</div>",
                 sep = "\n"
             )
@@ -808,6 +1104,77 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             self$results$reportSentence$setContent(report_html)
+        },
+
+        # Helper method to generate glossary panel
+        .generateGlossary = function() {
+            glossary_html <- paste(
+                .("<h3>📖 Network Analysis Glossary</h3>"),
+                "<div style='background-color: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+
+                "<dl style='margin: 0;'>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Node (Vertex)"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("An entity or element in the network (e.g., gene, patient, disease, protein). Nodes are the fundamental building blocks of networks, representing the items being studied."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Edge (Arc)"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("A connection or relationship between two nodes (e.g., regulatory link, similarity score, co-occurrence). In arc diagrams, edges are visualized as curved arcs connecting nodes."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Degree Centrality"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("Number of direct connections a node has. High-degree nodes are 'hubs' that interact with many other entities. <strong>Clinical interpretation:</strong> A gene with high degree might be a master regulator; a patient with high degree might share characteristics with many others."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Betweenness Centrality"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("Measures how often a node lies on shortest paths between other nodes. High betweenness indicates the node serves as a 'bridge' connecting different network regions. <strong>Clinical interpretation:</strong> Entities with high betweenness may be critical bottlenecks or gateways in biological pathways."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Closeness Centrality"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("Average distance from a node to all other nodes in the network. Higher closeness means the node can reach others more quickly. <strong>Note:</strong> May be infinite (Inf) for disconnected graphs."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Network Density"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("Proportion of actual connections vs. all possible connections (0-1 scale). <strong>Interpretation:</strong> 0-0.2 = sparse (selective relationships), 0.2-0.5 = moderate (balanced), >0.5 = dense (highly interconnected). Dense networks may indicate shared mechanisms or pathways."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Weighted Network"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("A network where edges have numerical values representing connection strength, correlation, distance, or other quantitative measures. Weights influence how centrality measures are calculated."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Directed vs. Undirected"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("<strong>Directed:</strong> Edges have direction (A→B is different from B→A), suitable for regulatory relationships or causal pathways. <strong>Undirected:</strong> Edges are bidirectional (A-B same as B-A), suitable for similarity or co-occurrence networks. <strong>Note:</strong> Arc diagrams do not display arrows even for directed networks."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Isolated Node"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("A node with degree = 0 (no connections). Isolated nodes appear in the diagram but have zero centrality measures. May indicate rare or independent entities."),
+                "</dd>",
+
+                "<dt style='font-weight: bold; margin-top: 10px;'>", .("Connected Component"), "</dt>",
+                "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
+                .("A subgroup of nodes where every node can reach every other node in that subgroup. Disconnected networks have multiple separate components, which may represent distinct functional modules or pathways."),
+                "</dd>",
+
+                "</dl>",
+
+                "<p style='margin-top: 15px; font-style: italic; color: #666;'>",
+                .("💡 Tip: Use this glossary as a quick reference when interpreting network statistics and visualizations."),
+                "</p>",
+
+                "</div>",
+                sep = "\n"
+            )
+
+            self$results$glossary$setContent(glossary_html)
         }
     )
 )

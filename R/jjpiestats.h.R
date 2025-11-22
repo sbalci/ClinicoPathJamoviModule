@@ -223,7 +223,8 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         plot4 = function() private$.items[["plot4"]],
         plot2 = function() private$.items[["plot2"]],
-        plot1 = function() private$.items[["plot1"]]),
+        plot1 = function() private$.items[["plot1"]],
+        donutPlot = function() private$.items[["donutPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -307,7 +308,16 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot1",
                 requiresData=TRUE,
-                visible="(dep)"))}))
+                visible="(dep)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="donutPlot",
+                title="Donut Chart",
+                width=500,
+                height=400,
+                renderFun=".plotDonut",
+                requiresData=TRUE,
+                visible="(addGGPubrDonut)"))}))
 
 jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjpiestatsBase",
@@ -426,6 +436,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$donutPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' @export

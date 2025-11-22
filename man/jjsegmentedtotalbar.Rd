@@ -120,6 +120,7 @@ A results object containing:
 \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
 \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
+\code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

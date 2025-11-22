@@ -170,36 +170,37 @@ options:
       title: Statistical Test Method
       type: List
       options:
-        - title: Automatic (t-test for 2 groups, pairwise t-tests for 3+)
+        - title: Automatic (ANOVA/Kruskal-Wallis → post-hoc if significant)
           name: auto
-        - title: Pairwise t-tests (parametric)
+        - title: ANOVA → pairwise t-tests (parametric)
           name: t.test
-        - title: Pairwise Wilcoxon tests (non-parametric)
+        - title: Kruskal-Wallis → pairwise Wilcoxon (non-parametric)
           name: wilcox.test
       default: auto
       description:
           ui: >
-            Select method for pairwise group comparisons. IMPORTANT: This module performs
-            pairwise tests only (not omnibus ANOVA/Kruskal-Wallis). For 3+ groups, all
-            pairs are tested with Bonferroni correction. t-tests assume normal distributions;
-            Wilcoxon tests are robust to skewness. Auto selects t-test by default.
-            For >2 groups, 'Show Pairwise Comparisons' must be enabled to see statistics.
+            Select method for statistical comparisons. For 3+ groups, hierarchical testing
+            is used: omnibus test (ANOVA or Kruskal-Wallis) is performed first, followed by
+            post-hoc pairwise comparisons (with Bonferroni correction) only if the omnibus
+            test is significant. For 2 groups, performs direct comparison (t-test or Wilcoxon).
+            Parametric tests assume normal distributions; non-parametric tests are robust to skewness.
           R: >
-            Method for pairwise statistical comparison. Only pairwise tests are performed, not omnibus tests.
-            For >2 groups, requires pairwiseComparisons = TRUE. Bonferroni correction applied automatically.
+            Method for statistical comparison. For >2 groups: omnibus test followed by post-hoc
+            pairwise comparisons if significant. For 2 groups: direct comparison. Bonferroni
+            correction applied to multiple comparisons.
 
     - name: pairwiseComparisons
-      title: Show Pairwise Comparisons
+      title: Show Pairwise Comparisons (Post-hoc)
       type: Bool
       default: false
       description:
           ui: >
-            Show all pairwise comparisons between groups. REQUIRED for statistical tests when
-            comparing >2 groups. When enabled, all pairs are tested with Bonferroni correction
-            for multiple comparisons.
+            Show post-hoc pairwise comparisons between groups. For 3+ groups, pairwise tests
+            are only performed if the omnibus test (ANOVA/Kruskal-Wallis) is significant.
+            All pairwise comparisons use Bonferroni correction for multiple testing.
           R: >
-            Whether to show all pairwise comparisons. Required for >2 groups to display any
-            statistical tests.
+            Whether to show post-hoc pairwise comparisons. For >2 groups, only shown if
+            omnibus test is significant (proper hierarchical testing).
 
     # === SCATTER PLOT SPECIFIC ===
     - name: addCorr

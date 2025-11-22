@@ -266,4 +266,11 @@ options:
       description: >
         Plot height in pixels.
 
+    - name: showexplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description: >
+        Show explanations of the statistical results
+
 ...

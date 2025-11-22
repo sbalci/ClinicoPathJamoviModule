@@ -115,8 +115,16 @@ children:
               - type: CheckBox
                 name: directed
               - type: CheckBox
+                name: aggregateEdges
+              - type: ComboBox
+                name: weightMode
+                enable: (weight)
+              - type: CheckBox
                 name: colorByGroup
                 enable: (group)
+              - type: ComboBox
+                name: arcColorMode
+                enable: (group && colorByGroup)
               - type: CheckBox
                 name: showLegend
                 enable: (group && colorByGroup)
@@ -146,3 +154,16 @@ children:
             children:
               - type: CheckBox
                 name: showStats
+      - type: Label
+        label: Report Outputs
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummary
+              - type: CheckBox
+                name: showAssumptions
+              - type: CheckBox
+                name: showGlossary

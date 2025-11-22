@@ -1,0 +1,63 @@
+name: jrecode
+title: Interactive Recoding
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    suggested:
+      - nominal
+      - ordinal
+    permitted:
+      - factor
+    children:
+      - type: TargetLayoutBox
+        label: Variable to recode
+        children:
+          - type: VariablesListBox
+            name: dep
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: 'Recoding rules (one per line, use "old -> new"):'
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: recode_rules
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: else_level
+        label: Unmatched values
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: recoded_output
+            label: Generate code to create a new variable
+          - type: TextBox
+            name: new_var_name
+            format: string
+            enable: (recoded_output)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_code
+            label: Show generated R code
+          - type: CheckBox
+            name: show_table
+            label: Show comparison table
+          - type: CheckBox
+            name: show_levels
+            label: Show available levels

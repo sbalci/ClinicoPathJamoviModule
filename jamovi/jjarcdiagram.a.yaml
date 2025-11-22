@@ -1,7 +1,7 @@
 ---
 name: jjarcdiagram
 title: Arc Diagram
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Network
 version: '0.0.32'
 jas: '1.2'
@@ -84,8 +84,14 @@ options:
       permitted: [ factor ]
       description:
           R: >
-            Starting point of each relationship or connection. Examples: Gene A regulating Gene B, 
-            Patient X similar to Patient Y, or Disease A co-occurring with Disease B.
+            Starting entity in each relationship. Select the variable containing the "from" nodes.
+
+            Clinical Examples:
+            • Gene regulatory networks: Regulator gene (e.g., TP53, BRCA1)
+            • Patient networks: First patient in similarity pair (Patient_ID)
+            • Disease co-occurrence: Primary diagnosis (ICD10 code)
+            • Protein interactions: Upstream protein
+            • Treatment pathways: Initial intervention
 
     - name: target
       title: Target Node (To)
@@ -94,8 +100,14 @@ options:
       permitted: [ factor ]
       description:
           R: >
-            Endpoint of each relationship or connection. This represents what is being regulated, 
-            influenced, or connected to by the source entity.
+            Ending entity in each relationship. Select the variable containing the "to" nodes.
+
+            Clinical Examples:
+            • Gene regulatory networks: Target gene being regulated (e.g., CDK4, MYC)
+            • Patient networks: Second patient in similarity pair
+            • Disease co-occurrence: Secondary diagnosis or comorbidity
+            • Protein interactions: Downstream protein
+            • Treatment pathways: Next intervention in sequence
 
     - name: weight
       title: Edge Weight (Strength)
@@ -105,9 +117,16 @@ options:
       default: NULL
       description:
           R: >
-            Optional numeric measure of connection strength. Examples: Correlation coefficient, 
-            interaction score, similarity index, or co-occurrence frequency. Higher values indicate 
-            stronger relationships.
+            Optional numeric measure of connection strength or importance.
+
+            Clinical Examples:
+            • Gene networks: Correlation coefficient (0-1), fold-change, or interaction score
+            • Patient networks: Similarity score (e.g., Jaccard index, cosine similarity)
+            • Disease co-occurrence: Number of co-occurrences or relative risk
+            • Protein interactions: Binding affinity (Kd) or confidence score
+            • Treatment pathways: Transition probability (0-1)
+
+            Leave empty for unweighted networks (all edges treated equally).
 
     - name: group
       title: Node Categories (Color Coding)
@@ -246,6 +265,64 @@ options:
           R: >
             Whether to treat the network as directed (edges have direction from source to target) or undirected (edges represent bidirectional relationships).
 
+    - name: aggregateEdges
+      title: Aggregate Duplicate Edges
+      type: Bool
+      default: true
+      description:
+          R: >
+            ✅ RECOMMENDED: Combine multiple edges between the same nodes by summing weights.
+
+            Why it matters:
+            • Ensures network density ≤ 1.0 (without aggregation, density can exceed 1.0)
+            • Prevents inflated centrality measures
+            • Provides accurate statistical summaries
+
+            Example: If Gene A→Gene B appears 3 times with weights [2, 3, 5],
+            aggregation creates a single edge with weight 10.
+
+            When to disable: Only if you specifically need to preserve parallel edges for specialized analyses.
+
+    - name: weightMode
+      title: Edge Weight Interpretation
+      type: List
+      options:
+        - name: strength
+          title: Strength (higher = stronger connection)
+        - name: distance
+          title: Distance (higher = longer path)
+      default: strength
+      description:
+          R: >
+            How edge weights should be interpreted for centrality calculations.
+
+            • STRENGTH mode (default): Higher values = stronger connections
+              ✅ Use for: Correlations, interaction scores, similarity indices
+              Examples: r=0.8 (strong), binding affinity score=90
+
+            • DISTANCE mode: Higher values = longer paths/weaker connections
+              ⚠️ Use for: Costs, physical distances, dissimilarity measures
+              Examples: Euclidean distance, cost metrics
+
+            Most clinical/biological networks use STRENGTH mode.
+
+    - name: arcColorMode
+      title: Arc Coloring (for Groups)
+      type: List
+      options:
+        - name: source
+          title: Color by Source Node
+        - name: target
+          title: Color by Target Node
+        - name: gradient
+          title: Gradient (Source to Target)
+      default: source
+      description:
+          R: >
+            How to color arcs when nodes are grouped. 'Source' colors arcs by source node's group,
+            'Target' by target node's group, 'Gradient' creates a gradient from source to target colors.
+            Only applies when Color Nodes by Group is enabled.
+
     - name: colorByGroup
       title: Color Nodes by Group
       type: Bool
@@ -287,5 +364,29 @@ options:
       description:
           R: >
             Optional title to display above the arc diagram. Leave empty for no title.
+
+    - name: showSummary
+      title: Show Copy-Ready Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display a natural-language summary paragraph suitable for copying into reports or publications. Includes network overview, key findings, and grouping information.
+
+    - name: showAssumptions
+      title: Show Assumptions & Guidelines
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display detailed assumptions, interpretation guidelines, and common pitfalls panel. Includes network requirements, centrality measure explanations, and important notes for proper interpretation.
+
+    - name: showGlossary
+      title: Show Glossary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to display a glossary panel with definitions of key network analysis terms (nodes, edges, centrality measures, density). Useful for users new to network analysis.
 
 ...

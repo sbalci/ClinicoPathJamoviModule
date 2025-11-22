@@ -30,7 +30,8 @@ jjcoefstats(
   colorScheme = "default",
   plotTheme = "default",
   plotWidth = 700,
-  plotHeight = 500
+  plotHeight = 500,
+  showexplanations = TRUE
 )
 }
 \arguments{
@@ -93,11 +94,14 @@ for ratios).}
 \item{plotWidth}{Plot width in pixels.}
 
 \item{plotHeight}{Plot height in pixels.}
+
+\item{showexplanations}{Show explanations of the statistical results}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$coefPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$coefficientTable} \tab \tab \tab \tab \tab a table \cr

@@ -702,34 +702,107 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 method <- self$options$statMethod
                 if (method == "auto") method <- if (length(groups) == 2) "t.test" else "anova"
 
-                # CRITICAL LIMITATION: Only pairwise tests are computed, never omnibus ANOVA/Kruskal-Wallis
-                # For >2 groups, user MUST enable pairwiseComparisons to see any statistical tests
-                if (!self$options$pairwiseComparisons && length(groups) > 2) {
-                    # Warn user about missing statistics
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'pairwiseCompRequired',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(paste0(
-                        "Statistical comparisons for ", length(groups), " groups require 'Show Pairwise Comparisons' to be enabled. ",
-                        "No omnibus ANOVA or Kruskal-Wallis test is performed by this module. ",
-                        "Only pairwise tests with Bonferroni correction are available."
+                # HIERARCHICAL TESTING: For >2 groups, perform omnibus test first
+                # Only proceed to pairwise comparisons if omnibus test is significant
+                if (length(groups) > 2) {
+                    # Perform omnibus test (ANOVA or Kruskal-Wallis)
+                    omnibus_result <- if (method %in% c("t.test", "auto", "anova")) {
+                        # One-way ANOVA
+                        formula_str <- paste(y_col, "~", x_col)
+                        anova_result <- aov(as.formula(formula_str), data = complete_data)
+                        summary_result <- summary(anova_result)
+                        list(
+                            statistic = summary_result[[1]]$`F value`[1],
+                            p.value = summary_result[[1]]$`Pr(>F)`[1],
+                            method = "One-way ANOVA",
+                            df1 = summary_result[[1]]$Df[1],
+                            df2 = summary_result[[1]]$Df[2]
+                        )
+                    } else {
+                        # Kruskal-Wallis test
+                        kw_result <- kruskal.test(as.formula(paste(y_col, "~", x_col)), data = complete_data)
+                        list(
+                            statistic = kw_result$statistic,
+                            p.value = kw_result$p.value,
+                            method = "Kruskal-Wallis",
+                            df = kw_result$parameter
+                        )
+                    }
+
+                    # Add omnibus test result to statistics table
+                    omnibus_comparison <- if (method %in% c("t.test", "auto", "anova")) {
+                        paste0("Overall F(", omnibus_result$df1, ",", omnibus_result$df2, ")")
+                    } else {
+                        paste0("Overall H(", omnibus_result$df, ")")
+                    }
+
+                    self$results$statistics$addRow(rowKey = "omnibus", values = list(
+                        comparison = omnibus_comparison,
+                        method = omnibus_result$method,
+                        statistic = omnibus_result$statistic,
+                        pvalue = omnibus_result$p.value,
+                        significance = if (omnibus_result$p.value < 0.001) "***" else if (omnibus_result$p.value < 0.01) "**" else if (omnibus_result$p.value < 0.05) "*" else "ns"
                     ))
-                    self$results$insert(1, notice)
-                    return()
+
+                    # Check if omnibus test is significant at alpha = 0.05
+                    if (omnibus_result$p.value >= 0.05) {
+                        # Omnibus not significant - inform user
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'omnibusNotSignificant',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(paste0(
+                            "The omnibus test (", omnibus_result$method, ") was not significant (p = ",
+                            round(omnibus_result$p.value, 4), "). ",
+                            "Post-hoc pairwise comparisons are not recommended when the overall test is non-significant, ",
+                            "as this increases Type I error risk. ",
+                            if (self$options$pairwiseComparisons) "Pairwise results shown below should be interpreted with caution." else ""
+                        ))
+                        self$results$insert(2, notice)
+
+                        # If pairwise not requested, stop here
+                        if (!self$options$pairwiseComparisons) {
+                            return()
+                        }
+                    }
+
+                    # If pairwise comparisons not enabled, stop after omnibus test
+                    if (!self$options$pairwiseComparisons) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'pairwiseNotEnabled',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(paste0(
+                            "Omnibus test is significant (p = ", round(omnibus_result$p.value, 4), "). ",
+                            "Enable 'Show Pairwise Comparisons' to see which specific groups differ."
+                        ))
+                        self$results$insert(2, notice)
+                        return()
+                    }
+                } else {
+                    # For 2 groups, pairwise IS the omnibus test - no hierarchical issue
+                    # Continue to pairwise comparison below
                 }
                 
-                # Generate comparisons
+                # Generate pairwise comparisons (post-hoc tests)
                 comps <- combn(groups, 2, simplify = FALSE)
                 n_comparisons <- length(comps)
-                
+
                 # Determine actual test method used for pairwise comparisons
-                # NOTE: Even if user selects "ANOVA", we perform pairwise t-tests, not omnibus ANOVA
                 actual_method_name <- if (method %in% c("t.test", "auto", "anova")) {
-                    "t-test (pairwise)"
+                    if (length(groups) > 2) {
+                        "Pairwise t-tests (post-hoc)"
+                    } else {
+                        "Independent t-test"
+                    }
                 } else {
-                    "Wilcoxon (pairwise)"
+                    if (length(groups) > 2) {
+                        "Pairwise Wilcoxon (post-hoc)"
+                    } else {
+                        "Mann-Whitney U test"
+                    }
                 }
 
                 # Initialize results dataframe

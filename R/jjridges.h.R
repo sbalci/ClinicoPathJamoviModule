@@ -99,8 +99,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "density_ridges",
                     "density_ridges_gradient",
                     "histogram_ridges",
-                    "violin_ridges",
-                    "double_ridges"),
+                    "violin_ridges"),
                 default="density_ridges")
             private$..scale <- jmvcore::OptionNumber$new(
                 "scale",
@@ -323,8 +322,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "custom",
                     "biomarker_distribution",
-                    "treatment_response",
-                    "correlation_analysis"),
+                    "treatment_response"),
                 default="custom")
 
             self$.addOption(private$..x_var)
@@ -728,8 +726,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   comparing ridge plots across another dimension.
 #' @param plot_type Type of ridge plot. 'density_ridges' for smooth curves,
 #'   'density_ridges_gradient' adds color gradients, 'histogram_ridges' for
-#'   discrete bins, 'violin_ridges' for violin-style plots, 'double_ridges' for
-#'   comparing two distributions.
+#'   discrete bins, 'violin_ridges' for violin-style plots.
 #' @param scale Controls ridge height and overlap. Values > 1 create
 #'   overlapping ridges, < 1 creates more separation between ridges.
 #' @param bandwidth Bandwidth selection for density estimation. Controls
@@ -749,7 +746,8 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param add_mean Add vertical line at the mean of each distribution.
 #' @param add_median Add vertical line at the median of each distribution.
 #' @param show_stats Display statistical annotations including p-values and
-#'   effect sizes using ggstatsplot functionality.
+#'   effect sizes. WARNING: Assumes independent observations. Not valid for
+#'   repeated measures data.
 #' @param test_type Type of statistical test for group comparisons when
 #'   show_stats is TRUE.
 #' @param p_adjust_method Method for adjusting p-values in multiple
@@ -787,7 +785,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param width Width of the plot in pixels.
 #' @param height Height of the plot in pixels.
 #' @param dpi Resolution for plot export.
-#' @param clinicalPreset Clinical analysis preset
+#' @param clinicalPreset Clinical analysis preset for ridge plots
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr

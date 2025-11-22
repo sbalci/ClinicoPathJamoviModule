@@ -21,7 +21,22 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .MAX_OUTLIER_PROP = 0.05,
         .VIRIDIS_FALLBACK = c("#440154", "#414487", "#2A788E", "#22A884", "#7AD151", "#FDE725"),
         .CLINICAL_CB_SAFE_COLORS = c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"),
+        
+        # Option overrides for presets
+        overrides = list(),
+        
+        .option = function(option) {
+            if (option %in% names(private$overrides)) {
+                return(private$overrides[[option]])
+            }
+            return(self$options[[option]])
+        },
+
         .init = function() {
+            # Apply presets first to ensure UI reflects overrides
+            private$.applyClinicalPreset()
+
+
             # Check if required variables are provided
             if (is.null(self$options$x_var) || is.null(self$options$y_var)) {
                 self$results$instructions$setContent(paste0(
@@ -82,7 +97,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$instructions$setVisible(visible = FALSE)
             self$results$plot$setVisible(visible = TRUE)
             self$results$statistics$setVisible(visible = TRUE)
-            self$results$tests$setVisible(visible = self$options$show_stats)
+            self$results$tests$setVisible(visible = private$.option("show_stats"))
             self$results$interpretation$setVisible(visible = TRUE)
             
             # Set plot dimensions - increase size if legends are likely to be shown
@@ -258,51 +273,22 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (preset == "biomarker_distribution") {
-                self$options$plot_type <- "density_ridges"
-                self$options$add_boxplot <- TRUE
-                self$options$add_quantiles <- TRUE
-                self$options$quantiles <- "0.25, 0.5, 0.75"
-                self$options$theme_style <- "theme_pubr"
+                private$overrides$plot_type <- "density_ridges"
+                private$overrides$add_boxplot <- TRUE
+                private$overrides$add_quantiles <- TRUE
+                private$overrides$quantiles <- "0.25, 0.5, 0.75"
+                private$overrides$theme_style <- "theme_pubr"
 
             } else if (preset == "treatment_response") {
-                self$options$plot_type <- "violin_ridges"
-                self$options$show_stats <- TRUE
-                self$options$test_type <- "nonparametric"
-                self$options$effsize_type <- "cliff_delta"
-                self$options$theme_style <- "theme_pubr"
+                private$overrides$plot_type <- "violin_ridges"
+                private$overrides$show_stats <- TRUE
+                private$overrides$test_type <- "nonparametric"
+                private$overrides$effsize_type <- "cliff_delta"
+                private$overrides$theme_style <- "theme_pubr"
 
-            } else if (preset == "correlation_analysis") {
-                # CRITICAL FIX: This preset is not yet fully implemented
-                # The double_ridges plot type currently only mirrors the same variable
-                # For true correlation analysis between two biomarkers, use scatter plots or correlation matrix
-
-                # Show prominent warning
-                warning_msg <- paste0(
-                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Feature Not Yet Implemented</h4>",
-                    "<p><strong>The 'Correlation Analysis' preset is not yet fully implemented.</strong></p>",
-                    "<p>The current 'double_ridges' plot only shows a mirrored version of the same variable, ",
-                    "not a true two-variable correlation analysis.</p>",
-                    "<p><strong>For correlation analysis between two biomarkers:</strong></p>",
-                    "<ul>",
-                    "<li>Use the <strong>Correlation Matrix</strong> analysis instead (jjcorrmat)</li>",
-                    "<li>Or use <strong>Scatter Plot with Stats</strong> (jjscatterstats)</li>",
-                    "</ul>",
-                    "<p>This preset will fall back to standard density ridges for now.</p>",
-                    "</div>"
-                )
-                self$results$warnings$setContent(warning_msg)
-                self$results$warnings$setVisible(TRUE)
-
-                # Fallback to standard density plot instead of broken double_ridges
-                self$options$plot_type <- "density_ridges"
-                self$options$show_stats <- TRUE
-                self$options$test_type <- "parametric"
-                self$options$effsize_type <- "d"
-                self$options$theme_style <- "theme_pubr"
             }
         },
-        
+
         .run = function() {
             # Check requirements
             if (is.null(self$options$x_var) || is.null(self$options$y_var))
@@ -368,8 +354,42 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateStatistics(plot_data)
             
             # Generate statistical tests if requested
-            if (self$options$show_stats) {
+            if (private$.option("show_stats")) {
                 private$.checkpoint()
+
+                # CRITICAL FIX: Check for potential repeated measures before running tests
+                repeated_measures_warning <- private$.checkRepeatedMeasures(plot_data)
+                if (!is.null(repeated_measures_warning)) {
+                    # Add prominent warning about independence assumption violation
+                    independence_warning_html <- paste0(
+                        "<div style='background:#fff3cd; border:2px solid #ff9800; padding:15px; margin:10px 0; border-radius:4px;'>",
+                        "<h5 style='color:#e65100; margin-top:0;'>⚠️ IMPORTANT: Independence Assumption</h5>",
+                        "<p style='color:#856404; margin:5px 0; font-weight:bold;'>",
+                        repeated_measures_warning,
+                        "</p>",
+                        "<p style='color:#856404; margin:5px 0;'>",
+                        "Statistical tests (p-values, effect sizes) shown below assume each observation is independent. ",
+                        "If your data has repeated measures, matched samples, or clustered observations, these results may be invalid.",
+                        "</p>",
+                        "<p style='color:#856404; margin:5px 0;'><strong>Recommendations:</strong></p>",
+                        "<ul style='color:#856404; margin:5px 0;'>",
+                        "<li>Aggregate data to one value per subject (e.g., mean, median, slope)</li>",
+                        "<li>Use specialized repeated measures or mixed-effects models</li>",
+                        "<li>Treat statistics as exploratory/descriptive only</li>",
+                        "</ul>",
+                        "</div>"
+                    )
+
+                    # Prepend to existing warnings
+                    current_warnings <- self$results$warnings$content
+                    if (is.null(current_warnings) || current_warnings == "") {
+                        self$results$warnings$setContent(independence_warning_html)
+                    } else {
+                        self$results$warnings$setContent(paste0(independence_warning_html, current_warnings))
+                    }
+                    self$results$warnings$setVisible(TRUE)
+                }
+
                 private$.generateTests(plot_data)
             }
             
@@ -384,7 +404,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateInterpretation(plot_data)
             
             # Set clinical summary
-            clinical_summary <- private$.generateClinicalSummary(plot_data, self$options$show_stats)
+            clinical_summary <- private$.generateClinicalSummary(plot_data, private$.option("show_stats"))
             self$results$clinicalSummary$setContent(clinical_summary)
             self$results$clinicalSummary$setVisible(TRUE)
         },
@@ -426,7 +446,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .createPlot = function(data) {
             # Base plot setup
-            plot_type <- self$options$plot_type
+            plot_type <- private$.option("plot_type")
             
             # Create base plot based on type
             if (plot_type == "ridgeline" || plot_type == "density_ridges") {
@@ -437,14 +457,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p <- private$.createHistogramPlot(data)
             } else if (plot_type == "violin_ridges") {
                 p <- private$.createViolinPlot(data)
-            } else if (plot_type == "double_ridges") {
-                p <- private$.createDoublePlot(data)
             } else {
                 p <- private$.createDensityPlot(data)  # Default
             }
             
             # Add advanced features
-            if (self$options$add_boxplot) {
+            if (private$.option("add_boxplot")) {
                 # Add boxplot elements using ggplot2 geoms
                 p <- p + ggplot2::geom_boxplot(
                     width = 0.1,
@@ -464,8 +482,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            if (self$options$add_quantiles) {
-                quantiles <- private$.validateQuantiles(self$options$quantiles)
+            if (private$.option("add_quantiles")) {
+                quantiles <- private$.validateQuantiles(private$.option("quantiles"))
                 p <- p + ggridges::stat_density_ridges(
                     quantile_lines = TRUE,
                     quantiles = quantiles
@@ -631,7 +649,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         alpha = self$options$alpha,
                         bandwidth = private$.getBandwidth(),
                         color = "black",
-                        size = 0.5,
+                        linewidth = 0.5,
                         show.legend = show_fill_legend
                     )
                 } else {
@@ -642,7 +660,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         alpha = self$options$alpha,
                         bandwidth = private$.getBandwidth(),
                         color = "black",
-                        size = 0.5,
+                        linewidth = 0.5,
                         show.legend = FALSE
                     )
                 }
@@ -654,7 +672,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     scale = self$options$scale,
                     fill = NA,
                     color = "black",
-                    size = 0.75,
+                    linewidth = 0.75,
                     bandwidth = private$.getBandwidth()
                 )
             }
@@ -696,7 +714,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         scale = self$options$scale,
                         alpha = self$options$alpha,
                         color = "black",
-                        size = 0.5,
+                        linewidth = 0.5,
                         show.legend = show_fill_legend
                     )
                 } else {
@@ -707,7 +725,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         scale = self$options$scale,
                         alpha = self$options$alpha,
                         color = "black",
-                        size = 0.5,
+                        linewidth = 0.5,
                         show.legend = FALSE
                     )
                 }
@@ -721,7 +739,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     scale = self$options$scale,
                     fill = NA,
                     color = "black",
-                    size = 0.75
+                    linewidth = 0.75
                 )
             }
             
@@ -757,35 +775,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(p)
         },
         
-        .createDoublePlot = function(data) {
-            # For double ridges, we need two distributions
-            # This is a simplified version - full implementation would need two x variables
-            p <- ggplot(data, aes(x = x, y = y))
-            
-            # Create mirrored distributions
-            p <- p + 
-                ggridges::geom_density_ridges(
-                    aes(fill = y),
-                    scale = self$options$scale,
-                    alpha = self$options$alpha / 2,
-                    bandwidth = private$.getBandwidth(),
-                    show.legend = FALSE
-                ) +
-                ggridges::geom_density_ridges(
-                    aes(fill = y),
-                    scale = -self$options$scale / 2,  # Negative scale for mirror effect
-                    alpha = self$options$alpha / 2,
-                    bandwidth = private$.getBandwidth(),
-                    show.legend = FALSE
-                )
-            
-            # Apply color palette
-            p <- private$.applyColorPalette(p)
-            
-            return(p)
-        },
-        
-        .getBandwidth = function() {
+        .calculateBandwidth = function() {
             if (self$options$bandwidth == "custom") {
                 return(self$options$bandwidth_value)
             } else if (self$options$bandwidth != "nrd0") {
@@ -835,7 +825,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .applyTheme = function(p) {
-            theme_style <- self$options$theme_style
+            theme_style <- private$.option("theme_style")
             
             if (theme_style == "theme_ridges") {
                 p <- p + ggridges::theme_ridges(grid = self$options$grid_lines)
@@ -849,8 +839,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     theme(
                         plot.background = element_rect(fill = "#2E2E2E", color = NA),
                         panel.background = element_rect(fill = "#2E2E2E", color = NA),
-                        panel.grid.major = element_line(color = "#555555", size = 0.3),
-                        panel.grid.minor = element_line(color = "#444444", size = 0.2),
+                        panel.grid.major = element_line(color = "#555555", linewidth = 0.3),
+                        panel.grid.minor = element_line(color = "#444444", linewidth = 0.2),
                         text = element_text(color = "#E0E0E0"),
                         axis.text = element_text(color = "#E0E0E0"),
                         axis.title = element_text(color = "#E0E0E0"),
@@ -954,7 +944,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Helper method: Perform a single statistical test with proper warnings
         .performSingleTest = function(data1, data2, group1, group2, stratum_label = "") {
-            test_type <- self$options$test_type
+            test_type <- private$.option("test_type")
             statistic <- NA
             p_value <- NA
             ci_lower <- NA
@@ -981,7 +971,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (test_type == "robust") {
                 # CRITICAL FIX: Warn if WRS2 unavailable instead of silent fallback
                 if (requireNamespace("WRS2", quietly = TRUE)) {
-                    test_result <- WRS2::yuen(data1, data2)
+                    # WRS2::yuen requires formula interface
+                    df_robust <- data.frame(
+                        val = c(data1, data2),
+                        grp = factor(rep(c("g1", "g2"), c(length(data1), length(data2))))
+                    )
+                    test_result <- WRS2::yuen(val ~ grp, data = df_robust)
                     statistic <- test_result$test
                     p_value <- test_result$p.value
                     ci_lower <- test_result$conf.int[1]
@@ -1040,6 +1035,15 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Calculate effect size with proper CIs
             effect_result <- private$.calculateEffectSizeWithCI(data1, data2)
 
+            # CRITICAL FIX: Combine effect size warnings with test warnings
+            if (!is.null(effect_result$warning)) {
+                if (warning_msg != "") {
+                    warning_msg <- paste0(warning_msg, " | ", effect_result$warning)
+                } else {
+                    warning_msg <- effect_result$warning
+                }
+            }
+
             # Build comparison label
             comparison_label <- paste(group1, "vs", group2)
             if (stratum_label != "") {
@@ -1062,7 +1066,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Helper method: Calculate effect size with proper confidence intervals
         .calculateEffectSizeWithCI = function(data1, data2) {
-            effsize_type <- self$options$effsize_type
+            effsize_type <- private$.option("effsize_type")
             effect_size <- NA
             ci_lower <- NA
             ci_upper <- NA
@@ -1070,9 +1074,32 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n1 <- length(data1)
             n2 <- length(data2)
 
+            # CRITICAL FIX: Check minimum sample sizes for effect size calculation
+            # Cohen's d and Hedges' g require at least n=3 per group for stable estimates
+            if (n1 < 3 || n2 < 3) {
+                return(list(
+                    effect_size = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    warning = paste0("Insufficient sample size for effect size (n1=", n1, ", n2=", n2, "). ",
+                                   "Minimum 3 observations per group required.")
+                ))
+            }
+
             if (effsize_type == "d") {
                 # Cohen's d with proper CI
                 pooled_sd <- sqrt(((n1 - 1) * var(data1) + (n2 - 1) * var(data2)) / (n1 + n2 - 2))
+
+                # CRITICAL FIX: Check for zero or near-zero variance
+                if (is.na(pooled_sd) || pooled_sd < 1e-10) {
+                    return(list(
+                        effect_size = NA,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        warning = "Cannot calculate Cohen's d: Zero or near-zero variance detected. Data may have constant values."
+                    ))
+                }
+
                 effect_size <- (mean(data1) - mean(data2)) / pooled_sd
 
                 # CI for Cohen's d using approximate formula
@@ -1083,6 +1110,17 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (effsize_type == "g") {
                 # Hedge's g with CI
                 pooled_sd <- sqrt(((n1 - 1) * var(data1) + (n2 - 1) * var(data2)) / (n1 + n2 - 2))
+
+                # CRITICAL FIX: Check for zero or near-zero variance
+                if (is.na(pooled_sd) || pooled_sd < 1e-10) {
+                    return(list(
+                        effect_size = NA,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        warning = "Cannot calculate Hedges' g: Zero or near-zero variance detected. Data may have constant values."
+                    ))
+                }
+
                 d <- (mean(data1) - mean(data2)) / pooled_sd
                 J <- 1 - (3 / (4 * (n1 + n2 - 2) - 1))
                 effect_size <- d * J
@@ -1170,8 +1208,68 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(list(
                 effect_size = effect_size,
                 ci_lower = ci_lower,
-                ci_upper = ci_upper
+                ci_upper = ci_upper,
+                warning = NULL
             ))
+        },
+
+        # Helper method: Check for potential repeated measures
+        .checkRepeatedMeasures = function(data) {
+            # CRITICAL FIX: Detect data patterns suggesting repeated measures/clustering
+            # This helps warn users when independence assumption is likely violated
+
+            # Calculate observations per group level
+            group_counts <- table(data$y)
+            total_obs <- nrow(data)
+            n_groups <- length(group_counts)
+
+            # Heuristic: If average observations per group is much higher than expected
+            # for independent samples, warn about possible repeated measures
+            avg_obs_per_group <- mean(group_counts)
+
+            # Check 1: High replication rate (>30 obs per group on average)
+            # Suggests longitudinal data or repeated biopsies
+            if (avg_obs_per_group > 30 && n_groups <= 5) {
+                return(paste0(
+                    "Data shows high observation density (avg ", round(avg_obs_per_group, 1),
+                    " observations per group). This pattern is common in repeated measures designs ",
+                    "(e.g., multiple time points, repeated biopsies per patient)."
+                ))
+            }
+
+            # Check 2: Look for integer-valued X variable with repeated values
+            # Common pattern: time points, visit numbers, days post-treatment
+            x_values <- data$x
+            if (all(x_values == floor(x_values), na.rm = TRUE)) {
+                # Count unique X values
+                n_unique_x <- length(unique(x_values))
+                # If we have many observations but few unique X values, likely repeated measures
+                if (total_obs > 50 && n_unique_x < 15) {
+                    return(paste0(
+                        "Data contains ", n_unique_x, " unique X values with ",
+                        total_obs, " total observations. This pattern suggests time series ",
+                        "or repeated measurements (e.g., Day 1, Day 7, Day 14)."
+                    ))
+                }
+            }
+
+            # Check 3: Look for variables with "patient", "subject", "id" in the data
+            # (checked in parent data, not just plot_data)
+            if (!is.null(self$data)) {
+                col_names <- tolower(names(self$data))
+                has_id_vars <- any(grepl("patient|subject|id|case", col_names))
+
+                if (has_id_vars && total_obs > 50) {
+                    return(paste0(
+                        "Dataset contains identifier variables (patient/subject ID columns). ",
+                        "If analyzing multiple observations per patient, results assume independence ",
+                        "which may not be appropriate."
+                    ))
+                }
+            }
+
+            # No obvious repeated measures pattern detected
+            return(NULL)
         },
 
         # Helper method: Adjust p-values handling NA correctly
@@ -1323,7 +1421,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateInterpretation = function(data) {
             # Generate clinical summary first
-            clinical_summary <- private$.generateClinicalSummary(data, self$options$show_stats)
+            clinical_summary <- private$.generateClinicalSummary(data, private$.option("show_stats"))
             
             # Traditional interpretation
             n_groups <- length(unique(data$y))
@@ -1343,7 +1441,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # Add plot-specific interpretations
-            if (self$options$plot_type == "density_ridges_gradient") {
+            if (private$.option("plot_type") == "density_ridges_gradient") {
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#e3f2fd; padding:10px; margin:10px 0; border-radius:4px;'>",
@@ -1352,7 +1450,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            if (self$options$add_boxplot) {
+            if (private$.option("add_boxplot")) {
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#e8f5e8; padding:10px; margin:10px 0; border-radius:4px;'>",
@@ -1362,7 +1460,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Add statistical context if tests were run
-            if (self$options$show_stats) {
+            if (private$.option("show_stats")) {
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#fff3e0; padding:10px; margin:10px 0; border-radius:4px;'>",

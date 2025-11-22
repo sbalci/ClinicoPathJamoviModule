@@ -1,0 +1,59 @@
+---
+name: jrecode
+title: Interactive Recoding
+jrs: '1.1'
+
+items:
+    - name: instructions
+      type: Html
+      visible: true
+
+    - name: levels_table
+      type: Table
+      title: Available Levels
+      visible: (show_levels)
+      clearWith:
+        - dep
+      columns:
+        - name: level
+          title: Level
+          type: text
+        - name: count
+          title: Count
+          type: integer
+        - name: percent
+          title: Percent
+          type: number
+          format: pc
+
+    - name: notices
+      type: Html
+      visible: false
+
+    - name: code_output
+      type: Preformatted
+      title: Generated R Code
+      visible: (show_code)
+
+    - name: comparison
+      type: Table
+      title: Recoding Preview
+      visible: (show_table)
+      clearWith:
+        - dep
+        - recode_rules
+        - else_level
+      columns:
+        - name: original
+          title: Original
+          type: text
+        - name: recoded
+          title: Recoded
+          type: text
+        - name: count
+          title: Count
+          type: integer
+        - name: percent
+          title: Percent
+          type: number
+          format: pc

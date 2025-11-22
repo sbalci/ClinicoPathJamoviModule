@@ -21,11 +21,17 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             arcWidthValue = 1,
             arcTransparency = 0.5,
             directed = FALSE,
+            aggregateEdges = TRUE,
+            weightMode = "strength",
+            arcColorMode = "source",
             colorByGroup = FALSE,
             showStats = FALSE,
             showLegend = FALSE,
             labelSize = 0.8,
-            plotTitle = "", ...) {
+            plotTitle = "",
+            showSummary = TRUE,
+            showAssumptions = TRUE,
+            showGlossary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -130,6 +136,25 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "directed",
                 directed,
                 default=FALSE)
+            private$..aggregateEdges <- jmvcore::OptionBool$new(
+                "aggregateEdges",
+                aggregateEdges,
+                default=TRUE)
+            private$..weightMode <- jmvcore::OptionList$new(
+                "weightMode",
+                weightMode,
+                options=list(
+                    "strength",
+                    "distance"),
+                default="strength")
+            private$..arcColorMode <- jmvcore::OptionList$new(
+                "arcColorMode",
+                arcColorMode,
+                options=list(
+                    "source",
+                    "target",
+                    "gradient"),
+                default="source")
             private$..colorByGroup <- jmvcore::OptionBool$new(
                 "colorByGroup",
                 colorByGroup,
@@ -152,6 +177,18 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "plotTitle",
                 plotTitle,
                 default="")
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=TRUE)
+            private$..showAssumptions <- jmvcore::OptionBool$new(
+                "showAssumptions",
+                showAssumptions,
+                default=TRUE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
 
             self$.addOption(private$..source)
             self$.addOption(private$..target)
@@ -168,11 +205,17 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..arcWidthValue)
             self$.addOption(private$..arcTransparency)
             self$.addOption(private$..directed)
+            self$.addOption(private$..aggregateEdges)
+            self$.addOption(private$..weightMode)
+            self$.addOption(private$..arcColorMode)
             self$.addOption(private$..colorByGroup)
             self$.addOption(private$..showStats)
             self$.addOption(private$..showLegend)
             self$.addOption(private$..labelSize)
             self$.addOption(private$..plotTitle)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showAssumptions)
+            self$.addOption(private$..showGlossary)
         }),
     active = list(
         source = function() private$..source$value,
@@ -190,11 +233,17 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         arcWidthValue = function() private$..arcWidthValue$value,
         arcTransparency = function() private$..arcTransparency$value,
         directed = function() private$..directed$value,
+        aggregateEdges = function() private$..aggregateEdges$value,
+        weightMode = function() private$..weightMode$value,
+        arcColorMode = function() private$..arcColorMode$value,
         colorByGroup = function() private$..colorByGroup$value,
         showStats = function() private$..showStats$value,
         showLegend = function() private$..showLegend$value,
         labelSize = function() private$..labelSize$value,
-        plotTitle = function() private$..plotTitle$value),
+        plotTitle = function() private$..plotTitle$value,
+        showSummary = function() private$..showSummary$value,
+        showAssumptions = function() private$..showAssumptions$value,
+        showGlossary = function() private$..showGlossary$value),
     private = list(
         ..source = NA,
         ..target = NA,
@@ -211,11 +260,17 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..arcWidthValue = NA,
         ..arcTransparency = NA,
         ..directed = NA,
+        ..aggregateEdges = NA,
+        ..weightMode = NA,
+        ..arcColorMode = NA,
         ..colorByGroup = NA,
         ..showStats = NA,
         ..showLegend = NA,
         ..labelSize = NA,
-        ..plotTitle = NA)
+        ..plotTitle = NA,
+        ..showSummary = NA,
+        ..showAssumptions = NA,
+        ..showGlossary = NA)
 )
 
 jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -227,7 +282,8 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         plot = function() private$.items[["plot"]],
         networkStats = function() private$.items[["networkStats"]],
         assumptions = function() private$.items[["assumptions"]],
-        reportSentence = function() private$.items[["reportSentence"]]),
+        reportSentence = function() private$.items[["reportSentence"]],
+        glossary = function() private$.items[["glossary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -268,12 +324,18 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
-                title="Analysis Assumptions & Guidelines"))
+                title="Analysis Assumptions & Guidelines",
+                visible="(showAssumptions)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentence",
                 title="Copy-Ready Summary",
-                visible="(showStats)"))}))
+                visible="(showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Network Analysis Glossary",
+                visible="(showGlossary)"))}))
 
 jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjarcdiagramBase",
@@ -363,14 +425,26 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' )
 #'}
 #' @param data The data as a data frame.
-#' @param source Starting point of each relationship or connection. Examples:
-#'   Gene A regulating Gene B,  Patient X similar to Patient Y, or Disease A
-#'   co-occurring with Disease B.
-#' @param target Endpoint of each relationship or connection. This represents
-#'   what is being regulated,  influenced, or connected to by the source entity.
-#' @param weight Optional numeric measure of connection strength. Examples:
-#'   Correlation coefficient,  interaction score, similarity index, or
-#'   co-occurrence frequency. Higher values indicate  stronger relationships.
+#' @param source Starting entity in each relationship. Select the variable
+#'   containing the "from" nodes. Clinical Examples: • Gene regulatory networks:
+#'   Regulator gene (e.g., TP53, BRCA1) • Patient networks: First patient in
+#'   similarity pair (Patient_ID) • Disease co-occurrence: Primary diagnosis
+#'   (ICD10 code) • Protein interactions: Upstream protein • Treatment pathways:
+#'   Initial intervention
+#' @param target Ending entity in each relationship. Select the variable
+#'   containing the "to" nodes. Clinical Examples: • Gene regulatory networks:
+#'   Target gene being regulated (e.g., CDK4, MYC) • Patient networks: Second
+#'   patient in similarity pair • Disease co-occurrence: Secondary diagnosis or
+#'   comorbidity • Protein interactions: Downstream protein • Treatment
+#'   pathways: Next intervention in sequence
+#' @param weight Optional numeric measure of connection strength or
+#'   importance. Clinical Examples: • Gene networks: Correlation coefficient
+#'   (0-1), fold-change, or interaction score • Patient networks: Similarity
+#'   score (e.g., Jaccard index, cosine similarity) • Disease co-occurrence:
+#'   Number of co-occurrences or relative risk • Protein interactions: Binding
+#'   affinity (Kd) or confidence score • Treatment pathways: Transition
+#'   probability (0-1) Leave empty for unweighted networks (all edges treated
+#'   equally).
 #' @param group Optional grouping variable for color-coding entities.
 #'   Examples: Gene families,  patient subtypes, disease categories, or
 #'   functional classifications.
@@ -404,6 +478,24 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param directed Whether to treat the network as directed (edges have
 #'   direction from source to target) or undirected (edges represent
 #'   bidirectional relationships).
+#' @param aggregateEdges ✅ RECOMMENDED: Combine multiple edges between the
+#'   same nodes by summing weights. Why it matters: • Ensures network density ≤
+#'   1.0 (without aggregation, density can exceed 1.0) • Prevents inflated
+#'   centrality measures • Provides accurate statistical summaries Example: If
+#'   Gene A→Gene B appears 3 times with weights [2, 3, 5], aggregation creates a
+#'   single edge with weight 10. When to disable: Only if you specifically need
+#'   to preserve parallel edges for specialized analyses.
+#' @param weightMode How edge weights should be interpreted for centrality
+#'   calculations. • STRENGTH mode (default): Higher values = stronger
+#'   connections   ✅ Use for: Correlations, interaction scores, similarity
+#'   indices   Examples: r=0.8 (strong), binding affinity score=90  • DISTANCE
+#'   mode: Higher values = longer paths/weaker connections   ⚠️ Use for: Costs,
+#'   physical distances, dissimilarity measures   Examples: Euclidean distance,
+#'   cost metrics  Most clinical/biological networks use STRENGTH mode.
+#' @param arcColorMode How to color arcs when nodes are grouped. 'Source'
+#'   colors arcs by source node's group, 'Target' by target node's group,
+#'   'Gradient' creates a gradient from source to target colors. Only applies
+#'   when Color Nodes by Group is enabled.
 #' @param colorByGroup When a grouping variable is specified, whether to
 #'   color-code nodes by their group membership. Requires a group variable.
 #' @param showStats Whether to display network statistics including number of
@@ -415,6 +507,16 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   above 1.0 increase label size, below 1.0 decrease it. Range: 0.1 to 2.0.
 #' @param plotTitle Optional title to display above the arc diagram. Leave
 #'   empty for no title.
+#' @param showSummary Whether to display a natural-language summary paragraph
+#'   suitable for copying into reports or publications. Includes network
+#'   overview, key findings, and grouping information.
+#' @param showAssumptions Whether to display detailed assumptions,
+#'   interpretation guidelines, and common pitfalls panel. Includes network
+#'   requirements, centrality measure explanations, and important notes for
+#'   proper interpretation.
+#' @param showGlossary Whether to display a glossary panel with definitions of
+#'   key network analysis terms (nodes, edges, centrality measures, density).
+#'   Useful for users new to network analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -423,6 +525,7 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$networkStats} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -443,11 +546,17 @@ jjarcdiagram <- function(
     arcWidthValue = 1,
     arcTransparency = 0.5,
     directed = FALSE,
+    aggregateEdges = TRUE,
+    weightMode = "strength",
+    arcColorMode = "source",
     colorByGroup = FALSE,
     showStats = FALSE,
     showLegend = FALSE,
     labelSize = 0.8,
-    plotTitle = "") {
+    plotTitle = "",
+    showSummary = TRUE,
+    showAssumptions = TRUE,
+    showGlossary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjarcdiagram requires jmvcore to be installed (restart may be required)")
@@ -484,11 +593,17 @@ jjarcdiagram <- function(
         arcWidthValue = arcWidthValue,
         arcTransparency = arcTransparency,
         directed = directed,
+        aggregateEdges = aggregateEdges,
+        weightMode = weightMode,
+        arcColorMode = arcColorMode,
         colorByGroup = colorByGroup,
         showStats = showStats,
         showLegend = showLegend,
         labelSize = labelSize,
-        plotTitle = plotTitle)
+        plotTitle = plotTitle,
+        showSummary = showSummary,
+        showAssumptions = showAssumptions,
+        showGlossary = showGlossary)
 
     analysis <- jjarcdiagramClass$new(
         options = options,

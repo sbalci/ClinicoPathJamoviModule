@@ -887,5 +887,72 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             TRUE
         }
 
+        , .plotDonut = function(image, ggtheme, theme, ...) {
+            
+            if (!self$options$addGGPubrDonut) return()
+            if (is.null(self$options$dep)) return()
+            
+            # Use cached data
+            tryCatch({
+                mydata <- private$.getCachedData()
+                options_data <- private$.prepareOptions()
+            }, error = function(e) {
+                stop(paste(.('Donut plot preparation failed: {error}'), list(error = e$message)))
+            })
+            
+            dep <- options_data$dep
+            group <- options_data$group
+            
+            # Prepare data for ggdonutchart (needs summary table)
+            # Handle weighted counts if present
+            if (!is.null(options_data$counts) && options_data$counts != "") {
+                # Weighted aggregation
+                formula_str <- paste0(options_data$counts, " ~ ", dep)
+                if (!is.null(group) && group != "") {
+                    formula_str <- paste0(formula_str, " + ", group)
+                }
+                
+                # Use xtabs to sum counts
+                agg_table <- xtabs(as.formula(formula_str), data = mydata)
+                plot_data <- as.data.frame(agg_table)
+                
+                # Rename count column to 'Freq' for consistency
+                names(plot_data)[names(plot_data) == "Freq"] <- "count"
+                
+            } else {
+                # Unweighted aggregation
+                if (!is.null(group) && group != "") {
+                    plot_data <- as.data.frame(table(mydata[[dep]], mydata[[group]]))
+                    names(plot_data) <- c(dep, group, "count")
+                } else {
+                    plot_data <- as.data.frame(table(mydata[[dep]]))
+                    names(plot_data) <- c(dep, "count")
+                }
+            }
+            
+            # Filter out zero counts to avoid plotting issues
+            plot_data <- plot_data[plot_data$count > 0, ]
+            
+            # Create plot
+            plot <- ggpubr::ggdonutchart(
+                plot_data, 
+                x = "count", 
+                label = dep,
+                fill = dep,
+                color = "white",
+                palette = self$options$ggpubrDonutPalette,
+                lab.pos = "in", 
+                lab.font = "white"
+            )
+            
+            # Facet if grouped
+            if (!is.null(group) && group != "") {
+                plot <- plot + ggplot2::facet_wrap(as.formula(paste("~", group)))
+            }
+            
+            print(plot)
+            TRUE
+        }
+
     )
 )

@@ -1,0 +1,59 @@
+---
+name: jrecode
+title: Recoding
+menuGroup: ExplorationT
+menuSubgroup: Data Preparation
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: dep
+      type: Variable
+      title: Variable to Recode
+      permitted:
+        - factor
+
+    - name: recode_rules
+      type: String
+      title: Recoding Rules
+      description: 'One rule per line. Format: oldvalue -> newvalue'
+      default: ''
+
+    - name: else_level
+      type: List
+      title: Unmatched Levels
+      options:
+        - name: copy
+          title: Keep original value
+        - name: na
+          title: Set to missing (NA)
+        - name: other
+          title: Set to "Other"
+      default: copy
+
+    - name: new_var_name
+      type: String
+      title: New Variable Name
+      description: 'Name for the recoded variable'
+      default: ''
+
+    # Display Options
+    - name: show_code
+      type: Bool
+      title: Show R Code
+      default: true
+
+    - name: show_table
+      type: Bool
+      title: Show Comparison Table
+      default: true
+
+    - name: show_levels
+      type: Bool
+      title: Show Available Levels
+      default: true
+
+    - name: recoded_output
+      type: Bool
+      title: Generate New Variable Code
+      default: false

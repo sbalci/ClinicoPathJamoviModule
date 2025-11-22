@@ -54,12 +54,14 @@ barplot, dotplot, line, errorplot}
 
 \item{addStats}{Whether to add statistical comparison p-values}
 
-\item{statMethod}{Method for statistical comparison. Only pairwise tests
-are performed, not omnibus tests. For >2 groups, requires
-pairwiseComparisons = TRUE.}
+\item{statMethod}{Method for statistical comparison. For >2 groups: omnibus
+test followed by post-hoc pairwise comparisons if significant. For 2
+groups: direct comparison. Bonferroni correction applied to multiple
+comparisons.}
 
-\item{pairwiseComparisons}{Whether to show all pairwise comparisons.
-Required for >2 groups to display any statistical tests.}
+\item{pairwiseComparisons}{Whether to show post-hoc pairwise comparisons.
+For >2 groups, only shown if omnibus test is significant (proper
+hierarchical testing).}
 
 \item{addCorr}{Whether to add correlation statistics}
 

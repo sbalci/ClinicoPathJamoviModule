@@ -34,11 +34,17 @@ items:
     - name: assumptions
       title: Analysis Assumptions & Guidelines
       type: Html
+      visible: (showAssumptions)
 
     - name: reportSentence
       title: Copy-Ready Summary
       type: Html
-      visible: (showStats)
+      visible: (showSummary)
+
+    - name: glossary
+      title: Network Analysis Glossary
+      type: Html
+      visible: (showGlossary)
 
 refs:
     - ClinicoPathJamoviModule

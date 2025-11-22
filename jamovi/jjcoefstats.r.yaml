@@ -10,6 +10,11 @@ items:
       type:  Html
       visible: true
 
+    - name:  about
+      title: About
+      type:  Html
+      visible: true
+
     - name:  coefPlot
       title: Coefficient Forest Plot
       type:  Image

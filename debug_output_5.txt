@@ -1,0 +1,58 @@
+
+Attaching package: ‘jmvcore’
+
+The following objects are masked from ‘package:base’:
+
+    endsWith, format, startsWith
+
+Warning message:
+package ‘ggplot2’ was built under R version 4.5.2 
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:jmvcore’:
+
+    select
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+You can cite this package as:
+     Patil, I. (2021). Visualizations with statistical details: The 'ggstatsplot' approach.
+     Journal of Open Source Software, 6(61), 3167, doi:10.21105/joss.03167
+Loading required package: Matrix
+[1] "Running minimal jmvcore test"
+[1] "Option created"
+[1] "Option checked"
+Test passed with 1 success 🎊.
+[1] "Creating options..."
+[1] "Options created."
+[1] "plotWidth: 700"
+[1] "plotHeight: 500"
+[1] "ciLevel: 0.95"
+[1] "Calling init"
+<simpleError in if (value > private$.max || value < private$.min) reject("{title} must be between {min} and {max} (is {value})",     title = private$.title, min = private$.min, max = private$.max,     value = value) else if (!value%%1 == 0) reject("{title} must be an integer value (is {value})",     title = private$.title, value = value): missing value where TRUE/FALSE needed>
+── Failure: jjcoefstats handles pre-computed data correctly ────────────────────
+Analysis run failed: missing value where TRUE/FALSE needed
+Backtrace:
+    ▆
+ 1. └─base::tryCatch(...)
+ 2.   └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 3.     └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 4.       └─value[[3L]](cond)
+Error:
+! Test failed with 1 failure and 0 successes.
+Backtrace:
+    ▆
+ 1. └─testthat::test_that(...)
+ 2.   └─testthat:::test_code(code, parent.frame())
+ 3.     ├─withr (local) `<fn>`()
+ 4.     └─reporter$end_test(context = reporter$.context, test = test)
+ 5.       └─cli::cli_abort(...)
+ 6.         └─rlang::abort(...)
+Execution halted

@@ -13,7 +13,6 @@ children:
           - type: ComboBox
             name: inputMode
             label: Data Input Mode
-
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -51,7 +50,6 @@ children:
             maxItemCount: 1
             isTarget: true
             enable: (inputMode:precomputed)
-
       - type: TargetLayoutBox
         label: Distribution Settings (Pre-computed)
         children:
@@ -60,7 +58,6 @@ children:
             label: Degrees of Freedom
             format: number
             enable: (inputMode:precomputed)
-
       - type: TargetLayoutBox
         label: Model Fitting (Automatic)
         children:
@@ -73,7 +70,6 @@ children:
             name: predictors
             isTarget: true
             enable: (inputMode:fitmodel)
-
       - type: TargetLayoutBox
         label: Survival Variables (Cox Model)
         children:
@@ -87,7 +83,6 @@ children:
             maxItemCount: 1
             isTarget: true
             enable: (inputMode:fitmodel && modelType:cox)
-
       - type: TargetLayoutBox
         label: Random Effects (Mixed Models)
         children:
@@ -96,7 +91,6 @@ children:
             maxItemCount: 1
             isTarget: true
             enable: (inputMode:fitmodel && modelType:mixed)
-
   - type: LayoutBox
     margin: large
     children:
@@ -114,7 +108,6 @@ children:
           - type: CheckBox
             name: exponentiate
             label: Exponentiate (OR/HR)
-
   - type: LayoutBox
     margin: large
     children:
@@ -137,7 +130,6 @@ children:
             name: referenceValue
             label: Reference Value
             format: number
-
   - type: LayoutBox
     margin: large
     children:
@@ -158,3 +150,8 @@ children:
             name: plotHeight
             label: Plot Height (pixels)
             format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showexplanations

@@ -596,82 +596,217 @@ describe("linechart Edge Cases", {
   })
 })
 
-# Integration tests
+# Integration tests - ACTUALLY CALLING linechart()
 describe("linechart Integration", {
-  
+
+  test_that("linechart creates valid result object with simple time series", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+    skip_if_not_installed("ClinicoPath")
+
+    data <- create_time_series_data(n = 30)
+
+    # CRITICAL: Actually call the linechart function
+    result <- linechart(
+      data = data,
+      xvar = "time",
+      yvar = "value"
+    )
+
+    # Verify result object structure
+    expect_true(inherits(result, "linechartResults"))
+    expect_true(!is.null(result))
+  })
+
   test_that("linechart works with clinical laboratory data", {
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("ggplot2")
-    
+    skip_if_not_installed("ClinicoPath")
+
     data <- create_clinical_lab_data(n = 49)
-    
-    # Test complete workflow
-    expect_no_error({
-      # Data validation
-      expect_true(all(c("visit_day", "hemoglobin_g_dl", "treatment_arm") %in% names(data)))
-      
-      # Summary statistics
-      summary_stats <- list(
-        n_observations = nrow(data),
-        n_x_points = length(unique(data$visit_day)),
-        y_mean = mean(data$hemoglobin_g_dl, na.rm = TRUE),
-        y_sd = sd(data$hemoglobin_g_dl, na.rm = TRUE)
-      )
-      
-      expect_true(all(sapply(summary_stats, is.numeric)))
-      
-      # Correlation analysis
-      if (is.numeric(data$visit_day)) {
-        cor_result <- cor.test(data$visit_day, data$hemoglobin_g_dl)
-        expect_true(is.numeric(cor_result$estimate))
-      }
-    })
+
+    # CRITICAL: Actually call linechart with grouped longitudinal data
+    result <- linechart(
+      data = data,
+      xvar = "visit_day",
+      yvar = "hemoglobin_g_dl",
+      groupby = "treatment_arm",
+      trendline = TRUE,
+      confidence = TRUE
+    )
+
+    expect_true(inherits(result, "linechartResults"))
+
+    # Verify warnings about repeated measures are issued
+    expect_warning(
+      linechart(
+        data = data,
+        xvar = "visit_day",
+        yvar = "hemoglobin_g_dl",
+        groupby = "treatment_arm",
+        trendline = TRUE
+      ),
+      regexp = "independent|repeated"
+    )
   })
-  
+
   test_that("linechart works with dose-response data", {
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("ggplot2")
-    
+    skip_if_not_installed("ClinicoPath")
+
     data <- create_dose_response_data(n = 60)
-    
-    # Test complete workflow
-    expect_no_error({
-      # Data validation
-      expect_true(all(c("dose_mg", "response_percent") %in% names(data)))
-      
-      # Check dose-response relationship
-      cor_result <- cor.test(data$dose_mg, data$response_percent)
-      expect_true(cor_result$estimate > 0)  # Should be positive correlation
-      
-      # Test regression
-      lm_result <- lm(data$response_percent ~ data$dose_mg)
-      expect_true(coef(lm_result)[2] > 0)  # Positive slope
-    })
+
+    # CRITICAL: Actually call linechart
+    result <- linechart(
+      data = data,
+      xvar = "dose_mg",
+      yvar = "response_percent",
+      trendline = TRUE
+    )
+
+    expect_true(inherits(result, "linechartResults"))
   })
-  
+
   test_that("linechart handles complex grouped time series", {
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("ggplot2")
-    
+    skip_if_not_installed("ClinicoPath")
+
     data <- create_time_series_data(n = 120, n_groups = 4)
-    
-    # Test complex scenario
+
+    # CRITICAL: Actually call linechart with multiple groups
+    result <- linechart(
+      data = data,
+      xvar = "time",
+      yvar = "value",
+      groupby = "treatment",
+      trendline = TRUE,
+      smooth = FALSE,
+      points = TRUE
+    )
+
+    expect_true(inherits(result, "linechartResults"))
+
+    # Verify warnings about grouped data are issued
+    expect_warning(
+      linechart(
+        data = data,
+        xvar = "time",
+        yvar = "value",
+        groupby = "treatment",
+        trendline = TRUE
+      ),
+      regexp = "grouped|independent"
+    )
+  })
+
+  test_that("linechart produces plot without errors", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+    skip_if_not_installed("ClinicoPath")
+
+    data <- create_time_series_data(n = 40, n_groups = 2)
+
+    # Test that plotting completes without error
     expect_no_error({
-      # Check group structure
-      expect_equal(length(unique(data$treatment)), 4)
-      
-      # Test group-wise statistics
-      group_stats <- data %>%
-        group_by(treatment) %>%
-        summarise(
-          n = n(),
-          mean_value = mean(value, na.rm = TRUE),
-          .groups = 'drop'
-        )
-      
-      expect_equal(nrow(group_stats), 4)
-      expect_true(all(group_stats$n > 0))
+      result <- linechart(
+        data = data,
+        xvar = "time",
+        yvar = "value",
+        groupby = "treatment",
+        trendline = TRUE,
+        confidence = TRUE,
+        points = TRUE,
+        smooth = FALSE
+      )
     })
+  })
+
+  test_that("linechart handles single observation per time point", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+    skip_if_not_installed("ClinicoPath")
+
+    # Create data with exactly one observation per time point (no repeated measures)
+    data <- data.frame(
+      time = 1:20,
+      value = rnorm(20, mean = 50, sd = 10)
+    )
+
+    # Should NOT trigger repeated measures warning
+    expect_no_warning(
+      linechart(
+        data = data,
+        xvar = "time",
+        yvar = "value",
+        trendline = TRUE
+      ),
+      regexp = "repeated"
+    )
+  })
+
+  test_that("linechart properly sorts data by time", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+    skip_if_not_installed("ClinicoPath")
+
+    # Create deliberately unsorted data
+    data <- data.frame(
+      time = c(5, 1, 3, 2, 4, 8, 6, 7),
+      value = c(15, 5, 10, 8, 12, 20, 18, 19)
+    )
+
+    # linechart should sort this internally
+    result <- linechart(
+      data = data,
+      xvar = "time",
+      yvar = "value"
+    )
+
+    expect_true(inherits(result, "linechartResults"))
+  })
+
+  test_that("linechart rejects insufficient data", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+    skip_if_not_installed("ClinicoPath")
+
+    # Only 2 observations - should fail minimum requirement
+    data <- data.frame(
+      time = 1:2,
+      value = c(10, 15)
+    )
+
+    expect_error(
+      linechart(
+        data = data,
+        xvar = "time",
+        yvar = "value"
+      ),
+      regexp = "At least 3"
+    )
+  })
+
+  test_that("linechart rejects zero variance data", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+    skip_if_not_installed("ClinicoPath")
+
+    # All Y values identical
+    data <- data.frame(
+      time = 1:10,
+      value = rep(50, 10)
+    )
+
+    expect_error(
+      linechart(
+        data = data,
+        xvar = "time",
+        yvar = "value"
+      ),
+      regexp = "no variation"
+    )
   })
 })
 

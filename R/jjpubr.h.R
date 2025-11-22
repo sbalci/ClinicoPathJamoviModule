@@ -350,8 +350,7 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ggpubr",
                     "ggplot2",
-                    "ClinicoPathJamoviModule",
-                    "tools"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -587,11 +586,13 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param groupvar Grouping variable for coloring points/boxes
 #' @param facetvar Variable for faceting plots into panels
 #' @param addStats Whether to add statistical comparison p-values
-#' @param statMethod Method for pairwise statistical comparison. Only pairwise
-#'   tests are performed, not omnibus tests. For >2 groups, requires
-#'   pairwiseComparisons = TRUE. Bonferroni correction applied automatically.
-#' @param pairwiseComparisons Whether to show all pairwise comparisons.
-#'   Required for >2 groups to display any statistical tests.
+#' @param statMethod Method for statistical comparison. For >2 groups: omnibus
+#'   test followed by post-hoc pairwise comparisons if significant. For 2
+#'   groups: direct comparison. Bonferroni correction applied to multiple
+#'   comparisons.
+#' @param pairwiseComparisons Whether to show post-hoc pairwise comparisons.
+#'   For >2 groups, only shown if omnibus test is significant (proper
+#'   hierarchical testing).
 #' @param addCorr Whether to add correlation statistics
 #' @param corrMethod Correlation method
 #' @param addSmoothLine Whether to add smooth trend line

@@ -3,7 +3,7 @@ name: jjridges
 title: Ridge Plot
 menuGroup: JJStatsPlotT
 menuSubgroup: Distribution
-# menuSubtitle: 'Enhanced Ridgeline Visualization'
+# menuSubtitle: 'Ridge Visualization'
 version: '0.0.32'
 jas: '1.2'
 
@@ -98,14 +98,12 @@ options:
           name: histogram_ridges
         - title: Violin Ridges
           name: violin_ridges
-        - title: Double Ridgeline
-          name: double_ridges
       default: density_ridges
       description:
           R: >
             Type of ridge plot. 'density_ridges' for smooth curves, 'density_ridges_gradient'
             adds color gradients, 'histogram_ridges' for discrete bins, 'violin_ridges'
-            for violin-style plots, 'double_ridges' for comparing two distributions.
+            for violin-style plots.
 
     - name: scale
       title: Ridge Height Scale
@@ -220,9 +218,15 @@ options:
       type: Bool
       default: false
       description:
+          ui: >
+            Display statistical comparisons between groups. IMPORTANT: Statistical tests
+            assume independent observations. For repeated measures, longitudinal data, or
+            matched samples (e.g., multiple biopsies per patient, time series), these tests
+            may produce invalid p-values. Consider aggregating to patient-level summaries
+            or using specialized repeated measures methods.
           R: >
-            Display statistical annotations including p-values and effect sizes
-            using ggstatsplot functionality.
+            Display statistical annotations including p-values and effect sizes.
+            WARNING: Assumes independent observations. Not valid for repeated measures data.
 
     - name: test_type
       title: Statistical Test
@@ -536,12 +540,12 @@ options:
           name: biomarker_distribution
         - title: Treatment Response
           name: treatment_response
-        - title: Correlation Analysis
-          name: correlation_analysis
       default: custom
       description:
           ui: >
-            Apply a preset for a specific clinical analysis
+            Apply a preset for a specific clinical analysis. Note: Ridge plots compare
+            distributions of a continuous variable across groups. They do not perform
+            correlation analysis between two continuous variables.
           R: >
-            Clinical analysis preset
+            Clinical analysis preset for ridge plots
 ...

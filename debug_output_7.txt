@@ -1,0 +1,58 @@
+
+Attaching package: ‘jmvcore’
+
+The following objects are masked from ‘package:base’:
+
+    endsWith, format, startsWith
+
+Warning message:
+package ‘ggplot2’ was built under R version 4.5.2 
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:jmvcore’:
+
+    select
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+You can cite this package as:
+     Patil, I. (2021). Visualizations with statistical details: The 'ggstatsplot' approach.
+     Journal of Open Source Software, 6(61), 3167, doi:10.21105/joss.03167
+Loading required package: Matrix
+── Failure: jjcoefstats handles pre-computed data correctly ────────────────────
+Expected `analysis$run()` not to throw any errors.
+Actually got a <simpleError> with message:
+  missing value where TRUE/FALSE needed
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(analysis$run(), NA)
+  2. │ └─testthat:::expect_condition_matching_(...)
+  3. │   └─testthat:::quasi_capture(...)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ └─base::withCallingHandlers(...)
+  6. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  7. └─analysis$run()
+  8.   └─self$init()
+  9.     ├─jmvcore (local) try(...)
+ 10.     │ └─base::eval(expr)
+ 11.     └─self$options$check(checkValues = TRUE)
+ 12.       └─option$check(checkValues, checkVars, checkData)
+ 13.         └─private$.check(data, checkValues, checkVars, checkData)
+Error:
+! Test failed with 1 failure and 0 successes.
+Backtrace:
+    ▆
+ 1. └─testthat::test_that(...)
+ 2.   └─testthat:::test_code(code, parent.frame())
+ 3.     ├─withr (local) `<fn>`()
+ 4.     └─reporter$end_test(context = reporter$.context, test = test)
+ 5.       └─cli::cli_abort(...)
+ 6.         └─rlang::abort(...)
+Execution halted

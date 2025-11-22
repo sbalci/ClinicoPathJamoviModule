@@ -49,7 +49,7 @@ test_that("jjarcdiagram correctly uses edge weights in centrality calculations",
   weighted_data <- data.frame(
     source = c("A", "A", "B", "B", "C"),
     target = c("B", "C", "D", "E", "E"),
-    weight = c(10, 1, 1, 1, 10),  # A and C have high-weight connections
+    weight = c(10, 2, 1, 1, 10),  # A and C have high-weight connections
     stringsAsFactors = FALSE
   )
 
@@ -305,7 +305,7 @@ test_that("jjarcdiagram correctly handles degree-based node sizing with weights"
   weighted_data <- data.frame(
     source = c("A", "A", "B", "C"),
     target = c("B", "C", "D", "D"),
-    weight = c(10, 1, 1, 1),  # A has high weighted degree
+    weight = c(10, 2, 1, 1),  # A has high weighted degree
     stringsAsFactors = FALSE
   )
 

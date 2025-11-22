@@ -1110,11 +1110,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Generate clinical summary text
             summary_text <- sprintf(
                 .("This analysis examined %d observations across %d categories of %s, with data segmented by %s into %d distinct groups. The most prominent finding was '%s' in the '%s' category, representing %.1f%% of that group. The '%s' category showed the most balanced distribution across all segments, indicating relatively equal representation of different outcomes within that group."),
-                total_obs,
-                n_categories,
+                as.integer(total_obs),
+                as.integer(n_categories),
                 self$options$x_var,
                 self$options$fill_var,
-                n_segments,
+                as.integer(n_segments),
                 largest_segment$segment[1],
                 largest_segment$category[1],
                 largest_segment$percentage[1],
@@ -1126,7 +1126,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 .("Segmented total bar chart analysis of %s by %s (N=%d): %s was the predominant segment in %s (%.1f%%). Distribution patterns varied across categories, with %s showing the most balanced composition."),
                 self$options$y_var,
                 self$options$x_var,
-                total_obs,
+                as.integer(total_obs),
                 largest_segment$segment[1],
                 largest_segment$category[1],
                 largest_segment$percentage[1],
