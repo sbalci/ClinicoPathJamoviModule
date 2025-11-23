@@ -4601,21 +4601,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     private$.populateLinearTrendTest(all_results$advanced_metrics$linear_trend_test)
                 }
                 
-                # Populate Stage Migration Effect results
-                if (!is.null(all_results$stage_migration_effect) && self$options$calculateSME) {
-                    private$.populateStageMigrationEffect(all_results$stage_migration_effect)
-                }
-                
-                # Populate RMST analysis results
-                if (!is.null(all_results$rmst_analysis) && self$options$calculateRMST) {
-                    private$.populateRMSTAnalysis(all_results$rmst_analysis)
-                }
-                
-                # Populate Competing Risks analysis results
-                if (!is.null(all_results$competing_risks_analysis) && self$options$performCompetingRisks) {
-                    private$.populateCompetingRisksAnalysis(all_results$competing_risks_analysis)
-                }
+
             }
+
+
 
             if (!is.null(all_results$homogeneity_tests)) {
                 # Add explanatory text for homogeneity tests
@@ -4787,8 +4776,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 message("DEBUG: About to call performAdvancedMigrationAnalysis")
                 message("DEBUG: all_results structure: ", paste(names(all_results), collapse = ", "))
                 private$.performAdvancedMigrationAnalysis(all_results)
-                message("DEBUG: performAdvancedMigrationAnalysis completed")
+
+                # SME, RMST, Competing Risks population moved inside .performAdvancedMigrationAnalysis
             }
+
+
 
             # Methodology Notes
             if (self$options$showMethodologyNotes) {
@@ -6552,6 +6544,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (!is.null(table) && !is.null(sme_results$calculations)) {
                     
                     # Add results for each timepoint
+                    message("DEBUG: Populating SME table. Timepoints: ", paste(names(sme_results$calculations), collapse=", "))
                     for (timepoint in names(sme_results$calculations)) {
                         calc <- sme_results$calculations[[timepoint]]
                         
@@ -7656,8 +7649,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         )
                         if (!is.null(sme_results) && is.null(sme_results$error)) {
                             all_results$stage_migration_effect <- sme_results
+                            # Populate immediately since all_results changes don't persist
+                            private$.populateStageMigrationEffect(sme_results)
                         }
-                        message("DEBUG: calculateStageMigrationEffect completed successfully")
                     }, error = function(e) {
                         message("DEBUG: calculateStageMigrationEffect failed: ", e$message)
                     })
@@ -21140,6 +21134,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 for (i in 1:4) {
                     timepoint <- timepoints_names[i]
+                    message("DEBUG: Calculating SME for timepoint: ", timepoint)
                     surv_field <- paste0("survival_", timepoint)
                     
                     # Calculate SME = Σ(S_new - S_old) for corresponding stages

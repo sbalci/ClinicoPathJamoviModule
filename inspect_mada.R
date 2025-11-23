@@ -1,0 +1,16 @@
+
+library(mada)
+data(AuditC)
+fit <- reitsma(AuditC)
+summ <- summary(fit)
+print("Structure of summary(fit)$i2:")
+print(summ$i2)
+print("Class of summary(fit)$i2:")
+print(class(summ$i2))
+print("Names of summary(fit)$i2:")
+print(names(summ$i2))
+print("Rownames of summary(fit)$i2:")
+print(rownames(summ$i2))
+
+print("Coefficients:")
+print(summ$coefficients)

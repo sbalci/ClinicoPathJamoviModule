@@ -462,44 +462,39 @@ diagnosticmetaClass <- R6::R6Class(
             }
             private$.pooled_specificity <- pooled_spec
 
-            # CRITICAL FIX: Extract dimension-specific I² values
-            # mada returns separate I² estimates for sensitivity (tsens) and specificity (tfpr)
-            # Using the same value for both misrepresents heterogeneity
+            # CRITICAL FIX: Calculate dimension-specific I² values using univariate models
+            # mada's bivariate model returns a global I² which doesn't map to sens/spec
             sens_i2 <- NA_real_
             spec_i2 <- NA_real_
 
-            if (!is.null(summary_results$i2) && is.data.frame(summary_results$i2)) {
-                # Use HollingUnadjusted1 method as it's commonly used for sensitivity/specificity
-                if ("HollingUnadjusted1" %in% names(summary_results$i2) && !is.null(rownames(summary_results$i2))) {
-                    # Extract I² values using row names (tsens for sensitivity, tfpr for false positive rate)
-                    row_names <- rownames(summary_results$i2)
-
-                    # Get I² for sensitivity (tsens row)
-                    tsens_idx <- which(row_names == "tsens")
-                    if (length(tsens_idx) > 0) {
-                        i2_tsens <- summary_results$i2$HollingUnadjusted1[tsens_idx[1]]
-                        if (is.finite(i2_tsens)) {
-                            sens_i2 <- i2_tsens * 100  # Convert to percentage
-                        }
-                    }
-
-                    # Get I² for false positive rate (tfpr row) - applies to specificity
-                    tfpr_idx <- which(row_names == "tfpr")
-                    if (length(tfpr_idx) > 0) {
-                        i2_tfpr <- summary_results$i2$HollingUnadjusted1[tfpr_idx[1]]
-                        if (is.finite(i2_tfpr)) {
-                            spec_i2 <- i2_tfpr * 100  # Convert to percentage
-                        }
-                    }
-
-                    # Fallback: if row names not found, try positional (but mark as potentially incorrect)
-                    if (is.na(sens_i2) && is.na(spec_i2) && nrow(summary_results$i2) >= 2) {
-                        i2_value1 <- summary_results$i2$HollingUnadjusted1[1]
-                        i2_value2 <- summary_results$i2$HollingUnadjusted1[2]
-                        if (is.finite(i2_value1)) sens_i2 <- i2_value1 * 100
-                        if (is.finite(i2_value2)) spec_i2 <- i2_value2 * 100
-                    }
-                }
+            if (requireNamespace("metafor", quietly = TRUE)) {
+                tryCatch({
+                    # Prepare data for univariate meta-analysis
+                    uni_data <- analysis_data
+                    uni_data$sens <- uni_data$tp / (uni_data$tp + uni_data$fn)
+                    uni_data$spec <- uni_data$tn / (uni_data$tn + uni_data$fp)
+                    
+                    # Logit transformation
+                    uni_data$logit_sens <- stats::qlogis(uni_data$sens)
+                    uni_data$logit_spec <- stats::qlogis(uni_data$spec)
+                    
+                    # Variances
+                    uni_data$var_logit_sens <- 1/uni_data$tp + 1/uni_data$fn
+                    uni_data$var_logit_spec <- 1/uni_data$tn + 1/uni_data$fp
+                    
+                    # Univariate meta-analysis for Sensitivity I²
+                    sens_model <- metafor::rma(yi = logit_sens, vi = var_logit_sens, 
+                                             data = uni_data, method = "REML")
+                    sens_i2 <- max(0, sens_model$I2)
+                    
+                    # Univariate meta-analysis for Specificity I²
+                    spec_model <- metafor::rma(yi = logit_spec, vi = var_logit_spec, 
+                                             data = uni_data, method = "REML")
+                    spec_i2 <- max(0, spec_model$I2)
+                    
+                }, error = function(e) {
+                    # Keep as NA if calculation fails
+                })
             }
 
             bivariate_table$addRow(rowKey = "sensitivity", values = list(
@@ -1094,12 +1089,33 @@ diagnosticmetaClass <- R6::R6Class(
             if (requireNamespace("ggplot2", quietly = TRUE)) {
 
                 # CRITICAL FIX: Get summary point from bivariate model
-                # summary(reitsma)$coefficients already contains PROBABILITIES (sensitivity, specificity)
-                # DO NOT apply plogis() - that would double-transform and push estimates toward center
                 summary_results <- summary(biv_model)
-                sum_sens <- summary_results$coefficients[1,1]  # Already a probability
-                sum_spec <- 1 - summary_results$coefficients[2,1]  # Row 2 is "false pos. rate", convert to specificity
-                sum_fpr <- summary_results$coefficients[2,1]  # Use FPR directly
+                coefficients <- summary_results$coefficients
+                
+                # Helper to safely get coefficient by name
+                get_coef <- function(target) {
+                    if (is.null(rownames(coefficients))) return(NULL)
+                    idx <- which(rownames(coefficients) == target)
+                    if (length(idx) == 0) idx <- which(tolower(rownames(coefficients)) == tolower(target))
+                    if (length(idx) > 0) coefficients[idx[1], 1] else NULL
+                }
+                
+                sum_sens <- get_coef("sensitivity")
+                sum_fpr <- get_coef("false pos. rate")
+                
+                # Fallback to intercept transformation if named rows missing
+                if (is.null(sum_sens)) {
+                    tsens <- get_coef("tsens.(Intercept)")
+                    if (!is.null(tsens)) sum_sens <- stats::plogis(tsens)
+                }
+                
+                if (is.null(sum_fpr)) {
+                    tfpr <- get_coef("tfpr.(Intercept)")
+                    if (!is.null(tfpr)) sum_fpr <- stats::plogis(tfpr)
+                }
+                
+                # If still missing, cannot plot summary point
+                has_summary <- !is.null(sum_sens) && !is.null(sum_fpr)
 
                 # Individual study points
                 meta_data$sens <- meta_data$tp / (meta_data$tp + meta_data$fn)

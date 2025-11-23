@@ -128,7 +128,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -142,7 +142,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathT4
+    menuGroup: OncoPathT1
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -2491,7 +2491,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT4
+    menuGroup: OncoPathT3
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation
@@ -2694,7 +2694,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT4
+    menuGroup: OncoPathT3
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed

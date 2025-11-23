@@ -56,6 +56,20 @@ children:
                 name: responseVar
                 maxItemCount: 1
                 isTarget: true
+          - type: TargetLayoutBox
+            label: "Censoring/Event Status (Optional)"
+            children:
+              - type: VariablesListBox
+                name: censorVar
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: "Grouping Variable (Optional)"
+            children:
+              - type: VariablesListBox
+                name: groupVar
+                maxItemCount: 1
+                isTarget: true
 
   # === TIME & DATE SETTINGS ===
   - type: CollapseBox

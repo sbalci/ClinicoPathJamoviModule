@@ -1,7 +1,7 @@
 ---
 name: swimmerplot
 title: "Swimmer Plot"
-menuGroup: OncoPathT4
+menuGroup: OncoPathT1
 menuSubgroup: Patient Follow-Up Plots
 version: '0.0.31'
 jas: '1.2'
@@ -115,6 +115,33 @@ options:
       description:
           R: >
             Optional variable for response types (e.g., CR, PR, SD, PD) to color lanes.
+
+    - name: censorVar
+      title: "Censoring/Event Status Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      required: false
+      description:
+          R: >
+            Optional variable indicating censoring status for ongoing treatment arrows.
+            Use 0/FALSE/"censored"/"alive" for ongoing patients (shows arrow),
+            or 1/TRUE/"event"/"dead" for completed follow-up (no arrow).
+            If not provided, arrows are drawn for patients at the latest time point.
+      default: NULL
+
+    - name: groupVar
+      title: "Grouping Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      required: false
+      description:
+          R: >
+            Optional grouping variable for comparing response rates between patient groups
+            (e.g., treatment arms, disease subtypes). When specified, Fisher's exact tests
+            compare ORR and DCR between groups. Groups are also shown in separate colors.
+      default: NULL
 
     # === Time Processing Options ===
     - name: timeType

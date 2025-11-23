@@ -10,6 +10,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             startTime = NULL,
             endTime = NULL,
             responseVar = NULL,
+            censorVar = NULL,
+            groupVar = NULL,
             timeType = "raw",
             dateFormat = "ymd",
             timeUnit = "months",
@@ -87,6 +89,28 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 permitted=list(
                     "factor"),
                 required=FALSE)
+            private$..censorVar <- jmvcore::OptionVariable$new(
+                "censorVar",
+                censorVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                required=FALSE,
+                default=NULL)
+            private$..groupVar <- jmvcore::OptionVariable$new(
+                "groupVar",
+                groupVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                required=FALSE,
+                default=NULL)
             private$..timeType <- jmvcore::OptionList$new(
                 "timeType",
                 timeType,
@@ -309,6 +333,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..startTime)
             self$.addOption(private$..endTime)
             self$.addOption(private$..responseVar)
+            self$.addOption(private$..censorVar)
+            self$.addOption(private$..groupVar)
             self$.addOption(private$..timeType)
             self$.addOption(private$..dateFormat)
             self$.addOption(private$..timeUnit)
@@ -350,6 +376,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         startTime = function() private$..startTime$value,
         endTime = function() private$..endTime$value,
         responseVar = function() private$..responseVar$value,
+        censorVar = function() private$..censorVar$value,
+        groupVar = function() private$..groupVar$value,
         timeType = function() private$..timeType$value,
         dateFormat = function() private$..dateFormat$value,
         timeUnit = function() private$..timeUnit$value,
@@ -390,6 +418,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..startTime = NA,
         ..endTime = NA,
         ..responseVar = NA,
+        ..censorVar = NA,
+        ..groupVar = NA,
         ..timeType = NA,
         ..dateFormat = NA,
         ..timeUnit = NA,
@@ -443,6 +473,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         exportInfo = function() private$.items[["exportInfo"]],
         validationReport = function() private$.items[["validationReport"]],
         advancedMetrics = function() private$.items[["advancedMetrics"]],
+        groupComparisonTest = function() private$.items[["groupComparisonTest"]],
         clinicalGlossary = function() private$.items[["clinicalGlossary"]],
         copyReadyReport = function() private$.items[["copyReadyReport"]],
         aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
@@ -473,6 +504,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "startTime",
                     "endTime",
                     "responseVar",
+                    "censorVar",
                     "timeType",
                     "dateFormat",
                     "timeUnit",
@@ -559,7 +591,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `type`="number"),
                     list(
                         `name`="incidence_rate", 
-                        `title`="Incidence Rate", 
+                        `title`="Follow-up Density", 
                         `type`="number")),
                 clearWith=list(
                     "patientID",
@@ -689,6 +721,10 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `title`="Value", 
                         `type`="number"),
                     list(
+                        `name`="confidence_interval", 
+                        `title`="95% CI", 
+                        `type`="text"),
+                    list(
                         `name`="metric_unit", 
                         `title`="Unit", 
                         `type`="text"),
@@ -703,6 +739,34 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "responseVar",
                     "timeUnit",
                     "personTimeAnalysis")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="groupComparisonTest",
+                title="Group Comparison Statistical Tests",
+                visible="(groupVar)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="test_statistic", 
+                        `title`="Test Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "groupVar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGlossary",
@@ -790,6 +854,14 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param endTime Time/date when observation/treatment ended.
 #' @param responseVar Optional variable for response types (e.g., CR, PR, SD,
 #'   PD) to color lanes.
+#' @param censorVar Optional variable indicating censoring status for ongoing
+#'   treatment arrows. Use 0/FALSE/"censored"/"alive" for ongoing patients
+#'   (shows arrow), or 1/TRUE/"event"/"dead" for completed follow-up (no arrow).
+#'   If not provided, arrows are drawn for patients at the latest time point.
+#' @param groupVar Optional grouping variable for comparing response rates
+#'   between patient groups (e.g., treatment arms, disease subtypes). When
+#'   specified, Fisher's exact tests compare ORR and DCR between groups. Groups
+#'   are also shown in separate colors.
 #' @param timeType Select whether time values are raw numbers or dates/times.
 #' @param dateFormat Select the date/time format in your data (only used when
 #'   Time Input Type is Date/Time).
@@ -857,6 +929,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
@@ -875,6 +948,8 @@ swimmerplot <- function(
     startTime,
     endTime,
     responseVar,
+    censorVar = NULL,
+    groupVar = NULL,
     timeType = "raw",
     dateFormat = "ymd",
     timeUnit = "months",
@@ -918,6 +993,8 @@ swimmerplot <- function(
     if ( ! missing(startTime)) startTime <- jmvcore::resolveQuo(jmvcore::enquo(startTime))
     if ( ! missing(endTime)) endTime <- jmvcore::resolveQuo(jmvcore::enquo(endTime))
     if ( ! missing(responseVar)) responseVar <- jmvcore::resolveQuo(jmvcore::enquo(responseVar))
+    if ( ! missing(censorVar)) censorVar <- jmvcore::resolveQuo(jmvcore::enquo(censorVar))
+    if ( ! missing(groupVar)) groupVar <- jmvcore::resolveQuo(jmvcore::enquo(groupVar))
     if ( ! missing(milestone1Date)) milestone1Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone1Date))
     if ( ! missing(milestone2Date)) milestone2Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone2Date))
     if ( ! missing(milestone3Date)) milestone3Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone3Date))
@@ -933,6 +1010,8 @@ swimmerplot <- function(
             `if`( ! missing(startTime), startTime, NULL),
             `if`( ! missing(endTime), endTime, NULL),
             `if`( ! missing(responseVar), responseVar, NULL),
+            `if`( ! missing(censorVar), censorVar, NULL),
+            `if`( ! missing(groupVar), groupVar, NULL),
             `if`( ! missing(milestone1Date), milestone1Date, NULL),
             `if`( ! missing(milestone2Date), milestone2Date, NULL),
             `if`( ! missing(milestone3Date), milestone3Date, NULL),
@@ -950,6 +1029,8 @@ swimmerplot <- function(
         startTime = startTime,
         endTime = endTime,
         responseVar = responseVar,
+        censorVar = censorVar,
+        groupVar = groupVar,
         timeType = timeType,
         dateFormat = dateFormat,
         timeUnit = timeUnit,

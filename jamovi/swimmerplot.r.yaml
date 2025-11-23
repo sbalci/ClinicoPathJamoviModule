@@ -20,6 +20,7 @@ items:
           - startTime
           - endTime
           - responseVar
+          - censorVar
           - timeType
           - dateFormat
           - timeUnit
@@ -99,7 +100,7 @@ items:
             title: "Mean Time"
             type: number
           - name: incidence_rate
-            title: "Incidence Rate"
+            title: "Follow-up Density"
             type: number
       clearWith:
           - patientID
@@ -218,6 +219,9 @@ items:
           - name: metric_value
             title: "Value"
             type: number
+          - name: confidence_interval
+            title: "95% CI"
+            type: text
           - name: metric_unit
             title: "Unit"
             type: text
@@ -231,6 +235,30 @@ items:
           - responseVar
           - timeUnit
           - personTimeAnalysis
+
+    - name: groupComparisonTest
+      title: "Group Comparison Statistical Tests"
+      type: Table
+      visible: (groupVar)
+      rows: 0
+      columns:
+          - name: comparison
+            title: "Comparison"
+            type: text
+          - name: test_statistic
+            title: "Test Statistic"
+            type: text
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+      clearWith:
+          - patientID
+          - responseVar
+          - groupVar
 
     - name: clinicalGlossary
       title: "Clinical Glossary"

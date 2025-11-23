@@ -1102,17 +1102,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create simplified response categories (threshold-based, NOT RECIST v1.1 compliant)
             # NOTE: Variable name "recist_category" retained for backward compatibility
             # but represents SIMPLIFIED categories (no confirmation, no new lesions, no non-target)
-            # FIXED: Corrected boundary conditions for proper RECIST categorization
-            # CR: ≤-100%, PR: -99% to -30%, SD: -29% to +20%, PD: >+20%
             recist_category = factor(
               dplyr::case_when(
-                is.na(response) ~ "Unknown",                                           # Handle NA values first
-                response <= private$RECIST_CR_THRESHOLD ~ "CR",                        # ≤-100% Complete Response
-                response > private$RECIST_CR_THRESHOLD &
-                  response <= private$RECIST_PR_THRESHOLD ~ "PR",                      # -99% to -30% Partial Response
-                response > private$RECIST_PR_THRESHOLD &
-                  response <= private$RECIST_PD_THRESHOLD ~ "SD",                      # -29% to +20% Stable Disease
-                response > private$RECIST_PD_THRESHOLD ~ "PD",                         # >+20% Progressive Disease
+                response <= private$RECIST_CR_THRESHOLD ~ "CR",  # Complete Response
+                response <= private$RECIST_PR_THRESHOLD ~ "PR",   # Partial Response
+                response <= private$RECIST_PD_THRESHOLD ~ "SD",    # Stable Disease
+                response > private$RECIST_PD_THRESHOLD ~ "PD",     # Progressive Disease
                 TRUE ~ "Unknown"
               ),
               levels = c("CR", "PR", "SD", "PD", .("Unknown"))
@@ -2290,22 +2285,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # REPLACED: t.test CI is inappropriate for skewed response data and computes CI for MEAN not MEDIAN
           # NEW: Bootstrap percentile CI for median (appropriate for skewed/ordinal data)
           tryCatch({
-            # REPRODUCIBILITY: Set seed for reproducible bootstrap results
-            set.seed(123)
-
-            # Get sample size for bootstrap
-            n_data <- sum(!is.na(df$response))
-
-            # SMALL SAMPLE WARNING: Bootstrap CI may be unstable with n<20
-            if (n_data < 20) {
-              message("Note: Bootstrap CI may be unstable with n=", n_data, ". Interpret with caution.")
-            }
-
-            # Use more iterations for small samples to improve stability
-            n_boot <- ifelse(n_data < 30, 2000, 1000)
-
+            n_boot <- 1000  # Bootstrap iterations
             boot_medians <- replicate(n_boot, {
-              boot_sample <- sample(df$response, size = n_data, replace = TRUE)
+              boot_sample <- sample(df$response, size = nrow(df), replace = TRUE)
               median(boot_sample, na.rm = TRUE)
             })
             # Percentile method: 2.5th and 97.5th percentiles
@@ -2931,30 +2913,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ci_upper = round(dcr_ci[2] * 100, 1),
           interpretation = private$.interpretDCR(metrics$DCR)
         ))
-
-        # SAFETY CHECK: Warn if confidence intervals are extremely wide (>40 percentage points)
-        # This indicates severe statistical uncertainty that makes results unreliable
-        orr_ci_width <- (orr_ci[2] - orr_ci[1]) * 100
-        dcr_ci_width <- (dcr_ci[2] - dcr_ci[1]) * 100
-
-        if (!is.na(orr_ci_width) && orr_ci_width > 40) {
-          extreme_ci_notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = "extremeConfidenceInterval",
-            type = jmvcore::NoticeType$STRONG_WARNING
-          )
-          extreme_ci_notice$setContent(paste0(
-            "VERY WIDE CONFIDENCE INTERVAL: ORR 95% CI spans ", round(orr_ci_width, 1),
-            " percentage points (", round(orr_ci[1] * 100, 1), "-", round(orr_ci[2] * 100, 1),
-            "%). This indicates EXTREME STATISTICAL UNCERTAINTY due to small sample size. ",
-            "Results are NOT reliable for treatment decision-making, regulatory submissions, or ",
-            "publication without explicit acknowledgment of severe imprecision. The true ORR could ",
-            "be anywhere within this wide range. REQUIRED ACTION: Increase sample size substantially ",
-            "before drawing clinical conclusions. Minimum n=30-40 patients recommended for adequate ",
-            "precision in phase II trials. Current results should be considered preliminary screening data only."
-          ))
-          self$results$insert(0, extreme_ci_notice)
-        }
       }
 
       ,
