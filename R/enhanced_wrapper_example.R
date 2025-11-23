@@ -1,10 +1,11 @@
 #' Enhanced Wrapper Example for ClinicoPath Functions
-#' 
+#'
 #' Demonstrates how to integrate robust error handling into existing ClinicoPath analyses
-#' 
+#'
+#' @name enhanced_wrapper_example
 #' @import jmvcore
 #' @importFrom stats t.test cor.test lm
-#' @export
+NULL
 
 #' Enhanced T-Test with Robust Error Handling
 #' 

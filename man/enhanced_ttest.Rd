@@ -2,7 +2,7 @@
 % Please edit documentation in R/enhanced_wrapper_example.R
 \name{enhanced_ttest}
 \alias{enhanced_ttest}
-\title{Enhanced Wrapper Example for ClinicoPath Functions}
+\title{Enhanced T-Test with Robust Error Handling}
 \usage{
 enhanced_ttest(
   data,
@@ -31,7 +31,4 @@ enhanced_ttest(
 }
 \description{
 Enhanced t-test implementation with clinical context error handling
-}
-\details{
-Demonstrates how to integrate robust error handling into existing ClinicoPath analyses
 }

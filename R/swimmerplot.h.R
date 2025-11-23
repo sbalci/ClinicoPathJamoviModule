@@ -33,6 +33,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             laneWidth = 3,
             markerSize = 5,
             plotTheme = "ggswim",
+            colorPalette = "default",
             showLegend = TRUE,
             referenceLines = "none",
             customReferenceTime = 12,
@@ -261,6 +262,15 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ggswim_dark",
                     "minimal"),
                 default="ggswim")
+            private$..colorPalette <- jmvcore::OptionList$new(
+                "colorPalette",
+                colorPalette,
+                options=list(
+                    "default",
+                    "viridis",
+                    "contrast",
+                    "monochrome"),
+                default="default")
             private$..showLegend <- jmvcore::OptionBool$new(
                 "showLegend",
                 showLegend,
@@ -356,6 +366,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..laneWidth)
             self$.addOption(private$..markerSize)
             self$.addOption(private$..plotTheme)
+            self$.addOption(private$..colorPalette)
             self$.addOption(private$..showLegend)
             self$.addOption(private$..referenceLines)
             self$.addOption(private$..customReferenceTime)
@@ -399,6 +410,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         laneWidth = function() private$..laneWidth$value,
         markerSize = function() private$..markerSize$value,
         plotTheme = function() private$..plotTheme$value,
+        colorPalette = function() private$..colorPalette$value,
         showLegend = function() private$..showLegend$value,
         referenceLines = function() private$..referenceLines$value,
         customReferenceTime = function() private$..customReferenceTime$value,
@@ -441,6 +453,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..laneWidth = NA,
         ..markerSize = NA,
         ..plotTheme = NA,
+        ..colorPalette = NA,
         ..showLegend = NA,
         ..referenceLines = NA,
         ..customReferenceTime = NA,
@@ -888,6 +901,10 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param laneWidth Width/thickness of patient timeline lanes.
 #' @param markerSize Size of event markers and milestone markers.
 #' @param plotTheme Visual theme for the swimmer plot.
+#' @param colorPalette Select color palette for response categories and
+#'   groups. Colorblind Safe uses perceptually uniform colors distinguishable by
+#'   all color vision types. High Contrast is optimized for projectors and
+#'   printing. Monochrome ensures clarity in grayscale publications.
 #' @param showLegend Whether to display the plot legend.
 #' @param referenceLines Add reference time lines to the plot for clinical
 #'   context.
@@ -971,6 +988,7 @@ swimmerplot <- function(
     laneWidth = 3,
     markerSize = 5,
     plotTheme = "ggswim",
+    colorPalette = "default",
     showLegend = TRUE,
     referenceLines = "none",
     customReferenceTime = 12,
@@ -1052,6 +1070,7 @@ swimmerplot <- function(
         laneWidth = laneWidth,
         markerSize = markerSize,
         plotTheme = plotTheme,
+        colorPalette = colorPalette,
         showLegend = showLegend,
         referenceLines = referenceLines,
         customReferenceTime = customReferenceTime,

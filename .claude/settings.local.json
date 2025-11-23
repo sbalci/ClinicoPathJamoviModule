@@ -132,7 +132,11 @@
       "WebFetch(domain:juba.github.io)",
       "Bash(sort:*)",
       "Bash(uniq:*)",
-      "Bash(do echo -n \"$out: \")"
+      "Bash(do echo -n \"$out: \")",
+      "Bash(jobs)",
+      "Bash(if grep -q \"self$options$$opt\" R/diagnosticmeta.b.R)",
+      "Bash(if grep -q \"self$results$$output$set\" R/diagnosticmeta.b.R)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": [],

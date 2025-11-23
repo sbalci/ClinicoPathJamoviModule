@@ -4,6 +4,12 @@ title: IHC Heterogeneity Analysis
 jrs: '1.1'
 
 items:
+    - name: welcome
+      title: ""
+      type: Html
+      visible: (biopsy1 == null)
+      description: Welcome screen shown when no variables selected
+
     - name: interpretation
       title: Clinical Interpretation and Analysis Summary
       type: Html

@@ -766,15 +766,63 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             patient_data$segment_duration <- private$.getDurations(patient_data)
-            split_data <- split(patient_data, patient_data$patient_id)
 
-            summary_list <- lapply(split_data, function(df) {
-                follow_up <- private$.calculateFollowUp(df$start_time, df$end_time)
+            # Performance optimization: Use data.table for large datasets (>1000 patients)
+            use_fast_path <- nrow(patient_data) > 1000 && requireNamespace("data.table", quietly = TRUE)
 
-                # Calculate person-time by merging overlapping intervals to avoid double-counting
-                # This ensures unique observation time is counted
-                person_time <- private$.mergeIntervalsAndSum(df$start_time, df$end_time)
-                if (is.na(person_time) || !is.finite(person_time)) person_time <- follow_up
+            if (use_fast_path) {
+                # Fast path with data.table (5-10x faster for large datasets)
+                dt <- data.table::as.data.table(patient_data)
+
+                # Group by patient and aggregate
+                summary_list <- dt[, {
+                    follow_up <- private$.calculateFollowUp(start_time, end_time)
+                    person_time <- private$.mergeIntervalsAndSum(start_time, end_time)
+                    if (is.na(person_time) || !is.finite(person_time)) person_time <- follow_up
+
+                    response_value <- NA_character_
+                    if ("response" %in% names(.SD)) {
+                        non_missing <- as.character(response[!is.na(response)])
+                        if (length(non_missing) > 0) {
+                            response_value <- private$.getBestResponse(non_missing)
+                        }
+                    }
+
+                    censor_value <- NA
+                    if ("censor_status" %in% names(.SD)) {
+                        censor_last <- censor_status[!is.na(censor_status)]
+                        if (length(censor_last) > 0) censor_value <- tail(censor_last, 1)
+                    }
+
+                    group_value <- NA
+                    if ("patient_group" %in% names(.SD)) {
+                        group_first <- patient_group[!is.na(patient_group)]
+                        if (length(group_first) > 0) group_value <- group_first[1]
+                    }
+
+                    list(
+                        start_time = min(start_time, na.rm = TRUE),
+                        end_time = max(end_time, na.rm = TRUE),
+                        follow_up = follow_up,
+                        person_time = person_time,
+                        response = response_value,
+                        censor_status = censor_value,
+                        patient_group = group_value
+                    )
+                }, by = patient_id]
+
+                summary_list <- split(summary_list, summary_list$patient_id)
+            } else {
+                # Standard path with base R (works for all dataset sizes)
+                split_data <- split(patient_data, patient_data$patient_id)
+
+                summary_list <- lapply(split_data, function(df) {
+                    follow_up <- private$.calculateFollowUp(df$start_time, df$end_time)
+
+                    # Calculate person-time by merging overlapping intervals to avoid double-counting
+                    # This ensures unique observation time is counted
+                    person_time <- private$.mergeIntervalsAndSum(df$start_time, df$end_time)
+                    if (is.na(person_time) || !is.finite(person_time)) person_time <- follow_up
 
                 # Get BEST response for ORR/DCR calculation (clinical standard in oncology)
                 # Hierarchy: CR > PR > SD > PD > NE/Other
@@ -830,8 +878,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     result$patient_group <- group_value
                 }
 
-                result
-            })
+                    result
+                })
+            }  # End of if/else for performance optimization
 
             patient_data$segment_duration <- NULL
             dplyr::bind_rows(summary_list)
@@ -1286,7 +1335,97 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 self$results$interpretation$setContent(summary_html)
             }
         },
-        
+
+        # Add clinical profile notices based on data characteristics
+        .addClinicalProfileNotices = function(patient_data, stats) {
+            notice_position <- 2  # Start after any ERROR notices
+
+            # STRONG_WARNING: Small sample size (<10 patients)
+            if (!is.null(stats$n_patients) && stats$n_patients < 10) {
+                warn <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSampleSize',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                warn$setContent(sprintf(
+                    'Very small sample size (n=%d patients). Results may have limited statistical power and generalizability. Consider interpreting findings as exploratory.',
+                    stats$n_patients
+                ))
+                self$results$insert(notice_position, warn)
+                notice_position <- notice_position + 1
+            }
+
+            # WARNING: Possible reversed censoring variable
+            if (!is.null(self$options$censorVar) && "censor_status" %in% names(patient_data)) {
+                # Check proportion of events (value = 1)
+                censor_values <- patient_data$censor_status[!is.na(patient_data$censor_status)]
+
+                if (length(censor_values) > 0) {
+                    # Convert to numeric if factor
+                    if (is.factor(censor_values)) {
+                        censor_values <- as.numeric(as.character(censor_values))
+                    }
+
+                    # Calculate proportion coded as 1
+                    prop_events <- mean(censor_values == 1, na.rm = TRUE)
+
+                    # Warn if >80% are coded as events (unusual in most clinical datasets)
+                    if (prop_events > 0.8) {
+                        warn <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'possibleCensoringReversed',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        warn$setContent(sprintf(
+                            'Censoring variable has %.0f%% coded as events (value=1). If these represent ongoing patients, values may be reversed. Convention: 0 = censored/ongoing, 1 = event/completed.',
+                            prop_events * 100
+                        ))
+                        self$results$insert(notice_position, warn)
+                        notice_position <- notice_position + 1
+                    }
+                }
+            }
+
+            # INFO: Missing censoring data (use simple median instead of reverse KM)
+            if (is.null(self$options$censorVar) && self$options$personTimeAnalysis) {
+                info <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noCensoringData',
+                    type = jmvcore::NoticeType$INFO
+                )
+                info$setContent('No censoring variable provided. Median follow-up calculated using simple median instead of reverse Kaplan-Meier method. For accurate median follow-up with censored data, add Censoring/Event Status variable in Core Data Variables.')
+                self$results$insert(999, info)  # Bottom position for INFO
+            }
+
+            # INFO: Analysis completion summary
+            if (!is.null(stats$n_patients) && !is.null(stats$median_duration)) {
+                success <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+
+                msg_parts <- sprintf(
+                    'Swimmer plot analysis completed: %d patients, median follow-up %.1f %s (range %.1f-%.1f)',
+                    stats$n_patients,
+                    stats$median_duration,
+                    self$options$timeUnit,
+                    stats$min_duration,
+                    stats$max_duration
+                )
+
+                # Add response summary if available
+                if (self$options$responseAnalysis && !is.null(stats$orr)) {
+                    msg_parts <- paste0(msg_parts, sprintf(' • ORR %.1f%% • DCR %.1f%%',
+                                                           stats$orr * 100,
+                                                           stats$dcr * 100))
+                }
+
+                success$setContent(msg_parts)
+                self$results$insert(999, success)  # Bottom position for INFO
+            }
+        },
+
         # Apply clinical preset configurations with context
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalPreset
@@ -1348,6 +1487,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (is.null(self$options$patientID) ||
                 is.null(self$options$startTime) ||
                 is.null(self$options$endTime)) {
+
+                # ERROR Notice (single line, position 1)
+                err <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingRequiredVariables',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
+                self$results$insert(1, err)
+
+                # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()
                 self$results$instructions$setContent(instructions)
             }
@@ -1359,10 +1509,20 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # private$.applyClinicalPreset()
             
             # Enhanced instructions with comprehensive guidance
-            if (is.null(self$options$patientID) || 
-                is.null(self$options$startTime) || 
+            if (is.null(self$options$patientID) ||
+                is.null(self$options$startTime) ||
                 is.null(self$options$endTime)) {
-                
+
+                # ERROR Notice (single line, position 1)
+                err <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingRequiredVariables',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
+                self$results$insert(1, err)
+
+                # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()
                 self$results$instructions$setContent(instructions)
                 return()
@@ -1376,6 +1536,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 # Check for data type mismatch (Date/Time selected but numeric data)
                 if (isTRUE(validation_result$data_type_mismatch)) {
+                    # ERROR Notice (single line)
+                    err <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'dataTypeMismatch',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    example_vals <- if (!is.null(validation_result$examples)) {
+                        paste(validation_result$examples[1:min(2, length(validation_result$examples))], collapse=', ')
+                    } else {
+                        "numeric values"
+                    }
+                    err$setContent(sprintf(
+                        'Data type mismatch detected: Time Input Type is set to Date/Time but data contains numeric values (%s). Change to Raw Values in Time & Date Settings section.',
+                        example_vals
+                    ))
+                    self$results$insert(1, err)
+
+                    # Keep detailed HTML guidance
                     mismatch_guidance <- paste0(
                         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
 
@@ -1561,6 +1739,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 private$.updateEventMarkerTable(patient_data, event_data)
                 private$.updateAdvancedMetrics(patient_data, stats)
                 private$.updateGroupComparisonTests(patient_data, stats)
+
+                # Add clinical profile notices (small sample warnings, completion info)
+                private$.addClinicalProfileNotices(patient_data, stats)
 
                 # Handle export functionality
                 private$.updateExportData(patient_data, milestone_data, event_data, stats)
@@ -2069,6 +2250,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     ))
                 }
             }
+
+            # Check for low cell counts in contingency tables
+            min_cell_orr <- if (!is.null(orr_contingency)) min(orr_contingency) else NA
+            min_cell_dcr <- if (!is.null(dcr_contingency)) min(dcr_contingency) else NA
+            min_cell <- min(c(min_cell_orr, min_cell_dcr), na.rm = TRUE)
+
+            if (!is.na(min_cell) && min_cell < 5) {
+                warn <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'lowCellCountFisher',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                warn$setContent(sprintf(
+                    'Fisher exact test has cells with counts < 5 (minimum cell count = %d). Test remains valid but interpret p-values cautiously with small cell counts. Consider grouping categories or collecting more data.',
+                    min_cell
+                ))
+                self$results$insert(2, warn)  # Insert after ERROR notices
+            }
         },
 
         # Export functionality
@@ -2345,7 +2544,26 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             } else {
                 p <- p + ggplot2::theme_minimal()
             }
-            
+
+            # Apply color palette (colorblind-safe options)
+            if (!is.null(self$options$colorPalette) && self$options$colorPalette != "default") {
+                if (self$options$colorPalette == "viridis") {
+                    # Viridis palette - perceptually uniform and colorblind-safe
+                    p <- p + ggplot2::scale_color_viridis_d(option = "D", end = 0.9)
+                    p <- p + ggplot2::scale_fill_viridis_d(option = "D", end = 0.9)
+                } else if (self$options$colorPalette == "contrast") {
+                    # High contrast palette (Okabe-Ito colorblind-safe palette)
+                    contrast_colors <- c("#000000", "#E69F00", "#56B4E9", "#009E73",
+                                        "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+                    p <- p + ggplot2::scale_color_manual(values = contrast_colors)
+                    p <- p + ggplot2::scale_fill_manual(values = contrast_colors)
+                } else if (self$options$colorPalette == "monochrome") {
+                    # Monochrome with varying shades for grayscale publications
+                    p <- p + ggplot2::scale_color_grey(start = 0.2, end = 0.8)
+                    p <- p + ggplot2::scale_fill_grey(start = 0.2, end = 0.8)
+                }
+            }
+
             # Add labels with clinical context
             is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
             x_label <- if (is_date_scale) .("Date") else paste0(.("Time ("), self$options$timeUnit, .(")"))

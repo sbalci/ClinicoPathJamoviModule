@@ -16,6 +16,8 @@ diagnosticmetaClass <- R6::R6Class(
         .analysis_data = NULL,
         .data_cache_valid = FALSE,
         .continuity_correction = FALSE,
+        .correction_method_used = "none",
+        .corrected_study_names = character(0),
         .pooled_sensitivity = NULL,
         .pooled_specificity = NULL,
         .n_studies = 0,
@@ -215,12 +217,13 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     private$.pooled_sensitivity <- NULL
                     private$.pooled_specificity <- NULL
-                    private$.appendInstructionMessage(
-                        sprintf(
-                            "<div class='alert alert-danger'><h4>Analysis Error</h4><p>%s</p></div>",
-                            jmvcore::escapeHtml(e$message)
-                        )
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'bivariateAnalysisError',
+                        type = jmvcore::NoticeType$WARNING
                     )
+                    notice$setContent(sprintf('Bivariate analysis error: %s', e$message))
+                    self$results$insert(50, notice)
                     private$.generateSummary(meta_data)
                 })
             } else {
@@ -237,12 +240,13 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performHSROCAnalysis(meta_data = meta_data,
                                                   mada_data = mada_data)
                 }, error = function(e) {
-                    private$.appendInstructionMessage(
-                        sprintf(
-                            "<div class='alert alert-warning'><h4>HSROC Analysis Error</h4><p>%s</p></div>",
-                            jmvcore::escapeHtml(e$message)
-                        )
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'hsrocAnalysisError',
+                        type = jmvcore::NoticeType$WARNING
                     )
+                    notice$setContent(sprintf('HSROC analysis error: %s', e$message))
+                    self$results$insert(51, notice)
                     self$results$hsrocresults$setNote("error", e$message)
                 })
             }
@@ -253,12 +257,13 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performHeterogeneityAnalysis(meta_data = meta_data,
                                                           analysis_data = analysis_data)
                 }, error = function(e) {
-                    private$.appendInstructionMessage(
-                        sprintf(
-                            "<div class='alert alert-warning'><h4>Heterogeneity Analysis Error</h4><p>%s</p></div>",
-                            jmvcore::escapeHtml(e$message)
-                        )
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'heterogeneityAnalysisError',
+                        type = jmvcore::NoticeType$WARNING
                     )
+                    notice$setContent(sprintf('Heterogeneity analysis error: %s', e$message))
+                    self$results$insert(52, notice)
                     self$results$heterogeneity$setNote("error", e$message)
                 })
             }
@@ -269,12 +274,13 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performMetaRegression(meta_data = meta_data,
                                                    analysis_data = analysis_data)
                 }, error = function(e) {
-                    private$.appendInstructionMessage(
-                        sprintf(
-                            "<div class='alert alert-warning'><h4>Meta-Regression Error</h4><p>%s</p></div>",
-                            jmvcore::escapeHtml(e$message)
-                        )
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'metaRegressionError',
+                        type = jmvcore::NoticeType$WARNING
                     )
+                    notice$setContent(sprintf('Meta-regression error: %s', e$message))
+                    self$results$insert(53, notice)
                     self$results$metaregression$setNote("error", e$message)
                 })
             }
@@ -285,12 +291,13 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performPublicationBiasAssessment(meta_data = meta_data,
                                                               analysis_data = analysis_data)
                 }, error = function(e) {
-                    private$.appendInstructionMessage(
-                        sprintf(
-                            "<div class='alert alert-warning'><h4>Publication Bias Analysis Error</h4><p>%s</p></div>",
-                            jmvcore::escapeHtml(e$message)
-                        )
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'publicationBiasError',
+                        type = jmvcore::NoticeType$WARNING
                     )
+                    notice$setContent(sprintf('Publication bias analysis error: %s', e$message))
+                    self$results$insert(54, notice)
                     self$results$publicationbias$setNote("error", e$message)
                 })
             }
@@ -332,6 +339,22 @@ diagnosticmetaClass <- R6::R6Class(
                 self$results$interpretation$setVisible(self$options$show_interpretation)
                 self$results$about$setVisible(self$options$show_methodology)
             }
+
+            # Add completion notice
+            if (!is.null(meta_data) && nrow(meta_data) >= 3) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+                total_n <- sum(meta_data$tp + meta_data$fp + meta_data$fn + meta_data$tn, na.rm = TRUE)
+                method_used <- self$options$method %||% "reml"
+                notice$setContent(sprintf(
+                    'Diagnostic meta-analysis completed using %d studies (N=%d total participants). Method: %s. Confidence level: %d%%.',
+                    nrow(meta_data), total_n, toupper(method_used), self$options$confidence_level
+                ))
+                self$results$insert(999, notice)
+            }
         },
         
         .performBivariateMetaAnalysis = function(meta_data, analysis_data, mada_data) {
@@ -354,28 +377,23 @@ diagnosticmetaClass <- R6::R6Class(
             }
 
             method_option <- self$options$method %||% "reml"
-            # Map jamovi options to mada package method names
-            method_map <- c(
-                reml = "reml",
-                ml = "ml",
-                fixed = "fixed",
-                mm = "mm",
-                vc = "vc",
-                dersimonian_laird = "reml"  # Map DL to REML for Reitsma model
-            )
-            method_used <- method_map[[method_option]] %||% "reml"
 
             # Ensure we only use methods supported by mada::reitsma
             valid_methods <- c("fixed", "ml", "reml", "mm", "vc")
-            if (!(method_used %in% valid_methods)) {
+            if (!(method_option %in% valid_methods)) {
                 method_used <- "reml"
-            }
-
-            # Inform user if DerSimonian-Laird was requested (mapped to REML for Reitsma)
-            if (method_option == "dersimonian_laird") {
-                private$.appendInstructionMessage(
-                    "<div class='alert alert-info'><h4>ℹ️ Method Adjustment</h4><p>DerSimonian-Laird is not directly available for the Reitsma model; REML estimation was used instead.</p></div>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'methodNotSupported',
+                    type = jmvcore::NoticeType$WARNING
                 )
+                notice$setContent(sprintf(
+                    "Method '%s' is not supported for bivariate diagnostic meta-analysis. Using REML instead.",
+                    method_option
+                ))
+                self$results$insert(55, notice)
+            } else {
+                method_used <- method_option
             }
 
             conf_level <- (self$options$confidence_level %||% 95) / 100
@@ -462,40 +480,22 @@ diagnosticmetaClass <- R6::R6Class(
             }
             private$.pooled_specificity <- pooled_spec
 
-            # CRITICAL FIX: Calculate dimension-specific I² values using univariate models
-            # mada's bivariate model returns a global I² which doesn't map to sens/spec
+            # Heterogeneity assessment: Use Q-statistic from bivariate model
+            # Note: Univariate I² values ignore bivariate correlation and overstate precision
+            # Proper assessment requires examining the bivariate covariance structure
             sens_i2 <- NA_real_
             spec_i2 <- NA_real_
 
-            if (requireNamespace("metafor", quietly = TRUE)) {
-                tryCatch({
-                    # Prepare data for univariate meta-analysis
-                    uni_data <- analysis_data
-                    uni_data$sens <- uni_data$tp / (uni_data$tp + uni_data$fn)
-                    uni_data$spec <- uni_data$tn / (uni_data$tn + uni_data$fp)
-                    
-                    # Logit transformation
-                    uni_data$logit_sens <- stats::qlogis(uni_data$sens)
-                    uni_data$logit_spec <- stats::qlogis(uni_data$spec)
-                    
-                    # Variances
-                    uni_data$var_logit_sens <- 1/uni_data$tp + 1/uni_data$fn
-                    uni_data$var_logit_spec <- 1/uni_data$tn + 1/uni_data$fp
-                    
-                    # Univariate meta-analysis for Sensitivity I²
-                    sens_model <- metafor::rma(yi = logit_sens, vi = var_logit_sens, 
-                                             data = uni_data, method = "REML")
-                    sens_i2 <- max(0, sens_model$I2)
-                    
-                    # Univariate meta-analysis for Specificity I²
-                    spec_model <- metafor::rma(yi = logit_spec, vi = var_logit_spec, 
-                                             data = uni_data, method = "REML")
-                    spec_i2 <- max(0, spec_model$I2)
-                    
-                }, error = function(e) {
-                    # Keep as NA if calculation fails
-                })
-            }
+            # Add note about heterogeneity to table
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'heterogeneityNote',
+                type = jmvcore::NoticeType$INFO
+            )
+            notice$setContent(
+                "I² values are not included in the bivariate table as univariate I² calculations ignore within-study correlation and bivariate model structure. Please refer to the Heterogeneity Assessment table for proper evaluation using Q-statistics and tau-squared."
+            )
+            self$results$insert(60, notice)
 
             bivariate_table$addRow(rowKey = "sensitivity", values = list(
                 parameter = "Pooled Sensitivity",
@@ -843,10 +843,28 @@ diagnosticmetaClass <- R6::R6Class(
             analysis_data <- analysis_data[!is.na(analysis_data$covariate), , drop = FALSE]
 
             if (nrow(analysis_data) < 3) {
-                private$.appendInstructionMessage(
-                    "<div class='alert alert-info'><h4>ℹ️ Meta-Regression Not Run</h4><p>Fewer than three studies remain after removing missing covariate values.</p></div>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'metaRegressionTooFewStudies',
+                    type = jmvcore::NoticeType$INFO
                 )
+                notice$setContent('Meta-regression not run: fewer than three studies remain after removing missing covariate values.')
+                self$results$insert(61, notice)
                 return()
+            }
+
+            # Stability warning for small sample sizes
+            if (nrow(analysis_data) < 10) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSampleMetaRegression',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf(
+                    'Meta-regression with only %d studies may produce unstable estimates. Results should be interpreted with extreme caution. Confidence intervals may be unreliable and parameter estimates may be biased. Consider reporting as exploratory analysis only.',
+                    nrow(analysis_data)
+                ))
+                self$results$insert(2, notice)
             }
 
             if (requireNamespace("metafor", quietly = TRUE)) {
@@ -1006,15 +1024,39 @@ diagnosticmetaClass <- R6::R6Class(
                 alpha <- 1 - conf_level
                 z_crit <- stats::qnorm(1 - alpha / 2)
 
-                meta_data$sens_ci_lower <- with(meta_data,
-                    pmax(0, sens - z_crit * sqrt(sens * (1-sens) / (tp + fn))))
-                meta_data$sens_ci_upper <- with(meta_data,
-                    pmin(1, sens + z_crit * sqrt(sens * (1-sens) / (tp + fn))))
+                # Wilson score interval (proper CI for proportions, not Wald)
+                # More accurate for extreme proportions near 0 or 1
+                wilson_ci <- function(x, n, z) {
+                    if (n == 0 || !is.finite(x) || !is.finite(n)) {
+                        return(c(0, 1))
+                    }
+                    p <- x / n
+                    denominator <- 1 + z^2 / n
+                    center <- (p + z^2 / (2 * n)) / denominator
+                    margin <- z * sqrt((p * (1 - p) / n + z^2 / (4 * n^2))) / denominator
 
-                meta_data$spec_ci_lower <- with(meta_data,
-                    pmax(0, spec - z_crit * sqrt(spec * (1-spec) / (tn + fp))))
-                meta_data$spec_ci_upper <- with(meta_data,
-                    pmin(1, spec + z_crit * sqrt(spec * (1-spec) / (tn + fp))))
+                    lower <- pmax(0, center - margin)
+                    upper <- pmin(1, center + margin)
+                    c(lower, upper)
+                }
+
+                # Calculate Wilson CIs for sensitivity
+                meta_data$sens_ci_lower <- NA_real_
+                meta_data$sens_ci_upper <- NA_real_
+                for (i in seq_len(nrow(meta_data))) {
+                    ci <- wilson_ci(meta_data$tp[i], meta_data$tp[i] + meta_data$fn[i], z_crit)
+                    meta_data$sens_ci_lower[i] <- ci[1]
+                    meta_data$sens_ci_upper[i] <- ci[2]
+                }
+
+                # Calculate Wilson CIs for specificity
+                meta_data$spec_ci_lower <- NA_real_
+                meta_data$spec_ci_upper <- NA_real_
+                for (i in seq_len(nrow(meta_data))) {
+                    ci <- wilson_ci(meta_data$tn[i], meta_data$tn[i] + meta_data$fp[i], z_crit)
+                    meta_data$spec_ci_lower[i] <- ci[1]
+                    meta_data$spec_ci_upper[i] <- ci[2]
+                }
 
                 # Reshape data to long format for faceting
                 sens_data <- meta_data[, c("study", "sens", "sens_ci_lower", "sens_ci_upper")]
@@ -1029,6 +1071,66 @@ diagnosticmetaClass <- R6::R6Class(
 
                 # Get color palette for accessibility
                 colors <- private$.getColorPalette()
+
+                # Add pooled estimates as diamond (standard meta-analysis convention)
+                pooled_data <- NULL
+                if (!is.null(private$.pooled_sensitivity) && !is.null(private$.pooled_specificity)) {
+                    # Get bivariate model summary for pooled CIs
+                    pooled_sens_ci <- c(NA_real_, NA_real_)
+                    pooled_spec_ci <- c(NA_real_, NA_real_)
+
+                    if (!is.null(private$.biv_model)) {
+                        tryCatch({
+                            summary_results <- summary(private$.biv_model)
+                            coefficients <- summary_results$coefficients
+
+                            # Helper to get CI from coefficients
+                            get_ci <- function(param_name) {
+                                if (is.null(rownames(coefficients))) return(c(NA_real_, NA_real_))
+                                idx <- which(rownames(coefficients) == param_name)
+                                if (length(idx) == 0) return(c(NA_real_, NA_real_))
+                                estimate <- coefficients[idx[1], 1]
+                                se <- coefficients[idx[1], 2]
+                                z <- stats::qnorm(1 - (1 - conf_level) / 2)
+                                c(estimate - z * se, estimate + z * se)
+                            }
+
+                            # Get CIs for sensitivity and specificity
+                            sens_ci_logit <- get_ci("sensitivity")
+                            if (!any(is.na(sens_ci_logit))) {
+                                pooled_sens_ci <- stats::plogis(sens_ci_logit)
+                            }
+
+                            fpr_ci_logit <- get_ci("false pos. rate")
+                            if (!any(is.na(fpr_ci_logit))) {
+                                pooled_spec_ci <- 1 - stats::plogis(fpr_ci_logit)
+                            }
+                        }, error = function(e) {
+                            # Silently use NA CIs if extraction fails
+                        })
+                    }
+
+                    # Create pooled estimate rows
+                    pooled_sens_row <- data.frame(
+                        study = "POOLED ESTIMATE",
+                        estimate = private$.pooled_sensitivity,
+                        ci_lower = pooled_sens_ci[1],
+                        ci_upper = pooled_sens_ci[2],
+                        metric = "Sensitivity",
+                        stringsAsFactors = FALSE
+                    )
+
+                    pooled_spec_row <- data.frame(
+                        study = "POOLED ESTIMATE",
+                        estimate = private$.pooled_specificity,
+                        ci_lower = pooled_spec_ci[1],
+                        ci_upper = pooled_spec_ci[2],
+                        metric = "Specificity",
+                        stringsAsFactors = FALSE
+                    )
+
+                    pooled_data <- rbind(pooled_sens_row, pooled_spec_row)
+                }
 
                 # Create forest plot
                 p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = estimate, y = reorder(study, estimate))) +
@@ -1049,6 +1151,42 @@ diagnosticmetaClass <- R6::R6Class(
                         axis.text = ggplot2::element_text(size = 10),
                         panel.spacing = ggplot2::unit(2, "lines")
                     )
+
+                # Add pooled estimate diamond (standard meta-analysis convention)
+                if (!is.null(pooled_data)) {
+                    # Create diamond shape data for each metric
+                    diamond_data <- do.call(rbind, lapply(1:nrow(pooled_data), function(i) {
+                        row <- pooled_data[i, ]
+                        y_pos <- "POOLED ESTIMATE"
+                        y_offset <- 0.3  # Half-height of diamond
+
+                        data.frame(
+                            x = c(row$ci_lower, row$estimate, row$ci_upper, row$estimate),
+                            y = c(y_pos, y_pos, y_pos, y_pos),
+                            y_numeric = c(0, y_offset, 0, -y_offset),  # For proper diamond shape
+                            metric = rep(row$metric, 4),
+                            group = rep(i, 4),
+                            stringsAsFactors = FALSE
+                        )
+                    }))
+
+                    p <- p +
+                        ggplot2::geom_polygon(
+                            data = diamond_data,
+                            ggplot2::aes(x = x, y = y, group = interaction(metric, group)),
+                            fill = colors$secondary,
+                            alpha = 0.6,
+                            inherit.aes = FALSE
+                        ) +
+                        ggplot2::geom_point(
+                            data = pooled_data,
+                            ggplot2::aes(x = estimate, y = "POOLED ESTIMATE"),
+                            size = 4,
+                            color = colors$secondary,
+                            shape = 18,  # Diamond shape
+                            inherit.aes = FALSE
+                        )
+                }
                 
                 print(p)
                 TRUE
@@ -1546,17 +1684,16 @@ diagnosticmetaClass <- R6::R6Class(
 
             # Check minimum study requirement first (critical error)
             if (nrow(meta_data) < 3) {
-                error_msg <- sprintf(
-                    "<div class='alert alert-danger'>
-                    <h4>Insufficient Data</h4>
-                    <p>Meta-analysis requires at least 3 studies with complete data.</p>
-                    <p>You have provided: <strong>%d studies</strong></p>
-                    <p><strong>Solution:</strong> Add more studies or use individual study analysis instead.</p>
-                    </div>",
-                    nrow(meta_data)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficientData',
+                    type = jmvcore::NoticeType$ERROR
                 )
-                self$results$instructions$setContent(error_msg)
-                self$results$instructions$setVisible(TRUE)
+                notice$setContent(sprintf(
+                    'Meta-analysis requires at least 3 studies with complete data. Current studies: %d. Please add more studies or use individual study analysis instead.',
+                    nrow(meta_data)
+                ))
+                self$results$insert(1, notice)
                 return(FALSE)
             }
 
@@ -1633,6 +1770,45 @@ diagnosticmetaClass <- R6::R6Class(
                 )
             }
 
+            # Build zero-cell correction disclosure
+            correction_disclosure <- ""
+            if (!is.null(private$.correction_method_used) && private$.correction_method_used != "none") {
+                n_corrected <- length(private$.corrected_study_names)
+                if (n_corrected > 0) {
+                    method_label <- switch(private$.correction_method_used,
+                                         constant = "constant +0.5 to all cells",
+                                         treatment_arm = "treatment-arm (+0.5 to zero cells only)",
+                                         empirical = "empirical (1/N) correction",
+                                         "unknown method")
+
+                    # Add STRONG_WARNING notice for zero-cell correction
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'zeroCellCorrection',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Zero-cell correction applied (%s) to %d of %d studies (%s). Results should be interpreted with caution as corrections can introduce bias, especially in large studies.',
+                        method_label, n_corrected, private$.n_studies,
+                        paste(head(private$.corrected_study_names, 3), collapse = ', ')
+                    ))
+                    self$results$insert(3, notice)
+
+                    correction_disclosure <- sprintf(
+                        "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
+                            <h5>⚠️ Zero-Cell Correction Applied</h5>
+                            <p><strong>Method:</strong> %s</p>
+                            <p><strong>Studies corrected:</strong> %d of %d (%s)</p>
+                            <p><em>Note:</em> Zero-cell corrections can introduce bias, especially in large studies. Results should be interpreted with caution.</p>
+                        </div>",
+                        method_label,
+                        n_corrected,
+                        private$.n_studies,
+                        paste(head(private$.corrected_study_names, 5), collapse = ", ")
+                    )
+                }
+            }
+
             summary_html <- sprintf("
             <div class='analysis-summary' style='background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 10px 0;'>
                 <h4>Meta-Analysis Summary</h4>
@@ -1643,6 +1819,8 @@ diagnosticmetaClass <- R6::R6Class(
                     <p><strong>Sensitivity:</strong> %.1f%% - The test correctly identifies %.0f out of 100 patients with disease</p>
                     <p><strong>Specificity:</strong> %.1f%% - The test correctly identifies %.0f out of 100 healthy individuals</p>
                 </div>
+
+                %s
 
                 <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>Clinical Decision Metrics</h5>
@@ -1667,6 +1845,7 @@ diagnosticmetaClass <- R6::R6Class(
             private$.n_studies,
             sens_pct, sens_pct,
             spec_pct, spec_pct,
+            correction_disclosure,
             plr_text,
             nlr_text,
             private$.getInterpretationText(sens_pct, spec_pct, lr_pos, lr_neg),
@@ -1746,19 +1925,168 @@ diagnosticmetaClass <- R6::R6Class(
             self$results$summary$setContent(summary_html)
         },
 
-        # Helper function for interpretation text
+        # Helper function for dynamic interpretation text with actual values
         .getInterpretationText = function(sens, spec, lr_pos, lr_neg) {
-            if (sens >= 90 && spec >= 90) {
-                return("Excellent diagnostic accuracy - suitable for both ruling in and ruling out disease.")
-            } else if (sens >= 90) {
-                return("High sensitivity - excellent for ruling out disease when test is negative (SnNout).")
-            } else if (spec >= 90) {
-                return("High specificity - excellent for ruling in disease when test is positive (SpPin).")
-            } else if (sens >= 80 && spec >= 80) {
-                return("Good overall diagnostic accuracy - useful for clinical decision making.")
+            # Classify sensitivity performance
+            sens_class <- if (sens >= 90) {
+                "excellent"
+            } else if (sens >= 80) {
+                "good"
+            } else if (sens >= 70) {
+                "moderate"
             } else {
-                return("Moderate diagnostic accuracy - consider using in combination with other clinical information.")
+                "limited"
             }
+
+            # Classify specificity performance
+            spec_class <- if (spec >= 90) {
+                "excellent"
+            } else if (spec >= 80) {
+                "good"
+            } else if (spec >= 70) {
+                "moderate"
+            } else {
+                "limited"
+            }
+
+            # Classify positive LR
+            plr_class <- if (is.finite(lr_pos)) {
+                if (lr_pos > 10) "strong"
+                else if (lr_pos >= 5) "moderate"
+                else if (lr_pos >= 2) "weak"
+                else "minimal"
+            } else {
+                "not estimable"
+            }
+
+            # Classify negative LR
+            nlr_class <- if (is.finite(lr_neg)) {
+                if (lr_neg < 0.1) "strong"
+                else if (lr_neg <= 0.2) "moderate"
+                else if (lr_neg <= 0.5) "weak"
+                else "minimal"
+            } else {
+                "not estimable"
+            }
+
+            # Build dynamic interpretation with actual values
+            interpretation <- sprintf(
+                "<strong>Your pooled sensitivity of %.1f%%</strong> is classified as <em>%s</em> for screening purposes. ",
+                sens, sens_class
+            )
+
+            # Add sensitivity-specific guidance
+            if (sens >= 90) {
+                interpretation <- paste0(interpretation,
+                    sprintf("With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f. ",
+                            sens, sens, 100 - sens),
+                    "<strong>Clinical implication:</strong> Excellent for ruling OUT disease when test is negative (SnNout principle). "
+                )
+            } else if (sens >= 80) {
+                interpretation <- paste0(interpretation,
+                    sprintf("With %.1f%% sensitivity, approximately %.0f out of 100 diseased patients will be correctly identified. ",
+                            sens, sens),
+                    "<strong>Clinical implication:</strong> Acceptable for screening, but negative results should be interpreted with caution. "
+                )
+            } else {
+                interpretation <- paste0(interpretation,
+                    sprintf("With %.1f%% sensitivity, up to %.0f out of 100 diseased patients may be missed. ",
+                            sens, 100 - sens),
+                    "<strong>Clinical implication:</strong> Limited screening utility - negative results do NOT effectively rule out disease. "
+                )
+            }
+
+            # Add specificity interpretation
+            interpretation <- paste0(interpretation,
+                sprintf("<br><br><strong>Your pooled specificity of %.1f%%</strong> is classified as <em>%s</em> for confirmatory testing. ",
+                        spec, spec_class)
+            )
+
+            if (spec >= 90) {
+                interpretation <- paste0(interpretation,
+                    sprintf("With %.1f%% specificity, only %.0f out of 100 healthy individuals will test positive (false alarms). ",
+                            spec, 100 - spec),
+                    "<strong>Clinical implication:</strong> Excellent for ruling IN disease when test is positive (SpPin principle). "
+                )
+            } else if (spec >= 80) {
+                interpretation <- paste0(interpretation,
+                    sprintf("With %.1f%% specificity, approximately %.0f out of 100 healthy individuals will be correctly classified. ",
+                            spec, spec),
+                    "<strong>Clinical implication:</strong> Acceptable for confirmation, but positive results may include false positives. "
+                )
+            } else {
+                interpretation <- paste0(interpretation,
+                    sprintf("With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test positive. ",
+                            spec, 100 - spec),
+                    "<strong>Clinical implication:</strong> Limited confirmatory value - positive results do NOT strongly confirm disease. "
+                )
+            }
+
+            # Add likelihood ratio interpretation if available
+            if (plr_class != "not estimable") {
+                interpretation <- paste0(interpretation,
+                    sprintf("<br><br><strong>Your positive LR of %.2f</strong> provides <em>%s</em> evidence FOR disease when test is positive. ",
+                            lr_pos, plr_class)
+                )
+
+                if (lr_pos > 10) {
+                    interpretation <- paste0(interpretation,
+                        sprintf("A positive result increases disease probability substantially (multiplies pre-test odds by %.1fx). ",
+                                lr_pos)
+                    )
+                } else if (lr_pos >= 5) {
+                    interpretation <- paste0(interpretation,
+                        "A positive result moderately increases disease probability. "
+                    )
+                } else {
+                    interpretation <- paste0(interpretation,
+                        "A positive result provides only weak evidence - clinical context is essential. "
+                    )
+                }
+            }
+
+            if (nlr_class != "not estimable") {
+                interpretation <- paste0(interpretation,
+                    sprintf("<strong>Your negative LR of %.2f</strong> provides <em>%s</em> evidence AGAINST disease when test is negative. ",
+                            lr_neg, nlr_class)
+                )
+
+                if (lr_neg < 0.1) {
+                    interpretation <- paste0(interpretation,
+                        sprintf("A negative result substantially decreases disease probability (divides pre-test odds by %.1fx). ",
+                                1/lr_neg)
+                    )
+                } else if (lr_neg <= 0.2) {
+                    interpretation <- paste0(interpretation,
+                        "A negative result moderately decreases disease probability. "
+                    )
+                } else {
+                    interpretation <- paste0(interpretation,
+                        "A negative result provides only weak evidence - clinical context is essential. "
+                    )
+                }
+            }
+
+            # Overall recommendation
+            if (sens >= 90 && spec >= 90) {
+                interpretation <- paste0(interpretation,
+                    "<br><br><strong>Overall Assessment:</strong> This test demonstrates <em>excellent</em> diagnostic accuracy suitable for both screening and confirmatory use in appropriate clinical populations."
+                )
+            } else if (sens >= 80 && spec >= 80) {
+                interpretation <- paste0(interpretation,
+                    "<br><br><strong>Overall Assessment:</strong> This test demonstrates <em>good</em> diagnostic accuracy and can be useful for clinical decision-making when combined with other clinical information."
+                )
+            } else if (sens >= 90 || spec >= 90) {
+                interpretation <- paste0(interpretation,
+                    "<br><br><strong>Overall Assessment:</strong> This test has <em>asymmetric</em> performance - excellent for one purpose (rule-in OR rule-out) but limited for the other. Use strategically based on clinical goals."
+                )
+            } else {
+                interpretation <- paste0(interpretation,
+                    "<br><br><strong>Overall Assessment:</strong> This test demonstrates <em>moderate</em> diagnostic accuracy. Consider using in combination with other tests or as part of a broader diagnostic algorithm rather than as a standalone test."
+                )
+            }
+
+            return(interpretation)
         },
 
         # Populate About This Analysis panel
@@ -1777,6 +2105,31 @@ diagnosticmetaClass <- R6::R6Class(
                         <li>🔍 <strong>Heterogeneity assessment</strong> - Evaluates consistency across studies</li>
                         <li>📉 <strong>Publication bias</strong> - Checks for selective reporting</li>
                     </ul>
+                </div>
+
+                <div style='margin: 15px 0; background-color: #e3f2fd; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3;'>
+                    <h5>📘 Understanding Bivariate vs HSROC Models</h5>
+                    <p><strong>Both models are valuable and provide complementary information:</strong></p>
+
+                    <p><strong>Bivariate Random-Effects Model (Recommended Primary Approach):</strong></p>
+                    <ul>
+                        <li>✅ Provides <em>intuitive</em> pooled sensitivity and specificity estimates</li>
+                        <li>✅ Accounts for correlation between sensitivity and specificity</li>
+                        <li>✅ Directly interpretable for clinical decision-making</li>
+                        <li>✅ Preferred for meta-analyses with <em>homogeneous thresholds</em></li>
+                        <li>📊 <strong>Use this when:</strong> Studies use the same diagnostic threshold</li>
+                    </ul>
+
+                    <p><strong>HSROC Model (Hierarchical Summary ROC):</strong></p>
+                    <ul>
+                        <li>✅ Models the <em>entire ROC curve</em> across different thresholds</li>
+                        <li>✅ Provides threshold-independent accuracy estimates (Λ parameter)</li>
+                        <li>✅ Captures asymmetry in diagnostic accuracy (β parameter)</li>
+                        <li>✅ Better for studies with <em>varying cutoffs or thresholds</em></li>
+                        <li>📊 <strong>Use this when:</strong> Studies use different diagnostic thresholds</li>
+                    </ul>
+
+                    <p><strong>💡 Clinical Insight:</strong> The SROC plot shown by this module is derived from the <em>bivariate model</em>, which provides a simpler and more intuitive visualization. The HSROC table provides additional parametric information (θ = threshold, Λ = accuracy) that can be useful for understanding test performance across different threshold scenarios. <strong>Both approaches are statistically valid</strong> - the choice depends on your research question and whether thresholds vary across studies.</p>
                 </div>
 
                 <div style='margin: 15px 0;'>
@@ -1851,7 +2204,11 @@ diagnosticmetaClass <- R6::R6Class(
                 analysis_data[[col]] <- as.numeric(analysis_data[[col]])
             }
 
+            # Apply zero-cell correction based on user choice
+            correction_method <- self$options$zero_cell_correction %||% "none"
             correction_flags <- rep(FALSE, nrow(analysis_data))
+            corrected_studies <- character(0)
+
             for (i in seq_len(nrow(analysis_data))) {
                 row_counts <- as.numeric(analysis_data[i, numeric_cols])
                 if (any(!is.finite(row_counts))) {
@@ -1860,11 +2217,40 @@ diagnosticmetaClass <- R6::R6Class(
                 if (any(row_counts < 0)) {
                     next
                 }
-                if (any(row_counts == 0)) {
-                    analysis_data[i, numeric_cols] <- row_counts + 0.5
-                    correction_flags[i] <- TRUE
+
+                has_zero <- any(row_counts == 0)
+
+                if (has_zero && correction_method != "none") {
+                    if (correction_method == "constant") {
+                        # Global +0.5 to all cells (biased for large studies)
+                        analysis_data[i, numeric_cols] <- row_counts + 0.5
+                        correction_flags[i] <- TRUE
+                        corrected_studies <- c(corrected_studies, as.character(analysis_data[i, "study"]))
+
+                    } else if (correction_method == "treatment_arm") {
+                        # Add 0.5 only to zero cells (treatment-arm correction)
+                        corrected_row <- row_counts
+                        corrected_row[row_counts == 0] <- 0.5
+                        analysis_data[i, numeric_cols] <- corrected_row
+                        correction_flags[i] <- TRUE
+                        corrected_studies <- c(corrected_studies, as.character(analysis_data[i, "study"]))
+
+                    } else if (correction_method == "empirical") {
+                        # Empirical correction: use 1/N where N is total sample size
+                        total_n <- sum(row_counts, na.rm = TRUE)
+                        if (total_n > 0) {
+                            correction <- 1 / total_n
+                            analysis_data[i, numeric_cols] <- row_counts + correction
+                            correction_flags[i] <- TRUE
+                            corrected_studies <- c(corrected_studies, as.character(analysis_data[i, "study"]))
+                        }
+                    }
                 }
             }
+
+            # Store correction info for reporting
+            private$.correction_method_used <- correction_method
+            private$.corrected_study_names <- corrected_studies
 
             private$.analysis_data <- analysis_data
             private$.mada_data <- data.frame(

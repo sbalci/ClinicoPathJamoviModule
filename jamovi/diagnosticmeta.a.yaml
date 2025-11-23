@@ -1,7 +1,7 @@
 ---
 name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
-menuGroup: OncoPathT3
+menuGroup: OncoPathT
 menuSubgroup: IHC Analysis
 version: '0.0.31'
 jas: '1.2'
@@ -151,11 +151,26 @@ options:
             title: Method of Moments
           - name: 'vc'
             title: Variance Components
-          - name: 'dersimonian_laird'
-            title: DerSimonian-Laird
       default: reml
       description:
-          R: Method for meta-analysis estimation
+          R: Method for meta-analysis estimation (Note DerSimonian-Laird is not appropriate for bivariate diagnostic meta-analysis)
+
+    - name: zero_cell_correction
+      title: Zero-Cell Correction Method
+      type: List
+      options:
+          - name: 'none'
+            title: None (Model-Based)
+          - name: 'constant'
+            title: Constant (+0.5 to all cells)
+          - name: 'treatment_arm'
+            title: Treatment-Arm (add to zero cells only)
+          - name: 'empirical'
+            title: Empirical (study-specific)
+      default: none
+      description:
+          R: |
+            Method for handling zero cells in 2x2 tables. 'none' relies on bivariate model (recommended). 'constant' adds 0.5 to all cells of affected studies. 'treatment_arm' adds correction only to zero cells. 'empirical' uses study-specific corrections.
 
     - name: forest_plot
       title: Forest Plot

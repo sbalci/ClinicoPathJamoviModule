@@ -25,7 +25,45 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
+        .calculateRobustCV = function(values) {
+            # Robust CV calculation with safeguards against division by near-zero means
+            values <- values[!is.na(values)]
+            if (length(values) < 2) return(NA)
+
+            mean_val <- mean(values)
+            sd_val <- sd(values)
+
+            # Guard against division by near-zero mean
+            if (abs(mean_val) < 1e-6) {
+                return(NA)
+            }
+
+            cv <- (sd_val / abs(mean_val)) * 100
+
+            # Cap extreme CVs (>500% likely indicates data issues)
+            if (!is.finite(cv) || cv > 500) {
+                return(NA)
+            }
+
+            return(cv)
+        },
+
         .init = function() {
+            # Populate welcome screen
+            self$results$welcome$setContent("
+                <div class='jmv-welcome' style='padding: 20px; background: #f8f9fa; border-left: 4px solid #007bff;'>
+                    <h3 style='margin-top: 0;'>📊 IHC Heterogeneity Analysis</h3>
+                    <p><strong>Get started:</strong></p>
+                    <ol>
+                        <li>Select <strong>Regional Measurement 1</strong> (required)</li>
+                        <li>Optionally add reference measurement (whole slide/hotspot)</li>
+                        <li>Add more regional measurements (2-4 or use Additional Measurements)</li>
+                        <li>Optionally specify <strong>Spatial Region ID</strong> for compartment analysis</li>
+                    </ol>
+                    <p style='margin-bottom: 0;'><em>Configure thresholds and options in the left panel.</em></p>
+                </div>
+            ")
+
             if (is.null(self$data)) {
                 self$results$interpretation$setContent(
                     "<h3>IHC Heterogeneity Analysis for Digital Pathology</h3>
@@ -262,6 +300,27 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 spatial_table$addColumn(name = 'cv_percent', title = 'CV (%)', type = 'number', format = 'zto')
                 spatial_table$addColumn(name = 'heterogeneity_level', title = 'Heterogeneity Level', type = 'text')
             }
+
+            # Compartment comparison table (if enabled)
+            if (self$options$compareCompartments && !is.null(self$options$spatial_id)) {
+                comp_table <- self$results$compartmentComparison
+                comp_table$addColumn(name = 'metric', title = 'Heterogeneity Metric', type = 'text')
+                comp_table$addColumn(name = 'compartment', title = 'Compartment', type = 'text')
+                comp_table$addColumn(name = 'value', title = 'Value', type = 'number', format = 'zto')
+                comp_table$addColumn(name = 'ci_lower', title = '95% CI Lower', type = 'number', format = 'zto')
+                comp_table$addColumn(name = 'ci_upper', title = '95% CI Upper', type = 'number', format = 'zto')
+                comp_table$addColumn(name = 'comparison', title = 'Comparison to Other Compartments', type = 'text')
+            }
+
+            # Compartment tests table (if enabled)
+            if (self$options$compartmentTests && !is.null(self$options$spatial_id)) {
+                test_table <- self$results$compartmentTests
+                test_table$addColumn(name = 'test_type', title = 'Test', type = 'text')
+                test_table$addColumn(name = 'statistic', title = 'Statistic', type = 'number', format = 'zto')
+                test_table$addColumn(name = 'df', title = 'DF', type = 'integer')
+                test_table$addColumn(name = 'p_value', title = 'p-value', type = 'number', format = 'zto,pvalue')
+                test_table$addColumn(name = 'interpretation', title = 'Interpretation', type = 'text')
+            }
         },
         
         .extractRegionalData = function(data) {
@@ -329,6 +388,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # 5. Spatial Analysis (if spatial data provided)
             if (!is.null(spatial_regions)) {
                 private$.analyzeSpatialHeterogeneity(whole_section, biopsy_data, spatial_regions)
+            }
+
+            # 6. Compartment Comparison (if enabled and spatial data available)
+            if (self$options$compareCompartments && !is.null(spatial_regions)) {
+                private$.compareCompartments(whole_section, biopsy_data, spatial_regions)
+            }
+
+            # 7. Compartment Statistical Tests (if enabled and spatial data available)
+            if (self$options$compartmentTests && !is.null(spatial_regions)) {
+                private$.performCompartmentTests(whole_section, biopsy_data, spatial_regions)
             }
 
             # Apply sampling strategy-specific adjustments
@@ -479,11 +548,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 ))
             }
             
-            # Coefficient of variation
-            biopsy_means <- rowMeans(biopsy_data, na.rm = TRUE)
-            biopsy_sds <- apply(biopsy_data, 1, sd, na.rm = TRUE)
-            cv_values <- biopsy_sds / biopsy_means * 100
-            mean_cv <- mean(cv_values[is.finite(cv_values)], na.rm = TRUE)
+            # Coefficient of variation (robust calculation)
+            cv_values <- apply(biopsy_data, 1, private$.calculateRobustCV)
+            mean_cv <- mean(cv_values, na.rm = TRUE)
+            if (is.nan(mean_cv) || is.infinite(mean_cv)) mean_cv <- NA
             
             repro_table$addRow(rowKey = 4, values = list(
                 metric = "Mean Coefficient of Variation (%)",
@@ -517,9 +585,19 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         mean_diff <- bias_test$estimate
                         p_value <- bias_test$p.value
                         
-                        # Effect size (Cohen's d for paired data)
+                        # Effect size (Hedges' g for paired data with small-sample correction)
                         diff_vals <- biopsy_complete - ws_complete
-                        cohens_d <- mean(diff_vals) / sd(diff_vals)
+                        n_pairs <- length(diff_vals)
+
+                        cohens_d_raw <- mean(diff_vals) / sd(diff_vals)
+
+                        # Apply Hedges' correction for small samples (n < 50)
+                        if (n_pairs < 50) {
+                            correction_factor <- 1 - (3 / (4 * n_pairs - 9))
+                            cohens_d <- cohens_d_raw * correction_factor
+                        } else {
+                            cohens_d <- cohens_d_raw
+                        }
                         
                         # Clinical impact assessment
                         relative_bias <- abs(mean_diff) / mean(ws_complete) * 100
@@ -548,9 +626,19 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         overall_diff <- overall_test$estimate
                         overall_p <- overall_test$p.value
                         
-                        # Effect size
+                        # Effect size (Hedges' g with small-sample correction)
                         diff_vals <- biopsy_means[complete_pairs] - whole_section[complete_pairs]
-                        overall_d <- mean(diff_vals) / sd(diff_vals)
+                        n_pairs <- length(diff_vals)
+
+                        overall_d_raw <- mean(diff_vals) / sd(diff_vals)
+
+                        # Apply Hedges' correction for small samples
+                        if (n_pairs < 50) {
+                            correction_factor <- 1 - (3 / (4 * n_pairs - 9))
+                            overall_d <- overall_d_raw * correction_factor
+                        } else {
+                            overall_d <- overall_d_raw
+                        }
                         
                         relative_bias <- abs(overall_diff) / mean(whole_section[complete_pairs]) * 100
                         clinical_impact <- ifelse(relative_bias <= 5, "Minimal (<5%)", 
@@ -687,17 +775,40 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 row_key <- 1
                 
                 for (effect_size in correlation_categories) {
-                    # Power calculation for correlation (Fisher's z transformation)
-                    z_effect <- 0.5 * log((1 + effect_size) / (1 - effect_size))
+                    # Skip if effect size is zero or near-zero
+                    if (abs(effect_size) < 0.01) {
+                        next
+                    }
+
+                    # CORRECTED Power calculation for correlation (Fisher's z transformation)
+                    # Fisher's z transformation for alternative hypothesis
+                    z_observed <- 0.5 * log((1 + effect_size) / (1 - effect_size))
+
+                    # Standard error under H0: rho = 0
                     se_z <- 1 / sqrt(n_cases - 3)
-                    z_score <- z_effect / se_z
-                    power <- pnorm(z_score - qnorm(0.975)) + pnorm(-z_score - qnorm(0.975))
-                    
+
+                    # Non-centrality parameter
+                    ncp <- z_observed / se_z
+
+                    # Two-tailed test power (alpha = 0.05)
+                    z_alpha_half <- qnorm(0.975)  # Critical value for alpha/2 = 0.025
+
+                    # Power = P(|Z| > z_alpha/2 | H1 is true) where Z ~ N(ncp, 1) under H1
+                    power <- pnorm(ncp - z_alpha_half) + pnorm(-ncp - z_alpha_half)
+
                     # Required sample size for 80% power
-                    z_alpha <- qnorm(0.975)  # two-tailed test
-                    z_beta <- qnorm(0.80)    # 80% power
-                    required_n <- ceiling(((z_alpha + z_beta) / z_effect)^2 + 3)
-                    
+                    z_beta <- qnorm(0.80)
+                    z_alpha <- qnorm(0.975)
+
+                    if (abs(z_observed) > 0.01) {
+                        required_n <- ceiling(((z_alpha + z_beta) / z_observed)^2 + 3)
+                    } else {
+                        required_n <- NA  # Effect size too small
+                    }
+
+                    # Ensure minimum of 5 cases
+                    required_n <- pmax(required_n, 5, na.rm = TRUE)
+
                     scenario <- if (effect_size == obs_correlation) {
                         "Observed Effect Size"
                     } else if (effect_size == 0.1) {
@@ -707,7 +818,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     } else {
                         "Large Effect (r=0.5)"
                     }
-                    
+
                     recommendation <- if (power >= 0.80) {
                         "Adequate power achieved"
                     } else if (required_n <= n_cases * 1.5) {
@@ -715,15 +826,15 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     } else {
                         "Substantial sample increase recommended"
                     }
-                    
+
                     power_table$addRow(rowKey = row_key, values = list(
                         scenario = scenario,
                         effect_size = effect_size,
                         power = power,
-                        required_n = pmax(required_n, 5),  # Minimum of 5
+                        required_n = required_n,
                         recommendation = recommendation
                     ))
-                    
+
                     row_key <- row_key + 1
                 }
             }
@@ -1001,38 +1112,28 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 bias_p <- NA
             }
 
+            # Calculate CV using robust method
             if (has_reference && nrow(biopsy_data) > 0) {
-                calculate_case_cv <- function(whole_val, biopsy_row) {
+                calculate_case_cv_with_ref <- function(whole_val, biopsy_row) {
                     values <- c(whole_val, as.numeric(biopsy_row))
-                    values <- values[!is.na(values)]
-                    if (length(values) >= 2) {
-                        sd(values) / mean(values) * 100
-                    } else {
-                        NA
-                    }
+                    private$.calculateRobustCV(values)
                 }
 
                 cv_values <- mapply(
-                    calculate_case_cv,
+                    calculate_case_cv_with_ref,
                     whole_section,
                     split(biopsy_data, seq_len(nrow(biopsy_data)))
                 )
             } else if (nrow(biopsy_data) > 0) {
                 cv_values <- apply(biopsy_data, 1, function(row) {
-                    row_vals <- as.numeric(row)
-                    row_vals <- row_vals[!is.na(row_vals)]
-                    if (length(row_vals) >= 2) {
-                        sd(row_vals) / mean(row_vals) * 100
-                    } else {
-                        NA
-                    }
+                    private$.calculateRobustCV(as.numeric(row))
                 })
             } else {
                 cv_values <- numeric(0)
             }
 
             mean_cv <- if (length(cv_values) > 0) mean(as.numeric(cv_values), na.rm = TRUE) else NA
-            if (is.nan(mean_cv)) mean_cv <- NA
+            if (is.nan(mean_cv) || is.infinite(mean_cv)) mean_cv <- NA
 
             icc_value <- if (!is.null(repro_stats$icc_value)) repro_stats$icc_value else NA
             correlations <- if (!is.null(repro_stats$correlations)) repro_stats$correlations else NA
@@ -1576,17 +1677,59 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Check if psych package is available
             if (!requireNamespace('psych', quietly = TRUE)) {
+                mean_r <- mean(correlations, na.rm = TRUE)
+
+                # Calculate CI using Fisher's z transformation
+                ci_lower <- NA
+                ci_upper <- NA
+
+                # Prepare ICC data to get sample size
+                if (has_reference) {
+                    icc_data_temp <- cbind(whole_section, biopsy_data)
+                } else {
+                    icc_data_temp <- biopsy_data
+                }
+                complete_cases_temp <- complete.cases(icc_data_temp)
+                n_complete <- sum(complete_cases_temp)
+
+                if (!is.na(mean_r) && abs(mean_r) < 0.999 && n_complete >= 3) {
+                    # Fisher's z transformation
+                    fisher_z <- 0.5 * log((1 + mean_r) / (1 - mean_r))
+
+                    # Standard error
+                    se_z <- 1 / sqrt(n_complete - 3)
+
+                    # 95% CI in z-space
+                    z_lower <- fisher_z - 1.96 * se_z
+                    z_upper <- fisher_z + 1.96 * se_z
+
+                    # Back-transform to correlation scale
+                    ci_lower <- (exp(2 * z_lower) - 1) / (exp(2 * z_lower) + 1)
+                    ci_upper <- (exp(2 * z_upper) - 1) / (exp(2 * z_upper) + 1)
+                }
+
                 if (n_biopsies >= 2) {
+                    note_text <- if (!is.na(mean_r) && !is.na(ci_lower)) {
+                        paste0(
+                            "Note: 'psych' package not available. Using correlation-based approximation ",
+                            "(r = ", round(mean_r, 3), ", 95% CI [", round(ci_lower, 3), ", ", round(ci_upper, 3), "]) ",
+                            "instead of ICC(3,1). Install 'psych' for exact ICC calculations."
+                        )
+                    } else {
+                        "Note: 'psych' package not available. Install 'psych' for enhanced reliability metrics (ICC)."
+                    }
+
                     self$results$interpretation$setNote(
                         key = "psych_missing",
-                        note = "Note: Install 'psych' package for enhanced reliability metrics (ICC).",
+                        note = note_text,
                         init = FALSE
                     )
                 }
+
                 return(list(
-                    value = mean(correlations, na.rm = TRUE),
-                    lower = NA,
-                    upper = NA
+                    value = mean_r,
+                    lower = ci_lower,
+                    upper = ci_upper
                 ))
             }
 
@@ -1724,6 +1867,363 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             return(warnings)
+        },
+
+        .compareCompartments = function(whole_section, biopsy_data, spatial_regions) {
+            # Compare heterogeneity metrics (ICC, CV, mean bias) across spatial compartments
+            unique_regions <- unique(spatial_regions)
+            unique_regions <- unique_regions[!is.na(unique_regions)]
+
+            if (length(unique_regions) < 2) {
+                # Need at least 2 compartments for comparison
+                return()
+            }
+
+            comp_table <- self$results$compartmentComparison
+            has_reference <- !is.null(whole_section)
+            row_key <- 1
+
+            # For each compartment, calculate key heterogeneity metrics
+            compartment_stats <- list()
+
+            for (region in unique_regions) {
+                region_mask <- spatial_regions == region & !is.na(spatial_regions)
+
+                if (sum(region_mask) < 3) {
+                    # Need at least 3 cases for meaningful statistics
+                    next
+                }
+
+                region_whole_section <- if (has_reference) whole_section[region_mask] else NULL
+                region_biopsy_data <- biopsy_data[region_mask, , drop = FALSE]
+
+                # Calculate ICC for this compartment
+                if (has_reference && nrow(region_biopsy_data) >= 3) {
+                    region_icc_data <- cbind(region_whole_section, region_biopsy_data)
+                    region_complete <- complete.cases(region_icc_data)
+                    region_icc_data <- region_icc_data[region_complete, , drop = FALSE]
+
+                    if (nrow(region_icc_data) >= 3 && ncol(region_icc_data) >= 2) {
+                        # Calculate ICC using existing helper
+                        region_correlations <- cor(region_icc_data[, 1],
+                                                   rowMeans(region_icc_data[, -1, drop = FALSE]),
+                                                   method = "spearman", use = "complete.obs")
+
+                        icc_result <- private$.calculateICC(
+                            whole_section = region_whole_section,
+                            biopsy_data = region_biopsy_data,
+                            correlations = region_correlations,
+                            has_reference = TRUE,
+                            n_biopsies = ncol(region_biopsy_data)
+                        )
+                        region_icc <- icc_result$value
+                        region_icc_lower <- icc_result$lower
+                        region_icc_upper <- icc_result$upper
+                    } else {
+                        region_icc <- region_icc_lower <- region_icc_upper <- NA
+                    }
+                } else {
+                    region_icc <- region_icc_lower <- region_icc_upper <- NA
+                }
+
+                # Calculate mean CV for this compartment
+                region_cv_values <- c()
+                for (i in seq_len(nrow(region_biopsy_data))) {
+                    if (has_reference && i <= length(region_whole_section)) {
+                        case_values <- c(region_whole_section[i], as.numeric(region_biopsy_data[i, ]))
+                    } else {
+                        case_values <- as.numeric(region_biopsy_data[i, ])
+                    }
+                    case_values <- case_values[!is.na(case_values)]
+                    if (length(case_values) >= 2) {
+                        cv <- sd(case_values) / mean(case_values) * 100
+                        if (!is.na(cv) && is.finite(cv)) {
+                            region_cv_values <- c(region_cv_values, cv)
+                        }
+                    }
+                }
+                region_mean_cv <- if (length(region_cv_values) > 0) mean(region_cv_values) else NA
+
+                # Calculate mean bias (if reference available)
+                if (has_reference && nrow(region_biopsy_data) > 0) {
+                    region_biopsy_means <- rowMeans(region_biopsy_data, na.rm = TRUE)
+                    complete_pairs <- complete.cases(region_whole_section, region_biopsy_means)
+                    if (sum(complete_pairs) >= 3) {
+                        bias_test <- t.test(region_biopsy_means[complete_pairs],
+                                          region_whole_section[complete_pairs],
+                                          paired = TRUE)
+                        region_mean_bias <- bias_test$estimate
+                    } else {
+                        region_mean_bias <- NA
+                    }
+                } else {
+                    region_mean_bias <- NA
+                }
+
+                # Store compartment statistics
+                compartment_stats[[as.character(region)]] <- list(
+                    icc = region_icc,
+                    icc_lower = region_icc_lower,
+                    icc_upper = region_icc_upper,
+                    cv = region_mean_cv,
+                    bias = region_mean_bias,
+                    n_cases = sum(region_mask)
+                )
+            }
+
+            # Populate comparison table with results
+            for (region in names(compartment_stats)) {
+                stats <- compartment_stats[[region]]
+
+                # ICC row
+                if (!is.na(stats$icc)) {
+                    # Compare to other compartments
+                    other_iccs <- sapply(compartment_stats[names(compartment_stats) != region],
+                                        function(x) x$icc)
+                    other_iccs <- other_iccs[!is.na(other_iccs)]
+
+                    comparison_text <- if (length(other_iccs) > 0) {
+                        mean_other <- mean(other_iccs)
+                        diff <- stats$icc - mean_other
+                        if (abs(diff) < 0.05) {
+                            "Similar to other compartments"
+                        } else if (diff > 0) {
+                            sprintf("Higher reliability (+%.2f)", diff)
+                        } else {
+                            sprintf("Lower reliability (%.2f)", diff)
+                        }
+                    } else {
+                        "No comparison available"
+                    }
+
+                    comp_table$addRow(rowKey = row_key, values = list(
+                        metric = "ICC(3,1)",
+                        compartment = region,
+                        value = stats$icc,
+                        ci_lower = stats$icc_lower,
+                        ci_upper = stats$icc_upper,
+                        comparison = comparison_text
+                    ))
+                    row_key <- row_key + 1
+                }
+
+                # CV row
+                if (!is.na(stats$cv)) {
+                    other_cvs <- sapply(compartment_stats[names(compartment_stats) != region],
+                                       function(x) x$cv)
+                    other_cvs <- other_cvs[!is.na(other_cvs)]
+
+                    comparison_text <- if (length(other_cvs) > 0) {
+                        mean_other <- mean(other_cvs)
+                        diff <- stats$cv - mean_other
+                        if (abs(diff) < 5) {
+                            "Similar variability"
+                        } else if (diff > 0) {
+                            sprintf("Higher variability (+%.1f%%)", diff)
+                        } else {
+                            sprintf("Lower variability (%.1f%%)", diff)
+                        }
+                    } else {
+                        "No comparison available"
+                    }
+
+                    comp_table$addRow(rowKey = row_key, values = list(
+                        metric = "Mean CV (%)",
+                        compartment = region,
+                        value = stats$cv,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        comparison = comparison_text
+                    ))
+                    row_key <- row_key + 1
+                }
+
+                # Bias row (if reference available)
+                if (!is.na(stats$bias)) {
+                    other_bias <- sapply(compartment_stats[names(compartment_stats) != region],
+                                        function(x) x$bias)
+                    other_bias <- other_bias[!is.na(other_bias)]
+
+                    comparison_text <- if (length(other_bias) > 0) {
+                        mean_other <- mean(other_bias)
+                        diff <- stats$bias - mean_other
+                        if (abs(diff) < 0.05) {
+                            "Similar bias"
+                        } else if (diff > 0) {
+                            "Higher positive bias"
+                        } else {
+                            "Higher negative bias"
+                        }
+                    } else {
+                        "No comparison available"
+                    }
+
+                    comp_table$addRow(rowKey = row_key, values = list(
+                        metric = "Mean Bias",
+                        compartment = region,
+                        value = stats$bias,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        comparison = comparison_text
+                    ))
+                    row_key <- row_key + 1
+                }
+            }
+        },
+
+        .performCompartmentTests = function(whole_section, biopsy_data, spatial_regions) {
+            # Perform formal statistical tests comparing heterogeneity across compartments
+            # Uses Levene's test for variance equality and Kruskal-Wallis for distributional differences
+
+            unique_regions <- unique(spatial_regions)
+            unique_regions <- unique_regions[!is.na(unique_regions)]
+
+            if (length(unique_regions) < 2) {
+                return()
+            }
+
+            test_table <- self$results$compartmentTests
+            has_reference <- !is.null(whole_section)
+            row_key <- 1
+
+            # Prepare data for testing: calculate CV values per case per compartment
+            cv_by_compartment <- list()
+            values_by_compartment <- list()
+
+            for (region in unique_regions) {
+                region_mask <- spatial_regions == region & !is.na(spatial_regions)
+
+                if (sum(region_mask) < 2) {
+                    next
+                }
+
+                region_whole_section <- if (has_reference) whole_section[region_mask] else NULL
+                region_biopsy_data <- biopsy_data[region_mask, , drop = FALSE]
+
+                # Calculate CV for each case in this compartment
+                region_cvs <- c()
+                region_values <- c()
+
+                for (i in seq_len(nrow(region_biopsy_data))) {
+                    if (has_reference && i <= length(region_whole_section)) {
+                        case_values <- c(region_whole_section[i], as.numeric(region_biopsy_data[i, ]))
+                    } else {
+                        case_values <- as.numeric(region_biopsy_data[i, ])
+                    }
+                    case_values <- case_values[!is.na(case_values)]
+
+                    if (length(case_values) >= 2) {
+                        cv <- sd(case_values) / mean(case_values) * 100
+                        if (!is.na(cv) && is.finite(cv)) {
+                            region_cvs <- c(region_cvs, cv)
+                        }
+                    }
+
+                    # Collect all values for distribution testing
+                    region_values <- c(region_values, case_values)
+                }
+
+                if (length(region_cvs) > 0) {
+                    cv_by_compartment[[as.character(region)]] <- region_cvs
+                }
+                if (length(region_values) > 0) {
+                    values_by_compartment[[as.character(region)]] <- region_values
+                }
+            }
+
+            # 1. Levene's Test for Variance Homogeneity of CV values across compartments
+            if (length(cv_by_compartment) >= 2) {
+                # Prepare data for Levene's test
+                cv_values <- unlist(cv_by_compartment)
+                cv_groups <- rep(names(cv_by_compartment),
+                                sapply(cv_by_compartment, length))
+
+                if (length(cv_values) >= 6 && length(unique(cv_groups)) >= 2) {
+                    # Perform Levene's test manually (using median-based approach)
+                    tryCatch({
+                        # Calculate group medians
+                        group_medians <- tapply(cv_values, cv_groups, median, na.rm = TRUE)
+
+                        # Calculate absolute deviations from group medians
+                        abs_dev <- abs(cv_values - group_medians[cv_groups])
+
+                        # Perform one-way ANOVA on absolute deviations
+                        levene_result <- oneway.test(abs_dev ~ cv_groups, var.equal = TRUE)
+
+                        levene_statistic <- levene_result$statistic
+                        levene_df <- levene_result$parameter
+                        levene_p <- levene_result$p.value
+
+                        interpretation <- if (levene_p < 0.05) {
+                            "Significant difference in variability heterogeneity across compartments"
+                        } else {
+                            "No significant difference in variability patterns across compartments"
+                        }
+
+                        test_table$addRow(rowKey = row_key, values = list(
+                            test_type = "Levene's Test (CV Variance)",
+                            statistic = levene_statistic,
+                            df = as.integer(levene_df),
+                            p_value = levene_p,
+                            interpretation = interpretation
+                        ))
+                        row_key <- row_key + 1
+                    }, error = function(e) {
+                        # Failed to compute Levene's test
+                        test_table$addRow(rowKey = row_key, values = list(
+                            test_type = "Levene's Test (CV Variance)",
+                            statistic = NA,
+                            df = NA,
+                            p_value = NA,
+                            interpretation = "Could not compute: insufficient data or computational error"
+                        ))
+                        row_key <<- row_key + 1
+                    })
+                }
+            }
+
+            # 2. Kruskal-Wallis Test for Distribution Differences across compartments
+            if (length(values_by_compartment) >= 2) {
+                all_values <- unlist(values_by_compartment)
+                all_groups <- rep(names(values_by_compartment),
+                                 sapply(values_by_compartment, length))
+
+                if (length(all_values) >= 6 && length(unique(all_groups)) >= 2) {
+                    tryCatch({
+                        kw_result <- kruskal.test(all_values ~ all_groups)
+
+                        kw_statistic <- kw_result$statistic
+                        kw_df <- kw_result$parameter
+                        kw_p <- kw_result$p.value
+
+                        interpretation <- if (kw_p < 0.05) {
+                            "Significant difference in biomarker distributions across compartments"
+                        } else if (kw_p < 0.10) {
+                            "Marginal difference in biomarker distributions (p < 0.10)"
+                        } else {
+                            "No significant difference in biomarker distributions across compartments"
+                        }
+
+                        test_table$addRow(rowKey = row_key, values = list(
+                            test_type = "Kruskal-Wallis Test (Distribution)",
+                            statistic = kw_statistic,
+                            df = as.integer(kw_df),
+                            p_value = kw_p,
+                            interpretation = interpretation
+                        ))
+                        row_key <- row_key + 1
+                    }, error = function(e) {
+                        test_table$addRow(rowKey = row_key, values = list(
+                            test_type = "Kruskal-Wallis Test (Distribution)",
+                            statistic = NA,
+                            df = NA,
+                            p_value = NA,
+                            interpretation = "Could not compute: insufficient data or computational error"
+                        ))
+                        row_key <<- row_key + 1
+                    })
+                }
+            }
         }
 
     )

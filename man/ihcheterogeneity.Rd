@@ -97,6 +97,7 @@ correlation)}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$welcome} \tab \tab \tab \tab \tab Welcome screen shown when no variables selected \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences ready for clinical reports and publications \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab Analysis assumptions, data requirements, and methodological considerations \cr

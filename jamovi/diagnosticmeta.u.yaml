@@ -1,4 +1,3 @@
----
 name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
 jus: '3.0'
@@ -12,161 +11,145 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "Study Names (Required)"
+            label: Study Names (Required)
             fitToGrid: true
           - type: VariablesListBox
             name: study
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "True Positives (Disease+, Test+)"
+            label: True Positives (Disease+, Test+)
             fitToGrid: true
           - type: VariablesListBox
             name: true_positives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "False Positives (Disease-, Test+)"
+            label: False Positives (Disease-, Test+)
             fitToGrid: true
           - type: VariablesListBox
             name: false_positives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "False Negatives (Disease+, Test-)"
+            label: False Negatives (Disease+, Test-)
             fitToGrid: true
           - type: VariablesListBox
             name: false_negatives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "True Negatives (Disease-, Test-)"
+            label: True Negatives (Disease-, Test-)
             fitToGrid: true
           - type: VariablesListBox
             name: true_negatives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: "Meta-Regression Variable (Optional)"
+            label: Meta-Regression Variable (Optional)
             fitToGrid: true
           - type: VariablesListBox
             name: covariate
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
   - type: LayoutBox
     margin: large
     stretchFactor: 2
     children:
       - type: Label
-        label: "Analysis Options"
+        label: Analysis Options
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: bivariate_analysis
-                label: "Bivariate Random-Effects Model"
-
+                label: Bivariate Random-Effects Model
               - type: CheckBox
                 name: hsroc_analysis
-                label: "HSROC Analysis (Summary ROC Curve)"
-
+                label: HSROC Analysis (Summary ROC Curve)
               - type: CheckBox
                 name: heterogeneity_analysis
-                label: "Heterogeneity Assessment (Study Variability)"
-
+                label: Heterogeneity Assessment (Study Variability)
               - type: CheckBox
                 name: meta_regression
-                label: "Meta-Regression (Explore Covariate Effects)"
+                label: Meta-Regression (Explore Covariate Effects)
                 enable: (!is.null(covariate) && covariate !="")
-
               - type: CheckBox
                 name: publication_bias
-                label: "Publication Bias Assessment (Deeks' Test)"
-
+                label: Publication Bias Assessment (Deeks' Test)
               - type: CheckBox
                 name: show_individual_studies
-                label: "Show Individual Study Results"
-
+                label: Show Individual Study Results
       - type: Label
-        label: "Advanced Options"
+        label: Advanced Options
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: TextBox
                 name: confidence_level
-                label: "Confidence Level (%)"
+                label: Confidence Level (%)
                 format: number
                 suffix: '%'
-
               - type: ComboBox
                 name: method
-                label: "Estimation Method"
-
+                label: Estimation Method
       - type: Label
-        label: "Visualization Options"
+        label: Visualization Options
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: forest_plot
-                label: "Forest Plot (Sensitivity & Specificity)"
-
+                label: Forest Plot (Sensitivity & Specificity)
               - type: CheckBox
                 name: sroc_plot
-                label: "Summary ROC Plot"
-
+                label: Summary ROC Plot
               - type: CheckBox
                 name: funnel_plot
-                label: "Funnel Plot (Publication Bias)"
+                label: Funnel Plot (Publication Bias)
                 enable: (publication_bias)
-
               - type: ComboBox
                 name: color_palette
-                label: "Plot Colors (Accessibility)"
-
+                label: Plot Colors (Accessibility)
               - type: CheckBox
                 name: show_plot_explanations
-                label: "Show Plot Explanations & Interpretation"
-
+                label: Show Plot Explanations & Interpretation
       - type: Label
-        label: "Reporting Options"
+        label: Reporting Options
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: show_interpretation
-                label: "Show Clinical Interpretation"
-
+                label: Show Clinical Interpretation
               - type: CheckBox
                 name: show_methodology
-                label: "Show Methodology Information"
-
+                label: Show Methodology Information
               - type: CheckBox
                 name: show_analysis_summary
-                label: "Show Analysis Summary"
+                label: Show Analysis Summary
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: zero_cell_correction

@@ -1,7 +1,7 @@
 ---
 name: swimmerplot
 title: "Swimmer Plot"
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: Patient Follow-Up Plots
 version: '0.0.31'
 jas: '1.2'
@@ -377,6 +377,23 @@ options:
       description:
           R: >
             Visual theme for the swimmer plot.
+
+    - name: colorPalette
+      title: "Color Palette"
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Colorblind Safe (Viridis)"
+          name: viridis
+        - title: "High Contrast"
+          name: contrast
+        - title: "Monochrome"
+          name: monochrome
+      default: default
+      description:
+          R: >
+            Select color palette for response categories and groups. Colorblind Safe uses perceptually uniform colors distinguishable by all color vision types. High Contrast is optimized for projectors and printing. Monochrome ensures clarity in grayscale publications.
 
     - name: showLegend
       title: "Show Legend"

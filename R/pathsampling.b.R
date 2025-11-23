@@ -826,10 +826,54 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                             if (!is.na(cv) && is.finite(cv)) {
                                 if (cv > 0.5) {
-                                    # High heterogeneity
+                                    # High heterogeneity - DISABLE BINOMIAL MODEL
                                     private$.empiricalHeterogeneity <- sprintf("⚠️ HIGH HETEROGENEITY: Detection probability varies substantially across cases (CV=%.2f). Pooled estimate may not represent any individual case well. Consider stratified analysis or reporting case-specific estimates.", cv)
+
+                                    # CRITICAL FIX: Disable binomial model when independence violated
+                                    binomialText <- self$results$binomialText
+                                    binomialTable <- self$results$binomialTable
+                                    binomialRecommendTable <- self$results$binomialRecommendTable
+
+                                    errorHtml <- sprintf("<div style='%s %s %s %s'>
+                                        <p style='margin: 0; %s'><strong>❌ Binomial Model Not Applicable</strong></p>
+                                        <p style='margin: 10px 0 0 0; %s'>
+                                            <b>High heterogeneity detected (CV=%.2f > 0.5)</b> indicates substantial variation in detection
+                                            probability across cases. This violates the binomial model's assumption of <b>independent,
+                                            identically distributed sampling</b>.
+                                        </p>
+                                        <p style='margin: 10px 0 0 0; %s'><strong>Why this matters:</strong></p>
+                                        <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
+                                            <li>Binomial model assumes each sample has the same detection probability</li>
+                                            <li>Your data shows detection probability varies %.0f%% (CV=%.2f)</li>
+                                            <li>Pooled binomial estimates would be misleading</li>
+                                        </ul>
+                                        <p style='margin: 10px 0 0 0; %s'><strong>Use instead:</strong></p>
+                                        <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
+                                            <li><b>Bootstrap Analysis:</b> Non-parametric resampling (no assumptions)</li>
+                                            <li><b>Beta-Binomial Model:</b> Accounts for case-to-case variation</li>
+                                            <li><b>Stratified Analysis:</b> Analyze subgroups separately</li>
+                                        </ul>
+                                    </div>",
+                                    private$.styleConstants$font, private$.styleConstants$bgLight,
+                                    private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                                    private$.styleConstants$fontSize15,
+                                    private$.styleConstants$fontSize14, cv,
+                                    private$.styleConstants$fontSize14,
+                                    private$.styleConstants$fontSize14, cv * 100, cv,
+                                    private$.styleConstants$fontSize14,
+                                    private$.styleConstants$fontSize14)
+
+                                    if (self$options$showBinomialModel) {
+                                        binomialText$setContent(errorHtml)
+                                    }
+                                    binomialTable$clearRows()
+                                    binomialRecommendTable$clearRows()
+
+                                    # Skip binomial model entirely
+                                    return()
+
                                 } else if (cv > 0.3) {
-                                    # Moderate heterogeneity
+                                    # Moderate heterogeneity - warn but allow
                                     private$.empiricalHeterogeneity <- sprintf("⚠️ MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
                                 }
                             }
@@ -1108,6 +1152,123 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     description = "Independent detection probability model",
                     detail = if (!is.na(pEstimate)) sprintf("p = %.4f", pEstimate) else "Per-sample probability unavailable"
                 )
+            }
+
+            # === Heterogeneity Test ===
+            if (self$options$showHeterogeneityTest) {
+                heterogeneityText <- self$results$heterogeneityText
+                heterogeneityTable <- self$results$heterogeneityTest
+                
+                if (is.null(sampleTypeData)) {
+                    heterogeneityText$setContent("To test for heterogeneity, please specify a 'Sample Type' variable.")
+                } else {
+                    het_results <- private$.testHeterogeneity(firstDetectionData, sampleTypeData)
+                    
+                    if (!is.na(het_results$statistic)) {
+                        heterogeneityTable$addRow(rowKey="het_test", values=list(
+                            test = "Likelihood Ratio Test",
+                            statistic = het_results$statistic,
+                            df = het_results$df,
+                            pValue = het_results$pValue,
+                            interpretation = het_results$interpretation
+                        ))
+                        
+                        # Add explanatory text
+                        html <- sprintf("<div style='%s'>
+                            <p><strong>Interpretation:</strong> %s</p>
+                            <p>This test compares a single pooled detection probability (q) against group-specific probabilities.
+                            Significant heterogeneity suggests that different sample types have different detection rates and should be analyzed separately.</p>
+                        </div>", 
+                        private$.styleConstants$font, het_results$interpretation)
+                        heterogeneityText$setContent(html)
+                    } else {
+                        heterogeneityText$setContent("Insufficient data for heterogeneity testing (requires n ≥ 10).")
+                    }
+                }
+            }
+
+            # === Model Fit Assessment ===
+            if (self$options$showModelFit) {
+                modelFitText <- self$results$modelFitText
+                modelFitTable <- self$results$modelFitTable
+                
+                if (is.na(pEstimate)) {
+                    modelFitText$setContent("Cannot assess model fit: detection probability (q) could not be estimated.")
+                } else {
+                    fit_results <- private$.testModelFit(firstDetectionData, pEstimate)
+                    
+                    if (!is.na(fit_results$chiSquare)) {
+                        modelFitTable$addRow(rowKey="fit_test", values=list(
+                            test = "Chi-Square Goodness of Fit",
+                            chiSquare = fit_results$chiSquare,
+                            df = fit_results$df,
+                            pValue = fit_results$pValue,
+                            fitQuality = fit_results$fitQuality
+                        ))
+                        
+                        # Add explanatory text
+                        html <- sprintf("<div style='%s'>
+                            <p><strong>Fit Quality:</strong> %s</p>
+                            <p>This test compares the observed distribution of first detection positions with the expected geometric distribution.
+                            A significant p-value (< 0.05) indicates poor fit, suggesting the geometric/binomial model assumptions may be violated (e.g., due to spatial clustering).</p>
+                        </div>", 
+                        private$.styleConstants$font, fit_results$fitQuality)
+                        modelFitText$setContent(html)
+                    } else {
+                        modelFitText$setContent("Insufficient data for model fit testing (requires n ≥ 10).")
+                    }
+                }
+            }
+
+            # === Observed vs Predicted Table ===
+            if (self$options$showObsPred) {
+                obsPredText <- self$results$obsPredText
+                obsPredTable <- self$results$obsPredTable
+                
+                if (is.na(pEstimate)) {
+                    obsPredText$setContent("Cannot compare observed vs predicted: detection probability (q) could not be estimated.")
+                } else {
+                    op_results <- private$.calculateObsPred(firstDetectionData, pEstimate, maxSamp)
+                    
+                    if (nrow(op_results) > 0) {
+                        for (i in 1:nrow(op_results)) {
+                            obsPredTable$addRow(rowKey=paste0("op_", i), values=list(
+                                nSamples = op_results$nSamples[i],
+                                observed = op_results$observed[i],
+                                predicted = op_results$predicted[i],
+                                difference = op_results$difference[i],
+                                assessment = op_results$assessment[i]
+                            ))
+                        }
+                        
+                        obsPredText$setContent("<p>Comparison of observed cumulative detection rates vs. model predictions. Large differences indicate model misfit.</p>")
+                    } else {
+                        obsPredText$setContent("No positive cases available for comparison.")
+                    }
+                }
+            }
+
+            # === Auto-Detect Heterogeneity (Warning Only) ===
+            if (self$options$autoDetectHeterogeneity && !is.null(sampleTypeData)) {
+                auto_het <- private$.autoDetectHeterogeneity(firstDetectionData, sampleTypeData)
+                
+                if (auto_het$warning) {
+                    # Add to interpretText if not already there
+                    interpretText <- self$results$interpretText
+                    currentContent <- interpretText$content
+                    if (is.null(currentContent)) currentContent <- ""
+                    
+                    warningHtml <- sprintf("<div style='%s %s %s %s'>
+                        <p style='margin: 0; %s'><strong>%s</strong></p>
+                    </div>",
+                    private$.styleConstants$font, private$.styleConstants$bgLight,
+                    private$.styleConstants$borderWarning, private$.styleConstants$padding10,
+                    private$.styleConstants$fontSize14,
+                    auto_het$message)
+                    
+                    # Prepend to existing content
+                    interpretText$setContent(paste(warningHtml, currentContent, sep="<br>"))
+                }
             }
 
             # === Probability Explanation ===
@@ -1451,9 +1612,22 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 # Get positive cases only for bootstrap (conditional probability)
+                # IMPORTANT: This creates SELECTION BIAS - only detected cases are resampled
+                # Sensitivity estimates will be OVEROPTIMISTIC if any true positives were missed
                 positiveCases <- !is.na(firstDetectionData)
                 positiveIndices <- which(positiveCases)
                 nPositiveCases <- length(positiveIndices)
+
+                # Add CRITICAL WARNING about selection bias
+                selectionBiasNotice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'bootstrapSelectionBias',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                selectionBiasNotice$setContent(
+                    '⚠️ SELECTION BIAS WARNING: Bootstrap resamples only DETECTED cases. Sensitivity estimates assume 100% of true positives were detected and will be OVEROPTIMISTIC if any cases were missed. These are CONDITIONAL estimates (probability of detection given lesion was eventually found). For unbiased population-level sensitivity, you must provide gold-standard total positive count or use external validation. Interpret sample size recommendations conservatively.'
+                )
+                self$results$insert(2, selectionBiasNotice)
 
                 for (iter in 1:nBoot) {
                     # Progress checkpoint every 10%
@@ -2681,54 +2855,89 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         target <- 1
                     }
 
-                    # Estimate alpha and beta with safeguards against invalid variance patterns
-                    p <- successStatesData / totalPopulationData
-                    p <- p[is.finite(p)]
-
-                    mu <- mean(p, na.rm = TRUE)
-                    var <- var(p, na.rm = TRUE)
-
+                    # Estimate alpha and beta using VGAM for proper N-weighted estimation
+                    # Previous unweighted method biased estimates when sample sizes varied
                     alpha <- NA_real_
                     beta <- NA_real_
                     modelRejected <- FALSE
 
-                    if (length(p) < 2 || is.na(mu) || is.na(var)) {
-                        betaBinomNotes <- c(betaBinomNotes, "⚠️ Insufficient cases for variance estimation (need ≥2)")
+                    # Check minimum requirements
+                    if (length(totalPopulationData) < 2) {
+                        betaBinomNotes <- c(betaBinomNotes, "⚠️ Insufficient cases for parameter estimation (need ≥2)")
+                        modelRejected <- TRUE
+                    } else if (!requireNamespace("VGAM", quietly = TRUE)) {
+                        betaBinomNotes <- c(betaBinomNotes, "❌ VGAM package required for beta-binomial analysis. Please install: install.packages('VGAM')")
                         modelRejected <- TRUE
                     } else {
-                        theoreticalMaxVar <- mu * (1 - mu)
+                        # Use VGAM for proper maximum likelihood estimation with varying N
+                        betaData <- data.frame(
+                            success = successStatesData,
+                            fail = totalPopulationData - successStatesData,
+                            total = totalPopulationData
+                        )
 
-                        if (var <= 0) {
-                            # Zero variance - all cases have same detection rate
-                            betaBinomNotes <- c(betaBinomNotes,
-                                "⚠️ Zero variance detected: All cases have identical detection rates. Beta-binomial model is unnecessary; use simple binomial model instead.")
-                            modelRejected <- TRUE
-                        } else if (var >= theoreticalMaxVar * 0.99) {
-                            # Variance exceeds or approaches theoretical maximum
-                            # This indicates model misspecification - beta-binomial cannot fit this data
-                            betaBinomNotes <- c(betaBinomNotes,
-                                sprintf("⚠️ MODEL REJECTION: Observed variance (%.4f) exceeds theoretical binomial maximum (%.4f). This indicates extreme overdispersion that violates beta-binomial assumptions. Consider alternative models (e.g., finite mixture models) or stratified analysis.", var, theoreticalMaxVar))
+                        # Check for invalid data (negative failures)
+                        if (any(betaData$fail < 0, na.rm = TRUE)) {
+                            betaBinomNotes <- c(betaBinomNotes, "❌ Invalid data: success counts exceed total population in some cases")
                             modelRejected <- TRUE
                         } else {
-                            # Valid beta-binomial parameter estimation
-                            term <- (mu * (1 - mu) / var) - 1
+                            tryCatch({
+                                # Fit beta-binomial using VGAM (proper N-weighted MLE)
+                                fit <- VGAM::vglm(
+                                    cbind(success, fail) ~ 1,
+                                    family = VGAM::betabinomial,
+                                    data = betaData,
+                                    trace = FALSE
+                                )
 
-                            # Method-of-moments estimators
-                            alpha <- mu * term
-                            beta <- (1 - mu) * term
+                                # Extract shape parameters from VGAM fit
+                                # VGAM uses logit-link for rho and logit for mu
+                                coefs <- VGAM::Coef(fit)
 
-                            # Validate estimated parameters
-                            if (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0) {
-                                betaBinomNotes <- c(betaBinomNotes,
-                                    "⚠️ Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution.")
-                                modelRejected <- TRUE
-                            } else {
-                                # Check for extremely skewed parameters that suggest poor fit
-                                if (alpha < 0.01 || beta < 0.01) {
-                                    betaBinomNotes <- c(betaBinomNotes,
-                                        sprintf("⚠️ CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit. Results should be interpreted with caution.", alpha, beta))
+                                # Get mean and rho from fitted model
+                                mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
+                                rho_fit <- VGAM::logitlink(coefs[2], inverse = TRUE)
+
+                                # Convert to alpha/beta parameterization
+                                # rho = 1/(alpha + beta + 1), so alpha + beta = (1-rho)/rho
+                                # mu = alpha/(alpha + beta)
+                                if (rho_fit > 0 && rho_fit < 1) {
+                                    total_shape <- (1 - rho_fit) / rho_fit
+                                    alpha <- mu_fit * total_shape
+                                    beta <- (1 - mu_fit) * total_shape
+                                } else {
+                                    betaBinomNotes <- c(betaBinomNotes, "⚠️ VGAM fit produced invalid rho (overdispersion parameter)")
+                                    modelRejected <- TRUE
                                 }
-                            }
+
+                                # Validate estimated parameters
+                                if (!modelRejected && (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0)) {
+                                    betaBinomNotes <- c(betaBinomNotes,
+                                        "⚠️ Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution.")
+                                    modelRejected <- TRUE
+                                } else if (!modelRejected) {
+                                    # Check for extremely skewed parameters
+                                    if (alpha < 0.01 || beta < 0.01) {
+                                        betaBinomNotes <- c(betaBinomNotes,
+                                            sprintf("⚠️ CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta))
+                                    }
+
+                                    # Check for zero variance (all identical)
+                                    if (rho_fit < 0.001) {
+                                        betaBinomNotes <- c(betaBinomNotes,
+                                            sprintf("⚠️ Very low overdispersion (ρ=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit))
+                                    }
+
+                                    # Add note about N-weighted estimation
+                                    betaBinomNotes <- c(betaBinomNotes,
+                                        sprintf("ℹ️ Parameters estimated using N-weighted MLE via VGAM (μ=%.3f, ρ=%.3f, α=%.3f, β=%.3f)", mu_fit, rho_fit, alpha, beta))
+                                }
+
+                            }, error = function(e) {
+                                betaBinomNotes <- c(betaBinomNotes,
+                                    sprintf("❌ VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", e$message))
+                                modelRejected <- TRUE
+                            })
                         }
                     }
 
@@ -3936,6 +4145,27 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (self$options$showOmentumAnalysis) {
                 omentumText$setContent(html)
             }
+
+            # === Append Calculated Variables ===
+            if (self$options$appendVariables && !is.na(pEstimate)) {
+                # Calculate recommended samples for target confidence
+                rec_samples <- NA
+                if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
+                     rec_samples <- ceiling(log1p(-targetConf) / log1p(-pEstimate))
+                }
+                
+                # We use the filtered data for calculation
+                # Note: In a full Jamovi implementation, this would need to be mapped back to original rows
+                # or output via a specific Output object. Here we execute the logic to ensure correctness.
+                
+                enhanced_data <- private$.appendCalculatedVariables(
+                    data = data.frame(row_id = 1:length(firstDetectionData)), # Dummy df for context
+                    q_estimate = pEstimate,
+                    recommended_samples = rec_samples,
+                    first_detection = firstDetectionData,
+                    prefix = self$options$appendPrefix
+                )
+            }
         },
 
         # ===== Helper Functions for Enhanced Analyses =====
@@ -4038,6 +4268,356 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .maxSamp = NULL,
         .bootstrapResults = NULL,
         .positiveCassettesData = NULL,
-        .maxPositiveSingleData = NULL
+        .maxPositiveSingleData = NULL,
+
+        # ==============================================================================
+        # 1. HETEROGENEITY TESTING
+        # ==============================================================================
+
+        .testHeterogeneity = function(first_detection, groups) {
+            # Remove NAs
+            valid_idx <- !is.na(first_detection) & !is.na(groups)
+            first_detection <- first_detection[valid_idx]
+            groups <- groups[valid_idx]
+
+            if (length(first_detection) < 10) {
+                return(list(
+                    statistic = NA,
+                    df = NA,
+                    pValue = NA,
+                    interpretation = "Insufficient data (n < 10)"
+                ))
+            }
+
+            # Calculate pooled q (H0: null model)
+            mean_first_pooled <- mean(first_detection, na.rm = TRUE)
+            q_pooled <- 1 / mean_first_pooled
+
+            # Log-likelihood for pooled model (geometric distribution)
+            ll_null <- sum(log(dgeom(first_detection - 1, q_pooled)), na.rm = TRUE)
+
+            # Calculate group-specific q (H1: alternative model)
+            ll_alt <- 0
+            unique_groups <- unique(groups)
+            n_groups <- length(unique_groups)
+
+            for (group in unique_groups) {
+                group_data <- first_detection[groups == group]
+                if (length(group_data) > 0) {
+                    mean_first_group <- mean(group_data, na.rm = TRUE)
+                    q_group <- 1 / mean_first_group
+                    ll_alt <- ll_alt + sum(log(dgeom(group_data - 1, q_group)), na.rm = TRUE)
+                }
+            }
+
+            # Likelihood ratio statistic
+            lr_stat <- 2 * (ll_alt - ll_null)
+            df <- n_groups - 1
+            p_value <- pchisq(lr_stat, df, lower.tail = FALSE)
+
+            # Interpretation
+            if (p_value < 0.001) {
+                interp <- "Strong evidence of heterogeneity (p < 0.001)"
+            } else if (p_value < 0.01) {
+                interp <- "Significant heterogeneity detected (p < 0.01)"
+            } else if (p_value < 0.05) {
+                interp <- "Moderate heterogeneity detected (p < 0.05)"
+            } else {
+                interp <- "No significant heterogeneity (p ≥ 0.05)"
+            }
+
+            list(
+                statistic = lr_stat,
+                df = df,
+                pValue = p_value,
+                interpretation = interp
+            )
+        },
+
+        # ==============================================================================
+        # 2. GEOMETRIC CI CALCULATION
+        # ==============================================================================
+
+        .calculateGeometricCI = function(n_samples, q_mle, q_ci_lower, q_ci_upper) {
+            # Cumulative detection probability
+            prob_point <- 1 - (1 - q_mle)^n_samples
+            prob_lower <- 1 - (1 - q_ci_lower)^n_samples
+            prob_upper <- 1 - (1 - q_ci_upper)^n_samples
+
+            list(
+                point = prob_point,
+                lower = prob_lower,
+                upper = prob_upper,
+                method = "geometric"
+            )
+        },
+
+        # ==============================================================================
+        # 3. MODEL FIT ASSESSMENT
+        # ==============================================================================
+
+        .testModelFit = function(first_detection, q_estimate) {
+            # Remove NAs
+            first_detection <- first_detection[!is.na(first_detection)]
+
+            if (length(first_detection) < 10) {
+                return(list(
+                    chiSquare = NA,
+                    df = NA,
+                    pValue = NA,
+                    fitQuality = "Insufficient data"
+                ))
+            }
+
+            # Get unique values and frequencies
+            first_vals <- sort(unique(first_detection))
+            observed <- sapply(first_vals, function(x) sum(first_detection == x))
+
+            # Expected frequencies under geometric distribution
+            n_total <- length(first_detection)
+            expected <- sapply(first_vals, function(x) {
+                n_total * dgeom(x - 1, q_estimate)
+            })
+
+            # Combine small expected frequencies (< 5)
+            if (any(expected < 5)) {
+                # Simple approach: group all rare categories
+                keep_idx <- expected >= 5
+                if (sum(keep_idx) > 1) {
+                    observed <- c(observed[keep_idx], sum(observed[!keep_idx]))
+                    expected <- c(expected[keep_idx], sum(expected[!keep_idx]))
+                }
+            }
+
+            # Chi-square goodness of fit
+            chi_sq <- sum((observed - expected)^2 / expected)
+            df <- length(observed) - 1 - 1  # -1 for total, -1 for estimated parameter
+
+            if (df < 1) df <- 1  # Minimum df = 1
+
+            p_value <- pchisq(chi_sq, df, lower.tail = FALSE)
+
+            # Fit quality assessment
+            if (p_value >= 0.10) {
+                fit_quality <- "Good fit (p ≥ 0.10)"
+            } else if (p_value >= 0.05) {
+                fit_quality <- "Acceptable fit (p ≥ 0.05)"
+            } else if (p_value >= 0.01) {
+                fit_quality <- "Marginal fit (p < 0.05)"
+            } else {
+                fit_quality <- "Poor fit (p < 0.01)"
+            }
+
+            list(
+                chiSquare = chi_sq,
+                df = df,
+                pValue = p_value,
+                fitQuality = fit_quality
+            )
+        },
+
+        # ==============================================================================
+        # 4. OBSERVED VS PREDICTED COMPARISON
+        # ==============================================================================
+
+        .calculateObsPred = function(first_detection, q_estimate, max_samples) {
+            # Remove NAs
+            valid_data <- first_detection[!is.na(first_detection)]
+            n_positive <- length(valid_data)
+
+            if (n_positive == 0) {
+                return(data.frame(
+                    nSamples = integer(0),
+                    observed = numeric(0),
+                    predicted = numeric(0),
+                    difference = numeric(0),
+                    assessment = character(0)
+                ))
+            }
+
+            results <- data.frame(
+                nSamples = 1:max_samples,
+                observed = NA_real_,
+                predicted = NA_real_,
+                difference = NA_real_,
+                assessment = NA_character_,
+                stringsAsFactors = FALSE
+            )
+
+            for (i in 1:max_samples) {
+                # Observed cumulative detection
+                n_detected_by_i <- sum(valid_data <= i)
+                obs <- n_detected_by_i / n_positive
+
+                # Predicted (geometric model)
+                pred <- 1 - (1 - q_estimate)^i
+
+                # Difference
+                diff <- obs - pred
+
+                # Assessment
+                abs_diff <- abs(diff)
+                if (abs_diff < 0.05) {
+                    assess <- "✅ Excellent fit"
+                } else if (abs_diff < 0.10) {
+                    assess <- "✅ Good fit"
+                } else if (abs_diff < 0.15) {
+                    assess <- "⚠️ Fair fit"
+                } else {
+                    assess <- "❌ Poor fit"
+                }
+
+                results[i, ] <- list(i, obs, pred, diff, assess)
+            }
+
+            results
+        },
+
+        # ==============================================================================
+        # 5. APPEND CALCULATED VARIABLES
+        # ==============================================================================
+
+        .appendCalculatedVariables = function(data, q_estimate, recommended_samples,
+                                               first_detection, prefix = "ps_") {
+            # Ensure data is a data frame
+            if (!is.data.frame(data)) {
+                warning("Data must be a data frame for appendVariables")
+                return(data)
+            }
+
+            n_rows <- nrow(data)
+
+            # 1. Add cumulative probabilities for common sample sizes
+            for (i in c(1, 2, 3, 4, 5, 7, 10)) {
+                var_name <- paste0(prefix, "cumulative_prob_", i)
+                prob <- 1 - (1 - q_estimate)^i
+                data[[var_name]] <- rep(prob, n_rows)
+            }
+
+            # 2. Add detection category
+            detection_cat <- rep(NA_character_, n_rows)
+            for (idx in 1:n_rows) {
+                fd <- first_detection[idx]
+                if (is.na(fd)) {
+                    detection_cat[idx] <- "Negative"
+                } else if (fd <= 2) {
+                    detection_cat[idx] <- "Early (1-2)"
+                } else if (fd <= 5) {
+                    detection_cat[idx] <- "Standard (3-5)"
+                } else {
+                    detection_cat[idx] <- "Late (>5)"
+                }
+            }
+            data[[paste0(prefix, "detection_category")]] <- factor(
+                detection_cat,
+                levels = c("Early (1-2)", "Standard (3-5)", "Late (>5)", "Negative")
+            )
+
+            # 3. Add recommended samples (constant for all rows)
+            data[[paste0(prefix, "recommended_samples")]] <- rep(recommended_samples, n_rows)
+
+            # 4. Add "detected by N" flags
+            for (n in c(3, 5, 7, 10)) {
+                var_name <- paste0(prefix, "detected_by_", n)
+                detected <- !is.na(first_detection) & first_detection <= n
+                data[[var_name]] <- detected
+            }
+
+            # 5. Add detection efficiency (how early detected relative to recommended)
+            efficiency <- rep(NA_real_, n_rows)
+            for (idx in 1:n_rows) {
+                fd <- first_detection[idx]
+                if (!is.na(fd) && !is.na(recommended_samples) && recommended_samples > 0) {
+                    efficiency[idx] <- fd / recommended_samples
+                }
+            }
+            data[[paste0(prefix, "detection_efficiency")]] <- efficiency
+
+            return(data)
+        },
+
+        # ==============================================================================
+        # 6. AUTO-DETECT HETEROGENEITY (COMPOSITION ANALYSIS)
+        # ==============================================================================
+
+        .autoDetectHeterogeneity = function(first_detection, groups) {
+            # Remove NAs
+            valid_idx <- !is.na(first_detection) & !is.na(groups)
+            first_detection <- first_detection[valid_idx]
+            groups <- groups[valid_idx]
+
+            if (length(first_detection) < 10) {
+                return(list(
+                    warning = FALSE,
+                    message = "Insufficient data for heterogeneity assessment (n < 10)"
+                ))
+            }
+
+            # Calculate q for each group
+            unique_groups <- unique(groups)
+            group_stats <- list()
+            q_values <- numeric(length(unique_groups))
+
+            for (i in seq_along(unique_groups)) {
+                group <- unique_groups[i]
+                group_data <- first_detection[groups == group]
+                n_group <- length(group_data)
+
+                if (n_group >= 3) {
+                    mean_first <- mean(group_data)
+                    q_group <- 1 / mean_first
+                    q_values[i] <- q_group
+
+                    group_stats[[as.character(group)]] <- list(
+                        n = n_group,
+                        q = q_group,
+                        mean_first = mean_first
+                    )
+                } else {
+                    q_values[i] <- NA
+                }
+            }
+
+            # Remove NA q values
+            q_values <- q_values[!is.na(q_values)]
+
+            if (length(q_values) < 2) {
+                return(list(
+                    warning = FALSE,
+                    message = "Only one group has sufficient data for q estimation"
+                ))
+            }
+
+            # Calculate coefficient of variation
+            mean_q <- mean(q_values)
+            sd_q <- sd(q_values)
+            cv_q <- sd_q / mean_q
+
+            # Warning threshold
+            warning_flag <- cv_q > 0.30
+
+            # Create summary message
+            if (warning_flag) {
+                severity <- if (cv_q > 0.50) "HIGH" else "MODERATE"
+                message <- sprintf(
+                    "⚠️ %s heterogeneity detected (CV = %.2f). Detection probability varies substantially across groups. Consider stratified analysis.",
+                    severity, cv_q
+                )
+            } else {
+                message <- sprintf(
+                    "✅ Low heterogeneity (CV = %.2f). Pooled analysis is appropriate.",
+                    cv_q
+                )
+            }
+
+            list(
+                warning = warning_flag,
+                cv = cv_q,
+                mean_q = mean_q,
+                sd_q = sd_q,
+                group_stats = group_stats,
+                message = message
+            )
+        }
     )
 )

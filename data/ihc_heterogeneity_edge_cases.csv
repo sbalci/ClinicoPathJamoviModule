@@ -1,0 +1,4 @@
+"case_id","spatial_region","whole_section_ki67","region_1_ki67","region_2_ki67","region_3_ki67","region_4_ki67"
+"EDGE_01","Central",0,0.5,1,NA,0
+"EDGE_02","Central",100,99.5,98,100,100
+"EDGE_03","Peripheral",50,48,52,51,NA

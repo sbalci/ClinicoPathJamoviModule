@@ -19,6 +19,7 @@ diagnosticmeta(
   publication_bias = FALSE,
   confidence_level = 95,
   method = "reml",
+  zero_cell_correction = "none",
   forest_plot = FALSE,
   sroc_plot = FALSE,
   funnel_plot = FALSE,
@@ -59,7 +60,13 @@ test}
 
 \item{confidence_level}{Confidence level for meta-analysis results}
 
-\item{method}{Method for meta-analysis estimation}
+\item{method}{Method for meta-analysis estimation (Note DerSimonian-Laird
+is not appropriate for bivariate diagnostic meta-analysis)}
+
+\item{zero_cell_correction}{Method for handling zero cells in 2x2 tables.
+'none' relies on bivariate model (recommended). 'constant' adds 0.5 to all
+cells of affected studies. 'treatment_arm' adds correction only to zero
+cells. 'empirical' uses study-specific corrections.}
 
 \item{forest_plot}{Generate forest plot for sensitivity and specificity}
 

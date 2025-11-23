@@ -251,8 +251,14 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 },
         .runFitModel = function() {
             # Check required variables
-            if (is.null(self$options$outcome) || is.null(self$options$predictors) ||
-                length(self$options$predictors) == 0) {
+            # Check required variables
+            if (self$options$modelType != "cox" && is.null(self$options$outcome)) {
+                return()
+            }
+            if (self$options$modelType == "cox" && (is.null(self$options$survivalTime) || is.null(self$options$eventStatus))) {
+                return()
+            }
+            if (is.null(self$options$predictors) || length(self$options$predictors) == 0) {
                 return()
             }
 
@@ -260,12 +266,14 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data %>% janitor::clean_names()
 
             # Get variable names
-            outcome_var <- janitor::make_clean_names(self$options$outcome)
+            outcome_var <- if (!is.null(self$options$outcome)) janitor::make_clean_names(self$options$outcome) else NULL
             predictor_vars <- janitor::make_clean_names(self$options$predictors)
 
-            # Create formula
-            formula_str <- paste(outcome_var, "~", paste(predictor_vars, collapse = " + "))
-            formula <- as.formula(formula_str)
+            # Create formula (only if outcome is present)
+            if (!is.null(outcome_var)) {
+                formula_str <- paste(outcome_var, "~", paste(predictor_vars, collapse = " + "))
+                formula <- as.formula(formula_str)
+            }
 
             # Fit model based on type
             model_type <- self$options$modelType

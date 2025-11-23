@@ -19,6 +19,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             publication_bias = FALSE,
             confidence_level = 95,
             method = "reml",
+            zero_cell_correction = "none",
             forest_plot = FALSE,
             sroc_plot = FALSE,
             funnel_plot = FALSE,
@@ -114,9 +115,17 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ml",
                     "fixed",
                     "mm",
-                    "vc",
-                    "dersimonian_laird"),
+                    "vc"),
                 default="reml")
+            private$..zero_cell_correction <- jmvcore::OptionList$new(
+                "zero_cell_correction",
+                zero_cell_correction,
+                options=list(
+                    "none",
+                    "constant",
+                    "treatment_arm",
+                    "empirical"),
+                default="none")
             private$..forest_plot <- jmvcore::OptionBool$new(
                 "forest_plot",
                 forest_plot,
@@ -173,6 +182,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..publication_bias)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..method)
+            self$.addOption(private$..zero_cell_correction)
             self$.addOption(private$..forest_plot)
             self$.addOption(private$..sroc_plot)
             self$.addOption(private$..funnel_plot)
@@ -197,6 +207,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         publication_bias = function() private$..publication_bias$value,
         confidence_level = function() private$..confidence_level$value,
         method = function() private$..method$value,
+        zero_cell_correction = function() private$..zero_cell_correction$value,
         forest_plot = function() private$..forest_plot$value,
         sroc_plot = function() private$..sroc_plot$value,
         funnel_plot = function() private$..funnel_plot$value,
@@ -220,6 +231,7 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..publication_bias = NA,
         ..confidence_level = NA,
         ..method = NA,
+        ..zero_cell_correction = NA,
         ..forest_plot = NA,
         ..sroc_plot = NA,
         ..funnel_plot = NA,
@@ -669,7 +681,12 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param publication_bias Assess publication bias using Deeks' funnel plot
 #'   test
 #' @param confidence_level Confidence level for meta-analysis results
-#' @param method Method for meta-analysis estimation
+#' @param method Method for meta-analysis estimation (Note DerSimonian-Laird
+#'   is not appropriate for bivariate diagnostic meta-analysis)
+#' @param zero_cell_correction Method for handling zero cells in 2x2 tables.
+#'   'none' relies on bivariate model (recommended). 'constant' adds 0.5 to all
+#'   cells of affected studies. 'treatment_arm' adds correction only to zero
+#'   cells. 'empirical' uses study-specific corrections.
 #' @param forest_plot Generate forest plot for sensitivity and specificity
 #' @param sroc_plot Generate summary receiver operating characteristic plot
 #' @param funnel_plot Generate funnel plot for publication bias assessment
@@ -728,6 +745,7 @@ diagnosticmeta <- function(
     publication_bias = FALSE,
     confidence_level = 95,
     method = "reml",
+    zero_cell_correction = "none",
     forest_plot = FALSE,
     sroc_plot = FALSE,
     funnel_plot = FALSE,
@@ -772,6 +790,7 @@ diagnosticmeta <- function(
         publication_bias = publication_bias,
         confidence_level = confidence_level,
         method = method,
+        zero_cell_correction = zero_cell_correction,
         forest_plot = forest_plot,
         sroc_plot = sroc_plot,
         funnel_plot = funnel_plot,

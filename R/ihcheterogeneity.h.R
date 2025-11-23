@@ -216,6 +216,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     "ihcheterogeneityResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
         interpretation = function() private$.items[["interpretation"]],
         report_sentences = function() private$.items[["report_sentences"]],
         assumptions = function() private$.items[["assumptions"]],
@@ -241,6 +242,11 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "psych"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="",
+                visible="(biopsy1 == null)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -559,6 +565,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   correlation)
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$welcome} \tab \tab \tab \tab \tab Welcome screen shown when no variables selected \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences ready for clinical reports and publications \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab Analysis assumptions, data requirements, and methodological considerations \cr
