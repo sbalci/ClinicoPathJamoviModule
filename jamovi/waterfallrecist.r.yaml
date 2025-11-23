@@ -1,0 +1,240 @@
+---
+name: waterfallrecist
+title: RECIST v1.1 Response Analysis
+jrs: '1.1'
+
+items:
+    - name: lesionTable
+      title: Lesion-Level Measurements
+      type: Table
+      visible: (showLesionTable)
+      clearWith:
+        - patientID
+        - lesionID
+        - visitTime
+        - diameter
+        - lesionType
+        - location
+      columns:
+        - name: patientID
+          title: Patient ID
+          type: text
+        - name: lesionID
+          title: Lesion ID
+          type: text
+        - name: visitTime
+          title: Visit Time
+          type: number
+        - name: visitNumber
+          title: Visit #
+          type: integer
+        - name: lesionType
+          title: Type
+          type: text
+        - name: location
+          title: Location
+          type: text
+        - name: diameter
+          title: Diameter (mm)
+          type: number
+          format: zto,pvalue
+        - name: changeFromBaseline
+          title: Change from Baseline (mm)
+          type: number
+          format: zto,pvalue
+        - name: percentChange
+          title: '% Change'
+          type: number
+          format: zto,pvalue
+
+    - name: targetSumTable
+      title: Target Lesion Sum by Visit
+      type: Table
+      visible: (showTargetSumTable)
+      clearWith:
+        - patientID
+        - visitTime
+        - diameter
+      columns:
+        - name: patientID
+          title: Patient ID
+          type: text
+        - name: visitTime
+          title: Visit Time
+          type: number
+        - name: visitNumber
+          title: Visit #
+          type: integer
+        - name: nTargetLesions
+          title: N Target
+          type: integer
+        - name: baselineSum
+          title: Baseline Sum (mm)
+          type: number
+          format: zto,pvalue
+        - name: currentSum
+          title: Current Sum (mm)
+          type: number
+          format: zto,pvalue
+        - name: absoluteChange
+          title: Absolute \u0394 (mm)
+          type: number
+          format: zto,pvalue
+        - name: percentChange
+          title: '% Change'
+          type: number
+          format: zto,pvalue
+        - name: targetResponse
+          title: Target Response
+          type: text
+        - name: responseConfirmed
+          title: Confirmed
+          type: text
+
+    - name: bestResponseTable
+      title: Best Overall Response (BOR)
+      type: Table
+      visible: (showBestResponseTable)
+      clearWith:
+        - patientID
+        - visitTime
+        - diameter
+        - confirmationInterval
+      columns:
+        - name: patientID
+          title: Patient ID
+          type: text
+        - name: bestOverallResponse
+          title: Best Response
+          type: text
+        - name: borConfirmed
+          title: Confirmed
+          type: text
+        - name: borFirstVisit
+          title: First Achieved (Visit)
+          type: text
+        - name: timeToResponse
+          title: Time to Response
+          type: number
+          format: zto,pvalue
+        - name: durationOfResponse
+          title: Duration of Response
+          type: number
+          format: zto,pvalue
+        - name: progressionOccurred
+          title: Progression
+          type: text
+        - name: progressionVisit
+          title: Progression Visit
+          type: text
+
+    - name: recistSummary
+      title: RECIST v1.1 Summary Statistics
+      type: Group
+      visible: (showBestResponseTable)
+      clearWith:
+        - patientID
+        - visitTime
+        - diameter
+        - confirmationInterval
+      items:
+        - name: orrConfirmed
+          title: Confirmed ORR (CR + PR)
+          type: Table
+          columns:
+            - name: metric
+              title: Metric
+              type: text
+            - name: value
+              title: Value
+              type: text
+            - name: ci
+              title: 95% CI
+              type: text
+            - name: interpretation
+              title: Interpretation
+              type: text
+
+        - name: dcrConfirmed
+          title: Confirmed DCR (CR + PR + SD)
+          type: Table
+          columns:
+            - name: metric
+              title: Metric
+              type: text
+            - name: value
+              title: Value
+              type: text
+            - name: ci
+              title: 95% CI
+              type: text
+            - name: interpretation
+              title: Interpretation
+              type: text
+
+        - name: responseDistribution
+          title: Response Category Distribution
+          type: Table
+          columns:
+            - name: category
+              title: Response Category
+              type: text
+            - name: confirmed
+              title: Confirmed (n)
+              type: integer
+            - name: confirmedPercent
+              title: Confirmed (%)
+              type: number
+              format: zto,pvalue
+            - name: unconfirmed
+              title: Unconfirmed (n)
+              type: integer
+            - name: unconfirmedPercent
+              title: Unconfirmed (%)
+              type: number
+              format: zto,pvalue
+
+    - name: complianceReport
+      title: RECIST v1.1 Compliance Audit
+      type: Html
+      visible: (showRecistComplianceReport)
+      clearWith:
+        - patientID
+        - lesionID
+        - visitTime
+        - diameter
+        - lesionType
+        - location
+        - maxTargetLesions
+        - maxLesionsPerOrgan
+        - confirmationInterval
+
+    - name: waterfallPlot
+      title: Waterfall Plot (Best Confirmed Response)
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .waterfallPlot
+      visible: (showWaterfallPlot)
+      clearWith:
+        - patientID
+        - diameter
+        - visitTime
+        - confirmationInterval
+        - colorScheme
+
+    - name: spiderPlot
+      title: Spider Plot (Target Lesion Sum Trajectories)
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .spiderPlot
+      visible: (showSpiderPlot)
+      clearWith:
+        - patientID
+        - diameter
+        - visitTime
+        - confirmationInterval
+        - colorScheme
+
+...

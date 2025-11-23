@@ -1,7 +1,7 @@
 ---
 name: swimmerplot
 title: "Swimmer Plot"
-menuGroup: OncoPathT
+menuGroup: OncoPathT4
 menuSubgroup: Patient Follow-Up Plots
 version: '0.0.31'
 jas: '1.2'

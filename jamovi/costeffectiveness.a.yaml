@@ -1,7 +1,7 @@
 ---
 name: costeffectiveness
 title: Cost-Effectiveness Analysis
-menuGroup: meddecideT
+menuGroup: meddecideT4
 menuSubgroup: Economic Evaluation
 menuSubtitle: ICER and cost-utility analysis for diagnostic tests
 version: '0.0.32'

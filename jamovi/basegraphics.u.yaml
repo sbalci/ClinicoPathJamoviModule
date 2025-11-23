@@ -34,81 +34,110 @@ children:
             name: group_var
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Plot Appearance
+    collapsed: true
     children:
-      - type: TextBox
-        name: main_title
-        format: string
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: Titles and Labels
+            children:
+              - type: TextBox
+                name: main_title
+                format: string
+              - type: TextBox
+                name: x_label
+                format: string
+              - type: TextBox
+                name: y_label
+                format: string
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: Point Styling (Scatter/Pairs)
+            children:
+              - type: ComboBox
+                name: point_type
+              - type: TextBox
+                name: point_size
+                format: number
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: Colors and Display
+            children:
+              - type: ComboBox
+                name: color_scheme
+              - type: CheckBox
+                name: add_grid
+              - type: CheckBox
+                name: add_legend
+  - type: CollapseBox
+    label: Plot-Specific Options
+    collapsed: true
     children:
-      - type: TextBox
-        name: x_label
-        format: string
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: Histogram Bins
+            children:
+              - type: TextBox
+                name: bins
+                format: number
+  - type: CollapseBox
+    label: Statistical Overlays (Exploratory Only)
+    collapsed: true
     children:
-      - type: TextBox
-        name: y_label
-        format: string
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: show_statistics
+  - type: CollapseBox
+    label: Axis Limits
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: CheckBox
+            name: custom_limits
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: X-Axis Range
+            children:
+              - type: TextBox
+                name: x_min
+                format: string
+              - type: TextBox
+                name: x_max
+                format: string
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: Label
+            label: Y-Axis Range
+            children:
+              - type: TextBox
+                name: y_min
+                format: string
+              - type: TextBox
+                name: y_max
+                format: string
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: point_type
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: point_size
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: color_scheme
+        name: correlation_method
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: add_grid
-      - type: CheckBox
-        name: add_legend
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: bins
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_statistics
-      - type: CheckBox
-        name: custom_limits
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: x_min
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: x_max
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: y_min
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: y_max
-        format: number
+        name: show_summary

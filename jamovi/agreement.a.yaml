@@ -47,32 +47,33 @@ options:
     - name: vars
       title: Raters
       type: Variables
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
       description:
           R: >
             A string naming the variable from `data` that contains the
             diagnosis given by the observer, variable can be categorical or ordinal.
 
+    - name: baConfidenceLevel
+      title: 'Confidence Level for LoA'
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
 
-    - name: sft
-      title: Show Frequency Tables
+    - name: proportionalBias
+      title: 'Test for Proportional Bias'
       type: Bool
+      default: false
+
+    - name:  sft
+      title: 'Frequency Table'
+      type:  Bool
       default: false
       description:
           R: >
             Display frequency tables showing the distribution of ratings for each rater.
             Useful for understanding rating patterns and identifying potential biases.
-
-    - name: showText
-      title: Show Simple Text Frequency Tables
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display simple preformatted text version of frequency tables.
-            Provides a plain-text alternative to the HTML formatted tables.
-
 
     - name: wght
       title: Weighted Kappa (Ordinal Data Only)
@@ -186,6 +187,7 @@ options:
     - name: clusterVariable
       title: "Cluster/Institution Variable"
       type: Variable
+      default: null
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:
@@ -354,6 +356,7 @@ options:
     - name: referenceRater
       title: "Reference Rater"
       type: Variable
+      default: null
       suggested: [ordinal, nominal]
       permitted: [factor]
       description:

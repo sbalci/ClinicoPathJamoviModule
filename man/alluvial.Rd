@@ -7,11 +7,11 @@
 alluvial(
   data,
   vars,
-  condensationvar,
+  condensationvar = NULL,
   excl = FALSE,
   marg = FALSE,
   fill = "first_variable",
-  fillGgalluvial,
+  fillGgalluvial = NULL,
   bin = "default",
   orient = "vert",
   usetitle = FALSE,
@@ -23,7 +23,7 @@ alluvial(
   themeStyle = "default",
   enhancedGradients = FALSE,
   plotSubtitle = "",
-  weight,
+  weight = NULL,
   sankeyStyle = FALSE,
   curveType = "cubic",
   flowDirection = "left_right",
@@ -95,9 +95,6 @@ ggalluvial for manual control with curve types and Sankey styling.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$noticeError} \tab \tab \tab \tab \tab a html \cr
-\code{results$noticeWarning} \tab \tab \tab \tab \tab a html \cr
-\code{results$noticeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr

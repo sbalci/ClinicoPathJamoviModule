@@ -38,6 +38,10 @@
 agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
     inherit = agreementBase, private = list(
 
+        # Store harmonized levels and ordering information for validation
+        .harmonizedLevels = NULL,
+        .isOrdered = FALSE,
+
         # Variable name escaping utility for special characters
         .escapeVar = function(x) {
             if (is.null(x) || length(x) == 0) return(character(0))
@@ -611,21 +615,63 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # Enhanced validation ----
             if (is.null(self$data) || nrow(self$data) == 0) {
-                stop("Data contains no rows")
+                error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "emptyDataset",
+                    type = jmvcore::NoticeType$ERROR
+                )
+                error_notice$setContent(
+                    "⛔ <b>Empty Dataset:</b> The dataset contains no rows. Please load data before running analysis."
+                )
+                self$results$insert(0, error_notice)
+                return()
             }
 
             if (nrow(self$data) < 3) {
-                stop("At least 3 observations required for reliability analysis")
+                error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "insufficientObservations",
+                    type = jmvcore::NoticeType$ERROR
+                )
+                error_notice$setContent(paste0(
+                    "⛔ <b>Insufficient Observations:</b> At least 3 observations are required for reliability analysis. ",
+                    "Currently ", nrow(self$data), " observation(s) available. ",
+                    "Please use a dataset with more cases."
+                ))
+                self$results$insert(0, error_notice)
+                return()
             }
 
             # Validate variable types
             for (v in self$options$vars) {
                 if (!v %in% names(self$data)) {
-                    stop(paste0("Variable '", v, "' not found in dataset"))
+                    error_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "variableNotFound",
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    error_notice$setContent(paste0(
+                        "⛔ <b>Variable Not Found:</b> Variable '", v, "' does not exist in the dataset. ",
+                        "Available variables: ", paste(names(self$data), collapse = ", "), ". ",
+                        "Please select valid rater variables."
+                    ))
+                    self$results$insert(0, error_notice)
+                    return()
                 }
                 var_data <- self$data[[v]]
                 if (!is.factor(var_data) && !is.numeric(var_data) && !is.ordered(var_data)) {
-                    stop(paste0("Variable '", v, "' must be categorical (factor), ordinal, or numeric"))
+                    error_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "invalidVariableType",
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    error_notice$setContent(paste0(
+                        "⛔ <b>Invalid Variable Type:</b> Variable '", v, "' must be categorical (factor), ordinal, or numeric. ",
+                        "Current type: ", class(var_data)[1], ". ",
+                        "Please convert to appropriate type in jamovi Data tab (Setup → Data Type)."
+                    ))
+                    self$results$insert(0, error_notice)
+                    return()
                 }
             }
 
@@ -661,6 +707,74 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             ratings[] <- lapply(ratings, function(col)
                 private$.prepareRatingColumn(col, numericLevels))
 
+            # CRITICAL FIX #1: Level Harmonization
+            # Ensure ALL raters have identical factor levels in identical order
+            # This is essential for valid kappa calculations, especially weighted kappa
+            tryCatch({
+                # Extract all unique levels across ALL raters
+                all_levels_list <- lapply(ratings, function(col) {
+                    if (is.factor(col)) return(levels(col))
+                    return(NULL)
+                })
+                all_levels_list <- all_levels_list[!sapply(all_levels_list, is.null)]
+
+                if (length(all_levels_list) > 0) {
+                    # Get union of all levels while preserving order from first rater
+                    all_levels <- all_levels_list[[1]]
+                    for (i in seq_along(all_levels_list)[-1]) {
+                        new_levels <- setdiff(all_levels_list[[i]], all_levels)
+                        if (length(new_levels) > 0) {
+                            all_levels <- c(all_levels, new_levels)
+                        }
+                    }
+
+                    # Check if any rater has ordered factor
+                    any_ordered <- any(sapply(ratings, is.ordered))
+
+                    # Harmonize: ensure ALL raters have same levels in same order
+                    ratings[] <- lapply(ratings, function(col) {
+                        if (is.factor(col)) {
+                            # Re-factor with common levels, preserving ordered status
+                            factor(as.character(col), levels = all_levels, ordered = any_ordered)
+                        } else {
+                            col  # Keep as-is if not factor
+                        }
+                    })
+
+                    # Validation: Check all raters now have identical levels
+                    harmonized_levels <- lapply(ratings, levels)
+                    unique_level_sets <- unique(lapply(harmonized_levels, function(x) paste(x, collapse = "|")))
+
+                    if (length(unique_level_sets) > 1) {
+                        warning_notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = "levelHarmonizationWarning",
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        warning_notice$setContent(paste0(
+                            "⚠️ <b>Level Harmonization Issue:</b> Different raters had different category levels. ",
+                            "All raters have been harmonized to use the union of all levels: {",
+                            paste(all_levels, collapse = ", "), "}. ",
+                            "This ensures statistically valid kappa calculations. ",
+                            "Verify this matches your intended category structure."
+                        ))
+                        self$results$insert(1, warning_notice)
+                    }
+
+                    # Store harmonized levels for later use (Krippendorff, cluster analyses)
+                    private$.harmonizedLevels <- all_levels
+                    private$.isOrdered <- any_ordered
+                } else {
+                    # No factors found (all numeric), use numericLevels
+                    private$.harmonizedLevels <- numericLevels
+                    private$.isOrdered <- TRUE  # Numeric data treated as ordered
+                }
+            }, error = function(e) {
+                warning(paste("Level harmonization failed:", e$message, "- Results may be unreliable"))
+                private$.harmonizedLevels <- NULL
+                private$.isOrdered <- FALSE
+            })
+
             # Preserve jamovi attributes if they exist
             if (!is.null(attr(mydata, "jmv-desc"))) {
                 # Only copy attributes for selected columns
@@ -694,13 +808,36 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         column <- ratings[[col_name]]
 
                         if (!is.ordered(column)) {
-                            stop("Weighted kappa requires ordinal (ordered factor) or numeric variables. Please adjust the data or choose 'Unweighted'.")
+                            error_notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = "weightedKappaRequiresOrdered",
+                                type = jmvcore::NoticeType$ERROR
+                            )
+                            error_notice$setContent(paste0(
+                                "⛔ <b>Weighted Kappa Requirement:</b> Weighted kappa requires ordinal (ordered factor) or numeric variables. ",
+                                "Variable '", col_name, "' is nominal (unordered factor). ",
+                                "Please either convert to ordinal in jamovi Data tab (Setup → Data Type → Ordinal) ",
+                                "or change weighting to 'Unweighted' for nominal categories."
+                            ))
+                            self$results$insert(0, error_notice)
+                            return()
                         }
                     }
                 }
 
                 if (exct == TRUE) {
-                    stop("Exact kappa requires at least 3 raters. Please add more rater variables or disable 'Exact Kappa'.")
+                    error_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "exactKappaRequiresThreeRaters",
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    error_notice$setContent(paste0(
+                        "⛔ <b>Exact Kappa Limitation:</b> Exact p-value calculation requires 3 or more raters. ",
+                        "Currently 2 raters selected. ",
+                        "Either select additional rater variables, or disable 'Exact Kappa' option to use normal approximation."
+                    ))
+                    self$results$insert(0, error_notice)
+                    return()
                 }
 
 
@@ -968,7 +1105,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 ))
 
                 # Create the actual computed column in the dataset
-                self$results$consensusVar$setValue(consensus)
+                self$results$consensusVar$setValues(consensus)
 
             }, error = function(e) {
                 # Handle errors gracefully
@@ -1165,7 +1302,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
 
                 # Create the actual computed column in the dataset
-                self$results$loaVar$setValue(loa_category)
+                self$results$loaVar$setValues(loa_category)
 
             }, error = function(e) {
                 # Handle errors gracefully
@@ -1179,14 +1316,55 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             # Convert ratings data frame to matrix
             ratings_matrix <- as.matrix(ratings)
 
-            # Ensure numeric conversion if needed
+            # CRITICAL FIX #2: Preserve ordinal spacing when converting to numeric
+            # Use harmonized levels from earlier processing to ensure consistent coding
             if (!is.numeric(ratings_matrix)) {
-                # If categorical/factor data, convert to numeric codes
-                ratings_matrix <- matrix(
-                    as.numeric(factor(ratings_matrix)),
-                    nrow = nrow(ratings_matrix),
-                    ncol = ncol(ratings_matrix)
-                )
+                # Check if we have harmonized factor levels from earlier processing
+                if (!is.null(private$.harmonizedLevels) && all(sapply(as.data.frame(ratings), is.factor))) {
+                    # Convert each column using the SAME harmonized level set
+                    # This preserves: 1) ordering, 2) consistent codes across raters
+                    ratings_matrix_list <- lapply(as.data.frame(ratings_matrix), function(col) {
+                        # Use harmonized levels to get consistent numeric codes
+                        factor_col <- factor(as.character(col), levels = private$.harmonizedLevels,
+                                           ordered = private$.isOrdered)
+                        as.numeric(factor_col)
+                    })
+                    ratings_matrix <- do.call(cbind, ratings_matrix_list)
+
+                    # Add warning for ordinal/interval methods with categorical data
+                    if (self$options$krippMethod %in% c("ordinal", "interval")) {
+                        kripp_notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = "krippCategoricalWarning",
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        kripp_notice$setContent(
+                            paste0("Ordinal/interval Krippendorff's alpha computed on categorical data recoded as numeric (1,2,3,...). ",
+                                  "Results assume EQUAL SPACING between categories. ",
+                                  "If categories have unequal clinical importance or spacing, use 'nominal' method or provide numeric ratings directly.")
+                        )
+                        self$results$insert(999, kripp_notice)
+                    }
+                } else {
+                    # Fallback: convert to numeric (less ideal, but better than crashing)
+                    # This pools all values - not recommended but maintains backward compatibility
+                    ratings_matrix <- matrix(
+                        as.numeric(factor(ratings_matrix)),
+                        nrow = nrow(ratings_matrix),
+                        ncol = ncol(ratings_matrix)
+                    )
+
+                    # Always warn when using fallback method
+                    kripp_warning_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "krippEncodingWarning",
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    kripp_warning_notice$setContent(
+                        "Krippendorff's alpha: Categorical data converted to numeric codes. Results may not be interpretable if original categories had specific meaning or spacing."
+                    )
+                    self$results$insert(999, kripp_warning_notice)
+                }
             }
 
             # Add error handling
@@ -1414,15 +1592,72 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             table <- self$results$hierarchicalICCTable
             if (is.null(table)) return()
 
+            # CRITICAL FIX #3: Block ICC for categorical data
+            # ICC from linear mixed models on categorical data is statistically invalid
+            data <- self$data
+            vars <- self$options$vars
+
+            # Check if data is categorical (factors or limited unique values)
+            is_categorical <- FALSE
+            unique_value_counts <- c()
+
+            for (var in vars) {
+                col <- data[[var]]
+                if (is.factor(col)) {
+                    is_categorical <- TRUE
+                    break
+                }
+                if (is.numeric(col)) {
+                    n_unique <- length(unique(col[!is.na(col)]))
+                    unique_value_counts <- c(unique_value_counts, n_unique)
+                    if (n_unique < 10) {
+                        is_categorical <- TRUE
+                    }
+                }
+            }
+
+            if (is_categorical) {
+                # Block ICC analysis and show error notice
+                icc_error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "iccCategoricalError",
+                    type = jmvcore::NoticeType$ERROR
+                )
+
+                error_msg <- paste0(
+                    "⛔ Hierarchical ICC CANNOT be computed for categorical/ordinal data. ",
+                    "ICC from linear mixed models on categorical data (factors or numeric codes 1,2,3,...) is STATISTICALLY INVALID and produces uninterpretable results. ",
+                    "\n\nFor categorical agreement across clusters, use:\n",
+                    "• Stratified kappa (compute kappa within each cluster)\n",
+                    "• Cluster-specific kappa table (see results below)\n",
+                    "• Multilevel categorical models (not implemented in this module)\n\n",
+                    "ICC is ONLY valid for true continuous interval/ratio scale data (e.g., blood pressure, temperature, tumor size in mm)."
+                )
+
+                icc_error_notice$setContent(error_msg)
+                self$results$insert(0, icc_error_notice)
+
+                # Populate table with error message
+                table$setRow(rowNo=1, values=list(
+                    icc_type = "ICC Analysis Blocked",
+                    icc_value = NA,
+                    icc_ci_lower = NA,
+                    icc_ci_upper = NA,
+                    interpretation = "ERROR: Cannot compute ICC for categorical data"
+                ))
+
+                table$setNote("categorical_error",
+                    "⛔ Hierarchical ICC requires continuous numeric data. Use kappa-based methods for categorical ratings.")
+
+                return()  # Exit without computing ICC
+            }
+
             # Check if required packages are available
             if (!requireNamespace("lme4", quietly = TRUE) &&
                 !requireNamespace("nlme", quietly = TRUE)) {
                 stop("Hierarchical ICC requires either 'lme4' or 'nlme' package")
             }
 
-            # Get data
-            data <- self$data
-            vars <- self$options$vars
             cluster_var <- self$options$clusterVariable
 
             if (length(vars) < 2) {
@@ -1431,19 +1666,18 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # Reshape data to long format for mixed model
             # Each row: subject, cluster, rater, rating
-            long_data <- data.frame()
-
-            for (rater_idx in seq_along(vars)) {
+            # Optimized: pre-allocate list and vectorize
+            data_list <- lapply(seq_along(vars), function(rater_idx) {
                 rater_name <- vars[rater_idx]
-                temp_data <- data.frame(
+                data.frame(
                     subject = 1:nrow(data),
                     cluster = data[[cluster_var]],
                     rater = rater_name,
                     rating = as.numeric(data[[rater_name]]),
                     stringsAsFactors = FALSE
                 )
-                long_data <- rbind(long_data, temp_data)
-            }
+            })
+            long_data <- do.call(rbind, data_list)
 
             # Remove missing values
             long_data <- long_data[complete.cases(long_data), ]
@@ -1572,15 +1806,63 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             table <- self$results$varianceComponents
             if (is.null(table)) return()
 
+            # CRITICAL FIX #3: Block variance components for categorical data
+            # Variance decomposition on categorical data is statistically invalid
+            data <- self$data
+            vars <- self$options$vars
+
+            # Check if data is categorical
+            is_categorical <- FALSE
+            for (var in vars) {
+                col <- data[[var]]
+                if (is.factor(col)) {
+                    is_categorical <- TRUE
+                    break
+                }
+                if (is.numeric(col)) {
+                    n_unique <- length(unique(col[!is.na(col)]))
+                    if (n_unique < 10) {
+                        is_categorical <- TRUE
+                        break
+                    }
+                }
+            }
+
+            if (is_categorical) {
+                # Block variance components and show error notice
+                vc_error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "varianceComponentsCategoricalError",
+                    type = jmvcore::NoticeType$ERROR
+                )
+
+                vc_error_notice$setContent(
+                    paste0("⛔ Variance components CANNOT be computed for categorical/ordinal data. ",
+                          "Variance decomposition requires continuous numeric measurements. ",
+                          "For categorical data, use kappa-based agreement measures instead.")
+                )
+                self$results$insert(0, vc_error_notice)
+
+                # Populate table with error message
+                table$setRow(rowNo=1, values=list(
+                    component = "Analysis Blocked",
+                    variance = NA,
+                    pct_total = NA,
+                    interpretation = "ERROR: Categorical data"
+                ))
+
+                table$setNote("categorical_error",
+                    "⛔ Variance components require continuous numeric data.")
+
+                return()  # Exit without computing variance components
+            }
+
             # Check if required packages are available
             if (!requireNamespace("lme4", quietly = TRUE) &&
                 !requireNamespace("nlme", quietly = TRUE)) {
                 stop("Variance components require either 'lme4' or 'nlme' package")
             }
 
-            # Get data
-            data <- self$data
-            vars <- self$options$vars
             cluster_var <- self$options$clusterVariable
 
             if (length(vars) < 2) {
@@ -1588,19 +1870,18 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }
 
             # Reshape data to long format
-            long_data <- data.frame()
-
-            for (rater_idx in seq_along(vars)) {
+            # Optimized: pre-allocate list and vectorize
+            data_list <- lapply(seq_along(vars), function(rater_idx) {
                 rater_name <- vars[rater_idx]
-                temp_data <- data.frame(
+                data.frame(
                     subject = 1:nrow(data),
                     cluster = data[[cluster_var]],
                     rater = rater_name,
                     rating = as.numeric(data[[rater_name]]),
                     stringsAsFactors = FALSE
                 )
-                long_data <- rbind(long_data, temp_data)
-            }
+            })
+            long_data <- do.call(rbind, data_list)
 
             # Remove missing values
             long_data <- long_data[complete.cases(long_data), ]
@@ -1739,6 +2020,21 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             table <- self$results$clusterSpecificKappaTable
             if (is.null(table)) return()
 
+            # CRITICAL FIX #6: Notify users shrinkage not implemented
+            if (self$options$shrinkageEstimates) {
+                shrinkage_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "shrinkageNotImplemented",
+                    type = jmvcore::NoticeType$WARNING
+                )
+                shrinkage_notice$setContent(
+                    paste0("Shrinkage estimates are not yet implemented. The shrinkage_kappa column will show NA values. ",
+                          "Empirical Bayes shrinkage toward overall kappa requires pooled estimation across all clusters, ",
+                          "which is planned for a future release. Use raw cluster-specific kappa values for now.")
+                )
+                self$results$insert(999, shrinkage_notice)
+            }
+
             # Get data
             data <- self$data
             vars <- self$options$vars
@@ -1766,6 +2062,18 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                     # Extract ratings for this cluster
                     ratings_matrix <- as.matrix(cluster_data[, vars, drop = FALSE])
+
+                    # CRITICAL FIX #5: Use harmonized levels for cluster-specific kappa
+                    # Ensure all clusters use same level set even if some clusters don't have all categories
+                    if (!is.null(private$.harmonizedLevels) && all(sapply(as.data.frame(ratings_matrix), is.factor))) {
+                        # Re-harmonize using the global level set
+                        ratings_df <- as.data.frame(ratings_matrix)
+                        ratings_df[] <- lapply(ratings_df, function(col) {
+                            factor(as.character(col), levels = private$.harmonizedLevels,
+                                  ordered = private$.isOrdered)
+                        })
+                        ratings_matrix <- as.matrix(ratings_df)
+                    }
 
                     # Remove rows with all NA
                     complete_rows <- rowSums(!is.na(ratings_matrix)) > 0
@@ -1983,24 +2291,33 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 # P-value from chi-square distribution
                 p_value <- 1 - pchisq(Q, df)
 
-                # Interpretation
+                # Interpretation with EXPLORATORY disclaimer
+                # CRITICAL FIX #4: Label test as exploratory/unvalidated
                 if (p_value < 0.001) {
-                    conclusion <- "Strong evidence of heterogeneity across clusters (p < 0.001)"
+                    conclusion <- "Strong evidence of heterogeneity across clusters (p < 0.001) [EXPLORATORY]"
                 } else if (p_value < 0.01) {
-                    conclusion <- "Significant heterogeneity across clusters (p < 0.01)"
+                    conclusion <- "Significant heterogeneity across clusters (p < 0.01) [EXPLORATORY]"
                 } else if (p_value < 0.05) {
-                    conclusion <- "Moderate heterogeneity across clusters (p < 0.05)"
+                    conclusion <- "Moderate heterogeneity across clusters (p < 0.05) [EXPLORATORY]"
                 } else {
-                    conclusion <- "No significant heterogeneity detected (homogeneous)"
+                    conclusion <- "No significant heterogeneity detected (homogeneous) [EXPLORATORY]"
                 }
 
-                # Populate table
+                # Populate table with disclaimer note
                 table$setRow(rowNo=1, values=list(
                     test_statistic = Q,
                     df = df,
                     p_value = p_value,
                     conclusion = conclusion
                 ))
+
+                # Add critical warning note
+                table$setNote("exploratory_warning",
+                    paste0("⚠️ EXPLORATORY TEST: This heterogeneity test is not formally validated for kappa statistics. ",
+                          "The Q statistic treats weighted kappa deviations as chi-square distributed, which lacks theoretical justification. ",
+                          "P-values should be interpreted with caution. Bootstrap or permutation methods recommended for formal testing. ",
+                          "See Fleiss & Davies (1982) and Donner & Eliasziw (1992) for validated approaches.")
+                )
 
             }, error = function(e) {
                 # Handle errors gracefully
@@ -2047,6 +2364,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                     # Extract ratings for this cluster
                     ratings_matrix <- as.matrix(cluster_data[, vars, drop = FALSE])
+
+                    # CRITICAL FIX #5: Use harmonized levels for cluster ranking kappa
+                    if (!is.null(private$.harmonizedLevels) && all(sapply(as.data.frame(ratings_matrix), is.factor))) {
+                        ratings_df <- as.data.frame(ratings_matrix)
+                        ratings_df[] <- lapply(ratings_df, function(col) {
+                            factor(as.character(col), levels = private$.harmonizedLevels,
+                                  ordered = private$.isOrdered)
+                        })
+                        ratings_matrix <- as.matrix(ratings_df)
+                    }
 
                     # Remove rows with all NA
                     complete_rows <- rowSums(!is.na(ratings_matrix)) > 0

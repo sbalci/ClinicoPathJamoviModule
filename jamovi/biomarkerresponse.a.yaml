@@ -78,7 +78,8 @@ options:
 
     - name: thresholdValue
       title: Biomarker Threshold
-      type: Number
+      type: String
+      default: ''
       description:
           R: >
             Threshold value for biomarker positivity (if known).
@@ -134,6 +135,7 @@ options:
     - name: groupVariable
       title: Grouping Variable (optional)
       type: Variable
+      default: null
       suggested: [nominal]
       description:
           R: >

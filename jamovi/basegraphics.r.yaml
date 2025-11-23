@@ -12,12 +12,29 @@ items:
   - name: plot_description
     title: "Plot Description"
     type: Html
-    visible: (x_var && plot_type)
+    visible: true
     clearWith:
       - plot_type
       - x_var
       - y_var
       - group_var
+
+  - name: glossary
+    title: "Statistical Glossary"
+    type: Html
+    visible: false
+    clearWith:
+      - show_statistics
+
+  - name: summary
+    title: "Plain-Language Summary"
+    type: Html
+    visible: false
+    clearWith:
+      - show_statistics
+      - show_summary
+      - x_var
+      - y_var
 
   - name: base_plot
     title: "Base R Graphics Plot"
@@ -25,7 +42,7 @@ items:
     width: 700
     height: 500
     renderFun: .plot_base
-    visible: (x_var && plot_type)
+    visible: true
     clearWith:
       - plot_type
       - x_var

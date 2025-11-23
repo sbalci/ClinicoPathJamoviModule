@@ -37,6 +37,129 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
+        # Validate weight variable for weighted alluvial plots
+        .validateWeightVariable = function(data, weight_var) {
+            if (is.null(weight_var) || weight_var == "" || !weight_var %in% names(data)) {
+                return(TRUE)  # No weight specified - valid
+            }
+
+            weight_col <- data[[weight_var]]
+
+            # Validate weight type
+            if (!is.numeric(weight_col)) {
+                error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "weightNotNumeric",
+                    type = jmvcore::NoticeType$ERROR
+                )
+                error_notice$setContent(paste0(
+                    "⛔ <b>Invalid Weight Variable:</b> Weight variable '", weight_var,
+                    "' must be numeric. Current type: ", class(weight_col)[1], ".<br/>",
+                    "Please select a numeric variable containing counts, frequencies, or sampling weights."
+                ))
+                self$results$insert(0, error_notice)
+                return(FALSE)
+            }
+
+            # Check for negative weights
+            n_negative <- sum(weight_col < 0, na.rm = TRUE)
+            if (n_negative > 0) {
+                error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "negativeWeights",
+                    type = jmvcore::NoticeType$ERROR
+                )
+                error_notice$setContent(paste0(
+                    "⛔ <b>Negative Weights Detected:</b> Weight variable '", weight_var,
+                    "' contains ", n_negative, " negative value", if(n_negative > 1) "s" else "", ". ",
+                    "Weights must be non-negative (≥ 0)."
+                ))
+                self$results$insert(0, error_notice)
+                return(FALSE)
+            }
+
+            # Check for NA weights
+            n_na <- sum(is.na(weight_col))
+            if (n_na > 0) {
+                pct_na <- round(100 * n_na / length(weight_col), 1)
+                warning_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "missingWeights",
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                warning_notice$setContent(paste0(
+                    "⚠️ <b>Missing Weights:</b> ", n_na, " observations (", pct_na,
+                    "%) have missing weights. ",
+                    "These will be excluded from the visualization."
+                ))
+                self$results$insert(1, warning_notice)
+            }
+
+            return(TRUE)
+        },
+
+        # Aggregate data for weighted ggalluvial plots
+        .aggregateDataForGgalluvial = function(data, vars, weight_var) {
+            if (is.null(weight_var) || weight_var == "" || !weight_var %in% names(data)) {
+                return(data)  # No aggregation needed
+            }
+
+            # Remove rows with NA weights
+            data <- data[!is.na(data[[weight_var]]), ]
+
+            # Aggregate weights by unique combinations of categorical variables
+            agg_formula <- as.formula(paste(weight_var, "~", paste(vars, collapse = " + ")))
+
+            # Use aggregate to sum weights by category combinations
+            data_agg <- stats::aggregate(
+                agg_formula,
+                data = data,
+                FUN = sum,
+                na.action = na.pass
+            )
+
+            return(data_agg)
+        },
+
+        # Handle missing values with transparency reporting
+        .handleMissingValues = function(data, vars) {
+            # Count missing before removal
+            n_total <- nrow(data)
+            missing_counts <- sapply(vars, function(v) sum(is.na(data[[v]])))
+            any_missing <- any(missing_counts > 0)
+
+            # ALWAYS remove NAs for consistent behavior
+            data_clean <- data[complete.cases(data[, vars, drop=FALSE]), ]
+            n_removed <- n_total - nrow(data_clean)
+
+            # Report missingness transparently
+            if (n_removed > 0) {
+                pct_removed <- round(100 * n_removed / n_total, 1)
+
+                info_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "missingDataExcluded",
+                    type = jmvcore::NoticeType$INFO
+                )
+
+                # Build details of which variables have missingness
+                vars_with_missing <- names(missing_counts[missing_counts > 0])
+                missing_details <- paste(sapply(vars_with_missing,
+                    function(v) sprintf("%s: %d", v, missing_counts[v])),
+                    collapse = ", ")
+
+                info_notice$setContent(paste0(
+                    "ℹ️ <b>Missing Data Excluded:</b> ", n_removed, " of ", n_total,
+                    " observations (", pct_removed, "%) excluded due to missing values.<br/>",
+                    "Variables with missingness: ", missing_details, "<br/>",
+                    "Analysis based on ", nrow(data_clean), " complete cases."
+                ))
+                self$results$insert(1, info_notice)
+            }
+
+            return(data_clean)
+        },
+
         # Shared validation helper to reduce duplication
         .validateAlluvialInputs = function() {
             if (is.null(self$options$vars) || length(self$options$vars) == 0)
@@ -101,56 +224,59 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     unique_values <- length(unique(var_data[!is.na(var_data)]))
                     total_values <- sum(!is.na(var_data))
 
-                    # If more than 10 unique values, show warning but allow plot to proceed
+                    # HARD STOP for continuous variables (>20 unique values)
+                    if (unique_values > 20) {
+                        var_safe <- htmltools::htmlEscape(var)
+
+                        error_notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = "continuousVariableNotAllowed",
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        error_notice$setContent(paste0(
+                            "⛔ <b>Continuous Variable Not Allowed:</b> Variable '", var_safe,
+                            "' has ", unique_values, " unique values and appears continuous. ",
+                            "Alluvial plots require categorical data.<br/><br/>",
+                            "<b>Required Action:</b> Create categorical bins using Data → Transform:<br/>",
+                            "• Quartiles: <code>NTILE(", var, ", 4)</code><br/>",
+                            "• Tertiles: <code>NTILE(", var, ", 3)</code><br/>",
+                            "• Custom bins: <code>IF(", var, " &lt; 25, 'Low', IF(", var,
+                            " &lt; 75, 'Medium', 'High'))</code><br/><br/>",
+                            "<b>Privacy Note:</b> Continuous variables may reveal individual-level data. ",
+                            "Binning creates aggregated views suitable for visualization."
+                        ))
+                        self$results$insert(0, error_notice)
+                        return(FALSE)
+                    }
+
+                    # STRONG WARNING for 11-20 unique values
                     if (unique_values > 10) {
                         var_safe <- htmltools::htmlEscape(var)
 
                         # Collect warning messages for the notice banner
                         warning_messages <- c(warning_messages, sprintf(
-                            'Variable "%s" has %d unique values and appears continuous.',
+                            'Variable "%s" has %d categories.',
                             var_safe, unique_values
                         ))
 
-                        # Keep Html for detailed guidance
-                        html <- paste0(
-                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                            "<h4 style='margin-top: 0; color: #856404;'>Continuous Variable Detected - Plot Will Proceed</h4>",
-                            "<p style='color: #856404;'>Variable '<strong>", var_safe, "</strong>' has <strong>", unique_values, "</strong> unique values and appears continuous.</p>",
-                            "<p><strong>Note:</strong> The plot will be generated, but continuous variables may create many thin flows that are difficult to interpret. For better visualization, consider creating categorical bins.</p>",
-                            "<hr style='border-color: #ffc107;'>",
-                            "<p><strong>Recommended: Create Categories for Better Visualization</strong></p>",
-                            "<p style='margin: 10px 0;'><strong>Option 1: jamovi Transform</strong></p>",
-                            "<ol style='margin-left: 20px;'>",
-                            "<li>Go to <strong>Data -> Compute</strong></li>",
-                            "<li>Create a new variable with binned categories</li>",
-                            "<li>Example formula: <code>IF(", var, " &lt; 25, '0-25', IF(", var, " &lt; 50, '25-50', '50+'))</code></li>",
-                            "</ol>",
-                            "<p style='margin: 10px 0;'><strong>Option 2: R Console</strong></p>",
-                            "<pre style='background-color: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px;'>",
-                            "# Create binned variable\ndata$", var, "_binned <- cut(data$", var, ", \n    breaks = 5, \n    labels = c('Very Low', 'Low', 'Medium', 'High', 'Very High'))",
-                            "</pre>",
-                            "<p><strong>After binning:</strong> Select the new binned variable instead of the continuous one for clearer flow patterns.</p>",
-                            "<p style='margin-top: 10px; font-size: 0.9em; color: #666;'><em>Privacy Note: Continuous variables with many unique values may reveal individual data points. Consider binning for aggregated views.</em></p>",
-                            "</div>"
+                        warning_notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = "tooManyCategories",
+                            type = jmvcore::NoticeType$STRONG_WARNING
                         )
-                        self$results$dataWarning$setContent(html)
-                        # Continue with plot generation - don't return FALSE
+                        warning_notice$setContent(paste0(
+                            "⚠️ <b>Too Many Categories:</b> Variable '", var_safe, "' has ",
+                            unique_values, " categories. This may create an unreadable plot with too many thin flows.<br/>",
+                            "<b>Recommendation:</b> Consider reducing to 3-7 categories for optimal visualization. ",
+                            "Use Data → Transform to group less frequent categories."
+                        ))
+                        self$results$insert(1, warning_notice)
                     }
                 }
             }
 
-            # Set warning notice if there are continuous variables
-            if (length(warning_messages) > 0) {
-                warning_html <- paste0(
-                    '<div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 5px 0;">',
-                    '<strong>Warning:</strong> ', paste(warning_messages, collapse = ' '), ' Consider binning for clearer visualization.',
-                    '</div>'
-                )
-                self$results$noticeWarning$setContent(warning_html)
-                self$results$noticeWarning$setVisible(TRUE)
-            } else {
-                self$results$noticeWarning$setVisible(FALSE)
-            }
+            # Note: Warning notices for too many categories are now handled by jmvcore::Notice at lines 262-273
+            # No need for redundant HTML warning
 
             return(TRUE)
         },
@@ -291,23 +417,51 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 # ToDo Message ----
                 todo <- "
-                <div style='font-family: Arial, sans-serif; color: #2c3e50;'>
-                  <h2>Welcome to ClinicoPath</h2>
-                  <p>This tool will help you form Alluvial Diagrams (Alluvial Plots).</p>
-                  <p><strong>Instructions:</strong> Please select at least <em>2 variables</em> to create an alluvial diagram.</p>
-                  <p>Alluvial diagrams show the flow of categorical data across multiple dimensions.</p>
-                  <hr>
+                <div style='font-family: Arial, sans-serif; color: #2c3e50; padding: 10px;'>
+                  <h2>📊 Alluvial Diagrams</h2>
+                  <p>Visualize the flow of categorical data across multiple dimensions.</p>
+
+                  <div style='background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;'>
+                    <h3 style='margin-top: 0;'>🚀 Quick Start</h3>
+                    <ul style='margin-bottom: 0;'>
+                      <li>Select <strong>2-5 categorical variables</strong> (optimal: 3-4)</li>
+                      <li>Each variable should have <strong>3-7 categories</strong> for best readability</li>
+                      <li>For continuous variables, use <em>Data → Transform</em> to create bins first</li>
+                    </ul>
+                  </div>
+
+                  <div style='background-color: #f0f8f0; border-left: 4px solid #4caf50; padding: 10px; margin: 10px 0;'>
+                    <h3 style='margin-top: 0;'>🏥 Clinical Use Cases</h3>
+                    <ul style='margin-bottom: 0;'>
+                      <li><strong>Patient flow:</strong> Track progression through treatment stages</li>
+                      <li><strong>Tumor progression:</strong> Visualize grade/stage transitions</li>
+                      <li><strong>Diagnostic pathways:</strong> Show relationships between symptoms → diagnosis → outcomes</li>
+                      <li><strong>Demographics:</strong> Explore patterns across age/sex/location categories</li>
+                    </ul>
+                  </div>
+
+                  <div style='background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0;'>
+                    <h3 style='margin-top: 0;'>💡 Tips</h3>
+                    <ul style='margin-bottom: 0;'>
+                      <li>Arrange variables in <strong>logical order</strong> (e.g., temporal sequence: Grade → Stage → Response)</li>
+                      <li>Start with <strong>fewer variables</strong> and add more once you understand the patterns</li>
+                      <li>Use <strong>weighted flows</strong> (GG Alluvial engine) for aggregated data with frequency counts</li>
+                      <li>Enable <strong>marginal histograms</strong> to see individual variable distributions</li>
+                    </ul>
+                  </div>
+
+                  <hr style='margin-top: 15px;'>
+                  <p style='font-size: 0.9em; color: #7f8c8d; text-align: center;'>
+                    Ready to begin? Select at least 2 categorical variables from the left panel.
+                  </p>
                 </div>
                 "
 
                 html <- self$results$todo
                 html$setContent(todo)
 
-                # Clear all notices and warnings when no variables selected
-                self$results$noticeError$setVisible(FALSE)
-                self$results$noticeWarning$setVisible(FALSE)
-                self$results$noticeInfo$setVisible(FALSE)
-                self$results$dataWarning$setContent("")  # Clear old validation errors
+                # Clear validation messages when no variables selected
+                self$results$dataWarning$setContent("")
 
             } else {
                 # Clear the to-do message
@@ -317,14 +471,16 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Use shared validation logic
                 if (!private$.validateAlluvialInputs()) {
-                    # Use pre-defined HTML output instead of dynamic Notice
-                    error_html <- paste0(
-                        '<div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0;">',
-                        '<strong>Error:</strong> Alluvial diagram requires at least 2 variables with valid data. Please check variable selection and data.',
-                        '</div>'
+                    # Use modern jmvcore::Notice
+                    error_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "validationFailure",
+                        type = jmvcore::NoticeType$ERROR
                     )
-                    self$results$noticeError$setContent(error_html)
-                    self$results$noticeError$setVisible(TRUE)
+                    error_notice$setContent(
+                        "⛔ <b>Validation Failed:</b> Alluvial diagram requires at least 2 variables with valid data. Please check variable selection and ensure sufficient data."
+                    )
+                    self$results$insert(0, error_notice)
                     return()
                 }
 
@@ -332,33 +488,38 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$condensationvar) &&
                     length(self$options$condensationvar) > 0 &&
                     !(self$options$condensationvar %in% names(self$data))) {
-                    # Use pre-defined HTML output instead of dynamic Notice
-                    error_html <- sprintf(
-                        '<div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0;">
-                        <strong>Error:</strong> Condensation variable "%s" not found in data. Please select a valid variable.
-                        </div>',
-                        htmltools::htmlEscape(self$options$condensationvar)
+
+                    condvar_safe <- htmltools::htmlEscape(self$options$condensationvar)
+                    error_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "condensationVariableNotFound",
+                        type = jmvcore::NoticeType$ERROR
                     )
-                    self$results$noticeError$setContent(error_html)
-                    self$results$noticeError$setVisible(TRUE)
+                    error_notice$setContent(paste0(
+                        "⛔ <b>Variable Not Found:</b> Condensation variable '", condvar_safe,
+                        "' does not exist in the data. Please select a valid variable from the available list."
+                    ))
+                    self$results$insert(0, error_notice)
                     return()
                 }
 
-                # Clear all error/warning notices if validation passes
-                self$results$noticeError$setVisible(FALSE)
-                self$results$dataWarning$setContent("")  # Explicitly clear old validation errors
+                # Clear dataWarning if validation passes
+                self$results$dataWarning$setContent("")
 
                 # Add INFO notice for successful validation
                 n_vars <- length(self$options$vars)
                 n_obs <- nrow(self$data)
-                info_html <- sprintf(
-                    '<div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 10px; margin: 5px 0;">
-                    <strong>Ready:</strong> Alluvial diagram will be generated using %d variables and %d observations.
-                    </div>',
-                    n_vars, n_obs
+
+                info_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "readyToPlot",
+                    type = jmvcore::NoticeType$INFO
                 )
-                self$results$noticeInfo$setContent(info_html)
-                self$results$noticeInfo$setVisible(TRUE)
+                info_notice$setContent(paste0(
+                    "ℹ️ <b>Ready:</b> Alluvial diagram will be generated using ", n_vars,
+                    " variable", if(n_vars > 1) "s" else "", " and ", n_obs, " observations."
+                ))
+                self$results$insert(1, info_notice)
             }
 
         }
@@ -377,11 +538,36 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Data Preparation ----
                 # Extract selected variables and create working dataset
                 varsName <- self$options$vars
-                mydata <- jmvcore::select(self$data, c(varsName))
+                weight_var <- self$options$weight
 
-                # Handle missing values based on user preference
-                excl <- self$options$excl
-                if (excl) {mydata <- jmvcore::naOmit(mydata)}
+                # Validate weight variable BEFORE data preparation
+                if (!private$.validateWeightVariable(self$data, weight_var)) {
+                    return()  # Stop if weight validation fails
+                }
+
+                # Select variables (include weight if specified)
+                vars_to_select <- c(varsName)
+                if (!is.null(weight_var) && weight_var != "" && weight_var %in% names(self$data)) {
+                    vars_to_select <- c(varsName, weight_var)
+                }
+                mydata <- jmvcore::select(self$data, vars_to_select)
+
+                # ALWAYS handle missing values with transparency
+                mydata <- private$.handleMissingValues(mydata, varsName)
+
+                # Check if enough data remains after NA removal
+                if (nrow(mydata) == 0) {
+                    error_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "noCompleteData",
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    error_notice$setContent(
+                        "⛔ <b>No Complete Data:</b> All observations have missing values in one or more selected variables. Cannot generate plot."
+                    )
+                    self$results$insert(0, error_notice)
+                    return()
+                }
 
                 # Configure plot aesthetics ----
                 # Set color fill strategy for the alluvial flows
@@ -417,22 +603,18 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Warn user if more variables selected than maxvars allows
                 num_selected <- length(varsName)
                 if (num_selected > maxvars) {
-                    # Use pre-defined HTML output instead of dynamic Notice
-                    info_html <- sprintf(
-                        '<div style="background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 10px; margin: 5px 0;">
-                        <strong>Note:</strong> Variables truncated: %d selected but maximum is %d. Only first %d variables displayed.
-                        </div>',
-                        num_selected, maxvars, maxvars
+                    # Use modern jmvcore::Notice
+                    truncate_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "variablesTruncated",
+                        type = jmvcore::NoticeType$INFO
                     )
-
-                    # Update the info notice
-                    existing <- self$results$noticeInfo$content
-                    if (!is.null(existing) && nchar(existing) > 0) {
-                        self$results$noticeInfo$setContent(paste0(existing, info_html))
-                    } else {
-                        self$results$noticeInfo$setContent(info_html)
-                    }
-                    self$results$noticeInfo$setVisible(TRUE)
+                    truncate_notice$setContent(paste0(
+                        "ℹ️ <b>Variables Truncated:</b> ", num_selected, " variables selected, ",
+                        "but maximum is ", maxvars, ". Only the first ", maxvars, " variables will be displayed.<br/>",
+                        "<b>Tip:</b> Increase 'Maximum variables' setting (up to 20) to display more variables."
+                    ))
+                    self$results$insert(1, truncate_notice)
 
                     # Keep detailed warning in dataWarning
                     warning_html <- paste0(
@@ -452,9 +634,38 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
-                # Get engine selection and weight variable
+                # Get engine selection
                 engine <- self$options$engine
-                weight_var <- self$options$weight
+
+                # Add interpretability checks
+                # Calculate total possible flow combinations
+                n_levels_per_var <- sapply(varsName, function(v) {
+                    if (is.factor(mydata[[v]])) {
+                        length(levels(mydata[[v]]))
+                    } else {
+                        length(unique(mydata[[v]]))
+                    }
+                })
+                total_combinations <- prod(n_levels_per_var)
+
+                # Warn if too many combinations (spaghetti plot risk)
+                if (total_combinations > 100) {
+                    warning_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "tooManyCombinations",
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    warning_notice$setContent(paste0(
+                        "⚠️ <b>Complex Visualization:</b> The selected variables create ",
+                        total_combinations, " possible flow combinations. ",
+                        "This may result in an overcrowded, difficult-to-interpret plot.<br/>",
+                        "<b>Recommendations:</b><br/>",
+                        "• Reduce the number of variables (currently ", length(varsName), ")<br/>",
+                        "• Group less frequent categories to reduce category counts<br/>",
+                        "• Focus on 3-5 variables with 3-7 categories each for optimal readability"
+                    ))
+                    self$results$insert(1, warning_notice)
+                }
 
                 # Generate plot based on selected engine ----
                 if (engine == "ggalluvial") {
@@ -465,8 +676,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         varsName[1]
                     }
 
-                    plot <- private$.createGgalluvialPlot(
+                    # Aggregate data if weight variable provided
+                    mydata_for_plot <- private$.aggregateDataForGgalluvial(
                         data = mydata,
+                        vars = varsName,
+                        weight_var = weight_var
+                    )
+
+                    plot <- private$.createGgalluvialPlot(
+                        data = mydata_for_plot,
                         vars = varsName,
                         fill_var = fill_var,
                         weight_var = weight_var
@@ -480,6 +698,20 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         verbose = FALSE,  # Disabled to prevent console clutter in jamovi
                         bin_labels = bin
                     )
+                }
+
+                # Warn if weight is provided but ignored by easyalluvial
+                if (engine == "easyalluvial" && !is.null(weight_var) && weight_var != "") {
+                    warning_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "weightVariableIgnored",
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    warning_notice$setContent(paste0(
+                        "⚠️ <b>Weight Variable Ignored:</b> The 'Weight Variable' option is only supported by the <strong>GG Alluvial</strong> engine.<br/>",
+                        "<b>Suggestion:</b> Switch 'Plot Engine' to 'GG Alluvial (manual control)' to use weighted flows."
+                    ))
+                    self$results$insert(1, warning_notice)
                 }
 
                 # Add marginal histograms if requested (easyalluvial only) ----
@@ -527,15 +759,22 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 usetitle <- self$options$usetitle
                 plotSubtitle <- self$options$plotSubtitle
 
+                # HARD STOP: Cannot use both marginals and custom titles
                 if (marg && usetitle) {
-                    warning_html <- paste0(
-                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>Custom Titles Not Supported with Marginal Plots</h4>",
-                        "<p style='color: #856404;'>Custom titles cannot be used when marginal plots are enabled. The plot will be generated with the default title.</p>",
-                        "<p><strong>Suggestion:</strong> To use a custom title, please disable the 'Marginal plots' option.</p>",
-                        "</div>"
+                    error_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "marginalsAndTitlesConflict",
+                        type = jmvcore::NoticeType$ERROR
                     )
-                    self$results$dataWarning$setContent(warning_html)
+                    error_notice$setContent(paste0(
+                        "⛔ <b>Incompatible Options:</b> Custom titles cannot be used with marginal plots. ",
+                        "This combination would produce ambiguous plot labeling.<br/><br/>",
+                        "<b>Required Action:</b> Choose one:<br/>",
+                        "• Disable 'Use custom title' to keep marginal plots<br/>",
+                        "• Disable 'Marginal plots' to use custom title"
+                    ))
+                    self$results$insert(0, error_notice)
+                    return()  # Stop execution to prevent ambiguous output
                 }
 
                 if (!marg && usetitle) {
@@ -555,22 +794,20 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 # Handle plot generation errors gracefully
-                error_html <- sprintf(
-                    '<div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;">
-                    <h4 style="margin-top: 0; color: #721c24;">Plot Generation Failed</h4>
-                    <p style="color: #721c24;">%s</p>
-                    <p><strong>Suggestions:</strong></p>
-                    <ul>
-                        <li>Try using the easyalluvial engine instead of ggalluvial</li>
-                        <li>Reduce the number of variables</li>
-                        <li>Check for variables with too many unique categories</li>
-                        <li>Ensure all selected variables exist in the data</li>
-                    </ul>
-                    </div>',
-                    htmltools::htmlEscape(e$message)
+                error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "plotGenerationFailed",
+                    type = jmvcore::NoticeType$ERROR
                 )
-                self$results$noticeError$setContent(error_html)
-                self$results$noticeError$setVisible(TRUE)
+                error_notice$setContent(paste0(
+                    "⛔ <b>Plot Generation Failed:</b> ", htmltools::htmlEscape(e$message), "<br/><br/>",
+                    "<b>Suggestions:</b><br/>",
+                    "• Try using the Easy Alluvial engine instead of GG Alluvial<br/>",
+                    "• Reduce the number of variables<br/>",
+                    "• Check for variables with too many unique categories<br/>",
+                    "• Ensure all selected variables exist in the data"
+                ))
+                self$results$insert(0, error_notice)
             })
         }
 

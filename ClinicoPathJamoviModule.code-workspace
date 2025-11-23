@@ -20,6 +20,15 @@
 		},
 		{
 			"path": "../ParaPathology"
+		},
+		{
+			"path": "../scan-time-in-real-life"
+		},
+		{
+			"path": "../onc_rcc"
+		},
+		{
+			"path": "../PinkKidney"
 		}
 	],
 	"settings": {}

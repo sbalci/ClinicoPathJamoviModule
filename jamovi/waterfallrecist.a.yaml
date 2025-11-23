@@ -1,0 +1,299 @@
+---
+name: waterfallrecist
+title: RECIST v1.1 Compliant Response Analysis
+menuGroup: OncoPathT1
+menuSubgroup: 'Patient Follow-Up Plots'
+menuSubtitle: 'Full RECIST v1.1 Waterfall Plot'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Creates RECIST v1.1 compliant waterfall and spider plots for tumor response analysis.
+        Implements full RECIST v1.1 protocol including target lesion summation, new lesion detection,
+        non-target progression assessment, and response confirmation requirements.
+        REGULATORY-READY: Suitable for clinical trial endpoints and regulatory submissions.
+    R:
+        dontrun: true
+        usage: |
+            # Example: Lesion-level data for RECIST v1.1
+            data_recist <- data.frame(
+                PatientID = rep(paste0("PT", 1:3), each = 6),
+                VisitTime = rep(c(0, 4, 8, 12, 16, 20), 3),
+                LesionID = paste0("L", rep(1:2, each = 3, times = 3)),
+                LesionType = rep(c("Target", "Target"), each = 3, times = 3),
+                Location = rep(c("Liver", "Lung"), each = 3, times = 3),
+                Diameter = c(
+                    # Patient 1
+                    35, 28, 20,  # Lesion 1
+                    42, 38, 30,  # Lesion 2
+                    # Patient 2
+                    50, 45, 48,  # Lesion 1
+                    30, 28, 32,  # Lesion 2
+                    # Patient 3
+                    45, 30, 25,  # Lesion 1
+                    38, 25, 20   # Lesion 2
+                ),
+                IsNewLesion = rep(0, 18)
+            )
+
+            waterfallrecist(
+                data = data_recist,
+                patientID = "PatientID",
+                lesionID = "LesionID",
+                visitTime = "VisitTime",
+                lesionType = "LesionType",
+                location = "Location",
+                diameter = "Diameter",
+                isNewLesion = "IsNewLesion"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame with LESION-LEVEL observations (one row per lesion per timepoint).
+          jamovi: >
+            LESION-LEVEL data frame (one row per lesion per visit).
+            Each lesion should be tracked across multiple timepoints.
+
+    - name: patientID
+      title: Patient ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [numeric, factor, id]
+      description:
+          R: >
+            Variable containing patient identifiers.
+            Each patient can have multiple lesions tracked across timepoints.
+          jamovi: >
+            Patient identifier variable (e.g., PT001, Patient_1).
+            Links multiple lesions to the same patient.
+
+    - name: lesionID
+      title: Lesion ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [numeric, factor, id]
+      description:
+          R: >
+            Unique lesion identifier within each patient (e.g., L1, L2, Liver_1, Lung_2).
+            Used to track individual lesions across timepoints.
+          jamovi: >
+            Unique identifier for each lesion within a patient.
+            Examples: L1, L2, Liver_1, Lung_2, Target_Lesion_1
+
+    - name: visitTime
+      title: Visit Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time point of measurement (e.g., weeks from baseline, days from treatment start).
+            Baseline should be time = 0. Used for tracking lesion progression over time.
+          jamovi: >
+            Time of lesion measurement (baseline = 0).
+            Examples: weeks from treatment start, months from baseline
+
+    - name: lesionType
+      title: Lesion Type
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Lesion classification: Target, NonTarget, or New.
+            Target lesions (max 5 total, max 2 per organ) are measured and summed.
+            NonTarget lesions are assessed qualitatively (present/absent/progressed).
+          jamovi: >
+            Lesion classification per RECIST v1.1:
+            • Target: Measurable lesions (max 5 total, max 2 per organ)
+            • NonTarget: Evaluated qualitatively (e.g., bone lesions, pleural effusion)
+            • New: Lesions appearing after baseline (any new lesion = PD)
+
+    - name: location
+      title: Anatomic Location
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Anatomic site of lesion (e.g., Liver, Lung, Lymph_Node).
+            Used to enforce RECIST rule: max 2 target lesions per organ.
+          jamovi: >
+            Anatomic location of lesion (e.g., Liver, Lung, Brain, Bone).
+            RECIST v1.1 allows maximum 2 target lesions per organ.
+
+    - name: diameter
+      title: Lesion Diameter (mm)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Longest diameter of target lesions in millimeters (≥10mm for non-lymph nodes, ≥15mm for lymph nodes).
+            For non-target lesions, can be NA (qualitative assessment only).
+          jamovi: >
+            Longest diameter in millimeters (RECIST measurement standard).
+            • Target lesions: ≥10mm (non-lymph nodes), ≥15mm (lymph nodes)
+            • NonTarget lesions: Can be blank (qualitative assessment)
+
+    - name: isNewLesion
+      title: New Lesion Indicator
+      type: Variable
+      suggested: [nominal]
+      permitted: [numeric, factor]
+      default: NULL
+      description:
+          R: >
+            Binary indicator (0 = baseline/existing, 1 = new lesion appearing after baseline).
+            ANY new lesion automatically triggers Progressive Disease (PD) per RECIST v1.1.
+          jamovi: >
+            Indicates if lesion is new (appeared after baseline):
+            • 0 or No: Baseline or previously documented lesion
+            • 1 or Yes: New lesion (triggers PD per RECIST v1.1)
+
+    - name: baselineTimepoint
+      title: Baseline Timepoint Value
+      type: Number
+      default: 0
+      description:
+          R: >
+            Value of visitTime representing baseline (default = 0).
+            All lesions at this timepoint establish the baseline sum.
+          jamovi: >
+            Timepoint value for baseline visit (default = 0).
+            Sum of target lesions at baseline = reference for percent change.
+
+    - name: confirmationInterval
+      title: Confirmation Interval (weeks)
+      type: Number
+      default: 4
+      min: 0
+      max: 52
+      description:
+          R: >
+            Minimum time interval (weeks) for response confirmation per RECIST v1.1.
+            CR and PR must be confirmed by repeat assessment ≥4 weeks after initial documentation.
+          jamovi: >
+            Time required for CR/PR confirmation (RECIST default = 4 weeks).
+            Response must be sustained on subsequent scan ≥4 weeks later.
+
+    - name: maxTargetLesions
+      title: Maximum Target Lesions
+      type: Number
+      default: 5
+      min: 1
+      max: 10
+      description:
+          R: >
+            Maximum number of target lesions per patient (RECIST v1.1 default = 5).
+          jamovi: >
+            Maximum target lesions to include per patient (RECIST v1.1 = 5).
+
+    - name: maxLesionsPerOrgan
+      title: Maximum Lesions Per Organ
+      type: Number
+      default: 2
+      min: 1
+      max: 5
+      description:
+          R: >
+            Maximum target lesions per organ (RECIST v1.1 default = 2).
+          jamovi: >
+            Maximum target lesions per anatomic site (RECIST v1.1 = 2).
+
+    - name: showWaterfallPlot
+      title: Show Waterfall Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display waterfall plot showing best confirmed response for each patient.
+          jamovi: >
+            Display waterfall plot with best CONFIRMED response per patient.
+
+    - name: showSpiderPlot
+      title: Show Spider Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display spider plot showing target lesion sum trajectories over time.
+          jamovi: >
+            Display spider plot tracking sum of target lesions over time.
+
+    - name: showLesionTable
+      title: Show Lesion-Level Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed lesion-level measurements across all timepoints.
+          jamovi: >
+            Show table with all lesion measurements by visit.
+
+    - name: showTargetSumTable
+      title: Show Target Lesion Sum Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display target lesion sums and percent changes per visit.
+          jamovi: >
+            Show sum of target lesions by timepoint with percent change from baseline.
+
+    - name: showBestResponseTable
+      title: Show Best Overall Response Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display best overall response with confirmation status per patient.
+          jamovi: >
+            Show best overall response (BOR) with confirmation status.
+
+    - name: showRecistComplianceReport
+      title: Show RECIST Compliance Report
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display audit report verifying RECIST v1.1 compliance (target lesion limits, confirmation, new lesions).
+          jamovi: >
+            Show compliance report documenting RECIST v1.1 adherence:
+            • Target lesion selection (≤5 total, ≤2 per organ)
+            • New lesion detection
+            • Confirmation requirements met
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: RECIST (Red/Blue/Green)
+          name: recist
+        - title: jamovi
+          name: jamovi
+        - title: Colorblind-Safe (Okabe–Ito)
+          name: colorblind
+      default: recist
+      description:
+          R: >
+            Color scheme for plots.
+          jamovi: >
+            Color scheme for waterfall and spider plots.
+
+    - name: addBestResponseToData
+      title: Add Best Overall Response to Data
+      type: Output
+      description:
+          R: >
+            Add new variable with best overall CONFIRMED response (CR/PR/SD/PD) per patient.
+          jamovi: >
+            Add RECIST v1.1 best overall response (BOR) variable to dataset.
+
+...

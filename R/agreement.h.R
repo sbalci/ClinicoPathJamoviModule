@@ -7,8 +7,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
+            baConfidenceLevel = 0.95,
+            proportionalBias = FALSE,
             sft = FALSE,
-            showText = FALSE,
             wght = "unweighted",
             exct = FALSE,
             kripp = FALSE,
@@ -53,16 +54,24 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 vars,
                 suggested=list(
                     "ordinal",
-                    "nominal"),
+                    "nominal",
+                    "continuous"),
                 permitted=list(
-                    "factor"))
+                    "factor",
+                    "numeric"))
+            private$..baConfidenceLevel <- jmvcore::OptionNumber$new(
+                "baConfidenceLevel",
+                baConfidenceLevel,
+                default=0.95,
+                min=0.5,
+                max=0.99)
+            private$..proportionalBias <- jmvcore::OptionBool$new(
+                "proportionalBias",
+                proportionalBias,
+                default=FALSE)
             private$..sft <- jmvcore::OptionBool$new(
                 "sft",
                 sft,
-                default=FALSE)
-            private$..showText <- jmvcore::OptionBool$new(
-                "showText",
-                showText,
                 default=FALSE)
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
@@ -116,6 +125,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..clusterVariable <- jmvcore::OptionVariable$new(
                 "clusterVariable",
                 clusterVariable,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -193,6 +203,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..referenceRater <- jmvcore::OptionVariable$new(
                 "referenceRater",
                 referenceRater,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -232,8 +243,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="loa_category")
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..baConfidenceLevel)
+            self$.addOption(private$..proportionalBias)
             self$.addOption(private$..sft)
-            self$.addOption(private$..showText)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
             self$.addOption(private$..kripp)
@@ -269,8 +281,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         }),
     active = list(
         vars = function() private$..vars$value,
+        baConfidenceLevel = function() private$..baConfidenceLevel$value,
+        proportionalBias = function() private$..proportionalBias$value,
         sft = function() private$..sft$value,
-        showText = function() private$..showText$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
         kripp = function() private$..kripp$value,
@@ -305,8 +318,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         loaVarName = function() private$..loaVarName$value),
     private = list(
         ..vars = NA,
+        ..baConfidenceLevel = NA,
+        ..proportionalBias = NA,
         ..sft = NA,
-        ..showText = NA,
         ..wght = NA,
         ..exct = NA,
         ..kripp = NA,
@@ -369,7 +383,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         loaTable = function() private$.items[["loaTable"]],
         loaVar = function() private$.items[["loaVar"]],
         summary = function() private$.items[["summary"]],
-        about = function() private$.items[["about"]]),
+        about = function() private$.items[["about"]],
+        blandAltmanPlot = function() private$.items[["blandAltmanPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -822,7 +837,15 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="about",
                 title="About This Analysis",
-                visible="(showAbout)"))}))
+                visible="(showAbout)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="blandAltmanPlot",
+                title="Bland-Altman Plot",
+                width=600,
+                height=450,
+                renderFun=".populateBlandAltmanPlot",
+                visible="(blandAltmanPlot)"))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -879,11 +902,11 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the
 #'   diagnosis given by the observer, variable can be categorical or ordinal.
+#' @param baConfidenceLevel .
+#' @param proportionalBias .
 #' @param sft Display frequency tables showing the distribution of ratings for
 #'   each rater. Useful for understanding rating patterns and identifying
 #'   potential biases.
-#' @param showText Display simple preformatted text version of frequency
-#'   tables. Provides a plain-text alternative to the HTML formatted tables.
 #' @param wght For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
 #'   kappa accounts for degree of disagreement. Linear weights: Adjacent
 #'   disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
@@ -1010,6 +1033,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$loaVar} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1022,8 +1046,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 agreement <- function(
     data,
     vars,
+    baConfidenceLevel = 0.95,
+    proportionalBias = FALSE,
     sft = FALSE,
-    showText = FALSE,
     wght = "unweighted",
     exct = FALSE,
     kripp = FALSE,
@@ -1033,7 +1058,7 @@ agreement <- function(
     gwetWeights = "unweighted",
     showLevelInfo = FALSE,
     hierarchicalKappa = FALSE,
-    clusterVariable,
+    clusterVariable = NULL,
     randomEffectsRater = FALSE,
     randomEffectsCluster = FALSE,
     iccHierarchical = FALSE,
@@ -1049,7 +1074,7 @@ agreement <- function(
     consensusRule = "majority",
     tieBreaker = "exclude",
     consensusName = "consensus_score",
-    referenceRater,
+    referenceRater = NULL,
     rankRaters = FALSE,
     loaVariable = FALSE,
     loaThresholds = "custom",
@@ -1070,14 +1095,14 @@ agreement <- function(
             `if`( ! missing(clusterVariable), clusterVariable, NULL),
             `if`( ! missing(referenceRater), referenceRater, NULL))
 
-    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in clusterVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in referenceRater) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- agreementOptions$new(
         vars = vars,
+        baConfidenceLevel = baConfidenceLevel,
+        proportionalBias = proportionalBias,
         sft = sft,
-        showText = showText,
         wght = wght,
         exct = exct,
         kripp = kripp,

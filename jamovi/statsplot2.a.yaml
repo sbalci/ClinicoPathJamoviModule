@@ -1,7 +1,7 @@
 ---
 name:  statsplot2
 title: Automatic Plot Selection
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT4
 menuSubgroup: All-In-One
 menuSubtitle: Automatic Plot Selection Based on Variable Types
 version: '0.0.32'

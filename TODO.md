@@ -49,6 +49,8 @@ echo "/document-function FUNC_NAME" | claude
 (menuGroup:\s.*)T2$
 $1D
 
+(menuGroup:\s.*?)(T3|T2|T1|T)$
+
 gemini: /chat share log.json 
 gemini: ctrl+s copy mode
 

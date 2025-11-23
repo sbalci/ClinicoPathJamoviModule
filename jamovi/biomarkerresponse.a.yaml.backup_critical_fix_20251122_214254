@@ -1,0 +1,188 @@
+---
+name: biomarkerresponse
+title: Biomarker Response Association
+menuGroup: OncoPathT1
+menuSubgroup: ClinicoPath Biomarker Analysis
+version: '0.0.3'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: biomarker
+      title: Biomarker Variable
+      type: Variable
+      suggested: [continuous]
+      description:
+          R: >
+            Continuous biomarker measurement (e.g., expression level, concentration).
+
+    - name: response
+      title: Response Variable
+      type: Variable
+      suggested: [nominal, continuous]
+      description:
+          R: >
+            Treatment response variable (binary, categorical, or continuous).
+
+    - name: responseType
+      title: Response Type
+      type: List
+      options:
+        - title: Binary (Responder/Non-responder)
+          name: binary
+        - title: Categorical (CR/PR/SD/PD)
+          name: categorical
+        - title: Continuous (% change)
+          name: continuous
+      default: categorical
+      description:
+          R: >
+            Type of response variable for appropriate analysis and visualization.
+
+    - name: positiveLevel
+      title: Positive Response Level (for binary)
+      type: String
+      description:
+          R: >
+            Specify which level represents positive response (e.g., 'Responder', 'Yes', '1'). If blank, uses second level alphabetically.
+
+    - name: plotType
+      title: Primary Plot Type
+      type: List
+      options:
+        - title: Box Plot by Response
+          name: boxplot
+        - title: Scatter Plot
+          name: scatter
+        - title: Violin Plot
+          name: violin
+        - title: Combined Plot
+          name: combined
+      default: boxplot
+      description:
+          R: >
+            Primary visualization method for biomarker-response relationship.
+
+    - name: showThreshold
+      title: Show Biomarker Thresholds
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display threshold lines for biomarker positivity/negativity.
+
+    - name: thresholdValue
+      title: Biomarker Threshold
+      type: String
+      default: ''
+      description:
+          R: >
+            Threshold value for biomarker positivity (if known).
+
+    - name: thresholdMethod
+      title: Threshold Method
+      type: List
+      options:
+        - title: Manual (specify value)
+          name: manual
+        - title: Median
+          name: median
+        - title: Upper Quartile (75th percentile)
+          name: q75
+        - title: Optimal (ROC-based)
+          name: optimal
+      default: median
+      description:
+          R: >
+            Method for determining biomarker threshold.
+
+    - name: addTrendLine
+      title: Add Trend Line
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add fitted trend line for continuous responses.
+
+    - name: trendMethod
+      title: Trend Line Method
+      type: List
+      options:
+        - title: Linear
+          name: lm
+        - title: LOESS (smooth)
+          name: loess
+        - title: GAM (spline)
+          name: gam
+      default: loess
+      description:
+          R: >
+            Method for fitting trend line.
+
+    - name: performTests
+      title: Perform Statistical Tests
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform appropriate statistical tests for biomarker-response association.
+
+    - name: groupVariable
+      title: Grouping Variable (optional)
+      type: Variable
+      default: null
+      suggested: [nominal]
+      description:
+          R: >
+            Optional grouping variable (e.g., treatment arm, disease stage).
+
+    - name: showCorrelation
+      title: Show Correlation Statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display correlation coefficients and tests.
+
+    - name: logTransform
+      title: Log Transform Biomarker
+      type: Bool
+      default: false
+      description:
+          R: >
+            Apply log transformation to biomarker values.
+
+    - name: outlierHandling
+      title: Outlier Handling
+      type: List
+      options:
+        - title: Include All
+          name: none
+        - title: Highlight Outliers
+          name: highlight
+        - title: Remove Outliers
+          name: remove
+      default: highlight
+      description:
+          R: >
+            Method for handling outlier values.
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: List
+      options:
+        - title: 95%
+          name: "0.95"
+        - title: 90%
+          name: "0.90"
+        - title: 99%
+          name: "0.99"
+      default: "0.95"
+      description:
+          R: >
+            Confidence level for intervals and tests.

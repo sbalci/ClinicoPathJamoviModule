@@ -12,12 +12,12 @@ biomarkerresponse(
   positiveLevel,
   plotType = "boxplot",
   showThreshold = FALSE,
-  thresholdValue,
+  thresholdValue = "",
   thresholdMethod = "median",
   addTrendLine = FALSE,
   trendMethod = "loess",
   performTests = FALSE,
-  groupVariable,
+  groupVariable = NULL,
   showCorrelation = FALSE,
   logTransform = FALSE,
   outlierHandling = "highlight",
@@ -78,6 +78,8 @@ A results object containing:
 \code{results$threshold} \tab \tab \tab \tab \tab a table \cr
 \code{results$groupComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$statisticalTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$postHocTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

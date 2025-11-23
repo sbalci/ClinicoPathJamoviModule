@@ -129,7 +129,10 @@
       "WebFetch(domain:dev.jamovi.org)",
       "Bash(cp:*)",
       "Bash(wait)",
-      "WebFetch(domain:juba.github.io)"
+      "WebFetch(domain:juba.github.io)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(do echo -n \"$out: \")"
     ],
     "deny": [],
     "ask": [],

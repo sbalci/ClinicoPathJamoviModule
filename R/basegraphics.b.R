@@ -38,20 +38,41 @@
 #' @importFrom dplyr select all_of
 #' @importFrom janitor clean_names
 #' @importFrom labelled set_variable_labels var_label
+#' @importFrom haven as_factor
 #' @import magrittr
 
 basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "basegraphicsClass",
     inherit = basegraphicsBase,
     private = list(
-        
+
         # Internal data storage
         .processed_data = NULL,
         .plot_data = NULL,
-        
+
+        # Variable name escaping utility
+        .escapeVariableName = function(x) {
+            if (is.null(x)) return(NULL)
+            # Use janitor for consistency, but add explicit safety
+            cleaned <- janitor::make_clean_names(x)
+            # Ensure valid R names
+            make.names(cleaned)
+        },
+
         .init = function() {
             # Initialize instructions
             instructions_html <- paste(
+                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ff9800;'>",
+                "<h4 style='color: #e65100; margin-top: 0;'>⚠️ IMPORTANT: Exploratory Visualization Only</h4>",
+                "<p style='margin: 5px 0; color: #d84315;'><strong>This module provides DESCRIPTIVE and EXPLORATORY visualization only.</strong></p>",
+                "<p style='margin: 5px 0;'><strong>NOT intended for:</strong></p>",
+                "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                "<li>Formal statistical inference or hypothesis testing</li>",
+                "<li>Clinical decision-making without proper statistical analysis</li>",
+                "<li>Publication-quality statistical reporting</li>",
+                "</ul>",
+                "<p style='margin: 5px 0;'><strong>Statistical overlays (correlation, R²) are exploratory estimates only</strong> and should NOT be interpreted as rigorous statistical tests. For clinical research, always use appropriate statistical methods with proper validation.</p>",
+                "</div>",
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'>Base Graphics Visualization</h3>",
                 "<div style='margin: 10px 0;'>",
@@ -86,65 +107,400 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             self$results$instructions$setContent(instructions_html)
         },
-        
+
+        # Validate variable name cleaning
+        .validateVariableNames = function(original_data) {
+            original_names <- colnames(original_data)
+            cleaned_names <- janitor::make_clean_names(original_names)
+
+            # Check for duplicates in original names
+            if (any(duplicated(original_names))) {
+                dup_names <- original_names[duplicated(original_names)]
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'duplicateVariableNames',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf(
+                    'Duplicate variable names detected: %s. This may cause incorrect variable mapping.',
+                    paste(unique(dup_names), collapse = ", ")
+                ))
+                self$results$insert(1, notice)
+            }
+
+            # Check if cleaning creates duplicates
+            if (any(duplicated(cleaned_names))) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'cleaningConflict',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent('Variable name cleaning created duplicate names. Some variables may be incorrectly mapped.')
+                self$results$insert(1, notice)
+            }
+
+            # Check if cleaning changed names - INFO at bottom
+            if (!all(cleaned_names == original_names)) {
+                changed_count <- sum(cleaned_names != original_names)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'variableNamesRenamed',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(sprintf(
+                    '%d variable name(s) were cleaned to ensure compatibility. Original labels are preserved.',
+                    changed_count
+                ))
+                self$results$insert(999, notice)
+            }
+        },
+
+        # Validate data types for selected plot type
+        .validateDataTypes = function() {
+            plot_type <- self$options$plot_type
+            x_var <- self$options$x_var
+            y_var <- self$options$y_var
+            group_var <- self$options$group_var
+
+            if (is.null(x_var)) return()
+
+            mydata <- private$.processed_data
+            x_var_clean <- private$.escapeVariableName(x_var)
+
+            # Check X variable type based on plot type
+            if (plot_type %in% c("scatter", "line", "histogram", "density")) {
+                # These require continuous X variable
+                if (!is.numeric(mydata[[x_var_clean]])) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'inappropriateXType',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        "Plot type '%s' typically requires a continuous X variable, but '%s' appears to be categorical. Results may be misleading.",
+                        plot_type, x_var
+                    ))
+                    self$results$insert(1, notice)
+                }
+            }
+
+            if (plot_type == "barplot") {
+                # Barplot works better with categorical data
+                if (is.numeric(mydata[[x_var_clean]]) && length(unique(mydata[[x_var_clean]])) > 20) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'tooManyBars',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        "Variable '%s' has many unique values (%d). Consider using a histogram instead of a bar plot for continuous data.",
+                        x_var, length(unique(mydata[[x_var_clean]]))
+                    ))
+                    self$results$insert(1, notice)
+                }
+            }
+
+            # Check Y variable if specified
+            if (!is.null(y_var)) {
+                y_var_clean <- private$.escapeVariableName(y_var)
+                if (!is.numeric(mydata[[y_var_clean]])) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'categoricalYVariable',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        "Y variable '%s' should be continuous but appears to be categorical.",
+                        y_var
+                    ))
+                    self$results$insert(1, notice)
+                }
+            }
+
+            # Check grouping variable
+            if (!is.null(group_var)) {
+                group_var_clean <- private$.escapeVariableName(group_var)
+                group_data <- as.factor(mydata[[group_var_clean]])
+                n_groups <- length(levels(group_data))
+
+                if (n_groups > 10) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'tooManyGroups',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        "Grouping variable '%s' has %d levels. Plots may be difficult to interpret with many groups.",
+                        group_var, n_groups
+                    ))
+                    self$results$insert(1, notice)
+                }
+
+                # Check for group imbalance
+                group_counts <- table(group_data)
+                min_count <- min(group_counts)
+                max_count <- max(group_counts)
+
+                if (max_count > 5 * min_count) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'groupImbalance',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Severe group imbalance detected. Smallest group: n=%d, largest group: n=%d. Comparisons may be unreliable.',
+                        min_count, max_count
+                    ))
+                    self$results$insert(1, notice)
+                }
+            }
+        },
+
+        # Check sample size and report data loss
+        .checkSampleSize = function(initial_data, final_data) {
+            initial_n <- nrow(initial_data)
+            final_n <- nrow(final_data)
+
+            data_loss <- initial_n - final_n
+            data_loss_pct <- round((data_loss / initial_n) * 100, 1)
+
+            if (data_loss > 0) {
+                # Data loss WARNING (>20%) or INFO (<20%)
+                notice_type <- if (data_loss_pct > 20) jmvcore::NoticeType$STRONG_WARNING else jmvcore::NoticeType$INFO
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'dataLoss',
+                    type = notice_type
+                )
+                notice$setContent(sprintf(
+                    'Sample size: %d observations retained from %d total (%d removed due to missing values, %.1f%% data loss).',
+                    final_n, initial_n, data_loss, data_loss_pct
+                ))
+                position <- if (data_loss_pct > 20) 1 else 999
+                self$results$insert(position, notice)
+
+                # Additional warning for substantial loss
+                if (data_loss_pct > 20) {
+                    notice2 <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'substantialDataLoss',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice2$setContent('Substantial data loss (>20%) may indicate data quality issues or inappropriate variable selection.')
+                    self$results$insert(2, notice2)
+                }
+            } else {
+                # No data loss - INFO
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'completeData',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(sprintf('Sample size: %d complete observations (no missing data).', final_n))
+                self$results$insert(999, notice)
+            }
+
+            # Small sample warning
+            if (final_n < 30) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSample',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf(
+                    'Small sample size (n=%d). Results may be unstable and should be interpreted with caution.',
+                    final_n
+                ))
+                self$results$insert(1, notice)
+            }
+        },
+
+        # Validate statistics before adding overlays
+        .validateStatistics = function(x, y = NULL) {
+            n <- if (is.null(y)) length(x) else length(na.omit(cbind(x, y))[,1])
+
+            # Check sample size for correlation/regression
+            if (!is.null(y)) {
+                if (n < 30) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallSampleCorrelation',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Sample size (n=%d) is below recommended minimum (n=30) for stable correlation estimates. Results should be interpreted with extreme caution.',
+                        n
+                    ))
+                    self$results$insert(1, notice)
+                }
+
+                # Check for outliers using ±3 SD threshold
+                x_outliers <- sum(abs(scale(x, center = TRUE, scale = TRUE)) > 3, na.rm = TRUE)
+                y_outliers <- sum(abs(scale(y, center = TRUE, scale = TRUE)) > 3, na.rm = TRUE)
+
+                if (x_outliers > 0 || y_outliers > 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'outliersDetected',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Potential outliers detected (%d observations >3 SD from mean). Correlation may be influenced by extreme values.',
+                        x_outliers + y_outliers
+                    ))
+                    self$results$insert(1, notice)
+                }
+
+                # Check for non-linearity using simple curvature test
+                if (n >= 10) {
+                    lm_linear <- lm(y ~ x)
+                    lm_quadratic <- lm(y ~ x + I(x^2))
+                    p_value <- tryCatch({
+                        anova(lm_linear, lm_quadratic)$`Pr(>F)`[2]
+                    }, error = function(e) 1)
+
+                    if (!is.na(p_value) && p_value < 0.05) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'nonLinearRelationship',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent('Non-linear relationship detected. Linear correlation (r) and R² may not adequately describe this relationship.')
+                        self$results$insert(1, notice)
+                    }
+                }
+
+                # Check normality assumption for Pearson correlation only
+                # Spearman correlation is non-parametric and does not require normality
+                if (n >= 10 && self$options$correlation_method == "pearson") {
+                    shapiro_x <- tryCatch(shapiro.test(x)$p.value, error = function(e) 1)
+                    shapiro_y <- tryCatch(shapiro.test(y)$p.value, error = function(e) 1)
+
+                    if (shapiro_x < 0.05 || shapiro_y < 0.05) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'nonNormalDistribution',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent("Non-normal distribution detected. Pearson correlation assumes bivariate normality. Switch to Spearman's correlation (in Statistical Overlays options) for non-normal data.")
+                        self$results$insert(1, notice)
+                    }
+                } else if (self$options$correlation_method == "spearman") {
+                    # Inform user that Spearman is appropriate for non-normal data
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'spearmanMethodInfo',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent("Using Spearman's rank correlation (non-parametric). This method is robust to outliers and does not assume normality.")
+                    self$results$insert(999, notice)
+                }
+
+                # CRITICAL: Exploratory statistics disclaimer
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'exploratoryStatistics',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent('Correlation and R² displayed on plot are EXPLORATORY estimates only. These do NOT constitute formal hypothesis tests and should not be used for clinical decision-making without proper statistical validation.')
+                self$results$insert(1, notice)
+            }
+        },
+
         .run = function() {
             # Clear instructions if analysis is ready
             if (!is.null(self$options$x_var) && self$options$plot_type != "") {
                 self$results$instructions$setContent("")
             }
-            
+
             # Early validation
-            if (is.null(self$options$x_var)) {
+            if (is.null(self$options$x_var) && !(self$options$plot_type %in% c("pairs", "matplot"))) {
                 return()
             }
-            
+
             # Data validation
             if (nrow(self$data) == 0) {
                 stop("Data contains no (complete) rows")
             }
-            
+
+            # Store initial data for comparison
+            initial_data <- self$data
+
+            # Validate variable names before processing
+            private$.validateVariableNames(initial_data)
+
             # Process data
             private$.processed_data <- private$.process_data()
-            
+
+            # Check sample size and report data loss
+            private$.checkSampleSize(initial_data, private$.processed_data)
+
+            # Validate data types for plot appropriateness
+            private$.validateDataTypes()
+
             # Prepare plot data
             private$.prepare_plot_data()
-            
+
+            # Validate statistics if they will be displayed
+            if (self$options$show_statistics) {
+                if (self$options$plot_type %in% c("scatter", "line") && !is.null(private$.plot_data$y)) {
+                    # Validate statistics and display notices (method inserts notices directly)
+                    private$.validateStatistics(private$.plot_data$x, private$.plot_data$y)
+                }
+            }
+
             # Set plot state for rendering
             self$results$base_plot$setState(list(
                 data = private$.plot_data,
                 options = self$options
             ))
-            
+
             # Generate plot description
             private$.generate_description()
+
+            # Generate statistical glossary if statistics are shown
+            if (self$options$show_statistics) {
+                private$.generate_glossary()
+            }
+
+            # Generate plain-language summary if requested
+            if (self$options$show_statistics && self$options$show_summary) {
+                private$.generate_summary()
+            }
         },
         
         .process_data = function() {
             mydata <- self$data
             
             # Store original names and labels
-            original_names <- names(mydata)
+            if (is.null(colnames(mydata))) {
+                colnames(mydata) <- paste0("V", seq_len(ncol(mydata)))
+            }
+            original_names <- colnames(mydata)
             labels <- setNames(original_names, original_names)
             
             # Clean variable names
             mydata <- mydata %>% janitor::clean_names()
             
             # Restore labels to cleaned names
-            corrected_labels <- setNames(original_names, names(mydata))
-            mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
+            if (length(original_names) == length(colnames(mydata))) {
+                corrected_labels <- setNames(original_names, colnames(mydata))
+                mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
+            }
             
             # Remove missing values for selected variables
-            required_vars <- c(self$options$x_var)
-            if (!is.null(self$options$y_var)) {
-                required_vars <- c(required_vars, self$options$y_var)
-            }
-            if (!is.null(self$options$group_var)) {
-                required_vars <- c(required_vars, self$options$group_var)
-            }
+            required_vars <- c()
+            if (!is.null(self$options$x_var)) required_vars <- c(required_vars, self$options$x_var)
+            if (!is.null(self$options$y_var)) required_vars <- c(required_vars, self$options$y_var)
+            if (!is.null(self$options$group_var)) required_vars <- c(required_vars, self$options$group_var)
             
             # Convert to cleaned names
-            required_vars_clean <- janitor::make_clean_names(required_vars)
-            mydata <- mydata[complete.cases(mydata[required_vars_clean]), ]
+            if (length(required_vars) > 0) {
+                required_vars_clean <- sapply(required_vars, private$.escapeVariableName)
+                mydata <- mydata[complete.cases(mydata[required_vars_clean]), , drop = FALSE]
+            } else {
+                mydata <- mydata[complete.cases(mydata), , drop = FALSE]
+            }
             
             return(mydata)
         },
@@ -152,25 +508,39 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .prepare_plot_data = function() {
             mydata <- private$.processed_data
             
-            # Convert variable names to cleaned versions
-            x_var_clean <- janitor::make_clean_names(self$options$x_var)
-            
-            plot_data <- list(
-                x = mydata[[x_var_clean]],
-                x_name = self$options$x_var
-            )
-            
+            plot_data <- list()
+
+            if (!is.null(self$options$x_var)) {
+                # Convert variable names to cleaned versions using utility
+                x_var_clean <- private$.escapeVariableName(self$options$x_var)
+                plot_data$x <- mydata[[x_var_clean]]
+                plot_data$x_name <- self$options$x_var
+            }
+
             # Add Y variable if specified
             if (!is.null(self$options$y_var)) {
-                y_var_clean <- janitor::make_clean_names(self$options$y_var)
+                y_var_clean <- private$.escapeVariableName(self$options$y_var)
                 plot_data$y <- mydata[[y_var_clean]]
                 plot_data$y_name <- self$options$y_var
             }
-            
+
             # Add grouping variable if specified
             if (!is.null(self$options$group_var)) {
-                group_var_clean <- janitor::make_clean_names(self$options$group_var)
-                plot_data$group <- as.factor(mydata[[group_var_clean]])
+                group_var_clean <- private$.escapeVariableName(self$options$group_var)
+                group_col <- mydata[[group_var_clean]]
+
+                # Handle labelled factors properly
+                if (inherits(group_col, "haven_labelled")) {
+                    # Convert haven_labelled to factor with labels
+                    plot_data$group <- haven::as_factor(group_col)
+                } else if (is.factor(group_col)) {
+                    # Already a factor, use as-is
+                    plot_data$group <- group_col
+                } else {
+                    # Convert to factor
+                    plot_data$group <- as.factor(group_col)
+                }
+
                 plot_data$group_name <- self$options$group_var
             }
             
@@ -223,15 +593,168 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             self$results$plot_description$setContent(desc_html)
         },
-        
+
+        .generate_glossary = function() {
+            # Generate statistical glossary for terms used in this module
+            glossary_html <- "<h4>Statistical Glossary</h4>"
+            glossary_html <- paste0(glossary_html, "<div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+            glossary_html <- paste0(glossary_html, "<dl style='margin: 0;'>")
+
+            # Pearson correlation
+            glossary_html <- paste0(glossary_html, "<dt><strong>Pearson Correlation (r)</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
+            glossary_html <- paste0(glossary_html, "Measures linear relationship strength between two continuous variables. ")
+            glossary_html <- paste0(glossary_html, "Range: -1 to +1. Values near 0 indicate weak relationship; values near ±1 indicate strong relationship. ")
+            glossary_html <- paste0(glossary_html, "Assumes bivariate normality and is sensitive to outliers.")
+            glossary_html <- paste0(glossary_html, "</dd>")
+
+            # Spearman correlation
+            glossary_html <- paste0(glossary_html, "<dt><strong>Spearman Correlation (ρ)</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
+            glossary_html <- paste0(glossary_html, "Non-parametric measure of monotonic relationship strength based on ranked data. ")
+            glossary_html <- paste0(glossary_html, "Range: -1 to +1. Does not assume normality and is robust to outliers. ")
+            glossary_html <- paste0(glossary_html, "Appropriate for ordinal data or non-normal distributions.")
+            glossary_html <- paste0(glossary_html, "</dd>")
+
+            # R-squared
+            glossary_html <- paste0(glossary_html, "<dt><strong>R² (Coefficient of Determination)</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
+            glossary_html <- paste0(glossary_html, "Proportion of variance in Y explained by X in linear regression. ")
+            glossary_html <- paste0(glossary_html, "Range: 0 to 1. Higher values indicate better model fit. ")
+            glossary_html <- paste0(glossary_html, "R² = 0.70 means 70% of variance is explained by the model.")
+            glossary_html <- paste0(glossary_html, "</dd>")
+
+            # Mean
+            glossary_html <- paste0(glossary_html, "<dt><strong>Mean</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
+            glossary_html <- paste0(glossary_html, "Arithmetic average of all values. Sensitive to extreme values (outliers).")
+            glossary_html <- paste0(glossary_html, "</dd>")
+
+            # Median
+            glossary_html <- paste0(glossary_html, "<dt><strong>Median</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
+            glossary_html <- paste0(glossary_html, "Middle value when data is ordered. Robust to outliers; preferred for skewed distributions.")
+            glossary_html <- paste0(glossary_html, "</dd>")
+
+            # Standard deviation
+            glossary_html <- paste0(glossary_html, "<dt><strong>Standard Deviation (SD)</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
+            glossary_html <- paste0(glossary_html, "Measure of data spread around the mean. ")
+            glossary_html <- paste0(glossary_html, "About 68% of values fall within ±1 SD, 95% within ±2 SD (for normal distributions).")
+            glossary_html <- paste0(glossary_html, "</dd>")
+
+            # Sample size
+            glossary_html <- paste0(glossary_html, "<dt><strong>Sample Size (n)</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
+            glossary_html <- paste0(glossary_html, "Number of observations in the analysis. ")
+            glossary_html <- paste0(glossary_html, "Minimum n=30 recommended for stable correlation estimates.")
+            glossary_html <- paste0(glossary_html, "</dd>")
+
+            glossary_html <- paste0(glossary_html, "</dl></div>")
+
+            self$results$glossary$setContent(glossary_html)
+            self$results$glossary$setVisible(TRUE)
+        },
+
+        .generate_summary = function() {
+            # Generate plain-language summary of statistical findings
+            # Only applicable for bivariate plots with correlation
+            if (!self$options$plot_type %in% c("scatter", "line") || is.null(private$.plot_data$y)) {
+                return()
+            }
+
+            # Calculate correlation using selected method
+            cor_method <- self$options$correlation_method
+            cor_value <- cor(private$.plot_data$x, private$.plot_data$y, use = "complete.obs", method = cor_method)
+
+            # Determine correlation strength
+            abs_cor <- abs(cor_value)
+            strength <- if (abs_cor < 0.3) {
+                "weak"
+            } else if (abs_cor < 0.7) {
+                "moderate"
+            } else {
+                "strong"
+            }
+
+            # Determine direction
+            direction <- if (cor_value > 0) {
+                "positive"
+            } else {
+                "negative"
+            }
+
+            # Build summary
+            summary_html <- "<h4>Plain-Language Summary</h4>"
+            summary_html <- paste0(summary_html, "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+
+            # Main interpretation
+            x_var <- self$options$x_var
+            y_var <- self$options$y_var
+            summary_html <- paste0(summary_html, "<p><strong>Relationship Interpretation:</strong></p>")
+            summary_html <- paste0(summary_html, "<p>There is a <strong>", strength, " ", direction, " relationship</strong> between ", x_var, " and ", y_var, ". ")
+
+            # Explain what this means
+            if (direction == "positive") {
+                summary_html <- paste0(summary_html, "This means that as ", x_var, " increases, ", y_var, " tends to increase as well. ")
+            } else {
+                summary_html <- paste0(summary_html, "This means that as ", x_var, " increases, ", y_var, " tends to decrease. ")
+            }
+
+            # Quantify the strength
+            if (cor_method == "pearson") {
+                r_squared <- cor_value^2
+                pct_explained <- round(r_squared * 100, 1)
+                summary_html <- paste0(summary_html, "About ", pct_explained, "% of the variation in ", y_var, " can be explained by ", x_var, ".")
+            } else {
+                summary_html <- paste0(summary_html, "The relationship is ", strength, " when considering the ranked values (not necessarily linear).")
+            }
+            summary_html <- paste0(summary_html, "</p>")
+
+            # Provide context on strength
+            summary_html <- paste0(summary_html, "<p><strong>Context:</strong></p><ul style='margin-top: 5px;'>")
+            if (strength == "weak") {
+                summary_html <- paste0(summary_html, "<li>", x_var, " and ", y_var, " show little association. Other factors likely play larger roles.</li>")
+            } else if (strength == "moderate") {
+                summary_html <- paste0(summary_html, "<li>", x_var, " and ", y_var, " show a meaningful association, but other factors also contribute.</li>")
+            } else {
+                summary_html <- paste0(summary_html, "<li>", x_var, " and ", y_var, " are closely related. Changes in one strongly predict changes in the other.</li>")
+            }
+
+            # Method-specific notes
+            if (cor_method == "spearman") {
+                summary_html <- paste0(summary_html, "<li>Using Spearman's method (rank-based), which is appropriate for non-normal data or ordinal variables.</li>")
+            } else {
+                summary_html <- paste0(summary_html, "<li>Using Pearson's method, which assumes a linear relationship and normally distributed data.</li>")
+            }
+            summary_html <- paste0(summary_html, "</ul>")
+
+            # Important reminder
+            summary_html <- paste0(summary_html, "<p style='margin-top: 10px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107;'>")
+            summary_html <- paste0(summary_html, "<strong>⚠️ Important:</strong> This is an <em>exploratory</em> analysis. ")
+            summary_html <- paste0(summary_html, "Correlation does not prove causation. Formal hypothesis testing is needed before using these findings for clinical decisions.")
+            summary_html <- paste0(summary_html, "</p>")
+
+            summary_html <- paste0(summary_html, "</div>")
+
+            self$results$summary$setContent(summary_html)
+            self$results$summary$setVisible(TRUE)
+        },
+
         .add_statistics_to_plot = function(data, options) {
             # Add statistical information overlay to plots
-            
+            # IMPORTANT: These are EXPLORATORY statistics only, not formal statistical tests
+            # Validation warnings are added in .run() method before this is called
+
             if (options$plot_type %in% c("scatter", "line") && !is.null(data$y)) {
-                # For bivariate plots, add correlation
-                cor_value <- cor(data$x, data$y, use = "complete.obs")
-                stats_text <- paste0("r = ", round(cor_value, 3))
-                
+                # For bivariate plots, add correlation using selected method
+                cor_method <- options$correlation_method
+                cor_value <- cor(data$x, data$y, use = "complete.obs", method = cor_method)
+
+                # Label depends on method (r for Pearson, ρ for Spearman)
+                cor_label <- if (cor_method == "spearman") "\u03C1" else "r"
+                stats_text <- paste0(cor_label, " = ", round(cor_value, 3), " (", cor_method, ")")
+
                 # Add regression line for scatter plots
                 if (options$plot_type == "scatter") {
                     abline(lm(data$y ~ data$x), col = "red", lty = 2)
@@ -239,7 +762,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     r_squared <- round(summary(lm_fit)$r.squared, 3)
                     stats_text <- paste0(stats_text, "\nR² = ", r_squared)
                 }
-                
+
                 # Position text in upper-left corner
                 mtext(stats_text, side = 3, line = -2, adj = 0.05, cex = 0.8, col = "blue")
                 
@@ -315,12 +838,15 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             tryCatch({
                 # Prepare custom axis limits
-                xlim <- if (options$custom_limits && !is.null(options$x_min) && !is.null(options$x_max)) {
-                    c(options$x_min, options$x_max)
-                } else NULL
-                ylim <- if (options$custom_limits && !is.null(options$y_min) && !is.null(options$y_max)) {
-                    c(options$y_min, options$y_max)
-                } else NULL
+                xlim <- NULL
+                if (options$custom_limits && options$x_min != "" && options$x_max != "") {
+                    xlim <- c(as.numeric(options$x_min), as.numeric(options$x_max))
+                }
+                
+                ylim <- NULL
+                if (options$custom_limits && options$y_min != "" && options$y_max != "") {
+                    ylim <- c(as.numeric(options$y_min), as.numeric(options$y_max))
+                }
                 
                 # Generate plot based on type
                 if (options$plot_type == "scatter") {

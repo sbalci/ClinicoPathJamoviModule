@@ -11,29 +11,6 @@ items:
       clearWith:
           - vars
 
-    - name: noticeError
-      title: Error
-      type: Html
-      visible: false
-      clearWith:
-          - vars
-          - condensationvar
-
-    - name: noticeWarning
-      title: Warning
-      type: Html
-      visible: false
-      clearWith:
-          - vars
-
-    - name: noticeInfo
-      title: Information
-      type: Html
-      visible: false
-      clearWith:
-          - vars
-          - maxvars
-
     - name: dataWarning
       title: Data Validation
       type: Html

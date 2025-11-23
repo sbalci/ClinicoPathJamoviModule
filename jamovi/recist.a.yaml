@@ -1,7 +1,7 @@
 ---
 name: recist
 title: RECIST 1.1 Multi-Lesion Aggregation
-menuGroup: OncoPathT
+menuGroup: OncoPathT4
 menuSubgroup: Response Evaluation
 menuSubtitle: Automated Best Overall Response
 version: '0.0.32'

@@ -1,7 +1,7 @@
 ---
 name:  reclassmetrics
 title: Model Reclassification Metrics (NRI & IDI)
-menuGroup: OncoPathT
+menuGroup: OncoPathT4
 menuSubgroup: Prediction Models
 version: '0.0.32'
 jas: '1.2'

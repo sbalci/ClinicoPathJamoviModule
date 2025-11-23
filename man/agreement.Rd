@@ -7,8 +7,9 @@
 agreement(
   data,
   vars,
+  baConfidenceLevel = 0.95,
+  proportionalBias = FALSE,
   sft = FALSE,
-  showText = FALSE,
   wght = "unweighted",
   exct = FALSE,
   kripp = FALSE,
@@ -18,7 +19,7 @@ agreement(
   gwetWeights = "unweighted",
   showLevelInfo = FALSE,
   hierarchicalKappa = FALSE,
-  clusterVariable,
+  clusterVariable = NULL,
   randomEffectsRater = FALSE,
   randomEffectsCluster = FALSE,
   iccHierarchical = FALSE,
@@ -34,7 +35,7 @@ agreement(
   consensusRule = "majority",
   tieBreaker = "exclude",
   consensusName = "consensus_score",
-  referenceRater,
+  referenceRater = NULL,
   rankRaters = FALSE,
   loaVariable = FALSE,
   loaThresholds = "custom",
@@ -50,12 +51,13 @@ where each row is a unique observation.}
 \item{vars}{A string naming the variable from \code{data} that contains the
 diagnosis given by the observer, variable can be categorical or ordinal.}
 
+\item{baConfidenceLevel}{.}
+
+\item{proportionalBias}{.}
+
 \item{sft}{Display frequency tables showing the distribution of ratings for
 each rater. Useful for understanding rating patterns and identifying
 potential biases.}
-
-\item{showText}{Display simple preformatted text version of frequency
-tables. Provides a plain-text alternative to the HTML formatted tables.}
 
 \item{wght}{For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
 kappa accounts for degree of disagreement. Linear weights: Adjacent
@@ -216,6 +218,7 @@ A results object containing:
 \code{results$loaVar} \tab \tab \tab \tab \tab an output \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

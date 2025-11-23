@@ -461,6 +461,14 @@ items:
       type: Html
       visible: (showAbout)
 
+    - name: blandAltmanPlot
+      title: "Bland-Altman Plot"
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .populateBlandAltmanPlot
+      visible: (blandAltmanPlot)
+
 
 
 

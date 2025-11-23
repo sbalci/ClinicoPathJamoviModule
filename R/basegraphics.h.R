@@ -20,11 +20,13 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             add_legend = TRUE,
             bins = 15,
             show_statistics = FALSE,
+            correlation_method = "pearson",
+            show_summary = FALSE,
             custom_limits = FALSE,
-            x_min = NULL,
-            x_max = NULL,
-            y_min = NULL,
-            y_max = NULL, ...) {
+            x_min = "",
+            x_max = "",
+            y_min = "",
+            y_max = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -48,6 +50,7 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..x_var <- jmvcore::OptionVariable$new(
                 "x_var",
                 x_var,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal",
@@ -58,6 +61,7 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..y_var <- jmvcore::OptionVariable$new(
                 "y_var",
                 y_var,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -65,6 +69,7 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..group_var <- jmvcore::OptionVariable$new(
                 "group_var",
                 group_var,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -132,22 +137,37 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "show_statistics",
                 show_statistics,
                 default=FALSE)
+            private$..correlation_method <- jmvcore::OptionList$new(
+                "correlation_method",
+                correlation_method,
+                options=list(
+                    "pearson",
+                    "spearman"),
+                default="pearson")
+            private$..show_summary <- jmvcore::OptionBool$new(
+                "show_summary",
+                show_summary,
+                default=FALSE)
             private$..custom_limits <- jmvcore::OptionBool$new(
                 "custom_limits",
                 custom_limits,
                 default=FALSE)
-            private$..x_min <- jmvcore::OptionNumber$new(
+            private$..x_min <- jmvcore::OptionString$new(
                 "x_min",
-                x_min)
-            private$..x_max <- jmvcore::OptionNumber$new(
+                x_min,
+                default="")
+            private$..x_max <- jmvcore::OptionString$new(
                 "x_max",
-                x_max)
-            private$..y_min <- jmvcore::OptionNumber$new(
+                x_max,
+                default="")
+            private$..y_min <- jmvcore::OptionString$new(
                 "y_min",
-                y_min)
-            private$..y_max <- jmvcore::OptionNumber$new(
+                y_min,
+                default="")
+            private$..y_max <- jmvcore::OptionString$new(
                 "y_max",
-                y_max)
+                y_max,
+                default="")
 
             self$.addOption(private$..plot_type)
             self$.addOption(private$..x_var)
@@ -163,6 +183,8 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..add_legend)
             self$.addOption(private$..bins)
             self$.addOption(private$..show_statistics)
+            self$.addOption(private$..correlation_method)
+            self$.addOption(private$..show_summary)
             self$.addOption(private$..custom_limits)
             self$.addOption(private$..x_min)
             self$.addOption(private$..x_max)
@@ -184,6 +206,8 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         add_legend = function() private$..add_legend$value,
         bins = function() private$..bins$value,
         show_statistics = function() private$..show_statistics$value,
+        correlation_method = function() private$..correlation_method$value,
+        show_summary = function() private$..show_summary$value,
         custom_limits = function() private$..custom_limits$value,
         x_min = function() private$..x_min$value,
         x_max = function() private$..x_max$value,
@@ -204,6 +228,8 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..add_legend = NA,
         ..bins = NA,
         ..show_statistics = NA,
+        ..correlation_method = NA,
+        ..show_summary = NA,
         ..custom_limits = NA,
         ..x_min = NA,
         ..x_max = NA,
@@ -217,6 +243,8 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         instructions = function() private$.items[["instructions"]],
         plot_description = function() private$.items[["plot_description"]],
+        glossary = function() private$.items[["glossary"]],
+        summary = function() private$.items[["summary"]],
         base_plot = function() private$.items[["base_plot"]]),
     private = list(),
     public=list(
@@ -241,12 +269,29 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="plot_description",
                 title="Plot Description",
-                visible="(x_var && plot_type)",
+                visible=TRUE,
                 clearWith=list(
                     "plot_type",
                     "x_var",
                     "y_var",
                     "group_var")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Statistical Glossary",
+                visible=FALSE,
+                clearWith=list(
+                    "show_statistics")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Plain-Language Summary",
+                visible=FALSE,
+                clearWith=list(
+                    "show_statistics",
+                    "show_summary",
+                    "x_var",
+                    "y_var")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="base_plot",
@@ -254,7 +299,7 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 width=700,
                 height=500,
                 renderFun=".plot_base",
-                visible="(x_var && plot_type)",
+                visible=TRUE,
                 clearWith=list(
                     "plot_type",
                     "x_var",
@@ -328,6 +373,8 @@ basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param add_legend Whether to add legend for grouped plots.
 #' @param bins Number of bins for histogram plots.
 #' @param show_statistics Whether to display basic statistics on the plot.
+#' @param correlation_method Method for calculating correlation coefficient.
+#' @param show_summary Display interpretation in non-technical language.
 #' @param custom_limits Whether to use custom axis limits.
 #' @param x_min Minimum value for x-axis (when custom limits enabled).
 #' @param x_max Maximum value for x-axis (when custom limits enabled).
@@ -337,6 +384,8 @@ basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot_description} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$base_plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -344,9 +393,9 @@ basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 basegraphics <- function(
     data,
     plot_type = "scatter",
-    x_var,
-    y_var,
-    group_var,
+    x_var = NULL,
+    y_var = NULL,
+    group_var = NULL,
     main_title = "",
     x_label = "",
     y_label = "",
@@ -357,11 +406,13 @@ basegraphics <- function(
     add_legend = TRUE,
     bins = 15,
     show_statistics = FALSE,
+    correlation_method = "pearson",
+    show_summary = FALSE,
     custom_limits = FALSE,
-    x_min,
-    x_max,
-    y_min,
-    y_max) {
+    x_min = "",
+    x_max = "",
+    y_min = "",
+    y_max = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("basegraphics requires jmvcore to be installed (restart may be required)")
@@ -393,6 +444,8 @@ basegraphics <- function(
         add_legend = add_legend,
         bins = bins,
         show_statistics = show_statistics,
+        correlation_method = correlation_method,
+        show_summary = show_summary,
         custom_limits = custom_limits,
         x_min = x_min,
         x_max = x_max,

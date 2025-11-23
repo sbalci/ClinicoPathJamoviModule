@@ -1,7 +1,7 @@
 ---
 name: stagemigration
 title: Advanced TNM Stage Migration Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPathT4
 menuSubgroup: Stage Migration Analysis
 menuSubtitle: 'State-of-the-Art Staging System Validation'
 version: '0.0.31'

@@ -1,7 +1,7 @@
 ---
 name: survivalendpoints
 title: Survival Endpoint Derivation
-menuGroup: jsurvivalT
+menuGroup: jsurvivalT4
 menuSubgroup: Survival Analysis
 menuSubtitle: Derive PFS, OS, TTP, DOR from Timeline Data
 version: '0.0.32'

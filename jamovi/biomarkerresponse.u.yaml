@@ -30,7 +30,7 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Response Type
+    label: Response Configuration
     collapsed: false
     children:
       - type: LayoutBox
@@ -40,6 +40,15 @@ children:
             name: responseType
           - type: ComboBox
             name: plotType
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Binary Response - Positive Level (REQUIRED):"
+          - type: TextBox
+            name: positiveLevel
+            format: string
+            enable: (responseType:binary)
   - type: CollapseBox
     label: Threshold Analysis
     collapsed: true
@@ -51,15 +60,13 @@ children:
             name: showThreshold
           - type: ComboBox
             name: thresholdMethod
+            enable: (showThreshold)
+          - type: Label
+            label: "Manual Threshold Value:"
           - type: TextBox
             name: thresholdValue
-            format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: positiveLevel
-        format: string
+            format: string
+            enable: (showThreshold && thresholdMethod:manual)
   - type: CollapseBox
     label: Plot Options
     collapsed: true

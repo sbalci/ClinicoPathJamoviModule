@@ -1,7 +1,7 @@
 ---
 name: timeinterval
 title: Comprehensive Time Interval Calculator
-menuGroup: SurvivalT
+menuGroup: SurvivalT4
 menuSubgroup: Data Preparation
 menuSubtitle: Advanced time interval analysis with quality assessment
 version: '0.0.3'

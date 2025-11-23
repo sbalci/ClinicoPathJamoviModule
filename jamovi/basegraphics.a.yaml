@@ -55,6 +55,7 @@ options:
     - name: x_var
       title: "X Variable"
       type: Variable
+      default: null
       suggested: [continuous, nominal, ordinal]
       permitted: [numeric, factor]
       description:
@@ -64,6 +65,7 @@ options:
     - name: y_var
       title: "Y Variable"
       type: Variable
+      default: null
       suggested: [continuous]
       permitted: [numeric]
       description:
@@ -73,6 +75,7 @@ options:
     - name: group_var
       title: "Grouping Variable (Optional)"
       type: Variable
+      default: null
       suggested: [nominal, ordinal]
       permitted: [factor]
       description:
@@ -197,6 +200,27 @@ options:
         R: Whether to display basic statistics on the plot.
         jamovi: Display basic statistical information on the plot.
 
+    - name: correlation_method
+      title: "Correlation Method"
+      type: List
+      options:
+        - title: "Pearson (assumes normality)"
+          name: pearson
+        - title: "Spearman (rank-based, robust)"
+          name: spearman
+      default: pearson
+      description:
+        R: Method for calculating correlation coefficient.
+        jamovi: Pearson for normally distributed data; Spearman for non-normal or ordinal data.
+
+    - name: show_summary
+      title: "Show Plain-Language Summary"
+      type: Bool
+      default: false
+      description:
+        R: Display interpretation in non-technical language.
+        jamovi: Generate a plain-language summary of the relationship and its strength.
+
     - name: custom_limits
       title: "Use Custom Axis Limits"
       type: Bool
@@ -207,28 +231,32 @@ options:
 
     - name: x_min
       title: "X-axis Minimum"
-      type: Number
+      type: String
+      default: ''
       description:
         R: Minimum value for x-axis (when custom limits enabled).
         jamovi: Set minimum value for x-axis.
 
     - name: x_max
       title: "X-axis Maximum"
-      type: Number
+      type: String
+      default: ''
       description:
         R: Maximum value for x-axis (when custom limits enabled).
         jamovi: Set maximum value for x-axis.
 
     - name: y_min
       title: "Y-axis Minimum"
-      type: Number
+      type: String
+      default: ''
       description:
         R: Minimum value for y-axis (when custom limits enabled).
         jamovi: Set minimum value for y-axis.
 
     - name: y_max
       title: "Y-axis Maximum"
-      type: Number
+      type: String
+      default: ''
       description:
         R: Maximum value for y-axis (when custom limits enabled).
         jamovi: Set maximum value for y-axis.

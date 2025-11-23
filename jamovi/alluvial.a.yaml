@@ -28,6 +28,7 @@ options:
     - name: condensationvar
       title: Condensation Variable
       type: Variable
+      default: NULL
       description:
           R: >
             The primary variable to be used for condensation.
@@ -78,6 +79,7 @@ options:
     - name: fillGgalluvial
       title: Fill by (ggalluvial)
       type: Variable
+      default: NULL
       description:
           R: >
             A string naming the variable from `data` that will be used to
@@ -252,6 +254,7 @@ options:
     - name: weight
       title: Weight Variable
       type: Variable
+      default: NULL
       suggested: [ continuous ]
       permitted: [ numeric ]
       description:

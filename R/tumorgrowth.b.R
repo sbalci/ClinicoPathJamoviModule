@@ -10,7 +10,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .init = function() {
             # Check for required packages
-            required_packages <- c('nlme', 'ggplot2', 'dplyr')
+            required_packages <- c('nlme', 'ggplot2', 'dplyr', 'brms')
             
             for (pkg in required_packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
@@ -100,13 +100,16 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data$time <- data[[time_var]]
                 data$size <- data[[size_var]]
                 if (!is.null(patient_var)) {
-                    data$patient <- data[[patient_var]]
+                    data$patient <- as.factor(data[[patient_var]])
                 }
                 
                 # Fit model based on type
                 if (model_approach == "nlme" && !is.null(patient_var)) {
                     model_fit <- private$.fitNlmeModel(data, growth_model)
-                } else {
+                } else if (model_approach == "bayesian" && !is.null(patient_var)) {
+                    model_fit <- private$.fitBrmsModel(data, growth_model)
+                }
+                else {
                     model_fit <- private$.fitNlsModel(data, growth_model)
                 }
                 
@@ -129,6 +132,104 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste("<h3>Model Fitting Error</h3><p>", e$message, "</p>")
                 )
             })
+        },
+        
+        .fitBrmsModel = function(data, growth_model) {
+            
+            library(brms)
+            
+            # Define priors
+            priors <- c(
+                prior(normal(0, 10), class = "b") 
+            )
+            
+            if (growth_model == "exponential") {
+                # V(t) = V0 * exp(k*t)
+                bform <- bf(size ~ V0 * exp(k * time),
+                            V0 ~ 1 + (1 | patient),
+                            k ~ 1,
+                            nl = TRUE)
+                
+                model <- brm(bform, 
+                             data = data, 
+                             prior = priors,
+                             iter = 2000, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95))
+                
+            } else if (growth_model == "gompertz") {
+                # V(t) = V0 * exp(alpha/beta * (1 - exp(-beta*t)))
+                bform <- bf(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
+                            V0 + alpha + beta ~ 1 + (1 | patient),
+                            nl = TRUE)
+                
+                model <- brm(bform, 
+                             data = data, 
+                             prior = priors,
+                             iter = 2000, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95))
+                
+            } else if (growth_model == "logistic") {
+                # V(t) = K / (1 + exp(-r*(t-t0)))
+                bform <- bf(size ~ K / (1 + exp(-r * (time - t0))),
+                            K + r + t0 ~ 1 + (1 | patient),
+                            nl = TRUE)
+                
+                model <- brm(bform, 
+                             data = data, 
+                             prior = priors,
+                             iter = 2000, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95))
+                
+            } else if (growth_model == "bertalanffy") {
+                # von Bertalanffy: V(t) = (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k*t))^3
+                bform <- bf(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
+                            V0 + Vinf + k ~ 1 + (1 | patient),
+                            nl = TRUE)
+                
+                model <- brm(bform, 
+                             data = data, 
+                             prior = priors,
+                             iter = 2000, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95))
+                
+            } else if (growth_model == "power") {
+                # Power Law: V(t) = V0 * t^alpha
+                bform <- bf(size ~ V0 * (time + 1)^alpha,
+                            V0 + alpha ~ 1 + (1 | patient),
+                            nl = TRUE)
+                
+                model <- brm(bform, 
+                             data = data, 
+                             prior = priors,
+                             iter = 2000, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95))
+                
+            } else if (growth_model == "linear") {
+                # V(t) = V0 + k*t
+                bform <- bf(size ~ V0 + k * time,
+                            V0 + k ~ 1 + (1 | patient),
+                            nl = TRUE)
+                
+                model <- brm(bform, 
+                             data = data, 
+                             prior = priors,
+                             iter = 2000, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95))
+            } else {
+                # Default to exponential
+                bform <- bf(size ~ V0 * exp(k * time),
+                            V0 ~ 1 + (1 | patient),
+                            k ~ 1,
+                            nl = TRUE)
+                
+                model <- brm(bform, 
+                             data = data, 
+                             prior = priors,
+                             iter = 2000, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95))
+            }
+            
+            return(model)
         },
         
         .fitNlmeModel = function(data, growth_model) {
@@ -267,6 +368,8 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 coef_summary <- summary(model)$coefficients
             } else if (inherits(model, "lm")) {
                 coef_summary <- summary(model)$coefficients
+            } else if (inherits(model, "brmsfit")) {
+                coef_summary <- summary(model)$fixed
             }
             
             # Populate model table
@@ -278,19 +381,32 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Biological interpretation
                 interpretation <- private$.interpretParameter(param_name, growth_model)
                 
-                # Get better confidence intervals
-                ci_result <- private$.calculateBetterConfidenceIntervals(model, param_name)
-                
-                model_table$addRow(rowKey = i, values = list(
-                    parameter = param_name,
-                    estimate = round(coef_summary[i, "Value"] %||% coef_summary[i, "Estimate"], 4),
-                    std_error = round(coef_summary[i, "Std.Error"] %||% coef_summary[i, "Std. Error"], 4),
-                    t_value = round(coef_summary[i, "t-value"] %||% coef_summary[i, "t value"], 3),
-                    p_value = round(coef_summary[i, "p-value"] %||% coef_summary[i, "Pr(>|t|)"], 4),
-                    ci_lower = round(ci_result$lower, 4),
-                    ci_upper = round(ci_result$upper, 4),
-                    interpretation = interpretation
-                ))
+                if (inherits(model, "brmsfit")) {
+                    model_table$addRow(rowKey = i, values = list(
+                        parameter = param_name,
+                        estimate = round(coef_summary[i, "Estimate"], 4),
+                        std_error = round(coef_summary[i, "Est.Error"], 4),
+                        t_value = NA,
+                        p_value = NA,
+                        ci_lower = round(coef_summary[i, "l-95% CI"], 4),
+                        ci_upper = round(coef_summary[i, "u-95% CI"], 4),
+                        interpretation = interpretation
+                    ))
+                } else {
+                    # Get better confidence intervals
+                    ci_result <- private$.calculateBetterConfidenceIntervals(model, param_name)
+                    
+                    model_table$addRow(rowKey = i, values = list(
+                        parameter = param_name,
+                        estimate = round(coef_summary[i, "Value"] %||% coef_summary[i, "Estimate"], 4),
+                        std_error = round(coef_summary[i, "Std.Error"] %||% coef_summary[i, "Std. Error"], 4),
+                        t_value = round(coef_summary[i, "t-value"] %||% coef_summary[i, "t value"], 3),
+                        p_value = round(coef_summary[i, "p-value"] %||% coef_summary[i, "Pr(>|t|)"], 4),
+                        ci_lower = round(ci_result$lower, 4),
+                        ci_upper = round(ci_result$upper, 4),
+                        interpretation = interpretation
+                    ))
+                }
             }
             
             # Generate summary
@@ -410,6 +526,33 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     bic_val <- BIC(model)
                     r2_val <- summary(model)$r.squared
                     loglik_val <- logLik(model)
+                } else if (inherits(model, "brmsfit")) {
+                    waic_val <- waic(model)$estimates["waic", "Estimate"]
+                    looic_val <- loo(model)$estimates["looic", "Estimate"]
+                    r2_val <- bayes_R2(model)[1, "Estimate"]
+                    
+                    # Populate fit statistics table
+                    fit_table <- self$results$fitStatistics
+                    
+                    fit_table$addRow(rowKey = "waic", values = list(
+                        metric = "WAIC",
+                        value = round(waic_val, 2),
+                        interpretation = "Lower is better"
+                    ))
+                    
+                    fit_table$addRow(rowKey = "looic", values = list(
+                        metric = "LOOIC",
+                        value = round(looic_val, 2),
+                        interpretation = "Lower is better"
+                    ))
+                    
+                    fit_table$addRow(rowKey = "r2", values = list(
+                        metric = "Bayes R-squared",
+                        value = round(r2_val, 3),
+                        interpretation = "Proportion of variance explained"
+                    ))
+                    
+                    return()
                 }
                 
                 # Populate fit statistics table
@@ -510,6 +653,11 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (inherits(private$growth_model, c("nlme", "nls", "lm"))) {
                     pred_data <- data.frame(time = time_range)
                     pred_data$fitted <- predict(private$growth_model, newdata = pred_data)
+                } else if (inherits(private$growth_model, "brmsfit")) {
+                    pred_data <- data.frame(time = time_range)
+                    pred_data$fitted <- predict(private$growth_model, newdata = pred_data)[, "Estimate"]
+                }
+
                     
                     # Create plot
                     p <- ggplot() +
@@ -534,7 +682,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     
                     print(p)
-                }
+                
                 
                 TRUE
                 
@@ -557,9 +705,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 model <- private$growth_model
                 
                 # Calculate residuals
-                if (inherits(model, c("nlme", "nls", "lm"))) {
-                    fitted_vals <- fitted(model)
-                    residuals <- residuals(model)
+                if (inherits(model, c("nlme", "nls", "lm", "brmsfit"))) {
+                    fitted_vals <- fitted(model)[, "Estimate"]
+                    residuals <- residuals(model)[, "Estimate"]
                     
                     # Create residual plot data
                     resid_data <- data.frame(
@@ -621,6 +769,10 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (inherits(private$growth_model, c("nlme", "nls", "lm"))) {
                     pred_data$fitted <- predict(private$growth_model, newdata = pred_data)
+                } else if (inherits(private$growth_model, "brmsfit")) {
+                    pred_data$fitted <- predict(private$growth_model, newdata = pred_data)[, "Estimate"]
+                }
+
                     
                     # Original data
                     orig_data <- data.frame(
@@ -645,7 +797,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         theme_classic()
                     
                     print(p)
-                }
+                
                 
                 TRUE
                 
@@ -705,25 +857,192 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else {
                         "No significant treatment effect"
                     }
+
+                    # Populate treatment effects table
+                    treatment_table <- self$results$treatmentEffectTable
                     
-                } else {
-                    # Simplified analysis for other models
-                    k_treatment_effect <- -0.15
-                    percent_change <- -15
-                    p_val <- 0.023
-                    clinical_interp <- "Significant reduction in growth"
+                    treatment_table$addRow(rowKey = "growth_rate", values = list(
+                        parameter = "Growth Rate (k)",
+                        treatment_effect = round(k_treatment_effect, 4),
+                        percent_change = round(percent_change, 1),
+                        p_value = round(p_val, 4),
+                        clinical_significance = clinical_interp
+                    ))
+                    
+                } else if (growth_model == "gompertz") {
+                    library(nlme)
+                    
+                    model_treatment <- nlme(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
+                                          data = data,
+                                          fixed = V0 + alpha + beta ~ treatment,
+                                          random = V0 ~ 1 | patient,
+                                          start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                                                               alpha = 1, beta = 0.1,
+                                                               V0.treatment = 0, alpha.treatment = -0.1, beta.treatment = 0)))
+                    
+                    # Extract treatment effects
+                    treatment_coefs <- fixef(model_treatment)
+                    alpha_treatment_effect <- treatment_coefs["alpha.treatment"]
+                    
+                    # Get p-value from summary
+                    p_val <- summary(model_treatment)$tTable["alpha.treatment", "p-value"]
+                    
+                    clinical_interp <- if (p_val < 0.05) {
+                        if (alpha_treatment_effect < 0) "Significant growth reduction" else "Significant growth acceleration"
+                    } else {
+                        "No significant treatment effect"
+                    }
+                    
+                    # Populate treatment effects table
+                    treatment_table <- self$results$treatmentEffectTable
+                    
+                    treatment_table$addRow(rowKey = "growth_potential", values = list(
+                        parameter = "Growth Potential (alpha)",
+                        treatment_effect = round(alpha_treatment_effect, 4),
+                        percent_change = NA,
+                        p_value = round(p_val, 4),
+                        clinical_significance = clinical_interp
+                    ))
+                } else if (growth_model == "logistic") {
+                    library(nlme)
+                    
+                    K_init <- max(data$size, na.rm = TRUE) * 1.2
+                    model_treatment <- nlme(size ~ K / (1 + exp(-r * (time - t0))),
+                                          data = data,
+                                          fixed = K + r + t0 ~ treatment,
+                                          random = K ~ 1 | patient,
+                                          start = list(fixed = c(K = K_init, r = 0.1, 
+                                                                 t0 = median(data$time, na.rm = TRUE),
+                                                                 K.treatment = 0, r.treatment = -0.05, t0.treatment = 0)))
+                    
+                    # Extract treatment effects
+                    treatment_coefs <- fixef(model_treatment)
+                    r_treatment_effect <- treatment_coefs["r.treatment"]
+                    
+                    # Get p-value from summary
+                    p_val <- summary(model_treatment)$tTable["r.treatment", "p-value"]
+                    
+                    clinical_interp <- if (p_val < 0.05) {
+                        if (r_treatment_effect < 0) "Significant growth reduction" else "Significant growth acceleration"
+                    } else {
+                        "No significant treatment effect"
+                    }
+                    
+                    # Populate treatment effects table
+                    treatment_table <- self$results$treatmentEffectTable
+                    
+                    treatment_table$addRow(rowKey = "growth_rate", values = list(
+                        parameter = "Intrinsic Growth Rate (r)",
+                        treatment_effect = round(r_treatment_effect, 4),
+                        percent_change = NA,
+                        p_value = round(p_val, 4),
+                        clinical_significance = clinical_interp
+                    ))
+                } else if (growth_model == "bertalanffy") {
+                    library(nlme)
+                    
+                    Vinf_init <- max(data$size, na.rm = TRUE) * 1.5
+                    model_treatment <- nlme(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
+                                          data = data,
+                                          fixed = V0 + Vinf + k ~ treatment,
+                                          random = V0 ~ 1 | patient,
+                                          start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                                                                 Vinf = Vinf_init, k = 0.1,
+                                                                 V0.treatment = 0, Vinf.treatment = 0, k.treatment = -0.05)))
+                    
+                    # Extract treatment effects
+                    treatment_coefs <- fixef(model_treatment)
+                    k_treatment_effect <- treatment_coefs["k.treatment"]
+                    
+                    # Get p-value from summary
+                    p_val <- summary(model_treatment)$tTable["k.treatment", "p-value"]
+                    
+                    clinical_interp <- if (p_val < 0.05) {
+                        if (k_treatment_effect < 0) "Significant growth reduction" else "Significant growth acceleration"
+                    } else {
+                        "No significant treatment effect"
+                    }
+                    
+                    # Populate treatment effects table
+                    treatment_table <- self$results$treatmentEffectTable
+                    
+                    treatment_table$addRow(rowKey = "growth_rate", values = list(
+                        parameter = "Growth Rate Constant (k)",
+                        treatment_effect = round(k_treatment_effect, 4),
+                        percent_change = NA,
+                        p_value = round(p_val, 4),
+                        clinical_significance = clinical_interp
+                    ))
+                } else if (growth_model == "power") {
+                    library(nlme)
+                    
+                    model_treatment <- nlme(size ~ V0 * (time + 1)^alpha,
+                                          data = data,
+                                          fixed = V0 + alpha ~ treatment,
+                                          random = V0 ~ 1 | patient,
+                                          start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                                                                 alpha = 1.2,
+                                                                 V0.treatment = 0, alpha.treatment = -0.1)))
+                    
+                    # Extract treatment effects
+                    treatment_coefs <- fixef(model_treatment)
+                    alpha_treatment_effect <- treatment_coefs["alpha.treatment"]
+                    
+                    # Get p-value from summary
+                    p_val <- summary(model_treatment)$tTable["alpha.treatment", "p-value"]
+                    
+                    clinical_interp <- if (p_val < 0.05) {
+                        if (alpha_treatment_effect < 0) "Significant growth reduction" else "Significant growth acceleration"
+                    }
+                    else {
+                        "No significant treatment effect"
+                    }
+                    
+                    # Populate treatment effects table
+                    treatment_table <- self$results$treatmentEffectTable
+                    
+                    treatment_table$addRow(rowKey = "growth_exponent", values = list(
+                        parameter = "Growth Exponent (alpha)",
+                        treatment_effect = round(alpha_treatment_effect, 4),
+                        percent_change = NA,
+                        p_value = round(p_val, 4),
+                        clinical_significance = clinical_interp
+                    ))
+                } else if (growth_model == "linear") {
+                    library(nlme)
+                    
+                    model_treatment <- nlme(size ~ V0 + k * time,
+                                          data = data,
+                                          fixed = V0 + k ~ treatment,
+                                          random = V0 ~ 1 | patient,
+                                          start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                                                                 k = 1,
+                                                                 V0.treatment = 0, k.treatment = -0.5)))
+                    
+                    # Extract treatment effects
+                    treatment_coefs <- fixef(model_treatment)
+                    k_treatment_effect <- treatment_coefs["k.treatment"]
+                    
+                    # Get p-value from summary
+                    p_val <- summary(model_treatment)$tTable["k.treatment", "p-value"]
+                    
+                    clinical_interp <- if (p_val < 0.05) {
+                        if (k_treatment_effect < 0) "Significant growth reduction" else "Significant growth acceleration"
+                    } else {
+                        "No significant treatment effect"
+                    }
+                    
+                    # Populate treatment effects table
+                    treatment_table <- self$results$treatmentEffectTable
+                    
+                    treatment_table$addRow(rowKey = "growth_rate", values = list(
+                        parameter = "Growth Rate (k)",
+                        treatment_effect = round(k_treatment_effect, 4),
+                        percent_change = NA,
+                        p_value = round(p_val, 4),
+                        clinical_significance = clinical_interp
+                    ))
                 }
-                
-                # Populate treatment effects table
-                treatment_table <- self$results$treatmentEffectTable
-                
-                treatment_table$addRow(rowKey = "growth_rate", values = list(
-                    parameter = "Growth Rate",
-                    treatment_effect = round(k_treatment_effect, 4),
-                    percent_change = round(percent_change, 1),
-                    p_value = round(p_val, 4),
-                    clinical_significance = clinical_interp
-                ))
                 
             }, error = function(e) {
                 message("Treatment analysis failed: ", e$message)
@@ -789,6 +1108,62 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         unit = "1/time",
                         ci_lower = round(beta * 0.9, 4),
                         ci_upper = round(beta * 1.1, 4)
+                    ))
+                } else if (growth_model == "logistic") {
+                    if (inherits(model, "nlme")) {
+                        r <- fixef(model)["r"]
+                        K <- fixef(model)["K"]
+                        t0 <- fixef(model)["t0"]
+                    } else {
+                        r <- coef(model)["r"]
+                        K <- coef(model)["K"]
+                        t0 <- coef(model)["t0"]
+                    }
+                    
+                    growth_table$addRow(rowKey = "max_growth_rate", values = list(
+                        characteristic = "Maximum Growth Rate",
+                        value = round(r * K / 4, 4),
+                        unit = "size/time",
+                        ci_lower = NA,
+                        ci_upper = NA
+                    ))
+                    
+                    growth_table$addRow(rowKey = "time_to_half_K", values = list(
+                        characteristic = "Time to 50% of K",
+                        value = round(t0, 4),
+                        unit = "time",
+                        ci_lower = NA,
+                        ci_upper = NA
+                    ))
+                } else if (growth_model == "bertalanffy") {
+                    if (inherits(model, "nlme")) {
+                        k <- fixef(model)["k"]
+                        V0 <- fixef(model)["V0"]
+                    } else {
+                        k <- coef(model)["k"]
+                        V0 <- coef(model)["V0"]
+                    }
+                    
+                    growth_table$addRow(rowKey = "initial_growth_rate", values = list(
+                        characteristic = "Initial Growth Rate",
+                        value = round(k * V0, 4),
+                        unit = "size/time",
+                        ci_lower = NA,
+                        ci_upper = NA
+                    ))
+                } else if (growth_model == "linear") {
+                    if (inherits(model, "lm")) {
+                        k <- coef(model)["time"]
+                    } else {
+                        k <- coef(model)["k"]
+                    }
+                    
+                    growth_table$addRow(rowKey = "growth_rate", values = list(
+                        characteristic = "Growth Rate",
+                        value = round(k, 4),
+                        unit = "size/time",
+                        ci_lower = NA,
+                        ci_upper = NA
                     ))
                 }
                 

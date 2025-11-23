@@ -1,7 +1,7 @@
 ---
 name: greyzoneroc
 title: Grey-zone (Fuzzy) ROC Analysis
-menuGroup: meddecideT
+menuGroup: meddecideT4
 menuSubgroup: ROC Analysis
 menuSubtitle: ROC analysis with uncertainty zones and deferred decisions
 version: '0.0.32'

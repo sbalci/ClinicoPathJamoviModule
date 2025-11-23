@@ -14,10 +14,8 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-            # maxItemCount: 5
-
   - type: Label
-    label: "Basic Agreement Measures"
+    label: Basic Agreement Measures
     children:
       - type: LayoutBox
         margin: large
@@ -29,9 +27,8 @@ children:
             enable: (wght:unweighted == FALSE)
           - type: CheckBox
             name: exct
-
   - type: CollapseBox
-    label: "Krippendorff's Alpha"
+    label: Krippendorff's Alpha
     collapsed: true
     children:
       - type: LayoutBox
@@ -45,9 +42,14 @@ children:
           - type: CheckBox
             name: bootstrap
             enable: (kripp)
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: baConfidenceLevel
+        format: number
   - type: CollapseBox
-    label: "Gwet's AC1/AC2"
+    label: Gwet's AC1/AC2
     collapsed: true
     children:
       - type: LayoutBox
@@ -58,9 +60,13 @@ children:
           - type: ComboBox
             name: gwetWeights
             enable: (gwet)
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: proportionalBias
   - type: CollapseBox
-    label: "Pairwise Kappa Analysis"
+    label: Pairwise Kappa Analysis
     collapsed: true
     children:
       - type: VariableSupplier
@@ -80,9 +86,8 @@ children:
           - type: CheckBox
             name: rankRaters
             enable: (referenceRater)
-
   - type: CollapseBox
-    label: "Consensus Score Derivation"
+    label: Consensus Score Derivation
     collapsed: true
     children:
       - type: LayoutBox
@@ -100,9 +105,8 @@ children:
             name: consensusName
             format: string
             enable: (consensusVar)
-
   - type: CollapseBox
-    label: "Level of Agreement (LoA)"
+    label: Level of Agreement (LoA)
     collapsed: true
     children:
       - type: LayoutBox
@@ -125,9 +129,8 @@ children:
             name: loaVarName
             format: string
             enable: (loaVariable)
-
   - type: CollapseBox
-    label: "Hierarchical/Multilevel Agreement"
+    label: Hierarchical/Multilevel Agreement
     collapsed: true
     children:
       - type: LayoutBox
@@ -156,7 +159,6 @@ children:
           - type: CheckBox
             name: randomEffectsCluster
             enable: (hierarchicalKappa)
-
       - type: LayoutBox
         margin: large
         children:
@@ -166,7 +168,6 @@ children:
           - type: CheckBox
             name: clusterSpecificKappa
             enable: (hierarchicalKappa)
-
       - type: LayoutBox
         margin: large
         children:
@@ -176,7 +177,6 @@ children:
           - type: CheckBox
             name: withinClusterVariance
             enable: (hierarchicalKappa)
-
       - type: LayoutBox
         margin: large
         children:
@@ -189,9 +189,8 @@ children:
           - type: CheckBox
             name: clusterRankings
             enable: (hierarchicalKappa)
-
   - type: CollapseBox
-    label: "Display Options"
+    label: Display Options
     collapsed: true
     children:
       - type: LayoutBox
@@ -199,9 +198,6 @@ children:
         children:
           - type: CheckBox
             name: sft
-          - type: CheckBox
-            name: showText
-            enable: (sft)
           - type: CheckBox
             name: showSummary
           - type: CheckBox

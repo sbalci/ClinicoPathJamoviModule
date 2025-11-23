@@ -7,9 +7,9 @@
 basegraphics(
   data,
   plot_type = "scatter",
-  x_var,
-  y_var,
-  group_var,
+  x_var = NULL,
+  y_var = NULL,
+  group_var = NULL,
   main_title = "",
   x_label = "",
   y_label = "",
@@ -20,11 +20,13 @@ basegraphics(
   add_legend = TRUE,
   bins = 15,
   show_statistics = FALSE,
+  correlation_method = "pearson",
+  show_summary = FALSE,
   custom_limits = FALSE,
-  x_min,
-  x_max,
-  y_min,
-  y_max
+  x_min = "",
+  x_max = "",
+  y_min = "",
+  y_max = ""
 )
 }
 \arguments{
@@ -58,6 +60,10 @@ basegraphics(
 
 \item{show_statistics}{Whether to display basic statistics on the plot.}
 
+\item{correlation_method}{Method for calculating correlation coefficient.}
+
+\item{show_summary}{Display interpretation in non-technical language.}
+
 \item{custom_limits}{Whether to use custom axis limits.}
 
 \item{x_min}{Minimum value for x-axis (when custom limits enabled).}
@@ -73,6 +79,8 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot_description} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$base_plot} \tab \tab \tab \tab \tab an image \cr
 }
 }

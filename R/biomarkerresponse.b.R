@@ -69,44 +69,104 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 response_factor <- factor(response_values, levels = c(negative_level, positive_level))
 
             } else {
-                # No positive level specified - use alphabetical ordering but issue warning
-                html <- paste0(
-                    "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #0c5460;'>ℹ️ Using Default Level Ordering</h4>",
-                    "<p style='color: #0c5460;'>No positive response level specified. Using alphabetical ordering.</p>",
-                    "<p><strong>Current ordering:</strong></p>",
-                    "<ul style='margin-left: 20px;'>",
-                    "<li>Negative class (0): <strong>", current_levels[1], "</strong></li>",
-                    "<li>Positive class (1): <strong>", current_levels[2], "</strong></li>",
-                    "</ul>",
-                    "<p><strong>Note:</strong> If this ordering is incorrect for your clinical interpretation ",
-                    "(e.g., 'Non-responder' should be negative), please specify the positive level in the ",
-                    "'Positive Response Level' field.</p>",
-                    "</div>"
+                # No positive level specified - BLOCK execution to prevent label inversion
+                error_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "positiveLevelRequired",
+                    type = jmvcore::NoticeType$ERROR
                 )
-                self$results$dataWarning$setContent(html)
-                # Keep alphabetical ordering
-                response_factor <- factor(response_values, levels = current_levels)
+                error_notice$setContent(paste0(
+                    "⛔ <b>Positive Level Required:</b> For binary response analysis, you must specify ",
+                    "which level represents positive response (e.g., 'Responder', 'Yes', '1').<br/><br/>",
+                    "<b>Available levels:</b> ", paste(current_levels, collapse = ", "), "<br/><br/>",
+                    "<b>Current alphabetical ordering:</b><br/>",
+                    "• Negative class (0): ", current_levels[1], "<br/>",
+                    "• Positive class (1): ", current_levels[2], "<br/><br/>",
+                    "<b>Why required?</b> Alphabetical ordering can invert sensitivity/specificity if, for example, ",
+                    "'Non-responder' comes before 'Responder'. This leads to incorrect clinical interpretation.<br/><br/>",
+                    "<b>Required Action:</b> Enter the positive response level (exactly as it appears above) ",
+                    "in the 'Positive Response Level' field."
+                ))
+                self$results$insert(0, error_notice)
+                return(NULL)  # Hard stop - do not proceed with analysis
             }
 
             return(response_factor)
         },
 
-        # Determine optimal threshold using ROC analysis
-        .calculateOptimalThreshold = function(biomarker_values, response_binary) {
+        # Determine optimal threshold using ROC analysis with bootstrap confidence intervals
+        .calculateOptimalThreshold = function(biomarker_values, response_binary, n_bootstrap = 1000, ci_level = 0.95) {
             tryCatch({
-                roc_obj <- pROC::roc(response_binary, biomarker_values)
+                # Calculate point estimates
+                roc_obj <- pROC::roc(response_binary, biomarker_values, quiet = TRUE)
                 coords_obj <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
-                
+                point_threshold <- coords_obj$threshold
+                point_sensitivity <- coords_obj$sensitivity
+                point_specificity <- coords_obj$specificity
+                point_auc <- as.numeric(pROC::auc(roc_obj))
+
+                # Bootstrap confidence intervals
+                n_samples <- length(biomarker_values)
+                bootstrap_results <- matrix(NA, nrow = n_bootstrap, ncol = 4)
+                colnames(bootstrap_results) <- c("threshold", "sensitivity", "specificity", "auc")
+
+                for (i in 1:n_bootstrap) {
+                    # Stratified bootstrap to maintain class balance
+                    pos_idx <- which(response_binary == 1)
+                    neg_idx <- which(response_binary == 0)
+
+                    boot_pos_idx <- sample(pos_idx, length(pos_idx), replace = TRUE)
+                    boot_neg_idx <- sample(neg_idx, length(neg_idx), replace = TRUE)
+                    boot_idx <- c(boot_pos_idx, boot_neg_idx)
+
+                    boot_biomarker <- biomarker_values[boot_idx]
+                    boot_response <- response_binary[boot_idx]
+
+                    # Calculate threshold and metrics for bootstrap sample
+                    tryCatch({
+                        boot_roc <- pROC::roc(boot_response, boot_biomarker, quiet = TRUE)
+                        boot_coords <- pROC::coords(boot_roc, "best", ret = c("threshold", "sensitivity", "specificity"))
+
+                        bootstrap_results[i, "threshold"] <- boot_coords$threshold
+                        bootstrap_results[i, "sensitivity"] <- boot_coords$sensitivity
+                        bootstrap_results[i, "specificity"] <- boot_coords$specificity
+                        bootstrap_results[i, "auc"] <- as.numeric(pROC::auc(boot_roc))
+                    }, error = function(e) {
+                        # If bootstrap sample fails, skip this iteration
+                        bootstrap_results[i, ] <<- NA
+                    })
+                }
+
+                # Calculate confidence intervals (percentile method)
+                alpha <- 1 - ci_level
+                ci_lower <- apply(bootstrap_results, 2, quantile, probs = alpha/2, na.rm = TRUE)
+                ci_upper <- apply(bootstrap_results, 2, quantile, probs = 1 - alpha/2, na.rm = TRUE)
+
+                # Also get AUC CI from pROC (uses DeLong method)
+                auc_ci <- as.numeric(pROC::ci.auc(roc_obj, conf.level = ci_level))
+
                 return(list(
-                    threshold = coords_obj$threshold,
-                    sensitivity = coords_obj$sensitivity,
-                    specificity = coords_obj$specificity,
-                    auc = as.numeric(pROC::auc(roc_obj))
+                    threshold = point_threshold,
+                    threshold_ci_lower = ci_lower["threshold"],
+                    threshold_ci_upper = ci_upper["threshold"],
+                    sensitivity = point_sensitivity,
+                    sensitivity_ci_lower = ci_lower["sensitivity"],
+                    sensitivity_ci_upper = ci_upper["sensitivity"],
+                    specificity = point_specificity,
+                    specificity_ci_lower = ci_lower["specificity"],
+                    specificity_ci_upper = ci_upper["specificity"],
+                    auc = point_auc,
+                    auc_ci_lower = auc_ci[1],
+                    auc_ci_upper = auc_ci[3]
                 ))
             }, error = function(e) {
-                return(list(threshold = median(biomarker_values, na.rm = TRUE), 
-                          sensitivity = NA, specificity = NA, auc = NA))
+                return(list(
+                    threshold = median(biomarker_values, na.rm = TRUE),
+                    threshold_ci_lower = NA, threshold_ci_upper = NA,
+                    sensitivity = NA, sensitivity_ci_lower = NA, sensitivity_ci_upper = NA,
+                    specificity = NA, specificity_ci_lower = NA, specificity_ci_upper = NA,
+                    auc = NA, auc_ci_lower = NA, auc_ci_upper = NA
+                ))
             })
         },
         
@@ -232,31 +292,60 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     
                 } else if (length(levels(response_factor)) > 2) {
                     # ANOVA for multiple groups
+                    anova_pvalue <- NULL
                     tryCatch({
                         anova_test <- aov(biomarker_values ~ response_factor)
                         anova_summary <- summary(anova_test)
+                        anova_pvalue <- anova_summary[[1]][["Pr(>F)"]][1]
+
                         tests[["anova"]] <- list(
                             test = "One-way ANOVA",
                             statistic = anova_summary[[1]][["F value"]][1],
-                            pvalue = anova_summary[[1]][["Pr(>F)"]][1],
-                            interpretation = ifelse(anova_summary[[1]][["Pr(>F)"]][1] < 0.05, 
-                                                   "Significant difference between groups", 
+                            pvalue = anova_pvalue,
+                            interpretation = ifelse(anova_pvalue < 0.05,
+                                                   "Significant difference between groups",
                                                    "No significant difference")
                         )
                     }, error = function(e) {})
-                    
+
                     # Kruskal-Wallis test
+                    kw_pvalue <- NULL
                     tryCatch({
                         kw_test <- kruskal.test(biomarker_values ~ response_factor)
+                        kw_pvalue <- kw_test$p.value
+
                         tests[["kruskal"]] <- list(
                             test = "Kruskal-Wallis test",
                             statistic = kw_test$statistic,
-                            pvalue = kw_test$p.value,
-                            interpretation = ifelse(kw_test$p.value < 0.05, 
-                                                   "Significant difference between groups", 
+                            pvalue = kw_pvalue,
+                            interpretation = ifelse(kw_pvalue < 0.05,
+                                                   "Significant difference between groups",
                                                    "No significant difference")
                         )
                     }, error = function(e) {})
+
+                    # Post-hoc tests if omnibus test is significant
+                    posthoc_performed <- FALSE
+                    if (!is.null(anova_pvalue) && anova_pvalue < 0.05) {
+                        # Tukey HSD post-hoc
+                        tukey_results <- private$.performTukeyHSD(biomarker_values, response_factor)
+                        if (!is.null(tukey_results)) {
+                            self$results$postHocTests$setVisible(TRUE)
+                            for (i in seq_len(nrow(tukey_results))) {
+                                self$results$postHocTests$addRow(rowKey = i, values = tukey_results[i, ])
+                            }
+                            posthoc_performed <- TRUE
+                        }
+                    } else if (!is.null(kw_pvalue) && kw_pvalue < 0.05 && !posthoc_performed) {
+                        # Dunn's test post-hoc
+                        dunn_results <- private$.performDunnTest(biomarker_values, response_factor)
+                        if (!is.null(dunn_results)) {
+                            self$results$postHocTests$setVisible(TRUE)
+                            for (i in seq_len(nrow(dunn_results))) {
+                                self$results$postHocTests$addRow(rowKey = i, values = dunn_results[i, ])
+                            }
+                        }
+                    }
                 }
                 
             } else if (response_type == "continuous") {
@@ -361,11 +450,16 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             biomarker_var <- self$options$biomarker
             response_var <- self$options$response
             response_type <- self$options$responseType
+            
+            # Robust confidence level handling
             conf_level <- as.numeric(self$options$confidenceLevel)
+            if (length(conf_level) == 0 || is.na(conf_level)) conf_level <- 0.95
             
             # Comprehensive data validation
             raw_biomarker_values <- data[[biomarker_var]]
             raw_response_values <- data[[response_var]]
+            
+
             
             # Initial data validation
             if (is.null(raw_biomarker_values)) {
@@ -453,6 +547,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (response_type == "binary") {
                 # Use explicit level ordering for binary response
                 positive_level <- self$options$positiveLevel
+                if (length(positive_level) == 0) positive_level <- NULL
                 raw_response_values <- private$.setBinaryFactorLevels(raw_response_values, positive_level)
 
                 # If setBinaryFactorLevels returned NULL (validation failed), stop
@@ -489,16 +584,133 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             # Enhanced data preprocessing
             biomarker_values <- private$.preprocessBiomarkerData(raw_biomarker_values)
             response_values <- raw_response_values
-            
+
+            # ============================================================================
+            # CLINICAL VALIDATION NOTICES
+            # ============================================================================
+
+            # Track final sample size after missing data removal
+            n_complete <- sum(complete.cases(data.frame(biomarker_values, response_values)))
+
+            # Notice 1: Small Sample Size Warning
+            if (n_complete < 30) {
+                small_n_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "smallSampleWarning",
+                    type = jmvcore::NoticeType$WARNING
+                )
+                small_n_notice$setContent(paste0(
+                    "Small sample size (n=", n_complete, ", below recommended minimum n=30). ",
+                    "Bootstrap CIs may be unstable, correlation estimates unreliable. ",
+                    "Results should be considered preliminary and validated in larger cohort. ",
+                    "Recommend n>=50 for biomarker development, n>=100 for clinical validation."
+                ))
+                self$results$insert(0, small_n_notice)
+            }
+
+            # Notice 2: Low Event Count Validation (Binary Response Only)
+            if (response_type == "binary") {
+                # Count events per group
+                response_numeric <- as.numeric(response_values) - 1  # Convert to 0/1
+                n_events <- sum(response_numeric == 1, na.rm = TRUE)
+                n_non_events <- sum(response_numeric == 0, na.rm = TRUE)
+
+                # CRITICAL: Block execution if < 10 events per group
+                if (n_events < 10 || n_non_events < 10) {
+                    low_events_error <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "insufficientEventsError",
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    low_events_error$setContent(paste0(
+                        "Insufficient events for reliable ROC analysis. ",
+                        "Positive cases: n=", n_events, ", Negative cases: n=", n_non_events, ". ",
+                        "Minimum 10 per group required for stable AUC/threshold estimates (Hanley & McNeil, 1982). ",
+                        "Collect additional data before proceeding with biomarker validation."
+                    ))
+                    self$results$insert(0, low_events_error)
+                    return()  # HARD STOP - do not proceed
+                }
+
+                # STRONG WARNING: 10-19 events (low but not blocking)
+                if (n_events < 20 || n_non_events < 20) {
+                    moderate_events_warning <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "lowEventsWarning",
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    moderate_events_warning$setContent(paste0(
+                        "Low event count (Positive: n=", n_events, ", Negative: n=", n_non_events, "). ",
+                        "ROC estimates may be unstable with wide confidence intervals. ",
+                        "FDA biomarker guidance recommends n>=50 per group for clinical validation studies. ",
+                        "Consider collecting additional data or use results cautiously as exploratory only."
+                    ))
+                    self$results$insert(0, moderate_events_warning)
+                }
+
+                # Notice 3: Extreme Prevalence Warning
+                prevalence <- n_events / (n_events + n_non_events)
+                if (prevalence < 0.05 || prevalence > 0.95) {
+                    extreme_prev_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "extremePrevalenceWarning",
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    extreme_prev_notice$setContent(paste0(
+                        "Extreme response prevalence (", round(prevalence * 100, 1), "% positive). ",
+                        "PPV and NPV estimates are HIGHLY UNSTABLE and unlikely to generalize to populations with different prevalence. ",
+                        "Threshold selection unreliable. ",
+                        "ROC analysis assumes balanced sampling (recommend 40-60% prevalence for biomarker development). ",
+                        "Consider stratified sampling or interpret with caution."
+                    ))
+                    self$results$insert(0, extreme_prev_notice)
+                }
+            }
+
+            # ============================================================================
+
             # Handle outliers if requested
             if (self$options$outlierHandling == "remove") {
                 outlier_indices <- private$.detectOutliers(biomarker_values)
                 if (length(outlier_indices) > 0) {
+                    # Calculate outlier statistics before removal
+                    outlier_count <- length(outlier_indices)
+                    total_count <- length(biomarker_values)
+                    outlier_pct <- round(outlier_count / total_count * 100, 1)
+                    outlier_values <- biomarker_values[outlier_indices]
+
+                    # Calculate IQR bounds for reporting
+                    Q1 <- quantile(biomarker_values, 0.25, na.rm = TRUE)
+                    Q3 <- quantile(biomarker_values, 0.75, na.rm = TRUE)
+                    IQR_val <- Q3 - Q1
+                    lower_bound <- Q1 - 1.5 * IQR_val
+                    upper_bound <- Q3 + 1.5 * IQR_val
+
+                    # Remove outliers
                     biomarker_values[outlier_indices] <- NA
                     response_values[outlier_indices] <- NA
-                    
-                    outlier_pct <- round(length(outlier_indices) / length(biomarker_values) * 100, 1)
-                    warning(paste("Removed", length(outlier_indices), "outliers (", outlier_pct, "% of data)."))
+
+                    # Issue informative Notice about outlier removal
+                    outlier_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "outlierRemoval",
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    outlier_notice$setContent(paste0(
+                        "⚠️ <b>Outliers Removed:</b> ", outlier_count, " data points (", outlier_pct, "% of total) ",
+                        "identified as outliers and excluded from analysis.<br/><br/>",
+                        "<b>Detection Method:</b> IQR-based (Tukey's fences)<br/>",
+                        "• Lower bound: ", round(lower_bound, 2), "<br/>",
+                        "• Upper bound: ", round(upper_bound, 2), "<br/>",
+                        "• Q1: ", round(Q1, 2), ", Q3: ", round(Q3, 2), ", IQR: ", round(IQR_val, 2), "<br/><br/>",
+                        "<b>Removed values range:</b> ", round(min(outlier_values, na.rm = TRUE), 2), " to ",
+                        round(max(outlier_values, na.rm = TRUE), 2), "<br/><br/>",
+                        "<b>Impact:</b> All subsequent analyses (ROC, statistics, correlations) are based on ",
+                        total_count - outlier_count, " remaining data points.<br/><br/>",
+                        "<b>⚠️ Important:</b> Outlier removal can bias results, especially in small samples or skewed distributions. ",
+                        "Consider reviewing excluded values to ensure they represent true outliers rather than valid extreme values."
+                    ))
+                    self$results$insert(0, outlier_notice)
                 }
             }
             
@@ -574,8 +786,11 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             # Determine threshold
             threshold_value <- NULL
             if (self$options$showThreshold) {
-                if (self$options$thresholdMethod == "manual" && !is.null(self$options$thresholdValue)) {
-                    threshold_value <- self$options$thresholdValue
+                threshold_val_opt <- self$options$thresholdValue
+                if (length(threshold_val_opt) == 0) threshold_val_opt <- ""
+
+                if (self$options$thresholdMethod == "manual" && threshold_val_opt != "") {
+                    threshold_value <- as.numeric(threshold_val_opt)
                 } else if (self$options$thresholdMethod == "median") {
                     threshold_value <- median(biomarker_values, na.rm = TRUE)
                 } else if (self$options$thresholdMethod == "q75") {
@@ -592,18 +807,233 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     # Factor levels already correctly ordered by .setBinaryFactorLevels
                     response_binary <- as.numeric(response_values) - 1
                     threshold_metrics <- private$.calculateThresholdMetrics(biomarker_values, response_binary, threshold_value)
-                    
-                    self$results$threshold$addRow(rowKey = 1, values = list(
-                        threshold = threshold_metrics$threshold,
-                        sensitivity = threshold_metrics$sensitivity,
-                        specificity = threshold_metrics$specificity,
-                        ppv = threshold_metrics$ppv,
-                        npv = threshold_metrics$npv,
-                        auc = threshold_metrics$auc
+
+                    # Calculate observed prevalence for PPV/NPV warning
+                    observed_prevalence <- mean(response_binary, na.rm = TRUE)
+
+                    # Issue warning about PPV/NPV prevalence dependence
+                    ppv_npv_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = "ppvNpvPrevalence",
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    ppv_npv_notice$setContent(paste0(
+                        "ℹ️ <b>PPV/NPV Prevalence Dependence:</b> The reported PPV and NPV values are calculated ",
+                        "using the <b>observed prevalence</b> in your dataset (", round(observed_prevalence * 100, 1), "%). ",
+                        "These values will differ in populations with different disease prevalence.<br/><br/>",
+                        "<b>Important:</b> When applying this biomarker in a different clinical setting:<br/>",
+                        "• PPV/NPV values will change based on local prevalence<br/>",
+                        "• Sensitivity and specificity remain constant across populations<br/>",
+                        "• For external validation, recalculate PPV/NPV using local prevalence<br/><br/>",
+                        "<b>Formulas for prevalence adjustment:</b><br/>",
+                        "PPV = (Sens × Prev) / (Sens × Prev + (1 - Spec) × (1 - Prev))<br/>",
+                        "NPV = (Spec × (1 - Prev)) / (Spec × (1 - Prev) + (1 - Sens) × Prev)"
                     ))
+                    self$results$insert(1, ppv_npv_notice)
+
+                    # For optimal threshold method, we have bootstrap CIs from .calculateOptimalThreshold()
+                    # For other methods (manual, median, q75), CIs are not available
+                    if (self$options$thresholdMethod == "optimal" && exists("optimal_result") && !is.null(optimal_result)) {
+                        # Use CIs from optimal threshold calculation
+                        self$results$threshold$addRow(rowKey = 1, values = list(
+                            threshold = threshold_metrics$threshold,
+                            threshold_ci_lower = optimal_result$threshold_ci_lower,
+                            threshold_ci_upper = optimal_result$threshold_ci_upper,
+                            sensitivity = threshold_metrics$sensitivity,
+                            sensitivity_ci_lower = optimal_result$sensitivity_ci_lower,
+                            sensitivity_ci_upper = optimal_result$sensitivity_ci_upper,
+                            specificity = threshold_metrics$specificity,
+                            specificity_ci_lower = optimal_result$specificity_ci_lower,
+                            specificity_ci_upper = optimal_result$specificity_ci_upper,
+                            ppv = threshold_metrics$ppv,
+                            npv = threshold_metrics$npv,
+                            auc = optimal_result$auc,
+                            auc_ci_lower = optimal_result$auc_ci_lower,
+                            auc_ci_upper = optimal_result$auc_ci_upper
+                        ))
+                    } else {
+                        # No CIs for manual/median/q75 thresholds
+                        self$results$threshold$addRow(rowKey = 1, values = list(
+                            threshold = threshold_metrics$threshold,
+                            threshold_ci_lower = NA,
+                            threshold_ci_upper = NA,
+                            sensitivity = threshold_metrics$sensitivity,
+                            sensitivity_ci_lower = NA,
+                            sensitivity_ci_upper = NA,
+                            specificity = threshold_metrics$specificity,
+                            specificity_ci_lower = NA,
+                            specificity_ci_upper = NA,
+                            ppv = threshold_metrics$ppv,
+                            npv = threshold_metrics$npv,
+                            auc = threshold_metrics$auc,
+                            auc_ci_lower = NA,
+                            auc_ci_upper = NA
+                        ))
+                    }
+
+                    # ============================================================================
+                    # AUC QUALITY VALIDATION
+                    # ============================================================================
+
+                    # Extract AUC value for validation
+                    auc_val <- if (self$options$thresholdMethod == "optimal" && exists("optimal_result") && !is.null(optimal_result)) {
+                        optimal_result$auc
+                    } else {
+                        threshold_metrics$auc
+                    }
+
+                    if (!is.na(auc_val)) {
+                        # CRITICAL ERROR: AUC below chance (0.5)
+                        if (auc_val < 0.5) {
+                            auc_catastrophic_notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = "aucBelowChance",
+                                type = jmvcore::NoticeType$ERROR
+                            )
+                            auc_catastrophic_notice$setContent(paste0(
+                                "CRITICAL: AUC=", round(auc_val, 3), " is below chance level (0.5). ",
+                                "Biomarker has NO discriminatory ability or relationship may be inverted. ",
+                                "Verify: (1) Positive level is specified correctly, ",
+                                "(2) Biomarker direction matches hypothesis (higher biomarker = better response?), ",
+                                "(3) Data quality (check for data entry errors, measurement issues). ",
+                                "Do NOT use this biomarker for clinical decision-making."
+                            ))
+                            self$results$insert(0, auc_catastrophic_notice)
+                        }
+                        # STRONG WARNING: Poor discrimination (0.5-0.7)
+                        else if (auc_val < 0.7) {
+                            auc_poor_notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = "aucPoorDiscrimination",
+                                type = jmvcore::NoticeType$STRONG_WARNING
+                            )
+                            auc_poor_notice$setContent(paste0(
+                                "Poor biomarker discrimination (AUC=", round(auc_val, 3), ", below acceptable threshold of 0.7). ",
+                                "Clinical utility is LIMITED for single-marker diagnostic use. ",
+                                "This biomarker alone CANNOT reliably predict response. ",
+                                "Recommended actions: (1) Combine with other biomarkers in multi-marker panel, ",
+                                "(2) Use different threshold optimization strategy, ",
+                                "(3) Investigate alternative biomarkers. ",
+                                "Only use in multi-factorial clinical decision algorithms, NOT as standalone test."
+                            ))
+                            self$results$insert(0, auc_poor_notice)
+                        }
+                        # INFO: Good-to-excellent performance (>= 0.8)
+                        else if (auc_val >= 0.8) {
+                            auc_excellent_notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = "aucExcellentPerformance",
+                                type = jmvcore::NoticeType$INFO
+                            )
+                            auc_excellent_notice$setContent(paste0(
+                                "Excellent biomarker discrimination (AUC=", round(auc_val, 3), "). ",
+                                "This biomarker shows strong predictive power and potential clinical utility. ",
+                                "Next steps for clinical implementation: ",
+                                "(1) Validate in independent cohort (external validation), ",
+                                "(2) Assess performance in clinically relevant subgroups, ",
+                                "(3) Compare to existing clinical markers, ",
+                                "(4) Evaluate cost-effectiveness for clinical deployment. ",
+                                "Consider regulatory pathway for companion diagnostic if applicable."
+                            ))
+                            self$results$insert(999, auc_excellent_notice)  # Bottom position for INFO
+                        }
+                    }
+
+                    # ============================================================================
                 }
             }
-            
+
+            # Stratified analysis by groupVariable (for binary response only)
+            if (!is.null(self$options$groupVariable) && response_type == "binary") {
+                group_var <- self$data[[self$options$groupVariable]][complete_cases]
+
+                if (!is.null(group_var) && length(unique(group_var)) > 1) {
+                    group_factor <- as.factor(group_var)
+                    group_levels <- levels(group_factor)
+
+                    # Perform stratified ROC analysis for each group
+                    stratified_results <- list()
+                    for (group_level in group_levels) {
+                        # Subset data for this group
+                        group_idx <- group_factor == group_level
+                        biomarker_group <- biomarker_values[group_idx]
+                        response_group <- as.numeric(response_values[group_idx]) - 1
+
+                        # Skip groups with insufficient data or single class
+                        if (length(biomarker_group) < 10 ||
+                            length(unique(response_group)) < 2 ||
+                            sum(response_group == 1) < 3 ||
+                            sum(response_group == 0) < 3) {
+                            next
+                        }
+
+                        # Calculate optimal threshold and metrics for this group
+                        tryCatch({
+                            optimal_group <- private$.calculateOptimalThreshold(
+                                biomarker_group, response_group,
+                                n_bootstrap = 500  # Reduced for stratified analysis
+                            )
+
+                            # Interpret AUC performance
+                            auc_val <- optimal_group$auc
+                            performance <- if (is.na(auc_val)) {
+                                "Insufficient data"
+                            } else if (auc_val >= 0.9) {
+                                "Excellent"
+                            } else if (auc_val >= 0.8) {
+                                "Good"
+                            } else if (auc_val >= 0.7) {
+                                "Fair"
+                            } else if (auc_val >= 0.6) {
+                                "Poor"
+                            } else {
+                                "No discrimination"
+                            }
+
+                            stratified_results[[group_level]] <- list(
+                                group = group_level,
+                                n = length(biomarker_group),
+                                auc = optimal_group$auc,
+                                auc_ci_lower = optimal_group$auc_ci_lower,
+                                auc_ci_upper = optimal_group$auc_ci_upper,
+                                threshold = optimal_group$threshold,
+                                sensitivity = optimal_group$sensitivity,
+                                specificity = optimal_group$specificity,
+                                interpretation = performance
+                            )
+                        }, error = function(e) {
+                            # Skip groups with errors
+                        })
+                    }
+
+                    # Populate stratified analysis table if we have results
+                    if (length(stratified_results) > 0) {
+                        self$results$stratifiedAnalysis$setVisible(TRUE)
+                        for (i in seq_along(stratified_results)) {
+                            self$results$stratifiedAnalysis$addRow(
+                                rowKey = i,
+                                values = stratified_results[[i]]
+                            )
+                        }
+
+                        # Add informative Notice about stratified analysis
+                        strat_notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = "stratifiedAnalysis",
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        strat_notice$setContent(paste0(
+                            "ℹ️ <b>Stratified Analysis Performed:</b> Biomarker performance evaluated separately for each level of '",
+                            self$options$groupVariable, "'.<br/><br/>",
+                            "<b>Groups analyzed:</b> ", length(stratified_results), " of ", length(group_levels), " total groups<br/><br/>",
+                            "<b>Use case:</b> Compare biomarker performance across treatment arms, disease stages, or patient subgroups.<br/><br/>",
+                            "<b>Note:</b> Groups with <10 patients or insufficient class representation were excluded from stratified analysis."
+                        ))
+                        self$results$insert(1, strat_notice)
+                    }
+                }
+            }
+
             # Group comparison statistics
             if (response_type %in% c("binary", "categorical")) {
                 response_factor <- as.factor(response_values)
@@ -938,35 +1368,19 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         
         .calculateCliffsDelta = function(x, y) {
             # Cliff's Delta for biomarker comparison between response groups
-            n1 <- length(x)
-            n2 <- length(y)
-            
-            greater <- 0
-            less <- 0
-            
-            for (xi in x) {
-                for (yj in y) {
-                    if (xi > yj) greater <- greater + 1
-                    else if (xi < yj) less <- less + 1
-                }
-            }
-            
-            delta <- (greater - less) / (n1 * n2)
+            # OPTIMIZED: Vectorized using outer() - ~10-100x speedup over nested loops
+            comparisons <- outer(x, y, "-")  # All pairwise differences as matrix
+            greater <- sum(comparisons > 0)   # Count x[i] > y[j]
+            less <- sum(comparisons < 0)      # Count x[i] < y[j]
+            delta <- (greater - less) / (length(x) * length(y))
             return(delta)
         },
         
         .calculateHodgesLehmann = function(x, y) {
             # Hodges-Lehmann shift for biomarker level difference
-            differences <- c()
-            
-            for (xi in x) {
-                for (yj in y) {
-                    differences <- c(differences, xi - yj)
-                }
-            }
-            
-            # Return median of all pairwise differences
-            return(median(differences))
+            # OPTIMIZED: Vectorized pairwise differences using outer()
+            differences <- outer(x, y, "-")  # Matrix of all x[i] - y[j]
+            return(median(differences))       # Median of all pairwise differences
         },
         
         .interpretBiomarkerEffects = function(p_value, cliff_delta, hodges_lehmann, group_levels) {
@@ -996,10 +1410,114 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 effect_size, " effect size (δ = ", round(cliff_delta, 3), "). ",
                 "Probability that ", group_levels[1], " has ", direction, " biomarker levels: ", prob, "%. ",
                 "Typical difference: ", round(abs_shift, 2), " units (",
-                ifelse(hodges_lehmann > 0, paste(group_levels[1], "typically higher"), 
+                ifelse(hodges_lehmann > 0, paste(group_levels[1], "typically higher"),
                        paste(group_levels[2], "typically higher")), "). ",
                 if (abs_delta >= 0.33) "Clinically meaningful biomarker difference." else "Limited clinical significance."
             ))
+        },
+
+        # Tukey HSD post-hoc test for ANOVA
+        .performTukeyHSD = function(biomarker_values, response_factor, conf_level = 0.95) {
+            tryCatch({
+                # Perform ANOVA
+                anova_model <- aov(biomarker_values ~ response_factor)
+
+                # Tukey HSD
+                tukey_result <- TukeyHSD(anova_model, conf.level = conf_level)
+                tukey_table <- as.data.frame(tukey_result$response_factor)
+
+                # Extract results
+                comparisons <- rownames(tukey_table)
+                results <- data.frame(
+                    comparison = comparisons,
+                    mean_diff = tukey_table$diff,
+                    ci_lower = tukey_table$lwr,
+                    ci_upper = tukey_table$upr,
+                    pvalue_adj = tukey_table$`p adj`,
+                    stringsAsFactors = FALSE
+                )
+
+                # Calculate Cohen's d for each comparison
+                results$effect_size <- sapply(seq_len(nrow(results)), function(i) {
+                    # Parse comparison (e.g., "Group2-Group1")
+                    groups <- strsplit(comparisons[i], "-")[[1]]
+                    group1_data <- biomarker_values[response_factor == groups[1]]
+                    group2_data <- biomarker_values[response_factor == groups[2]]
+
+                    # Pooled SD
+                    n1 <- length(group1_data)
+                    n2 <- length(group2_data)
+                    sd1 <- sd(group1_data, na.rm = TRUE)
+                    sd2 <- sd(group2_data, na.rm = TRUE)
+                    pooled_sd <- sqrt(((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))
+
+                    # Cohen's d
+                    cohens_d <- results$mean_diff[i] / pooled_sd
+                    return(cohens_d)
+                })
+
+                # Interpretation
+                results$interpretation <- sapply(seq_len(nrow(results)), function(i) {
+                    p <- results$pvalue_adj[i]
+                    d <- abs(results$effect_size[i])
+
+                    sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
+                    effect <- ifelse(d < 0.2, "negligible",
+                                   ifelse(d < 0.5, "small",
+                                        ifelse(d < 0.8, "medium", "large")))
+
+                    return(paste0(sig, " (", effect, " effect)"))
+                })
+
+                # Add raw p-values (same as adjusted for Tukey)
+                results$pvalue <- results$pvalue_adj
+
+                return(results)
+            }, error = function(e) {
+                return(NULL)
+            })
+        },
+
+        # Dunn's test post-hoc for Kruskal-Wallis
+        .performDunnTest = function(biomarker_values, response_factor) {
+            tryCatch({
+                # Perform Dunn's test with Bonferroni correction
+                if (!requireNamespace("FSA", quietly = TRUE)) {
+                    warning("FSA package required for Dunn's test. Install with install.packages('FSA')")
+                    return(NULL)
+                }
+
+                dunn_result <- FSA::dunnTest(biomarker_values ~ response_factor, method = "bonferroni")
+                dunn_table <- dunn_result$res
+
+                # Extract results
+                results <- data.frame(
+                    comparison = dunn_table$Comparison,
+                    mean_diff = NA,  # Dunn's test is rank-based, no mean difference
+                    pvalue = dunn_table$P.unadj,
+                    pvalue_adj = dunn_table$P.adj,
+                    ci_lower = NA,  # No CI for rank-based test
+                    ci_upper = NA,
+                    effect_size = dunn_table$Z,  # Use Z-statistic as effect measure
+                    stringsAsFactors = FALSE
+                )
+
+                # Interpretation based on p-value
+                results$interpretation <- sapply(seq_len(nrow(results)), function(i) {
+                    p <- results$pvalue_adj[i]
+                    z <- abs(results$effect_size[i])
+
+                    sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
+                    effect <- ifelse(z < 1.96, "small", ifelse(z < 2.58, "medium", "large"))
+
+                    return(paste0(sig, " (", effect, " Z-score)"))
+                })
+
+                return(results)
+            }, error = function(e) {
+                warning(paste("Dunn's test failed:", e$message))
+                return(NULL)
+            })
         }
     )
 )

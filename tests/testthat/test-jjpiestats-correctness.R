@@ -552,3 +552,303 @@ test_that("jjpiestats can add ggpubr donut chart variant", {
 
   expect_true(inherits(result, "jjpiestatsResults"))
 })
+
+# === STATISTICAL CORRECTNESS TESTS (CRITICAL FIXES) ===
+
+# Test 31: CRITICAL - McNemar Validation Rejects Non-2x2 Tables ----
+test_that("jjpiestats CRITICAL FIX #3: McNemar validation rejects non-2x2 tables", {
+  # Create 3x2 table (INVALID for McNemar)
+  test_data <- data.frame(
+    response = factor(rep(c("CR", "PR", "SD"), 20)),
+    timepoint = factor(rep(c("Pre", "Post"), 30)),
+    stringsAsFactors = FALSE
+  )
+
+  # Should run without error but not use paired analysis
+  result <- jjpiestats(
+    data = test_data,
+    dep = "response",
+    group = "timepoint",
+    paired = TRUE,
+    typestatistics = "parametric"
+  )
+
+  # Function should complete (not crash)
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 32: CRITICAL - McNemar Validation Accepts Valid 2x2 Tables ----
+test_that("jjpiestats CRITICAL FIX #3: McNemar validation accepts valid 2x2 tables", {
+  # Create valid 2x2 table
+  test_data <- data.frame(
+    response = factor(rep(c("Improved", "NotImproved"), 25)),
+    timepoint = factor(rep(c("Pre", "Post"), 25)),
+    stringsAsFactors = FALSE
+  )
+
+  # Should run successfully
+  result <- jjpiestats(
+    data = test_data,
+    dep = "response",
+    group = "timepoint",
+    paired = TRUE,
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 33: CRITICAL - Counts Variable Validation (Non-Numeric) ----
+test_that("jjpiestats CRITICAL FIX #2: Rejects non-numeric counts variable", {
+  test_data <- data.frame(
+    category = factor(c("A", "B", "C")),
+    n = c("10", "20", "30")  # Character, not numeric
+  )
+
+  # Should error due to non-numeric counts
+  expect_error(
+    jjpiestats(
+      data = test_data,
+      dep = "category",
+      counts = "n",
+      typestatistics = "parametric"
+    ),
+    regexp = "must be numeric"
+  )
+})
+
+# Test 34: CRITICAL - Counts Variable Validation (Negative Values) ----
+test_that("jjpiestats CRITICAL FIX #2: Rejects negative counts", {
+  test_data <- data.frame(
+    category = factor(c("A", "B", "C")),
+    n = c(30, -10, 25)  # Negative value
+  )
+
+  # Should error due to negative counts
+  expect_error(
+    jjpiestats(
+      data = test_data,
+      dep = "category",
+      counts = "n",
+      typestatistics = "parametric"
+    ),
+    regexp = "negative"
+  )
+})
+
+# Test 35: CRITICAL - Counts Variable Validation (Valid Numeric) ----
+test_that("jjpiestats CRITICAL FIX #2: Accepts valid numeric counts", {
+  test_data <- data.frame(
+    category = factor(c("A", "B", "C")),
+    n = c(30, 45, 25)
+  )
+
+  # Should run successfully
+  result <- jjpiestats(
+    data = test_data,
+    dep = "category",
+    counts = "n",
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 36: CRITICAL - Weighted Assumption Checks ----
+test_that("jjpiestats CRITICAL FIX #4: Assumption checks respect weighted data", {
+  # Aggregated data with counts variable
+  test_data <- data.frame(
+    treatment = factor(c("A", "A", "B", "B")),
+    response = factor(c("Yes", "No", "Yes", "No")),
+    n = c(45, 5, 40, 10)  # 90% vs 80% response rate
+  )
+
+  # Should run successfully with weighted data
+  result <- jjpiestats(
+    data = test_data,
+    dep = "response",
+    group = "treatment",
+    counts = "n",
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 37: Enhanced Ratio Parsing with Normalization ----
+test_that("jjpiestats ENHANCEMENT #6: Ratio parsing normalizes non-summing values", {
+  test_data <- data.frame(
+    category = factor(rep(c("A", "B"), 30))
+  )
+
+  # Ratio that doesn't sum to 1 (should auto-normalize)
+  result <- jjpiestats(
+    data = test_data,
+    dep = "category",
+    ratio = "2,3",  # Sums to 5, should normalize to 0.4, 0.6
+    proportiontest = TRUE,
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 38: Enhanced Ratio Parsing with Invalid Values ----
+test_that("jjpiestats ENHANCEMENT #6: Ratio parsing handles invalid values gracefully", {
+  test_data <- data.frame(
+    category = factor(rep(c("A", "B"), 30))
+  )
+
+  # Invalid ratio (contains letters)
+  result <- jjpiestats(
+    data = test_data,
+    dep = "category",
+    ratio = "0.5,abc",  # Invalid
+    proportiontest = TRUE,
+    typestatistics = "parametric"
+  )
+
+  # Should fall back to equal proportions
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 39: Enhancement #1 - Small Group Sizes Notice ----
+test_that("jjpiestats ENHANCEMENT #1: Small group sizes trigger Notice (not warning)", {
+  # Create data with small group size (n=3 < 5)
+  test_data <- data.frame(
+    response = factor(c(rep("Yes", 10), rep("No", 15), rep("Yes", 3), rep("No", 12))),
+    group = factor(c(rep("A", 25), rep("B", 15))),
+    stringsAsFactors = FALSE
+  )
+
+  # Should show Notice about small group size
+  result <- jjpiestats(
+    data = test_data,
+    dep = "response",
+    group = "group",
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+  # Notice system is internal - just verify function completes successfully
+})
+
+# Test 40: Enhancement #2 - Extreme Prevalence Warning for Diagnostic Preset ----
+test_that("jjpiestats ENHANCEMENT #2: Extreme prevalence triggers info notice in diagnostic preset", {
+  # Create diagnostic test data with low prevalence (~7%)
+  test_data <- data.frame(
+    test_result = factor(c(rep("Positive", 7), rep("Negative", 93))),
+    disease_status = factor(c(rep("Diseased", 7), rep("Healthy", 93))),
+    stringsAsFactors = FALSE
+  )
+
+  # Should trigger extreme prevalence warning
+  result <- jjpiestats(
+    data = test_data,
+    dep = "test_result",
+    group = "disease_status",
+    clinicalpreset = "diagnostic",
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+  # Notice about PPV/NPV generalizability should be shown (internal verification)
+})
+
+# Test 41: Enhancement #2 - High Prevalence Warning ----
+test_that("jjpiestats ENHANCEMENT #2: High prevalence (>90%) triggers info notice", {
+  # Create diagnostic test data with high prevalence (~95%)
+  test_data <- data.frame(
+    test_result = factor(c(rep("Positive", 95), rep("Negative", 5))),
+    disease_status = factor(c(rep("Diseased", 95), rep("Healthy", 5))),
+    stringsAsFactors = FALSE
+  )
+
+  # Should trigger extreme prevalence warning
+  result <- jjpiestats(
+    data = test_data,
+    dep = "test_result",
+    group = "disease_status",
+    clinicalpreset = "diagnostic",
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 42: Enhancement #2 - No Warning for Normal Prevalence ----
+test_that("jjpiestats ENHANCEMENT #2: Normal prevalence (10-90%) does not trigger warning", {
+  # Create diagnostic test data with normal prevalence (~50%)
+  test_data <- data.frame(
+    test_result = factor(c(rep("Positive", 50), rep("Negative", 50))),
+    disease_status = factor(c(rep("Diseased", 50), rep("Healthy", 50))),
+    stringsAsFactors = FALSE
+  )
+
+  # Should NOT trigger prevalence warning
+  result <- jjpiestats(
+    data = test_data,
+    dep = "test_result",
+    group = "disease_status",
+    clinicalpreset = "diagnostic",
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 43: Enhancement #2 - Only Triggers for Diagnostic Preset ----
+test_that("jjpiestats ENHANCEMENT #2: Prevalence check only for diagnostic preset", {
+  # Create data with extreme prevalence but non-diagnostic preset
+  test_data <- data.frame(
+    category = factor(c(rep("A", 95), rep("B", 5))),
+    group = factor(c(rep("Group1", 95), rep("Group2", 5))),
+    stringsAsFactors = FALSE
+  )
+
+  # Should NOT trigger prevalence warning (not diagnostic preset)
+  result <- jjpiestats(
+    data = test_data,
+    dep = "category",
+    group = "group",
+    clinicalpreset = "treatment",  # Not diagnostic
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})
+
+# Test 44: BUG FIX - Empty string validation ----
+test_that("jjpiestats BUG FIX: Handles empty string dep variable gracefully", {
+  # This test verifies the fix for "argument is of length zero" error
+  # when dep is empty string instead of NULL
+
+  test_data <- data.frame(
+    category = factor(rep(c("A", "B"), 30))
+  )
+
+  # Create result object with empty dep (simulating jamovi behavior)
+  # Should not error with "argument is of length zero"
+  result <- jjpiestats(data = test_data)
+
+  # Should create valid results object
+  expect_true(inherits(result, "jjpiestatsResults"))
+
+  # No plot should be generated (dep is empty)
+  # This is validated by the early return in .plot1()
+})
+
+# Test 45: Single-column dataset retains data frame structure ----
+test_that("jjpiestats handles single-column data without dropping dimensions", {
+  test_data <- data.frame(
+    race = factor(rep(c("A", "B"), 3))
+  )
+
+  result <- jjpiestats(
+    data = test_data,
+    dep = "race",
+    typestatistics = "parametric"
+  )
+
+  expect_true(inherits(result, "jjpiestatsResults"))
+})

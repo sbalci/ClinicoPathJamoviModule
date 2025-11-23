@@ -72,7 +72,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalpreset %||% "custom"
-            
+
+            # Skip if custom preset (user settings)
+            if (preset == "custom") return(invisible(NULL))
+
             tryCatch({
                 switch(preset,
                     "diagnostic" = {
@@ -95,13 +98,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         self$options$typestatistics <- "robust"
                         self$options$resultssubtitle <- TRUE
                         self$options$label <- "both"
-                    },
-                    # custom: use user settings
+                    }
                 )
             }, error = function(e) {
                 # If preset application fails, continue with custom settings
-                warning(paste(.('Clinical preset application failed: {error}. Using custom settings.'),
-                            list(error = e$message)))
+                warning(glue::glue(.('Clinical preset application failed: {error}. Using custom settings.'),
+                                 error = e$message))
             })
         },
         
@@ -193,11 +195,20 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateAssumptionsContent = function() {
             warnings_list <- c()
-            
+
             # Check for small sample sizes
             if (!is.null(self$options$group) && self$options$group %in% names(self$data)) {
                 tryCatch({
-                    contingency_table <- table(self$data[[self$options$dep]], self$data[[self$options$group]])
+                    # CRITICAL FIX #4: Use weighted contingency table if counts variable present
+                    counts_var <- self$options$counts
+                    if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(self$data)) {
+                        # Weighted contingency table using xtabs
+                        formula_str <- paste0(counts_var, " ~ ", self$options$dep, " + ", self$options$group)
+                        contingency_table <- xtabs(as.formula(formula_str), data = self$data)
+                    } else {
+                        # Unweighted contingency table
+                        contingency_table <- table(self$data[[self$options$dep]], self$data[[self$options$group]])
+                    }
                     expected_counts <- chisq.test(contingency_table)$expected
                     
                     if (any(expected_counts < 5)) {
@@ -345,7 +356,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Enhanced validation for statistical tests
             private$.validateStatisticalRequirements(dep, group)
-            
+
+            # CRITICAL FIX #2: Validate counts variable
+            counts_var <- self$options$counts
+            if (!is.null(counts_var) && counts_var != "") {
+                counts_validation <- private$.validateCounts(self$data, counts_var)
+                if (!counts_validation$valid) {
+                    stop(counts_validation$message)
+                }
+            }
+
             return(TRUE)
         },
         
@@ -353,18 +373,28 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check minimum group sizes for statistical tests when group variable is present
             if (!is.null(group) && group != "" && group %in% names(self$data)) {
                 group_sizes <- table(self$data[[group]], useNA = "no")
-                
+
                 if (any(group_sizes < 5)) {
                     small_groups <- names(group_sizes[group_sizes < 5])
-                    warning(paste(.('Small group sizes detected ({groups}). Chi-square tests require minimum 5 observations per group for reliable results.'),
-                                list(groups = paste(paste(small_groups, ':', group_sizes[small_groups]), collapse = ', '))))
+                    group_details <- paste(paste(small_groups, ':', group_sizes[small_groups]), collapse = ', ')
+
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallGroupSizes',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Small group sizes detected: %s. Chi-square tests require minimum 5 observations per group for reliable results.',
+                        group_details
+                    ))
+                    self$results$insert(999, notice)
                 }
-                
+
                 if (length(group_sizes) < 2) {
                     stop(.('Grouping variable must have at least 2 categories for comparison.'))
                 }
             }
-            
+
             # Check dependent variable has sufficient variation
             if (!is.null(dep) && dep != "" && dep %in% names(self$data)) {
                 dep_levels <- table(self$data[[dep]], useNA = "no")
@@ -374,27 +404,304 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
         },
-        
+
+        .validateCounts = function(data, counts_var) {
+            # CRITICAL FIX #2: Validate counts variable for aggregated data
+
+            # Check if variable exists
+            if (!counts_var %in% names(data)) {
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('Counts variable "%s" not found in data. Available variables: %s'),
+                        counts_var,
+                        paste(names(data), collapse = ", ")
+                    )
+                ))
+            }
+
+            # Check if variable is numeric
+            if (!is.numeric(data[[counts_var]])) {
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('Counts variable "%s" must be numeric. Found type: %s. The counts variable should contain frequency counts for aggregated/tabulated data.'),
+                        counts_var,
+                        class(data[[counts_var]])[1]
+                    )
+                ))
+            }
+
+            # Check for negative values
+            if (any(data[[counts_var]] < 0, na.rm = TRUE)) {
+                neg_count <- sum(data[[counts_var]] < 0, na.rm = TRUE)
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('Counts variable "%s" contains %d negative values. Frequency counts must be non-negative (>= 0).'),
+                        counts_var,
+                        neg_count
+                    )
+                ))
+            }
+
+            # Check if all values are NA
+            if (all(is.na(data[[counts_var]]))) {
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('Counts variable "%s" contains only missing values (NA). Cannot compute statistics with no valid counts.'),
+                        counts_var
+                    )
+                ))
+            }
+
+            # Check if total count is zero after removing NAs
+            total_count <- sum(data[[counts_var]], na.rm = TRUE)
+            if (total_count == 0) {
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('Counts variable "%s" sums to zero. Need at least one observation with positive count.'),
+                        counts_var
+                    )
+                ))
+            }
+
+            # All validations passed
+            return(list(valid = TRUE, message = .('Counts variable validated successfully.')))
+        },
+
+        .checkFisherNeeded = function(data, dep_var, group_var, counts_var = NULL) {
+            # CRITICAL FIX #5: Check if Fisher's exact test should be used
+            # Returns list with use_fisher, low_count_cells, total_cells, pct_low
+
+            if (is.null(group_var) || group_var == "") {
+                return(list(use_fisher = FALSE, low_count_cells = 0, total_cells = 0, pct_low = 0))
+            }
+
+            tryCatch({
+                # Create contingency table (weighted if counts present)
+                if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
+                    formula_str <- paste0(counts_var, " ~ ", dep_var, " + ", group_var)
+                    cont_table <- xtabs(as.formula(formula_str), data = data)
+                } else {
+                    cont_table <- table(data[[dep_var]], data[[group_var]])
+                }
+
+                # Chi-square test requires at least 2x2 table
+                if (nrow(cont_table) < 2 || ncol(cont_table) < 2) {
+                    return(list(use_fisher = FALSE, low_count_cells = 0, total_cells = 0, pct_low = 0))
+                }
+
+                # Calculate expected counts
+                expected <- chisq.test(cont_table)$expected
+
+                # Count cells with expected count < 5
+                low_count_cells <- sum(expected < 5)
+                total_cells <- length(expected)
+                pct_low <- 100 * low_count_cells / total_cells
+
+                # Fisher's exact recommended when >20% of cells have expected count < 5
+                # For 2x2 tables, use if ANY cell < 5
+                use_fisher <- if (total_cells == 4) {  # 2x2 table
+                    low_count_cells > 0
+                } else {
+                    pct_low > 20
+                }
+
+                return(list(
+                    use_fisher = use_fisher,
+                    low_count_cells = low_count_cells,
+                    total_cells = total_cells,
+                    pct_low = pct_low
+                ))
+
+            }, error = function(e) {
+                return(list(use_fisher = FALSE, low_count_cells = 0, total_cells = 0, pct_low = 0))
+            })
+        },
+
+        .validatePairedData = function(data, dep_var, group_var) {
+            # CRITICAL FIX #3: Validate paired data for McNemar test
+            # McNemar test requires exactly 2x2 contingency table
+
+            if (is.null(group_var) || group_var == "") {
+                return(list(
+                    valid = FALSE,
+                    message = .('McNemar test requires a grouping variable (e.g., Pre vs Post, Treatment A vs B). No grouping variable specified.')
+                ))
+            }
+
+            # Create contingency table (use weighted if counts variable present)
+            counts_var <- self$options$counts
+            if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
+                # Weighted contingency table
+                formula_str <- paste0(counts_var, " ~ ", dep_var, " + ", group_var)
+                cross_table <- xtabs(as.formula(formula_str), data = data)
+            } else {
+                # Unweighted contingency table
+                cross_table <- table(data[[dep_var]], data[[group_var]])
+            }
+
+            # Check if table is exactly 2x2
+            if (!all(dim(cross_table) == c(2, 2))) {
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('McNemar test requires a 2×2 contingency table. Your data has %d×%d levels (%s: %d levels, %s: %d levels). For paired data with more than 2 categories, use Cochran Q test or marginal homogeneity test instead. Consider dichotomizing your outcome variable or use parametric/nonparametric options instead of paired analysis.'),
+                        nrow(cross_table), ncol(cross_table),
+                        dep_var, nrow(cross_table),
+                        group_var, ncol(cross_table)
+                    )
+                ))
+            }
+
+            # Check minimum sample size (McNemar requires at least 10 paired observations)
+            total_n <- sum(cross_table)
+            if (total_n < 10) {
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('McNemar test requires at least 10 paired observations for reliable results. Your data has %d paired observations. Consider collecting more data or using Fisher exact test (nonparametric option) instead.'),
+                        total_n
+                    )
+                ))
+            }
+
+            # Check for zero marginals (can cause computational issues)
+            row_sums <- rowSums(cross_table)
+            col_sums <- colSums(cross_table)
+
+            if (any(row_sums == 0) || any(col_sums == 0)) {
+                return(list(
+                    valid = FALSE,
+                    message = .('McNemar test requires non-zero marginal totals. Your contingency table has at least one row or column with zero observations. Check your data for complete coverage of all category combinations.')
+                ))
+            }
+
+            # All validations passed
+            return(list(
+                valid = TRUE,
+                message = sprintf(
+                    .('Data structure validated for McNemar test: 2×2 table with %d paired observations.'),
+                    total_n
+                )
+            ))
+        },
+
+        .checkExtremePrevalence = function(data, dep_var, group_var) {
+            # ENHANCEMENT #2: Warn about extreme prevalence affecting PPV/NPV generalizability
+            # Only relevant for diagnostic preset with 2x2 contingency tables
+
+            # Only check for diagnostic preset
+            if (is.null(self$options$clinicalpreset) || self$options$clinicalpreset != "diagnostic") {
+                return()
+            }
+
+            # Must have group variable for prevalence calculation
+            if (is.null(group_var) || group_var == "" || !group_var %in% names(data)) {
+                return()
+            }
+
+            # Create contingency table (use weighted if counts present)
+            counts_var <- self$options$counts
+            if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
+                formula_str <- paste0(counts_var, " ~ ", dep_var, " + ", group_var)
+                cont_table <- xtabs(as.formula(formula_str), data = data)
+            } else {
+                cont_table <- table(data[[dep_var]], data[[group_var]])
+            }
+
+            # Only check for 2x2 tables (diagnostic test scenario)
+            if (!all(dim(cont_table) == c(2, 2))) {
+                return()
+            }
+
+            # Calculate prevalence (proportion in first group level - typically "positive/diseased")
+            group_totals <- colSums(cont_table)
+            total_n <- sum(group_totals)
+
+            # Assuming first level of grouping variable represents "diseased/positive"
+            prevalence <- group_totals[1] / total_n
+
+            # Warn if prevalence is extreme (<10% or >90%)
+            if (prevalence < 0.10 || prevalence > 0.90) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'extremePrevalence',
+                    type = jmvcore::NoticeType$INFO
+                )
+
+                direction <- if (prevalence < 0.10) "low" else "high"
+                notice$setContent(sprintf(
+                    'Disease prevalence in this dataset is %.1f%% (%s prevalence setting). Positive Predictive Value (PPV) and Negative Predictive Value (NPV) are highly dependent on prevalence and may not generalize to populations with substantially different disease rates. Consider reporting sensitivity, specificity, and likelihood ratios which are less affected by prevalence.',
+                    prevalence * 100,
+                    direction
+                ))
+                self$results$insert(999, notice)
+            }
+        },
+
         .getCachedData = function() {
+            # CRITICAL FIX #1: Include actual data content in hash (not just dimensions/names)
+            # CRITICAL FIX: Defensive check for dep variable
+            if (is.null(self$options$dep) || length(self$options$dep) == 0 ||
+                (length(self$options$dep) == 1 && self$options$dep == "")) {
+                stop(.('Dependent variable is required but not properly set'))
+            }
+
+            # Build list of relevant columns for hash
+            relevant_cols <- c(self$options$dep)
+            if (!is.null(self$options$group) && length(self$options$group) > 0 && self$options$group != "") {
+                relevant_cols <- c(relevant_cols, self$options$group)
+            }
+            if (!is.null(self$options$grvar) && length(self$options$grvar) > 0 && self$options$grvar != "") {
+                relevant_cols <- c(relevant_cols, self$options$grvar)
+            }
+            if (!is.null(self$options$counts) && length(self$options$counts) > 0 && self$options$counts != "") {
+                relevant_cols <- c(relevant_cols, self$options$counts)
+            }
+
+            # Filter to columns that actually exist
+            relevant_cols <- relevant_cols[relevant_cols %in% names(self$data)]
+
+            # Additional safety check
+            if (length(relevant_cols) == 0) {
+                stop(.('No valid analysis variables found in dataset. Please check variable names.'))
+            }
+
+            # Hash actual data content (not just structure)
+            data_content_hash <- if (length(relevant_cols) > 0) {
+                digest::digest(
+                    self$data[, relevant_cols, drop = FALSE],
+                    algo = "md5"
+                )
+            } else {
+                digest::digest(dim(self$data), algo = "md5")
+            }
+
             # Create hash of current data and options state
             current_hash <- digest::digest(list(
                 data_dim = dim(self$data),
                 data_names = names(self$data),
+                data_content = data_content_hash,  # ✅ NOW INCLUDES ACTUAL DATA VALUES
                 options = list(
                     dep = self$options$dep,
                     group = self$options$group,
-                    grvar = self$options$grvar
+                    grvar = self$options$grvar,
+                    counts = self$options$counts
                 )
             ), algo = "md5")
-            
+
             # Return cached data if hash matches and validation passed
-            if (!is.null(private$.processedData) && 
+            if (!is.null(private$.processedData) &&
                 !is.null(private$.data_hash) &&
-                private$.data_hash == current_hash && 
+                private$.data_hash == current_hash &&
                 private$.validation_passed) {
                 return(private$.processedData)
             }
-            
+
             # Validate and prepare fresh data
             # Checkpoint before validation (statistical requirements checking)
             private$.checkpoint(flush = FALSE)
@@ -402,12 +709,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.processedData <- private$.prepareData()
             private$.data_hash <- current_hash
             private$.validation_passed <- TRUE
-            
+
             return(private$.processedData)
         },
 
         # Optimized data preparation with caching
         .prepareData = function(force_refresh = FALSE) {
+            # CRITICAL FIX: Defensive check for dep variable
+            if (is.null(self$options$dep) || length(self$options$dep) == 0 ||
+                (length(self$options$dep) == 1 && self$options$dep == "")) {
+                stop(.('Dependent variable is required but not properly set'))
+            }
+
             # Prepare data with progress feedback
             self$results$todo$setContent(
                 glue::glue("<br>{msg}<br><hr>", msg = .('Processing data for pie chart analysis...'))
@@ -418,20 +731,26 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Selective NA omission - only remove rows with NAs in relevant variables
             # Build list of relevant columns
             relevant_cols <- c(self$options$dep)
-            if (!is.null(self$options$group) && self$options$group != "") {
+            if (!is.null(self$options$group) && length(self$options$group) > 0 && self$options$group != "") {
                 relevant_cols <- c(relevant_cols, self$options$group)
             }
-            if (!is.null(self$options$grvar) && self$options$grvar != "") {
+            if (!is.null(self$options$grvar) && length(self$options$grvar) > 0 && self$options$grvar != "") {
                 relevant_cols <- c(relevant_cols, self$options$grvar)
             }
-            if (!is.null(self$options$counts) && self$options$counts != "") {
+            if (!is.null(self$options$counts) && length(self$options$counts) > 0 && self$options$counts != "") {
                 relevant_cols <- c(relevant_cols, self$options$counts)
+            }
+
+            # Safety check
+            if (length(relevant_cols) == 0) {
+                stop(.('No valid analysis variables specified'))
             }
 
             # Remove rows with NAs only in relevant columns
             n_before <- nrow(mydata)
             private$.checkpoint()
-            mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
+            # Keep data as data.frame even when only one relevant column is present
+            mydata <- mydata[complete.cases(mydata[relevant_cols]), , drop = FALSE]
             n_after <- nrow(mydata)
 
             # Report dropped rows
@@ -495,11 +814,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 glue::glue("<br>{msg}<br><hr>", msg = .('Preparing pie chart analysis options...'))
             )
 
-            # Process options
+            # Process options with defensive checks
             dep <- self$options$dep
             group <- self$options$group
             grvar <- self$options$grvar
             typestatistics <- self$options$typestatistics
+
+            # Defensive validation: ensure dep is not zero-length
+            if (is.null(dep) || length(dep) == 0 || (length(dep) == 1 && dep == "")) {
+                stop(.('Dependent variable is not properly set'))
+            }
             
             # Parse ratio if provided
             # Checkpoint before ratio parsing (can be computationally intensive for complex ratios)
@@ -541,7 +865,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateClinicalPanels()
 
             # Initial Message ----
-            if ( is.null(self$options$dep) ) {
+            # CRITICAL FIX: Check for zero-length character vectors
+            if ( is.null(self$options$dep) ||
+                 length(self$options$dep) == 0 ||
+                 (length(self$options$dep) == 1 && self$options$dep == "") ) {
 
                 # TODO ----
                 todo <- glue::glue(
@@ -666,17 +993,25 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot1 = function(image, ggtheme, theme, ...) {
 
             # Validation ----
-            if ( is.null(self$options$dep) )
+            # CRITICAL FIX: Check for zero-length character vectors
+            if ( is.null(self$options$dep) ||
+                 length(self$options$dep) == 0 ||
+                 (length(self$options$dep) == 1 && self$options$dep == "") )
                 return()
 
             # Use cached data for performance with error handling
             tryCatch({
                 mydata <- private$.getCachedData()
+            }, error = function(e) {
+                stop(glue::glue('Data preparation failed in plot1: {e$message}'))
+            })
+
+            tryCatch({
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste(.('Plot preparation failed: {error}'), list(error = e$message)))
+                stop(glue::glue('Options preparation failed in plot1: {e$message}'))
             })
-            
+
             dep <- options_data$dep
 
 
@@ -692,6 +1027,21 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 NULL
             }
 
+            # CRITICAL FIX #3: Validate paired data before McNemar test
+            if (options_data$paired) {
+                # plot1 has no grouping variable (y=NULL), so paired doesn't apply
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'pairedWithoutGroup',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(
+                    .('Paired/repeated measures analysis requires a grouping variable (e.g., Pre vs Post). Single variable pie charts cannot use paired option. Please add a grouping variable or disable the paired option.')
+                )
+                self$results$insert(0, notice)
+                return()
+            }
+
             # Checkpoint before expensive statistical computation
             private$.checkpoint()
 
@@ -702,7 +1052,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y = NULL,
                     counts = counts_var,
                     ratio = options_data$ratio,
-                    paired = options_data$paired,
+                    paired = FALSE,  # Always FALSE for single variable
                     type = options_data$typestatistics,
                     label = options_data$label,
                     label.args = list(alpha = 1, fill = "white"),
@@ -743,7 +1093,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         , .plot2 = function(image, ggtheme, theme, ...) {
 
             # Validation ----
-            if ( is.null(self$options$dep) || is.null(self$options$group) )
+            # CRITICAL FIX: Check for zero-length character vectors
+            if ( is.null(self$options$dep) || length(self$options$dep) == 0 ||
+                 (length(self$options$dep) == 1 && self$options$dep == "") ||
+                 is.null(self$options$group) || length(self$options$group) == 0 ||
+                 (length(self$options$group) == 1 && self$options$group == "") )
                 return()
 
             # Use cached data for performance with error handling
@@ -751,7 +1105,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste(.('Plot preparation failed: {error}'), list(error = e$message)))
+                stop(glue::glue('Plot preparation failed: {e$message}'))
             })
             
             dep <- options_data$dep
@@ -769,6 +1123,105 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 NULL
             }
 
+            # ENHANCEMENT #6: Enhanced ratio parsing with notice-based feedback
+            ratio_vec <- NULL
+            if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
+                tryCatch({
+                    ratio_parts <- strsplit(self$options$ratio, ",")[[1]]
+                    ratio_vec <- as.numeric(trimws(ratio_parts))
+
+                    if (any(is.na(ratio_vec))) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'invalidRatioValues',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(sprintf(
+                            .('Invalid ratio values in "%s". Expected comma-separated numbers (e.g., "0.5,0.5"). Using equal proportions instead.'),
+                            self$options$ratio
+                        ))
+                        self$results$insert(999, notice)
+                        ratio_vec <- NULL
+                    } else if (abs(sum(ratio_vec) - 1.0) > 0.001) {
+                        normalized <- ratio_vec / sum(ratio_vec)
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'ratioNormalized',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(sprintf(
+                            .('Ratio values normalized to sum to 1.0 (original sum: %.3f). Using: %s'),
+                            sum(ratio_vec),
+                            paste(round(normalized, 3), collapse = ", ")
+                        ))
+                        self$results$insert(999, notice)
+                        ratio_vec <- normalized
+                    } else if (any(ratio_vec <= 0)) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'ratioNonPositive',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(
+                            .('Ratio values must be positive. Using equal proportions instead.')
+                        )
+                        self$results$insert(999, notice)
+                        ratio_vec <- NULL
+                    }
+                }, error = function(e) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ratioParseError',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        .('Error parsing ratio "%s": %s. Using equal proportions.'),
+                        self$options$ratio, e$message
+                    ))
+                    self$results$insert(999, notice)
+                    ratio_vec <- NULL
+                })
+            }
+
+            # CRITICAL FIX #3: Validate paired data before McNemar test
+            if (options_data$paired) {
+                validation <- private$.validatePairedData(mydata, dep, group)
+                if (!validation$valid) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'pairedValidationError',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(validation$message)
+                    self$results$insert(0, notice)
+                    return()
+                }
+            }
+
+            # CRITICAL FIX #5: Auto-switch to Fisher's exact if chi-square assumptions violated
+            override_type <- options_data$typestatistics
+            if (options_data$typestatistics == "parametric" && !options_data$paired) {
+                fisher_check <- private$.checkFisherNeeded(mydata, dep, group, counts_var)
+                if (fisher_check$use_fisher) {
+                    override_type <- "nonparametric"  # Fisher's exact for 2x2
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'fisherAutoSwitch',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf(
+                        .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
+                        fisher_check$low_count_cells,
+                        fisher_check$total_cells,
+                        fisher_check$pct_low
+                    ))
+                    self$results$insert(1, notice)
+                }
+            }
+
+            # ENHANCEMENT #2: Check for extreme prevalence in diagnostic preset
+            private$.checkExtremePrevalence(mydata, dep, group)
+
             # Checkpoint before expensive statistical computation
             private$.checkpoint()
 
@@ -778,9 +1231,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     x = !!rlang::sym(dep),
                     y = !!rlang::sym(group),
                     counts = counts_var,
-                    ratio = options_data$ratio,
+                    ratio = ratio_vec,  # Use enhanced parsed ratio
                     paired = options_data$paired,
-                    type = options_data$typestatistics,
+                    type = override_type,  # Use potentially overridden type
                     label = options_data$label,
                     label.args = list(alpha = 1, fill = "white"),
                     bf.message = options_data$bfmessage,
@@ -826,7 +1279,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         , .plot4 = function(image, ggtheme, theme, ...) {
 
             # Validation ----
-            if ( is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar) )
+            # CRITICAL FIX: Check for zero-length character vectors
+            if ( is.null(self$options$dep) || length(self$options$dep) == 0 ||
+                 (length(self$options$dep) == 1 && self$options$dep == "") ||
+                 is.null(self$options$group) || length(self$options$group) == 0 ||
+                 (length(self$options$group) == 1 && self$options$group == "") ||
+                 is.null(self$options$grvar) || length(self$options$grvar) == 0 ||
+                 (length(self$options$grvar) == 1 && self$options$grvar == "") )
                 return()
 
             # Use cached data for performance with error handling
@@ -834,7 +1293,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste(.('Grouped plot preparation failed: {error}'), list(error = e$message)))
+                stop(glue::glue('Grouped plot preparation failed: {e$message}'))
             })
             
             dep <- options_data$dep
@@ -858,6 +1317,102 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     NULL
                 }
 
+                # ENHANCEMENT #6: Enhanced ratio parsing with notice-based feedback
+                ratio_vec <- NULL
+                if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
+                    tryCatch({
+                        ratio_parts <- strsplit(self$options$ratio, ",")[[1]]
+                        ratio_vec <- as.numeric(trimws(ratio_parts))
+
+                        if (any(is.na(ratio_vec))) {
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'invalidRatioValues',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(sprintf(
+                                .('Invalid ratio values in "%s". Expected comma-separated numbers (e.g., "0.5,0.5"). Using equal proportions instead.'),
+                                self$options$ratio
+                            ))
+                            self$results$insert(999, notice)
+                            ratio_vec <- NULL
+                        } else if (abs(sum(ratio_vec) - 1.0) > 0.001) {
+                            normalized <- ratio_vec / sum(ratio_vec)
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'ratioNormalized',
+                                type = jmvcore::NoticeType$INFO
+                            )
+                            notice$setContent(sprintf(
+                                .('Ratio values normalized to sum to 1.0 (original sum: %.3f). Using: %s'),
+                                sum(ratio_vec),
+                                paste(round(normalized, 3), collapse = ", ")
+                            ))
+                            self$results$insert(999, notice)
+                            ratio_vec <- normalized
+                        } else if (any(ratio_vec <= 0)) {
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'ratioNonPositive',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(
+                                .('Ratio values must be positive. Using equal proportions instead.')
+                            )
+                            self$results$insert(999, notice)
+                            ratio_vec <- NULL
+                        }
+                    }, error = function(e) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'ratioParseError',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(sprintf(
+                            .('Error parsing ratio "%s": %s. Using equal proportions.'),
+                            self$options$ratio, e$message
+                        ))
+                        self$results$insert(999, notice)
+                        ratio_vec <- NULL
+                    })
+                }
+
+                # CRITICAL FIX #3: Validate paired data before McNemar test
+                if (options_data$paired) {
+                    validation <- private$.validatePairedData(mydata, dep, group)
+                    if (!validation$valid) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'pairedValidationError',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(validation$message)
+                        self$results$insert(0, notice)
+                        return()
+                    }
+                }
+
+                # CRITICAL FIX #5: Auto-switch to Fisher's exact if chi-square assumptions violated
+                override_type <- options_data$typestatistics
+                if (options_data$typestatistics == "parametric" && !options_data$paired) {
+                    fisher_check <- private$.checkFisherNeeded(mydata, dep, group, counts_var)
+                    if (fisher_check$use_fisher) {
+                        override_type <- "nonparametric"  # Fisher's exact for 2x2
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'fisherAutoSwitch',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(sprintf(
+                            .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
+                            fisher_check$low_count_cells,
+                            fisher_check$total_cells,
+                            fisher_check$pct_low
+                        ))
+                        self$results$insert(1, notice)
+                    }
+                }
+
                 # Checkpoint before expensive grouped statistical computation
                 private$.checkpoint()
 
@@ -867,8 +1422,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y = !!rlang::sym(group),
                     counts = counts_var,
                     grouping.var = !!rlang::sym(grvar),
-                    type = options_data$typestatistics,
-                    ratio = options_data$ratio,
+                    type = override_type,  # Use potentially overridden type
+                    ratio = ratio_vec,  # Use enhanced parsed ratio
                     paired = options_data$paired,
                     label = options_data$label,
                     digits = options_data$digits,
@@ -888,16 +1443,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         , .plotDonut = function(image, ggtheme, theme, ...) {
-            
+
             if (!self$options$addGGPubrDonut) return()
-            if (is.null(self$options$dep)) return()
-            
+            # CRITICAL FIX: Check for zero-length character vectors
+            if (is.null(self$options$dep) || length(self$options$dep) == 0 ||
+                (length(self$options$dep) == 1 && self$options$dep == "")) return()
+
             # Use cached data
             tryCatch({
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste(.('Donut plot preparation failed: {error}'), list(error = e$message)))
+                stop(glue::glue('Donut plot preparation failed: {e$message}'))
             })
             
             dep <- options_data$dep

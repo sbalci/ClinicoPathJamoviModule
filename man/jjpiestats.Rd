@@ -23,6 +23,9 @@ jjpiestats(
   clinicalpreset = "custom",
   showexplanations = TRUE,
   resultssubtitle = FALSE,
+  showSummary = TRUE,
+  showAssumptions = TRUE,
+  showInterpretation = FALSE,
   addGGPubrDonut = FALSE,
   ggpubrDonutPalette = "jco"
 )
@@ -92,6 +95,17 @@ result interpretation.}
 subtitle in the pie chart. Shows test statistics, p-values, effect sizes,
 and confidence intervals for categorical association tests. Provides
 detailed statistical summary.}
+
+\item{showSummary}{Display natural-language summary paragraph with key
+findings suitable for copying into reports and publications.}
+
+\item{showAssumptions}{Display statistical assumptions panel with detected
+violations, warnings about chi-square expected counts, and Fisher exact
+test recommendations.}
+
+\item{showInterpretation}{Display effect size interpretation guidelines
+(Cramér's V thresholds), clinical context based on analysis preset, and
+methodological notes.}
 
 \item{addGGPubrDonut}{Add modern donut chart variant using ggpubr.}
 

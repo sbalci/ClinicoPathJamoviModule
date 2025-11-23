@@ -12,7 +12,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             positiveLevel = NULL,
             plotType = "boxplot",
             showThreshold = FALSE,
-            thresholdValue = NULL,
+            thresholdValue = "",
             thresholdMethod = "median",
             addTrendLine = FALSE,
             trendMethod = "loess",
@@ -64,9 +64,10 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "showThreshold",
                 showThreshold,
                 default=FALSE)
-            private$..thresholdValue <- jmvcore::OptionNumber$new(
+            private$..thresholdValue <- jmvcore::OptionString$new(
                 "thresholdValue",
-                thresholdValue)
+                thresholdValue,
+                default="")
             private$..thresholdMethod <- jmvcore::OptionList$new(
                 "thresholdMethod",
                 thresholdMethod,
@@ -95,6 +96,7 @@ biomarkerresponseOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..groupVariable <- jmvcore::OptionVariable$new(
                 "groupVariable",
                 groupVariable,
+                default=NULL,
                 suggested=list(
                     "nominal"))
             private$..showCorrelation <- jmvcore::OptionBool$new(
@@ -185,7 +187,9 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         correlation = function() private$.items[["correlation"]],
         threshold = function() private$.items[["threshold"]],
         groupComparison = function() private$.items[["groupComparison"]],
-        statisticalTests = function() private$.items[["statisticalTests"]]),
+        statisticalTests = function() private$.items[["statisticalTests"]],
+        postHocTests = function() private$.items[["postHocTests"]],
+        stratifiedAnalysis = function() private$.items[["stratifiedAnalysis"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -257,13 +261,43 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `type`="number", 
                         `format`="zto"),
                     list(
+                        `name`="threshold_ci_lower", 
+                        `title`="Threshold CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="threshold_ci_upper", 
+                        `title`="Threshold CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="sensitivity", 
                         `title`="Sensitivity", 
                         `type`="number", 
                         `format`="zto"),
                     list(
+                        `name`="sensitivity_ci_lower", 
+                        `title`="Sens CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sensitivity_ci_upper", 
+                        `title`="Sens CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="specificity", 
                         `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="specificity_ci_lower", 
+                        `title`="Spec CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="specificity_ci_upper", 
+                        `title`="Spec CI Upper", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -279,6 +313,16 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     list(
                         `name`="auc", 
                         `title`="AUC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_ci_lower", 
+                        `title`="AUC CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_ci_upper", 
+                        `title`="AUC CI Upper", 
                         `type`="number", 
                         `format`="zto"))))
             self$add(jmvcore::Table$new(
@@ -335,6 +379,98 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="postHocTests",
+                title="Post-hoc Pairwise Comparisons",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_diff", 
+                        `title`="Mean Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="pvalue_adj", 
+                        `title`="Adjusted P-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stratifiedAnalysis",
+                title="Stratified Analysis by Group",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_ci_lower", 
+                        `title`="AUC CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_ci_upper", 
+                        `title`="AUC CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Optimal Threshold", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Performance", 
                         `type`="text"))))}))
 
 biomarkerresponseBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -396,6 +532,8 @@ biomarkerresponseBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$threshold} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$groupComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$statisticalTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$postHocTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -413,12 +551,12 @@ biomarkerresponse <- function(
     positiveLevel,
     plotType = "boxplot",
     showThreshold = FALSE,
-    thresholdValue,
+    thresholdValue = "",
     thresholdMethod = "median",
     addTrendLine = FALSE,
     trendMethod = "loess",
     performTests = FALSE,
-    groupVariable,
+    groupVariable = NULL,
     showCorrelation = FALSE,
     logTransform = FALSE,
     outlierHandling = "highlight",

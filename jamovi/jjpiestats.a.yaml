@@ -1,7 +1,7 @@
 ---
 name:  jjpiestats
 title: Pie Charts
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotT4
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Pie Charts'
 version: '0.0.32'
@@ -251,6 +251,34 @@ options:
             Whether to display statistical test results as subtitle in the pie chart.
             Shows test statistics, p-values, effect sizes, and confidence intervals
             for categorical association tests. Provides detailed statistical summary.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display natural-language summary paragraph with key findings
+            suitable for copying into reports and publications.
+
+    - name: showAssumptions
+      title: Show Assumptions & Warnings
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display statistical assumptions panel with detected violations,
+            warnings about chi-square expected counts, and Fisher exact test
+            recommendations.
+
+    - name: showInterpretation
+      title: Show Interpretation Guide
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display effect size interpretation guidelines (Cramér's V thresholds),
+            clinical context based on analysis preset, and methodological notes.
 
     - name: addGGPubrDonut
       title: Add Donut Chart (ggpubr)

@@ -1,7 +1,7 @@
 ---
 name: vusanalysis
 title: Volume Under ROC Surface (VUS) Analysis
-menuGroup: meddecideT
+menuGroup: meddecideT4
 menuSubgroup: Multi-Class ROC Analysis
 menuSubtitle: VUS for 3+ class diagnostic accuracy
 version: '0.0.32'

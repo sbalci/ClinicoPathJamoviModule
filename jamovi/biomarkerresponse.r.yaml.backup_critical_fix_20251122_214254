@@ -1,0 +1,129 @@
+---
+name: biomarkerresponse
+title: Biomarker Response Association
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+
+    - name: dataWarning
+      title: Data Validation
+      type: Html
+      visible: true
+      clearWith:
+          - biomarker
+          - response
+
+    - name: plot
+      title: Biomarker-Response Plot
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      
+    - name: correlation
+      title: Correlation Analysis
+      type: Table
+      columns:
+        - name: method
+          title: "Method"
+          type: text
+        - name: correlation
+          title: "Correlation"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+          
+    - name: threshold
+      title: Threshold Analysis
+      type: Table
+      columns:
+        - name: threshold
+          title: "Threshold"
+          type: number
+          format: zto
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: zto
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: zto
+        - name: ppv
+          title: "PPV"
+          type: number
+          format: zto
+        - name: npv
+          title: "NPV"
+          type: number
+          format: zto
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto
+
+    - name: groupComparison
+      title: Response Group Comparison
+      type: Table
+      columns:
+        - name: response_group
+          title: "Response Group"
+          type: text
+        - name: n
+          title: "N"
+          type: integer
+        - name: mean
+          title: "Mean"
+          type: number
+          format: zto
+        - name: sd
+          title: "SD"
+          type: number
+          format: zto
+        - name: median
+          title: "Median"
+          type: number
+          format: zto
+        - name: iqr
+          title: "IQR"
+          type: text
+
+    - name: statisticalTests
+      title: Statistical Tests
+      type: Table
+      columns:
+        - name: test
+          title: "Test"
+          type: text
+        - name: statistic
+          title: "Statistic"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+refs:
+    - pROC
+    - ggplot2
+    - dplyr
+    - ClinicoPathJamoviModule
+...

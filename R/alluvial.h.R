@@ -41,7 +41,8 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 vars)
             private$..condensationvar <- jmvcore::OptionVariable$new(
                 "condensationvar",
-                condensationvar)
+                condensationvar,
+                default=NULL)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -61,7 +62,8 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="first_variable")
             private$..fillGgalluvial <- jmvcore::OptionVariable$new(
                 "fillGgalluvial",
-                fillGgalluvial)
+                fillGgalluvial,
+                default=NULL)
             private$..bin <- jmvcore::OptionList$new(
                 "bin",
                 bin,
@@ -133,6 +135,7 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..weight <- jmvcore::OptionVariable$new(
                 "weight",
                 weight,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -252,9 +255,6 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        noticeError = function() private$.items[["noticeError"]],
-        noticeWarning = function() private$.items[["noticeWarning"]],
-        noticeInfo = function() private$.items[["noticeInfo"]],
         dataWarning = function() private$.items[["dataWarning"]],
         plot = function() private$.items[["plot"]],
         condensationWarning = function() private$.items[["condensationWarning"]],
@@ -276,29 +276,6 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="To Do",
                 clearWith=list(
                     "vars")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="noticeError",
-                title="Error",
-                visible=FALSE,
-                clearWith=list(
-                    "vars",
-                    "condensationvar")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="noticeWarning",
-                title="Warning",
-                visible=FALSE,
-                clearWith=list(
-                    "vars")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="noticeInfo",
-                title="Information",
-                visible=FALSE,
-                clearWith=list(
-                    "vars",
-                    "maxvars")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataWarning",
@@ -424,9 +401,6 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$noticeError} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$noticeWarning} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$noticeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr
@@ -437,11 +411,11 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 alluvial <- function(
     data,
     vars,
-    condensationvar,
+    condensationvar = NULL,
     excl = FALSE,
     marg = FALSE,
     fill = "first_variable",
-    fillGgalluvial,
+    fillGgalluvial = NULL,
     bin = "default",
     orient = "vert",
     usetitle = FALSE,
@@ -453,7 +427,7 @@ alluvial <- function(
     themeStyle = "default",
     enhancedGradients = FALSE,
     plotSubtitle = "",
-    weight,
+    weight = NULL,
     sankeyStyle = FALSE,
     curveType = "cubic",
     flowDirection = "left_right",

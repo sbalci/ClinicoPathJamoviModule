@@ -55,12 +55,36 @@ items:
           title: "Threshold"
           type: number
           format: zto
+        - name: threshold_ci_lower
+          title: "Threshold CI Lower"
+          type: number
+          format: zto
+        - name: threshold_ci_upper
+          title: "Threshold CI Upper"
+          type: number
+          format: zto
         - name: sensitivity
           title: "Sensitivity"
           type: number
           format: zto
+        - name: sensitivity_ci_lower
+          title: "Sens CI Lower"
+          type: number
+          format: zto
+        - name: sensitivity_ci_upper
+          title: "Sens CI Upper"
+          type: number
+          format: zto
         - name: specificity
           title: "Specificity"
+          type: number
+          format: zto
+        - name: specificity_ci_lower
+          title: "Spec CI Lower"
+          type: number
+          format: zto
+        - name: specificity_ci_upper
+          title: "Spec CI Upper"
           type: number
           format: zto
         - name: ppv
@@ -73,6 +97,14 @@ items:
           format: zto
         - name: auc
           title: "AUC"
+          type: number
+          format: zto
+        - name: auc_ci_lower
+          title: "AUC CI Lower"
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: "AUC CI Upper"
           type: number
           format: zto
 
@@ -119,6 +151,81 @@ items:
           format: zto,pvalue
         - name: interpretation
           title: "Interpretation"
+          type: text
+
+    - name: postHocTests
+      title: Post-hoc Pairwise Comparisons
+      type: Table
+      visible: false
+      columns:
+        - name: comparison
+          title: "Comparison"
+          type: text
+        - name: mean_diff
+          title: "Mean Difference"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+        - name: pvalue_adj
+          title: "Adjusted P-value"
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+        - name: effect_size
+          title: "Effect Size"
+          type: number
+          format: zto
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: stratifiedAnalysis
+      title: Stratified Analysis by Group
+      type: Table
+      visible: false
+      columns:
+        - name: group
+          title: "Group"
+          type: text
+        - name: n
+          title: "N"
+          type: integer
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto
+        - name: auc_ci_lower
+          title: "AUC CI Lower"
+          type: number
+          format: zto
+        - name: auc_ci_upper
+          title: "AUC CI Upper"
+          type: number
+          format: zto
+        - name: threshold
+          title: "Optimal Threshold"
+          type: number
+          format: zto
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: zto
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: zto
+        - name: interpretation
+          title: "Performance"
           type: text
 
 refs:
