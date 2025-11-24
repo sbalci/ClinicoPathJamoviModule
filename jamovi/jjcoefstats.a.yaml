@@ -1,7 +1,7 @@
 ---
 name:  jjcoefstats
 title: Coefficient Forest Plot (ggcoefstats)
-menuGroup: JJStatsPlotT3
+menuGroup: JJStatsPlotT2
 menuSubgroup: Regression Plots
 version: '0.0.32'
 jas: '1.2'
@@ -57,6 +57,7 @@ options:
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
+      default: null
       description: >
         Variable containing coefficient names (for pre-computed mode).
 
@@ -65,6 +66,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: null
       description: >
         Coefficient estimates or log-odds ratios.
 
@@ -73,6 +75,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: null
       description: >
         Standard errors of estimates.
 
@@ -81,6 +84,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: null
       description: >
         Lower confidence interval bounds.
 
@@ -89,6 +93,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: null
       description: >
         Upper confidence interval bounds.
 
@@ -97,12 +102,14 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: null
       description: >
         P-values for each coefficient.
 
     - name: degreesOfFreedom
       title: Degrees of Freedom (Optional)
       type: Integer
+      default: 999
       description: >
         Degrees of freedom for t-distribution. If provided, t-distribution will be used
         for confidence intervals and p-values instead of normal approximation.
@@ -114,12 +121,14 @@ options:
       type: Variable
       suggested: [continuous, nominal]
       permitted: [numeric, factor]
+      default: null
       description: >
         Outcome variable for model fitting.
 
     - name: predictors
       title: Predictor Variables
       type: Variables
+      default: null
       description: >
         Predictor variables for model fitting.
 
@@ -144,6 +153,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: null
       description: >
         Time variable for Cox proportional hazards model.
 
@@ -152,6 +162,7 @@ options:
       type: Variable
       suggested: [nominal]
       permitted: [factor, numeric]
+      default: null
       description: >
         Event indicator for Cox model (0=censored, 1=event).
 
@@ -160,6 +171,7 @@ options:
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
+      default: null
       description: >
         Grouping variable for random intercepts in mixed effects models (e.g., subject ID, cluster ID).
         Used to specify random effects term like (1|subject).
@@ -175,14 +187,14 @@ options:
     - name: excludeIntercept
       title: Exclude Intercept
       type: Bool
-      default: true
+      default: false
       description: >
         Exclude intercept from the plot.
 
     - name: showPValues
       title: Show P-Values
       type: Bool
-      default: true
+      default: false
       description: >
         Display p-values alongside coefficients.
 
@@ -269,7 +281,7 @@ options:
     - name: showexplanations
       title: Show Explanations
       type: Bool
-      default: true
+      default: false
       description: >
         Show explanations of the statistical results
 

@@ -59,3 +59,5 @@ backups/
 _updateModules_config.yaml
 jamovi_modules
 README.html
+.tmp/
+

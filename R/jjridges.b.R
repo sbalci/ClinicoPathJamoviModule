@@ -32,6 +32,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(self$options[[option]])
         },
 
+        .checkpoint = function() {},
+
         .init = function() {
             # Apply presets first to ensure UI reflects overrides
             private$.applyClinicalPreset()
@@ -290,12 +292,15 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            print("DEBUG: Entering .run")
             # Check requirements
             if (is.null(self$options$x_var) || is.null(self$options$y_var))
                 return()
 
             # Apply clinical preset if selected (must be done before other processing)
+            print("DEBUG: Calling .applyClinicalPreset")
             private$.applyClinicalPreset()
+            print("DEBUG: Returned from .applyClinicalPreset")
 
             # Check package availability
             if (!requireNamespace("ggridges", quietly = TRUE)) {
@@ -307,6 +312,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Validate inputs and collect warnings
+            print("DEBUG: Calling .validateInputs")
             input_warnings <- tryCatch({
                 private$.validateInputs()
             }, error = function(e) {
@@ -314,6 +320,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$warnings$setVisible(TRUE)
                 return(NULL)
             })
+            print("DEBUG: Returned from .validateInputs")
             
             # Prepare data
             private$.checkpoint()
@@ -445,6 +452,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .createPlot = function(data) {
+            print("DEBUG: Entering .createPlot")
             # Base plot setup
             plot_type <- private$.option("plot_type")
             
@@ -1215,6 +1223,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Helper method: Check for potential repeated measures
         .checkRepeatedMeasures = function(data) {
+            print("DEBUG: Entering .checkRepeatedMeasures")
             # CRITICAL FIX: Detect data patterns suggesting repeated measures/clustering
             # This helps warn users when independence assumption is likely violated
 

@@ -13,7 +13,7 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             confLow = NULL,
             confHigh = NULL,
             pValue = NULL,
-            degreesOfFreedom = NULL,
+            degreesOfFreedom = 999,
             outcome = NULL,
             predictors = NULL,
             modelType = "lm",
@@ -21,8 +21,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             eventStatus = NULL,
             randomEffects = NULL,
             sortCoefs = FALSE,
-            excludeIntercept = TRUE,
-            showPValues = TRUE,
+            excludeIntercept = FALSE,
+            showPValues = FALSE,
             pSymbols = FALSE,
             ciLevel = 0.95,
             exponentiate = FALSE,
@@ -31,7 +31,7 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             plotTheme = "default",
             plotWidth = 700,
             plotHeight = 500,
-            showexplanations = TRUE, ...) {
+            showexplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -53,45 +53,52 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..estimate <- jmvcore::OptionVariable$new(
                 "estimate",
                 estimate,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..stdError <- jmvcore::OptionVariable$new(
                 "stdError",
                 stdError,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..confLow <- jmvcore::OptionVariable$new(
                 "confLow",
                 confLow,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..confHigh <- jmvcore::OptionVariable$new(
                 "confHigh",
                 confHigh,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..pValue <- jmvcore::OptionVariable$new(
                 "pValue",
                 pValue,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..degreesOfFreedom <- jmvcore::OptionInteger$new(
                 "degreesOfFreedom",
-                degreesOfFreedom)
+                degreesOfFreedom,
+                default=999)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -100,10 +107,12 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "nominal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
-                predictors)
+                predictors,
+                default=NULL)
             private$..modelType <- jmvcore::OptionList$new(
                 "modelType",
                 modelType,
@@ -119,7 +128,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..eventStatus <- jmvcore::OptionVariable$new(
                 "eventStatus",
                 eventStatus,
@@ -127,7 +137,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..randomEffects <- jmvcore::OptionVariable$new(
                 "randomEffects",
                 randomEffects,
@@ -135,7 +146,8 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..sortCoefs <- jmvcore::OptionBool$new(
                 "sortCoefs",
                 sortCoefs,
@@ -143,11 +155,11 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..excludeIntercept <- jmvcore::OptionBool$new(
                 "excludeIntercept",
                 excludeIntercept,
-                default=TRUE)
+                default=FALSE)
             private$..showPValues <- jmvcore::OptionBool$new(
                 "showPValues",
                 showPValues,
-                default=TRUE)
+                default=FALSE)
             private$..pSymbols <- jmvcore::OptionBool$new(
                 "pSymbols",
                 pSymbols,
@@ -199,7 +211,7 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..showexplanations <- jmvcore::OptionBool$new(
                 "showexplanations",
                 showexplanations,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..inputMode)
             self$.addOption(private$..term)
@@ -499,22 +511,22 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jjcoefstats <- function(
     data,
     inputMode = "precomputed",
-    term,
-    estimate,
-    stdError,
-    confLow,
-    confHigh,
-    pValue,
-    degreesOfFreedom,
-    outcome,
-    predictors,
+    term = NULL,
+    estimate = NULL,
+    stdError = NULL,
+    confLow = NULL,
+    confHigh = NULL,
+    pValue = NULL,
+    degreesOfFreedom = 999,
+    outcome = NULL,
+    predictors = NULL,
     modelType = "lm",
-    survivalTime,
-    eventStatus,
-    randomEffects,
+    survivalTime = NULL,
+    eventStatus = NULL,
+    randomEffects = NULL,
     sortCoefs = FALSE,
-    excludeIntercept = TRUE,
-    showPValues = TRUE,
+    excludeIntercept = FALSE,
+    showPValues = FALSE,
     pSymbols = FALSE,
     ciLevel = 0.95,
     exponentiate = FALSE,
@@ -523,7 +535,7 @@ jjcoefstats <- function(
     plotTheme = "default",
     plotWidth = 700,
     plotHeight = 500,
-    showexplanations = TRUE) {
+    showexplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjcoefstats requires jmvcore to be installed (restart may be required)")

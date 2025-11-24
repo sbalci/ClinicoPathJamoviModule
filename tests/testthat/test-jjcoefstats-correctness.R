@@ -33,6 +33,7 @@ test_that("jjcoefstats precomputed mode with z-distribution (no df)", {
       stdError = "std_error"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -60,6 +61,7 @@ test_that("jjcoefstats precomputed mode with t-distribution (df provided)", {
       degreesOfFreedom = 50
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -87,6 +89,7 @@ test_that("jjcoefstats precomputed exponentiation uses delta method", {
       exponentiate = FALSE
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -101,6 +104,7 @@ test_that("jjcoefstats precomputed exponentiation uses delta method", {
       exponentiate = TRUE
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -138,6 +142,7 @@ test_that("jjcoefstats precomputed with provided CIs and p-values", {
       pValue = "p_value"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -169,6 +174,7 @@ test_that("jjcoefstats linear model (lm) works correctly", {
       modelType = "lm"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -196,6 +202,7 @@ test_that("jjcoefstats linear model excludes intercept when requested", {
       excludeIntercept = TRUE
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -247,6 +254,7 @@ test_that("jjcoefstats logistic regression works with valid binary outcome", {
       modelType = "glm"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -274,6 +282,7 @@ test_that("jjcoefstats logistic regression with exponentiation (OR)", {
       exponentiate = TRUE
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -331,6 +340,7 @@ test_that("jjcoefstats Cox model works with valid event coding", {
       eventStatus = "event"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -361,6 +371,7 @@ test_that("jjcoefstats Cox model with exponentiation (HR)", {
       exponentiate = TRUE
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -437,6 +448,7 @@ test_that("jjcoefstats mixed model (lmer) works with continuous outcome", {
       randomEffects = "subject"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -465,6 +477,7 @@ test_that("jjcoefstats mixed model (glmer) works with binary outcome", {
       randomEffects = "subject"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -497,6 +510,7 @@ test_that("jjcoefstats handles coefficient sorting", {
       sortCoefs = TRUE
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -523,6 +537,7 @@ test_that("jjcoefstats handles different confidence levels", {
       ciLevel = 0.99
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -549,6 +564,7 @@ test_that("jjcoefstats handles different reference values", {
       referenceValue = 1
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -578,6 +594,7 @@ test_that("jjcoefstats handles missing required variables gracefully", {
       modelType = "lm"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -604,6 +621,7 @@ test_that("jjcoefstats produces consistent results across runs", {
       modelType = "lm"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -616,6 +634,7 @@ test_that("jjcoefstats produces consistent results across runs", {
       modelType = "lm"
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 
@@ -652,6 +671,7 @@ test_that("jjcoefstats handles real clinical regression data structure", {
       exponentiate = TRUE  # Get hazard ratios
     )
   }, error = function(e) {
+    print(e)
     NULL
   })
 

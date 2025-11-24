@@ -1711,7 +1711,7 @@ analyses:
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT4
+    menuGroup: JJStatsPlotT3
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
@@ -1723,7 +1723,7 @@ analyses:
   - title: Dot Chart
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT4
+    menuGroup: JJStatsPlotT3
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart
     ribbon: analyses
@@ -1776,7 +1776,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT4
+    menuGroup: JJStatsPlotT3
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -2530,7 +2530,7 @@ analyses:
     name: pathsampling
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT3
+    menuGroup: OncoPathT
     menuTitle: Pathology Sampling Adequacy Analysis
     description: >
       Determines the minimum number of tissue samples (blocks, cassettes,
@@ -5661,7 +5661,7 @@ analyses:
     name: jjcoefstats
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT4
+    menuGroup: JJStatsPlotT2
     menuSubgroup: Regression Plots
     menuTitle: Coefficient Forest Plot (ggcoefstats)
     description: >

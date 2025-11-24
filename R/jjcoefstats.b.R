@@ -11,6 +11,16 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .modelFit = NULL,
         .tidyCoefs = NULL,
 
+        .escapeVar = function(var) {
+            # Safely escape variable names for formula construction
+            if (is.null(var)) return(NULL)
+            # Use backticks for variables with spaces/special chars
+            if (grepl("[^A-Za-z0-9_\\.]", var)) {
+                return(paste0("`", var, "`"))
+            }
+            return(var)
+        },
+
         .init = function() {
             # Show initial instructions
             instructions <- glue::glue("
@@ -269,9 +279,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             outcome_var <- if (!is.null(self$options$outcome)) janitor::make_clean_names(self$options$outcome) else NULL
             predictor_vars <- janitor::make_clean_names(self$options$predictors)
 
-            # Create formula (only if outcome is present)
+            # Create formula (only if outcome is present) with proper escaping
             if (!is.null(outcome_var)) {
-                formula_str <- paste(outcome_var, "~", paste(predictor_vars, collapse = " + "))
+                outcome_safe <- private$.escapeVar(outcome_var)
+                predictors_safe <- sapply(predictor_vars, private$.escapeVar)
+                formula_str <- paste(outcome_safe, "~", paste(predictors_safe, collapse = " + "))
                 formula <- as.formula(formula_str)
             }
 
@@ -353,12 +365,13 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                       " + (1|", random_var, ")"))
 
                     # Determine whether to use lmer (continuous) or glmer (binary)
-                    # Check if outcome is binary
-                    outcome_unique <- unique(mydata[[outcome_var]])
-                    outcome_unique <- outcome_unique[!is.na(outcome_unique)]
+                    outcome_unique <- sort(unique(mydata[[outcome_var]][!is.na(mydata[[outcome_var]])]))
 
-                    if (length(outcome_unique) == 2 && all(outcome_unique %in% c(0, 1))) {
+                    if (length(outcome_unique) == 2) {
                         # Binary outcome - use glmer
+                        if (!all(outcome_unique %in% c(0, 1))) {
+                            stop("For mixed-effects logistic regression (glmer), the outcome variable must be coded as 0 and 1.")
+                        }
                         model <- lme4::glmer(mixed_formula, data = mydata, family = binomial(link = "logit"))
                     } else {
                         # Continuous outcome - use lmer
@@ -372,7 +385,14 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.modelFit <- model
 
                 # Extract tidy coefficients using broom
-                tidy_coefs <- broom::tidy(model, conf.int = TRUE, conf.level = self$options$ciLevel)
+                if (inherits(model, "lmerMod")) {
+                    if (!requireNamespace("broom.mixed", quietly = TRUE)) {
+                        stop("The broom.mixed package is required for mixed-effects models. Please install it.")
+                    }
+                    tidy_coefs <- broom.mixed::tidy(model, conf.int = TRUE, conf.level = self$options$ciLevel)
+                } else {
+                    tidy_coefs <- broom::tidy(model, conf.int = TRUE, conf.level = self$options$ciLevel)
+                }
 
                 # Filter out intercept if requested
                 if (self$options$excludeIntercept) {
@@ -422,13 +442,26 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .populateCoefTable = function(tidy_coefs) {
             table <- self$results$coefficientTable
 
+            # Adjust table titles if exponentiating
+            if (self$options$exponentiate) {
+                if (self$options$modelType == "glm") {
+                    table$setColumnTitle("estimate", "Odds Ratio")
+                } else if (self$options$modelType == "cox") {
+                    table$setColumnTitle("estimate", "Hazard Ratio")
+                } else {
+                    table$setColumnTitle("estimate", "Exp(Estimate)")
+                }
+                table$setColumnVisible("statistic", FALSE)
+            }
+
+
             for (i in 1:nrow(tidy_coefs)) {
                 table$addRow(rowKey = i, values = list(
                     term = tidy_coefs$term[i],
                     estimate = round(tidy_coefs$estimate[i], 3),
-                    std_error = round(tidy_coefs$std.error[i], 3),
-                    statistic = if (!is.null(tidy_coefs$statistic)) round(tidy_coefs$statistic[i], 3) else NA,
-                    p_value = if (!is.null(tidy_coefs$p.value)) tidy_coefs$p.value[i] else NA,
+                    std_error = if ("std.error" %in% names(tidy_coefs)) round(tidy_coefs$std.error[i], 3) else NA,
+                    statistic = if ("statistic" %in% names(tidy_coefs)) round(tidy_coefs$statistic[i], 3) else NA,
+                    p_value = if ("p.value" %in% names(tidy_coefs)) tidy_coefs$p.value[i] else NA,
                     conf_low = round(tidy_coefs$conf.low[i], 3),
                     conf_high = round(tidy_coefs$conf.high[i], 3)
                 ))
@@ -486,7 +519,13 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(private$.tidyCoefs)) return()
 
             n_coefs <- nrow(private$.tidyCoefs)
-            sig_coefs <- sum(private$.tidyCoefs$p.value < 0.05, na.rm = TRUE)
+            
+            if ("p.value" %in% names(private$.tidyCoefs)) {
+                sig_coefs <- sum(private$.tidyCoefs$p.value < 0.05, na.rm = TRUE)
+            } else {
+                sig_coefs <- "N/A"
+            }
+
 
             summary_text <- glue::glue("
             <h4>Analysis Summary</h4>
@@ -517,91 +556,56 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Determine axis labels
-            if (self$options$exponentiate) {
-                if (self$options$modelType == "glm") {
-                    xlab <- "Odds Ratio"
-                } else if (self$options$modelType == "cox") {
-                    xlab <- "Hazard Ratio"
-                } else {
-                    xlab <- "Exponentiated Coefficient"
-                }
+            xlab <- if (self$options$exponentiate) {
+                switch(self$options$modelType,
+                    "glm" = "Odds Ratio",
+                    "cox" = "Hazard Ratio",
+                    "Exponentiated Coefficient"
+                )
             } else {
-                xlab <- "Coefficient Estimate"
+                "Coefficient Estimate"
             }
 
-            # Create basic data frame for ggcoefstats
-            plot_data <- data.frame(
-                term = tidy_coefs$term,
-                estimate = tidy_coefs$estimate,
-                conf.low = tidy_coefs$conf.low,
-                conf.high = tidy_coefs$conf.high,
-                p.value = if (!is.null(tidy_coefs$p.value)) tidy_coefs$p.value else NA,
-                stringsAsFactors = FALSE
-            )
 
             tryCatch({
-                # Determine if we should use a model object or tidy data
-                if (!is.null(private$.modelFit)) {
-                    # Use model object directly
-                    model_obj <- private$.modelFit
-                    use_model <- TRUE
-                } else {
-                    # Use tidy data frame
-                    use_model <- FALSE
-                }
-
-                # Create plot using ggcoefstats
-                if (use_model) {
-                    plot <- ggstatsplot::ggcoefstats(
-                        x = private$.modelFit,
-                        conf.level = self$options$ciLevel,
-                        exclude.intercept = self$options$excludeIntercept,
-                        sort = if (self$options$sortCoefs) "ascending" else "none",
-                        stats.label.color = c("#0072B2", "#D55E00"),
-                        vline.args = list(
-                            xintercept = ref_val,
-                            linetype = "dashed",
-                            color = "red"
-                        ),
-                        ggtheme = ggtheme
-                    ) +
-                    ggplot2::labs(x = xlab)
-                } else {
-                    # Manual plotting when using pre-computed data
-                    # Create a simple ggplot since ggcoefstats needs a model object
-                    plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = estimate, y = term)) +
-                        ggplot2::geom_point(size = 3, color = "#0072B2") +
-                        ggplot2::geom_errorbarh(ggplot2::aes(xmin = conf.low, xmax = conf.high),
-                                               height = 0.2, color = "#0072B2") +
-                        ggplot2::geom_vline(xintercept = ref_val, linetype = "dashed", color = "red") +
-                        ggplot2::labs(
-                            x = xlab,
-                            y = "Term",
-                            title = "Coefficient Forest Plot"
-                        ) +
-                        ggtheme
-
-                    # Add p-values if requested
-                    if (self$options$showPValues && !is.null(plot_data$p.value)) {
-                        if (self$options$pSymbols) {
-                            # Use symbols
-                            plot_data$sig_symbol <- ifelse(plot_data$p.value < 0.001, "***",
-                                                          ifelse(plot_data$p.value < 0.01, "**",
-                                                                ifelse(plot_data$p.value < 0.05, "*", "ns")))
-                            plot <- plot +
-                                ggplot2::geom_text(data = plot_data,
-                                                  ggplot2::aes(label = sig_symbol, x = conf.high),
-                                                  hjust = -0.5, size = 4)
-                        } else {
-                            # Use numeric p-values
-                            plot_data$p_label <- sprintf("p=%.3f", plot_data$p.value)
-                            plot <- plot +
-                                ggplot2::geom_text(data = plot_data,
-                                                  ggplot2::aes(label = p_label, x = conf.high),
-                                                  hjust = -0.1, size = 3)
-                        }
+                # Determine stats label args based on p-value options
+                stats_label_args <- if (self$options$showPValues) {
+                    if (self$options$pSymbols) {
+                        list(p.value = TRUE, p.value.label = "symbol")
+                    } else {
+                        list(p.value = TRUE)
                     }
+                } else {
+                    list(p.value = FALSE)
                 }
+
+                # Determine color palette based on scheme
+                palette_args <- switch(self$options$colorScheme,
+                    "colorblind" = list(package = "ggthemes", palette = "Colorblind"),
+                    "viridis" = list(package = "viridis", palette = "viridis"),
+                    "grayscale" = list(package = "gray", palette = "gray"),
+                    list(package = "RColorBrewer", palette = "Set2")  # default
+                )
+
+                # Always use the tidy data frame with ggcoefstats
+                plot <- ggstatsplot::ggcoefstats(
+                    x = tidy_coefs,
+                    conf.level = self$options$ciLevel,
+                    exclude.intercept = self$options$excludeIntercept,
+                    sort = if (self$options$sortCoefs) "ascending" else "none",
+                    stats.label.color = c("#0072B2", "#D55E00"),
+                    stats.label.args = stats_label_args,
+                    package = palette_args$package,
+                    palette = palette_args$palette,
+                    vline.args = list(
+                        xintercept = ref_val,
+                        linetype = "dashed",
+                        color = "red"
+                    ),
+                    ggtheme = ggtheme
+                ) +
+                ggplot2::labs(x = xlab)
+
 
                 # Apply theme customization
                 if (self$options$plotTheme != "default") {

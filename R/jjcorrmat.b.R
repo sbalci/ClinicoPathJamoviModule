@@ -330,7 +330,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Generate clinical interpretation of correlation results
-        .generateInterpretationContent = function(mydata, options_data) {
+        .generateInterpretation = function(mydata, options_data) {
             if (length(options_data$myvars) < 2) return()
 
             # Calculate correlation matrix for interpretation
@@ -418,7 +418,21 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Generate interpretation
             if (length(cor_results) == 0) {
-                interpretation <- .("<p>Unable to calculate correlations with the selected options.</p>")
+                if (options_data$typestatistics %in% c("robust", "bayes")) {
+                     interpretation <- paste0(
+                        "<h4>", .("Correlation Analysis Summary"), "</h4>",
+                        "<p><strong>", .("Analysis Details:"), "</strong><br>",
+                        "• ", sprintf(.("Variables analyzed: %d"), length(options_data$myvars)), "<br>",
+                        "• ", sprintf(.("Sample size: %d observations"), nrow(cor_data)), "<br>",
+                        "• ", sprintf(.("Method: %s correlation"), method_display), "<br>",
+                        "• ", sprintf(.("Correlation type: %s"), if(options_data$partial && length(options_data$myvars) >= 3) .("Partial") else .("Zero-order")), "</p>",
+                        
+                        "<p><strong>", .("Note:"), "</strong> ", 
+                        .("Detailed correlation coefficients and p-values for Robust and Bayesian methods are visualized in the plot. Text summary is limited for these methods."), "</p>"
+                    )
+                } else {
+                    interpretation <- .("<p>Unable to calculate correlations with the selected options.</p>")
+                }
             } else {
                 # Create summary
                 n_vars <- length(options_data$myvars)
@@ -566,6 +580,10 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (nrow(self$data) == 0)
             stop(.('Data contains no (complete) rows'))
 
+        # Validate inputs before processing
+        if (!private$.validateInputs())
+            return()
+
         # Pre-process data and options for performance
         mydata <- private$.prepareData()
         options_data <- private$.prepareOptions()
@@ -575,7 +593,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateSummary(options_data)
             private$.checkAssumptions(options_data)
             private$.generateInterpretation(mydata, options_data)
-            private$.generateReport(options_data)
+
         }
 
     }
