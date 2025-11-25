@@ -276,7 +276,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         percentage = value / sum(value) * 100,
                         total_in_category = sum(value)
                     ) %>%
-                    dplyr::ungroup()
+                    dplyr::ungroup() %>%
+                    dplyr::mutate(
+                        overall_percentage = value / sum(value) * 100
+                    )
             } else {
                 processed_data <- processed_data %>%
                     dplyr::group_by(!!rlang::sym(x_var)) %>%
@@ -284,7 +287,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         percentage = value / sum(value) * 100,
                         total_in_category = sum(value)
                     ) %>%
-                    dplyr::ungroup()
+                    dplyr::ungroup() %>%
+                    dplyr::mutate(
+                        overall_percentage = value / sum(value) * 100
+                    )
             }
 
             # Check for empty groups
@@ -316,9 +322,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Create composition data for table
             composition_data <- processed_data %>%
-                dplyr::select(!!rlang::sym(x_var), !!rlang::sym(fill_var), count, percentage, total_in_category)
+                dplyr::select(!!rlang::sym(x_var), !!rlang::sym(fill_var), count, percentage, overall_percentage, total_in_category)
 
-            names(composition_data) <- c("category", "segment", "count", "percentage", "total_in_category")
+            names(composition_data) <- c("category", "segment", "count", "percentage", "overall_percentage", "total_in_category")
 
             private$.composition_data <- composition_data
         },
@@ -495,7 +501,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             } else if (style == "publication") {
                 p <- p + ggplot2::theme_classic() +
                     ggplot2::theme(
-                        text = ggplot2::element_text(size = 10, family = "serif"),
+                        text = ggplot2::element_text(size = 10),
                         axis.title = ggplot2::element_text(size = 11, face = "bold"),
                         plot.title = ggplot2::element_text(size = 12, face = "bold", hjust = 0.5),
                         legend.text = ggplot2::element_text(size = 9),
@@ -514,7 +520,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             } else if (style == "clinical") {
                 p <- p + ggplot2::theme_bw() +
                     ggplot2::theme(
-                        text = ggplot2::element_text(size = 11, family = "sans"),
+                        text = ggplot2::element_text(size = 11),
                         axis.title = ggplot2::element_text(size = 12, face = "bold"),
                         plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5),
                         panel.grid.major.x = ggplot2::element_blank(),
@@ -526,7 +532,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             } else if (style == "bbc_style") {
                 p <- p + ggplot2::theme_minimal() +
                     ggplot2::theme(
-                        text = ggplot2::element_text(size = 11, family = "sans"),
+                        text = ggplot2::element_text(size = 11),
                         plot.title = ggplot2::element_text(size = 18, face = "bold", hjust = 0),
                         plot.subtitle = ggplot2::element_text(size = 14, hjust = 0),
                         axis.title = ggplot2::element_blank(),
@@ -542,7 +548,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             } else if (style == "prism_style") {
                 p <- p + ggplot2::theme_classic() +
                     ggplot2::theme(
-                        text = ggplot2::element_text(size = 10, family = "sans"),
+                        text = ggplot2::element_text(size = 10),
                         axis.title = ggplot2::element_text(size = 11),
                         plot.title = ggplot2::element_text(size = 12, face = "bold", hjust = 0.5),
                         axis.line = ggplot2::element_line(color = "black", linewidth = 0.5),
@@ -623,6 +629,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     segment = as.character(data$segment[i]),
                     count = data$count[i],
                     percentage = data$percentage[i] / 100,  # Convert to proportion for percentage format
+                    overall_percentage = data$overall_percentage[i] / 100,
                     total_in_category = data$total_in_category[i]
                 )
 
@@ -826,8 +833,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         ggplot2::aes(
                             x = !!rlang::sym(x_var),
                             y = .data$value,
-                            label = .data$..lab,
-                            fill = !!rlang::sym(fill_var)
+                            label = .data$..lab
                         ),
                         position = ggplot2::position_fill(vjust = 0.5),
                         size = 3, color = "white", fontface = "bold",
@@ -850,7 +856,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     width = self$options$bar_width,
                     color = outline_col,
                     fill = NA,
-                    linewidth = 0.3
+                    linewidth = 0.2
                 )
             }
 
@@ -865,7 +871,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Apply color palette using centralized method
             p <- private$.applyColorPalette(p, df, fill_var)
 
-            # Apply chart style using the .applyTheme method
+            # Apply chart style            # Apply theme
             p <- private$.applyTheme(p)
             
             # Ensure title is centered (override if needed)
@@ -882,15 +888,14 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Export-friendly tweaks
             if (isTRUE(self$options$export_ready)) {
                 p <- p + ggplot2::theme(
-                    text = ggplot2::element_text(family = "Arial"),
+                    # text = ggplot2::element_text(family = "Arial"),
                     plot.background = ggplot2::element_rect(fill = "white", color = NA),
                     panel.background = ggplot2::element_rect(fill = "white", color = NA),
                     legend.background = ggplot2::element_rect(fill = "white", color = NA)
                 )
             }
 
-            print(p)
-            TRUE
+            return(p)
         },
 
         .plot_ggsegmented = function(image, ggtheme, theme, ...) {

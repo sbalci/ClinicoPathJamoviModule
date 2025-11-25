@@ -277,7 +277,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             if (palette_name == "viridis") {
                 if (requireNamespace("viridis", quietly = TRUE)) {
-                    return(viridis::viridis(n_colors, discrete = TRUE))
+                    return(viridis::viridis(n_colors))
                 } else {
                     # Fallback to similar color scheme
                     return(grDevices::heat.colors(n_colors))
@@ -330,7 +330,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 }, error = function(e) {
                     # Fallback to viridis if ggprism palette fails
                     if (requireNamespace("viridis", quietly = TRUE)) {
-                        viridis::viridis(n_colors, discrete = TRUE)
+                        viridis::viridis(n_colors)
                     } else {
                         grDevices::heat.colors(n_colors)
                     }
@@ -338,7 +338,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             } else {
                 # Fallback to viridis if ggprism not available
                 if (requireNamespace("viridis", quietly = TRUE)) {
-                    viridis::viridis(n_colors, discrete = TRUE)
+                    viridis::viridis(n_colors)
                 } else {
                     grDevices::heat.colors(n_colors)
                 }

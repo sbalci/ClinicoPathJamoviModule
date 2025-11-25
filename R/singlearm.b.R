@@ -334,6 +334,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         time_valid <- (subcondition2b1 && subcondition2b2 && subcondition2b3) ||
                      (subcondition2a && !subcondition2b1 && !subcondition2b2 && !subcondition2b3)
 
+        # Check if variables exist in data
+        if (subcondition1a && !self$options$outcome %in% names(self$data)) {
+            outcome_valid <- FALSE
+        }
+        
+        if (subcondition2a && !self$options$elapsedtime %in% names(self$data)) {
+            time_valid <- FALSE
+        }
+
         return(list(
           outcome_valid = outcome_valid,
           time_valid = time_valid,
@@ -580,6 +589,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # mydata[[self$options$outcome]]
 
           } else if (inherits(outcome1, "factor")) {
+            
+            if (is.null(outcomeLevel)) {
+                stop("Please select the Event Level (e.g., 'Dead') for the outcome variable.")
+            }
+            
             mydata[["myoutcome"]] <-
               ifelse(
                 test = outcome1 == outcomeLevel,

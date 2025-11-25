@@ -1,5 +1,445 @@
 # ClinicoPath News
 
+## Version 0.0.32.19
+
+### 🗓️ **November 25, 2025 - Evaluation: Single Arm Survival (singlearm)**
+
+---
+
+## 📊 **GENERAL STATISTICS**
+
+### **Project Scope: Evaluation of `singlearm` Function**
+
+Comprehensive evaluation of the `singlearm` function for single-cohort survival analysis, including overall survival, competing risks, and person-time metrics.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Survival Estimates**: Accurately calculates Kaplan-Meier estimates for overall survival and Cumulative Incidence Functions (CIF) for competing risks.
+*   **Person-Time Metrics**: Correctly computes total person-time, incidence rates, and exact Poisson confidence intervals.
+*   **Baseline Hazard**: Provides both step-function and smoothed baseline hazard estimates to visualize instantaneous risk over time.
+*   **Date Handling**: Robustly calculates follow-up time from diagnosis and follow-up dates, supporting various date formats.
+
+#### **2. Clinical Utility**
+*   **Interpretation**: Generates clear, clinically relevant summaries of median survival, survival rates at specific time points (1, 3, 5 years), and event rates.
+*   **Visualizations**: Produces publication-ready Kaplan-Meier curves, cumulative event plots, and smoothed hazard plots.
+*   **Guidance**: Includes "Guided Mode" with educational explanations of survival concepts and result interpretation.
+
+#### **3. Robustness**
+*   **Validation**: Implemented strict checks for variable existence and correct outcome level specification.
+*   **Error Handling**: Fixed issues where missing outcome variables or levels caused crashes, ensuring user-friendly error messages.
+*   **Data Quality**: Added comprehensive data quality assessments (sample size, follow-up duration, completeness) to alert users to potential limitations.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Outcome Organizer (outcomeorganizer)**
+
+---
+
+## 📊 **GENERAL STATISTICS**
+
+### **Project Scope: Evaluation of `outcomeorganizer` Function**
+
+Comprehensive evaluation of the `outcomeorganizer` function for preparing survival analysis outcomes, including overall survival, competing risks, and multistate models.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Versatility**: Supports preparation for Overall Survival (OS), Cause-Specific Survival, Competing Risks, Recurrence-Free Survival (RFS), Progression-Free Survival (PFS), Disease-Free Survival (DFS), Time to Progression (TTP), and Multistate models.
+*   **Recoding**: Automatically converts various input formats (binary, factor, character) into standardized numeric codes (0/1 for binary, 0/1/2+ for competing risks).
+*   **Advanced Features**: Handles interval censoring, administrative censoring, and event hierarchies for patients with multiple records.
+
+#### **2. Clinical Utility**
+*   **Guidance**: Provides clear natural language summaries explaining how outcomes were recoded (e.g., "Dead of disease coded as 1, Dead of other causes coded as 2").
+*   **Diagnostics**: Offers detailed diagnostic tables to verify recoding accuracy and identify potential issues (e.g., missing levels).
+*   **Visualization**: Includes bar plots to visualize the distribution of recoded outcomes.
+
+#### **3. Robustness**
+*   **Validation**: Enforces strict checks for variable existence, sufficient sample size, and correct level specification.
+*   **Error Handling**: Prevents common errors like missing outcome levels or mismatched event types with clear, actionable error messages.
+*   **Bug Fixes**: Resolved issues related to missing outcome variable handling and missing outcome level validation during the evaluation.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Odds Ratio (oddsratio)**
+
+---
+
+## 📊 **GENERAL STATISTICS**
+
+### **Project Scope: Evaluation of `oddsratio` Function**
+
+Comprehensive evaluation of the `oddsratio` function for logistic regression, risk quantification, and diagnostic accuracy assessment.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Logistic Regression**: Uses `finalfit` to produce publication-ready odds ratio tables with confidence intervals and p-values.
+*   **Nomograms**: Integrates `rms` package to generate interactive nomograms for individual risk prediction.
+*   **Diagnostic Metrics**: Automatically calculates sensitivity, specificity, PPV, NPV, and likelihood ratios for binary predictors.
+
+#### **2. Clinical Utility**
+*   **Interpretation**: Provides context-aware natural language summaries (e.g., "Risk Factor", "Diagnostic Test", "Treatment Response").
+*   **Visualizations**: Generates forest plots for odds ratios and nomogram plots for risk calculation.
+*   **Guidance**: Includes educational explanations for statistical concepts like Odds Ratios and Likelihood Ratios.
+
+#### **3. Robustness**
+*   **Validation**: Enforces strict checks for binary outcomes, sufficient sample size, and data quality.
+*   **Internationalization**: Supports user-specified positive outcome levels, crucial for non-English datasets.
+*   **Error Handling**: Provides detailed, actionable error messages for common issues like perfect separation or missing data.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Multivariable Survival (multisurvival)**
+
+---
+
+## 🏥 **SURVIVAL ANALYSIS**
+
+### **Project Scope: Evaluation of `multisurvival` Function**
+
+Comprehensive evaluation of the `multisurvival` function for advanced Cox regression, AFT models, and risk stratification.
+
+### **✅ Key Findings:**
+
+#### **1. Advanced Modeling**
+*   **Cox Regression**: Robust implementation of Cox proportional hazards models with support for stratification and time-dependent covariates.
+*   **AFT Models**: Validated Accelerated Failure Time models (Weibull, Log-normal, etc.) for scenarios where PH assumption is violated.
+*   **Person-Time**: Accurate calculation of incidence rates and person-time at risk, crucial for epidemiological studies.
+
+#### **2. Clinical Utility**
+*   **Risk Scores**: Automatically calculates and stratifies patients into risk groups based on model coefficients.
+*   **Nomograms**: Generates visual nomograms for individual risk prediction.
+*   **Interpretation**: Provides natural language summaries and clinical interpretation of Hazard Ratios and Time Ratios.
+
+#### **3. Robustness**
+*   **Validation**: Includes comprehensive checks for data quality (negative times, outcome coding) and sample size adequacy.
+*   **Error Handling**: Graceful handling of missing data and model convergence issues with user-friendly error messages.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: DateTime Converter (datetimeconverter)**
+
+---
+
+## 🕒 **DATA PREPARATION**
+
+### **Project Scope: Evaluation of `datetimeconverter` Function**
+
+Comprehensive evaluation of the `datetimeconverter` function for parsing, standardizing, and extracting components from datetime variables.
+
+### **✅ Key Findings:**
+
+#### **1. Intelligent Parsing**
+*   **Auto-Detection**: Accurately identifies common date formats (YMD, DMY, MDY, ISO 8601) without user intervention.
+*   **Numeric Handling**: Correctly interprets Excel serial dates (days since 1900) and Unix epoch timestamps (seconds since 1970).
+*   **Timezone Awareness**: Provides robust timezone handling, allowing conversion between system local time and UTC.
+
+#### **2. Component Extraction**
+*   **Granular Control**: Users can extract specific components: Year, Month, Day, Hour, Minute, Second.
+*   **Rich Metadata**: Extracts derived attributes like Day Name (Monday, Tuesday...), Month Name (January, February...), Week Number, Quarter, and Day of Year.
+*   **Preview**: Offers a real-time preview of extracted components to ensure accuracy before modifying the dataset.
+
+#### **3. Clinical Relevance**
+*   **Data Cleaning**: Essential for standardizing mixed date formats often found in multi-center clinical trials.
+*   **Temporal Analysis**: Extracted components facilitate seasonal analysis (Month/Quarter) and survival time calculations (Year/Date).
+*   **Quality Assurance**: Includes a "Data Quality Assessment" panel that flags missing values, parsing failures, and potential misuse (e.g., future dates).
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Date Correction (datecorrection)**
+
+---
+
+## 📅 **DATA PREPARATION**
+
+### **Project Scope: Evaluation of `datecorrection` Function**
+
+Comprehensive evaluation of the `datecorrection` function for standardizing and correcting messy date fields in clinical datasets.
+
+### **✅ Key Findings:**
+
+#### **1. Robust Correction Methods**
+*   **Multiple Engines**: Successfully integrates `datefixR` (automatic detection), `anytime` (flexible parsing), and `lubridate` (format-specific) for maximum coverage.
+*   **Consensus Logic**: Implements a smart consensus algorithm that cross-validates results from multiple parsers to ensure accuracy.
+*   **Excel Support**: Correctly handles numeric Excel dates (days since 1900), a common issue in clinical data management.
+
+#### **2. Clinical Data Safety**
+*   **Audit Trail**: Generates a detailed "Corrected Date Data" table showing original vs. corrected values, status, and method used for every observation.
+*   **Quality Assessment**: Provides comprehensive quality metrics (success rates, error patterns) to help users trust the results.
+*   **Safety Warnings**: Automatically triggers warnings for low success rates (<85%) or conflicting results between parsers.
+
+#### **3. Advanced Features**
+*   **Imputation**: Supports configurable imputation for missing days (default 1st) and months (default July) to handle partial dates.
+*   **Format Analysis**: Analyzes and reports the distribution of date formats in the original data.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Tidy Plots (tidyplots)**
+
+---
+
+## 📊 **TIDYPLOTS INTEGRATION**
+
+### **Project Scope: Evaluation of `tidyplots` Function**
+
+Comprehensive evaluation of the `tidyplots` function for creating publication-ready plots using the tidyplots framework.
+
+### **✅ Key Findings:**
+
+#### **1. Comprehensive Plot Support**
+*   **Plot Types**: Successfully generates Points, Lines, Bars, Boxplots, Violin plots, Histograms, Area plots, Pie charts, Donut charts, Heatmaps, and Ellipse plots.
+*   **Statistical Elements**: Correctly adds Means, Medians, Sums, Counts, SEM, SD, CI, and Range indicators.
+*   **Distribution**: Supports adding distribution elements like density curves (via histogram approximation) and rug plots (via points).
+
+#### **2. Advanced Customization**
+*   **Themes**: Supports multiple themes (Default, Tidyplot, ggplot2, Minimal X/Y/XY).
+*   **Color Schemes**: Extensive color palette support including Discrete (Friendly, Seaside, Apple, etc.), Continuous (Viridis, Inferno, etc.), and Diverging schemes.
+*   **Labels**: Full control over titles, axis labels, legends, and captions.
+
+#### **3. Robustness & Compatibility**
+*   **Compatibility**: Adjusted to work with the installed version of `tidyplots` by removing unsupported function calls (e.g., specific alignment adjustments).
+*   **Error Handling**: Gracefully handles missing variables and invalid inputs.
+*   **Faceting**: Correctly supports faceting by a third variable.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Automatic Plot Selection (statsplot2)**
+
+---
+
+## 📊 **AUTOMATIC VISUALIZATION**
+
+### **Project Scope: Evaluation of `statsplot2` Function**
+
+Comprehensive evaluation of the `statsplot2` function for automatic plot selection and generation.
+
+### **✅ Key Findings:**
+
+#### **1. Intelligent Plot Selection**
+*   **Logic**: Correctly identifies variable types (Continuous vs Categorical) and study design (Independent vs Repeated).
+*   **Selection**: Automatically selects appropriate plots:
+    *   Violin Plots (Factor vs Continuous)
+    *   Scatter Plots (Continuous vs Continuous)
+    *   Bar Charts (Factor vs Factor)
+    *   Alluvial Diagrams (Repeated Factor vs Factor)
+
+#### **2. Robustness & Fallback**
+*   **Fallback**: Successfully generates basic `ggplot2` visualizations when specialized plots are not applicable or fail.
+*   **Validation**: Comprehensive data validation checks for sample size, missing values, and group balance.
+*   **Guidance**: Provides clear, context-aware notices (Warnings/Errors) to guide the user.
+
+#### **3. Clinical Relevance**
+*   **Interpretation**: Generates detailed clinical interpretation and statistical explanation for each plot type.
+*   **Assumptions**: Automatically checks and warns about statistical assumptions (normality, outliers, small samples).
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Raincloud Plots**
+
+---
+
+## 🌧️ **DISTRIBUTION VISUALIZATION**
+
+### **Project Scope: Evaluation of `raincloud` Function**
+
+Comprehensive evaluation of the `raincloud` function for visualizing data distributions.
+
+### **✅ Key Findings:**
+
+#### **1. Visualization Features**
+*   **Components**: Half-violin, box plot, and dot plot components work seamlessly together.
+*   **Customization**: Orientation, transparency, and color palettes (including Prism themes) function correctly.
+*   **Faceting**: Multi-panel plots generated correctly with `facet_var`.
+
+#### **2. Statistical Analysis**
+*   **Summaries**: Comprehensive statistics table (N, Mean, Median, SD, IQR, Skewness) generated accurately.
+*   **Tests**: Normality tests (Shapiro-Wilk) and group comparisons (t-test, ANOVA, etc.) implemented correctly.
+*   **Outliers**: Outlier detection (IQR, Z-score) works as intended.
+
+#### **3. Reliability**
+*   **Error Handling**: Robust handling of missing variables and empty datasets.
+*   **Verification**: Passed all automated tests in `verify_raincloud.R`.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: PCA Loading Heatmap**
+
+---
+
+## 🎨 **MULTIVARIATE VISUALIZATION**
+
+### **Project Scope: Evaluation of `pcaloadingheatmap` Function**
+
+Comprehensive evaluation of the `pcaloadingheatmap` function for visualizing Principal Component Analysis loadings.
+
+### **✅ Key Findings:**
+
+#### **1. Visualization Features**
+*   **Heatmap**: Correctly displays loading matrix with customizable gradients.
+*   **Barmap**: Effectively shows loading patterns across components with cutoff lines.
+*   **Significance**: Star indicators and text values work as intended.
+
+#### **2. Mathematical Accuracy**
+*   **PCA**: Results match standard R `prcomp` output.
+*   **Standardization**: Loading normalization logic verified against manual calculation.
+
+#### **3. Reliability**
+*   **Error Handling**: Robust handling of missing variables, non-numeric data, and insufficient observations.
+*   **Verification**: Passed all automated tests in `verify_pcaloadingheatmap.R`.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Lollipop Charts**
+
+---
+
+## 🍭 **VISUALIZATION MODULE**
+
+### **Project Scope: Evaluation of `lollipop` Function**
+
+Comprehensive evaluation of the `lollipop` function for clinical data visualization.
+
+### **✅ Key Findings:**
+
+#### **1. Visualization Features**
+*   **Orientation**: Vertical and horizontal layouts work correctly.
+*   **Sorting**: Sorting by value (asc/desc) and group (alpha) functions as expected.
+*   **Aggregation**: Mean, median, and sum aggregation prevent over-plotting.
+*   **Highlighting**: Specific groups can be highlighted effectively.
+*   **Conditional Coloring**: Threshold-based coloring works for clinical cutoffs.
+
+#### **2. Clinical Utility**
+*   **Summaries**: Clinical summaries provide clear, actionable insights.
+*   **Warnings**: Appropriate warnings for small sample sizes and unbalanced groups.
+
+#### **3. Reliability**
+*   **Error Handling**: Robust handling of missing variables and invalid data types.
+*   **Verification**: Passed all automated tests in `verify_lollipop.R`.
+
+---
+
+### 🗓️ **November 25, 2025 - Fix: Segmented Total Bar Table**
+
+---
+
+## 📊 **TABLE ENHANCEMENT**
+
+### **Project Scope: Refinement of `jjsegmentedtotalbar` Table**
+
+Addressed user feedback regarding percentage display in the composition table.
+
+### **✅ Key Improvements:**
+
+#### **1. Percentage Clarity**
+*   **Fix**: Separated "Group Percentage" (within category) and "Overall Percentage" (total sample) into distinct columns.
+*   **Verified**: Confirmed that group percentages sum to 100% per category and overall percentages sum to 100% total.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Waffle Charts**
+
+---
+
+## 📊 **VISUALIZATION ENHANCEMENT**
+
+### **Project Scope: Evaluation and Refinement of `jwaffle`**
+
+Critically evaluated the `jwaffle` function for mathematical accuracy, clinical suitability, and release readiness. Verified data aggregation, plot generation, and clinical summaries.
+
+### **✅ Key Improvements:**
+
+#### **1. Robust Verification**
+*   **Verified**: Confirmed correct waffle chart generation for basic and faceted data.
+*   **Verified**: Validated handling of weighted data (counts variable).
+*   **Verified**: Confirmed correct application of professional color palettes.
+
+#### **2. Clinical Suitability**
+*   **Verified**: "Analysis Summary" provides clear, clinically relevant interpretations of proportions.
+*   **Verified**: "Explanations" module correctly details methodology and clinical applications.
+*   **Fix**: Replaced unicode approximation symbol ('≈') with ASCII compatible '~' to prevent potential encoding issues in plot captions.
+
+#### **3. Error Handling**
+*   **Verified**: Confirmed graceful handling of missing grouping variables and invalid data types.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Within-Subjects Stats (Violin Plots)**
+
+---
+
+## 📊 **VISUALIZATION ENHANCEMENT**
+
+### **Project Scope: Evaluation and Refinement of `jjwithinstats`**
+
+Critically evaluated the `jjwithinstats` function for mathematical accuracy, clinical suitability, and release readiness. Addressed missing functionality and verified statistical outputs.
+
+### **✅ Key Improvements:**
+
+#### **1. Explanations Module**
+*   **Fix**: Added missing `explanations` element to YAML and implemented `.generateExplanations` method in R.
+*   **Verified**: Confirmed that explanations are now correctly generated and displayed.
+
+#### **2. Robust Verification**
+*   **Verified**: Confirmed correct execution of parametric, nonparametric, and robust tests for repeated measures.
+*   **Verified**: Validated "Biomarker" and "Treatment" clinical presets.
+*   **Verified**: Confirmed `ggpubr` plot generation works without errors.
+
+#### **3. Error Handling**
+*   **Verified**: Confirmed graceful handling of missing data and insufficient variables.
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Syndromic Plot (PCA)**
+
+---
+
+## 📊 **VISUALIZATION ENHANCEMENT**
+
+### **Project Scope: Evaluation and Refinement of `jjsyndromicplot`**
+
+Critically evaluated the `jjsyndromicplot` function for mathematical accuracy, clinical suitability, and release readiness. Addressed deprecated parameter warnings and verified PCA loading calculations.
+
+### **✅ Key Improvements:**
+
+#### **1. Robust Plot Generation**
+*   **Fix**: Updated `geom_segment` calls to use modern `ggplot2` parameter `linewidth` instead of the deprecated `size`, ensuring compatibility with future `ggplot2` versions.
+*   **Verified**: Confirmed that the syndromic plot correctly visualizes PCA loadings with appropriate arrow sizes and colors.
+
+#### **2. Mathematical Verification**
+*   **Verified**: Confirmed that calculated loadings match those produced by standard R functions (`prcomp`).
+*   **Verified**: Validated correct handling of scaling (`scale=TRUE/FALSE`) and centering.
+
+#### **3. Clinical Presets**
+*   **Verified**: Confirmed that "Biomarker Discovery" and "Disease Subtyping" presets correctly apply their respective configuration settings (cutoff, arrow size, etc.).
+
+---
+
+### 🗓️ **November 25, 2025 - Evaluation: Segmented Total Bar Charts**
+
+---
+
+## 📊 **VISUALIZATION ENHANCEMENT**
+
+### **Project Scope: Evaluation and Refinement of `jjsegmentedtotalbar`**
+
+Critically evaluated the `jjsegmentedtotalbar` function for mathematical accuracy, clinical suitability, and release readiness. Addressed font rendering issues and deprecated parameter warnings.
+
+### **✅ Key Improvements:**
+
+#### **1. Robust Plot Generation**
+*   **Fix**: Resolved "invalid font type" errors by removing explicit font family dependencies in `ggplot2` themes.
+*   **Fix**: Updated `geom_col` and `geom_text` calls to use modern `ggplot2` parameters (`linewidth` instead of `size`) and remove invalid aesthetics (`fill` in text).
+
+#### **2. Mathematical Verification**
+*   **Verified**: Confirmed that segmented portions correctly sum to 100% (or 1.0 proportion) for each category.
+*   **Verified**: Validated correct handling of faceted data in plot generation.
+
+#### **3. Usability Note**
+*   **Identified**: The "Composition Analysis" table aggregates data by category but currently lacks a facet column when faceting is used. This is a known limitation to be addressed in future updates.
+
+---
+
 ## Version 0.0.32.18
 
 ### 🗓️ **January 5, 2025 - Phase 13: Survival Endpoint Derivation**

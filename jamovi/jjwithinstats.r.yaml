@@ -43,6 +43,10 @@ items:
       title: Clinical Interpretation
       type: Html
 
+    - name: explanations
+      title: Explanations
+      type: Html
+
     - name: plot
       title: 'Violin Plots'
       type: Image

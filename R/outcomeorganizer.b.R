@@ -107,21 +107,21 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # 1. Check if required variables exist in data
-            if (!is.null(outcome_var) && !outcome_var %in% names(mydata)) {
+            if (!is.null(outcome_var) && length(outcome_var) > 0 && !outcome_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
                     paste("Outcome variable '", outcome_var, "' not found in dataset.", sep=""))
                 validation_results$should_stop <- TRUE
             }
             
             # 2. Check recurrence variable if specified
-            if (!is.null(recurrence_var) && !recurrence_var %in% names(mydata)) {
+            if (!is.null(recurrence_var) && length(recurrence_var) > 0 && !recurrence_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
                     paste("Recurrence variable '", recurrence_var, "' not found in dataset.", sep=""))
                 validation_results$should_stop <- TRUE
             }
             
             # 3. Check patient ID variable if specified
-            if (!is.null(id_var) && !id_var %in% names(mydata)) {
+            if (!is.null(id_var) && length(id_var) > 0 && !id_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
                     paste("Patient ID variable '", id_var, "' not found in dataset.", sep=""))
                 validation_results$should_stop <- TRUE
@@ -133,7 +133,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # 4. Validate outcome variable
-            if (!is.null(outcome_var) && outcome_var %in% names(mydata)) {
+            if (!is.null(outcome_var) && length(outcome_var) > 0 && outcome_var %in% names(mydata)) {
                 outcome_data <- mydata[[outcome_var]]
                 outcome_data_clean <- outcome_data[!is.na(outcome_data)]
                 
@@ -187,7 +187,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Check for missing data patterns
-                if (!is.null(outcome_var) && outcome_var %in% names(mydata)) {
+                if (!is.null(outcome_var) && length(outcome_var) > 0 && outcome_var %in% names(mydata)) {
                     missing_outcome <- sum(is.na(mydata[[outcome_var]]))
                     missing_proportion <- missing_outcome / total_rows
 
@@ -308,6 +308,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                 } else if (inherits(outcome1, c("factor", "character"))) {
+                    # Check if outcomeLevel is provided
+                    if (is.null(outcomeLevel)) {
+                        stop('Please select which value represents the event using the "Outcome Level" option.')
+                    }
+                    
                     # Convert to 1s and 0s based on the event level
                     mydata[["myoutcome"]] <- ifelse(
                         test = outcome1 == outcomeLevel,

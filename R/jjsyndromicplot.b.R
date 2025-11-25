@@ -468,7 +468,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ) +
                 ggplot2::geom_segment(
                     arrow = arrow(type = 'closed', length = unit(0.3, 'cm'), angle = 25),
-                    size = abs(p$arrow_weight) * arrow_size_multi, show.legend = FALSE,
+                    linewidth = abs(p$arrow_weight) * arrow_size_multi, show.legend = FALSE,
                     linejoin = 'mitre'
                 ) +
                 ggplot2::ylab(NULL) +
@@ -508,12 +508,12 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ggplot2::geom_segment(data = legend_df, aes(x = .data$x, y = .data$y,
                                                                     xend = .data$xend,
                                                                     yend = .data$yend, color = .data$z,
-                                                                    size = abs(.data$z) * 20),
+                                                                    linewidth = abs(.data$z) * 20),
                                              inherit.aes = FALSE, show.legend = FALSE) +
                         geom_segment(data = legend_df_cutoff, aes(x = .data$x, y = .data$y,
                                                                   xend = .data$xend,
                                                                   yend = .data$yend,
-                                                                  size = abs(.data$z) * 20,
+                                                                  linewidth = abs(.data$z) * 20,
                                                                   alpha = abs(.data$z)),
                                     inherit.aes = FALSE, show.legend = FALSE, color = "grey") +
                         ggplot2::annotate(geom = "text", x = 0, y = -12.5,
@@ -521,16 +521,16 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                          size = text_size - 2) +
                         ggplot2::annotate(geom = "segment", x = cutoff_line.xmin,
                                          xend = cutoff_line.xmin,
-                                         y = -10.6, yend = -11.4, size = 1, alpha = 0.5) +
+                                         y = -10.6, yend = -11.4, linewidth = 1, alpha = 0.5) +
                         ggplot2::annotate(geom = "segment", x = cutoff_line.xmax,
                                          xend = cutoff_line.xmax,
-                                         y = -10.6, yend = -11.4, size = 1, alpha = 0.5)
+                                         y = -10.6, yend = -11.4, linewidth = 1, alpha = 0.5)
                 } else {
                     s_plot <- s_plot +
                         ggplot2::geom_segment(data = legend_df, aes(x = .data$x, y = .data$y,
                                                                     xend = .data$xend,
                                                                     yend = .data$yend, color = .data$z,
-                                                                    size = abs(.data$z) * 20),
+                                                                    linewidth = abs(.data$z) * 20),
                                              inherit.aes = FALSE, show.legend = FALSE)
                 }
 
@@ -540,13 +540,13 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                              yend = -11), color = colors[3],
                                          arrow = arrow(type = 'closed',
                                                       length = unit(0.1, 'cm'), angle = 25),
-                                         size = 6, show.legend = FALSE, linejoin = 'mitre') +
+                                         linewidth = 6, show.legend = FALSE, linejoin = 'mitre') +
                     ggplot2::geom_segment(aes(x = min(legend_df$x), y = -11,
                                              xend = min(legend_df$x) - 0.1,
                                              yend = -11), color = colors[1],
                                          arrow = arrow(type = 'closed',
                                                       length = unit(0.1, 'cm'), angle = 25),
-                                         size = 6, show.legend = FALSE, linejoin = 'mitre') +
+                                         linewidth = 6, show.legend = FALSE, linejoin = 'mitre') +
                     ggplot2::annotate(geom = 'text', x = -4.1, y = -11, label = "-1",
                                      size = text_size) +
                     ggplot2::annotate(geom = 'text', x = 4.1, y = -11, label = "1",

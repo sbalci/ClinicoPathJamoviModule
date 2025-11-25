@@ -241,13 +241,13 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(facet_var) && !is.null(facet_level)) {
                 # Facet-specific caption
                 caption_text <- sprintf(
-                    "%s = %s: Each square ≈ %.1f %s (%.1f%%) (total = %d)",
+                    "%s = %s: Each square ~ %.1f %s (%.1f%%) (total = %d)",
                     facet_var, facet_level, units_per_square, unit_label, squares_per_unit, total_cases
                 )
             } else if (!is.null(facet_var)) {
                 # General faceted caption (when not specific to a level)
                 caption_text <- sprintf(
-                    "Each square ≈ %.1f %s per facet group (values vary by %s)",
+                    "Each square ~ %.1f %s per facet group (values vary by %s)",
                     units_per_square, unit_label, facet_var
                 )
             } else {

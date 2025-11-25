@@ -343,6 +343,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       .nom_object = NULL,
       .perf_timers = NULL,
+      .validation_warnings = NULL,
+      .validation_time = NULL,
+      .analysis_times = NULL,
 
       # Validation Helper Functions ----
 

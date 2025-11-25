@@ -1,7 +1,7 @@
 ---
 name: jrecode
 title: Recoding
-menuGroup: ExplorationT4
+menuGroup: ExplorationD
 menuSubgroup: Data Preparation
 version: '1.0.0'
 jas: '1.2'

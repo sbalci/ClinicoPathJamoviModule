@@ -1,7 +1,7 @@
 ---
 name: jjsegmentedtotalbar
 title: "Segmented Total Bar Charts"
-menuGroup: JJStatsPlotT4
+menuGroup: JJStatsPlotT3
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
 version: '0.0.32'

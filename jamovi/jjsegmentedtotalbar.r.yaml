@@ -66,7 +66,11 @@ items:
           title: 'Count'
           type: integer
         - name: percentage
-          title: 'Percentage'
+          title: 'Group Percentage'
+          type: number
+          format: pc
+        - name: overall_percentage
+          title: 'Overall Percentage'
           type: number
           format: pc
         - name: total_in_category

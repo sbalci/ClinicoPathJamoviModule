@@ -371,9 +371,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Build base aesthetic mapping
-            aes_mapping <- ggplot2::aes_string(
-                x = self$options$dep,
-                y = self$options$group
+            aes_mapping <- ggplot2::aes(
+                x = .data[[self$options$dep]],
+                y = .data[[self$options$group]]
             )
 
             # Start building plot
@@ -434,7 +434,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add point labels using ggrepel if requested
             if (!is.null(self$options$labelvar) && self$options$labelvar != "") {
                 if (requireNamespace("ggrepel", quietly = TRUE)) {
-                    label_aes <- ggplot2::aes_string(label = self$options$labelvar)
+                    label_aes <- ggplot2::aes(label = .data[[self$options$labelvar]])
                     p <- p + ggrepel::geom_text_repel(
                         mapping = label_aes,
                         size = 3,
@@ -585,26 +585,33 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Implement ggpubrAddSmooth option
             # Build the 'add' parameter based on user selections
-            add_elements <- c()
+            # ggpubr::ggscatter 'add' argument only accepts a single string in some versions
+            # So we handle multiple elements by adding them manually
+            add_element <- NULL
 
             if (self$options$ggpubrAddCorr) {
-                add_elements <- c(add_elements, "reg.line")
+                add_element <- "reg.line"
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
+            } else if (self$options$ggpubrAddSmooth) {
+                # Only set loess here if reg.line is NOT set
+                add_element <- "loess"
+                args$conf.int <- TRUE # Add CI for loess too if it's the only one
             }
 
-            if (self$options$ggpubrAddSmooth) {
-                add_elements <- c(add_elements, "loess")
-            }
-
-            # Combine add elements if any are selected
-            if (length(add_elements) > 0) {
-                args$add <- add_elements
+            # Set the add argument if we have one
+            if (!is.null(add_element)) {
+                args$add <- add_element
             }
 
             # Create scatter plot
             plot <- do.call(ggpubr::ggscatter, args)
+
+            # If BOTH are selected, we need to add loess manually since we used reg.line for 'add'
+            if (self$options$ggpubrAddCorr && self$options$ggpubrAddSmooth) {
+                plot <- plot + ggplot2::geom_smooth(method = "loess", se = TRUE)
+            }
 
             # Apply theme
             plot <- plot + ggpubr::theme_pubr()
@@ -640,26 +647,33 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Implement ggpubrAddSmooth option
             # Build the 'add' parameter based on user selections
-            add_elements <- c()
+            # ggpubr::ggscatter 'add' argument only accepts a single string in some versions
+            # So we handle multiple elements by adding them manually
+            add_element <- NULL
 
             if (self$options$ggpubrAddCorr) {
-                add_elements <- c(add_elements, "reg.line")
+                add_element <- "reg.line"
                 args$conf.int <- TRUE
                 args$cor.coef <- TRUE
                 args$cor.method <- self$options$ggpubrCorrMethod
+            } else if (self$options$ggpubrAddSmooth) {
+                # Only set loess here if reg.line is NOT set
+                add_element <- "loess"
+                args$conf.int <- TRUE # Add CI for loess too if it's the only one
             }
 
-            if (self$options$ggpubrAddSmooth) {
-                add_elements <- c(add_elements, "loess")
-            }
-
-            # Combine add elements if any are selected
-            if (length(add_elements) > 0) {
-                args$add <- add_elements
+            # Set the add argument if we have one
+            if (!is.null(add_element)) {
+                args$add <- add_element
             }
 
             # Create scatter plot
             plot <- do.call(ggpubr::ggscatter, args)
+
+            # If BOTH are selected, we need to add loess manually since we used reg.line for 'add'
+            if (self$options$ggpubrAddCorr && self$options$ggpubrAddSmooth) {
+                plot <- plot + ggplot2::geom_smooth(method = "loess", se = TRUE)
+            }
 
             # Apply theme
             plot <- plot + ggpubr::theme_pubr()

@@ -100,13 +100,13 @@ create_mock_self <- function(data, options = list()) {
   mock_self$private$.generateTests <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.generateTests
   mock_self$private$.createDensityPlot <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.createDensityPlot
   mock_self$private$.createGradientPlot <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.createGradientPlot
-  mock_self$private$.createHistogramPlot <- ClinicoPathJamoviModule:::jjridgesJamoviModule:::jjridgesClass$private_methods$.createHistogramPlot
+  mock_self$private$.createHistogramPlot <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.createHistogramPlot
   mock_self$private$.createViolinPlot <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.createViolinPlot
   mock_self$private$.createPlot <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.createPlot
   mock_self$private$.applyColorPalette <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.applyColorPalette
   mock_self$private$.applyTheme <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.applyTheme
   mock_self$private$.applyLabels <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.applyLabels
-  mock_self$private$.getBandwidth <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.getBandwidth
+  mock_self$private$.calculateBandwidth <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.calculateBandwidth
   mock_self$private$.calculateCliffsDelta <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.calculateCliffsDelta
   mock_self$private$.calculateHodgesLehmann <- ClinicoPathJamoviModule:::jjridgesClass$private_methods$.calculateHodgesLehmann
 
@@ -405,8 +405,8 @@ test_that(".generateTests works with and without stratification", {
   expect_true(length(mock_tests_table_facet$rows) > 0)
   # Expecting two comparisons (G1 vs G2 within S1, G1 vs G2 within S2)
   expect_equal(length(mock_tests_table_facet$rows), 2)
-  expect_true(grepl("G1 vs G2 \(facet=S1\)", mock_tests_table_facet$rows[["1"]]$comparison))
-  expect_true(grepl("G1 vs G2 \(facet=S2\)", mock_tests_table_facet$rows[["2"]]$comparison))
+  expect_true(grepl("G1 vs G2 (facet=S1)", mock_tests_table_facet$rows[["1"]]$comparison, fixed=TRUE))
+  expect_true(grepl("G1 vs G2 (facet=S2)", mock_tests_table_facet$rows[["2"]]$comparison, fixed=TRUE))
   
   # Test with stratification (fill and facet)
   options_all_strata <- list(x_var = "x", y_var = "y", fill_var = "fill", facet_var = "facet", show_stats = TRUE, test_type = "parametric", p_adjust_method = "none", effsize_type = "d")
@@ -436,10 +436,10 @@ test_that(".generateTests works with and without stratification", {
   # And within each of those, G1 vs G2 is compared.
   # Resulting in 4 comparisons.
   expect_equal(length(mock_tests_table_all$rows), 4) 
-  expect_true(grepl("G1 vs G2 \(fill=F1 / facet=S1\)", mock_tests_table_all$rows[["1"]]$comparison))
-  expect_true(grepl("G1 vs G2 \(fill=F2 / facet=S1\)", mock_tests_table_all$rows[["2"]]$comparison))
-  expect_true(grepl("G1 vs G2 \(fill=F1 / facet=S2\)", mock_tests_table_all$rows[["3"]]$comparison))
-  expect_true(grepl("G1 vs G2 \(fill=F2 / facet=S2\)", mock_tests_table_all$rows[["4"]]$comparison))
+  expect_true(grepl("G1 vs G2 (fill=F1 / facet=S1)", mock_tests_table_all$rows[["1"]]$comparison, fixed=TRUE))
+  expect_true(grepl("G1 vs G2 (fill=F2 / facet=S1)", mock_tests_table_all$rows[["2"]]$comparison, fixed=TRUE))
+  expect_true(grepl("G1 vs G2 (fill=F1 / facet=S2)", mock_tests_table_all$rows[["3"]]$comparison, fixed=TRUE))
+  expect_true(grepl("G1 vs G2 (fill=F2 / facet=S2)", mock_tests_table_all$rows[["4"]]$comparison, fixed=TRUE))
 })
 
 # Test plot creation

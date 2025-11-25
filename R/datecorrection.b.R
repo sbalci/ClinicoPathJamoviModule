@@ -13,6 +13,7 @@
 datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrectionClass",
     inherit = datecorrectionBase,
     private = list(
+        .correction_results = NULL,
 
         #' @keywords internal
         .escapeVar = function(x) {

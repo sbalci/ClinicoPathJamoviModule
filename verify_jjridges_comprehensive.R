@@ -73,11 +73,21 @@ jmvcore$OptionString <- R6::R6Class("OptionString", inherit = jmvcore$Option,
 
 jmvcore$Group <- R6::R6Class("Group",
     public = list(
-        initialize = function(...) {},
-        add = function(item) {
-            private$.items[[item$name]] <- item
+        name = NULL,
+        title = NULL,
+        visible = TRUE,
+        initialize = function(options=NULL, name="", title="", visible=TRUE, ...) {
+            print(paste("DEBUG: Group initialize", name))
+            self$name <- name
+            self$title <- title
+            self$visible <- visible
         },
-        setVisible = function(...) {},
+        add = function(item) {
+            print(paste("DEBUG: Adding item", item$name))
+            private$.items[[item$name]] <- item
+            print(paste("DEBUG: Item added. Items now:", paste(names(private$.items), collapse=", ")))
+        },
+        setVisible = function(visible) { self$visible <- visible },
         items = list()
     ),
     private = list(
@@ -87,10 +97,11 @@ jmvcore$Group <- R6::R6Class("Group",
 
 jmvcore$Analysis <- R6::R6Class("Analysis",
     public = list(
-        initialize = function(options, data=NULL, ...) {
+        initialize = function(options, data=NULL, results=NULL, ...) {
             self$options <- options
             self$data <- data
-            self$results <- list() 
+            self$results <- results
+            if (is.null(results)) self$results <- list()
         },
         options = NULL,
         data = NULL,
@@ -103,7 +114,9 @@ jmvcore$Analysis <- R6::R6Class("Analysis",
 
 jmvcore$Image <- R6::R6Class("Image", inherit = jmvcore$Group,
     public = list(
-        initialize = function(...) {},
+        initialize = function(options=NULL, name="", title="", visible=TRUE, ...) {
+            super$initialize(options=options, name=name, title=title, visible=visible, ...)
+        },
         setState = function(p) { 
             print("Plot State Set") 
             print(class(p))
@@ -116,7 +129,9 @@ jmvcore$Image <- R6::R6Class("Image", inherit = jmvcore$Group,
 jmvcore$Html <- R6::R6Class("Html", inherit = jmvcore$Group,
     public = list(
         content = NULL,
-        initialize = function(...) {},
+        initialize = function(options=NULL, name="", title="", visible=TRUE, ...) {
+            super$initialize(options=options, name=name, title=title, visible=visible, ...)
+        },
         setContent = function(content) { 
             self$content <- content
             print(paste("HTML Content Set (Length):", nchar(content))) 
@@ -129,7 +144,9 @@ jmvcore$Html <- R6::R6Class("Html", inherit = jmvcore$Group,
 jmvcore$Table <- R6::R6Class("Table", inherit = jmvcore$Group,
     public = list(
         rows = list(),
-        initialize = function(...) {},
+        initialize = function(options=NULL, name="", title="", visible=TRUE, ...) {
+            super$initialize(options=options, name=name, title=title, visible=visible, ...)
+        },
         addRow = function(rowKey, values) { 
             print(paste("Row Added:", rowKey)) 
             self$rows[[as.character(rowKey)]] <- values
@@ -149,16 +166,75 @@ jmvcore$toNumeric <- function(x) as.numeric(x)
 # A simple way is to read the file, replace `jmvcore::` with `jmvcore$`, and eval it.
 
 source_mocked <- function(file) {
+    print(paste("DEBUG: Sourcing", file))
     lines <- readLines(file)
     # Replace jmvcore:: with jmvcore$
     lines <- gsub("jmvcore::", "jmvcore$", lines)
     # Also handle requireNamespace check
     lines <- gsub('requireNamespace\\("jmvcore", quietly=TRUE\\)', 'TRUE', lines)
+    
+    # Debug: print first few lines of modified code
+    print("DEBUG: First 20 lines of modified code:")
+    print(head(lines, 20))
+    
     eval(parse(text = lines), envir = .GlobalEnv)
+    print("DEBUG: Sourcing complete")
 }
 
 # Source the implementation files with mocking
 source_mocked("R/jjridges.h.R")
+
+# Force definition of jjridgesResults if sourcing failed to produce a working class
+# This mimics what R/jjridges.h.R does but ensures it works in our mock environment
+jjridgesResults <- R6::R6Class(
+    "jjridgesResults",
+    inherit = jmvcore$Group,
+    active = list(
+        instructions = function() private$.items[["instructions"]],
+        warnings = function() private$.items[["warnings"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        plot = function() private$.items[["plot"]],
+        statistics = function() private$.items[["statistics"]],
+        tests = function() private$.items[["tests"]],
+        interpretation = function() private$.items[["interpretation"]]),
+    private = list(),
+    public=list(
+        initialize=function(options) {
+            print("DEBUG: jjridgesResults manual initialize called")
+            super$initialize(options=options, name="", title="Advanced Ridge Plot")
+            self$add(jmvcore$Html$new(options=options, name="instructions", title="Instructions", visible=FALSE))
+            self$add(jmvcore$Html$new(options=options, name="warnings", title="Data Quality Warnings", visible=FALSE))
+            self$add(jmvcore$Html$new(options=options, name="clinicalSummary", title="Clinical Summary", visible=FALSE))
+            self$add(jmvcore$Image$new(options=options, name="plot", title="Ridge Plot", visible=TRUE))
+            self$add(jmvcore$Table$new(options=options, name="statistics", title="Statistical Summary", visible=TRUE))
+            self$add(jmvcore$Table$new(options=options, name="tests", title="Statistical Tests", visible=FALSE))
+            self$add(jmvcore$Html$new(options=options, name="interpretation", title="Interpretation", visible=FALSE))
+        }
+    )
+)
+
+# Re-define jjridgesBase to use this new jjridgesResults
+jjridgesBase <- R6::R6Class(
+    "jjridgesBase",
+    inherit = jmvcore$Analysis,
+    public = list(
+        initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
+            super$initialize(
+                package = "ClinicoPath",
+                name = "jjridges",
+                version = c(0,0,32),
+                options = options,
+                results = jjridgesResults$new(options=options),
+                data = data,
+                datasetId = datasetId,
+                analysisId = analysisId,
+                revision = revision,
+                pause = NULL,
+                completeWhenFilled = FALSE,
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
+        }))
+
 source_mocked("R/jjridges.b.R")
 
 # Helper to run analysis
@@ -206,6 +282,18 @@ test_data <- data.frame(
     facet_group = factor(rep(c("F1", "F2"), each = 50)),
     stringsAsFactors = FALSE
 )
+
+print("DEBUG: Testing jjridgesResults instantiation")
+print("DEBUG: jjridgesResults class definition:")
+print(jjridgesResults)
+tryCatch({
+    opts <- jjridgesOptions$new()
+    res <- jjridgesResults$new(options = opts)
+    print("DEBUG: jjridgesResults instantiation successful")
+    print(paste("DEBUG: res$statistics is NULL?", is.null(res$statistics)))
+}, error = function(e) {
+    print(paste("DEBUG: jjridgesResults instantiation failed:", e$message))
+})
 
 # Test 1: Basic Functionality
 run_analysis(

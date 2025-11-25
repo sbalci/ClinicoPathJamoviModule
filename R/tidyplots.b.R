@@ -622,12 +622,12 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Apply title alignment
             if (!is.null(self$options$plotTitle) && self$options$plotTitle != "") {
-                p <- p |> tidyplots::adjust_title_alignment(self$options$titleAlignment)
+                # p <- p |> tidyplots::adjust_title_alignment(self$options$titleAlignment)
             }
 
             # Apply caption alignment
             if (!is.null(self$options$plotCaption) && self$options$plotCaption != "") {
-                p <- p |> tidyplots::adjust_caption_alignment(self$options$captionAlignment)
+                # p <- p |> tidyplots::adjust_caption_alignment(self$options$captionAlignment)
             }
 
             # Apply legend position
@@ -637,7 +637,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Apply dodge width
             if (self$options$dodgeWidth != 0.8) {
-                p <- p |> tidyplots::adjust_dodge_width(self$options$dodgeWidth)
+                # p <- p |> tidyplots::adjust_dodge_width(self$options$dodgeWidth)
             }
 
             return(p)
@@ -655,31 +655,31 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Apply plot orientation flip if requested
             if (self$options$flipOrientation) {
-                p <- p |> tidyplots::flip_plot_orientation()
+                p <- p |> tidyplots::flip_plot()
             }
 
             # Apply axis limits if specified
             if (self$options$setXLimits) {
-                p <- p |> tidyplots::adjust_x_axis_limits(
-                    min = self$options$xMin,
-                    max = self$options$xMax
-                )
+                # p <- p |> tidyplots::adjust_x_axis_limits(
+                #     min = self$options$xMin,
+                #     max = self$options$xMax
+                # )
             }
 
             if (self$options$setYLimits) {
-                p <- p |> tidyplots::adjust_y_axis_limits(
-                    min = self$options$yMin,
-                    max = self$options$yMax
-                )
+                # p <- p |> tidyplots::adjust_y_axis_limits(
+                #     min = self$options$yMin,
+                #     max = self$options$yMax
+                # )
             }
 
             # Apply axis tick counts
             if (self$options$xAxisTickCount != 5) {
-                p <- p |> tidyplots::adjust_x_axis_n_breaks(self$options$xAxisTickCount)
+                # p <- p |> tidyplots::adjust_x_axis_n_breaks(self$options$xAxisTickCount)
             }
 
             if (self$options$yAxisTickCount != 5) {
-                p <- p |> tidyplots::adjust_y_axis_n_breaks(self$options$yAxisTickCount)
+                # p <- p |> tidyplots::adjust_y_axis_n_breaks(self$options$yAxisTickCount)
             }
 
             # Apply median line for time series if requested
@@ -690,14 +690,14 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply smoother if requested
             if (self$options$addSmoother) {
                 p <- p |> tidyplots::add_curve_fit(
-                    method = self$options$smootherMethod,
-                    se = self$options$smootherSE
+                    # method = self$options$smootherMethod,
+                    # se = self$options$smootherSE
                 )
             }
 
             # Apply rasterization if requested
             if (self$options$useRasterization) {
-                p <- p |> tidyplots::rasterize(dpi = self$options$rasterDPI)
+                # p <- p |> tidyplots::rasterize(dpi = self$options$rasterDPI)
             }
 
             # Apply data point limit if specified

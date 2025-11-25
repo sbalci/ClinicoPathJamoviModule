@@ -32,8 +32,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(self$options[[option]])
         },
 
-        .checkpoint = function() {},
-
         .init = function() {
             # Apply presets first to ensure UI reflects overrides
             private$.applyClinicalPreset()
@@ -292,27 +290,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
-            print("DEBUG: Entering .run")
             # Check requirements
             if (is.null(self$options$x_var) || is.null(self$options$y_var))
                 return()
 
             # Apply clinical preset if selected (must be done before other processing)
-            print("DEBUG: Calling .applyClinicalPreset")
             private$.applyClinicalPreset()
-            print("DEBUG: Returned from .applyClinicalPreset")
 
-            # Check package availability
-            if (!requireNamespace("ggridges", quietly = TRUE)) {
-                self$results$warnings$setContent(
-                    paste0("<p style='color:red;'>", .("The ggridges package is required but not installed."), "</p>")
-                )
-                self$results$warnings$setVisible(TRUE)
-                return()
-            }
-
-            # Validate inputs and collect warnings
-            print("DEBUG: Calling .validateInputs")
+            # Validate inputs
             input_warnings <- tryCatch({
                 private$.validateInputs()
             }, error = function(e) {
@@ -320,7 +305,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$warnings$setVisible(TRUE)
                 return(NULL)
             })
-            print("DEBUG: Returned from .validateInputs")
             
             # Prepare data
             private$.checkpoint()
@@ -328,7 +312,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (nrow(plot_data) == 0) {
                 self$results$warnings$setContent(
-                    paste0("<p style='color:orange;'>", .("No complete cases found after removing missing values."), "</p>")
+                    paste0("<p style='color:red;'>", .("No valid data available for analysis. Check your variable selections and data."), "</p>")
                 )
                 self$results$warnings$setVisible(TRUE)
                 return()
@@ -452,7 +436,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .createPlot = function(data) {
-            print("DEBUG: Entering .createPlot")
             # Base plot setup
             plot_type <- private$.option("plot_type")
             
@@ -655,7 +638,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         aes(fill = fill),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
-                        bandwidth = private$.getBandwidth(),
+                        bandwidth = private$.calculateBandwidth(),
                         color = "black",
                         linewidth = 0.5,
                         show.legend = show_fill_legend
@@ -666,7 +649,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         aes(fill = y),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
-                        bandwidth = private$.getBandwidth(),
+                        bandwidth = private$.calculateBandwidth(),
                         color = "black",
                         linewidth = 0.5,
                         show.legend = FALSE
@@ -681,7 +664,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     fill = NA,
                     color = "black",
                     linewidth = 0.75,
-                    bandwidth = private$.getBandwidth()
+                    bandwidth = private$.calculateBandwidth()
                 )
             }
             
@@ -695,7 +678,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 aes(fill = after_stat(x)),
                 scale = self$options$scale,
                 gradient_lwd = 1.0,
-                bandwidth = private$.getBandwidth()
+                bandwidth = private$.calculateBandwidth()
             )
             
             # Apply gradient colors
@@ -765,7 +748,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     scale = self$options$scale,
                     alpha = self$options$alpha,
                     show.legend = show_fill_legend,
-                    bandwidth = private$.getBandwidth()
+                    bandwidth = private$.calculateBandwidth()
                 )
             } else {
                 p <- p + ggridges::geom_density_ridges(
@@ -773,7 +756,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     scale = self$options$scale,
                     alpha = self$options$alpha,
                     show.legend = FALSE,
-                    bandwidth = private$.getBandwidth()
+                    bandwidth = private$.calculateBandwidth()
                 )
             }
             
@@ -922,7 +905,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Populate table
             for (i in seq_len(nrow(stats))) {
-                private$.checkpoint(flush = FALSE)
+                private$.checkpoint()
 
                 # Build group label from all grouping variables
                 group_label <- as.character(stats$y[i])
@@ -1223,7 +1206,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Helper method: Check for potential repeated measures
         .checkRepeatedMeasures = function(data) {
-            print("DEBUG: Entering .checkRepeatedMeasures")
             # CRITICAL FIX: Detect data patterns suggesting repeated measures/clustering
             # This helps warn users when independence assumption is likely violated
 

@@ -60,7 +60,7 @@ use gemini to make Readiness for Clinicians and Pathologists assessment and Use 
 
 you are an expert R-package and jamovi developer.
 you are an expert in biostatistics working with pathologists and clinicians.
-critically evaluate FUNC_NAME function.
+critically evaluate lollipop function.
 is it mathematically and statistically accurate?
 is it ready to be used by clinicians and pathologists? is it ready for release?
 

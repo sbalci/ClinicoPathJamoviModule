@@ -1,7 +1,7 @@
 ---
 name: raincloud
 title: Raincloud Plot
-menuGroup: JJStatsPlotT4
+menuGroup: JJStatsPlotT3
 menuSubgroup: Categorical vs Continuous
 version: '0.0.32'
 jas: '1.2'

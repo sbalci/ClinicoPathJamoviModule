@@ -589,10 +589,35 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             return(paste(summary_parts, collapse = ""))
-        }
+        },
+
+        # Generate explanations ----
+        .generateExplanations = function() {
+            self$results$explanations$setVisible(TRUE)
+            self$results$explanations$setContent(
+                "<h3>Explanations</h3>
+                <p>
+                    This analysis compares repeated measurements from the same subjects (within-subjects design).
+                    It helps determine if there are significant differences between time points or conditions.
+                </p>
+                <p>
+                    <strong>Violin Plots:</strong> Show the distribution of data. Wider sections indicate more data points.
+                    <br>
+                    <strong>Box Plots:</strong> Show the median (middle line) and quartiles (box edges).
+                </p>
+                <p>
+                    <strong>Statistical Tests:</strong>
+                    <ul>
+                        <li><strong>Parametric (ANOVA/t-test):</strong> Assumes normal distribution. Tests for difference in means.</li>
+                        <li><strong>Nonparametric (Friedman/Wilcoxon):</strong> No distribution assumption. Tests for difference in medians.</li>
+                        <li><strong>Robust:</strong> Resistant to outliers. Uses trimmed means.</li>
+                        <li><strong>Bayesian:</strong> Provides evidence strength for/against the null hypothesis.</li>
+                    </ul>
+                </p>"
+            )
+        },
 
         # run ----
-        ,
         .run = function() {
             ## Initial Message ----
             if ( is.null(self$options$dep1) || is.null(self$options$dep2)) {
