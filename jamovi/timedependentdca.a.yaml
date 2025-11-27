@@ -1,7 +1,7 @@
 ---
 name: timedependentdca
 title: Time-Dependent Decision Curve Analysis
-menuGroup: meddecideT4
+menuGroup: meddecideT3
 menuSubgroup: Medical Decision Analysis
 menuTitle: Time-Dependent DCA
 menuSubtitle: Net benefit for survival and longitudinal data
@@ -153,34 +153,6 @@ options:
       description:
           R: >
             apply LOESS smoothing to decision curves for visualization
-
-    - name: confidence_intervals
-      title: Calculate Confidence Intervals
-      type: Bool
-      default: false
-      description:
-          R: >
-            calculate confidence intervals for net benefit (via bootstrap)
-
-    - name: bootstrap_samples
-      title: Bootstrap Samples
-      type: Number
-      min: 100
-      max: 5000
-      default: 500
-      description:
-          R: >
-            number of bootstrap samples for CI calculation
-
-    - name: confidence_level
-      title: Confidence Level
-      type: Number
-      min: 0.5
-      max: 0.99
-      default: 0.95
-      description:
-          R: >
-            confidence level for intervals (default: 0.95 for 95% CI)
 
     - name: plot_net_benefit
       title: Plot Net Benefit Curves

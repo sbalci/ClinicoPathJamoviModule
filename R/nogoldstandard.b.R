@@ -14,8 +14,11 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "nogoldstandardClass",
     inherit = nogoldstandardBase,
     private = list(
+        .preset_info = NULL,
 
         .init = function() {
+            print("DEBUG: Inside .init")
+            print(ls(private))
             # Apply clinical preset if selected
             private$.applyPreset()
             
@@ -24,6 +27,74 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Show welcome message initially
             private$.showWelcomeMessage()
+        },
+
+        .populateCrossTab = function(test_data, tests, test_levels) {
+            # Create cross-tabulation table showing all possible test combinations
+            n_tests <- length(tests)
+            if (n_tests < 2) return()
+            
+            # Generate all possible combinations of test results
+            # For each test, create binary result (positive/negative)
+            binary_results <- data.frame(matrix(nrow=nrow(test_data), ncol=n_tests))
+            names(binary_results) <- tests
+            
+            for (i in seq_along(tests)) {
+                test_name <- tests[[i]]
+                pos_level <- test_levels[[i]]
+                binary_results[[test_name]] <- as.numeric(test_data[[test_name]] == pos_level)
+            }
+            
+            # Generate all possible patterns (2^n_tests combinations)
+            patterns <- expand.grid(replicate(n_tests, 0:1, simplify = FALSE))
+            names(patterns) <- tests
+            
+            # Count occurrences of each pattern
+            table_data <- data.frame()
+            total_obs <- nrow(binary_results)
+            
+            for (i in 1:nrow(patterns)) {
+                pattern <- patterns[i, ]
+                
+                # Check which rows match this pattern
+                matches <- rep(TRUE, nrow(binary_results))
+                for (j in 1:ncol(pattern)) {
+                    matches <- matches & (binary_results[[j]] == pattern[[j]])
+                }
+                
+                count <- sum(matches, na.rm = TRUE)
+                percentage <- count / total_obs
+                
+                # Create descriptive label for the pattern
+                pattern_labels <- character(ncol(pattern))
+                for (j in 1:ncol(pattern)) {
+                    test_name <- names(pattern)[j]
+                    result <- ifelse(pattern[[j]] == 1, "+", "-")
+                    pattern_labels[j] <- paste0(test_name, result)
+                }
+                combination_label <- paste(pattern_labels, collapse = ", ")
+                
+                # Add row to table
+                table_data <- rbind(table_data, data.frame(
+                    test_combination = combination_label,
+                    count = count,
+                    percentage = percentage,
+                    stringsAsFactors = FALSE
+                ))
+            }
+            
+            # Sort by count (descending)
+            table_data <- table_data[order(table_data$count, decreasing = TRUE), ]
+            
+            # Populate the results table
+            crosstab_table <- self$results$crosstab
+            for (i in 1:nrow(table_data)) {
+                crosstab_table$addRow(rowKey=paste0("pattern_", i), values=list(
+                    test_combination = table_data$test_combination[i],
+                    count = table_data$count[i],
+                    percentage = table_data$percentage[i]
+                ))
+            }
         },
 
         .showWelcomeMessage = function() {
@@ -293,6 +364,15 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Run analysis based on selected method
             results <- NULL
             if (self$options$method == "latent_class") {
+                if (length(tests) < 3) {
+                     self$results$instructions$setContent(
+                        paste0("<div style='color: #856404; background-color: #fff3cd; border-color: #ffeeba; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;'>",
+                               "<strong>Warning:</strong> Latent Class Analysis requires at least 3 tests to be statistically identifiable when analyzing a single population. ",
+                               "With only 2 tests, the model is under-identified and results may be unreliable or fail to converge. ",
+                               "Please consider adding a third test or using a different method (e.g., Composite Reference).</div>")
+                     )
+                     self$results$instructions$setVisible(TRUE)
+                }
                 results <- private$.runLCA(binary_data, tests, test_levels)
             } else if (self$options$method == "composite") {
                 results <- private$.runComposite(binary_data)
@@ -974,73 +1054,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
-        .populateCrossTab = function(test_data, tests, test_levels) {
-            # Create cross-tabulation table showing all possible test combinations
-            n_tests <- length(tests)
-            if (n_tests < 2) return()
-            
-            # Generate all possible combinations of test results
-            # For each test, create binary result (positive/negative)
-            binary_results <- data.frame(matrix(nrow=nrow(test_data), ncol=n_tests))
-            names(binary_results) <- tests
-            
-            for (i in seq_along(tests)) {
-                test_name <- tests[[i]]
-                pos_level <- test_levels[[i]]
-                binary_results[[test_name]] <- as.numeric(test_data[[test_name]] == pos_level)
-            }
-            
-            # Generate all possible patterns (2^n_tests combinations)
-            patterns <- expand.grid(replicate(n_tests, 0:1, simplify = FALSE))
-            names(patterns) <- tests
-            
-            # Count occurrences of each pattern
-            table_data <- data.frame()
-            total_obs <- nrow(binary_results)
-            
-            for (i in 1:nrow(patterns)) {
-                pattern <- patterns[i, ]
-                
-                # Check which rows match this pattern
-                matches <- rep(TRUE, nrow(binary_results))
-                for (j in 1:ncol(pattern)) {
-                    matches <- matches & (binary_results[[j]] == pattern[[j]])
-                }
-                
-                count <- sum(matches, na.rm = TRUE)
-                percentage <- count / total_obs
-                
-                # Create descriptive label for the pattern
-                pattern_labels <- character(ncol(pattern))
-                for (j in 1:ncol(pattern)) {
-                    test_name <- names(pattern)[j]
-                    result <- ifelse(pattern[[j]] == 1, "+", "-")
-                    pattern_labels[j] <- paste0(test_name, result)
-                }
-                combination_label <- paste(pattern_labels, collapse = ", ")
-                
-                # Add row to table
-                table_data <- rbind(table_data, data.frame(
-                    test_combination = combination_label,
-                    count = count,
-                    percentage = percentage,
-                    stringsAsFactors = FALSE
-                ))
-            }
-            
-            # Sort by count (descending)
-            table_data <- table_data[order(table_data$count, decreasing = TRUE), ]
-            
-            # Populate the results table
-            crosstab_table <- self$results$crosstab
-            for (i in 1:nrow(table_data)) {
-                crosstab_table$addRow(rowKey=paste0("pattern_", i), values=list(
-                    test_combination = table_data$test_combination[i],
-                    count = table_data$count[i],
-                    percentage = table_data$percentage[i]
-                ))
-            }
-        },
+
         
         .calculatePPVNPV = function(sensitivity, specificity, prevalence) {
             # Calculate Positive Predictive Value (PPV) and Negative Predictive Value (NPV)
@@ -1315,6 +1329,64 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
+        .showMethodGuide = function() {
+            # Create comprehensive method selection guide in HTML
+            guide_html <- paste0(
+                "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;'>",
+                "<h3 style='color: #007bff; margin-top: 0;'>📖 ", .("Method Selection Guide"), "</h3>",
+                
+                "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>🏆 ", .("Latent Class Analysis (Recommended)"), "</h4>",
+                "<p><strong>", .("Description"), ":</strong> ", .("Most robust method using mixture models. Estimates disease prevalence and test parameters simultaneously."), "</p>",
+                "<p><strong>", .("Best for"), ":</strong> ", .("Diagnostic validation studies with 3+ tests and N≥100"), "</p>",
+                "<p><strong>", .("Strengths"), ":</strong> ", .("Handles conditional dependence, provides model fit statistics, most statistically rigorous"), "</p>",
+                "</div>",
+                
+                "<div style='margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 5px;'>",
+                "<h4 style='color: #1565c0; margin-top: 0;'>📊 ", .("Bayesian Analysis"), "</h4>",
+                "<p><strong>", .("Description"), ":</strong> ", .("Incorporates prior knowledge about test performance using Bayesian methods."), "</p>",
+                "<p><strong>", .("Best for"), ":</strong> ", .("Studies where you have prior information about expected sensitivity/specificity"), "</p>",
+                "<p><strong>", .("Strengths"), ":</strong> ", .("Uses prior knowledge, handles uncertainty well, good for smaller samples"), "</p>",
+                "</div>",
+                
+                "<div style='margin: 15px 0; padding: 15px; background: #fff3e0; border-radius: 5px;'>",
+                "<h4 style='color: #ef6c00; margin-top: 0;'>🗳️ ", .("Composite Reference"), "</h4>",
+                "<p><strong>", .("Description"), ":</strong> ", .("Uses majority vote of available tests as pseudo-gold standard."), "</p>",
+                "<p><strong>", .("Best for"), ":</strong> ", .("Inter-rater agreement studies with 3+ tests, exploratory analysis"), "</p>",
+                "<p><strong>", .("Strengths"), ":</strong> ", .("Simple and intuitive, requires minimal assumptions, good starting point"), "</p>",
+                "</div>",
+                
+                "<div style='margin: 15px 0; padding: 15px; background: #fce4ec; border-radius: 5px;'>",
+                "<h4 style='color: #c2185b; margin-top: 0;'>🔒 ", .("All Tests Positive"), "</h4>",
+                "<p><strong>", .("Description"), ":</strong> ", .("Conservative approach - disease present only if ALL tests are positive."), "</p>",
+                "<p><strong>", .("Best for"), ":</strong> ", .("Highly specific diagnoses where false positives are very costly"), "</p>",
+                "<p><strong>", .("Strengths"), ":</strong> ", .("High specificity reference, minimizes false positives"), "</p>",
+                "</div>",
+                
+                "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
+                "<h4 style='color: #388e3c; margin-top: 0;'>🔓 ", .("Any Test Positive"), "</h4>",
+                "<p><strong>", .("Description"), ":</strong> ", .("Liberal approach - disease present if ANY test is positive."), "</p>",
+                "<p><strong>", .("Best for"), ":</strong> ", .("Population screening scenarios where missing cases is costly"), "</p>",
+                "<p><strong>", .("Strengths"), ":</strong> ", .("High sensitivity reference, minimizes false negatives"), "</p>",
+                "</div>",
+                
+                "<div style='margin: 15px 0; padding: 10px; background: #fff8e1; border-radius: 5px; border-left: 3px solid #ffb300;'>",
+                "<h4 style='color: #e65100; margin-top: 0;'>💡 ", .("Selection Tips"), "</h4>",
+                "<ul>",
+                "<li>", .("Start with Latent Class Analysis for most diagnostic studies"), "</li>",
+                "<li>", .("Use Composite Reference for quick exploratory analysis"), "</li>",
+                "<li>", .("Choose All/Any Tests Positive based on clinical consequences of errors"), "</li>",
+                "<li>", .("Consider Bayesian if you have strong prior information"), "</li>",
+                "</ul>",
+                "</div>",
+                
+                "</div>"
+            )
+            
+            # Set the method guide content
+            self$results$method_guide$setContent(guide_html)
+        },
+
         .applyPreset = function() {
             preset <- self$options$clinicalPreset
             
@@ -1375,63 +1447,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
-        .showMethodGuide = function() {
-            # Create comprehensive method selection guide in HTML
-            guide_html <- paste0(
-                "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;'>",
-                "<h3 style='color: #007bff; margin-top: 0;'>📖 ", .("Method Selection Guide"), "</h3>",
-                
-                "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>🏆 ", .("Latent Class Analysis (Recommended)"), "</h4>",
-                "<p><strong>", .("Description"), ":</strong> ", .("Most robust method using mixture models. Estimates disease prevalence and test parameters simultaneously."), "</p>",
-                "<p><strong>", .("Best for"), ":</strong> ", .("Diagnostic validation studies with 3+ tests and N≥100"), "</p>",
-                "<p><strong>", .("Strengths"), ":</strong> ", .("Handles conditional dependence, provides model fit statistics, most statistically rigorous"), "</p>",
-                "</div>",
-                
-                "<div style='margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 5px;'>",
-                "<h4 style='color: #1565c0; margin-top: 0;'>📊 ", .("Bayesian Analysis"), "</h4>",
-                "<p><strong>", .("Description"), ":</strong> ", .("Incorporates prior knowledge about test performance using Bayesian methods."), "</p>",
-                "<p><strong>", .("Best for"), ":</strong> ", .("Studies where you have prior information about expected sensitivity/specificity"), "</p>",
-                "<p><strong>", .("Strengths"), ":</strong> ", .("Uses prior knowledge, handles uncertainty well, good for smaller samples"), "</p>",
-                "</div>",
-                
-                "<div style='margin: 15px 0; padding: 15px; background: #fff3e0; border-radius: 5px;'>",
-                "<h4 style='color: #ef6c00; margin-top: 0;'>🗳️ ", .("Composite Reference"), "</h4>",
-                "<p><strong>", .("Description"), ":</strong> ", .("Uses majority vote of available tests as pseudo-gold standard."), "</p>",
-                "<p><strong>", .("Best for"), ":</strong> ", .("Inter-rater agreement studies with 3+ tests, exploratory analysis"), "</p>",
-                "<p><strong>", .("Strengths"), ":</strong> ", .("Simple and intuitive, requires minimal assumptions, good starting point"), "</p>",
-                "</div>",
-                
-                "<div style='margin: 15px 0; padding: 15px; background: #fce4ec; border-radius: 5px;'>",
-                "<h4 style='color: #c2185b; margin-top: 0;'>🔒 ", .("All Tests Positive"), "</h4>",
-                "<p><strong>", .("Description"), ":</strong> ", .("Conservative approach - disease present only if ALL tests are positive."), "</p>",
-                "<p><strong>", .("Best for"), ":</strong> ", .("Highly specific diagnoses where false positives are very costly"), "</p>",
-                "<p><strong>", .("Strengths"), ":</strong> ", .("High specificity reference, minimizes false positives"), "</p>",
-                "</div>",
-                
-                "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
-                "<h4 style='color: #388e3c; margin-top: 0;'>🔓 ", .("Any Test Positive"), "</h4>",
-                "<p><strong>", .("Description"), ":</strong> ", .("Liberal approach - disease present if ANY test is positive."), "</p>",
-                "<p><strong>", .("Best for"), ":</strong> ", .("Population screening scenarios where missing cases is costly"), "</p>",
-                "<p><strong>", .("Strengths"), ":</strong> ", .("High sensitivity reference, minimizes false negatives"), "</p>",
-                "</div>",
-                
-                "<div style='margin: 15px 0; padding: 10px; background: #fff8e1; border-radius: 5px; border-left: 3px solid #ffb300;'>",
-                "<h4 style='color: #e65100; margin-top: 0;'>💡 ", .("Selection Tips"), "</h4>",
-                "<ul>",
-                "<li>", .("Start with Latent Class Analysis for most diagnostic studies"), "</li>",
-                "<li>", .("Use Composite Reference for quick exploratory analysis"), "</li>",
-                "<li>", .("Choose All/Any Tests Positive based on clinical consequences of errors"), "</li>",
-                "<li>", .("Consider Bayesian if you have strong prior information"), "</li>",
-                "</ul>",
-                "</div>",
-                
-                "</div>"
-            )
-            
-            # Set the method guide content
-            self$results$method_guide$setContent(guide_html)
-        },
+
 
         .generateClinicalSummary = function(results, method, tests) {
             if (is.null(results)) return("")

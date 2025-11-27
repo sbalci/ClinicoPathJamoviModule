@@ -1,6 +1,212 @@
 # ClinicoPath News
 
+## Version 0.0.32.24
+
+### 🗓️ **November 26, 2025 - Evaluation: Data Quality Assessment (checkdata)**
+
+---
+
+## 🏥 **DATA QUALITY TOOL**
+
+### **Project Scope: Evaluation**
+*   **`dataquality` Function**:
+    *   Critically evaluated and verified the `dataquality` function.
+    *   Confirmed accuracy of duplicate detection (rows and values) and missing value analysis.
+    *   Validated visual exploration capabilities (Data Overview, Missing Patterns, Data Types) using `visdat`.
+    *   Ensured robust handling of complete cases and data completeness reporting.
+    *   **`enhancedROC` Function**:
+        *   Critically evaluated and verified the `enhancedROC` function.
+        *   **Fixed Clinical Presets**: Implemented logic to correctly apply sensitivity/specificity thresholds when presets (e.g., "Biomarker Screening") are selected.
+        *   **Improved Input Validation**: Refined error handling for insufficient outcome levels to ensure graceful user feedback.
+        *   **Enhanced Verification**: Updated verification script to cover clinical presets and edge cases, ensuring robust performance.
+        *   **Identified Future Work**: Documented unimplemented advanced options (Calibration, Survival ROC) for future development.
+
+* ## Recent Evaluations & Verifications
+
+*   Verified `decisioncombine` function: Confirmed accuracy of test combination strategies (Parallel, Serial, Majority) and metrics.
+*   Verified `decisioncompare` function: Confirmed accuracy of diagnostic metrics, McNemar's test, and Cochran's Q test for comparing multiple tests.
+*   **`decisioncalculator`**: Verified calculator mode with manual inputs. Confirmed accuracy of advanced metrics (Balanced Accuracy, F1, MCC) and multiple cut-off evaluation features.
+*   **`decision`**: Verified comprehensive diagnostic test analysis, including sensitivity/specificity calculations, population prevalence adjustment, confidence intervals, and Fagan nomogram generation.
+*   **`cotest`**: Verified concurrent test analysis (independent and dependent), clinical presets, and Fagan nomogram generation.
+* **venn** - Critically evaluated Venn diagram function. Verified support for multiple engines (`ggvenn`, `ggVennDiagram`, `UpSetR`, `ComplexUpset`) and up to 7 variables. Confirmed accurate set calculations, robust data validation, and generation of clinical interpretations. All verification tests passed. Ready for release. ✓
+* **vartree** - Critically evaluated variable tree function. Verified integration with `vtree` package, correct summary statistics calculation, and pruning logic. Confirmed robust handling of missing values and accurate interpretation generation. All verification tests passed. Ready for release. ✓
+* **pcaloadingtest** - Critically evaluated PCA loading significance test function. Verified implementation of `permV` method (Linting et al., 2011) with Procrustes rotation. Confirmed robust data validation and correct p-value calculation. All verification tests passed. Ready for release. ✓
+* **pcacomponenttest** - Critically evaluated PCA component significance test function. Verified implementation of Buja & Eyuboglu (1992) sequential permutation method. Confirmed robust data validation (numeric types, scaling warnings) and correct stopping logic. All verification tests passed. Ready for release. ✓
+* **outlierdetection** - Critically eval uated outlier detection function. Fixed two bugs: (1) incorrect variable escaping causing column access failure, (2) missing 'mahalanobis_robust' case in plain summary. All verification tests passed. Function is production-ready with comprehensive outlier detection methods (univariate, multivariate, composite) and excellent clinical guidance. ✓
+* **dataquality** - Critically evaluated data quality assessment function. No bugs found. All verification tests passed. Function provides comprehensive duplicate detection, missing value analysis, and visual data quality inspection using `visdat`. Ready for release. ✓
+* **crosstable** - Critically evaluated cross-tabulation function. No bugs found. All verification tests passed. Function provides multiple table styles (arsenal, finalfit, gtsummary), automatic test selection, stratified analysis (Mantel-Haenszel, Breslow-Day), and comprehensive data quality warnings. Ready for release. ✓
+* **classification** - Critically evaluated classification function. No bugs found. All verification tests passed. Function provides robust machine learning classification with clinical metrics, cross-validation, and class imbalance handling. Ready for release. ✓
+* **chisqposttest** - Critically evaluated chi-square post-hoc testing function. No bugs found. All verification tests passed. Function provides comprehensive pairwise comparisons with multiple correction methods, standardized residuals, and clinical interpretation. Ready for release. ✓
+*   **`crosstable` Function**:
+    *   Critically evaluated and verified the `crosstable` function.
+    *   Confirmed accuracy of multiple table styles (gtsummary, finalfit, arsenal, NEJM, Lancet).
+    *   Verified automatic test selection (Chi-square, Fisher's, t-test, ANOVA) and multiple testing corrections (FDR).
+    *   Validated stratified analysis (Mantel-Haenszel) and data quality warnings.
+
+*   **`classification` Function**:
+    *   Critically evaluated and verified the `classification` function.
+    *   Confirmed accuracy of multiple classifiers (Decision Tree, Random Forest, KNN, Naive Bayes, Logistic Regression, SVM).
+    *   Verified class imbalance handling (Upsample, Downsample, SMOTE).
+    *   Validated clinical metrics (Sensitivity, Specificity, NNT, MCC) and validation methods (CV, Bootstrap).
+
+*   **`chisqposttest` Function**:
+    *   Critically evaluated and verified the `chisqposttest` function.
+    *   Confirmed accuracy of overall Chi-Square test and post-hoc pairwise comparisons (Bonferroni, Holm, FDR).
+    *   Verified residuals analysis and identification of significant cells.
+    *   Validated clinical summaries, educational panels, and assumptions checks.
+    *   Ensured robustness with weighted data and low expected counts.
+
+*   **`checkdata` Function**:
+    *   Critically evaluated and verified the `checkdata` function.
+    *   Confirmed accuracy of outlier detection (consensus-based), distribution analysis, and missing data patterns.
+    *   Verified clinical context validation for Age, Weight, Height, and Lab values.
+    *   Validated the automated quality grading system (Grade A-D).
+    *   Ensured robust handling of various data types and edge cases.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Outlier Detection**: Verified consensus-based detection using Z-score, IQR, and Modified Z-score methods.
+*   **Clinical Validation**: Confirmed context-specific checks for Age, Weight, Height, and Laboratory values.
+*   **Quality Grading**: Validated the automated quality scoring system (Grade A-D).
+
+#### **2. Verification Status**
+*   **Automated Testing**: Created and executed `verify_checkdata.R` with comprehensive test cases.
+*   **Results**: All tests passed, confirming the function's mathematical accuracy and clinical suitability.
+
+---
+
+## Version 0.0.32.23
+
+### 🗓️ **November 26, 2025 - Evaluation: Categorize Continuous Variables (categorize)**
+
+---
+
+## 📊 **CATEGORIZATION TOOL**
+
+### **Project Scope: Evaluation of `categorize` Function**
+
+Critical evaluation of the `categorize` function for accurate binning of continuous variables into categorical ones using various statistical methods.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Binning Methods**: Verified accuracy of Equal Intervals, Quantiles, Manual Breaks, Mean ± SD, and Median Split methods.
+*   **Label Generation**: Confirmed correct application of Auto, Semantic, Numbered, Lettered, and Custom labels.
+*   **Data Integrity**: Validated handling of missing values and correct generation of frequency tables.
+
+#### **2. Verification Status**
+*   **Automated Testing**: Created and executed `verify_categorize.R` with comprehensive test cases.
+*   **Results**: All tests passed, confirming the function's mathematical accuracy and clinical suitability.
+
+---
+
+## Version 0.0.32.22
+
+### 🗓️ **November 26, 2025 - Evaluation: Survival Endpoint Derivation (survivalendpoints)**
+
+---
+
+## 🏥 **SURVIVAL ENDPOINT DERIVATION**
+
+### **Project Scope: Evaluation of `survivalendpoints` Function**
+
+Critical evaluation of the `survivalendpoints` function for accurate derivation of standard survival endpoints (PFS, OS, TTP, DOR) from clinical trial timeline data.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **PFS Calculation**: Verified correct prioritization of progression vs. death events (earliest event used).
+*   **OS Calculation**: Confirmed accurate time-to-death calculation and censoring logic.
+*   **TTP Calculation**: Validated that death without progression is correctly treated as a censoring event.
+*   **DOR Calculation**: Verified duration of response calculation for responders, measuring time from response to progression.
+
+#### **2. Verification Status**
+*   **Automated Testing**: Created and executed `verify_survivalendpoints.R` with comprehensive test cases.
+*   **Results**: All tests passed, confirming the function's mathematical accuracy and clinical suitability.
+
+---
+
+## Version 0.0.32.21
+
+### 🗓️ **November 26, 2025 - Evaluation: Time Interval Calculator (timeinterval)**
+
+---
+
+## ⏱️ **TIME INTERVAL CALCULATOR**
+
+### **Project Scope: Evaluation of `timeinterval` Function**
+
+Critical evaluation of the `timeinterval` function for accurate time interval calculations, date parsing, and data quality assessment.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Robust Date Parsing**: Verified auto-detection and parsing of various date formats (YMD, DMY, etc.).
+*   **Accurate Calculations**: Confirmed correct interval calculations in days, weeks, months, and years.
+*   **Landmark Analysis**: Verified correct implementation of landmark analysis (excluding early events and adjusting times).
+*   **Data Quality**: Validated detection of negative intervals and missing values.
+
+#### **2. Verification Status**
+*   **Automated Testing**: Created and executed `verify_timeinterval.R` with comprehensive test cases.
+*   **Results**: All tests passed, confirming the function's reliability for clinical data preparation.
+
+---
+
+## Version 0.0.32.20
+
+### 🗓️ **November 26, 2025 - Evaluation: Survival Power Analysis (survivalPower)**
+
+---
+
+## ⚡ **SURVIVAL POWER ANALYSIS**
+
+### **Project Scope: Evaluation of `survivalPower` Function**
+
+Critical evaluation of the `survivalPower` function for sample size and power calculations in survival analysis.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Comprehensive Methods**: Verified Log-rank test (Sample Size, Power, Duration), Cox Regression Power, and Non-inferiority designs.
+*   **Robust Calculations**: Confirmed accuracy of calculations against standard formulas and expected behaviors.
+*   **Input Validation**: Validated robust handling of invalid inputs (e.g., negative HR, invalid Alpha) and unsupported options.
+
+#### **2. Verification Status**
+*   **Automated Testing**: Created and executed `verify_survivalPower.R` with comprehensive test cases.
+*   **Results**: All tests passed, confirming the function's reliability for clinical research planning.
+
+---
+
 ## Version 0.0.32.19
+
+### 🗓️ **November 25, 2025 - Evaluation: Survival Analysis (survival)**
+
+---
+
+## 🏥 **SURVIVAL ANALYSIS**
+
+### **Project Scope: Evaluation of `survival` Function**
+
+Comprehensive evaluation of the `survival` function for univariate survival analysis, including Kaplan-Meier, Cox regression, RMST, and Parametric models.
+
+### **✅ Key Findings:**
+
+#### **1. Analysis Capabilities**
+*   **Comprehensive Methods**: Supports Kaplan-Meier, Cox Proportional Hazards, Competing Risks (Cumulative Incidence), and Parametric Survival Models (Weibull, Exponential, etc.).
+*   **Advanced Metrics**: Calculates Restricted Mean Survival Time (RMST) and Person-Time incidence rates with exact confidence intervals.
+*   **Date Handling**: Robustly handles date-based inputs for automatic time-to-event calculation.
+
+#### **2. Clinical Utility**
+*   **Interpretation**: Generates "copy-ready" clinical sentences describing median survival, hazard ratios, and risk differences.
+*   **Visualizations**: Produces publication-quality Kaplan-Meier curves, cumulative event plots, and hazard plots with risk tables.
+*   **Landmark Analysis**: Supports landmark analysis for conditional survival assessment.
+
+#### **3. Robustness & Bug Fixes**
+*   **Bug Fixes**: Resolved critical issues in Competing Risks analysis (missing table object), grouping variables in cumulative incidence, and parametric model failures (column naming, coefficient extraction).
+*   **Verification**: Validated mathematical accuracy against standard R packages (`survival`, `cmprsk`, `flexsurv`) via a comprehensive verification script.
+
+---
 
 ### 🗓️ **November 25, 2025 - Evaluation: Single Arm Survival (singlearm)**
 

@@ -20,6 +20,7 @@ enhancedROCClass <- R6::R6Class(
         .predictors = NULL,
         .rocObjects = NULL,
         .positiveClass = NULL,
+        .presetConfig = NULL,
 
         # Variable name escaping utility for special characters
         .escapeVar = function(x) {
@@ -88,7 +89,13 @@ enhancedROCClass <- R6::R6Class(
                 private$.populateAUCSummary()
             }
 
-            if (self$options$optimalCutoffs && self$options$youdenOptimization) {
+            # Determine if optimization should be run
+            use_optimization <- self$options$youdenOptimization
+            if (!is.null(private$.presetConfig)) {
+                use_optimization <- TRUE
+            }
+
+            if (self$options$optimalCutoffs && use_optimization) {
                 private$.checkpoint()
                 private$.populateOptimalCutoffs()
             }
@@ -147,11 +154,39 @@ enhancedROCClass <- R6::R6Class(
                 private$.checkpoint()
                 private$.populateClinicalInterpretation()
             }
+
+            if (self$options$calibrationAnalysis) {
+                private$.checkpoint()
+                private$.populateCalibrationAnalysis()
+            }
+
+            if (self$options$multiClassROC) {
+                private$.checkpoint()
+                private$.populateMultiClassROC()
+            }
+
+            if (self$options$clinicalImpact) {
+                private$.checkpoint()
+                private$.populateClinicalImpact()
+            }
+
+
+
+            if (self$options$timeDependentROC || self$options$survivalROC) {
+                 self$results$results$instructions$setContent(
+                    "<p><b>Note:</b> Time-Dependent and Survival ROC analyses are not currently supported due to missing time-to-event input options.</p>"
+                 )
+            }
             
             # Generate natural language summary
             if (length(private$.rocResults) > 0) {
                 private$.generateAnalysisSummary()
                 private$.generateClinicalReport()
+            }
+
+            if (self$options$internalValidation) {
+                private$.checkpoint()
+                private$.populateInternalValidation()
             }
         },
 
@@ -260,45 +295,74 @@ enhancedROCClass <- R6::R6Class(
                 )
                 return(NULL)
             } else if (levels_count > 2) {
-                # Convert multi-level outcome to binary using selected positive class
-                available_levels <- levels(outcome_var)
-                positive_class <- self$options$positiveClass
-                
-                if (is.null(positive_class) || positive_class == "" || !positive_class %in% available_levels) {
+                # Check if Multi-Class ROC is enabled
+                if (self$options$multiClassROC) {
+                    # Allow multi-level outcome
+                    available_levels <- levels(outcome_var)
+                    positive_class <- self$options$positiveClass
+                    
+                    # Store positive class for potential binary fallback
+                    if (!is.null(positive_class) && positive_class != "" && positive_class %in% available_levels) {
+                        private$.positiveClass <- positive_class
+                    } else {
+                        private$.positiveClass <- available_levels[2]
+                    }
+                    
+                    # Inform user
+                    info_msg <- paste0("<div style='padding: 10px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; margin-top: 10px;'>",
+                                     "<h4 style='color: #0c5460; margin-top: 0;'>ℹ Multi-Class Analysis Enabled</h4>",
+                                     "<p>Outcome variable '<code>", private$.outcome, "</code>' has ", levels_count, " levels.</p>",
+                                     "<p>Multi-Class ROC metrics will be calculated.</p>",
+                                     "<p>Standard ROC tables will show performance for Positive Class: '<code>", private$.positiveClass, "</code>' vs Others.</p>",
+                                     "</div>")
                     self$results$results$instructions$setContent(
-                        paste0("<div style='padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;'>",
-                               "<h4 style='color: #856404; margin-top: 0;'>Multi-level Outcome Variable Detected</h4>",
-                               "<p><strong>Issue:</strong> Outcome variable '<code>", private$.outcome, 
-                               "</code>' has ", levels_count, " levels for ROC analysis: <strong>", paste(available_levels, collapse = ", "), "</strong></p>",
-                               "<p><strong>Solution:</strong> ROC analysis requires a binary outcome. Please:</p>",
-                               "<ol>",
-                               "<li><strong>Select a Positive Class:</strong> Choose which level represents the 'positive' outcome (e.g., disease present) from the <em>Positive Class</em> dropdown above. All other levels will be combined as 'negative'.</li>",
-                               "<li><strong>Alternative:</strong> Pre-process your data to create a binary version of this variable before analysis.</li>",
-                               "</ol>",
-                               "<p><em>Example:</em> If analyzing mortality, you might select 'DOD' (Dead of Disease) as positive, combining 'DOOC', 'AWD', 'AWOD' as negative cases.</p>",
-                               "</div>")
+                        paste(private$.getInstructions(), info_msg)
                     )
-                    return(NULL)
+                    
+                    # Do NOT convert to binary here
+                    
+                } else {
+                    # Convert multi-level outcome to binary using selected positive class
+                    available_levels <- levels(outcome_var)
+                    positive_class <- self$options$positiveClass
+                    
+                    if (is.null(positive_class) || positive_class == "" || !positive_class %in% available_levels) {
+                        self$results$results$instructions$setContent(
+                            paste0("<div style='padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;'>",
+                                   "<h4 style='color: #856404; margin-top: 0;'>Multi-level Outcome Variable Detected</h4>",
+                                   "<p><strong>Issue:</strong> Outcome variable '<code>", private$.outcome, 
+                                   "</code>' has ", levels_count, " levels for ROC analysis: <strong>", paste(available_levels, collapse = ", "), "</strong></p>",
+                                   "<p><strong>Solution:</strong> ROC analysis requires a binary outcome. Please:</p>",
+                                   "<ol>",
+                                   "<li><strong>Select a Positive Class:</strong> Choose which level represents the 'positive' outcome (e.g., disease present) from the <em>Positive Class</em> dropdown above. All other levels will be combined as 'negative'.</li>",
+                                   "<li><strong>Alternative:</strong> Pre-process your data to create a binary version of this variable before analysis.</li>",
+                                   "<li><strong>Enable Multi-Class ROC:</strong> If you intend to perform multi-class analysis, enable the 'Multi-Class ROC' option.</li>",
+                                   "</ol>",
+                                   "<p><em>Example:</em> If analyzing mortality, you might select 'DOD' (Dead of Disease) as positive, combining 'DOOC', 'AWD', 'AWOD' as negative cases.</p>",
+                                   "</div>")
+                        )
+                        return(NULL)
+                    }
+                    
+                    # Convert to binary: positive class vs all others
+                    binary_outcome <- ifelse(outcome_var == positive_class, positive_class, "Other")
+                    outcome_var <- factor(binary_outcome, levels = c("Other", positive_class))
+                    
+                    # Update data with binary outcome
+                    data[[private$.outcome]] <- outcome_var
+                    
+                    # Inform user about the conversion
+                    info_msg <- paste0("<div style='padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-top: 10px;'>",
+                                     "<h4 style='color: #155724; margin-top: 0;'>✓ Outcome Variable Converted to Binary</h4>",
+                                     "<p><strong>Positive Class:</strong> '<code>", positive_class, "</code>' (cases of interest)</p>",
+                                     "<p><strong>Negative Class:</strong> '<code>Other</code>' (combined: ", 
+                                     paste(available_levels[available_levels != positive_class], collapse = ", "), ")</p>",
+                                     "<p><em>ROC analysis will evaluate how well the predictor(s) distinguish between these two groups.</em></p>",
+                                     "</div>")
+                    self$results$results$instructions$setContent(
+                        paste(private$.getInstructions(), info_msg)
+                    )
                 }
-                
-                # Convert to binary: positive class vs all others
-                binary_outcome <- ifelse(outcome_var == positive_class, positive_class, "Other")
-                outcome_var <- factor(binary_outcome, levels = c("Other", positive_class))
-                
-                # Update data with binary outcome
-                data[[private$.outcome]] <- outcome_var
-                
-                # Inform user about the conversion
-                info_msg <- paste0("<div style='padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-top: 10px;'>",
-                                 "<h4 style='color: #155724; margin-top: 0;'>✓ Outcome Variable Converted to Binary</h4>",
-                                 "<p><strong>Positive Class:</strong> '<code>", positive_class, "</code>' (cases of interest)</p>",
-                                 "<p><strong>Negative Class:</strong> '<code>Other</code>' (combined: ", 
-                                 paste(available_levels[available_levels != positive_class], collapse = ", "), ")</p>",
-                                 "<p><em>ROC analysis will evaluate how well the predictor(s) distinguish between these two groups.</em></p>",
-                                 "</div>")
-                self$results$results$instructions$setContent(
-                    paste(private$.getInstructions(), info_msg)
-                )
             }
             
             # Handle positive class selection for binary variables
@@ -425,9 +489,26 @@ enhancedROCClass <- R6::R6Class(
                         direction <- "auto"  # Fallback to auto-detection
                     }
 
+                    # Handle Multi-Class Outcome for Standard ROC
+                    outcome_col <- data[[private$.outcome]]
+                    if (is.factor(outcome_col) && nlevels(outcome_col) > 2) {
+                        # Convert to binary: Positive Class vs Others
+                        pos_class <- private$.positiveClass
+                        # Fallback if pos_class not valid
+                        if (is.null(pos_class) || !pos_class %in% levels(outcome_col)) {
+                            pos_class <- levels(outcome_col)[2]
+                        }
+                        
+                        binary_outcome <- factor(ifelse(outcome_col == pos_class, pos_class, "Other"),
+                                               levels = c("Other", pos_class))
+                        response_var <- binary_outcome
+                    } else {
+                        response_var <- outcome_col
+                    }
+
                     # Create ROC object with optional smoothing
                     roc_obj <- pROC::roc(
-                        response = data[[private$.outcome]],
+                        response = response_var,
                         predictor = data[[predictor]],
                         direction = direction,
                         ci = TRUE,
@@ -513,8 +594,30 @@ enhancedROCClass <- R6::R6Class(
         },
 
         .calculateOptimalCutoff = function(roc_obj, data, predictor) {
-            # Check if Youden optimization is enabled
-            if (!self$options$youdenOptimization) {
+            # Determine thresholds based on presets or options
+            sens_threshold <- self$options$sensitivityThreshold
+            spec_threshold <- self$options$specificityThreshold
+            use_optimization <- self$options$youdenOptimization
+
+            if (!is.null(private$.presetConfig)) {
+                config <- private$.presetConfig
+                # Force optimization when using presets
+                use_optimization <- TRUE
+                
+                if (config$focus == "sensitivity") {
+                    sens_threshold <- config$threshold
+                    spec_threshold <- 0
+                } else if (config$focus == "specificity") {
+                    sens_threshold <- 0
+                    spec_threshold <- config$threshold
+                } else if (config$focus == "balanced") {
+                    sens_threshold <- config$sens_threshold
+                    spec_threshold <- config$spec_threshold
+                }
+            }
+
+            # Check if optimization is enabled (either by option or preset)
+            if (!use_optimization) {
                 # If Youden optimization is disabled, return a simple result based on best threshold
                 coords_result <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
 
@@ -549,12 +652,12 @@ enhancedROCClass <- R6::R6Class(
             # Apply sensitivity/specificity threshold constraints if specified
             valid_indices <- rep(TRUE, length(coords_result$threshold))
 
-            if (self$options$sensitivityThreshold > 0) {
-                valid_indices <- valid_indices & (coords_result$sensitivity >= self$options$sensitivityThreshold)
+            if (sens_threshold > 0) {
+                valid_indices <- valid_indices & (coords_result$sensitivity >= sens_threshold)
             }
 
-            if (self$options$specificityThreshold > 0) {
-                valid_indices <- valid_indices & (coords_result$specificity >= self$options$specificityThreshold)
+            if (spec_threshold > 0) {
+                valid_indices <- valid_indices & (coords_result$specificity >= spec_threshold)
             }
 
             # If no thresholds meet constraints, use unconstrained optimization
@@ -2811,6 +2914,583 @@ enhancedROCClass <- R6::R6Class(
                 warning(paste("Failed to create convex hull plot:", e$message))
                 FALSE
             })
+        },
+
+        .populateCalibrationAnalysis = function() {
+            if (!self$options$calibrationAnalysis) return()
+            
+            calTable <- self$results$results$calibrationSummary
+            hlTable <- self$results$results$hosmerLemeshowTable
+            
+            for (predictor in names(private$.rocResults)) {
+                tryCatch({
+                    # Get data
+                    data <- private$.data
+                    outcome <- data[[private$.outcome]]
+                    pred_vals <- data[[predictor]]
+                    
+                    # Ensure outcome is binary 0/1
+                    y_binary <- as.numeric(outcome == levels(outcome)[2])
+                    
+                    # Get probabilities
+                    # If predictor is already a probability (0-1), use it directly?
+                    # For safety, we'll fit a logistic regression to get calibrated probabilities
+                    # unless the user explicitly provides probabilities (which we can't easily check here)
+                    # So we will fit a model.
+                    
+                    model <- glm(y_binary ~ pred_vals, family = binomial)
+                    probs <- predict(model, type = "response")
+                    
+                    # Brier Score
+                    brier <- mean((probs - y_binary)^2)
+                    
+                    # Scaled Brier Score (1 - Brier / Brier_max)
+                    # Brier_max is Brier score of a null model (prevalence)
+                    prev <- mean(y_binary)
+                    brier_max <- prev * (1 - prev)^2 + (1 - prev) * prev^2
+                    scaled_brier <- 1 - (brier / brier_max)
+                    
+                    # Calibration Slope and Intercept
+                    # Fit logistic regression of outcome on logit(probs)
+                    logit_probs <- qlogis(probs)
+                    # Handle infinite logits if probs are 0 or 1
+                    logit_probs[probs == 0] <- -10 
+                    logit_probs[probs == 1] <- 10
+                    
+                    cal_model <- glm(y_binary ~ logit_probs, family = binomial)
+                    intercept <- coef(cal_model)[1]
+                    slope <- coef(cal_model)[2]
+                    
+                    # Calibration-in-the-large (intercept when slope is fixed to 1)
+                    # offset(logit_probs)
+                    cal_large_model <- glm(y_binary ~ offset(logit_probs), family = binomial)
+                    cal_in_large <- coef(cal_large_model)[1]
+                    
+                    # Interpretation
+                    interpretation <- ""
+                    if (slope > 1.1) interpretation <- "Under-fitting (slope > 1)"
+                    else if (slope < 0.9) interpretation <- "Over-fitting (slope < 1)"
+                    else interpretation <- "Good calibration slope"
+                    
+                    # Populate Calibration Summary Table
+                    row <- list(
+                        predictor = predictor,
+                        brier_score = brier,
+                        scaled_brier = scaled_brier,
+                        calibration_slope = slope,
+                        calibration_intercept = intercept,
+                        calibration_in_large = cal_in_large,
+                        interpretation = interpretation
+                    )
+                    calTable$addRow(rowKey = predictor, values = row)
+                    
+                    # Hosmer-Lemeshow Test
+                    if (self$options$hosmerLemeshow) {
+                        n_groups <- self$options$hlGroups
+                        
+                        # Create groups based on quantiles
+                        # Use cut2 or manual quantile cutting
+                        # Handle potential duplicate quantiles
+                        breaks <- unique(quantile(probs, probs = seq(0, 1, length.out = n_groups + 1)))
+                        if (length(breaks) < 3) {
+                             # Fallback for very few unique values
+                             groups <- as.numeric(as.factor(probs))
+                             actual_groups <- length(unique(groups))
+                        } else {
+                             groups <- cut(probs, breaks = breaks, include.lowest = TRUE, labels = FALSE)
+                             actual_groups <- length(unique(groups))
+                        }
+                        
+                        obs <- tapply(y_binary, groups, sum)
+                        exp <- tapply(probs, groups, sum)
+                        n_cnt <- tapply(y_binary, groups, length)
+                        
+                        # Calculate Chi-Square statistic
+                        hl_stat <- sum((obs - exp)^2 / (exp * (1 - exp/n_cnt)), na.rm = TRUE)
+                        df <- actual_groups - 2
+                        p_val <- 1 - pchisq(hl_stat, df = df)
+                        
+                        conclusion <- if (p_val < 0.05) "Significant lack of fit" else "Good fit"
+                        
+                        hl_row <- list(
+                            predictor = predictor,
+                            chi_square = hl_stat,
+                            df = df,
+                            p_value = p_val,
+                            n_groups = actual_groups,
+                            conclusion = conclusion
+                        )
+                        hlTable$addRow(rowKey = predictor, values = hl_row)
+                    }
+                    
+                }, error = function(e) {
+                    warning(paste("Calibration analysis failed for", predictor, ":", e$message))
+                })
+            }
+        },
+
+        .plotCalibration = function(image, ggtheme, theme, ...) {
+            if (!self$options$calibrationAnalysis || !self$options$calibrationPlot) return(FALSE)
+            
+            # Set custom plot dimensions if specified
+            width <- self$options$plotWidth %||% 600
+            height <- self$options$plotHeight %||% 600
+            image$setState(list(width = width, height = height))
+            
+            tryCatch({
+                library(ggplot2)
+                
+                plot_data <- data.frame()
+                
+                for (predictor in names(private$.rocResults)) {
+                    # Get data
+                    data <- private$.data
+                    outcome <- data[[private$.outcome]]
+                    pred_vals <- data[[predictor]]
+                    y_binary <- as.numeric(outcome == levels(outcome)[2])
+                    
+                    # Fit model
+                    model <- glm(y_binary ~ pred_vals, family = binomial)
+                    probs <- predict(model, type = "response")
+                    
+                    # Create bins for plotting (deciles)
+                    data_df <- data.frame(prob = probs, outcome = y_binary)
+                    data_df$bin <- cut(data_df$prob, breaks = seq(0, 1, 0.1), include.lowest = TRUE)
+                    
+                    # Calculate observed vs expected in each bin
+                    bin_stats <- aggregate(cbind(outcome, prob) ~ bin, data = data_df, FUN = mean)
+                    bin_stats$Predictor <- predictor
+                    
+                    plot_data <- rbind(plot_data, bin_stats)
+                }
+                
+                # Create plot
+                p <- ggplot(plot_data, aes(x = prob, y = outcome, color = Predictor, group = Predictor)) +
+                    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+                    geom_point(size = 3, alpha = 0.7) +
+                    geom_line(size = 1, alpha = 0.7) +
+                    labs(
+                        x = "Predicted Probability",
+                        y = "Observed Proportion",
+                        title = "Calibration Plot",
+                        subtitle = "Observed vs Predicted Probabilities (Deciles)",
+                        color = "Predictor"
+                    ) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    coord_fixed() +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        plot.subtitle = element_text(hjust = 0.5, size = 10),
+                        legend.position = "bottom"
+                    )
+                
+                # Apply clinical theme if selected
+                if (self$options$plotTheme == "clinical") {
+                    p <- p + theme(
+                        panel.grid.major = element_line(color = "gray90"),
+                        panel.grid.minor = element_line(color = "gray95"),
+                        panel.background = element_rect(fill = "white"),
+                        legend.background = element_rect(fill = "white", color = "gray80")
+                    )
+                }
+                
+                print(p)
+                TRUE
+                
+            }, error = function(e) {
+                warning(paste("Failed to create calibration plot:", e$message))
+                FALSE
+            })
+        },
+
+        .populateMultiClassROC = function() {
+            if (!self$options$multiClassROC) return()
+            
+            aucTable <- self$results$results$multiClassAUC
+            avgTable <- self$results$results$multiClassAverage
+            
+            # Check if outcome has > 2 levels
+            outcome <- private$.data[[private$.outcome]]
+            if (nlevels(outcome) < 3) {
+                self$results$results$instructions$setContent(
+                    "<p><b>Note:</b> Multi-class ROC analysis requires an outcome variable with 3 or more levels.</p>"
+                )
+                return()
+            }
+            
+            for (predictor in private$.predictors) {
+                tryCatch({
+                    # Get data
+                    data <- private$.data
+                    pred_vals <- data[[predictor]]
+                    
+                    # Run Multi-class ROC
+                    # pROC::multiclass.roc
+                    mc_roc <- pROC::multiclass.roc(
+                        response = outcome,
+                        predictor = pred_vals,
+                        levels = levels(outcome)
+                    )
+                    
+                    # Populate Average Table
+                    avgTable$setRow(rowNo = 1, values = list(
+                        averaging_method = "Hand & Till (Pairwise)",
+                        macro_auc = as.numeric(mc_roc$auc),
+                        weighted_auc = NA, # Not directly provided by pROC default
+                        micro_auc = NA
+                    ))
+                    
+                    # Populate Pairwise/Class-specific AUCs if available
+                    # pROC returns pairwise comparisons
+                    # We can iterate through them
+                    
+                    # Note: pROC multiclass.roc returns a list of ROC curves for pairwise comparisons
+                    # We can try to map these to the table structure
+                    
+                    # The table structure expects "class" and "strategy" (e.g. One-vs-Rest)
+                    # pROC does pairwise (One-vs-One) by default
+                    
+                    # If we want One-vs-Rest, we need to calculate it manually
+                    if (self$options$multiClassStrategy == "ovr") {
+                        for (lvl in levels(outcome)) {
+                            # Create binary outcome: Class vs Rest
+                            binary_outcome <- factor(ifelse(outcome == lvl, "Positive", "Negative"), 
+                                                   levels = c("Negative", "Positive"))
+                            
+                            # Calculate ROC
+                            roc_obj <- pROC::roc(response = binary_outcome, predictor = pred_vals, 
+                                               direction = "auto", quiet = TRUE)
+                            
+                            row <- list(
+                                class = lvl,
+                                strategy = "One-vs-Rest",
+                                auc = as.numeric(roc_obj$auc),
+                                auc_lower = if(self$options$useBootstrap) as.numeric(pROC::ci.auc(roc_obj)[1]) else NA,
+                                auc_upper = if(self$options$useBootstrap) as.numeric(pROC::ci.auc(roc_obj)[3]) else NA,
+                                n_positive = sum(outcome == lvl),
+                                n_negative = sum(outcome != lvl)
+                            )
+                            aucTable$addRow(rowKey = paste0(predictor, "_", lvl), values = row)
+                        }
+                    } else {
+                        # One-vs-One (Pairwise)
+                        # We can extract from mc_roc$rocs if available, or re-calculate
+                        # mc_roc$rocs is a list of lists of roc objects
+                        
+                        pairs <- combn(levels(outcome), 2)
+                        for (i in 1:ncol(pairs)) {
+                            class1 <- pairs[1, i]
+                            class2 <- pairs[2, i]
+                            
+                            # Subset data
+                            subset_idx <- outcome %in% c(class1, class2)
+                            subset_outcome <- factor(outcome[subset_idx], levels = c(class1, class2))
+                            subset_pred <- pred_vals[subset_idx]
+                            
+                            roc_obj <- pROC::roc(response = subset_outcome, predictor = subset_pred,
+                                               direction = "auto", quiet = TRUE)
+                            
+                            row <- list(
+                                class = paste(class1, "vs", class2),
+                                strategy = "One-vs-One",
+                                auc = as.numeric(roc_obj$auc),
+                                auc_lower = NA, # CI for pairwise might be overkill to compute for all
+                                auc_upper = NA,
+                                n_positive = sum(outcome == class2), # Assuming class2 is 'positive' in the pair
+                                n_negative = sum(outcome == class1)
+                            )
+                            aucTable$addRow(rowKey = paste0(predictor, "_", class1, "_", class2), values = row)
+                        }
+                    }
+                    
+                }, error = function(e) {
+                    warning(paste("Multi-class ROC analysis failed for", predictor, ":", e$message))
+                })
+            }
+        },
+
+        .plotMultiClassROC = function(image, ggtheme, theme, ...) {
+            if (!self$options$multiClassROC) return(FALSE)
+            
+            # Set custom plot dimensions if specified
+            width <- self$options$plotWidth %||% 600
+            height <- self$options$plotHeight %||% 600
+            image$setState(list(width = width, height = height))
+            
+            tryCatch({
+                library(ggplot2)
+                
+                plot_data <- data.frame()
+                outcome <- private$.data[[private$.outcome]]
+                
+                if (nlevels(outcome) < 3) return(FALSE)
+                
+                for (predictor in private$.predictors) {
+                    pred_vals <- private$.data[[predictor]]
+                    
+                    if (self$options$multiClassStrategy == "ovr") {
+                        for (lvl in levels(outcome)) {
+                            binary_outcome <- factor(ifelse(outcome == lvl, "Positive", "Negative"), 
+                                                   levels = c("Negative", "Positive"))
+                            
+                            roc_obj <- pROC::roc(response = binary_outcome, predictor = pred_vals, 
+                                               direction = "auto", quiet = TRUE)
+                            
+                            coords <- pROC::coords(roc_obj, "all", ret = c("specificity", "sensitivity"))
+                            
+                            df <- data.frame(
+                                FPR = 1 - coords$specificity,
+                                TPR = coords$sensitivity,
+                                Class = lvl,
+                                Predictor = predictor
+                            )
+                            plot_data <- rbind(plot_data, df)
+                        }
+                    }
+                }
+                
+                if (nrow(plot_data) == 0) return(FALSE)
+                
+                p <- ggplot(plot_data, aes(x = FPR, y = TPR, color = Class)) +
+                    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+                    geom_line(size = 1) +
+                    labs(
+                        x = "False Positive Rate",
+                        y = "True Positive Rate",
+                        title = "Multi-Class ROC Curves (One-vs-Rest)",
+                        color = "Class"
+                    ) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    coord_fixed() +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        legend.position = "bottom"
+                    )
+                
+                if (length(private$.predictors) > 1) {
+                    p <- p + facet_wrap(~Predictor)
+                }
+                
+                print(p)
+                TRUE
+                
+            }, error = function(e) {
+                warning(paste("Failed to create multi-class ROC plot:", e$message))
+                FALSE
+            })
+        },
+
+        .populateClinicalImpact = function() {
+            if (!self$options$clinicalImpact) return()
+            
+            impactTable <- self$results$results$clinicalImpactTable
+            decisionTable <- self$results$results$decisionImpactSummary
+            
+            for (predictor in names(private$.rocResults)) {
+                tryCatch({
+                    # Get data
+                    data <- private$.data
+                    outcome <- data[[private$.outcome]]
+                    pred_vals <- data[[predictor]]
+                    y_binary <- as.numeric(outcome == levels(outcome)[2])
+                    n <- length(y_binary)
+                    prevalence <- mean(y_binary)
+                    
+                    # Calculate optimal cutoff metrics
+                    optimal <- private$.rocResults[[predictor]]$optimal_cutoff
+                    sens <- optimal$sensitivity
+                    spec <- optimal$specificity
+                    
+                    # NNT/NND Calculation (at optimal cutoff)
+                    # NNT = 1 / (ARR) or similar, but for diagnostic:
+                    # Number Needed to Diagnose = 1 / (Sensitivity + Specificity - 1) = 1 / Youden
+                    youden <- sens + spec - 1
+                    nnd <- if (youden > 0) 1 / youden else NA
+                    
+                    # Populate Impact Table (at optimal cutoff)
+                    row <- list(
+                        predictor = predictor,
+                        threshold = optimal$cutoff,
+                        sensitivity = sens,
+                        specificity = spec,
+                        ppv = (sens * prevalence) / (sens * prevalence + (1 - spec) * (1 - prevalence)),
+                        npv = (spec * (1 - prevalence)) / (spec * (1 - prevalence) + (1 - sens) * prevalence),
+                        nnd = nnd,
+                        net_benefit = (sens * prevalence) - ((1 - spec) * (1 - prevalence) * (optimal$cutoff / (1 - optimal$cutoff)))
+                    )
+                    impactTable$addRow(rowKey = predictor, values = row)
+                    
+                }, error = function(e) {
+                    warning(paste("Clinical impact analysis failed for", predictor, ":", e$message))
+                })
+            }
+        },
+
+        .plotClinicalUtility = function(image, ggtheme, theme, ...) {
+            if (!self$options$clinicalImpact || !self$options$clinicalUtilityCurve) return(FALSE)
+            
+            # Set custom plot dimensions if specified
+            width <- self$options$plotWidth %||% 600
+            height <- self$options$plotHeight %||% 600
+            image$setState(list(width = width, height = height))
+            
+            tryCatch({
+                library(ggplot2)
+                
+                plot_data <- data.frame()
+                thresholds <- seq(0.01, 0.99, by = 0.01)
+                
+                for (predictor in names(private$.rocResults)) {
+                    data <- private$.data
+                    outcome <- data[[private$.outcome]]
+                    pred_vals <- data[[predictor]]
+                    y_binary <- as.numeric(outcome == levels(outcome)[2])
+                    n <- length(y_binary)
+                    
+                    # Fit model to get probabilities if needed, or use raw if 0-1
+                    # Assuming raw for now if 0-1, else fit
+                    if (all(pred_vals >= 0 & pred_vals <= 1)) {
+                        probs <- pred_vals
+                    } else {
+                        model <- glm(y_binary ~ pred_vals, family = binomial)
+                        probs <- predict(model, type = "response")
+                    }
+                    
+                    net_benefits <- numeric(length(thresholds))
+                    
+                    for (i in seq_along(thresholds)) {
+                        thresh <- thresholds[i]
+                        tp <- sum(probs >= thresh & y_binary == 1)
+                        fp <- sum(probs >= thresh & y_binary == 0)
+                        
+                        # Net Benefit
+                        nb <- (tp / n) - (fp / n) * (thresh / (1 - thresh))
+                        net_benefits[i] <- nb
+                    }
+                    
+                    df <- data.frame(
+                        Threshold = thresholds,
+                        NetBenefit = net_benefits,
+                        Predictor = predictor,
+                        Type = "Model"
+                    )
+                    plot_data <- rbind(plot_data, df)
+                }
+                
+                # Add "Treat All" line
+                prevalence <- mean(as.numeric(private$.data[[private$.outcome]] == levels(private$.data[[private$.outcome]])[2]))
+                treat_all_nb <- prevalence - (1 - prevalence) * (thresholds / (1 - thresholds))
+                treat_all_df <- data.frame(
+                    Threshold = thresholds,
+                    NetBenefit = treat_all_nb,
+                    Predictor = "Treat All",
+                    Type = "Reference"
+                )
+                
+                # Add "Treat None" line (Net Benefit = 0)
+                treat_none_df <- data.frame(
+                    Threshold = thresholds,
+                    NetBenefit = 0,
+                    Predictor = "Treat None",
+                    Type = "Reference"
+                )
+                
+                plot_data <- rbind(plot_data, treat_all_df, treat_none_df)
+                
+                # Filter out negative net benefits for cleaner plot (optional, but standard DCA often shows them)
+                # Usually we limit y-axis to reasonable range
+                
+                p <- ggplot(plot_data, aes(x = Threshold, y = NetBenefit, color = Predictor, linetype = Type)) +
+                    geom_line(size = 1) +
+                    labs(
+                        x = "Threshold Probability",
+                        y = "Net Benefit",
+                        title = "Decision Curve Analysis",
+                        subtitle = "Net Benefit vs Threshold Probability",
+                        color = "Strategy",
+                        linetype = "Type"
+                    ) +
+                    coord_cartesian(ylim = c(-0.05, prevalence + 0.05)) + # Zoom in on relevant range
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        legend.position = "bottom"
+                    )
+                
+                print(p)
+                TRUE
+                
+            }, error = function(e) {
+                warning(paste("Failed to create clinical utility plot:", e$message))
+                FALSE
+            })
+        },
+
+        .populateInternalValidation = function() {
+            if (!self$options$internalValidation) return()
+            
+            val_method <- self$options$validationMethod
+            
+            summary_text <- paste0("<h3>Internal Validation (", val_method, ")</h3>")
+            
+            for (predictor in names(private$.rocResults)) {
+                tryCatch({
+                    data <- private$.data
+                    outcome <- data[[private$.outcome]]
+                    pred_vals <- data[[predictor]]
+                    y_binary <- as.numeric(outcome == levels(outcome)[2])
+                    
+                    original_auc <- as.numeric(private$.rocResults[[predictor]]$roc$auc)
+                    
+                    if (val_method == "bootstrap" || val_method == "both") {
+                        # Bootstrap Validation (Optimism)
+                        B <- 100 # Use fewer samples for speed
+                        boot_aucs <- numeric(B)
+                        
+                        for (i in 1:B) {
+                            indices <- sample(1:length(y_binary), replace = TRUE)
+                            roc_boot <- pROC::roc(outcome[indices], pred_vals[indices], direction="auto", quiet=TRUE)
+                            boot_aucs[i] <- as.numeric(roc_boot$auc)
+                        }
+                        
+                        ci_lower <- quantile(boot_aucs, 0.025)
+                        ci_upper <- quantile(boot_aucs, 0.975)
+                        
+                        summary_text <- paste0(summary_text, 
+                            "<p><b>", predictor, ":</b> Original AUC = ", round(original_auc, 3), 
+                            ", Bootstrap 95% CI [", round(ci_lower, 3), ", ", round(ci_upper, 3), "]</p>")
+                    }
+                    
+                    if (val_method == "cv" || val_method == "both") {
+                        # Cross-Validation
+                        k <- 10
+                        folds <- cut(seq(1, length(y_binary)), breaks = k, labels = FALSE)
+                        folds <- sample(folds)
+                        
+                        cv_aucs <- numeric(k)
+                        
+                        for (i in 1:k) {
+                            test_idx <- which(folds == i)
+                            roc_cv <- pROC::roc(outcome[test_idx], pred_vals[test_idx], direction="auto", quiet=TRUE)
+                            cv_aucs[i] <- as.numeric(roc_cv$auc)
+                        }
+                        
+                        mean_cv_auc <- mean(cv_aucs, na.rm = TRUE)
+                        
+                        summary_text <- paste0(summary_text, 
+                            "<p><b>", predictor, ":</b> ", k, "-Fold CV AUC = ", round(mean_cv_auc, 3), "</p>")
+                    }
+                    
+                }, error = function(e) {
+                    summary_text <- paste0(summary_text, "<p>Validation failed for ", predictor, ": ", e$message, "</p>")
+                })
+            }
+            
+            # Append to analysis summary
+            current_content <- self$results$results$analysisSummary$content
+            self$results$results$analysisSummary$setContent(paste(current_content, summary_text, sep = "<br>"))
         }
     )
 )

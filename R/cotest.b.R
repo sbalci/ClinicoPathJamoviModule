@@ -15,6 +15,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # Cache for expensive nomogram calculations
             .nomogramCache = NULL,
             .lastNomogramParams = NULL,
+            .notices = NULL,
             .init = function() {
                 # Add welcome instructions
                 instructions <- '

@@ -233,8 +233,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 switch(analysis_type,
                     "cox_regression" = {
                         # Safe access to Cox regression results with fallbacks
-                        hr_val <- ifelse(is.null(result_values$hr) || result_values$hr == "-", "N/A", round(as.numeric(result_values$hr), 2))
-                        if (hr_val == "N/A") {
+                        val <- result_values$hr
+                        if (length(val) == 0 || is.na(val) || val == "-") {
+                            hr_val <- "N/A"
+                        } else {
+                            hr_val <- round(as.numeric(val), 2)
+                        }
+                        
+                        if (identical(hr_val, "N/A")) {
                             glue::glue(.('Analysis of {variable} could not determine hazard ratio.'), variable = variable_name)
                         } else {
                             glue::glue(.('When {variable} increases by 1 unit, the hazard (risk) of the event changes by a factor of {hr}.'), 
@@ -275,12 +281,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 tryCatch({
                     analysis_function()
                 }, error = function(e) {
-                    warning(.('Analysis failed in {context}: {error}. Using fallback method.'), 
-                            context = context, error = e$message)
+                    warning(glue::glue(.('Analysis failed in {context}: {error}. Using fallback method.'), 
+                            context = context, error = e$message))
                     return(fallback_value)
                 }, warning = function(w) {
-                    message(.('Warning in {context}: {warning}'), 
-                            context = context, warning = w$message)
+                    message(glue::glue(.('Warning in {context}: {warning}'), 
+                            context = context, warning = w$message))
                     suppressWarnings(analysis_function())
                 })
             },
@@ -377,7 +383,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 
                 # Detect inappropriate cut-off hunting
                 if (self$options$multiple_cutoffs && !is.null(self$options$num_cutoffs)) {
-                    num_cuts <- as.numeric(self$options$num_cutoffs)
+                    # Map string options to numeric values
+                    num_cuts_map <- c("two" = 2, "three" = 3, "four" = 4)
+                    num_cuts <- num_cuts_map[self$options$num_cutoffs]
+                    
+                    # Fallback for safety
+                    if (is.na(num_cuts)) num_cuts <- 0
+                    
                     if (num_cuts > 5) {
                         warnings <- c(warnings, .(
                             "Testing many cut-offs ({n}) increases risk of false discoveries. Consider pre-specified cut-offs or correction for multiple testing."
@@ -725,12 +737,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 mydata[["start"]] <- func(mydata[[dxdate]])
                                 mydata[["end"]] <- func(mydata[[fudate]])
                             }, error = function(e) {
-                                stop(.('Date parsing error: {error}. Please check that your dates match the selected format: {format}'),
-                                     error = e$message, format = timetypedata)
+                                stop(.('Date parsing error: {error}. Please check that your dates match the selected format: {format}',
+                                     error = e$message, format = timetypedata))
                             })
                         } else {
-                            stop(.('Unsupported time type: {type}. Supported formats: {formats}'),
-                                 type = timetypedata, formats = paste(names(lubridate_functions), collapse = ", "))
+                            stop(.('Unsupported time type: {type}. Supported formats: {formats}',
+                                 type = timetypedata, formats = paste(names(lubridate_functions), collapse = ", ")))
                         }
                     } else {
                         # Mixed types error
@@ -739,8 +751,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
-                        stop(.('Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {type}'), 
-                             type = self$options$timetypedata)
+                        stop(.('Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {type}', 
+                             type = self$options$timetypedata))
                     }
 
                     timetypeoutput <-
@@ -1548,7 +1560,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     )
                     
                     # Set table note with clinical context
-                    rescutTable$setNote(interpretation_box)
+                    rescutTable$setNote("clinical", interpretation_box)
                 }
 
                 data_frame <- rescut_summary
@@ -2355,14 +2367,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                     # Debug information
-                    message(.('Data columns: {cols}'), cols = paste(names(mydata), collapse = ", "))
-                    message(.('Trying to access variable: {var}'), var = mycontexpl)
-                    message(.('Variable exists: {exists}'), exists = mycontexpl %in% names(mydata))
+                    message(glue::glue(.('Data columns: {cols}'), cols = paste(names(mydata),collapse = ", ")))
+                    message(glue::glue(.('Trying to access variable: {var}'), var = mycontexpl))
+                    message(glue::glue(.('Variable exists: {exists}'), exists = mycontexpl %in% names(mydata)))
                     if (mycontexpl %in% names(mydata)) {
-                        message(.('Multiple cutoffs analysis: n = {n}, method = {method}, num_cuts = {cuts}'), 
-                                n = length(cont_var), 
-                                method = self$options$cutoff_method,
-                                cuts = self$options$num_cutoffs)
+                        message(glue::glue(.('Multiple cutoffs analysis: n = {n}, method = {method}, num_cuts = {cuts}'), 
+                        n = nrow(results$data), method = self$options$cutoff_method, cuts = self$options$num_cutoffs))
                     }
                     
                     # Determine number of cutoffs
@@ -2651,17 +2661,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Populate multiple cutoffs tables ----
             ,
             .multipleCutoffTables = function(multicut_results) {
-                message(.('multipleCutoffTables called'))
+                message(glue::glue(.('multipleCutoffTables called')))
                 
                 # Check if results are valid
                 if (is.null(multicut_results) || 
                     is.null(multicut_results$cutoff_values) ||
                     is.null(multicut_results$group_stats)) {
-                    message(.('multicut_results is null or invalid'))
+                    message(glue::glue(.('multicut_results is null or invalid')))
                     return()
                 }
                 
-                message(.('Populating tables with {n} cutoffs'), n = length(multicut_results$cutoff_values))
+                message(glue::glue(.('Populating tables with {n} cutoffs'), n = length(multicut_results$cutoff_values)))
                 
                 # Populate cut-off points table (without statistical columns)
                 cutoff_table <- self$results$multipleCutTable
@@ -2706,15 +2716,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         full_text <- paste(logrank_text, interpretation, sep = "\n\n")
                         
                         # Store in a text result (we'll need to check what text output is available)
-                        # For now, let's use a preformatted result
+                        # For now, let's add it as a note
                         if (!is.null(self$results$multipleCutTable)) {
-                            # We can add a note to the table or create a separate text output
-                            # Let's add it as a note for now
                             self$results$multipleCutTable$setNote("logrank", full_text)
                         }
                         
                     }, error = function(e) {
-                        message(.('Error calculating log-rank test: {error}'), error = e$message)
+                        message(glue::glue(.('Error calculating log-rank test: {error}'), error = e$message))
                     })
                 }
                 
@@ -2753,9 +2761,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 
                                 if (length(surv_summary$surv) > 0) {
                                     # Debug the raw values
-                                    message(.('Debug survival for {group} at time {time}: raw surv = {surv}, n.risk = {risk}'), 
-                                            group = group_name, time = time_point, 
-                                            surv = surv_summary$surv[1], risk = surv_summary$n.risk[1])
+                                    message(glue::glue(.('Debug survival for {group} at time {time}: raw surv = {surv}, n.risk = {risk}'), 
+                                            group = group_name, time = time_point, surv = surv_prob, risk = n_risk))
                                     
                                     # Don't multiply by 100 - the YAML format: pc does this automatically
                                     surv_prob <- surv_summary$surv[1]  # Keep as proportion (0-1)
@@ -2785,8 +2792,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                     ))
                                 }
                             }, error = function(e) {
-                                message(.('Error calculating survival at time {time} for group {group}: {error}'), 
-                                        time = time_point, group = group_name, error = e$message)
+                                message(glue::glue(.('Error calculating survival at time {time} for group {group}: {error}'), 
+                                        time = time_point, group = group_name, error = e$message))
                             })
                         }
                     }
@@ -3629,6 +3636,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 <li>High group: May need more intensive monitoring/treatment</li>
                                 <li>Low group: Could be suitable for less intensive approaches</li>
                                 <li>Consider clinical context, not just statistical significance</li>
+                                <li>Consider clinical context, not just statistical significance</li>
                             </ul>
                         </div>
                         
@@ -3703,9 +3711,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 
                 if (n_rows > warn_threshold) {
                     memory_usage <- format(object.size(data), units = "MB")
-                    message(.('Processing large dataset: {rows} rows, ~{memory} memory usage'), 
-                            rows = n_rows, memory = memory_usage)
-                    
+                    message(glue::glue(.('Processing large dataset: {rows} rows, ~{memory} memory usage'), 
+                            rows = n_rows, memory = format(object.size(self$data), units = "auto")))                 
                     if (n_rows > 100000) {
                         message(.('Consider using data sampling or chunking for very large datasets'))
                     }

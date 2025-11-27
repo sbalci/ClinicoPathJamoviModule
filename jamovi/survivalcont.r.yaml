@@ -1098,3 +1098,127 @@ refs:
     - ClinicoPathJamoviModule
 
 ...
+
+    - name: multipleCutTable
+      title: Multiple Cut-off Points
+      type: Table
+      visible: (multiple_cutoffs)
+      rows: 0
+      columns:
+        - name: cutpoint_number
+          title: 'Cut Point #'
+          type: integer
+        - name: cutpoint_value
+          title: 'Cut Point Value'
+          type: number
+        - name: group_created
+          title: 'Group Created'
+          type: text
+      clearWith:
+        - multiple_cutoffs
+        - num_cutoffs
+        - cutoff_method
+        - contexpl
+        - outcome
+
+    - name: multipleMedianTable
+      title: Median Survival by Risk Group
+      type: Table
+      visible: (multiple_cutoffs)
+      rows: 0
+      columns:
+        - name: risk_group
+          title: 'Risk Group'
+          type: text
+        - name: n_patients
+          title: 'N'
+          type: integer
+        - name: events
+          title: 'Events'
+          type: integer
+        - name: median_survival
+          title: 'Median Survival'
+          type: number
+        - name: median_lower
+          title: 'Lower'
+          superTitle: '95% CI'
+          type: number
+        - name: median_upper
+          title: 'Upper'
+          superTitle: '95% CI'
+          type: number
+      clearWith:
+        - multiple_cutoffs
+        - num_cutoffs
+        - cutoff_method
+        - contexpl
+        - outcome
+
+    - name: multipleSurvTable
+      title: Survival Table by Risk Group
+      type: Table
+      visible: (multiple_cutoffs && risktable)
+      rows: 0
+      columns:
+        - name: strata
+          title: 'Risk Group'
+          type: text
+        - name: time
+          title: 'Time'
+          type: number
+        - name: n_risk
+          title: 'Number at Risk'
+          type: integer
+        - name: n_event
+          title: 'Number of Events'
+          type: integer
+        - name: survival
+          title: 'Survival Probability'
+          type: number
+        - name: std_err
+          title: 'SE'
+          type: number
+        - name: lower_ci
+          title: 'Lower'
+          superTitle: '95% CI'
+          type: number
+        - name: upper_ci
+          title: 'Upper'
+          superTitle: '95% CI'
+          type: number
+      clearWith:
+        - multiple_cutoffs
+        - num_cutoffs
+        - cutoff_method
+        - contexpl
+        - outcome
+
+    - name: plotMultipleCutoffs
+      title: Multiple Cut-offs Plot
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotMultipleCutoffs
+      visible: (multiple_cutoffs)
+      requiresData: true
+      clearWith:
+        - multiple_cutoffs
+        - num_cutoffs
+        - cutoff_method
+        - contexpl
+        - outcome
+
+    - name: plotMultipleSurvival
+      title: Survival by Risk Group
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotMultipleSurvival
+      visible: (multiple_cutoffs)
+      requiresData: true
+      clearWith:
+        - multiple_cutoffs
+        - num_cutoffs
+        - cutoff_method
+        - contexpl
+        - outcome

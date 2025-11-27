@@ -58,20 +58,22 @@ use gemini to make Readiness for Clinicians and Pathologists assessment and Use 
 
 
 
-you are an expert R-package and jamovi developer.
-you are an expert in biostatistics working with pathologists and clinicians.
-critically evaluate lollipop function.
-is it mathematically and statistically accurate?
-is it ready to be used by clinicians and pathologists? is it ready for release?
+You are an expert R-package and jamovi developer.
+You are an expert in biostatistics working with pathologists and clinicians.
+Critically evaluate clinicalheatmap function.
+Is it mathematically and statistically accurate?
+Is it ready to be used by clinicians and pathologists? Is it ready for release?
+Suggest improvements.
+Do not remove functionality.
 
 > fix issues and implement recommendations. favor functionality over explanations and guidence parts.
 
 > how does FUNC_NAME handle varibale with empty spaces and characters in them.
-is it necessary to implement escapeVariableNames logic from modelbuilder to FUNC_NAME.
+Is it necessary to implement escapeVariableNames logic from modelbuilder to FUNC_NAME.
 In tables and plots I see the modified names that is why I am asking
-can we apply labelled logic as in oddsratio
+Can we apply labelled logic as in oddsratio
 
-check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js> and <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39>  to implement it for clinical presets
+Check this javascript usage <https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js> and <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39>  to implement it for clinical presets
 <https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R>
 
 jmvtools::prepare();devtools::document();devtools::load_all();data <- readr::read_csv("~/Desktop/survival_pancreas_T2_to_T3_upstage_10072025.csv");stagemigration(data = data, oldStage = T_AJCC8_gr, newStage = T_modified_gr, survivalTime = OverallTime, event = Outcome, eventLevel = "DEAD")

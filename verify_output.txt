@@ -1,0 +1,167 @@
+Loading required package: magrittr
+
+Attaching package: ‘magrittr’
+
+The following object is masked from ‘package:arsenal’:
+
+    set_attr
+
+The following objects are masked from ‘package:testthat’:
+
+    equals, is_less_than, not
+
+Loading required package: knitr
+
+Attaching package: ‘janitor’
+
+The following objects are masked from ‘package:stats’:
+
+    chisq.test, fisher.test
+
+
+Attaching package: ‘labelled’
+
+The following object is masked from ‘package:finalfit’:
+
+    remove_labels
+
+Loading required namespace: jmvcore
+── Warning: gtsummary Style Generates Correctly ────────────────────────────────
+Using an external vector in selections was deprecated in tidyselect 1.1.0.
+i Please use `all_of()` or `any_of()` instead.
+  # Was:
+  data %>% select(mygroup)
+
+  # Now:
+  data %>% select(all_of(mygroup))
+
+See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+Backtrace:
+     ▆
+  1. ├─analysis$run()
+  2. │ └─private$.run()
+  3. │   └─... %>% ...
+  4. ├─gtsummary::add_p(...)
+  5. │ └─gtsummary:::check_class(x, "gtsummary")
+  6. ├─gtsummary::add_overall(.)
+  7. │ └─gtsummary:::check_class(x, "gtsummary")
+  8. ├─gtsummary::add_n(.)
+  9. │ └─gtsummary:::check_class(x, "gtsummary")
+ 10. └─gtsummary::tbl_summary(...)
+ 11.   ├─cards::process_selectors(...)
+ 12.   └─cards:::process_selectors.data.frame(...)
+ 13.     └─cards:::imap(...)
+ 14.       └─cards:::map2(.x, names(.x) %||% seq_along(.x), .f, ...)
+ 15.         └─base::mapply(.f, .x, .y, MoreArgs = list(...), SIMPLIFY = FALSE)
+ 16.           └─cards (local) `<fn>`(dots[[1L]][[2L]], dots[[2L]][[2L]])
+ 17.             └─cards::cards_select(...)
+ 18.               ├─base::tryCatch(...)
+ 19.               │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.               │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.               │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.               └─tidyselect::eval_select(expr = expr, data = data, ...)
+ 23.                 └─tidyselect:::eval_select_impl(...)
+ 24.                   ├─tidyselect:::with_subscript_errors(...)
+ 25.                   │ └─base::withCallingHandlers(...)
+ 26.                   └─tidyselect:::vars_select_eval(...)
+ 27.                     └─tidyselect:::walk_data_tree(expr, data_mask, context_mask)
+ 28.                       └─tidyselect:::eval_sym(expr, data_mask, context_mask)
+Test passed with 2 successes 🎊.
+Test passed with 2 successes 🎊.
+Test passed with 1 success 🎊.
+── Warning: Multiple Testing Correction (FDR) Works ────────────────────────────
+Using an external vector in selections was deprecated in tidyselect 1.1.0.
+i Please use `all_of()` or `any_of()` instead.
+  # Was:
+  data %>% select(mygroup)
+
+  # Now:
+  data %>% select(all_of(mygroup))
+
+See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+Backtrace:
+     ▆
+  1. ├─analysis$run()
+  2. │ └─private$.run()
+  3. │   └─... %>% ...
+  4. ├─gtsummary::add_p(...)
+  5. │ └─gtsummary:::check_class(x, "gtsummary")
+  6. ├─gtsummary::add_overall(.)
+  7. │ └─gtsummary:::check_class(x, "gtsummary")
+  8. ├─gtsummary::add_n(.)
+  9. │ └─gtsummary:::check_class(x, "gtsummary")
+ 10. └─gtsummary::tbl_summary(...)
+ 11.   ├─cards::process_selectors(...)
+ 12.   └─cards:::process_selectors.data.frame(...)
+ 13.     └─cards:::imap(...)
+ 14.       └─cards:::map2(.x, names(.x) %||% seq_along(.x), .f, ...)
+ 15.         └─base::mapply(.f, .x, .y, MoreArgs = list(...), SIMPLIFY = FALSE)
+ 16.           └─cards (local) `<fn>`(dots[[1L]][[2L]], dots[[2L]][[2L]])
+ 17.             └─cards::cards_select(...)
+ 18.               ├─base::tryCatch(...)
+ 19.               │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.               │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.               │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.               └─tidyselect::eval_select(expr = expr, data = data, ...)
+ 23.                 └─tidyselect:::eval_select_impl(...)
+ 24.                   ├─tidyselect:::with_subscript_errors(...)
+ 25.                   │ └─base::withCallingHandlers(...)
+ 26.                   └─tidyselect:::vars_select_eval(...)
+ 27.                     └─tidyselect:::walk_data_tree(expr, data_mask, context_mask)
+ 28.                       └─tidyselect:::eval_sym(expr, data_mask, context_mask)
+Test passed with 3 successes 🎉.
+── Warning: Stratified Analysis (Mantel-Haenszel) Works ────────────────────────
+Using an external vector in selections was deprecated in tidyselect 1.1.0.
+i Please use `all_of()` or `any_of()` instead.
+  # Was:
+  data %>% select(mygroup)
+
+  # Now:
+  data %>% select(all_of(mygroup))
+
+See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+Backtrace:
+     ▆
+  1. ├─analysis$run()
+  2. │ └─private$.run()
+  3. │   └─... %>% ...
+  4. ├─gtsummary::add_p(...)
+  5. │ └─gtsummary:::check_class(x, "gtsummary")
+  6. ├─gtsummary::add_overall(.)
+  7. │ └─gtsummary:::check_class(x, "gtsummary")
+  8. ├─gtsummary::add_n(.)
+  9. │ └─gtsummary:::check_class(x, "gtsummary")
+ 10. └─gtsummary::tbl_summary(...)
+ 11.   ├─cards::process_selectors(...)
+ 12.   └─cards:::process_selectors.data.frame(...)
+ 13.     └─cards:::imap(...)
+ 14.       └─cards:::map2(.x, names(.x) %||% seq_along(.x), .f, ...)
+ 15.         └─base::mapply(.f, .x, .y, MoreArgs = list(...), SIMPLIFY = FALSE)
+ 16.           └─cards (local) `<fn>`(dots[[1L]][[2L]], dots[[2L]][[2L]])
+ 17.             └─cards::cards_select(...)
+ 18.               ├─base::tryCatch(...)
+ 19.               │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.               │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.               │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.               └─tidyselect::eval_select(expr = expr, data = data, ...)
+ 23.                 └─tidyselect:::eval_select_impl(...)
+ 24.                   ├─tidyselect:::with_subscript_errors(...)
+ 25.                   │ └─base::withCallingHandlers(...)
+ 26.                   └─tidyselect:::vars_select_eval(...)
+ 27.                     └─tidyselect:::walk_data_tree(expr, data_mask, context_mask)
+ 28.                       └─tidyselect:::eval_sym(expr, data_mask, context_mask)
+── Failure: Stratified Analysis (Mantel-Haenszel) Works ────────────────────────
+Expected `analysis$results$mantelHaenszelResults$content` to match regexp "Common Odds Ratio".
+Actual text:
+x | <div style='background-color: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #dee2e6;'><h2 style='margin-top: 0; color: #495057;'>Stratified Analysis Results</h2><p><strong>Stratification Variable:</strong> Strata</p><p><strong>Purpose:</strong> Mantel-Haenszel test examines the association between row and column variables while controlling for the effect of the stratification variable. This helps identify whether an observed association is confounded by a third variable.</p></div><h3 style='margin-top: 20px; color: #333;'>Variable: Outcome</h3><div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'><h4 style='margin-top: 0; color: #1976D2;'>Mantel-Haenszel Chi-Square Test</h4><p><strong>Purpose:</strong> Tests association between row and column variables while controlling for stratification variable.</p><table style='width: 100%; border-collapse: collapse; margin: 10px 0;'><tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Chi-square statistic:</strong></td><td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>0.000</td></tr><tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Degrees of freedom:</strong></td><td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>1</td></tr><tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>P-value:</strong></td><td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>1.0000</td></tr><tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Common odds ratio:</strong></td><td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>1.000</td></tr><tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>95% CI for OR:</strong></td><td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>(0.345, 2.895)</td></tr><tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Number of strata:</strong></td><td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>2</td></tr></table><p><strong>Interpretation:</strong></p><ul><li><strong>Common OR = 1:</strong> No association between variables (after controlling for strata)</li><li><strong>Common OR > 1:</strong> Positive association (exposure increases odds of outcome)</li><li><strong>Common OR < 1:</strong> Negative association (exposure decreases odds of outcome)</li></ul></div>
+Error:
+! Test failed with 1 failure and 2 successes.
+Backtrace:
+    ▆
+ 1. └─testthat::test_that(...)
+ 2.   └─testthat:::test_code(code, parent.frame())
+ 3.     ├─withr (local) `<fn>`()
+ 4.     └─reporter$end_test(context = reporter$.context, test = test)
+ 5.       └─cli::cli_abort(...)
+ 6.         └─rlang::abort(...)
+Execution halted

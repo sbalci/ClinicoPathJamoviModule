@@ -283,23 +283,28 @@ jmvcore_reject <- function(message, code = NULL) {
 source_file <- "R/survival.b.R"
 source_code <- readLines(source_file)
 
-# Remove the 'survivalClass <- if (requireNamespace('jmvcore'))' wrapper
-# and the closing parenthesis/brace at the end
-start_line <- grep("survivalClass <- if", source_code)[1]
+# Extract helper functions defined before the class
+# Based on inspection, they are between lines 203 and 240
+helper_functions <- source_code[203:240]
+eval(parse(text = helper_functions))
+
+# Find the start of the private list
+private_start_line <- grep("private = list\\(", source_code)[1]
 end_line <- length(source_code)
 
-# Extract the class definition body
-class_def <- source_code[(start_line + 1):end_line]
+# Extract the private member definitions (content inside private = list(...))
+# We start from the line after 'private = list('
+private_body <- source_code[(private_start_line + 1):end_line]
 
-# Replace 'inherit = survivalBase' with 'inherit = R6::R6Class' for testing
-class_def <- gsub("inherit = survivalBase,", "inherit = R6::R6Class,", class_def)
+# Apply mock replacements to private_body
+private_body <- gsub("jmvcore::toNumeric", "jmvcore_toNumeric", private_body)
+private_body <- gsub("jmvcore::constructFormula", "jmvcore_constructFormula", private_body)
+private_body <- gsub("jmvcore::naOmit", "jmvcore_naOmit", private_body)
+private_body <- gsub("jmvcore::select", "jmvcore_select", private_body)
+private_body <- gsub("jmvcore::reject", "jmvcore_reject", private_body)
 
-# Replace jmvcore:: calls with our mocks
-class_def <- gsub("jmvcore::toNumeric", "jmvcore_toNumeric", class_def)
-class_def <- gsub("jmvcore::constructFormula", "jmvcore_constructFormula", class_def)
-class_def <- gsub("jmvcore::naOmit", "jmvcore_naOmit", class_def)
-class_def <- gsub("jmvcore::select", "jmvcore_select", class_def)
-class_def <- gsub("jmvcore::reject", "jmvcore_reject", class_def)
+# Add mock .checkpoint function at the beginning
+private_body <- c("    .checkpoint = function() {},", private_body)
 
 # Write the modified code to a temporary file and source it
 temp_file <- tempfile(fileext = ".R")
@@ -314,14 +319,47 @@ writeLines(c(
   "      self$options <- options",
   "      self$data <- data",
   "      self$results <- Results$new()",
+  "      print(\"Checking private$.run:\")",
+  "      print(private$.run)",
   "      private$.init()",
   "    },",
   "    run = function() {",
+  "      print(\"Inside run method\")",
+  "      print(\"Checking private$.run inside run:\")",
+  "      print(private$.run)",
+  "      print(\"Checking private$.validateInputs inside run:\")",
+  "      print(private$.validateInputs)",
+  "      print(\"Checking private$.todo inside run:\")",
+  "      print(private$.todo)",
+  "      ",
+  "      print(\"Running private$.validateInputs() directly:\")",
+  "      tryCatch({",
+  "        private$.validateInputs()",
+  "        print(\"private$.validateInputs() success\")",
+  "      }, error = function(e) {",
+  "        print(paste(\"private$.validateInputs() failed:\", e$message))",
+  "      })",
+  "      ",
+  "      print(\"Running private$.run():\")",
   "      private$.run()",
   "    }",
   "  ),",
-  paste(class_def, collapse = "\n")
+  "  private = list(",
+  paste(private_body, collapse = "\n")
 ), temp_file)
+
+print("First 10 lines of private_body:")
+print(head(private_body, 10))
+print("Last 10 lines of private_body:")
+print(tail(private_body, 10))
+
+print("Checking for .run definition in private_body:")
+run_def_lines <- grep("\\.run\\s*=\\s*function", private_body)
+print(paste("Found .run definition at lines:", paste(run_def_lines, collapse = ", ")))
+if (length(run_def_lines) > 0) {
+  print("Content around .run definition:")
+  print(private_body[(run_def_lines[1]-5):(run_def_lines[1]+5)])
+}
 
 source(temp_file)
 
@@ -648,5 +686,6 @@ test_that("Pairwise comparisons run correctly", {
 })
 
 # Run tests
-test_result <- test_dir(dirname(temp_file), reporter = "summary")
-print(test_result)
+# Run tests
+# test_result <- test_dir(dirname(temp_file), reporter = "summary")
+# print(test_result)

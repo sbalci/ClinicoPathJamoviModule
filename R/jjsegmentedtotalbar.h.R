@@ -440,7 +440,12 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                         `type`="integer"),
                     list(
                         `name`="percentage", 
-                        `title`="Percentage", 
+                        `title`="Group Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="overall_percentage", 
+                        `title`="Overall Percentage", 
                         `type`="number", 
                         `format`="pc"),
                     list(

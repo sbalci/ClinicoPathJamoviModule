@@ -1204,6 +1204,20 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 optimization <- private$.optimizeMarkerPanel(df, clusters, catVars, contVars)
             }
 
+            # Perform marker-level clustering if requested
+            markerClusteringResults <- NULL
+            if (isTRUE(opts$performMarkerClustering)) {
+                markerClusteringResults <- private$.performMarkerClustering(
+                    df,
+                    catVars,
+                    contVars,
+                    method = opts$markerClusteringMethod %||% "chisquared",
+                    linkage = opts$markerLinkage %||% "ward",
+                    testAssociations = opts$markerSignificanceTest %||% TRUE,
+                    autoCut = opts$markerCutHeight %||% TRUE
+                )
+            }
+
             # Compute cluster quality metrics
             quality <- NULL
             if (isTRUE(opts$clusterQualityMetrics)) {
@@ -1359,6 +1373,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             analysisState$optimization <- optimization
             analysisState$quality <- quality
             analysisState$refinement <- refinement
+            analysisState$markerClusteringResults <- markerClusteringResults
             analysisState$spatialResults <- spatialResults
             analysisState$spatialConcordance <- spatialConcordance
             analysisState$spatialMarkerDifferences <- spatialMarkerDifferences
@@ -1371,6 +1386,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Populate all tables
             private$.populatePCAContributions()
             private$.populateMarkerImportance()
+            private$.populateMarkerClusteringResults()
             private$.populateClusterQuality()
             private$.populateRefinementHistory()
             private$.populateSpatialCompartmentSummary()
@@ -3567,6 +3583,691 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     redundant_with = row$redundant_with,
                     recommendation = row$recommendation
                 ))
+            }
+        },
+
+        # =============================================================================
+        # MARKER-LEVEL CLUSTERING FUNCTIONS
+        # =============================================================================
+
+        # Main marker clustering function
+        .performMarkerClustering = function(df, catVars, contVars, method = "chisquared",
+                                           linkage = "ward", testAssociations = TRUE,
+                                           autoCut = TRUE) {
+
+            allMarkers <- c(catVars, contVars)
+            if (length(allMarkers) < 2) {
+                return(list(error = "Need at least 2 markers for clustering"))
+            }
+
+            # Compute distance matrix based on method
+            distMatrix <- NULL
+            markerType <- "mixed"
+
+            if (method == "chisquared" && length(catVars) >= 2) {
+                # Chi-squared distance for categorical markers
+                distMatrix <- private$.computeChiSquaredDistance(df, catVars)
+                markers <- catVars
+                markerType <- "categorical"
+            } else if (method == "jaccard" && length(catVars) >= 2) {
+                # Jaccard distance for binary markers
+                distMatrix <- private$.computeJaccardDistance(df, catVars)
+                markers <- catVars
+                markerType <- "categorical"
+            } else if (method == "hamming" && length(catVars) >= 2) {
+                # Hamming distance for categorical markers
+                distMatrix <- private$.computeHammingDistance(df, catVars)
+                markers <- catVars
+                markerType <- "categorical"
+            } else if (method == "cramer" && length(catVars) >= 2) {
+                # Cramér's V distance for categorical markers
+                distMatrix <- private$.computeCramerDistance(df, catVars)
+                markers <- catVars
+                markerType <- "categorical"
+            } else if (method == "euclidean" && length(contVars) >= 2) {
+                # Euclidean distance for continuous markers
+                distMatrix <- dist(scale(df[, contVars]), method = "euclidean")
+                markers <- contVars
+                markerType <- "continuous"
+            } else if (method == "manhattan" && length(contVars) >= 2) {
+                # Manhattan distance for continuous markers
+                distMatrix <- dist(scale(df[, contVars]), method = "manhattan")
+                markers <- contVars
+                markerType <- "continuous"
+            } else if (method == "correlation" && length(contVars) >= 2) {
+                # Correlation distance for continuous markers
+                corMatrix <- cor(df[, contVars], use = "pairwise.complete.obs")
+                distMatrix <- as.dist(1 - abs(corMatrix))
+                markers <- contVars
+                markerType <- "continuous"
+            } else if (method == "mutual_info" && length(allMarkers) >= 2) {
+                # Mutual information distance (works for any type)
+                distMatrix <- private$.computeMutualInfoDistance(df, catVars, contVars)
+                markers <- allMarkers
+                markerType <- "mixed"
+            } else if (method == "mixed" && length(allMarkers) >= 2) {
+                # Mixed distance using automatic selection
+                distMatrix <- private$.computeMixedMarkerDistance(df, catVars, contVars)
+                markers <- allMarkers
+                markerType <- "mixed"
+            } else {
+                return(list(error = "Invalid marker clustering method or insufficient markers"))
+            }
+
+            # Perform hierarchical clustering
+            linkageMethod <- switch(linkage,
+                ward = "ward.D2",
+                complete = "complete",
+                average = "average",
+                "ward.D2"
+            )
+
+            hc <- hclust(distMatrix, method = linkageMethod)
+
+            # Test marker-marker associations if requested
+            associations <- NULL
+            if (testAssociations) {
+                associations <- private$.testMarkerAssociations(df, markers, markerType)
+            }
+
+            # Build clustering tree (dendrogram merge sequence)
+            clusteringTree <- private$.buildMarkerClusteringTree(hc, distMatrix, markers)
+
+            # Identify marker groups if auto-cut enabled
+            markerGroups <- NULL
+            if (autoCut) {
+                markerGroups <- private$.identifyMarkerGroups(hc, associations, markers)
+            }
+
+            return(list(
+                hc = hc,
+                distMatrix = distMatrix,
+                markers = markers,
+                markerType = markerType,
+                associations = associations,
+                clusteringTree = clusteringTree,
+                markerGroups = markerGroups,
+                method = method,
+                linkage = linkage
+            ))
+        },
+
+        # Compute chi-squared distance matrix for categorical markers
+        .computeChiSquaredDistance = function(df, catVars) {
+            n_markers <- length(catVars)
+            chiSqMatrix <- matrix(0, n_markers, n_markers)
+            rownames(chiSqMatrix) <- colnames(chiSqMatrix) <- catVars
+
+            for (i in 1:(n_markers-1)) {
+                for (j in (i+1):n_markers) {
+                    marker1 <- df[[catVars[i]]]
+                    marker2 <- df[[catVars[j]]]
+
+                    # Create contingency table
+                    contTable <- table(marker1, marker2, useNA = "no")
+
+                    # Compute chi-squared statistic
+                    if (nrow(contTable) > 1 && ncol(contTable) > 1) {
+                        chiTest <- tryCatch({
+                            chisq.test(contTable)
+                        }, error = function(e) NULL, warning = function(w) NULL)
+
+                        if (!is.null(chiTest)) {
+                            # Use chi-squared as dissimilarity (higher = more different)
+                            chiSqMatrix[i, j] <- chiTest$statistic
+                            chiSqMatrix[j, i] <- chiTest$statistic
+                        }
+                    }
+                }
+            }
+
+            # Convert to distance object (normalize by max chi-squared)
+            maxChiSq <- max(chiSqMatrix)
+            if (maxChiSq > 0) {
+                chiSqMatrix <- chiSqMatrix / maxChiSq
+            }
+
+            return(as.dist(chiSqMatrix))
+        },
+
+        # Compute Jaccard distance for binary/categorical markers
+        .computeJaccardDistance = function(df, catVars) {
+            n_markers <- length(catVars)
+            jaccardMatrix <- matrix(0, n_markers, n_markers)
+            rownames(jaccardMatrix) <- colnames(jaccardMatrix) <- catVars
+
+            for (i in 1:(n_markers-1)) {
+                for (j in (i+1):n_markers) {
+                    marker1 <- df[[catVars[i]]]
+                    marker2 <- df[[catVars[j]]]
+
+                    # Convert to binary if needed (presence/absence)
+                    # For ordinal data, consider positive if > baseline
+                    binary1 <- as.numeric(marker1 != levels(marker1)[1])
+                    binary2 <- as.numeric(marker2 != levels(marker2)[1])
+
+                    # Compute Jaccard index
+                    intersection <- sum(binary1 & binary2, na.rm = TRUE)
+                    union <- sum(binary1 | binary2, na.rm = TRUE)
+
+                    jaccard <- ifelse(union > 0, intersection / union, 0)
+                    jaccardMatrix[i, j] <- 1 - jaccard  # Convert to distance
+                    jaccardMatrix[j, i] <- 1 - jaccard
+                }
+            }
+
+            return(as.dist(jaccardMatrix))
+        },
+
+        # Compute Hamming distance for categorical markers
+        .computeHammingDistance = function(df, catVars) {
+            n_markers <- length(catVars)
+            n_cases <- nrow(df)
+            hammingMatrix <- matrix(0, n_markers, n_markers)
+            rownames(hammingMatrix) <- colnames(hammingMatrix) <- catVars
+
+            for (i in 1:(n_markers-1)) {
+                for (j in (i+1):n_markers) {
+                    marker1 <- df[[catVars[i]]]
+                    marker2 <- df[[catVars[j]]]
+
+                    # Count mismatches (cases where markers differ)
+                    mismatches <- sum(marker1 != marker2, na.rm = TRUE)
+                    valid_pairs <- sum(!is.na(marker1) & !is.na(marker2))
+
+                    # Normalize by number of valid comparisons
+                    hamming_dist <- ifelse(valid_pairs > 0, mismatches / valid_pairs, 0)
+
+                    hammingMatrix[i, j] <- hamming_dist
+                    hammingMatrix[j, i] <- hamming_dist
+                }
+            }
+
+            return(as.dist(hammingMatrix))
+        },
+
+        # Compute Cramér's V distance for categorical markers
+        .computeCramerDistance = function(df, catVars) {
+            n_markers <- length(catVars)
+            cramerMatrix <- matrix(0, n_markers, n_markers)
+            rownames(cramerMatrix) <- colnames(cramerMatrix) <- catVars
+
+            for (i in 1:(n_markers-1)) {
+                for (j in (i+1):n_markers) {
+                    marker1 <- df[[catVars[i]]]
+                    marker2 <- df[[catVars[j]]]
+
+                    # Create contingency table
+                    contTable <- table(marker1, marker2, useNA = "no")
+
+                    # Compute Cramér's V
+                    if (nrow(contTable) > 1 && ncol(contTable) > 1) {
+                        chiTest <- tryCatch({
+                            chisq.test(contTable)
+                        }, error = function(e) NULL, warning = function(w) NULL)
+
+                        if (!is.null(chiTest)) {
+                            n <- sum(contTable)
+                            minDim <- min(dim(contTable)) - 1
+                            cramersV <- sqrt(chiTest$statistic / (n * minDim))
+                            # Convert to distance: high V = similar (low distance)
+                            cramerMatrix[i, j] <- 1 - as.numeric(cramersV)
+                            cramerMatrix[j, i] <- 1 - as.numeric(cramersV)
+                        }
+                    }
+                }
+            }
+
+            return(as.dist(cramerMatrix))
+        },
+
+        # Compute mutual information distance
+        .computeMutualInfoDistance = function(df, catVars, contVars) {
+            allMarkers <- c(catVars, contVars)
+            n_markers <- length(allMarkers)
+            miMatrix <- matrix(0, n_markers, n_markers)
+            rownames(miMatrix) <- colnames(miMatrix) <- allMarkers
+
+            # Helper function to discretize continuous variables
+            discretize <- function(x, n_bins = 5) {
+                cut(x, breaks = n_bins, labels = FALSE, include.lowest = TRUE)
+            }
+
+            for (i in 1:(n_markers-1)) {
+                for (j in (i+1):n_markers) {
+                    var1 <- allMarkers[i]
+                    var2 <- allMarkers[j]
+
+                    # Get data and discretize if continuous
+                    data1 <- df[[var1]]
+                    data2 <- df[[var2]]
+
+                    if (var1 %in% contVars) {
+                        data1 <- discretize(data1)
+                    }
+                    if (var2 %in% contVars) {
+                        data2 <- discretize(data2)
+                    }
+
+                    # Compute mutual information
+                    mi <- private$.computeMI(data1, data2)
+
+                    # Normalize by max entropy (creates normalized MI in [0,1])
+                    h1 <- private$.computeEntropy(data1)
+                    h2 <- private$.computeEntropy(data2)
+                    max_h <- max(h1, h2)
+
+                    normalized_mi <- ifelse(max_h > 0, mi / max_h, 0)
+
+                    # Convert to distance
+                    miMatrix[i, j] <- 1 - normalized_mi
+                    miMatrix[j, i] <- 1 - normalized_mi
+                }
+            }
+
+            return(as.dist(miMatrix))
+        },
+
+        # Compute entropy for a variable
+        .computeEntropy = function(x) {
+            x <- x[!is.na(x)]
+            if (length(x) == 0) return(0)
+
+            probs <- table(x) / length(x)
+            probs <- probs[probs > 0]  # Remove zero probabilities
+
+            -sum(probs * log2(probs))
+        },
+
+        # Compute mutual information between two variables
+        .computeMI = function(x, y) {
+            # Remove missing values
+            valid_idx <- !is.na(x) & !is.na(y)
+            x <- x[valid_idx]
+            y <- y[valid_idx]
+
+            if (length(x) == 0) return(0)
+
+            # Compute marginal entropies
+            h_x <- private$.computeEntropy(x)
+            h_y <- private$.computeEntropy(y)
+
+            # Compute joint entropy
+            joint_table <- table(x, y)
+            joint_probs <- joint_table / sum(joint_table)
+            joint_probs <- joint_probs[joint_probs > 0]
+            h_xy <- -sum(joint_probs * log2(joint_probs))
+
+            # MI = H(X) + H(Y) - H(X,Y)
+            mi <- h_x + h_y - h_xy
+
+            return(max(0, mi))  # Ensure non-negative
+        },
+
+        # Compute mixed-type marker distance
+        .computeMixedMarkerDistance = function(df, catVars, contVars) {
+            allMarkers <- c(catVars, contVars)
+            n_markers <- length(allMarkers)
+            distMatrix <- matrix(0, n_markers, n_markers)
+            rownames(distMatrix) <- colnames(distMatrix) <- allMarkers
+
+            for (i in 1:(n_markers-1)) {
+                for (j in (i+1):n_markers) {
+                    var1 <- allMarkers[i]
+                    var2 <- allMarkers[j]
+
+                    # Determine variable types
+                    isCat1 <- var1 %in% catVars
+                    isCat2 <- var2 %in% catVars
+
+                    distance <- 0
+                    if (isCat1 && isCat2) {
+                        # Both categorical: use chi-squared
+                        contTable <- table(df[[var1]], df[[var2]], useNA = "no")
+                        chiTest <- tryCatch(chisq.test(contTable),
+                                          error = function(e) NULL,
+                                          warning = function(w) NULL)
+                        if (!is.null(chiTest)) {
+                            # Normalize by sample size
+                            distance <- sqrt(chiTest$statistic / nrow(df))
+                        }
+                    } else if (!isCat1 && !isCat2) {
+                        # Both continuous: use correlation
+                        corVal <- cor(df[[var1]], df[[var2]], use = "pairwise.complete.obs")
+                        distance <- 1 - abs(corVal)
+                    } else {
+                        # Mixed: use eta-squared (ANOVA-based)
+                        catVar <- if (isCat1) var1 else var2
+                        contVar <- if (isCat1) var2 else var1
+
+                        aovResult <- tryCatch({
+                            aov(df[[contVar]] ~ df[[catVar]])
+                        }, error = function(e) NULL)
+
+                        if (!is.null(aovResult)) {
+                            ss <- summary(aovResult)[[1]]
+                            if (nrow(ss) >= 2) {
+                                etaSq <- ss[1, "Sum Sq"] / sum(ss[, "Sum Sq"])
+                                distance <- 1 - etaSq
+                            }
+                        }
+                    }
+
+                    distMatrix[i, j] <- distance
+                    distMatrix[j, i] <- distance
+                }
+            }
+
+            return(as.dist(distMatrix))
+        },
+
+        # Test marker-marker associations
+        .testMarkerAssociations = function(df, markers, markerType) {
+            n_markers <- length(markers)
+            if (n_markers < 2) return(NULL)
+
+            associations <- data.frame(
+                marker1 = character(),
+                marker2 = character(),
+                test = character(),
+                statistic = numeric(),
+                df = integer(),
+                p_value = numeric(),
+                effect_size = character(),
+                interpretation = character(),
+                stringsAsFactors = FALSE
+            )
+
+            for (i in 1:(n_markers-1)) {
+                for (j in (i+1):n_markers) {
+                    marker1 <- markers[i]
+                    marker2 <- markers[j]
+
+                    result <- NULL
+                    if (markerType %in% c("categorical", "mixed")) {
+                        # Chi-squared test for categorical associations
+                        contTable <- table(df[[marker1]], df[[marker2]], useNA = "no")
+                        result <- tryCatch({
+                            test <- chisq.test(contTable)
+
+                            # Calculate Cramer's V
+                            n <- sum(contTable)
+                            minDim <- min(dim(contTable)) - 1
+                            cramersV <- sqrt(test$statistic / (n * minDim))
+
+                            # Interpretation
+                            interp <- if (test$p.value < 0.001) "Very strong association" else
+                                     if (test$p.value < 0.01) "Strong association" else
+                                     if (test$p.value < 0.05) "Moderate association" else
+                                     "Weak/No association"
+
+                            list(
+                                test = "Chi-squared",
+                                statistic = as.numeric(test$statistic),
+                                df = test$parameter,
+                                p_value = test$p.value,
+                                effect_size = sprintf("Cramer's V = %.3f", cramersV),
+                                interpretation = interp
+                            )
+                        }, error = function(e) NULL, warning = function(w) NULL)
+                    } else if (markerType == "continuous") {
+                        # Correlation test for continuous associations
+                        result <- tryCatch({
+                            test <- cor.test(df[[marker1]], df[[marker2]])
+
+                            # Interpretation
+                            r <- abs(test$estimate)
+                            interp <- if (test$p.value < 0.05 && r > 0.7) "Strong correlation" else
+                                     if (test$p.value < 0.05 && r > 0.4) "Moderate correlation" else
+                                     if (test$p.value < 0.05) "Weak correlation" else
+                                     "No significant correlation"
+
+                            list(
+                                test = "Pearson correlation",
+                                statistic = as.numeric(test$statistic),
+                                df = test$parameter,
+                                p_value = test$p.value,
+                                effect_size = sprintf("r = %.3f", test$estimate),
+                                interpretation = interp
+                            )
+                        }, error = function(e) NULL)
+                    }
+
+                    if (!is.null(result)) {
+                        associations <- rbind(associations, data.frame(
+                            marker1 = marker1,
+                            marker2 = marker2,
+                            test = result$test,
+                            statistic = result$statistic,
+                            df = as.integer(result$df),
+                            p_value = result$p_value,
+                            effect_size = result$effect_size,
+                            interpretation = result$interpretation,
+                            stringsAsFactors = FALSE
+                        ))
+                    }
+                }
+            }
+
+            return(associations)
+        },
+
+        # Build marker clustering tree showing merge sequence
+        .buildMarkerClusteringTree = function(hc, distMatrix, markers) {
+            n <- length(markers)
+            mergeSequence <- hc$merge
+            heights <- hc$height
+
+            tree <- data.frame(
+                step = integer(),
+                markers_merged = character(),
+                groups_after_merge = character(),
+                distance = numeric(),
+                distance_reduction = numeric(),
+                pct_reduction = numeric(),
+                stringsAsFactors = FALSE
+            )
+
+            # Track cluster membership
+            clusters <- as.list(1:n)
+            names(clusters) <- markers
+
+            initialDist <- max(heights)
+            prevDist <- initialDist
+
+            for (i in seq_len(nrow(mergeSequence))) {
+                step <- mergeSequence[i, ]
+                currentDist <- heights[i]
+
+                # Identify which clusters/markers are being merged
+                cluster1Idx <- abs(step[1])
+                cluster2Idx <- abs(step[2])
+
+                # Get cluster contents
+                cluster1 <- if (step[1] < 0) markers[-step[1]] else paste0("Group", step[1])
+                cluster2 <- if (step[2] < 0) markers[-step[2]] else paste0("Group", step[2])
+
+                # Calculate reductions
+                reduction <- prevDist - currentDist
+                pctReduction <- ifelse(initialDist > 0, reduction / initialDist * 100, 0)
+
+                # Update tree
+                tree <- rbind(tree, data.frame(
+                    step = i,
+                    markers_merged = paste(cluster1, "+", cluster2),
+                    groups_after_merge = paste(n - i, "groups"),
+                    distance = currentDist,
+                    distance_reduction = reduction,
+                    pct_reduction = pctReduction,
+                    stringsAsFactors = FALSE
+                ))
+
+                prevDist <- currentDist
+            }
+
+            return(tree)
+        },
+
+        # Identify statistically distinct marker groups
+        .identifyMarkerGroups = function(hc, associations, markers) {
+            if (is.null(associations) || nrow(associations) == 0) {
+                # Without association tests, use dynamic cut
+                cutHeight <- mean(hc$height)
+                groups <- cutree(hc, h = cutHeight)
+            } else {
+                # Use association p-values to determine cut height
+                # Markers with p < 0.05 should be in different groups
+                significantAssoc <- associations[associations$p_value < 0.05, ]
+
+                if (nrow(significantAssoc) > 0) {
+                    # Find height that best separates significant associations
+                    cutHeight <- median(hc$height)
+                } else {
+                    cutHeight <- mean(hc$height)
+                }
+
+                groups <- cutree(hc, h = cutHeight)
+            }
+
+            # Build group summary
+            groupSummary <- data.frame(
+                group = character(),
+                members = character(),
+                n_markers = integer(),
+                avg_association = numeric(),
+                interpretation = character(),
+                stringsAsFactors = FALSE
+            )
+
+            for (g in sort(unique(groups))) {
+                groupMarkers <- markers[groups == g]
+
+                # Calculate average association within group
+                avgAssoc <- NA
+                if (!is.null(associations) && length(groupMarkers) > 1) {
+                    groupAssocs <- associations[
+                        (associations$marker1 %in% groupMarkers & associations$marker2 %in% groupMarkers),
+                    ]
+                    if (nrow(groupAssocs) > 0) {
+                        avgAssoc <- mean(groupAssocs$p_value, na.rm = TRUE)
+                    }
+                }
+
+                # Interpretation
+                interp <- if (length(groupMarkers) == 1) {
+                    "Single marker"
+                } else if (!is.na(avgAssoc) && avgAssoc < 0.05) {
+                    "Co-expressed markers (statistically associated)"
+                } else {
+                    "Markers cluster together but associations not significant"
+                }
+
+                groupSummary <- rbind(groupSummary, data.frame(
+                    group = paste0("Group ", g),
+                    members = paste(groupMarkers, collapse = ", "),
+                    n_markers = length(groupMarkers),
+                    avg_association = ifelse(is.na(avgAssoc), 0, avgAssoc),
+                    interpretation = interp,
+                    stringsAsFactors = FALSE
+                ))
+            }
+
+            return(groupSummary)
+        },
+
+        # Populate marker clustering results tables
+        .populateMarkerClusteringResults = function() {
+            if (!isTRUE(self$options$performMarkerClustering)) return()
+
+            analysisState <- self$results$summary$state
+            if (is.null(analysisState)) return()
+
+            results <- analysisState$markerClusteringResults
+            if (is.null(results) || !is.null(results$error)) return()
+
+            # Populate association table
+            if (!is.null(results$associations) && isTRUE(self$options$markerSignificanceTest)) {
+                assocTable <- self$results$markerAssociationTable
+                for (i in seq_len(nrow(results$associations))) {
+                    row <- results$associations[i, ]
+                    assocTable$addRow(rowKey = paste0(row$marker1, "_", row$marker2), list(
+                        marker1 = row$marker1,
+                        marker2 = row$marker2,
+                        test = row$test,
+                        statistic = row$statistic,
+                        df = row$df,
+                        p_value = row$p_value,
+                        effect_size = row$effect_size,
+                        interpretation = row$interpretation
+                    ))
+                }
+            }
+
+            # Populate clustering tree table
+            if (!is.null(results$clusteringTree)) {
+                treeTable <- self$results$markerClusteringTree
+                for (i in seq_len(nrow(results$clusteringTree))) {
+                    row <- results$clusteringTree[i, ]
+                    treeTable$addRow(rowKey = i, list(
+                        step = row$step,
+                        markers_merged = row$markers_merged,
+                        groups_after_merge = row$groups_after_merge,
+                        distance = row$distance,
+                        distance_reduction = row$distance_reduction,
+                        pct_reduction = row$pct_reduction / 100
+                    ))
+                }
+            }
+
+            # Populate marker groups table
+            if (!is.null(results$markerGroups) && isTRUE(self$options$markerCutHeight)) {
+                groupsTable <- self$results$markerGroups
+                for (i in seq_len(nrow(results$markerGroups))) {
+                    row <- results$markerGroups[i, ]
+                    groupsTable$addRow(rowKey = row$group, list(
+                        group = row$group,
+                        members = row$members,
+                        n_markers = row$n_markers,
+                        avg_association = row$avg_association,
+                        interpretation = row$interpretation
+                    ))
+                }
+            }
+        },
+
+        # Plot marker dendrogram
+        .plotMarkerDendrogram = function(image, ggtheme, theme, ...) {
+            if (!isTRUE(self$options$performMarkerClustering)) return()
+
+            analysisState <- self$results$summary$state
+            if (is.null(analysisState)) return()
+
+            results <- analysisState$markerClusteringResults
+            if (is.null(results) || !is.null(results$error)) return()
+
+            hc <- results$hc
+            if (is.null(hc)) return()
+
+            # Plot dendrogram
+            plot(hc,
+                 main = sprintf("Marker Clustering Dendrogram (%s distance, %s linkage)",
+                               results$method, results$linkage),
+                 xlab = "IHC Markers",
+                 ylab = "Distance/Dissimilarity",
+                 cex = 0.8,
+                 hang = -1)
+
+            # Add significance line if marker groups identified
+            if (!is.null(results$markerGroups) && isTRUE(self$options$markerCutHeight)) {
+                cutHeight <- mean(hc$height)
+                abline(h = cutHeight, col = "red", lty = 2, lwd = 2)
+                text(length(hc$labels) * 0.8, cutHeight,
+                     "Significance threshold",
+                     pos = 3, col = "red", cex = 0.8)
+
+                # Highlight groups
+                nGroups <- length(unique(cutree(hc, h = cutHeight)))
+                rect.hclust(hc, k = nGroups, border = "blue", lwd = 2)
             }
         },
 

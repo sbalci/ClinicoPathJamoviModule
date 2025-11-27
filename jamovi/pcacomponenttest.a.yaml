@@ -1,7 +1,7 @@
 ---
 name:  pcacomponenttest
 title: PCA Component Significance Test
-menuGroup: ExplorationT4
+menuGroup: ExplorationT3
 menuSubgroup: Multivariate Analysis
 version: '1.0.0'
 jas: '1.2'

@@ -619,6 +619,117 @@ items:
           - fontSize
           - plotContrast
 
+    # Marker-Level Clustering Results
+    - name: markerAssociationTable
+      title: Marker-Marker Association Tests
+      type: Table
+      visible: (performMarkerClustering && markerSignificanceTest)
+      description: Statistical tests for associations between IHC markers
+      columns:
+          - name: marker1
+            title: Marker 1
+            type: text
+          - name: marker2
+            title: Marker 2
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - catVars
+          - contVars
+          - markerClusteringMethod
+
+    - name: markerClusteringTree
+      title: Marker Clustering Sequence
+      type: Table
+      visible: (performMarkerClustering)
+      description: Hierarchical merging sequence showing which markers cluster together
+      columns:
+          - name: step
+            title: Step
+            type: integer
+          - name: markers_merged
+            title: Markers Merged
+            type: text
+          - name: groups_after_merge
+            title: Groups After Merge
+            type: text
+          - name: distance
+            title: Distance/Chi-squared
+            type: number
+          - name: distance_reduction
+            title: Reduction
+            type: number
+          - name: pct_reduction
+            title: '% Reduction'
+            type: number
+            format: zto,pc
+      clearWith:
+          - catVars
+          - contVars
+          - markerClusteringMethod
+          - markerLinkage
+
+    - name: markerGroups
+      title: Identified Marker Groups
+      type: Table
+      visible: (performMarkerClustering && markerCutHeight)
+      description: Statistically distinct groups of co-expressed markers
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: members
+            title: Markers
+            type: text
+          - name: n_markers
+            title: N Markers
+            type: integer
+          - name: avg_association
+            title: Avg Association
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - catVars
+          - contVars
+          - markerClusteringMethod
+          - markerLinkage
+
+    - name: markerDendrogram
+      title: Marker Clustering Dendrogram
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .plotMarkerDendrogram
+      visible: (performMarkerClustering)
+      clearWith:
+          - catVars
+          - contVars
+          - markerClusteringMethod
+          - markerLinkage
+          - colorPalette
+          - fontSize
+          - plotContrast
+
     - name: survivalPlot
       title: Survival Analysis by Cluster
       type: Image

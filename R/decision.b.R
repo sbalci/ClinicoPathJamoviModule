@@ -1006,7 +1006,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Table 1 ----
 
                 results1 <- mydata %>%
-                    dplyr::select(.data[[testVariable]], .data[[goldVariable]]) %>%
+                    dplyr::select(dplyr::all_of(c(testVariable, goldVariable))) %>%
                     table()
 
                 # self$results$text1$setContent(results1)

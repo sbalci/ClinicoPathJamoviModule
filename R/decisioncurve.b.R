@@ -764,6 +764,28 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (self$options$compareModels && length(model_vars) > 1) {
                 private$.performModelComparison()
             }
+            
+            # Enhanced Analysis Options
+            
+            # Cost-Benefit Analysis
+            if (self$options$costBenefitAnalysis) {
+                private$.populateCostBenefitTable()
+            }
+            
+            # Decision Consequences
+            if (self$options$showDecisionConsequences) {
+                private$.populateDecisionConsequencesTable()
+            }
+            
+            # Resource Utilization
+            if (self$options$resourceUtilization) {
+                private$.populateResourceUtilizationTable()
+            }
+            
+            # Enhanced Model Comparison
+            if (self$options$multiModelComparison && length(model_vars) > 1) {
+                private$.performEnhancedModelComparison()
+            }
 
             # Generate clinical interpretation
             private$.generateClinicalInterpretation()
@@ -799,17 +821,245 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Create row values
                 row_values <- list(
                     threshold = thresh,
-                    treat_all = treat_all_nb[closest_idx],
-                    treat_none = treat_none_nb[closest_idx]
+                    treat_all = private$.calculateTreatAllNetBenefit(
+                        self$data[[self$options$outcome]], thresh, self$options$outcomePositive
+                    ),
+                    treat_none = 0
                 )
-
+                
                 # Add model values
                 for (model_name in model_names) {
+                    # Find net benefit for this model at this threshold
+                    nb_idx <- which.min(abs(private$.dcaResults[[model_name]]$thresholds - thresh))
+                    nb <- private$.dcaResults[[model_name]]$net_benefits[nb_idx]
+                    
                     col_name <- paste0("model_", gsub("[^A-Za-z0-9]", "_", model_name))
-                    row_values[[col_name]] <- private$.dcaResults[[model_name]]$net_benefits[closest_idx]
+                    row_values[[col_name]] <- nb
                 }
+                
+                results_table$addRow(rowKey = paste0("thresh_", i), values = row_values)
+            }
+        },
 
-                results_table$addRow(rowKey = i, values = row_values)
+        .populateCostBenefitTable = function() {
+            table <- self$results$costBenefitTable
+            selected_thresholds <- private$.parseSelectedThresholds()
+            model_names <- names(private$.dcaResults)
+            
+            # Costs and benefits
+            test_cost <- self$options$testCost
+            treat_cost <- self$options$treatmentCost
+            benefit_tp <- self$options$benefitCorrectTreatment
+            harm_fp <- self$options$harmFalseTreatment
+            
+            # Calculate for each model at each threshold
+            for (model_name in model_names) {
+                model_results <- private$.dcaResults[[model_name]]
+                
+                for (i in seq_along(selected_thresholds)) {
+                    thresh <- selected_thresholds[i]
+                    
+                    # Get detailed results (TP, FP, etc.)
+                    # We need to recalculate or retrieve detailed results
+                    # Since .dcaResults stores detailed_results list, we can use that if thresholds match
+                    # But thresholds might not match exactly due to floating point
+                    
+                    # Recalculate for precision
+                    res <- private$.calculateNetBenefit(
+                        self$data[[self$options$models[which(model_names == model_name)]]], 
+                        self$data[[self$options$outcome]], 
+                        thresh, 
+                        self$options$outcomePositive
+                    )
+                    
+                    # Calculate costs and benefits
+                    # Total Cost = (Tests * Test Cost) + (TP + FP) * Treatment Cost
+                    # Note: Everyone gets tested in this scenario
+                    n_total <- res$tp + res$fp + res$tn + res$fn
+                    total_cost <- (n_total * test_cost) + ((res$tp + res$fp) * treat_cost)
+                    
+                    # Total Benefit = (TP * Benefit) - (FP * Harm)
+                    # Note: This is a simplified view. Usually we compare to Treat All/None.
+                    total_benefit <- (res$tp * benefit_tp) - (res$fp * harm_fp)
+                    
+                    # Net Monetary Benefit
+                    nmb <- total_benefit - total_cost
+                    
+                    # Incremental values (vs Treat All)
+                    # Treat All: Everyone treated, no test cost (if no test needed) or test cost?
+                    # Usually "Treat All" means treat everyone without testing.
+                    # So Test Cost = 0, Treatment Cost = N * Treat Cost
+                    # TP = Prevalence * N, FP = (1-Prevalence) * N
+                    
+                    prevalence <- res$prevalence
+                    tp_all <- prevalence * n_total
+                    fp_all <- (1 - prevalence) * n_total
+                    
+                    cost_all <- (n_total * 0) + (n_total * treat_cost) # Assuming no test cost for Treat All
+                    benefit_all <- (tp_all * benefit_tp) - (fp_all * harm_fp)
+                    nmb_all <- benefit_all - cost_all
+                    
+                    inc_cost <- total_cost - cost_all
+                    inc_benefit <- total_benefit - benefit_all
+                    
+                    # ICER = Incremental Cost / Incremental Benefit (in units of outcome?)
+                    # Here we have monetary benefit, so ICER might be different.
+                    # Let's just output the values.
+                    
+                    table$addRow(rowKey = paste0(model_name, "_", i), values = list(
+                        model = model_name,
+                        threshold = thresh,
+                        total_cost = total_cost,
+                        total_benefit = total_benefit,
+                        net_monetary_benefit = nmb,
+                        incremental_cost = inc_cost,
+                        incremental_benefit = inc_benefit,
+                        icer = if (abs(inc_benefit) > 1e-6) inc_cost / inc_benefit else NA
+                    ))
+                }
+            }
+        },
+
+        .populateDecisionConsequencesTable = function() {
+            table <- self$results$decisionConsequencesTable
+            selected_thresholds <- private$.parseSelectedThresholds()
+            model_names <- names(private$.dcaResults)
+            
+            for (model_name in model_names) {
+                # Get the variable name corresponding to the model name
+                # This logic assumes model_names and self$options$models are aligned
+                model_idx <- which(private$.parseModelNames() == model_name)
+                if (length(model_idx) == 0) next
+                model_var <- self$options$models[model_idx]
+                
+                for (i in seq_along(selected_thresholds)) {
+                    thresh <- selected_thresholds[i]
+                    
+                    res <- private$.calculateNetBenefit(
+                        self$data[[model_var]], 
+                        self$data[[self$options$outcome]], 
+                        thresh, 
+                        self$options$outcomePositive
+                    )
+                    
+                    # Calculate PPV/NPV
+                    ppv <- if ((res$tp + res$fp) > 0) res$tp / (res$tp + res$fp) else NA
+                    npv <- if ((res$tn + res$fn) > 0) res$tn / (res$tn + res$fn) else NA
+                    
+                    table$addRow(rowKey = paste0(model_name, "_", i), values = list(
+                        model = model_name,
+                        threshold = thresh,
+                        true_positive = res$tp,
+                        false_positive = res$fp,
+                        true_negative = res$tn,
+                        false_negative = res$fn,
+                        sensitivity = res$sensitivity,
+                        specificity = res$specificity,
+                        ppv = ppv,
+                        npv = npv
+                    ))
+                }
+            }
+        },
+
+        .populateResourceUtilizationTable = function() {
+            table <- self$results$resourceUtilizationTable
+            selected_thresholds <- private$.parseSelectedThresholds()
+            model_names <- names(private$.dcaResults)
+            
+            for (model_name in model_names) {
+                model_idx <- which(private$.parseModelNames() == model_name)
+                if (length(model_idx) == 0) next
+                model_var <- self$options$models[model_idx]
+                
+                for (i in seq_along(selected_thresholds)) {
+                    thresh <- selected_thresholds[i]
+                    
+                    res <- private$.calculateNetBenefit(
+                        self$data[[model_var]], 
+                        self$data[[self$options$outcome]], 
+                        thresh, 
+                        self$options$outcomePositive
+                    )
+                    
+                    n_total <- res$tp + res$fp + res$tn + res$fn
+                    
+                    # Per 1000 patients
+                    scale_factor <- 1000 / n_total
+                    
+                    tests_per_1000 <- n_total * scale_factor # Everyone tested
+                    treatments_per_1000 <- (res$tp + res$fp) * scale_factor
+                    unnecessary_treatments <- res$fp * scale_factor
+                    missed_cases <- res$fn * scale_factor
+                    
+                    # Reduction vs Treat All
+                    # Treat All: All treated
+                    treatments_all <- n_total * scale_factor
+                    reduction <- (treatments_all - treatments_per_1000) / treatments_all
+                    
+                    table$addRow(rowKey = paste0(model_name, "_", i), values = list(
+                        model = model_name,
+                        threshold = thresh,
+                        tests_per_1000 = tests_per_1000,
+                        treatments_per_1000 = treatments_per_1000,
+                        unnecessary_treatments = unnecessary_treatments,
+                        missed_cases = missed_cases,
+                        reduction_vs_treat_all = reduction
+                    ))
+                }
+            }
+        },
+        
+        .performEnhancedModelComparison = function() {
+            table <- self$results$modelComparisonEnhanced
+            model_names <- names(private$.dcaResults)
+            
+            if (length(model_names) < 2) return()
+            
+            # Pairwise comparisons
+            pairs <- combn(model_names, 2, simplify = FALSE)
+            
+            for (pair in pairs) {
+                m1 <- pair[1]
+                m2 <- pair[2]
+                
+                # Calculate differences in Net Benefit across range
+                # Use the calculated thresholds from dcaResults
+                # Assuming same thresholds for both (which is true as we generate one sequence)
+                
+                nb1 <- private$.dcaResults[[m1]]$net_benefits
+                nb2 <- private$.dcaResults[[m2]]$net_benefits
+                
+                diff <- nb1 - nb2
+                mean_diff <- mean(diff, na.rm = TRUE)
+                median_diff <- median(diff, na.rm = TRUE)
+                
+                # Statistical test (Bootstrap)
+                # This is computationally expensive, so we'll do a simple version
+                # Resample data, calculate NB diff, get CI and p-value
+                
+                p_value <- NA
+                conclusion <- "Inconclusive"
+                
+                if (self$options$comparisonMethod == "bootstrap") {
+                    # Simple bootstrap for NB difference
+                    # Note: This should ideally be done during the main bootstrap loop for efficiency
+                    # But for now, we'll do a quick check if bootstrap results are available
+                    
+                    # If we didn't run bootstrap CIs, we can't easily get p-values without re-running
+                    # For now, we'll just report the differences
+                    conclusion <- "Bootstrap required"
+                }
+                
+                table$addRow(rowKey = paste0(m1, "_vs_", m2), values = list(
+                    model1 = m1,
+                    model2 = m2,
+                    nb_difference_mean = mean_diff,
+                    nb_difference_median = median_diff,
+                    test_statistic = NA,
+                    p_value = NA,
+                    conclusion = conclusion
+                ))
             }
         },
 
@@ -1401,6 +1651,81 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             )
 
             print(p)
+            return(TRUE)
+        },
+
+        .plotRelativeUtility = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.dcaResults)) return(FALSE)
+            
+            plot_data <- private$.plotData
+            
+            # Calculate Relative Utility
+            # RU = (NB_model - NB_all) / (NB_perfect - NB_all)
+            
+            prevalence <- mean(self$data[[self$options$outcome]] == self$options$outcomePositive, na.rm=TRUE)
+            
+            plot_data$relative_utility <- NA
+            
+            for (i in 1:nrow(plot_data)) {
+                thresh <- plot_data$threshold[i]
+                nb <- plot_data$net_benefit[i]
+                
+                # NB_perfect (Sensitivity=1, Specificity=1)
+                nb_perfect <- prevalence
+                
+                # NB_all
+                nb_all <- prevalence - (1 - prevalence) * (thresh / (1 - thresh))
+                
+                denom <- nb_perfect - nb_all
+                
+                if (abs(denom) > 1e-6) {
+                    ru <- (nb - nb_all) / denom
+                } else {
+                    ru <- 0
+                }
+                
+                plot_data$relative_utility[i] <- ru
+            }
+            
+            # Filter for reasonable range
+            plot_data <- plot_data[plot_data$relative_utility > -0.5 & plot_data$relative_utility <= 1.1, ]
+            
+            plot <- ggplot(plot_data, aes(x = threshold, y = relative_utility, color = model)) +
+                geom_line(size = 1) +
+                scale_color_brewer(palette = "Set1") +
+                labs(title = "Relative Utility Curve",
+                     x = "Threshold Probability",
+                     y = "Relative Utility (vs Treat All)",
+                     color = "Model") +
+                theme_minimal() +
+                ggtheme +
+                ylim(-0.1, 1.0)
+            
+            print(plot)
+            return(TRUE)
+        },
+        
+        .plotStandardizedNetBenefit = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.dcaResults)) return(FALSE)
+            
+            plot_data <- private$.plotData
+            
+            # Standardized Net Benefit (sNB) = NB / Prevalence
+            prevalence <- mean(self$data[[self$options$outcome]] == self$options$outcomePositive, na.rm=TRUE)
+            
+            plot_data$snb <- plot_data$net_benefit / prevalence
+            
+            plot <- ggplot(plot_data, aes(x = threshold, y = snb, color = model)) +
+                geom_line(size = 1) +
+                scale_color_brewer(palette = "Set1") +
+                labs(title = "Standardized Net Benefit",
+                     x = "Threshold Probability",
+                     y = "Standardized Net Benefit (NB / Prevalence)",
+                     color = "Model") +
+                theme_minimal() +
+                ggtheme
+            
+            print(plot)
             return(TRUE)
         }
     )

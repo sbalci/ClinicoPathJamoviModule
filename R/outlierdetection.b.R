@@ -439,8 +439,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # Convert to numeric with safe variable access
             for (var in selected_vars) {
-                safe_var <- private$.escapeVar(var)
-                analysis_data[[var]] <- as.numeric(analysis_data[[safe_var]])
+                analysis_data[[var]] <- as.numeric(analysis_data[[var]])
             }
 
             # Initialize outlier_results variable
@@ -839,6 +838,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 "multivariate" = {
                     specific_method <- switch(self$options$multivariate_methods,
                         "mahalanobis" = "Mahalanobis distance",
+                        "mahalanobis_robust" = "Robust Mahalanobis distance",
                         "mcd" = "Minimum Covariance Determinant (MCD)",
                         "ics" = "Invariant Coordinate Selection (ICS)",
                         "optics" = "OPTICS clustering method",

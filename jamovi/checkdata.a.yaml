@@ -1,7 +1,7 @@
 ---
 name:  checkdata
 title: Single Variable Quality Check
-menuGroup: ExplorationT4
+menuGroup: ExplorationT3
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'

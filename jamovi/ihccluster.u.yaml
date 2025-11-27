@@ -4,9 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # ============================================================================
-  # Variable Selection
-  # ============================================================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -41,10 +38,6 @@ children:
             name: spatialCompartment
             maxItemCount: 1
             isTarget: true
-
-  # ============================================================================
-  # Clustering Settings
-  # ============================================================================
   - type: CollapseBox
     label: Clustering Settings
     collapsed: false
@@ -96,10 +89,6 @@ children:
           - type: TextBox
             name: seed
             format: number
-
-  # ============================================================================
-  # Data Preprocessing
-  # ============================================================================
   - type: CollapseBox
     label: Data Preprocessing
     collapsed: true
@@ -122,10 +111,6 @@ children:
           - type: TextBox
             name: weights
             format: string
-
-  # ============================================================================
-  # Phase 3: Derived Markers (Sterlacci 2019)
-  # ============================================================================
   - type: CollapseBox
     label: Derived Markers (CD4/CD8 Ratio)
     collapsed: true
@@ -178,10 +163,6 @@ children:
           - type: TextBox
             name: ratioHighCutoff
             format: number
-
-  # ============================================================================
-  # Spatial Analysis
-  # ============================================================================
   - type: CollapseBox
     label: Spatial Compartment Analysis
     collapsed: true
@@ -196,10 +177,6 @@ children:
             label: Spatial Comparison Mode
           - type: ComboBox
             name: spatialComparisonMode
-
-  # ============================================================================
-  # Phase 2: Validation & Supervised Clustering (Sterlacci 2019)
-  # ============================================================================
   - type: CollapseBox
     label: Cluster Validation (Sterlacci 2019)
     collapsed: true
@@ -229,10 +206,6 @@ children:
                 name: supervisedVariable
                 maxItemCount: 1
                 isTarget: true
-
-  # ============================================================================
-  # Advanced Options
-  # ============================================================================
   - type: CollapseBox
     label: Advanced Clustering Options
     collapsed: true
@@ -262,10 +235,6 @@ children:
           - type: TextBox
             name: refinementIterations
             format: number
-
-  # ============================================================================
-  # Diagnostic Features (Olsen 2006)
-  # ============================================================================
   - type: CollapseBox
     label: Diagnostic Features (Olsen 2006)
     collapsed: true
@@ -305,10 +274,6 @@ children:
           - type: TextBox
             name: outlierThreshold
             format: number
-
-  # ============================================================================
-  # Visualizations
-  # ============================================================================
   - type: CollapseBox
     label: Visualizations
     collapsed: false
@@ -335,10 +300,6 @@ children:
       - type: CheckBox
         name: showBoxplots
         label: Marker distribution boxplots
-
-  # ============================================================================
-  # Output Tables
-  # ============================================================================
   - type: CollapseBox
     label: Output Tables & Statistics
     collapsed: false
@@ -368,10 +329,6 @@ children:
       - type: CheckBox
         name: exportClusters
         label: Export cluster assignments to dataset
-
-  # ============================================================================
-  # Clinical Correlations
-  # ============================================================================
   - type: CollapseBox
     label: Clinical Correlations (optional)
     collapsed: true
@@ -400,10 +357,11 @@ children:
                 name: survivalEvent
                 maxItemCount: 1
                 isTarget: true
-
-  # ============================================================================
-  # Accessibility & Display
-  # ============================================================================
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: performMarkerClustering
   - type: CollapseBox
     label: Accessibility & Display
     collapsed: true
@@ -431,3 +389,20 @@ children:
       - type: CheckBox
         name: showTechnicalNotes
         label: Show technical notes
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: markerClusteringMethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: markerLinkage
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: markerSignificanceTest
+      - type: CheckBox
+        name: markerCutHeight

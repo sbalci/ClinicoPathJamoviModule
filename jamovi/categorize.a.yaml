@@ -1,7 +1,7 @@
 ---
 name:  categorize
 title: Categorize Continuous Variables
-menuGroup: ExplorationT4
+menuGroup: ExplorationT3
 menuSubgroup: Data Preparation
 version: '0.0.1'
 jas: '1.2'

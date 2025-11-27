@@ -187,38 +187,133 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 if (estimate_method == "direct") {
                     # Predictor is already a probability
                     prob_event <- predictor
+                    
                 } else if (estimate_method == "kaplan_meier") {
-                    # Use KM to estimate baseline, scale predictor
+                    # Use KM with stratification by predictor quantiles
+                    # This provides proper non-parametric estimation
+                    
+                    # Determine number of strata based on sample size
+                    n_groups <- if (n < 100) 3 else if (n < 300) 5 else 10
+                    
+                    # Create predictor groups
+                    predictor_breaks <- quantile(predictor, 
+                                                 probs = seq(0, 1, length = n_groups + 1),
+                                                 na.rm = TRUE)
+                    predictor_groups <- cut(predictor, 
+                                           breaks = predictor_breaks,
+                                           include.lowest = TRUE,
+                                           labels = FALSE)
+                    
+                    # Fit KM by group
                     surv_obj <- Surv(time, event)
-                    km_fit <- survfit(surv_obj ~ 1)
-
-                    # Get survival at time t
-                    surv_t <- summary(km_fit, times = t_eval)$surv
-                    prob_event_baseline <- 1 - surv_t
-
-                    # Scale predictor to probability (simple linear scaling)
-                    prob_event <- (predictor - min(predictor)) / (max(predictor) - min(predictor))
-                    prob_event <- prob_event * prob_event_baseline * 2  # Scale around baseline
-                    prob_event <- pmin(pmax(prob_event, 0), 1)  # Constrain to [0,1]
+                    
+                    tryCatch({
+                        surv_by_group <- survfit(surv_obj ~ predictor_groups)
+                        
+                        # Get survival at time t for each group
+                        group_summary <- summary(surv_by_group, times = t_eval, extend = TRUE)
+                        
+                        # Initialize probability vector
+                        prob_event <- numeric(n)
+                        
+                        # Map survival probabilities back to individuals
+                        for (g in 1:n_groups) {
+                            group_mask <- predictor_groups == g
+                            if (sum(group_mask, na.rm = TRUE) > 0) {
+                                # Find survival for this group
+                                if (length(group_summary$strata) > 0) {
+                                    stratum_name <- paste0("predictor_groups=", g)
+                                    stratum_idx <- which(group_summary$strata == stratum_name)
+                                    
+                                    if (length(stratum_idx) > 0) {
+                                        surv_g <- group_summary$surv[stratum_idx[1]]
+                                        prob_event[group_mask] <- 1 - surv_g
+                                    } else {
+                                        # Fallback to overall event rate for this group
+                                        prob_event[group_mask] <- mean(event[group_mask], na.rm = TRUE)
+                                    }
+                                } else {
+                                    # Single group or no strata
+                                    prob_event[group_mask] <- 1 - group_summary$surv[1]
+                                }
+                            }
+                        }
+                        
+                    }, error = function(e) {
+                        # Fallback: use overall Kaplan-Meier if stratification fails
+                        warning("KM stratification failed, using overall estimate: ", e$message)
+                        km_overall <- survfit(surv_obj ~ 1)
+                        surv_t <- summary(km_overall, times = t_eval, extend = TRUE)$surv[1]
+                        prob_event <<- rep(1 - surv_t, n)
+                    })
+                    
+                    # Ensure valid probabilities
+                    prob_event <- pmin(pmax(prob_event, 0), 1)
 
                 } else {  # cox
-                    # Fit Cox model
+                    # Fit Cox proportional hazards model
                     surv_obj <- Surv(time, event)
-                    cox_fit <- coxph(surv_obj ~ predictor)
-
-                    # Predict survival at time t
-                    newdata <- data.frame(predictor = predictor)
-                    surv_pred <- summary(survfit(cox_fit, newdata = newdata), times = t_eval)
-
-                    # Extract predicted survival (1 - event probability)
-                    # For simplicity, use linear predictor
-                    linear_pred <- predict(cox_fit, type = "lp")
-                    prob_event <- 1 / (1 + exp(-linear_pred))  # Convert to probability
+                    
+                    tryCatch({
+                        cox_fit <- coxph(surv_obj ~ predictor)
+                        
+                        # Create newdata for predictions
+                        newdata <- data.frame(predictor = predictor)
+                        
+                        # Get survival predictions at time t using survfit
+                        surv_fit <- survfit(cox_fit, newdata = newdata)
+                        
+                        # Extract survival probabilities at time t_eval
+                        # survfit returns a list of survival curves (one per individual)
+                        prob_event <- numeric(n)
+                        
+                        for (i in 1:n) {
+                            # Get survival curve for individual i
+                            surv_times <- surv_fit$time
+                            surv_probs <- surv_fit$surv
+                            
+                            # Handle matrix vs vector format
+                            if (is.matrix(surv_probs)) {
+                                surv_i <- surv_probs[, i]
+                            } else {
+                                surv_i <- surv_probs
+                            }
+                            
+                            # Find survival at t_eval (use last observed if t_eval > max time)
+                            if (length(surv_times) == 0) {
+                                prob_event[i] <- 0  # No events observed
+                            } else {
+                                time_idx <- which(surv_times <= t_eval)
+                                if (length(time_idx) > 0) {
+                                    surv_at_t <- surv_i[max(time_idx)]
+                                } else {
+                                    surv_at_t <- 1  # Before first event time
+                                }
+                                prob_event[i] <- 1 - surv_at_t
+                            }
+                        }
+                        
+                    }, error = function(e) {
+                        warning("Cox model failed: ", e$message, ". Using KM fallback.")
+                        # Fallback to overall KM
+                        km_overall <- survfit(surv_obj ~ 1)
+                        surv_t <- summary(km_overall, times = t_eval, extend = TRUE)$surv[1]
+                        prob_event <<- rep(1 - surv_t, n)
+                    })
+                    
+                    # Ensure valid probabilities
+                    prob_event <- pmin(pmax(prob_event, 0), 1)
                 }
 
                 # Determine who has event by time t
                 has_event_by_t <- (time <= t_eval & event == 1)
-                at_risk_at_t <- (time >= t_eval | has_event_by_t)
+                
+                # CORRECTED: Define at-risk population properly
+                # Include only those who:
+                # 1. Were censored after t_eval (time > t_eval & event == 0), OR
+                # 2. Had event at or after t_eval (time >= t_eval & event == 1)
+                at_risk_at_t <- (time > t_eval) | (time >= t_eval & event == 1)
+
 
                 n_at_risk <- sum(at_risk_at_t)
                 n_events <- sum(has_event_by_t)

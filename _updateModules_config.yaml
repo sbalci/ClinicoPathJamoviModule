@@ -10,8 +10,8 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.32.33"
-new_date: "2025-11-25"
+new_version: "0.0.32.35"
+new_date: "2025-11-27"
 quick: false
 TEST: true
 meddecide: false

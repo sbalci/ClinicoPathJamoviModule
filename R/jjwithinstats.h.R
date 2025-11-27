@@ -364,6 +364,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         todo = function() private$.items[["todo"]],
         interpretation = function() private$.items[["interpretation"]],
+        explanations = function() private$.items[["explanations"]],
         plot = function() private$.items[["plot"]],
         summary = function() private$.items[["summary"]],
         ggpubrPlot = function() private$.items[["ggpubrPlot"]]),
@@ -414,6 +415,10 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="Explanations"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -600,6 +605,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr

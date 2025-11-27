@@ -1711,7 +1711,6 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # Execute the ROC analysis
     .run = function() {
-
       # -----------------------------------------------------------------------
       # 1. INSTRUCTIONS AND PRELIMINARY CHECKS
       # -----------------------------------------------------------------------
@@ -1752,7 +1751,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Make ROC plots visible if requested
         if (self$options$plotROC) {
-          self$results$plotROC$setVisible(TRUE)
+          # self$results$plotROC$setVisible(TRUE)
         }
         
         # Make optional tables/plots visible based on options
@@ -1798,10 +1797,10 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # Add subgroup info if used
-        if (!is.null(self$options$subGroup)) {
+        if (FALSE) { # (!is.null(self$options$subGroup) && self$options$subGroup != "") {
           procedureNotes <- paste0(
             procedureNotes,
-            "<p> Sub-Group Variable: ",
+            "<p> Subgroup Variable: ",
             self$options$subGroup,
             "</p>")
         }
@@ -1847,6 +1846,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )
         self$results$procedureNotes$setContent(procedureNotes)
       }
+
 
       # -----------------------------------------------------------------------
       # 2. SET UP ANALYSIS PARAMETERS
@@ -1934,6 +1934,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       # Set up metric function
       metricName <- self$options$metric
+      
       if (metricName == "youden") {
         metric <- cutpointr::youden
       } else if (metricName == "sum_sens_spec") {
@@ -1998,6 +1999,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         youden = numeric(),
         stringsAsFactors = FALSE
       )
+
 
       # -----------------------------------------------------------------------
       # 3. PREPARE VARIABLES FOR ANALYSIS

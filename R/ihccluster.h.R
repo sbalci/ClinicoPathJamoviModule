@@ -36,6 +36,11 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             multipleTestingCorrection = "bonferroni",
             markerOptimization = FALSE,
             showMarkerCorrelation = FALSE,
+            performMarkerClustering = FALSE,
+            markerClusteringMethod = "chisquared",
+            markerLinkage = "ward",
+            markerSignificanceTest = TRUE,
+            markerCutHeight = TRUE,
             clusterQualityMetrics = TRUE,
             iterativeRefinement = FALSE,
             refinementIterations = 3,
@@ -247,6 +252,40 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showMarkerCorrelation",
                 showMarkerCorrelation,
                 default=FALSE)
+            private$..performMarkerClustering <- jmvcore::OptionBool$new(
+                "performMarkerClustering",
+                performMarkerClustering,
+                default=FALSE)
+            private$..markerClusteringMethod <- jmvcore::OptionList$new(
+                "markerClusteringMethod",
+                markerClusteringMethod,
+                options=list(
+                    "chisquared",
+                    "jaccard",
+                    "hamming",
+                    "cramer",
+                    "euclidean",
+                    "manhattan",
+                    "correlation",
+                    "mutual_info",
+                    "mixed"),
+                default="chisquared")
+            private$..markerLinkage <- jmvcore::OptionList$new(
+                "markerLinkage",
+                markerLinkage,
+                options=list(
+                    "ward",
+                    "complete",
+                    "average"),
+                default="ward")
+            private$..markerSignificanceTest <- jmvcore::OptionBool$new(
+                "markerSignificanceTest",
+                markerSignificanceTest,
+                default=TRUE)
+            private$..markerCutHeight <- jmvcore::OptionBool$new(
+                "markerCutHeight",
+                markerCutHeight,
+                default=TRUE)
             private$..clusterQualityMetrics <- jmvcore::OptionBool$new(
                 "clusterQualityMetrics",
                 clusterQualityMetrics,
@@ -446,6 +485,11 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..multipleTestingCorrection)
             self$.addOption(private$..markerOptimization)
             self$.addOption(private$..showMarkerCorrelation)
+            self$.addOption(private$..performMarkerClustering)
+            self$.addOption(private$..markerClusteringMethod)
+            self$.addOption(private$..markerLinkage)
+            self$.addOption(private$..markerSignificanceTest)
+            self$.addOption(private$..markerCutHeight)
             self$.addOption(private$..clusterQualityMetrics)
             self$.addOption(private$..iterativeRefinement)
             self$.addOption(private$..refinementIterations)
@@ -507,6 +551,11 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         multipleTestingCorrection = function() private$..multipleTestingCorrection$value,
         markerOptimization = function() private$..markerOptimization$value,
         showMarkerCorrelation = function() private$..showMarkerCorrelation$value,
+        performMarkerClustering = function() private$..performMarkerClustering$value,
+        markerClusteringMethod = function() private$..markerClusteringMethod$value,
+        markerLinkage = function() private$..markerLinkage$value,
+        markerSignificanceTest = function() private$..markerSignificanceTest$value,
+        markerCutHeight = function() private$..markerCutHeight$value,
         clusterQualityMetrics = function() private$..clusterQualityMetrics$value,
         iterativeRefinement = function() private$..iterativeRefinement$value,
         refinementIterations = function() private$..refinementIterations$value,
@@ -567,6 +616,11 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..multipleTestingCorrection = NA,
         ..markerOptimization = NA,
         ..showMarkerCorrelation = NA,
+        ..performMarkerClustering = NA,
+        ..markerClusteringMethod = NA,
+        ..markerLinkage = NA,
+        ..markerSignificanceTest = NA,
+        ..markerCutHeight = NA,
         ..clusterQualityMetrics = NA,
         ..iterativeRefinement = NA,
         ..refinementIterations = NA,
@@ -631,6 +685,10 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pcaPlot = function() private$.items[["pcaPlot"]],
         boxplotPlot = function() private$.items[["boxplotPlot"]],
         markerCorrelationPlot = function() private$.items[["markerCorrelationPlot"]],
+        markerAssociationTable = function() private$.items[["markerAssociationTable"]],
+        markerClusteringTree = function() private$.items[["markerClusteringTree"]],
+        markerGroups = function() private$.items[["markerGroups"]],
+        markerDendrogram = function() private$.items[["markerDendrogram"]],
         survivalPlot = function() private$.items[["survivalPlot"]],
         medoidInfo = function() private$.items[["medoidInfo"]],
         interpretationGuide = function() private$.items[["interpretationGuide"]],
@@ -1373,6 +1431,132 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "colorPalette",
                     "fontSize",
                     "plotContrast")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="markerAssociationTable",
+                title="Marker-Marker Association Tests",
+                visible="(performMarkerClustering && markerSignificanceTest)",
+                columns=list(
+                    list(
+                        `name`="marker1", 
+                        `title`="Marker 1", 
+                        `type`="text"),
+                    list(
+                        `name`="marker2", 
+                        `title`="Marker 2", 
+                        `type`="text"),
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "markerClusteringMethod")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="markerClusteringTree",
+                title="Marker Clustering Sequence",
+                visible="(performMarkerClustering)",
+                columns=list(
+                    list(
+                        `name`="step", 
+                        `title`="Step", 
+                        `type`="integer"),
+                    list(
+                        `name`="markers_merged", 
+                        `title`="Markers Merged", 
+                        `type`="text"),
+                    list(
+                        `name`="groups_after_merge", 
+                        `title`="Groups After Merge", 
+                        `type`="text"),
+                    list(
+                        `name`="distance", 
+                        `title`="Distance/Chi-squared", 
+                        `type`="number"),
+                    list(
+                        `name`="distance_reduction", 
+                        `title`="Reduction", 
+                        `type`="number"),
+                    list(
+                        `name`="pct_reduction", 
+                        `title`="% Reduction", 
+                        `type`="number", 
+                        `format`="zto,pc")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "markerClusteringMethod",
+                    "markerLinkage")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="markerGroups",
+                title="Identified Marker Groups",
+                visible="(performMarkerClustering && markerCutHeight)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="members", 
+                        `title`="Markers", 
+                        `type`="text"),
+                    list(
+                        `name`="n_markers", 
+                        `title`="N Markers", 
+                        `type`="integer"),
+                    list(
+                        `name`="avg_association", 
+                        `title`="Avg Association", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "markerClusteringMethod",
+                    "markerLinkage")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="markerDendrogram",
+                title="Marker Clustering Dendrogram",
+                width=900,
+                height=600,
+                renderFun=".plotMarkerDendrogram",
+                visible="(performMarkerClustering)",
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "markerClusteringMethod",
+                    "markerLinkage",
+                    "colorPalette",
+                    "fontSize",
+                    "plotContrast")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
@@ -1709,6 +1893,14 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param markerOptimization Analyze marker importance and identify optimal
 #'   panel
 #' @param showMarkerCorrelation Display correlation structure between markers
+#' @param performMarkerClustering Cluster IHC markers to identify
+#'   co-expression patterns and redundancy
+#' @param markerClusteringMethod Distance metric for marker clustering
+#' @param markerLinkage Linkage method for marker dendrogram
+#' @param markerSignificanceTest Perform statistical tests for marker-marker
+#'   associations
+#' @param markerCutHeight Automatically identify statistically distinct marker
+#'   groups
 #' @param clusterQualityMetrics Calculate PPV, purity, and cluster quality
 #'   measures
 #' @param iterativeRefinement Perform iterative clustering with marker
@@ -1782,6 +1974,10 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$pcaPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$boxplotPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$markerCorrelationPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$markerAssociationTable} \tab \tab \tab \tab \tab Statistical tests for associations between IHC markers \cr
+#'   \code{results$markerClusteringTree} \tab \tab \tab \tab \tab Hierarchical merging sequence showing which markers cluster together \cr
+#'   \code{results$markerGroups} \tab \tab \tab \tab \tab Statistically distinct groups of co-expressed markers \cr
+#'   \code{results$markerDendrogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
@@ -1837,6 +2033,11 @@ ihccluster <- function(
     multipleTestingCorrection = "bonferroni",
     markerOptimization = FALSE,
     showMarkerCorrelation = FALSE,
+    performMarkerClustering = FALSE,
+    markerClusteringMethod = "chisquared",
+    markerLinkage = "ward",
+    markerSignificanceTest = TRUE,
+    markerCutHeight = TRUE,
     clusterQualityMetrics = TRUE,
     iterativeRefinement = FALSE,
     refinementIterations = 3,
@@ -1932,6 +2133,11 @@ ihccluster <- function(
         multipleTestingCorrection = multipleTestingCorrection,
         markerOptimization = markerOptimization,
         showMarkerCorrelation = showMarkerCorrelation,
+        performMarkerClustering = performMarkerClustering,
+        markerClusteringMethod = markerClusteringMethod,
+        markerLinkage = markerLinkage,
+        markerSignificanceTest = markerSignificanceTest,
+        markerCutHeight = markerCutHeight,
         clusterQualityMetrics = clusterQualityMetrics,
         iterativeRefinement = iterativeRefinement,
         refinementIterations = refinementIterations,

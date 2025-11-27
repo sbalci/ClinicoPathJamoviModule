@@ -289,6 +289,62 @@ options:
       default: false
       description: 'Display correlation structure between markers'
 
+    - name: performMarkerClustering
+      title: 'Perform Marker-Level Clustering'
+      type: Bool
+      default: false
+      description: 'Cluster IHC markers to identify co-expression patterns and redundancy'
+
+    - name: markerClusteringMethod
+      title: 'Marker Clustering Distance'
+      type: List
+      options:
+          - title: 'Chi-squared (categorical markers)'
+            name: chisquared
+          - title: 'Jaccard (binary markers)'
+            name: jaccard
+          - title: 'Hamming (categorical mismatches)'
+            name: hamming
+          - title: 'Cramér V (normalized association)'
+            name: cramer
+          - title: 'Euclidean (continuous markers)'
+            name: euclidean
+          - title: 'Manhattan (continuous markers)'
+            name: manhattan
+          - title: 'Correlation (continuous markers)'
+            name: correlation
+          - title: 'Mutual Information (any type)'
+            name: mutual_info
+          - title: 'Mixed (automatic selection)'
+            name: mixed
+      default: chisquared
+      description: 'Distance metric for marker clustering'
+
+    - name: markerLinkage
+      title: 'Marker Linkage Method'
+      type: List
+      options:
+          - title: 'Ward (minimize variance)'
+            name: ward
+          - title: 'Complete (furthest neighbor)'
+            name: complete
+          - title: 'Average (mean distance)'
+            name: average
+      default: ward
+      description: 'Linkage method for marker dendrogram'
+
+    - name: markerSignificanceTest
+      title: 'Test Marker Associations'
+      type: Bool
+      default: true
+      description: 'Perform statistical tests for marker-marker associations'
+
+    - name: markerCutHeight
+      title: 'Auto-detect Marker Groups'
+      type: Bool
+      default: true
+      description: 'Automatically identify statistically distinct marker groups'
+
     - name: clusterQualityMetrics
       title: 'Cluster Quality Metrics'
       type: Bool

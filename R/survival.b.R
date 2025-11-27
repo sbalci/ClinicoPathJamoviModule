@@ -243,7 +243,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
         "survivalClass",
         inherit = survivalBase,
         private = list(
-
+            .parametric_model = NULL,
+            .parametric_model_name = NULL,
+            .parametric_results = NULL,
             .init = function() {
                 # Hide all outputs first - this ensures they're hidden even if we return early
                 # Hide all heading/explanation outputs
@@ -682,7 +684,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 return(self$options$multievent && self$options$analysistype == "compete")
             },
 
-            .competingRiskCumInc = function(mydata, mytime, myoutcome) {
+            .competingRiskCumInc = function(mydata, mytime, myoutcome, myfactor = NULL) {
                 # Calculate cumulative incidence function for competing risks
                 # Uses cmprsk package for proper handling of competing events
                 #
@@ -690,14 +692,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 #   mydata: cleaned data frame
                 #   mytime: time variable name
                 #   myoutcome: outcome variable name (0=censored, 1=event, 2=competing)
+                #   myfactor: grouping variable name (optional)
                 # Returns:
                 #   cuminc object from cmprsk package
 
                 mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+                
+                # Get grouping variable if provided
+                group_var <- if (!is.null(myfactor) && myfactor %in% names(mydata)) mydata[[myfactor]] else NULL
 
                 cuminc_fit <- cmprsk::cuminc(
                     ftime = mydata[[mytime]],
                     fstatus = mydata[[myoutcome]],
+                    group = group_var,
                     cencode = 0
                 )
                 return(cuminc_fit)
@@ -1405,7 +1412,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # COMPETING RISK MODE: Use cumulative incidence function
                     # This provides proper handling of competing events
 
-                    cuminc_fit <- private$.competingRiskCumInc(mydata, mytime, myoutcome)
+                    cuminc_fit <- private$.competingRiskCumInc(mydata, mytime, myoutcome, myfactor)
 
                     # Process cumulative incidence by group if factor exists
                     if (!is.null(myfactor) && myfactor %in% names(mydata)) {
@@ -1556,7 +1563,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Median Survival Summary ----
 
-                results1table %>%
+                results2table %>%
                     dplyr::mutate(
                         description =
                             glue::glue(
@@ -3824,16 +3831,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 cleanData <- results$cleanData
                 
                 # Prepare formula for parametric models
+                time_var <- .escapeVariableNames(results$name1time)
+                outcome_var <- .escapeVariableNames(results$name2outcome)
+                
                 if (self$options$parametric_covariates && !is.null(self$options$explanatory)) {
                     explanatory_names <- self$options$explanatory
                     # Escape variable names for safe formula construction
                     escaped_explanatory_names <- .escapeVariableNames(explanatory_names)
                     # Build covariate formula
                     covariate_formula <- paste(escaped_explanatory_names, collapse = " + ")
-                    formula_str <- paste("Surv(CalculatedTime, CalculatedOutcome) ~", covariate_formula)
+                    formula_str <- paste0("Surv(", time_var, ", ", outcome_var, ") ~ ", covariate_formula)
                 } else {
                     # Intercept-only model
-                    formula_str <- "Surv(CalculatedTime, CalculatedOutcome) ~ 1"
+                    formula_str <- paste0("Surv(", time_var, ", ", outcome_var, ") ~ 1")
                 }
                 
                 survival_formula <- as.formula(formula_str)
@@ -3908,18 +3918,27 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Populate model summary table
                 if (!is.null(best_model)) {
-                    summary_data <- summary(best_model)
-                    coef_table <- summary_data$coefficients
+                    # summary_data <- summary(best_model)
+                    coef_table <- best_model$res
                     
                     model_table <- self$results$parametricModelSummary
                     for (i in 1:nrow(coef_table)) {
+                        # Calculate p-value if missing
+                        p_val <- if ("p" %in% colnames(coef_table)) {
+                            coef_table[i, "p"]
+                        } else {
+                            est <- coef_table[i, "est"]
+                            se <- coef_table[i, "se"]
+                            if (!is.na(se) && se > 0) 2 * (1 - pnorm(abs(est / se))) else NA
+                        }
+                        
                         model_table$addRow(rowKey = i, values = list(
                             parameter = rownames(coef_table)[i],
                             estimate = coef_table[i, "est"],
                             se = coef_table[i, "se"],
                             ci_lower = coef_table[i, "L95%"],
                             ci_upper = coef_table[i, "U95%"],
-                            pvalue = coef_table[i, "p"]
+                            pvalue = p_val
                         ))
                     }
                     
