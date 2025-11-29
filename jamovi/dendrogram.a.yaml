@@ -1,7 +1,7 @@
 ---
 name:  dendrogram
 title: Dendrogram
-menuGroup: OncoPathT4
+menuGroup: OncoPathT2
 menuSubgroup: Drafts
 version: '0.0.31'
 jas: '1.2'
@@ -192,4 +192,12 @@ options:
       title: Show cell borders
       type: Bool
       default: false
+
+    - name: clustOutput
+      title: Save Cluster Membership
+      type: Output
+      varTitle: Cluster
+      measureType: nominal
+      description:
+          R: Output variable for cluster membership.
 ...

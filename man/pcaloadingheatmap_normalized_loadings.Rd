@@ -16,6 +16,6 @@ pcaloadingheatmap_normalized_loadings(pca, pca_data, scaled)
 \description{
 Converts PCA rotation matrices to correlation-style loadings that are
 comparable across different \code{scale} settings. Values are clipped within the
-\link{-1, 1} range to avoid small numerical drifts outside the unit interval.
+(-1, 1) range to avoid small numerical drifts outside the unit interval.
 }
 \keyword{internal}

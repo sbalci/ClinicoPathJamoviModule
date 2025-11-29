@@ -33,6 +33,15 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             colorSuccess = "color: #155724;",
             colorInfo = "color: #0c5460;"
         ),
+        
+        .empiricalHeterogeneity = NULL,
+        .totalSamplesData = NULL,
+        .firstDetectionData = NULL,
+        .pEstimate = NULL,
+        .maxSamp = NULL,
+        .bootstrapResults = NULL,
+        .positiveCassettesData = NULL,
+        .maxPositiveSingleData = NULL,
 
         # Helper to build combined styles
         .buildStyle = function(...) {
@@ -285,6 +294,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             maxSamp <- self$options$maxSamples
             nBoot <- self$options$bootstrapIterations
             analysisContext <- if (is.null(self$options$analysisContext)) "general" else self$options$analysisContext
+            
+            # Flag to skip Binomial model if assumptions violated
+            skipBinomial <- FALSE
 
             # Prepare recommendation collector to summarize minimum samples for target confidence
             recommendations <- list()
@@ -415,8 +427,8 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (self$options$showBootstrap && nBoot < 1000) {
                 interpretText <- self$results$interpretText
                 warningHtml <- sprintf("<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong>WARNING: Low Bootstrap Iterations</strong></p>
-                    <p style='margin: 5px 0 0 0; %s'>
+                    <p style='margin: 0; %s %s'><strong>WARNING: Low Bootstrap Iterations</strong></p>
+                    <p style='margin: 5px 0 0 0; %s %s'>
                         Only %d bootstrap iterations specified. Confidence intervals may be unstable.
                         Recommended: ≥1,000 iterations for preliminary analysis, ≥10,000 for publication.
                     </p>
@@ -834,7 +846,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                     binomialTable <- self$results$binomialTable
                                     binomialRecommendTable <- self$results$binomialRecommendTable
 
-                                    errorHtml <- sprintf("<div style='%s %s %s %s'>
+                                    fmt <- "<div style='%s %s %s %s'>
                                         <p style='margin: 0; %s'><strong>❌ Binomial Model Not Applicable</strong></p>
                                         <p style='margin: 10px 0 0 0; %s'>
                                             <b>High heterogeneity detected (CV=%.2f > 0.5)</b> indicates substantial variation in detection
@@ -853,7 +865,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                             <li><b>Beta-Binomial Model:</b> Accounts for case-to-case variation</li>
                                             <li><b>Stratified Analysis:</b> Analyze subgroups separately</li>
                                         </ul>
-                                    </div>",
+                                    </div>"
+                                    
+                                    errorHtml <- sprintf(fmt,
                                     private$.styleConstants$font, private$.styleConstants$bgLight,
                                     private$.styleConstants$borderWarning, private$.styleConstants$padding15,
                                     private$.styleConstants$fontSize15,
@@ -862,16 +876,13 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                     private$.styleConstants$fontSize14, cv * 100, cv,
                                     private$.styleConstants$fontSize14,
                                     private$.styleConstants$fontSize14)
-
+                                    
                                     if (self$options$showBinomialModel) {
                                         binomialText$setContent(errorHtml)
                                     }
-                                    binomialTable$clearRows()
-                                    binomialRecommendTable$clearRows()
 
-                                    # Skip binomial model entirely
-                                    return()
-
+                                    # Skip binomial model entirely, but continue to other analyses
+                                    skipBinomial <- TRUE
                                 } else if (cv > 0.3) {
                                     # Moderate heterogeneity - warn but allow
                                     private$.empiricalHeterogeneity <- sprintf("⚠️ MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
@@ -882,7 +893,8 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 # Method 2: Geometric MLE (fallback or explicit choice)
-                if ((is.na(pEstimate) || methodChoice == "geometric" || (!contextSupportsEmpirical && methodChoice == "auto" && !is.null(positiveCountData))) && nDetected > 0) {
+                # Method 2: Geometric MLE (fallback or explicit choice)
+                if (!skipBinomial && ((is.na(pEstimate) || methodChoice == "geometric" || (!contextSupportsEmpirical && methodChoice == "auto" && !is.null(positiveCountData))) && nDetected > 0)) {
 
                     # Use geometric MLE: q = 1 / mean(first detection position)
                     positive_first <- firstDetectionData[!is.na(firstDetectionData)]
@@ -902,37 +914,43 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 # Validate probability estimate and warn on data quality issues
-                pForCalc <- pEstimate
+                # Validate probability estimate and warn on data quality issues
                 dataQualityWarnings <- character(0)
-
-                # Add heterogeneity warning if detected during empirical estimation
-                if (!is.null(private$.empiricalHeterogeneity)) {
-                    dataQualityWarnings <- c(dataQualityWarnings, private$.empiricalHeterogeneity)
-                }
-
-                if (is.na(pForCalc)) {
+                
+                if (!skipBinomial) {
+                    pForCalc <- pEstimate
+    
+                    # Add heterogeneity warning if detected during empirical estimation
+                    if (!is.null(private$.empiricalHeterogeneity)) {
+                        dataQualityWarnings <- c(dataQualityWarnings, private$.empiricalHeterogeneity)
+                    }
+    
+                    if (is.na(pForCalc)) {
+                        pForCalc <- NA_real_
+                        dataQualityWarnings <- c(dataQualityWarnings,
+                            "⚠️ Could not estimate detection probability from data")
+                    } else if (pForCalc <= 0) {
+                        dataQualityWarnings <- c(dataQualityWarnings,
+                            "⚠️ DATA QUALITY ISSUE: Estimated probability ≤ 0. Check for data entry errors or insufficient positive cases.")
+                        # Set to NA instead of 0 to avoid log(0) errors in downstream calculations
+                        pForCalc <- NA_real_
+                    } else if (pForCalc >= 1) {
+                        dataQualityWarnings <- c(dataQualityWarnings,
+                            "⚠️ DATA QUALITY ISSUE: Estimated probability ≥ 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity.")
+                        # Cap at 0.9999 instead of 1 - 1e-12 to avoid extreme log calculations
+                        # This represents practical certainty while maintaining numeric stability
+                        pForCalc <- 0.9999
+                    } else if (pForCalc < 0.0001) {
+                        # Warn about very low probabilities that may cause numeric issues
+                        dataQualityWarnings <- c(dataQualityWarnings,
+                            sprintf("⚠️ CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc))
+                    } else if (pForCalc > 0.99) {
+                        # Warn about very high probabilities
+                        dataQualityWarnings <- c(dataQualityWarnings,
+                            sprintf("⚠️ CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc))
+                    }
+                } else {
                     pForCalc <- NA_real_
-                    dataQualityWarnings <- c(dataQualityWarnings,
-                        "⚠️ Could not estimate detection probability from data")
-                } else if (pForCalc <= 0) {
-                    dataQualityWarnings <- c(dataQualityWarnings,
-                        "⚠️ DATA QUALITY ISSUE: Estimated probability ≤ 0. Check for data entry errors or insufficient positive cases.")
-                    # Set to NA instead of 0 to avoid log(0) errors in downstream calculations
-                    pForCalc <- NA_real_
-                } else if (pForCalc >= 1) {
-                    dataQualityWarnings <- c(dataQualityWarnings,
-                        "⚠️ DATA QUALITY ISSUE: Estimated probability ≥ 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity.")
-                    # Cap at 0.9999 instead of 1 - 1e-12 to avoid extreme log calculations
-                    # This represents practical certainty while maintaining numeric stability
-                    pForCalc <- 0.9999
-                } else if (pForCalc < 0.0001) {
-                    # Warn about very low probabilities that may cause numeric issues
-                    dataQualityWarnings <- c(dataQualityWarnings,
-                        sprintf("⚠️ CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc))
-                } else if (pForCalc > 0.99) {
-                    # Warn about very high probabilities
-                    dataQualityWarnings <- c(dataQualityWarnings,
-                        sprintf("⚠️ CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc))
                 }
 
                 # Check for impossible positive counts
@@ -1248,6 +1266,194 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
+            # === Power Analysis ===
+            if (self$options$showPowerAnalysis) {
+                powerText <- self$results$powerAnalysisText
+                powerTable <- self$results$powerTable
+                
+                targetPower <- self$options$targetPower
+                targetQ <- self$options$targetDetectionProb
+                
+                # Scenario 1: User specified target q
+                n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
+                achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
+                
+                powerTable$addRow(rowKey="user_spec", values=list(
+                    scenario = "User Specified Target",
+                    targetPower = targetPower,
+                    probDetect = targetQ,
+                    nSamples = n_req_1,
+                    achievedPower = achieved_power_1
+                ))
+                
+                # Scenario 2: Observed q (if available)
+                if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
+                    n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
+                    achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
+                    
+                    powerTable$addRow(rowKey="observed", values=list(
+                        scenario = "Observed Data Estimate",
+                        targetPower = targetPower,
+                        probDetect = pEstimate,
+                        nSamples = n_req_2,
+                        achievedPower = achieved_power_2
+                    ))
+                }
+                
+                html <- sprintf("<div style='%s'>
+                    <p><strong>Power Analysis:</strong> Calculates the number of samples needed to detect at least one lesion with %.0f%% probability (Power), assuming a per-sample detection probability (q).</p>
+                    <p>Formula: n = log(1 - Power) / log(1 - q)</p>
+                </div>", private$.styleConstants$font)
+                powerText$setContent(html)
+            }
+
+            # === Multi-Focal Analysis ===
+            if (self$options$showMultifocalAnalysis) {
+                multifocalText <- self$results$multifocalAnalysisText
+                multifocalTable <- self$results$multifocalProbTable
+                
+                q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
+                
+                for (i in 1:maxSamp) {
+                    # P(X >= k) = 1 - pbinom(k-1, n, p)
+                    p_ge_1 <- 1 - pbinom(0, i, q_val)
+                    p_ge_2 <- 1 - pbinom(1, i, q_val)
+                    p_ge_3 <- 1 - pbinom(2, i, q_val)
+                    
+                    multifocalTable$addRow(rowKey=i, values=list(
+                        nSamples = i,
+                        detectOne = p_ge_1,
+                        detectTwo = p_ge_2,
+                        detectThree = p_ge_3
+                    ))
+                }
+                
+                html <- sprintf("<div style='%s'>
+                    <p><strong>Multifocal Detection:</strong> Probability of detecting multiple lesions in 'n' samples, assuming per-sample detection probability q = %.3f.</p>
+                    <p>Useful for planning sampling when the goal is to find multiple foci (e.g., multifocal tumor).</p>
+                </div>", private$.styleConstants$font, q_val)
+                multifocalText$setContent(html)
+            }
+
+            # === Automated Model Selection ===
+            if (self$options$autoSelectModel) {
+                selectionText <- self$results$modelSelectionText
+                comparisonTable <- self$results$modelComparisonTable
+                
+                # Use private helper to compare models
+                if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
+                    model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
+                    
+                    for (res in model_results) {
+                        comparisonTable$addRow(rowKey=res$model, values=res)
+                    }
+                    
+                    best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
+                    
+                    html <- sprintf("<div style='%s'>
+                        <p><strong>Best Fitting Model:</strong> %s (based on AIC)</p>
+                        <p>Lower AIC/BIC indicates better fit. Non-significant Chi-square p-value (>0.05) indicates adequate fit.</p>
+                    </div>", private$.styleConstants$font, best_model)
+                    selectionText$setContent(html)
+                } else {
+                    selectionText$setContent("Insufficient data for model selection.")
+                }
+            }
+
+            # === Power Analysis ===
+            if (self$options$showPowerAnalysis) {
+                powerText <- self$results$powerAnalysisText
+                powerTable <- self$results$powerTable
+                
+                targetPower <- self$options$targetPower
+                targetQ <- self$options$targetDetectionProb
+                
+                # Scenario 1: User specified target q
+                n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
+                achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
+                
+                powerTable$addRow(rowKey="user_spec", values=list(
+                    scenario = "User Specified Target",
+                    targetPower = targetPower,
+                    probDetect = targetQ,
+                    nSamples = n_req_1,
+                    achievedPower = achieved_power_1
+                ))
+                
+                # Scenario 2: Observed q (if available)
+                if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
+                    n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
+                    achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
+                    
+                    powerTable$addRow(rowKey="observed", values=list(
+                        scenario = "Observed Data Estimate",
+                        targetPower = targetPower,
+                        probDetect = pEstimate,
+                        nSamples = n_req_2,
+                        achievedPower = achieved_power_2
+                    ))
+                }
+                
+                html <- sprintf("<div style='%s'>
+                    <p><strong>Power Analysis:</strong> Calculates the number of samples needed to detect at least one lesion with %.0f%% probability (Power), assuming a per-sample detection probability (q).</p>
+                    <p>Formula: n = log(1 - Power) / log(1 - q)</p>
+                </div>", private$.styleConstants$font, targetPower * 100)
+                powerText$setContent(html)
+            }
+
+            # === Multi-Focal Analysis ===
+            if (self$options$showMultifocalAnalysis) {
+                multifocalText <- self$results$multifocalAnalysisText
+                multifocalTable <- self$results$multifocalProbTable
+                
+                q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
+                
+                for (i in 1:maxSamp) {
+                    # P(X >= k) = 1 - pbinom(k-1, n, p)
+                    p_ge_1 <- 1 - pbinom(0, i, q_val)
+                    p_ge_2 <- 1 - pbinom(1, i, q_val)
+                    p_ge_3 <- 1 - pbinom(2, i, q_val)
+                    
+                    multifocalTable$addRow(rowKey=i, values=list(
+                        nSamples = i,
+                        detectOne = p_ge_1,
+                        detectTwo = p_ge_2,
+                        detectThree = p_ge_3
+                    ))
+                }
+                
+                html <- sprintf("<div style='%s'>
+                    <p><strong>Multifocal Detection:</strong> Probability of detecting multiple lesions in 'n' samples, assuming per-sample detection probability q = %.3f.</p>
+                    <p>Useful for planning sampling when the goal is to find multiple foci (e.g., multifocal tumor).</p>
+                </div>", private$.styleConstants$font, q_val)
+                multifocalText$setContent(html)
+            }
+
+            # === Automated Model Selection ===
+            if (self$options$autoSelectModel) {
+                selectionText <- self$results$modelSelectionText
+                comparisonTable <- self$results$modelComparisonTable
+                
+                # Use private helper to compare models
+                if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
+                    model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
+                    
+                    for (res in model_results) {
+                        comparisonTable$addRow(rowKey=res$model, values=res)
+                    }
+                    
+                    best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
+                    
+                    html <- sprintf("<div style='%s'>
+                        <p><strong>Best Fitting Model:</strong> %s (based on AIC)</p>
+                        <p>Lower AIC/BIC indicates better fit. Non-significant Chi-square p-value (>0.05) indicates adequate fit.</p>
+                    </div>", private$.styleConstants$font, best_model)
+                    selectionText$setContent(html)
+                } else {
+                    selectionText$setContent("Insufficient data for model selection.")
+                }
+            }
+
             # === Auto-Detect Heterogeneity (Warning Only) ===
             if (self$options$autoDetectHeterogeneity && !is.null(sampleTypeData)) {
                 auto_het <- private$.autoDetectHeterogeneity(firstDetectionData, sampleTypeData)
@@ -1521,7 +1727,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ),
             prevalence * 100)
 
-            if (self$options$showProbabilityExplanation) {
+            if (!skipBinomial && self$options$showProbabilityExplanation) {
                 probabilityExplanation$setContent(html)
             }
 
@@ -1629,6 +1835,8 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 self$results$insert(2, selectionBiasNotice)
 
+                # Perform bootstrap resampling
+                
                 for (iter in 1:nBoot) {
                     # Progress checkpoint every 10%
                     if (iter %% checkpointInterval == 0) {
@@ -1649,21 +1857,28 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Store for plotting
                 private$.bootstrapResults <- bootstrapResults
 
+                # Calculate summary statistics from bootstrap results
+                for (j in 1:maxSamp) {
+                    bootstrapMeans[j] <- mean(bootstrapResults[, j], na.rm = TRUE)
+                    bootstrapCILower[j] <- quantile(bootstrapResults[, j], probs = 0.025, na.rm = TRUE)
+                    bootstrapCIUpper[j] <- quantile(bootstrapResults[, j], probs = 0.975, na.rm = TRUE)
+                }
+
                 # Populate bootstrap table
                 bootstrapTable <- self$results$bootstrapTable
-
+                
+                # Clear existing rows (if any)
+                # bootstrapTable$clearRows() # Not available in mock?
+                
                 for (i in 1:maxSamp) {
-                    meanSens <- mean(bootstrapResults[, i])
-                    ciLower <- quantile(bootstrapResults[, i], 0.025)
-                    ciUpper <- quantile(bootstrapResults[, i], 0.975)
-
-                    bootstrapMeans[i] <- meanSens
-                    bootstrapCILower[i] <- ciLower
-                    bootstrapCIUpper[i] <- ciUpper
-
-                    bootstrapTable$addRow(rowKey=paste0("n_", i), values=list(
+                    meanVal <- bootstrapMeans[i]
+                    ciLower <- bootstrapCILower[i]
+                    ciUpper <- bootstrapCIUpper[i]
+                    
+                    # Add row to table
+                    bootstrapTable$addRow(rowKey = i, values = list(
                         nSamples = i,
-                        meanSens = meanSens,
+                        meanSens = meanVal,
                         ciLower = ciLower,
                         ciUpper = ciUpper
                     ))
@@ -1676,8 +1891,11 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 targetCandidates <- which(!is.na(bootstrapMeans) & bootstrapMeans >= targetConf)
                 bootstrapTargetIdx <- if (length(targetCandidates) > 0) targetCandidates[1] else NA_integer_
 
-                ciTarget <- if (!is.na(bootstrapTargetIdx)) c(bootstrapCILowerVec[bootstrapTargetIdx], bootstrapCIUpperVec[bootstrapTargetIdx]) else NULL
-
+                ciTarget <- c(
+                    quantile(bootstrapMeansVec, probs = (1 - targetConf) / 2, na.rm = TRUE),
+                    quantile(bootstrapMeansVec, probs = 1 - (1 - targetConf) / 2, na.rm = TRUE)
+                )
+                
                 addRecommendation(
                     method = "Bootstrap",
                     probVec = bootstrapMeans,
@@ -1992,6 +2210,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # === Correlation Analysis ===
+            positiveCassettes <- self$options$positiveCassettes
             if (self$options$showCorrelation && !is.null(positiveCassettes)) {
 
                 positiveCassettesEsc <- private$.escapeVar(positiveCassettes)
@@ -2035,6 +2254,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # === Distribution Pattern Analysis (Single vs Summed) ===
+            positiveCassettes <- self$options$positiveCassettes
             maxPositiveSingle <- self$options$maxPositiveSingle
 
             if (self$options$showDistributionPattern && !is.null(positiveCassettes) && !is.null(maxPositiveSingle)) {
@@ -4262,14 +4482,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Private storage for plotting data
-        .totalSamplesData = NULL,
-        .firstDetectionData = NULL,
-        .pEstimate = NULL,
-        .maxSamp = NULL,
-        .bootstrapResults = NULL,
-        .positiveCassettesData = NULL,
-        .maxPositiveSingleData = NULL,
-
+        
         # ==============================================================================
         # 1. HETEROGENEITY TESTING
         # ==============================================================================

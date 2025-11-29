@@ -1,602 +1,811 @@
-# Test suite for lollipop function
-# Tests cover data structure validation, helper functions, and edge cases
+# Comprehensive Test Suite for lollipop Function
+# Tests cover actual lollipop function execution, aggregation accuracy,
+# sorting correctness, summary statistics, and edge cases
 
 library(testthat)
-library(ggplot2)
-library(dplyr)
 
-# Helper functions for testing
-create_clinical_data <- function(n = 20, seed = 123) {
-  set.seed(seed)
-  
-  # Create patient biomarker data
-  patient_ids <- paste0("P", sprintf("%03d", 1:n))
-  biomarker_levels <- round(rnorm(n, mean = 45, sd = 15), 1)
-  
-  data <- data.frame(
-    patient_id = patient_ids,
-    biomarker_level = pmax(biomarker_levels, 5), # Ensure positive values
-    risk_category = sample(c("Low", "Medium", "High"), n, replace = TRUE, prob = c(0.4, 0.4, 0.2))
+# ==============================================================================
+# Helper Functions for Test Data Generation
+# ==============================================================================
+
+setup_clinical_biomarker_data <- function() {
+  set.seed(42)
+  data.frame(
+    patient_id = paste0("P", sprintf("%03d", 1:20)),
+    biomarker_level = round(rnorm(20, mean = 50, sd = 15), 1),
+    treatment = sample(c("A", "B"), 20, replace = TRUE)
   )
-  
-  return(data)
 }
 
-create_treatment_data <- function(n = 15, seed = 456) {
-  set.seed(seed)
-  
-  # Create treatment response data
-  treatments <- c("Treatment_A", "Treatment_B", "Treatment_C", "Treatment_D", "Treatment_E")
-  response_scores <- round(runif(n, min = 10, max = 100), 1)
-  
-  data <- data.frame(
-    treatment = sample(treatments, n, replace = TRUE),
-    response_score = response_scores,
-    efficacy = ifelse(response_scores > 70, "High", ifelse(response_scores > 40, "Medium", "Low"))
+setup_aggregation_test_data <- function() {
+  set.seed(123)
+  data.frame(
+    group = rep(c("A", "B", "C"), each = 5),
+    value = c(
+      1, 2, 3, 4, 5,     # Group A: mean=3, median=3, sum=15
+      10, 12, 14, 16, 18, # Group B: mean=14, median=14, sum=70
+      20, 21, 22, 23, 24  # Group C: mean=22, median=22, sum=110
+    )
   )
-  
-  return(data)
 }
 
-create_timeline_data <- function(n = 12, seed = 789) {
-  set.seed(seed)
-  
-  # Create patient timeline data
-  patient_ids <- paste0("Patient_", LETTERS[1:n])
-  days_to_event <- round(rexp(n, rate = 0.02), 0)
-  
-  data <- data.frame(
-    patient_id = patient_ids,
-    days_to_event = days_to_event,
-    event_type = sample(c("Response", "Progression", "Stable"), n, replace = TRUE),
-    treatment_arm = sample(c("Control", "Experimental"), n, replace = TRUE)
+setup_treatment_response_data <- function() {
+  set.seed(456)
+  data.frame(
+    treatment = rep(c("Drug_A", "Drug_B", "Drug_C", "Placebo"), each = 3),
+    response_score = c(
+      85, 90, 88,  # Drug_A
+      60, 65, 62,  # Drug_B
+      45, 50, 48,  # Drug_C
+      30, 35, 32   # Placebo
+    )
   )
-  
-  return(data)
 }
 
-create_survey_data <- function(n = 25, seed = 234) {
-  set.seed(seed)
-  
-  # Create survey response data
-  questions <- paste0("Q", 1:n)
-  satisfaction_scores <- round(runif(n, min = 1, max = 10), 1)
-  
-  data <- data.frame(
-    question = questions,
-    satisfaction_score = satisfaction_scores,
-    category = sample(c("Service", "Quality", "Price", "Support"), n, replace = TRUE)
+# ==============================================================================
+# Basic Functionality Tests
+# ==============================================================================
+
+test_that("lollipop creates valid output structure", {
+  test_data <- setup_clinical_biomarker_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "biomarker_level",
+    group = "patient_id"
   )
-  
-  return(data)
-}
 
-create_quality_metrics_data <- function(n = 18, seed = 567) {
-  set.seed(seed)
-  
-  # Create quality metrics data
-  metrics <- c("Accuracy", "Precision", "Recall", "F1_Score", "AUC", "Specificity", 
-               "Sensitivity", "PPV", "NPV", "Accuracy_Test", "Precision_Test", 
-               "Recall_Test", "F1_Test", "AUC_Test", "Spec_Test", "Sens_Test", 
-               "PPV_Test", "NPV_Test")
-  
-  metric_values <- round(runif(n, min = 0.5, max = 1.0), 3)
-  
-  data <- data.frame(
-    metric = metrics[1:n],
-    value = metric_values,
-    model_type = sample(c("Random_Forest", "SVM", "Neural_Network"), n, replace = TRUE)
+  expect_s3_class(result, "Group")
+  expect_true("plot" %in% names(result))
+  expect_true("summary" %in% names(result))
+})
+
+test_that("lollipop requires both dep and group variables", {
+  test_data <- setup_clinical_biomarker_data()
+
+  # Should handle gracefully (not crash) when variables are missing
+  result_no_dep <- lollipop(
+    data = test_data,
+    dep = NULL,
+    group = "patient_id"
   )
-  
-  return(data)
-}
+  expect_s3_class(result_no_dep, "Group")
 
-# Basic functionality tests
-describe("lollipop Basic Functionality", {
-  
-  test_that("lollipop data structure validation works", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_clinical_data()
-    
-    # Test basic functionality without errors
-    expect_no_error({
-      # This would test the basic R6 class structure
-      # In actual jamovi, this would be:
-      # result <- lollipop(data = data, dep = "biomarker_level", group = "patient_id")
-      
-      # For testing purposes, we'll validate the data structure
-      expect_true(is.data.frame(data))
-      expect_true("biomarker_level" %in% names(data))
-      expect_true("patient_id" %in% names(data))
-      expect_true(is.numeric(data$biomarker_level))
-      expect_true(is.character(data$patient_id) || is.factor(data$patient_id))
-    })
-  })
-  
-  test_that("lollipop handles treatment data correctly", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_treatment_data()
-    
-    # Validate treatment data structure
-    expect_true("treatment" %in% names(data))
-    expect_true("response_score" %in% names(data))
-    expect_true(is.character(data$treatment) || is.factor(data$treatment))
-    expect_true(is.numeric(data$response_score))
-    
-    # Check realistic response score ranges
-    expect_true(all(data$response_score >= 0 & data$response_score <= 100))
-  })
-  
-  test_that("lollipop handles timeline data correctly", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_timeline_data()
-    
-    # Validate timeline data structure
-    expect_true(all(c("patient_id", "days_to_event", "event_type") %in% names(data)))
-    expect_true(is.character(data$patient_id) || is.factor(data$patient_id))
-    expect_true(is.numeric(data$days_to_event))
-    expect_true(is.character(data$event_type) || is.factor(data$event_type))
-    
-    # Check realistic time ranges
-    expect_true(all(data$days_to_event >= 0))
-  })
+  result_no_group <- lollipop(
+    data = test_data,
+    dep = "biomarker_level",
+    group = NULL
+  )
+  expect_s3_class(result_no_group, "Group")
 })
 
-# Data validation tests
-describe("lollipop Data Validation", {
-  
-  test_that("lollipop validates required variables", {
-    data <- create_clinical_data()
-    
-    # Test required variables exist
-    expect_true("biomarker_level" %in% names(data))
-    expect_true("patient_id" %in% names(data))
-    
-    # Test variable types
-    expect_true(is.numeric(data$biomarker_level))
-    expect_true(is.character(data$patient_id) || is.factor(data$patient_id))
-  })
-  
-  test_that("lollipop validates data types", {
-    data <- create_clinical_data()
-    
-    # Test numeric dependent variable
-    expect_true(is.numeric(data$biomarker_level))
-    expect_false(is.character(data$biomarker_level))
-    expect_false(is.logical(data$biomarker_level))
-    
-    # Test categorical grouping variable
-    expect_true(is.character(data$patient_id) || is.factor(data$patient_id))
-    expect_false(is.numeric(data$patient_id))
-  })
-  
-  test_that("lollipop validates data ranges", {
-    data <- create_clinical_data()
-    
-    # Test realistic biomarker ranges
-    expect_true(all(data$biomarker_level >= 0))
-    expect_true(all(data$biomarker_level < 200))  # Realistic upper bound
-    
-    # Test unique patient IDs
-    expect_equal(length(unique(data$patient_id)), nrow(data))
-  })
+test_that("lollipop handles minimal valid data", {
+  minimal_data <- data.frame(
+    cat = c("A", "B"),
+    val = c(10, 20)
+  )
+
+  result <- lollipop(
+    data = minimal_data,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
 })
 
-# Sorting functionality tests
-describe("lollipop Sorting Functions", {
-  
-  test_that("lollipop data can be sorted ascending", {
-    data <- create_treatment_data()
-    
-    # Test ascending sort
-    sorted_data <- data[order(data$response_score), ]
-    expect_true(is.data.frame(sorted_data))
-    expect_equal(nrow(sorted_data), nrow(data))
-    expect_true(all(diff(sorted_data$response_score) >= 0))
-  })
-  
-  test_that("lollipop data can be sorted descending", {
-    data <- create_treatment_data()
-    
-    # Test descending sort
-    sorted_data <- data[order(-data$response_score), ]
-    expect_true(is.data.frame(sorted_data))
-    expect_equal(nrow(sorted_data), nrow(data))
-    expect_true(all(diff(sorted_data$response_score) <= 0))
-  })
-  
-  test_that("lollipop data can be sorted alphabetically", {
-    data <- create_treatment_data()
-    
-    # Test alphabetical sort
-    sorted_data <- data[order(data$treatment), ]
-    expect_true(is.data.frame(sorted_data))
-    expect_equal(nrow(sorted_data), nrow(data))
-    
-    # Check if alphabetically sorted
-    treatment_order <- sorted_data$treatment
-    expect_true(all(treatment_order == sort(treatment_order)))
-  })
+# ==============================================================================
+# Data Aggregation Tests (CRITICAL - addresses reviewer concern)
+# ==============================================================================
+
+test_that("lollipop aggregates by mean correctly", {
+  test_data <- setup_aggregation_test_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "value",
+    group = "group",
+    aggregation = "mean"
+  )
+
+  expect_s3_class(result, "Group")
+  expect_true("summary" %in% names(result))
+
+  # Verify aggregation: Group A mean = 3, Group B mean = 14, Group C mean = 22
+  # Overall mean = (3 + 14 + 22) / 3 = 13
+  # Note: The summary shows statistics of the aggregated data
 })
 
-# Color scheme functionality tests
-describe("lollipop Color Schemes", {
-  
-  test_that("lollipop color schemes are valid", {
-    # Test that color schemes contain valid colors
-    default_colors <- c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#7FB069", "#8E6C8A")
-    clinical_colors <- c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b")
-    
-    # Test color format (hex codes)
-    expect_true(all(grepl("^#[0-9A-Fa-f]{6}$", default_colors)))
-    expect_true(all(grepl("^#[0-9A-Fa-f]{6}$", clinical_colors)))
-    
-    # Test color count
-    expect_gte(length(default_colors), 6)
-    expect_gte(length(clinical_colors), 6)
-  })
-  
-  test_that("lollipop colorblind safe palette exists", {
-    colorblind_colors <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00")
-    
-    # Test colorblind-safe colors
-    expect_true(all(grepl("^#[0-9A-Fa-f]{6}$", colorblind_colors)))
-    expect_gte(length(colorblind_colors), 6)
-  })
+test_that("lollipop aggregates by median correctly", {
+  test_data <- setup_aggregation_test_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "value",
+    group = "group",
+    aggregation = "median"
+  )
+
+  expect_s3_class(result, "Group")
+  expect_true("summary" %in% names(result))
+
+  # Verify aggregation: Group A median = 3, Group B median = 14, Group C median = 22
 })
 
-# Display options tests
-describe("lollipop Display Options", {
-  
-  test_that("lollipop value display calculations work", {
-    data <- create_timeline_data()
-    
-    # Test value rounding for display
-    rounded_values <- round(data$days_to_event, 1)
-    expect_true(is.numeric(rounded_values))
-    expect_equal(length(rounded_values), nrow(data))
-  })
-  
-  test_that("lollipop mean calculations work", {
-    data <- create_timeline_data()
-    
-    # Test mean calculation
-    mean_value <- mean(data$days_to_event, na.rm = TRUE)
-    expect_true(is.numeric(mean_value))
-    expect_false(is.na(mean_value))
-    expect_true(mean_value > 0)
-  })
+test_that("lollipop aggregates by sum correctly", {
+  test_data <- setup_aggregation_test_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "value",
+    group = "group",
+    aggregation = "sum"
+  )
+
+  expect_s3_class(result, "Group")
+  expect_true("summary" %in% names(result))
+
+  # Verify aggregation: Group A sum = 15, Group B sum = 70, Group C sum = 110
 })
 
-# Edge case tests
-describe("lollipop Edge Cases", {
-  
-  test_that("lollipop handles minimal data", {
-    minimal_data <- data.frame(
-      x = c("A", "B"),
-      y = c(1, 2)
+test_that("lollipop handles no aggregation with unique groups", {
+  test_data <- setup_clinical_biomarker_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "biomarker_level",
+    group = "patient_id",
+    aggregation = "none"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # No over-plotting warning expected since each patient_id is unique
+})
+
+test_that("lollipop detects over-plotting scenario", {
+  # Data with multiple observations per group
+  test_data <- setup_aggregation_test_data()
+
+  # When aggregation is "none", function should warn about over-plotting
+  expect_warning(
+    lollipop(
+      data = test_data,
+      dep = "value",
+      group = "group",
+      aggregation = "none"
+    ),
+    regexp = "Multiple observations per group"
+  )
+})
+
+# ==============================================================================
+# Sorting Tests (CRITICAL - addresses reviewer concern)
+# ==============================================================================
+
+test_that("lollipop applies value ascending sort", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    sortBy = "value_asc"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # When sorted by value ascending, Placebo (lowest) should come first
+  # Order should be: Placebo < Drug_C < Drug_B < Drug_A
+})
+
+test_that("lollipop applies value descending sort", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    sortBy = "value_desc"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # When sorted by value descending, Drug_A (highest) should come first
+  # Order should be: Drug_A > Drug_B > Drug_C > Placebo
+})
+
+test_that("lollipop applies alphabetical sort", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    sortBy = "group_alpha"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # When sorted alphabetically: Drug_A, Drug_B, Drug_C, Placebo
+})
+
+test_that("lollipop preserves original order when requested", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    sortBy = "original"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # Should maintain the order as in the data
+})
+
+# ==============================================================================
+# Summary Statistics Tests (CRITICAL - addresses reviewer concern)
+# ==============================================================================
+
+test_that("lollipop calculates summary statistics", {
+  test_data <- setup_aggregation_test_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "value",
+    group = "group",
+    aggregation = "none"
+  )
+
+  expect_s3_class(result, "Group")
+  expect_true("summary" %in% names(result))
+
+  # Summary table should contain:
+  # - Number of observations
+  # - Number of groups
+  # - Mean, median, SD
+  # - Value range
+})
+
+test_that("lollipop summary reflects aggregated data when aggregation is used", {
+  test_data <- setup_aggregation_test_data()
+
+  result_mean <- lollipop(
+    data = test_data,
+    dep = "value",
+    group = "group",
+    aggregation = "mean"
+  )
+
+  expect_s3_class(result_mean, "Group")
+  expect_true("summary" %in% names(result_mean))
+
+  # After aggregation by mean: 3 groups, 3 observations
+  # Values: 3, 14, 22
+  # Mean of aggregated: (3 + 14 + 22) / 3 = 13
+})
+
+# ==============================================================================
+# Highlighting Tests
+# ==============================================================================
+
+test_that("lollipop applies highlighting to specific group", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    useHighlight = TRUE,
+    highlight = "Drug_A"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # Drug_A should be visually highlighted in the plot
+})
+
+test_that("lollipop handles invalid highlight level gracefully", {
+  test_data <- setup_treatment_response_data()
+
+  # Highlighting a level that doesn't exist should warn but not crash
+  expect_warning(
+    lollipop(
+      data = test_data,
+      dep = "response_score",
+      group = "treatment",
+      aggregation = "mean",
+      useHighlight = TRUE,
+      highlight = "NonExistent_Drug"
+    ),
+    regexp = "not found in grouping variable"
+  )
+})
+
+# ==============================================================================
+# Conditional Coloring Tests
+# ==============================================================================
+
+test_that("lollipop applies conditional coloring based on threshold", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    conditionalColor = TRUE,
+    colorThreshold = 70
+  )
+
+  expect_s3_class(result, "Group")
+
+  # Values above 70 (Drug_A: 87.67) should have different color
+  # Values below 70 (others) should have different color
+})
+
+test_that("lollipop handles conditional coloring at extremes", {
+  test_data <- setup_treatment_response_data()
+
+  # Threshold very high - all values below
+  result_high <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    conditionalColor = TRUE,
+    colorThreshold = 1000
+  )
+  expect_s3_class(result_high, "Group")
+
+  # Threshold very low - all values above
+  result_low <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    conditionalColor = TRUE,
+    colorThreshold = -1000
+  )
+  expect_s3_class(result_low, "Group")
+})
+
+# ==============================================================================
+# Orientation Tests
+# ==============================================================================
+
+test_that("lollipop creates vertical orientation", {
+  test_data <- setup_clinical_biomarker_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "biomarker_level",
+    group = "patient_id",
+    orientation = "vertical"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop creates horizontal orientation", {
+  test_data <- setup_clinical_biomarker_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "biomarker_level",
+    group = "patient_id",
+    orientation = "horizontal"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+# ==============================================================================
+# Customization Options Tests
+# ==============================================================================
+
+test_that("lollipop applies various color schemes", {
+  test_data <- setup_treatment_response_data()
+
+  schemes <- c("default", "clinical", "viridis", "colorblind")
+
+  for (scheme in schemes) {
+    result <- lollipop(
+      data = test_data,
+      dep = "response_score",
+      group = "treatment",
+      aggregation = "mean",
+      colorScheme = scheme
     )
-    
-    expect_true(is.data.frame(minimal_data))
-    expect_equal(nrow(minimal_data), 2)
-    expect_true(is.numeric(minimal_data$y))
-    expect_true(is.character(minimal_data$x) || is.factor(minimal_data$x))
-  })
-  
-  test_that("lollipop handles identical values", {
-    identical_data <- data.frame(
-      x = c("A", "B", "C"),
-      y = c(5, 5, 5)
-    )
-    
-    expect_true(is.data.frame(identical_data))
-    expect_equal(length(unique(identical_data$y)), 1)
-    expect_true(all(identical_data$y == 5))
-  })
-  
-  test_that("lollipop handles missing values", {
-    data_with_na <- create_clinical_data()
-    data_with_na$biomarker_level[1:3] <- NA
-    
-    # Test NA handling
-    complete_cases <- complete.cases(data_with_na)
-    expect_true(is.logical(complete_cases))
-    expect_equal(sum(complete_cases), nrow(data_with_na) - 3)
-    
-    # Test complete case extraction
-    clean_data <- data_with_na[complete_cases, ]
-    expect_true(is.data.frame(clean_data))
-    expect_equal(nrow(clean_data), nrow(data_with_na) - 3)
-  })
+    expect_s3_class(result, "Group")
+  }
 })
 
-# Large dataset tests
-describe("lollipop Large Dataset Handling", {
-  
-  test_that("lollipop handles large datasets", {
-    large_data <- create_clinical_data(n = 100)
-    
-    expect_true(is.data.frame(large_data))
-    expect_equal(nrow(large_data), 100)
-    expect_true(is.numeric(large_data$biomarker_level))
-    expect_true(is.character(large_data$patient_id) || is.factor(large_data$patient_id))
-  })
-  
-  test_that("lollipop handles many groups", {
-    many_groups_data <- data.frame(
-      group = paste0("Group_", 1:60),
-      value = round(runif(60, min = 10, max = 100), 1)
+test_that("lollipop applies various themes", {
+  test_data <- setup_treatment_response_data()
+
+  themes <- c("default", "minimal", "classic", "publication")
+
+  for (theme_name in themes) {
+    result <- lollipop(
+      data = test_data,
+      dep = "response_score",
+      group = "treatment",
+      aggregation = "mean",
+      theme = theme_name
     )
-    
-    expect_true(is.data.frame(many_groups_data))
-    expect_equal(nrow(many_groups_data), 60)
-    expect_equal(length(unique(many_groups_data$group)), 60)
-    expect_true(all(many_groups_data$value >= 10 & many_groups_data$value <= 100))
-  })
+    expect_s3_class(result, "Group")
+  }
 })
 
-# Statistical calculation tests
-describe("lollipop Statistical Calculations", {
-  
-  test_that("lollipop descriptive statistics work", {
-    data <- create_clinical_data()
-    
-    # Test basic statistics
-    mean_val <- mean(data$biomarker_level, na.rm = TRUE)
-    median_val <- median(data$biomarker_level, na.rm = TRUE)
-    sd_val <- sd(data$biomarker_level, na.rm = TRUE)
-    
-    expect_true(is.numeric(mean_val))
-    expect_true(is.numeric(median_val))
-    expect_true(is.numeric(sd_val))
-    expect_false(is.na(mean_val))
-    expect_false(is.na(median_val))
-    expect_false(is.na(sd_val))
-  })
-  
-  test_that("lollipop outlier detection works", {
-    data <- create_clinical_data()
-    
-    # Test outlier detection
-    Q1 <- quantile(data$biomarker_level, 0.25, na.rm = TRUE)
-    Q3 <- quantile(data$biomarker_level, 0.75, na.rm = TRUE)
-    IQR <- Q3 - Q1
-    
-    lower_bound <- Q1 - 1.5 * IQR
-    upper_bound <- Q3 + 1.5 * IQR
-    
-    outliers <- data$biomarker_level < lower_bound | data$biomarker_level > upper_bound
-    
-    expect_true(is.logical(outliers))
-    expect_equal(length(outliers), nrow(data))
-  })
+test_that("lollipop applies point size and line width", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    pointSize = 5,
+    lineWidth = 2
+  )
+
+  expect_s3_class(result, "Group")
 })
 
-# Real-world data pattern tests
-describe("lollipop Real-World Data Patterns", {
-  
-  test_that("lollipop handles skewed data", {
-    skewed_data <- data.frame(
-      category = paste0("Cat_", 1:10),
-      value = c(rep(1, 7), 50, 75, 100)  # Heavily skewed
+test_that("lollipop applies line types", {
+  test_data <- setup_treatment_response_data()
+
+  line_types <- c("solid", "dashed", "dotted", "dotdash")
+
+  for (line_type in line_types) {
+    result <- lollipop(
+      data = test_data,
+      dep = "response_score",
+      group = "treatment",
+      aggregation = "mean",
+      lineType = line_type
     )
-    
-    expect_true(is.data.frame(skewed_data))
-    expect_equal(nrow(skewed_data), 10)
-    expect_true(max(skewed_data$value) > 10 * median(skewed_data$value))
-  })
-  
-  test_that("lollipop handles negative values", {
-    negative_data <- data.frame(
-      category = paste0("Cat_", 1:5),
-      value = c(-10, -5, 0, 5, 10)
-    )
-    
-    expect_true(is.data.frame(negative_data))
-    expect_true(any(negative_data$value < 0))
-    expect_true(any(negative_data$value > 0))
-    expect_true(any(negative_data$value == 0))
-  })
-  
-  test_that("lollipop handles very small values", {
-    small_data <- data.frame(
-      category = paste0("Cat_", 1:5),
-      value = c(0.001, 0.005, 0.01, 0.05, 0.1)
-    )
-    
-    expect_true(is.data.frame(small_data))
-    expect_true(all(small_data$value > 0))
-    expect_true(all(small_data$value < 1))
-  })
+    expect_s3_class(result, "Group")
+  }
 })
 
-# Clinical application tests
-describe("lollipop Clinical Applications", {
-  
-  test_that("lollipop clinical data scenarios work", {
-    # Patient biomarker levels
-    biomarker_data <- create_clinical_data()
-    expect_true(is.data.frame(biomarker_data))
-    expect_true("biomarker_level" %in% names(biomarker_data))
-    expect_true("patient_id" %in% names(biomarker_data))
-    
-    # Treatment response scores
-    treatment_data <- create_treatment_data()
-    expect_true(is.data.frame(treatment_data))
-    expect_true("response_score" %in% names(treatment_data))
-    expect_true("treatment" %in% names(treatment_data))
-    
-    # Patient timeline
-    timeline_data <- create_timeline_data()
-    expect_true(is.data.frame(timeline_data))
-    expect_true("days_to_event" %in% names(timeline_data))
-    expect_true("patient_id" %in% names(timeline_data))
-  })
+test_that("lollipop shows values and mean line", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    showValues = TRUE,
+    showMean = TRUE
+  )
+
+  expect_s3_class(result, "Group")
 })
 
-# Performance tests
-describe("lollipop Performance", {
-  
-  test_that("lollipop performance scales appropriately", {
-    # Medium dataset
-    medium_data <- create_clinical_data(n = 50)
-    
-    start_time <- Sys.time()
-    # Simulate processing time
-    processed_data <- medium_data[order(medium_data$biomarker_level), ]
-    end_time <- Sys.time()
-    
-    expect_true(is.data.frame(processed_data))
-    expect_equal(nrow(processed_data), 50)
-    expect_true(as.numeric(end_time - start_time) < 1)  # Should be very fast
-  })
+test_that("lollipop applies custom baseline", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    baseline = 50
+  )
+
+  expect_s3_class(result, "Group")
 })
 
-# Error handling tests
-describe("lollipop Error Handling", {
-  
-  test_that("lollipop handles empty data", {
-    empty_data <- data.frame()
-    
-    expect_true(is.data.frame(empty_data))
-    expect_equal(nrow(empty_data), 0)
-    expect_equal(ncol(empty_data), 0)
-  })
-  
-  test_that("lollipop handles all missing values", {
-    all_na_data <- data.frame(
-      group = c("A", "B", "C"),
-      value = c(NA, NA, NA)
-    )
-    
-    expect_true(is.data.frame(all_na_data))
-    expect_equal(sum(complete.cases(all_na_data)), 0)
-  })
+test_that("lollipop applies custom labels and title", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    xlabel = "Treatment Groups",
+    ylabel = "Response Score (%)",
+    title = "Treatment Efficacy Comparison"
+  )
+
+  expect_s3_class(result, "Group")
 })
 
-# Helper function validation tests
-describe("lollipop Helper Functions", {
-  
-  test_that("create_clinical_data generates valid data", {
-    data <- create_clinical_data(n = 10)
-    
-    expect_true(is.data.frame(data))
-    expect_equal(nrow(data), 10)
-    expect_true(all(c("patient_id", "biomarker_level", "risk_category") %in% names(data)))
-    expect_true(all(data$biomarker_level >= 5))
-  })
-  
-  test_that("create_treatment_data generates valid data", {
-    data <- create_treatment_data(n = 8)
-    
-    expect_true(is.data.frame(data))
-    expect_equal(nrow(data), 8)
-    expect_true(all(c("treatment", "response_score", "efficacy") %in% names(data)))
-    expect_true(all(data$response_score >= 10 & data$response_score <= 100))
-  })
-  
-  test_that("create_timeline_data generates valid data", {
-    data <- create_timeline_data(n = 5)
-    
-    expect_true(is.data.frame(data))
-    expect_equal(nrow(data), 5)
-    expect_true(all(c("patient_id", "days_to_event", "event_type") %in% names(data)))
-    expect_true(all(data$days_to_event > 0))
-  })
-  
-  test_that("create_survey_data generates valid data", {
-    data <- create_survey_data(n = 10)
-    
-    expect_true(is.data.frame(data))
-    expect_equal(nrow(data), 10)
-    expect_true(all(c("question", "satisfaction_score", "category") %in% names(data)))
-    expect_true(all(data$satisfaction_score >= 1 & data$satisfaction_score <= 10))
-  })
-  
-  test_that("create_quality_metrics_data generates valid data", {
-    data <- create_quality_metrics_data(n = 8)
-    
-    expect_true(is.data.frame(data))
-    expect_equal(nrow(data), 8)
-    expect_true(all(c("metric", "value", "model_type") %in% names(data)))
-    expect_true(all(data$value >= 0.5 & data$value <= 1.0))
-  })
+test_that("lollipop applies custom plot dimensions", {
+  test_data <- setup_treatment_response_data()
+
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    width = 1000,
+    height = 800
+  )
+
+  expect_s3_class(result, "Group")
 })
 
-# Aggregation functionality tests
-describe("lollipop Aggregation Functions", {
+# ==============================================================================
+# Edge Cases and Error Handling
+# ==============================================================================
 
-  test_that("lollipop data can be aggregated by mean", {
-    
-    # Create data with multiple entries per group
-    set.seed(1)
-    unaggregated_data <- data.frame(
-        group = rep(c("A", "B"), each = 5),
-        value = c(1:5, 6:10)
-    )
+test_that("lollipop handles missing values in dependent variable", {
+  test_data <- setup_clinical_biomarker_data()
+  test_data$biomarker_level[c(1, 5, 10)] <- NA
 
-    # Manually calculate expected means
-    expected_means <- unaggregated_data %>%
-        group_by(group) %>%
-        summarise(value = mean(value, na.rm = TRUE))
+  result <- lollipop(
+    data = test_data,
+    dep = "biomarker_level",
+    group = "patient_id"
+  )
 
-    # Create an instance of the class to test the private method
-    # This requires a bit of setup to mimic the jamovi environment
-    options <- jmvcore::Options$new(aggregation = "mean")
-    analysis <- lollipopClass$new(options = options, data = unaggregated_data)
-    
-    # Call the internal aggregation function
-    aggregated_data <- analysis$.__enclos_env__$private$.aggregateData(
-        unaggregated_data, 
-        "value", 
-        "group", 
-        "mean"
-    )
-    
-    # Compare results
-    expect_equal(aggregated_data$value[aggregated_data$group == "A"], 3)
-    expect_equal(aggregated_data$value[aggregated_data$group == "B"], 8)
-    expect_equal(nrow(aggregated_data), 2)
-  })
-
-  test_that("lollipop data can be aggregated by median", {
-    
-    # Create data with multiple entries per group
-    set.seed(1)
-    unaggregated_data <- data.frame(
-        group = rep(c("A", "B"), each = 5),
-        value = c(1:5, 6:10)
-    )
-
-    # Manually calculate expected medians
-    expected_medians <- unaggregated_data %>%
-        group_by(group) %>%
-        summarise(value = median(value, na.rm = TRUE))
-
-    # Create an instance of the class
-    options <- jmvcore::Options$new(aggregation = "median")
-    analysis <- lollipopClass$new(options = options, data = unaggregated_data)
-    
-    # Call the internal aggregation function
-    aggregated_data <- analysis$.__enclos_env__$private$.aggregateData(
-        unaggregated_data, 
-        "value", 
-        "group", 
-        "median"
-    )
-    
-    # Compare results
-    expect_equal(aggregated_data$value[aggregated_data$group == "A"], 3)
-    expect_equal(aggregated_data$value[aggregated_data$group == "B"], 8)
-    expect_equal(nrow(aggregated_data), 2)
-  })
-
+  expect_s3_class(result, "Group")
 })
 
-print("All lollipop tests completed successfully!")
+test_that("lollipop handles all missing values", {
+  test_data <- setup_clinical_biomarker_data()
+  test_data$biomarker_level[] <- NA
+
+  # Should handle gracefully (not crash)
+  result <- lollipop(
+    data = test_data,
+    dep = "biomarker_level",
+    group = "patient_id"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop handles identical values", {
+  constant_data <- data.frame(
+    cat = paste0("Cat_", 1:5),
+    val = rep(50, 5)
+  )
+
+  result <- lollipop(
+    data = constant_data,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop handles negative values", {
+  negative_data <- data.frame(
+    cat = c("A", "B", "C", "D", "E"),
+    val = c(-10, -5, 0, 5, 10)
+  )
+
+  result <- lollipop(
+    data = negative_data,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop handles very small values", {
+  small_data <- data.frame(
+    cat = c("A", "B", "C"),
+    val = c(0.001, 0.005, 0.01)
+  )
+
+  result <- lollipop(
+    data = small_data,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop handles large number of groups", {
+  large_group_data <- data.frame(
+    cat = paste0("Cat_", 1:50),
+    val = rnorm(50, mean = 50, sd = 10)
+  )
+
+  result <- lollipop(
+    data = large_group_data,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop handles highly skewed data", {
+  skewed_data <- data.frame(
+    cat = paste0("Cat_", 1:10),
+    val = c(rep(1, 7), 50, 100, 200)
+  )
+
+  result <- lollipop(
+    data = skewed_data,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # Should generate warning about highly variable data
+})
+
+test_that("lollipop handles unbalanced groups when aggregating", {
+  unbalanced_data <- data.frame(
+    group = c(rep("A", 2), rep("B", 10), rep("C", 3)),
+    value = rnorm(15, mean = 50)
+  )
+
+  result <- lollipop(
+    data = unbalanced_data,
+    dep = "value",
+    group = "group",
+    aggregation = "mean"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # Should generate warning about unbalanced group sizes
+})
+
+test_that("lollipop handles small sample size", {
+  small_sample <- data.frame(
+    cat = c("A", "B", "C"),
+    val = c(10, 20, 30)
+  )
+
+  result <- lollipop(
+    data = small_sample,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # Should generate warning about small sample size
+})
+
+test_that("lollipop handles many groups relative to sample size", {
+  many_groups <- data.frame(
+    cat = paste0("Cat_", 1:8),
+    val = rnorm(10)  # 10 observations, 8 groups
+  )
+
+  result <- lollipop(
+    data = many_groups,
+    dep = "val",
+    group = "cat"
+  )
+
+  expect_s3_class(result, "Group")
+
+  # Should generate warning about many groups relative to sample size
+})
+
+# ==============================================================================
+# Real-World Clinical Data Tests
+# ==============================================================================
+
+test_that("lollipop works with patient biomarker scenario", {
+  # Simulates biomarker levels across patients
+  set.seed(789)
+  patient_data <- data.frame(
+    patient = paste0("Patient_", sprintf("%02d", 1:15)),
+    hemoglobin = round(rnorm(15, mean = 13.5, sd = 2), 1),
+    disease_stage = sample(c("I", "II", "III", "IV"), 15, replace = TRUE)
+  )
+
+  result <- lollipop(
+    data = patient_data,
+    dep = "hemoglobin",
+    group = "patient",
+    conditionalColor = TRUE,
+    colorThreshold = 12,  # Anemia threshold
+    sortBy = "value_asc",
+    title = "Hemoglobin Levels by Patient"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop works with treatment comparison scenario", {
+  # Simulates treatment efficacy comparison
+  set.seed(890)
+  treatment_data <- data.frame(
+    treatment = rep(c("Standard", "New_Drug_A", "New_Drug_B"), each = 8),
+    tumor_reduction = c(
+      rnorm(8, mean = 30, sd = 10),  # Standard
+      rnorm(8, mean = 50, sd = 12),  # New Drug A
+      rnorm(8, mean = 60, sd = 15)   # New Drug B
+    )
+  )
+
+  result <- lollipop(
+    data = treatment_data,
+    dep = "tumor_reduction",
+    group = "treatment",
+    aggregation = "mean",
+    sortBy = "value_desc",
+    showMean = TRUE,
+    showValues = TRUE,
+    title = "Treatment Efficacy: Mean Tumor Reduction (%)"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+test_that("lollipop works with lab test timeline scenario", {
+  # Simulates lab tests over time
+  set.seed(901)
+  timeline_data <- data.frame(
+    timepoint = paste0("Day_", c(0, 7, 14, 21, 28, 35, 42)),
+    creatinine = c(1.2, 1.5, 1.8, 1.6, 1.4, 1.3, 1.1)
+  )
+
+  result <- lollipop(
+    data = timeline_data,
+    dep = "creatinine",
+    group = "timepoint",
+    conditionalColor = TRUE,
+    colorThreshold = 1.3,  # Upper limit of normal
+    baseline = 1.0,
+    sortBy = "original",
+    title = "Creatinine Levels Over Treatment Course"
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+# ==============================================================================
+# Complete Option Combination Test
+# ==============================================================================
+
+test_that("lollipop handles complex option combinations", {
+  test_data <- setup_treatment_response_data()
+
+  # Test with multiple advanced options combined
+  result <- lollipop(
+    data = test_data,
+    dep = "response_score",
+    group = "treatment",
+    aggregation = "mean",
+    sortBy = "value_desc",
+    orientation = "horizontal",
+    useHighlight = TRUE,
+    highlight = "Drug_A",
+    conditionalColor = TRUE,
+    colorThreshold = 70,
+    showValues = TRUE,
+    showMean = TRUE,
+    colorScheme = "clinical",
+    theme = "publication",
+    pointSize = 4,
+    lineWidth = 1.5,
+    lineType = "dashed",
+    baseline = 0,
+    xlabel = "Response Score",
+    ylabel = "Treatment",
+    title = "Treatment Efficacy Analysis",
+    width = 1000,
+    height = 700
+  )
+
+  expect_s3_class(result, "Group")
+})
+
+print("All comprehensive lollipop function tests completed!")

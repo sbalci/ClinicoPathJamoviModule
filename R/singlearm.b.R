@@ -2,6 +2,9 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import magrittr
+#' @importFrom ggplot2 ggplot aes geom_text geom_line geom_point labs theme_void theme element_blank scale_x_continuous scale_y_continuous annotate
+#' @importFrom gridExtra grid.arrange
+#' @importFrom survminer ggsurvplot ggcompetingrisks
 #'
 #' @description
 #' This function prepares and cleans data for single-arm survival analysis by
@@ -1227,6 +1230,84 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         private$.checkpoint()
 
+
+        # Handle Competing Risk Analysis for Survival Table
+        if (private$.isCompetingRisk()) {
+          # For competing risk, we calculate Cumulative Incidence
+          
+          # Use proper mstate survival fit
+          # 0=censored, 1=event of interest, 2=competing event
+          # We construct formula carefully to avoid quoting issues
+          f_str <- paste0('survival::Surv(', mytime, ',', myoutcome, ', type="mstate") ~ 1')
+          formula_mstate <- as.formula(f_str)
+          
+          fit_mstate <- private$.safeExecute({
+            private$.getCachedSurvfit(formula_mstate, mydata, "survtable_mstate")
+          }, context = "survival_calculation")
+          
+          if (is.null(fit_mstate)) {
+            stop("Unable to perform competing risk analysis. Please check your data.")
+          }
+          
+          utimes <- self$options$cutp
+          utimes <- strsplit(utimes, ",")
+          utimes <- purrr::reduce(utimes, as.vector)
+          utimes <- as.numeric(utimes)
+          if (length(utimes) == 0) utimes <- private$.getDefaultCutpoints()
+          
+          s_summary <- summary(fit_mstate, times = utimes, extend = TRUE)
+          
+          # Extract CIF for event 1
+          if (is.null(dim(s_summary$pstate))) {
+             cif_est <- s_summary$pstate[2]
+             cif_se <- s_summary$std.err[2]
+             cif_lower <- s_summary$lower[2]
+             cif_upper <- s_summary$upper[2]
+             n_risk_val <- s_summary$n.risk[1]
+             n_event_val <- s_summary$n.event[2]
+          } else {
+             cif_est <- s_summary$pstate[, 2]
+             cif_se <- s_summary$std.err[, 2]
+             cif_lower <- s_summary$lower[, 2]
+             cif_upper <- s_summary$upper[, 2]
+             n_risk_val <- s_summary$n.risk[, 1]
+             n_event_val <- s_summary$n.event[, 2]
+          }
+          
+          km_fit_df <- data.frame(
+            time = s_summary$time,
+            n.risk = n_risk_val,
+            n.event = n_event_val,
+            surv = cif_est,
+            std.err = cif_se,
+            lower = cif_lower,
+            upper = cif_upper
+          )
+          
+          survTable <- self$results$survTable
+          for (i in seq_along(km_fit_df[, 1, drop = T])) {
+            survTable$addRow(rowKey = i, values = c(km_fit_df[i,]))
+          }
+          
+          km_fit_df %>%
+            dplyr::mutate(
+              description = glue::glue(
+                "At {time} {self$options$timetypeoutput}, the cumulative incidence of the event of interest is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]."
+              ),
+            ) %>%
+            dplyr::select(description) %>%
+            dplyr::pull(.) -> survTableSummary
+            
+          self$results$survTableSummary$setContent(survTableSummary)
+          
+          self$results$survTable$setNote(
+            key = "cif_note",
+            note = "Note: For competing risk analysis, the 'Survival' column represents the Cumulative Incidence of the event of interest."
+          )
+          
+          return()
+        }
+        
         formula <-
           paste('survival::Surv(',
                 mytime,
@@ -1853,12 +1934,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         mytime <- results$name1time
-        mytime <- jmvcore::constructFormula(terms = mytime)
+        mytime_orig <- jmvcore::constructFormula(terms = mytime) # Keep original for plotting labels
 
         myoutcome <- results$name2outcome
-        myoutcome <-
-          jmvcore::constructFormula(terms = myoutcome)
-
+        myoutcome_orig <- jmvcore::constructFormula(terms = myoutcome) # Keep original for plotting labels
 
         myfactor <- results$name3explanatory
         myfactor <-
@@ -1889,44 +1968,70 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         
         # Use original names in formula if available, otherwise fall back to cleaned names
-        formula_time <- if (!is.null(original_time_name)) original_time_name else mytime
-        formula_outcome <- if (!is.null(original_outcome_name)) original_outcome_name else myoutcome
-        myformula_original <- paste("survival::Surv(`", formula_time, "`, `", formula_outcome, "`)")
+        formula_time <- if (!is.null(original_time_name)) original_time_name else mytime_orig
+        formula_outcome <- if (!is.null(original_outcome_name)) original_outcome_name else myoutcome_orig
 
         private$.checkpoint()
 
-        plot <- plotDataWithOriginalNames$data %>%
-          finalfit::surv_plot(
-            .data = .,
-            dependent = myformula_original,
-            explanatory = myfactor,
-            xlab = if (!is.null(original_time_name)) original_time_name else paste0('Time (', self$options$timetypeoutput, ')'),
-            # pval = TRUE,
-            # pval.method	= TRUE,
-            legend = 'none',
-            break.time.by = self$options$byplot,
-            xlim = c(0, self$options$endplot),
-            ylim = c(
-              self$options$ybegin_plot,
-              self$options$yend_plot),
-            title = .("Survival of the Whole Group"),
-            subtitle = .("Based on Kaplan-Meier estimates"),
-            risk.table = self$options$risktable,
-            conf.int = self$options$ci95,
-            censor = self$options$censored,
-            surv.median.line = self$options$medianline
+        if (private$.isCompetingRisk()) {
+            # Competing Risk Plot (Cumulative Incidence)
+            
+            # The 'fit' object for ggcompetingrisks should be from cmprsk::cuminc
+            # We need to run it here
+            cuminc_fit <- private$.competingRiskCumInc(results)
+            
+            plot_obj <- survminer::ggcompetingrisks(
+                fit = cuminc_fit,
+                conf.int = self$options$ci95, # Confidence intervals
+                title = .("Cumulative Incidence Function (CIF)"),
+                xlab = paste0('Time (', self$options$timetypeoutput, ')'),
+                # The colors are automatically set by ggcompetingrisks based on event types
+                # surv.median.line is not applicable to CIF
+                censor = self$options$censored,
+                xlim = c(0, self$options$endplot),
+                ylim = c(self$options$ybegin_plot, self$options$yend_plot),
+                risk.table = FALSE # Risk table not directly supported by ggcompetingrisks in same way as ggsurvplot
+            )
 
-          )
+            # Apply additional theming
+            plot_obj <- plot_obj + 
+              ggtheme + 
+              ggplot2::labs(subtitle = .("For Competing Risks (Event of Interest vs. Competing Event)")) +
+              ggplot2::theme(legend.position = 'bottom') # Move legend to bottom for clarity
 
-        # Apply colorblind-safe theme and colors
-        plot <- plot + 
-          ggplot2::scale_color_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
-          ggplot2::scale_fill_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
-          ggtheme
+        } else {
+            # Standard KM Plot
+            myformula_original <- paste("survival::Surv(`", formula_time, "`, `", formula_outcome, "`)")
 
-        print(plot)
+            plot_obj <- plotDataWithOriginalNames$data %>%
+              finalfit::surv_plot(
+                .data = .,
+                dependent = myformula_original,
+                explanatory = myfactor,
+                xlab = if (!is.null(original_time_name)) original_time_name else paste0('Time (', self$options$timetypeoutput, ')'),
+                legend = 'none',
+                break.time.by = self$options$byplot,
+                xlim = c(0, self$options$endplot),
+                ylim = c(
+                  self$options$ybegin_plot,
+                  self$options$yend_plot),
+                title = .("Survival of the Whole Group"),
+                subtitle = .("Based on Kaplan-Meier estimates"),
+                risk.table = self$options$risktable,
+                conf.int = self$options$ci95,
+                censor = self$options$censored,
+                surv.median.line = self$options$medianline
+              )
+
+            # Apply colorblind-safe theme and colors
+            plot_obj <- plot_obj + 
+              ggplot2::scale_color_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
+              ggplot2::scale_fill_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
+              ggtheme
+        }
+
+        print(plot_obj)
         TRUE
-
       }
 
 

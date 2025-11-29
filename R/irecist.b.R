@@ -2,7 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag
+#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag select left_join
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats binom.test
 #' @export
@@ -166,15 +166,28 @@ irecistClass <- R6::R6Class(
             # Get data
             mydata <- self$data
 
+            # Helper to get correct column name (supports both R and Jamovi)
+            getVarName <- function(name) {
+                if (is.null(name)) return(NULL)
+                if (name %in% names(mydata)) {
+                    return(name)
+                }
+                b64 <- jmvcore::toB64(name)
+                if (b64 %in% names(mydata)) {
+                    return(b64)
+                }
+                return(name) # Fallback
+            }
+
             # Extract variables
-            patientId <- jmvcore::toB64(self$options$patientId)
-            assessmentTime <- jmvcore::toB64(self$options$assessmentTime)
-            targetLesionSum <- jmvcore::toB64(self$options$targetLesionSum)
-            newLesions <- jmvcore::toB64(self$options$newLesions)
+            patientId <- getVarName(self$options$patientId)
+            assessmentTime <- getVarName(self$options$assessmentTime)
+            targetLesionSum <- getVarName(self$options$targetLesionSum)
+            newLesions <- getVarName(self$options$newLesions)
 
             # Create working dataframe
             data <- data.frame(
-                patientId = mydata[[patientId]],
+                patientId = as.character(mydata[[patientId]]),
                 assessmentTime = as.numeric(mydata[[assessmentTime]]),
                 targetSum = as.numeric(mydata[[targetLesionSum]]),
                 newLesions = as.numeric(mydata[[newLesions]]),
@@ -183,7 +196,7 @@ irecistClass <- R6::R6Class(
 
             # Add non-target status if provided
             if (!is.null(self$options$nonTargetStatus)) {
-                nonTarget <- jmvcore::toB64(self$options$nonTargetStatus)
+                nonTarget <- getVarName(self$options$nonTargetStatus)
                 data$nonTargetStatus <- as.character(mydata[[nonTarget]])
             } else {
                 data$nonTargetStatus <- NA
@@ -191,7 +204,7 @@ irecistClass <- R6::R6Class(
 
             # Add grouping variable if provided
             if (!is.null(self$options$groupVar)) {
-                groupVar <- jmvcore::toB64(self$options$groupVar)
+                groupVar <- getVarName(self$options$groupVar)
                 data$group <- as.character(mydata[[groupVar]])
             }
 
@@ -213,7 +226,8 @@ irecistClass <- R6::R6Class(
             baseline <- data %>%
                 group_by(patientId) %>%
                 arrange(assessmentTime) %>%
-                filter(row_number() == 1) %>%
+                mutate(isBaseline = row_number() == 1) %>%
+                filter(isBaseline) %>%
                 ungroup() %>%
                 select(patientId, baselineSum = targetSum, baselineTime = assessmentTime)
 
@@ -221,6 +235,9 @@ irecistClass <- R6::R6Class(
 
             # Merge baseline back to data
             data <- merge(data, baseline, by = "patientId")
+            
+            # Identify baseline rows in the full dataset
+            data$isBaseline <- data$assessmentTime == data$baselineTime
 
             # Calculate nadir (lowest value up to current timepoint)
             if (self$options$nadirReference) {
@@ -364,6 +381,7 @@ irecistClass <- R6::R6Class(
 
             # Calculate best response per patient
             bestResponse <- data %>%
+                filter(!isBaseline) %>%
                 group_by(patientId) %>%
                 arrange(assessmentTime) %>%
                 summarise(
@@ -429,17 +447,18 @@ irecistClass <- R6::R6Class(
 
             data <- private$.responseData
 
-            # Find all iUPD events and their outcomes
+            # Filter for iUPD events (including confirmed and pseudo)
+            # nextTime and nextCategory were added in .applyConfirmation
             pseudo <- data %>%
-                filter(irecistCategory == "iUPD") %>%
-                group_by(patientId) %>%
-                arrange(assessmentTime) %>%
-                summarise(
-                    iupdTime = assessmentTime[1],
-                    confirmationTime = lead(assessmentTime)[1],
-                    outcome = confirmed[1],
-                    subsequentResponse = lead(irecistCategory)[1],
-                    .groups = "drop"
+                filter(irecistCategory == "iUPD" | 
+                       irecistCategory == "iCPD" | 
+                       grepl("\\(pseudo\\)", irecistCategory)) %>%
+                select(
+                    patientId,
+                    iupdTime = assessmentTime,
+                    confirmationTime = nextTime,
+                    outcome = confirmed,
+                    subsequentResponse = nextCategory
                 )
 
             private$.pseudoprogressionData <- pseudo

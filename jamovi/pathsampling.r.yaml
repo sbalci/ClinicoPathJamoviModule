@@ -706,6 +706,103 @@ items:
           title: 'Expected Detections'
           type: number
 
+    # === POWER ANALYSIS RESULTS ===
+    - name: powerAnalysisText
+      title: Power Analysis for Sample Size Planning
+      type: Html
+      visible: (showPowerAnalysis)
+
+    - name: powerTable
+      title: Sample Size for Target Power
+      type: Table
+      visible: (showPowerAnalysis)
+      clearWith:
+        - targetPower
+        - targetDetectionProb
+      columns:
+        - name: scenario
+          title: 'Scenario'
+          type: text
+        - name: targetPower
+          title: 'Target Power'
+          type: number
+          format: 'pc'
+        - name: probDetect
+          title: 'Detection Probability (q)'
+          type: number
+          format: 'pc'
+        - name: nSamples
+          title: 'Required Samples'
+          type: integer
+        - name: achievedPower
+          title: 'Achieved Power'
+          type: number
+          format: 'pc'
+
+    # === MULTIFOCAL ANALYSIS RESULTS ===
+    - name: multifocalAnalysisText
+      title: Multifocal Disease Modeling
+      type: Html
+      visible: (showMultifocalAnalysis)
+
+    - name: multifocalProbTable
+      title: Probability of Detecting Multiple Lesions
+      type: Table
+      visible: (showMultifocalAnalysis)
+      clearWith:
+        - maxSamples
+        - firstDetection
+      columns:
+        - name: nSamples
+          title: 'Samples'
+          type: integer
+        - name: detectOne
+          title: 'P(≥1 lesion)'
+          type: number
+          format: 'pc'
+        - name: detectTwo
+          title: 'P(≥2 lesions)'
+          type: number
+          format: 'pc'
+        - name: detectThree
+          title: 'P(≥3 lesions)'
+          type: number
+          format: 'pc'
+
+    # === AUTOMATED MODEL SELECTION ===
+    - name: modelSelectionText
+      title: Automated Model Selection
+      type: Html
+      visible: (autoSelectModel)
+
+    - name: modelComparisonTable
+      title: Model Fit Comparison
+      type: Table
+      visible: (autoSelectModel)
+      clearWith:
+        - totalSamples
+        - firstDetection
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: aic
+          title: 'AIC'
+          type: number
+        - name: bic
+          title: 'BIC'
+          type: number
+        - name: chisq
+          title: 'Chi-Square'
+          type: number
+        - name: pVal
+          title: 'p-value (GOF)'
+          type: number
+          format: 'zto,pvalue'
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
     # === SPECIALIZED MODELS: LYMPH NODE ANALYSIS ===
     - name: lnAnalysisText
       title: Lymph Node Ratio and Staging Analysis

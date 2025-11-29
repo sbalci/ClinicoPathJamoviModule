@@ -31,6 +31,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
             },
 
             .run = function() {
+
+                # Ready to run?
+                if (is.null(self$options$test1_sens) || is.null(self$options$test1_spec) || 
+                    is.null(self$options$test2_sens) || is.null(self$options$test2_spec)) {
+                    return()
+                }
+
                 # Get parameters from options
                 test1_name <- self$options$test1_name
                 test1_sens <- self$options$test1_sens
@@ -478,6 +485,62 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     )
                 )
 
+                # --- Cost Analysis ---
+                if (self$options$show_cost_analysis) {
+                    test1_cost <- self$options$test1_cost
+                    test2_cost <- self$options$test2_cost
+                    
+                    # Calculate number of tests
+                    n_test1 <- pop_size
+                    n_test2 <- 0
+                    
+                    if (strategy == "serial_positive") {
+                        n_test2 <- test1_pos
+                    } else if (strategy == "serial_negative") {
+                        n_test2 <- test1_neg
+                    } else if (strategy == "parallel") {
+                        n_test2 <- pop_size
+                    }
+                    
+                    total_cost1 <- n_test1 * test1_cost
+                    total_cost2 <- n_test2 * test2_cost
+                    total_combined <- total_cost1 + total_cost2
+                    
+                    costTable <- self$results$cost_analysis_table
+                    
+                    costTable$addRow(rowKey = "test1", values = list(
+                        item = paste0("Test 1: ", test1_name),
+                        unit_cost = test1_cost,
+                        number_tests = as.integer(n_test1),
+                        total_cost = total_cost1
+                    ))
+                    
+                    costTable$addRow(rowKey = "test2", values = list(
+                        item = paste0("Test 2: ", test2_name),
+                        unit_cost = test2_cost,
+                        number_tests = as.integer(n_test2),
+                        total_cost = total_cost2
+                    ))
+                    
+                    costTable$addRow(rowKey = "total", values = list(
+                        item = "Total Protocol Cost",
+                        unit_cost = NA,
+                        number_tests = as.integer(n_test1 + n_test2),
+                        total_cost = total_combined
+                    ))
+                }
+
+                # Update summary table
+                summaryTable <- self$results$summary_table
+                
+                # Add independence warning if parallel strategy is used
+                if (strategy == "parallel") {
+                    summaryTable$setNote(
+                        key = "independence_warning",
+                        note = "Note: Parallel testing calculations assume conditional independence between tests. If tests are correlated, combined sensitivity/specificity may be overestimated."
+                    )
+                }
+                
                 # Generate explanation HTML
                 if (self$options$show_explanation) {
                     explanation <- ""

@@ -57,12 +57,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         dataset <- self$data
 
-        # Determine variables to analyze with proper escaping
+        # Determine variables to analyze
         if (length(self$options$vars) > 0) {
-            # Apply variable escaping for safe access (handles spaces/special chars)
-            var_list <- sapply(self$options$vars, function(v) {
-                jmvcore::composeTerm(v)
-            }, USE.NAMES = FALSE)
+            # Use raw variable names from self$options$vars for subsetting.
+            # jmvcore::composeTerm is typically for constructing formulas, not for direct dataframe subsetting,
+            # as it can add backticks that might prevent correct column selection.
+            var_list <- self$options$vars
 
             # Validate that all requested variables exist in the dataset
             missing_vars <- var_list[!var_list %in% names(dataset)]
@@ -75,10 +75,18 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             }
 
             # Safely extract columns
-            analysis_data <- dataset[var_list]
+            analysis_data <- dataset[, var_list, drop = FALSE]
         } else {
-            var_list <- names(dataset)
-            analysis_data <- dataset
+            # This block is reached if self$options$vars is empty,
+            # which means the welcome message (and return) logic above was executed.
+            # So, this else-branch should ideally not be reached during normal execution path.
+            # Keeping it as a fallback, but the early return handles the empty vars case.
+            # To be clear: if vars is empty, it returns early. If not empty, it uses the if block.
+            # The 'else' here (original code's 'else') is for a theoretical 'else' to `length(self$options$vars) > 0`.
+            # Reverting the `var_list <- names(dataset)` behavior here, as per user's request to return early if no variables.
+            # If the code reaches here, it means vars > 0.
+            # We already defined var_list in the `if` branch, so this `else` is dead.
+            stop("Internal error: Should not reach this point with empty vars. Check logic.")
         }
 
         quality_results <- list()
@@ -133,7 +141,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
                 quality_results$duplicates <- paste0(
                     "<h4>Duplicate Value Analysis</h4>",
-                    paste(names(dup_summary), dup_summary, sep = ": ", collapse = "<br>")
+                    paste(names(dup_summary), dup_summary, sep = ": ", collapse = "<br>"),
+                    "<p style='margin-top: 10px; font-size: 0.9em; color: #555;'>",
+                    "<em>Interpretation Note:</em> For categorical variables with few unique levels (e.g., 'Gender', 'Status'), ",
+                    "a high number of 'Duplicates' often reflects data redundancy (many observations sharing the same valid value), ",
+                    "not necessarily data errors. For identifier variables (e.g., 'Patient ID'), duplicates would typically indicate errors.",
+                    "</p>"
                 )
             }
         }

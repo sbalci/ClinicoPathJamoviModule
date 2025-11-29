@@ -1,7 +1,7 @@
 ---
 name:  pcacomponenttest
 title: PCA Component Significance Test
-menuGroup: ExplorationT3
+menuGroup: ExplorationT2
 menuSubgroup: Multivariate Analysis
 version: '1.0.0'
 jas: '1.2'
@@ -159,6 +159,29 @@ options:
       description:
           R: >
             Color for permuted VAF line/points. Use color names or hex codes.
+
+    - name: showScreePlot
+      title: Show Scree Plot
+      type: Bool
+      default: false
+      description:
+          R: Display a scree plot of eigenvalues.
+
+    - name: showLoadingsPlot
+      title: Show Loadings Plot
+      type: Bool
+      default: false
+      description:
+          R: Display a plot of variable loadings for significant components.
+
+    - name: nLoadings
+      title: Number of Top Loadings
+      type: Integer
+      min: 1
+      max: 50
+      default: 5
+      description:
+          R: Number of top variables to display in loadings plot.
 
     - name: plotwidth
       title: Plot Width

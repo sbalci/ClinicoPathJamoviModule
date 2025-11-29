@@ -4,7 +4,7 @@
 \alias{jjridgesClass}
 \title{Advanced Ridge Plot}
 \description{
-Creates advanced ridgeline plots combining features from ggridges and ggstatsplot
+Creates advanced ridgeline plots with robust statistical analysis
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::jjridgesBase} -> \code{jjridgesClass}

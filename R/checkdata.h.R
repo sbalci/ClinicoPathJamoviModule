@@ -10,7 +10,13 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showOutliers = TRUE,
             showDistribution = TRUE,
             showDuplicates = TRUE,
-            showPatterns = FALSE, ...) {
+            showPatterns = FALSE,
+            rareCategoryThreshold = 5,
+            clinicalValidation = TRUE,
+            unitSystem = "auto",
+            outlierTransform = "none",
+            mcarTest = FALSE,
+            cvMinMean = 0.01, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -37,25 +43,79 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showPatterns",
                 showPatterns,
                 default=FALSE)
+            private$..rareCategoryThreshold <- jmvcore::OptionNumber$new(
+                "rareCategoryThreshold",
+                rareCategoryThreshold,
+                min=0.1,
+                max=20,
+                default=5)
+            private$..clinicalValidation <- jmvcore::OptionBool$new(
+                "clinicalValidation",
+                clinicalValidation,
+                default=TRUE)
+            private$..unitSystem <- jmvcore::OptionList$new(
+                "unitSystem",
+                unitSystem,
+                options=list(
+                    "auto",
+                    "metric",
+                    "imperial"),
+                default="auto")
+            private$..outlierTransform <- jmvcore::OptionList$new(
+                "outlierTransform",
+                outlierTransform,
+                options=list(
+                    "none",
+                    "log",
+                    "sqrt"),
+                default="none")
+            private$..mcarTest <- jmvcore::OptionBool$new(
+                "mcarTest",
+                mcarTest,
+                default=FALSE)
+            private$..cvMinMean <- jmvcore::OptionNumber$new(
+                "cvMinMean",
+                cvMinMean,
+                min=0,
+                max=10,
+                default=0.01)
 
             self$.addOption(private$..var)
             self$.addOption(private$..showOutliers)
             self$.addOption(private$..showDistribution)
             self$.addOption(private$..showDuplicates)
             self$.addOption(private$..showPatterns)
+            self$.addOption(private$..rareCategoryThreshold)
+            self$.addOption(private$..clinicalValidation)
+            self$.addOption(private$..unitSystem)
+            self$.addOption(private$..outlierTransform)
+            self$.addOption(private$..mcarTest)
+            self$.addOption(private$..cvMinMean)
         }),
     active = list(
         var = function() private$..var$value,
         showOutliers = function() private$..showOutliers$value,
         showDistribution = function() private$..showDistribution$value,
         showDuplicates = function() private$..showDuplicates$value,
-        showPatterns = function() private$..showPatterns$value),
+        showPatterns = function() private$..showPatterns$value,
+        rareCategoryThreshold = function() private$..rareCategoryThreshold$value,
+        clinicalValidation = function() private$..clinicalValidation$value,
+        unitSystem = function() private$..unitSystem$value,
+        outlierTransform = function() private$..outlierTransform$value,
+        mcarTest = function() private$..mcarTest$value,
+        cvMinMean = function() private$..cvMinMean$value),
     private = list(
         ..var = NA,
         ..showOutliers = NA,
         ..showDistribution = NA,
         ..showDuplicates = NA,
-        ..showPatterns = NA)
+        ..showPatterns = NA,
+        ..rareCategoryThreshold = NA,
+        ..clinicalValidation = NA,
+        ..unitSystem = NA,
+        ..outlierTransform = NA,
+        ..mcarTest = NA,
+        ..cvMinMean = NA)
 )
 
 checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -67,6 +127,7 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         missingVals = function() private$.items[["missingVals"]],
         noOutliers = function() private$.items[["noOutliers"]],
         outliers = function() private$.items[["outliers"]],
+        outlierMethodSummary = function() private$.items[["outlierMethodSummary"]],
         distribution = function() private$.items[["distribution"]],
         duplicates = function() private$.items[["duplicates"]],
         patterns = function() private$.items[["patterns"]]),
@@ -130,8 +191,43 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Z-Score", 
                         `type`="number"),
                     list(
+                        `name`="zscoreFlag", 
+                        `title`="Z-score", 
+                        `type`="text"),
+                    list(
+                        `name`="iqrFlag", 
+                        `title`="IQR", 
+                        `type`="text"),
+                    list(
+                        `name`="madFlag", 
+                        `title`="MAD", 
+                        `type`="text"),
+                    list(
                         `name`="severity", 
-                        `title`="Severity", 
+                        `title`="Severity (by Z)", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="outlierMethodSummary",
+                title="Outlier Detection Method Summary (Heuristic)",
+                visible="(showOutliers)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="text"),
+                    list(
+                        `name`="outliers_detected", 
+                        `title`="Outliers Found", 
+                        `type`="integer"),
+                    list(
+                        `name`="note", 
+                        `title`="Note", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -224,6 +320,18 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showDuplicates Identify and count duplicate values in the dataset.
 #' @param showPatterns Analyze patterns in missing data and value
 #'   distributions.
+#' @param rareCategoryThreshold Percentage threshold for flagging rare
+#'   categories (important for chi-squared assumptions and modeling).
+#' @param clinicalValidation Perform context-specific validation for clinical
+#'   variables (age, lab values, etc.). Heuristic ranges may need adjustment.
+#' @param unitSystem Unit system for clinical plausibility checks. Auto-detect
+#'   attempts to infer from data ranges.
+#' @param outlierTransform Apply transformation before outlier detection to
+#'   handle skewed distributions (especially right-skewed lab values).
+#' @param mcarTest Perform Little's MCAR test if available (requires naniar
+#'   package). Provides formal test vs. heuristic assessment.
+#' @param cvMinMean Suppress coefficient of variation when absolute mean is
+#'   below this threshold (avoids instability).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -231,6 +339,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$noOutliers} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$outliers} \tab \tab \tab \tab \tab Shows outliers detected by at least 2 of 3 methods: Z-score (|z|>3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|>3.5). Points flagged by only 1 method are NOT shown. \cr
+#'   \code{results$outlierMethodSummary} \tab \tab \tab \tab \tab Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting. \cr
 #'   \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$patterns} \tab \tab \tab \tab \tab a table \cr
@@ -249,7 +358,13 @@ checkdata <- function(
     showOutliers = TRUE,
     showDistribution = TRUE,
     showDuplicates = TRUE,
-    showPatterns = FALSE) {
+    showPatterns = FALSE,
+    rareCategoryThreshold = 5,
+    clinicalValidation = TRUE,
+    unitSystem = "auto",
+    outlierTransform = "none",
+    mcarTest = FALSE,
+    cvMinMean = 0.01) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("checkdata requires jmvcore to be installed (restart may be required)")
@@ -266,7 +381,13 @@ checkdata <- function(
         showOutliers = showOutliers,
         showDistribution = showDistribution,
         showDuplicates = showDuplicates,
-        showPatterns = showPatterns)
+        showPatterns = showPatterns,
+        rareCategoryThreshold = rareCategoryThreshold,
+        clinicalValidation = clinicalValidation,
+        unitSystem = unitSystem,
+        outlierTransform = outlierTransform,
+        mcarTest = mcarTest,
+        cvMinMean = cvMinMean)
 
     analysis <- checkdataClass$new(
         options = options,

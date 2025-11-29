@@ -1,7 +1,7 @@
 ---
 name:  checkdata
 title: Single Variable Quality Check
-menuGroup: ExplorationT3
+menuGroup: ExplorationT1
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'
@@ -45,4 +45,70 @@ options:
       description:
           R: >
             Analyze patterns in missing data and value distributions.
+
+    - name: rareCategoryThreshold
+      title: Rare Category Threshold (%)
+      type: Number
+      min: 0.1
+      max: 20
+      default: 5
+      description:
+          R: >
+            Percentage threshold for flagging rare categories (important for chi-squared assumptions and modeling).
+
+    - name: clinicalValidation
+      title: Enable Clinical Plausibility Checks
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform context-specific validation for clinical variables (age, lab values, etc.). Heuristic ranges may need adjustment.
+
+    - name: unitSystem
+      title: Unit System for Clinical Checks
+      type: List
+      options:
+        - name: auto
+          title: Auto-detect
+        - name: metric
+          title: Metric (SI units)
+        - name: imperial
+          title: Imperial/US units
+      default: auto
+      description:
+          R: >
+            Unit system for clinical plausibility checks. Auto-detect attempts to infer from data ranges.
+
+    - name: outlierTransform
+      title: Outlier Detection Transformation
+      type: List
+      options:
+        - name: none
+          title: None (use raw data)
+        - name: log
+          title: Log transform (for right-skewed)
+        - name: sqrt
+          title: Square root transform
+      default: none
+      description:
+          R: >
+            Apply transformation before outlier detection to handle skewed distributions (especially right-skewed lab values).
+
+    - name: mcarTest
+      title: Perform MCAR Statistical Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform Little's MCAR test if available (requires naniar package). Provides formal test vs. heuristic assessment.
+
+    - name: cvMinMean
+      title: Minimum Mean for CV Calculation
+      type: Number
+      min: 0
+      max: 10
+      default: 0.01
+      description:
+          R: >
+            Suppress coefficient of variation when absolute mean is below this threshold (avoids instability).
 ...

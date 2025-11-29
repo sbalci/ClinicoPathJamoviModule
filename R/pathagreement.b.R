@@ -31,7 +31,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .agreement_results = NULL,
         .pairwise_results = NULL,
         .category_results = NULL,
+
         .style_clustering_results = NULL,
+        .rater_metadata = NULL,
+
 
         # Initialization
         .init = function() {
@@ -1700,7 +1703,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         #
         # Diagnostic style heatmap - Creates case-by-rater heatmap with two-way clustering
         .diagnosticStyleHeatmap = function(image, ggtheme, theme, ...) {
-            if (!self$options$diagnosticStyleAnalysis || is.null(private$.style_clustering_results)) {
+            if (!self$options$diagnosticStyleAnalysis || !self$options$styleHeatmap || is.null(private$.style_clustering_results)) {
                 p <- ggplot() +
                     geom_text(aes(x = 0.5, y = 0.5, label = "Enable Diagnostic Style Analysis\nto view style heatmap"),
                              size = 6) +

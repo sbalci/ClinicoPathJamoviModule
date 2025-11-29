@@ -11,10 +11,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             y_var = NULL,
             fill_var = NULL,
             facet_var = NULL,
-            show_ggplot2_plot = FALSE,
-            show_ggsegmented_plot = FALSE,
-            ggsegmented_labels = TRUE,
-            ggsegmented_alpha = 0.3,
+            show_plot = TRUE,
             chart_style = "clinical",
             color_palette = "clinical",
             show_percentages = TRUE,
@@ -87,24 +84,10 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 permitted=list(
                     "factor"),
                 default=NULL)
-            private$..show_ggplot2_plot <- jmvcore::OptionBool$new(
-                "show_ggplot2_plot",
-                show_ggplot2_plot,
-                default=FALSE)
-            private$..show_ggsegmented_plot <- jmvcore::OptionBool$new(
-                "show_ggsegmented_plot",
-                show_ggsegmented_plot,
-                default=FALSE)
-            private$..ggsegmented_labels <- jmvcore::OptionBool$new(
-                "ggsegmented_labels",
-                ggsegmented_labels,
+            private$..show_plot <- jmvcore::OptionBool$new(
+                "show_plot",
+                show_plot,
                 default=TRUE)
-            private$..ggsegmented_alpha <- jmvcore::OptionNumber$new(
-                "ggsegmented_alpha",
-                ggsegmented_alpha,
-                default=0.3,
-                min=0,
-                max=1)
             private$..chart_style <- jmvcore::OptionList$new(
                 "chart_style",
                 chart_style,
@@ -251,10 +234,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..y_var)
             self$.addOption(private$..fill_var)
             self$.addOption(private$..facet_var)
-            self$.addOption(private$..show_ggplot2_plot)
-            self$.addOption(private$..show_ggsegmented_plot)
-            self$.addOption(private$..ggsegmented_labels)
-            self$.addOption(private$..ggsegmented_alpha)
+            self$.addOption(private$..show_plot)
             self$.addOption(private$..chart_style)
             self$.addOption(private$..color_palette)
             self$.addOption(private$..show_percentages)
@@ -284,10 +264,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         y_var = function() private$..y_var$value,
         fill_var = function() private$..fill_var$value,
         facet_var = function() private$..facet_var$value,
-        show_ggplot2_plot = function() private$..show_ggplot2_plot$value,
-        show_ggsegmented_plot = function() private$..show_ggsegmented_plot$value,
-        ggsegmented_labels = function() private$..ggsegmented_labels$value,
-        ggsegmented_alpha = function() private$..ggsegmented_alpha$value,
+        show_plot = function() private$..show_plot$value,
         chart_style = function() private$..chart_style$value,
         color_palette = function() private$..color_palette$value,
         show_percentages = function() private$..show_percentages$value,
@@ -316,10 +293,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..y_var = NA,
         ..fill_var = NA,
         ..facet_var = NA,
-        ..show_ggplot2_plot = NA,
-        ..show_ggsegmented_plot = NA,
-        ..ggsegmented_labels = NA,
-        ..ggsegmented_alpha = NA,
+        ..show_plot = NA,
         ..chart_style = NA,
         ..color_palette = NA,
         ..show_percentages = NA,
@@ -350,7 +324,6 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
     active = list(
         instructions = function() private$.items[["instructions"]],
         plot = function() private$.items[["plot"]],
-        plot_ggsegmented = function() private$.items[["plot_ggsegmented"]],
         summary = function() private$.items[["summary"]],
         composition_table = function() private$.items[["composition_table"]],
         detailed_stats = function() private$.items[["detailed_stats"]],
@@ -367,8 +340,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Segmented Total Bar Charts",
                 refs=list(
-                    "ClinicoPathJamoviModule",
-                    "ggsegmentedtotalbar"))
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -377,20 +349,11 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Segmented Total Bar Chart (ggplot2)",
+                title="Segmented Total Bar Chart",
                 width=650,
                 height=450,
                 requiresData=TRUE,
                 renderFun=".plot"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot_ggsegmented",
-                title="Segmented Total Bar Chart (ggsegmentedtotalbar)",
-                width=650,
-                height=450,
-                requiresData=TRUE,
-                renderFun=".plot_ggsegmented",
-                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -574,11 +537,7 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param fill_var Categorical variable for bar segment colors and
 #'   composition.
 #' @param facet_var Optional variable for creating multiple panels.
-#' @param show_ggplot2_plot Show plot using built-in ggplot2 implementation.
-#' @param show_ggsegmented_plot Show plot using ggsegmentedtotalbar package.
-#' @param ggsegmented_labels Show value labels in ggsegmentedtotalbar plot.
-#' @param ggsegmented_alpha Transparency of background boxes in
-#'   ggsegmentedtotalbar.
+#' @param show_plot Show segmented total bar chart.
 #' @param chart_style Overall visual style for the chart.
 #' @param color_palette Color palette for segment fills.
 #' @param show_percentages Whether to display percentage labels on segments.
@@ -606,7 +565,6 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot_ggsegmented} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$composition_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detailed_stats} \tab \tab \tab \tab \tab a table \cr
@@ -631,10 +589,7 @@ jjsegmentedtotalbar <- function(
     y_var,
     fill_var,
     facet_var = NULL,
-    show_ggplot2_plot = FALSE,
-    show_ggsegmented_plot = FALSE,
-    ggsegmented_labels = TRUE,
-    ggsegmented_alpha = 0.3,
+    show_plot = TRUE,
     chart_style = "clinical",
     color_palette = "clinical",
     show_percentages = TRUE,
@@ -683,10 +638,7 @@ jjsegmentedtotalbar <- function(
         y_var = y_var,
         fill_var = fill_var,
         facet_var = facet_var,
-        show_ggplot2_plot = show_ggplot2_plot,
-        show_ggsegmented_plot = show_ggsegmented_plot,
-        ggsegmented_labels = ggsegmented_labels,
-        ggsegmented_alpha = ggsegmented_alpha,
+        show_plot = show_plot,
         chart_style = chart_style,
         color_palette = color_palette,
         show_percentages = show_percentages,

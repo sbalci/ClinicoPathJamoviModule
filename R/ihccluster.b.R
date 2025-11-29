@@ -269,6 +269,14 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cluster_labels <- unique(cluster_func(df)$clusters)
             n_clusters <- length(cluster_labels)
 
+            # Create numeric version of data for profile calculation
+            df_numeric <- df
+            for (var in names(df_numeric)) {
+                if (is.factor(df_numeric[[var]]) || is.character(df_numeric[[var]])) {
+                    df_numeric[[var]] <- as.numeric(as.factor(df_numeric[[var]]))
+                }
+            }
+
             for (split in 1:n_splits) {
                 set.seed(opts$seed + split)
 
@@ -279,6 +287,10 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 df_a <- df[group_a_idx, , drop = FALSE]
                 df_b <- df[group_b_idx, , drop = FALSE]
 
+                # Numeric subsets for profiling
+                df_num_a <- df_numeric[group_a_idx, , drop = FALSE]
+                df_num_b <- df_numeric[group_b_idx, , drop = FALSE]
+
                 # Cluster each group independently
                 result_a <- cluster_func(df_a)
                 result_b <- cluster_func(df_b)
@@ -288,18 +300,18 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 confusion <- matrix(0, nrow = n_clusters, ncol = n_clusters)
 
                 for (i in 1:n_clusters) {
-                    cases_a <- which(result_a$clusters == cluster_labels[i])
+                    cases_a <- which(as.character(result_a$clusters) == as.character(cluster_labels[i]))
                     if (length(cases_a) == 0) next
 
                     # Get marker profile for cluster i in group A
-                    profile_a <- colMeans(df_a[cases_a, , drop = FALSE], na.rm = TRUE)
+                    profile_a <- colMeans(df_num_a[cases_a, , drop = FALSE], na.rm = TRUE)
 
                     for (j in 1:n_clusters) {
-                        cases_b <- which(result_b$clusters == cluster_labels[j])
+                        cases_b <- which(as.character(result_b$clusters) == as.character(cluster_labels[j]))
                         if (length(cases_b) == 0) next
 
                         # Get marker profile for cluster j in group B
-                        profile_b <- colMeans(df_b[cases_b, , drop = FALSE], na.rm = TRUE)
+                        profile_b <- colMeans(df_num_b[cases_b, , drop = FALSE], na.rm = TRUE)
 
                         # Similarity = negative euclidean distance
                         confusion[i, j] <- -sqrt(sum((profile_a - profile_b)^2, na.rm = TRUE))
@@ -316,9 +328,9 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # Binary classification: cluster k vs all others
                     # Group A
-                    class_a <- as.numeric(result_a$clusters == cluster_labels[k])
+                    class_a <- as.numeric(as.character(result_a$clusters) == as.character(cluster_labels[k]))
                     # Group B (using matched cluster)
-                    class_b <- as.numeric(result_b$clusters == cluster_labels[matched_cluster])
+                    class_b <- as.numeric(as.character(result_b$clusters) == as.character(cluster_labels[matched_cluster]))
 
                     # For cases in both groups, calculate kappa
                     # (Not applicable for independent splits, so skip)
@@ -699,6 +711,25 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             weights
         },
 
+        .performClustering = function(df, catVars, contVars, opts, silhouetteTable = NULL) {
+            method <- opts$method %||% "pam"
+            requestedK <- opts$nClusters %||% 3
+            autoSelect <- isTRUE(opts$autoSelectK) || is.null(opts$nClusters)
+            weights <- private$.parseWeights(opts$weights, colnames(df))
+
+            return(private$.clusterData(
+                df = df,
+                method = method,
+                opts = opts,
+                k = requestedK,
+                autoSelect = autoSelect,
+                catVars = catVars,
+                contVars = contVars,
+                weights = weights,
+                silhouetteTable = silhouetteTable
+            ))
+        },
+
         .clusterData = function(df, method, opts, k, autoSelect, catVars, contVars, weights, silhouetteTable = NULL) {
             result <- list(clusters = NULL, usedK = k, fit = NULL, dist = NULL, hc = NULL,
                            scores = NULL, silhouette = NULL, notes = character(), method = method)
@@ -738,6 +769,10 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else {
                     dist_matrix <- cluster::daisy(dist_input, metric = "gower", weights = dist_weights)
                 }
+            }
+            if (anyNA(dist_matrix)) {
+                result$notes <- c(result$notes, "Warning: Pairwise distances resulted in missing values. Imputing with max distance.")
+                dist_matrix[is.na(dist_matrix)] <- max(dist_matrix, na.rm = TRUE)
             }
             result$dist <- dist_matrix
 
@@ -2189,6 +2224,58 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # })
         },
 
+        .plotConsensus = function(image, ggtheme, theme, ...) {
+            if (!isTRUE(self$options$consensusClustering)) return(FALSE)
+            
+            analysisState <- self$results$summary$state
+            if (is.null(analysisState) || is.null(analysisState$consensusMatrix)) return(FALSE)
+            
+            matrix <- analysisState$consensusMatrix
+            clusters <- analysisState$clusters
+            
+            # Order matrix by cluster assignment
+            ord <- order(clusters)
+            matrix <- matrix[ord, ord]
+            clusters <- clusters[ord]
+            
+            # Use pheatmap if available
+            if (requireNamespace("pheatmap", quietly = TRUE)) {
+                # Create annotation for clusters
+                annotation_col <- data.frame(Cluster = clusters)
+                rownames(annotation_col) <- colnames(matrix)
+                
+                # Define colors
+                cluster_colors <- rainbow(length(unique(clusters)))
+                names(cluster_colors) <- levels(clusters)
+                annotation_colors <- list(Cluster = cluster_colors)
+                
+                pheatmap::pheatmap(
+                    matrix,
+                    color = colorRampPalette(c("white", "darkblue"))(100),
+                    cluster_rows = FALSE,
+                    cluster_cols = FALSE,
+                    annotation_col = annotation_col,
+                    annotation_colors = annotation_colors,
+                    show_rownames = FALSE,
+                    show_colnames = FALSE,
+                    main = "Consensus Clustering Matrix"
+                )
+            } else {
+                # Base heatmap fallback
+                heatmap(
+                    matrix,
+                    Rowv = NA, 
+                    Colv = NA,
+                    col = colorRampPalette(c("white", "darkblue"))(100),
+                    labRow = NA, 
+                    labCol = NA,
+                    main = "Consensus Clustering Matrix"
+                )
+            }
+            
+            return(TRUE)
+        },
+
         # --- Plots ---
         # Generate silhouette plot for cluster quality assessment
         # Creates silhouette plot showing cluster cohesion and separation.
@@ -2624,6 +2711,11 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else {
                 # Mixed data: Classical MDS on Gower distance
                 d <- cluster::daisy(df, metric = "gower")
+
+                if (anyNA(d)) {
+                    d[is.na(d)] <- max(d, na.rm = TRUE)
+                }
+
                 cmd <- stats::cmdscale(d, k = 5, eig = TRUE)
 
                 result$type <- "mds"
@@ -3371,6 +3463,13 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Compute silhouette scores
             if (!is.null(dist_matrix)) {
+                # Ensure dist_matrix is clean
+                if (anyNA(dist_matrix) || any(!is.finite(dist_matrix))) {
+                     val <- max(dist_matrix, na.rm = TRUE)
+                     if (!is.finite(val)) val <- 1
+                     dist_matrix[is.na(dist_matrix) | !is.finite(dist_matrix)] <- val
+                }
+
                 sil <- cluster::silhouette(as.integer(clusters), dist_matrix)
                 for (i in 1:n_clusters) {
                     cluster_idx <- which(clusters == levels(clusters)[i])
@@ -3611,7 +3710,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 markerType <- "categorical"
             } else if (method == "jaccard" && length(catVars) >= 2) {
                 # Jaccard distance for binary markers
-                distMatrix <- private$.computeJaccardDistance(df, catVars)
+                distMatrix <- private$.computeMarkerJaccardDistance(df, catVars)
                 markers <- catVars
                 markerType <- "categorical"
             } else if (method == "hamming" && length(catVars) >= 2) {
@@ -3731,7 +3830,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Compute Jaccard distance for binary/categorical markers
-        .computeJaccardDistance = function(df, catVars) {
+        .computeMarkerJaccardDistance = function(df, catVars) {
             n_markers <- length(catVars)
             jaccardMatrix <- matrix(0, n_markers, n_markers)
             rownames(jaccardMatrix) <- colnames(jaccardMatrix) <- catVars

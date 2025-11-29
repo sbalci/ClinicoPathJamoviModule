@@ -16,6 +16,9 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             showpercent = TRUE,
             colororiginal = "steelblue",
             colorpermuted = "orange",
+            showScreePlot = FALSE,
+            showLoadingsPlot = FALSE,
+            nLoadings = 5,
             plotwidth = 600,
             plotheight = 450, ...) {
 
@@ -82,6 +85,20 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "colorpermuted",
                 colorpermuted,
                 default="orange")
+            private$..showScreePlot <- jmvcore::OptionBool$new(
+                "showScreePlot",
+                showScreePlot,
+                default=FALSE)
+            private$..showLoadingsPlot <- jmvcore::OptionBool$new(
+                "showLoadingsPlot",
+                showLoadingsPlot,
+                default=FALSE)
+            private$..nLoadings <- jmvcore::OptionInteger$new(
+                "nLoadings",
+                nLoadings,
+                min=1,
+                max=50,
+                default=5)
             private$..plotwidth <- jmvcore::OptionInteger$new(
                 "plotwidth",
                 plotwidth,
@@ -105,6 +122,9 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..showpercent)
             self$.addOption(private$..colororiginal)
             self$.addOption(private$..colorpermuted)
+            self$.addOption(private$..showScreePlot)
+            self$.addOption(private$..showLoadingsPlot)
+            self$.addOption(private$..nLoadings)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
         }),
@@ -119,6 +139,9 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         showpercent = function() private$..showpercent$value,
         colororiginal = function() private$..colororiginal$value,
         colorpermuted = function() private$..colorpermuted$value,
+        showScreePlot = function() private$..showScreePlot$value,
+        showLoadingsPlot = function() private$..showLoadingsPlot$value,
+        nLoadings = function() private$..nLoadings$value,
         plotwidth = function() private$..plotwidth$value,
         plotheight = function() private$..plotheight$value),
     private = list(
@@ -132,6 +155,9 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..showpercent = NA,
         ..colororiginal = NA,
         ..colorpermuted = NA,
+        ..showScreePlot = NA,
+        ..showLoadingsPlot = NA,
+        ..nLoadings = NA,
         ..plotwidth = NA,
         ..plotheight = NA)
 )
@@ -142,7 +168,9 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     active = list(
         todo = function() private$.items[["todo"]],
         results = function() private$.items[["results"]],
-        vafplot = function() private$.items[["vafplot"]]),
+        vafplot = function() private$.items[["vafplot"]],
+        screePlot = function() private$.items[["screePlot"]],
+        loadingsPlot = function() private$.items[["loadingsPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -228,7 +256,23 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "colororiginal",
                     "colorpermuted",
                     "plotwidth",
-                    "plotheight")))}))
+                    "plotheight")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="screePlot",
+                title="Scree Plot (Eigenvalues)",
+                width=600,
+                height=450,
+                renderFun=".screePlot",
+                visible="(showScreePlot)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="loadingsPlot",
+                title="Variable Loadings Plot",
+                width=600,
+                height=600,
+                renderFun=".loadingsPlot",
+                visible="(showLoadingsPlot)"))}))
 
 pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pcacomponenttestBase",
@@ -319,6 +363,10 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   hex codes.
 #' @param colorpermuted Color for permuted VAF line/points. Use color names or
 #'   hex codes.
+#' @param showScreePlot Display a scree plot of eigenvalues.
+#' @param showLoadingsPlot Display a plot of variable loadings for significant
+#'   components.
+#' @param nLoadings Number of top variables to display in loadings plot.
 #' @param plotwidth Width of the plot in pixels.
 #' @param plotheight Height of the plot in pixels.
 #' @return A results object containing:
@@ -326,6 +374,8 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results} \tab \tab \tab \tab \tab Statistical significance of principal components based on permutation testing \cr
 #'   \code{results$vafplot} \tab \tab \tab \tab \tab Visualization comparing original VAF to permuted null distribution \cr
+#'   \code{results$screePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$loadingsPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -347,6 +397,9 @@ pcacomponenttest <- function(
     showpercent = TRUE,
     colororiginal = "steelblue",
     colorpermuted = "orange",
+    showScreePlot = FALSE,
+    showLoadingsPlot = FALSE,
+    nLoadings = 5,
     plotwidth = 600,
     plotheight = 450) {
 
@@ -371,6 +424,9 @@ pcacomponenttest <- function(
         showpercent = showpercent,
         colororiginal = colororiginal,
         colorpermuted = colorpermuted,
+        showScreePlot = showScreePlot,
+        showLoadingsPlot = showLoadingsPlot,
+        nLoadings = nLoadings,
         plotwidth = plotwidth,
         plotheight = plotheight)
 

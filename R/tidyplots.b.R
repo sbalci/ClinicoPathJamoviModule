@@ -95,8 +95,15 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             message(paste("DEBUG: Variables - xvar:", xvar, "yvar:", yvar, "color:", colorvar, "group:", groupvar, "facet:", facetvar))
 
             # Check if required variables are selected
-            if (is.null(xvar) || is.null(yvar)) {
-                private$.debug("ERROR: X or Y variable not selected")
+            if (is.null(xvar)) {
+                private$.debug("ERROR: X variable not selected")
+                self$results$instructions$setVisible(TRUE)
+                return(FALSE)
+            }
+
+            # Y variable is required for most plots, but not for histogram/density
+            if (is.null(yvar) && !self$options$plotType %in% c("histogram", "density")) {
+                private$.debug("ERROR: Y variable not selected")
                 self$results$instructions$setVisible(TRUE)
                 return(FALSE)
             }
@@ -115,37 +122,30 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Initialize tidyplot with required aesthetics
             message("DEBUG: Creating tidyplot with basic aesthetics")
             # Build the aesthetic mapping
-            aes_args <- list(x = rlang::sym(xvar), y = rlang::sym(yvar))
+            # Build arguments for tidyplot
+            args <- list(
+                .data = plotData,
+                x = rlang::sym(xvar)
+            )
+
+            if (!is.null(yvar) && yvar != "") {
+                args$y <- rlang::sym(yvar)
+            }
 
             if (!is.null(colorvar) && colorvar != "") {
                 message(paste("DEBUG: Adding color aesthetic:", colorvar))
-                aes_args$color <- rlang::sym(colorvar)
-            }
-
-            # Note: tidyplots may not support group aesthetic directly
-            # Group functionality may be handled through color or facet
-            if (!is.null(groupvar) && groupvar != "" &&
-                (is.null(colorvar) || colorvar == "")) {
+                args$color <- rlang::sym(colorvar)
+            } else if (!is.null(groupvar) && groupvar != "") {
                 message(paste("DEBUG: Using group as color:", groupvar))
-                # Use group as color if no color variable is specified
-                aes_args$color <- rlang::sym(groupvar)
+                args$color <- rlang::sym(groupvar)
             }
 
             message("DEBUG: Calling tidyplots::tidyplot")
             message(paste("DEBUG: Data dimensions:", nrow(plotData), "x", ncol(plotData)))
             message(paste("DEBUG: Data columns:", paste(names(plotData), collapse = ", ")))
 
-            # Try simple approach first
-            if (!is.null(colorvar) && colorvar != "") {
-                message("DEBUG: Creating tidyplot with color")
-                p <- plotData |> tidyplots::tidyplot(x = !!rlang::sym(xvar), y = !!rlang::sym(yvar), color = !!rlang::sym(colorvar))
-            } else if (!is.null(groupvar) && groupvar != "" && (is.null(colorvar) || colorvar == "")) {
-                message("DEBUG: Creating tidyplot with group as color")
-                p <- plotData |> tidyplots::tidyplot(x = !!rlang::sym(xvar), y = !!rlang::sym(yvar), color = !!rlang::sym(groupvar))
-            } else {
-                message("DEBUG: Creating basic tidyplot")
-                p <- plotData |> tidyplots::tidyplot(x = !!rlang::sym(xvar), y = !!rlang::sym(yvar))
-            }
+            # Create tidyplot object
+            p <- rlang::exec(tidyplots::tidyplot, !!!args)
             message("DEBUG: tidyplot object created successfully")
             message(paste("DEBUG: Current plot type option:", self$options$plotType))
             message(paste("DEBUG: Alpha option:", self$options$alpha))
@@ -205,7 +205,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!self$options$xvar %in% names(data)) {
                 stop(paste("X variable", self$options$xvar, "not found in data"))
             }
-            if (!self$options$yvar %in% names(data)) {
+            if (!is.null(self$options$yvar) && self$options$yvar != "" && !self$options$yvar %in% names(data)) {
                 stop(paste("Y variable", self$options$yvar, "not found in data"))
             }
 

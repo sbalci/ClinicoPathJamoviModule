@@ -17,6 +17,7 @@
 #' @param n_boot Number of bootstrap iterations
 #' @param conf_level Confidence level (default 0.95)
 #' @return List with NRI components and confidence intervals
+#' @export
 bootstrapNRI <- function(new_values, ref_values, actual,
                          direction = ">=", thresholds = NULL,
                          n_boot = 1000, conf_level = 0.95) {
@@ -147,7 +148,7 @@ computeNRI <- function(new_values, ref_values, actual,
         # Categorical NRI
         # Create risk categories with proper handling of boundaries
         breaks <- c(0, thresholds, 1)
-        labels <- 1:length(breaks - 1)
+        labels <- 1:(length(breaks) - 1)
 
         ref_cats <- cut(ref_probs,
                         breaks = breaks,

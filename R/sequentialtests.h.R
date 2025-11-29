@@ -10,13 +10,16 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             test1_name = "Screening Test",
             test1_sens = 0.95,
             test1_spec = 0.7,
+            test1_cost = 0,
             test2_name = "Confirmatory Test",
             test2_sens = 0.8,
             test2_spec = 0.98,
+            test2_cost = 0,
             strategy = "serial_positive",
             prevalence = 0.1,
             show_explanation = TRUE,
             show_formulas = FALSE,
+            show_cost_analysis = FALSE,
             show_nomogram = FALSE, ...) {
 
             super$initialize(
@@ -54,6 +57,11 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=0.7,
                 min=0.01,
                 max=0.99)
+            private$..test1_cost <- jmvcore::OptionNumber$new(
+                "test1_cost",
+                test1_cost,
+                default=0,
+                min=0)
             private$..test2_name <- jmvcore::OptionString$new(
                 "test2_name",
                 test2_name,
@@ -70,6 +78,11 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=0.98,
                 min=0.01,
                 max=0.99)
+            private$..test2_cost <- jmvcore::OptionNumber$new(
+                "test2_cost",
+                test2_cost,
+                default=0,
+                min=0)
             private$..strategy <- jmvcore::OptionList$new(
                 "strategy",
                 strategy,
@@ -92,6 +105,10 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "show_formulas",
                 show_formulas,
                 default=FALSE)
+            private$..show_cost_analysis <- jmvcore::OptionBool$new(
+                "show_cost_analysis",
+                show_cost_analysis,
+                default=FALSE)
             private$..show_nomogram <- jmvcore::OptionBool$new(
                 "show_nomogram",
                 show_nomogram,
@@ -101,13 +118,16 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test1_name)
             self$.addOption(private$..test1_sens)
             self$.addOption(private$..test1_spec)
+            self$.addOption(private$..test1_cost)
             self$.addOption(private$..test2_name)
             self$.addOption(private$..test2_sens)
             self$.addOption(private$..test2_spec)
+            self$.addOption(private$..test2_cost)
             self$.addOption(private$..strategy)
             self$.addOption(private$..prevalence)
             self$.addOption(private$..show_explanation)
             self$.addOption(private$..show_formulas)
+            self$.addOption(private$..show_cost_analysis)
             self$.addOption(private$..show_nomogram)
         }),
     active = list(
@@ -115,26 +135,32 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test1_name = function() private$..test1_name$value,
         test1_sens = function() private$..test1_sens$value,
         test1_spec = function() private$..test1_spec$value,
+        test1_cost = function() private$..test1_cost$value,
         test2_name = function() private$..test2_name$value,
         test2_sens = function() private$..test2_sens$value,
         test2_spec = function() private$..test2_spec$value,
+        test2_cost = function() private$..test2_cost$value,
         strategy = function() private$..strategy$value,
         prevalence = function() private$..prevalence$value,
         show_explanation = function() private$..show_explanation$value,
         show_formulas = function() private$..show_formulas$value,
+        show_cost_analysis = function() private$..show_cost_analysis$value,
         show_nomogram = function() private$..show_nomogram$value),
     private = list(
         ..preset = NA,
         ..test1_name = NA,
         ..test1_sens = NA,
         ..test1_spec = NA,
+        ..test1_cost = NA,
         ..test2_name = NA,
         ..test2_sens = NA,
         ..test2_spec = NA,
+        ..test2_cost = NA,
         ..strategy = NA,
         ..prevalence = NA,
         ..show_explanation = NA,
         ..show_formulas = NA,
+        ..show_cost_analysis = NA,
         ..show_nomogram = NA)
 )
 
@@ -145,6 +171,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         summary_table = function() private$.items[["summary_table"]],
         individual_tests_table = function() private$.items[["individual_tests_table"]],
         population_flow_table = function() private$.items[["population_flow_table"]],
+        cost_analysis_table = function() private$.items[["cost_analysis_table"]],
         explanation_text = function() private$.items[["explanation_text"]],
         formulas_text = function() private$.items[["formulas_text"]],
         plot_flow_diagram = function() private$.items[["plot_flow_diagram"]],
@@ -292,6 +319,29 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="true_neg", 
                         `title`="True Negatives", 
                         `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cost_analysis_table",
+                title="Cost Analysis (Per 1000 Patients)",
+                visible="(show_cost_analysis)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="item", 
+                        `title`="Item", 
+                        `type`="text"),
+                    list(
+                        `name`="unit_cost", 
+                        `title`="Unit Cost", 
+                        `type`="number"),
+                    list(
+                        `name`="number_tests", 
+                        `title`="Number of Tests", 
+                        `type`="integer"),
+                    list(
+                        `name`="total_cost", 
+                        `title`="Total Cost", 
+                        `type`="number"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanation_text",
@@ -414,19 +464,23 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param test1_name .
 #' @param test1_sens .
 #' @param test1_spec .
+#' @param test1_cost .
 #' @param test2_name .
 #' @param test2_sens .
 #' @param test2_spec .
+#' @param test2_cost .
 #' @param strategy .
 #' @param prevalence .
 #' @param show_explanation .
 #' @param show_formulas .
+#' @param show_cost_analysis .
 #' @param show_nomogram .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$summary_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$individual_tests_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$population_flow_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cost_analysis_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$explanation_text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$formulas_text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot_flow_diagram} \tab \tab \tab \tab \tab an image \cr
@@ -448,13 +502,16 @@ sequentialtests <- function(
     test1_name = "Screening Test",
     test1_sens = 0.95,
     test1_spec = 0.7,
+    test1_cost = 0,
     test2_name = "Confirmatory Test",
     test2_sens = 0.8,
     test2_spec = 0.98,
+    test2_cost = 0,
     strategy = "serial_positive",
     prevalence = 0.1,
     show_explanation = TRUE,
     show_formulas = FALSE,
+    show_cost_analysis = FALSE,
     show_nomogram = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -466,13 +523,16 @@ sequentialtests <- function(
         test1_name = test1_name,
         test1_sens = test1_sens,
         test1_spec = test1_spec,
+        test1_cost = test1_cost,
         test2_name = test2_name,
         test2_sens = test2_sens,
         test2_spec = test2_spec,
+        test2_cost = test2_cost,
         strategy = strategy,
         prevalence = prevalence,
         show_explanation = show_explanation,
         show_formulas = show_formulas,
+        show_cost_analysis = show_cost_analysis,
         show_nomogram = show_nomogram)
 
     analysis <- sequentialtestsClass$new(

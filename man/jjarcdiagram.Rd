@@ -105,21 +105,21 @@ clutter in dense networks.}
 direction from source to target) or undirected (edges represent
 bidirectional relationships).}
 
-\item{aggregateEdges}{✅ RECOMMENDED: Combine multiple edges between the
-same nodes by summing weights. Why it matters: • Ensures network density ≤
-1.0 (without aggregation, density can exceed 1.0) • Prevents inflated
-centrality measures • Provides accurate statistical summaries Example: If
-Gene A→Gene B appears 3 times with weights \link{2, 3, 5}, aggregation creates a
-single edge with weight 10. When to disable: Only if you specifically need
-to preserve parallel edges for specialized analyses.}
+\item{aggregateEdges}{"RECOMMENDED: Combine multiple edges between the same
+nodes by summing weights. Why it matters: Ensures network density ≤ 1.0
+(without aggregation, density can exceed 1.0) Prevents inflated centrality
+measures Provides accurate statistical summaries Example: If Gene A→Gene B
+appears 3 times with weights (2, 3, 5), aggregation creates a single edge
+with weight 10. When to disable: Only if you specifically need to preserve
+parallel edges for specialized analyses."}
 
-\item{weightMode}{How edge weights should be interpreted for centrality
-calculations. • STRENGTH mode (default): Higher values = stronger
-connections   ✅ Use for: Correlations, interaction scores, similarity
-indices   Examples: r=0.8 (strong), binding affinity score=90  • DISTANCE
-mode: Higher values = longer paths/weaker connections   ⚠️ Use for: Costs,
-physical distances, dissimilarity measures   Examples: Euclidean distance,
-cost metrics  Most clinical/biological networks use STRENGTH mode.}
+\item{weightMode}{"How edge weights should be interpreted for centrality
+calculations. STRENGTH mode (default): Higher values = stronger connections
+Use for: Correlations, interaction scores, similarity indices   Examples:
+r=0.8 (strong), binding affinity score=90 DISTANCE mode: Higher values =
+longer paths/weaker connections   Use for: Costs, physical distances,
+dissimilarity measures   Examples: Euclidean distance, cost metrics Most
+clinical/biological networks use STRENGTH mode."}
 
 \item{arcColorMode}{How to color arcs when nodes are grouped. 'Source'
 colors arcs by source node's group, 'Target' by target node's group,

@@ -14,7 +14,6 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-
   - type: CollapseBox
     label: Clustering Method
     collapsed: false
@@ -25,7 +24,6 @@ children:
         name: distanceMethod
       - type: CheckBox
         name: standardize
-
   - type: CollapseBox
     label: Cluster Highlighting
     collapsed: true
@@ -36,7 +34,6 @@ children:
         name: nClusters
         format: number
         enable: (highlightClusters)
-
   - type: CollapseBox
     label: Grouping & Colors
     collapsed: true
@@ -57,7 +54,6 @@ children:
                 enable: (colorGroups)
       - type: ComboBox
         name: colorScheme
-
   - type: CollapseBox
     label: Plot Options
     collapsed: true
@@ -79,7 +75,6 @@ children:
       - type: TextBox
         name: plotHeight
         format: number
-
   - type: CollapseBox
     label: Heatmap Options
     collapsed: true
@@ -99,3 +94,8 @@ children:
       - type: CheckBox
         name: showCellBorders
         enable: (plotType:heatmap)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Output
+        name: clustOutput

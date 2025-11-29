@@ -429,21 +429,79 @@ plscoxClass <- R6::R6Class(
                 
                 # Bootstrap validation
                 if (self$options$bootstrap_validation) {
-                    # Implement bootstrap validation
                     n_bootstrap <- self$options$n_bootstrap
                     
-                    bootstrap_text <- glue::glue("
-                    <h3>Bootstrap Validation Results</h3>
-                    <p><b>Bootstrap validation with {n_bootstrap} replications</b></p>
-                    <p><i>Bootstrap validation implementation in progress...</i></p>
-                    <p>This feature will provide:</p>
-                    <ul>
-                    <li>Bootstrap confidence intervals for C-index</li>
-                    <li>Model stability assessment</li>
-                    <li>Optimism-corrected performance estimates</li>
-                    <li>Variable selection stability</li>
-                    </ul>
-                    ")
+                    bootstrap_c_indices <- numeric(n_bootstrap)
+                    valid_bootstraps <- 0
+                    
+                    # Progress bar or messaging if possible, but for now just loop
+                    for (i in 1:n_bootstrap) {
+                        tryCatch({
+                            # Resample
+                            boot_idx <- sample(nrow(pred_matrix), replace = TRUE)
+                            boot_X <- pred_matrix[boot_idx, , drop = FALSE]
+                            boot_time <- time_var[boot_idx]
+                            boot_status <- status_var[boot_idx]
+                            
+                            # Fit model on bootstrap sample (using optimal_nt from main analysis)
+                            # Note: Re-running CV would be better but too slow.
+                            # We assess stability of the chosen model configuration.
+                            if (sum(boot_status) > 5) { # Ensure enough events
+                                boot_pls <- plsRcox::plsRcox(
+                                    Xplan = boot_X,
+                                    time = boot_time,
+                                    event = boot_status,
+                                    nt = optimal_nt,
+                                    alpha.pvals.Fisher = 0.05,
+                                    verbose = FALSE
+                                )
+                                
+                                # Calculate C-index
+                                # Need scores for bootstrap sample
+                                boot_scores <- boot_pls$tt
+                                if (!is.null(boot_scores)) {
+                                    boot_cox_data <- data.frame(
+                                        time = boot_time,
+                                        status = boot_status,
+                                        boot_scores
+                                    )
+                                    colnames(boot_cox_data)[3:ncol(boot_cox_data)] <- paste0("Comp", 1:ncol(boot_scores))
+                                    
+                                    boot_formula <- as.formula(paste("survival::Surv(time, status) ~", 
+                                                                   paste(colnames(boot_cox_data)[3:ncol(boot_cox_data)], collapse = " + ")))
+                                    
+                                    boot_c <- survival::concordance(boot_formula, data = boot_cox_data)$concordance
+                                    valid_bootstraps <- valid_bootstraps + 1
+                                    bootstrap_c_indices[valid_bootstraps] <- boot_c
+                                }
+                            }
+                        }, error = function(e) {
+                            # Skip failed bootstraps
+                        })
+                    }
+                    
+                    # Trim to valid results
+                    bootstrap_c_indices <- bootstrap_c_indices[1:valid_bootstraps]
+                    
+                    if (valid_bootstraps > 0) {
+                        mean_boot_c <- mean(bootstrap_c_indices)
+                        sd_boot_c <- sd(bootstrap_c_indices)
+                        ci_lower <- quantile(bootstrap_c_indices, 0.025)
+                        ci_upper <- quantile(bootstrap_c_indices, 0.975)
+                        
+                        bootstrap_text <- glue::glue("
+                        <h3>Bootstrap Validation Results</h3>
+                        <p><b>Bootstrap validation with {valid_bootstraps} successful replications</b> (Target: {n_bootstrap})</p>
+                        <ul>
+                        <li><b>Mean Bootstrap C-Index:</b> {round(mean_boot_c, 3)}</li>
+                        <li><b>Standard Error:</b> {round(sd_boot_c, 3)}</li>
+                        <li><b>95% Confidence Interval:</b> {round(ci_lower, 3)} - {round(ci_upper, 3)}</li>
+                        </ul>
+                        <p><i>Note:</i> Confidence intervals reflect the variability of the model performance on resampled data (internal validity).</p>
+                        ")
+                    } else {
+                        bootstrap_text <- "<h3>Bootstrap Validation Failed</h3><p>Could not generate valid bootstrap models (possibly due to small sample size or convergence issues).</p>"
+                    }
                     
                     self$results$bootstrapResults$setContent(bootstrap_text)
                 }
@@ -452,18 +510,73 @@ plscoxClass <- R6::R6Class(
                 if (self$options$permutation_test) {
                     n_permutations <- self$options$n_permutations
                     
-                    permutation_text <- glue::glue("
-                    <h3>Permutation Test Results</h3>
-                    <p><b>Permutation testing with {n_permutations} permutations</b></p>
-                    <p><i>Permutation test implementation in progress...</i></p>
-                    <p>This feature will provide:</p>
-                    <ul>
-                    <li>Null distribution of model performance</li>
-                    <li>Significance testing of predictive ability</li>
-                    <li>Variable importance significance</li>
-                    <li>False discovery rate control</li>
-                    </ul>
-                    ")
+                    # Original C-index
+                    original_c <- summary(cox_model)$concordance[1]
+                    
+                    perm_c_indices <- numeric(n_permutations)
+                    valid_perms <- 0
+                    
+                    for (i in 1:n_permutations) {
+                        tryCatch({
+                            # Permute outcome
+                            perm_idx <- sample(nrow(pred_matrix))
+                            perm_time <- time_var[perm_idx]
+                            perm_status <- status_var[perm_idx]
+                            
+                            # Fit PLS on permuted data
+                            perm_pls <- plsRcox::plsRcox(
+                                Xplan = pred_matrix, # Predictors fixed
+                                time = perm_time,
+                                event = perm_status,
+                                nt = optimal_nt,
+                                alpha.pvals.Fisher = 0.05,
+                                verbose = FALSE
+                            )
+                            
+                            # Calculate C-index
+                            perm_scores <- perm_pls$tt
+                            if (!is.null(perm_scores)) {
+                                perm_cox_data <- data.frame(
+                                    time = perm_time,
+                                    status = perm_status,
+                                    perm_scores
+                                )
+                                colnames(perm_cox_data)[3:ncol(perm_cox_data)] <- paste0("Comp", 1:ncol(perm_scores))
+                                
+                                perm_formula <- as.formula(paste("survival::Surv(time, status) ~", 
+                                                               paste(colnames(perm_cox_data)[3:ncol(perm_cox_data)], collapse = " + ")))
+                                
+                                perm_c <- survival::concordance(perm_formula, data = perm_cox_data)$concordance
+                                valid_perms <- valid_perms + 1
+                                perm_c_indices[valid_perms] <- perm_c
+                            }
+                        }, error = function(e) {
+                            # Skip failed permutations
+                        })
+                    }
+                    
+                    perm_c_indices <- perm_c_indices[1:valid_perms]
+                    
+                    if (valid_perms > 0) {
+                        # Calculate p-value (proportion of permuted C >= original C)
+                        # Note: C-index < 0.5 is also "predictive" (inverse), so we test abs(C - 0.5) for 2-sided equivalent?
+                        # Usually we want C > 0.5.
+                        n_better <- sum(perm_c_indices >= original_c)
+                        p_val <- (n_better + 1) / (valid_perms + 1)
+                        
+                        permutation_text <- glue::glue("
+                        <h3>Permutation Test Results</h3>
+                        <p><b>Permutation testing with {valid_perms} successful permutations</b> (Target: {n_permutations})</p>
+                        <ul>
+                        <li><b>Original C-Index:</b> {round(original_c, 3)}</li>
+                        <li><b>Mean Permuted C-Index:</b> {round(mean(perm_c_indices), 3)} (expected ~0.5)</li>
+                        <li><b>P-value:</b> {round(p_val, 4)}</li>
+                        </ul>
+                        <p><i>Interpretation:</i> The p-value represents the probability of observing a C-index as high as {round(original_c, 3)} by chance alone (if predictors had no relationship to survival).</p>
+                        ")
+                    } else {
+                        permutation_text <- "<h3>Permutation Test Failed</h3><p>Could not generate valid permutation models.</p>"
+                    }
                     
                     self$results$permutationResults$setContent(permutation_text)
                 }

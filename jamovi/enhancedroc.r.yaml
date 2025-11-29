@@ -51,6 +51,38 @@ items:
                   title: 'Recommendation'
                   type: text
 
+          # Precision-Recall Metrics Table
+          - name: precisionRecallTable
+            title: Precision-Recall Metrics
+            type: Table
+            description: Metrics for imbalanced data analysis
+            visible: (detectImbalance)
+            rows: 1
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: auc_pr
+                  title: 'AUC-PR'
+                  type: number
+                  format: zto
+                - name: f1_score
+                  title: 'F1 Score (Max)'
+                  type: number
+                  format: zto
+                - name: precision
+                  title: 'Precision'
+                  type: number
+                  format: zto
+                - name: recall
+                  title: 'Recall'
+                  type: number
+                  format: zto
+                - name: average_precision
+                  title: 'Average Precision'
+                  type: number
+                  format: zto
+
           # Natural Language Summary
           - name: analysisSummary
             title: Analysis Summary
@@ -511,6 +543,16 @@ items:
             description: ROC curves with optimal cutoff points
             visible: (rocCurve)
             renderFun: .plotROCCurve
+            width: 600
+            height: 600
+
+          # Precision-Recall Curve Plot
+          - name: prcPlot
+            title: Precision-Recall Curve
+            type: Image
+            description: Precision-Recall curve for imbalanced data
+            visible: (detectImbalance)
+            renderFun: .plotPRC
             width: 600
             height: 600
 

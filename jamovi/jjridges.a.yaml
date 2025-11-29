@@ -1,7 +1,7 @@
 ---
 name: jjridges
 title: Ridge Plot
-menuGroup: JJStatsPlotT3
+menuGroup: JJStatsPlotT2
 menuSubgroup: Distribution
 # menuSubtitle: 'Ridge Visualization'
 version: '0.0.32'
@@ -540,12 +540,24 @@ options:
           name: biomarker_distribution
         - title: Treatment Response
           name: treatment_response
+        - title: Age by Disease Stage
+          name: age_by_stage
+        - title: Tumor Size Comparison
+          name: tumor_size_comparison
+        - title: Lab Values by Group
+          name: lab_values_by_group
+        - title: Survival Time Distribution
+          name: survival_time_distribution
       default: custom
       description:
           ui: >
-            Apply a preset for a specific clinical analysis. Note: Ridge plots compare
-            distributions of a continuous variable across groups. They do not perform
-            correlation analysis between two continuous variables.
+            Apply a preset for a specific clinical analysis. Each preset automatically
+            configures plot type, statistical tests, effect sizes, and p-value adjustments
+            appropriate for the clinical context. Note: Ridge plots compare distributions
+            of a continuous variable across groups.
           R: >
-            Clinical analysis preset for ridge plots
+            Clinical analysis preset for ridge plots. Biomarker Distribution: nonparametric
+            tests with Cliff's delta. Treatment Response: violin plots with Bonferroni correction.
+            Age by Stage: parametric tests with Cohen's d. Tumor Size: Hodges-Lehmann shift.
+            Lab Values: robust tests with Hedges' g. Survival Time: median with quartiles.
 ...

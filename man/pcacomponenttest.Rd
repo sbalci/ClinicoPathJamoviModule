@@ -16,6 +16,9 @@ pcacomponenttest(
   showpercent = TRUE,
   colororiginal = "steelblue",
   colorpermuted = "orange",
+  showScreePlot = FALSE,
+  showLoadingsPlot = FALSE,
+  nLoadings = 5,
   plotwidth = 600,
   plotheight = 450
 )
@@ -55,6 +58,13 @@ hex codes.}
 \item{colorpermuted}{Color for permuted VAF line/points. Use color names or
 hex codes.}
 
+\item{showScreePlot}{Display a scree plot of eigenvalues.}
+
+\item{showLoadingsPlot}{Display a plot of variable loadings for significant
+components.}
+
+\item{nLoadings}{Number of top variables to display in loadings plot.}
+
 \item{plotwidth}{Width of the plot in pixels.}
 
 \item{plotheight}{Height of the plot in pixels.}
@@ -65,6 +75,8 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$results} \tab \tab \tab \tab \tab Statistical significance of principal components based on permutation testing \cr
 \code{results$vafplot} \tab \tab \tab \tab \tab Visualization comparing original VAF to permuted null distribution \cr
+\code{results$screePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$loadingsPlot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

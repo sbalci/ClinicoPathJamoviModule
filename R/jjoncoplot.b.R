@@ -75,15 +75,28 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     only_gene2 <- sum(data[[gene1]] == 0 & data[[gene2]] == 1, na.rm = TRUE)
                     neither <- sum(data[[gene1]] == 0 & data[[gene2]] == 0, na.rm = TRUE)
                     
-                    # Fisher's exact test for association
-                    contingency_table <- matrix(c(both_mutated, only_gene1, only_gene2, neither), nrow = 2)
-                    fisher_test <- fisher.test(contingency_table)
-                    
-                    # Determine association type
-                    association <- if (fisher_test$p.value < 0.05) {
-                        if (fisher_test$estimate > 1) "Co-occurring" else "Mutually exclusive"
+                    # Check for zero variance or empty cells to avoid errors
+                    if ((both_mutated + only_gene1 == 0) || (both_mutated + only_gene2 == 0) ||
+                        (only_gene1 + neither == 0) || (only_gene2 + neither == 0)) {
+                        association <- "Indeterminate"
+                        p_value <- 1.0
                     } else {
-                        "Independent"
+                        # Fisher's exact test for association
+                        contingency_table <- matrix(c(both_mutated, only_gene1, only_gene2, neither), nrow = 2)
+                        fisher_test <- tryCatch({
+                            fisher.test(contingency_table)
+                        }, error = function(e) {
+                            list(p.value = 1.0, estimate = 1.0)
+                        })
+                        
+                        p_value <- fisher_test$p.value
+                        
+                        # Determine association type
+                        association <- if (p_value < 0.05) {
+                            if (fisher_test$estimate > 1) "Co-occurring" else "Mutually exclusive"
+                        } else {
+                            "Independent"
+                        }
                     }
                     
                     # Add to results
@@ -93,7 +106,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         cooccurrence_count = both_mutated,
                         exclusivity_count = only_gene1 + only_gene2,
                         association_type = association,
-                        p_value = fisher_test$p.value
+                        p_value = p_value
                     ))
                 }
             }
@@ -495,6 +508,37 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
             
+            # Add clinical annotations if requested and available
+            if (plotType == "oncoplot" && showClinicalAnnotation && !is.null(clinical_data) && ncol(clinical_data) > 1) {
+                # Reshape clinical data for plotting
+                clinical_long <- clinical_data %>%
+                    tidyr::pivot_longer(
+                        cols = -!!rlang::sym(self$options$sampleVar),
+                        names_to = "variable",
+                        values_to = "value"
+                    )
+                
+                # Create clinical heatmap
+                clinical_plot <- clinical_long %>%
+                    ggplot2::ggplot(ggplot2::aes(x = !!rlang::sym(self$options$sampleVar), y = variable, fill = value)) +
+                    ggplot2::geom_tile(color = "white", size = 0.1) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        axis.text.x = ggplot2::element_blank(),
+                        axis.title.x = ggplot2::element_blank(),
+                        axis.text.y = ggplot2::element_text(size = fontSize - 2),
+                        axis.title.y = ggplot2::element_blank(),
+                        panel.grid = ggplot2::element_blank(),
+                        legend.position = "right",
+                        plot.margin = ggplot2::margin(5, 0, 0, 0)
+                    ) +
+                    ggplot2::labs(fill = "Clinical")
+                
+                # Combine with main plot using patchwork
+                # Adjust layout to put clinical plot at the bottom
+                p <- p / clinical_plot + patchwork::plot_layout(heights = c(4, 1))
+            }
+            
             # Apply jamovi theme
             p <- p + ggtheme
             
@@ -775,6 +819,33 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Set mutation summary data safely
             for (i in seq_len(nrow(mutation_summary))) {
                 self$results$mutationSummary$addRow(rowKey = i, values = mutation_summary[i, ])
+            }
+
+            # Calculate TMB for all samples and save if requested
+            if (self$results$tmbOutput$isNotFilled()) {
+                # Use original data to ensure alignment with rows
+                raw_data <- self$data
+                genes <- self$options$geneVars
+                
+                if (!is.null(genes) && length(genes) > 0) {
+                    # Create a temporary numeric matrix for TMB calculation
+                    tmb_matrix <- matrix(0, nrow = nrow(raw_data), ncol = length(genes))
+                    
+                    for (i in seq_along(genes)) {
+                        var <- genes[i]
+                        val <- raw_data[[var]]
+                        # Handle factor/numeric conversion safely
+                        if (is.factor(val)) {
+                            val <- as.numeric(as.character(val))
+                        }
+                        # Treat missing as 0, positive > 0 as 1
+                        val[is.na(val)] <- 0
+                        tmb_matrix[, i] <- ifelse(val > 0, 1, 0)
+                    }
+                    
+                    tmb_values <- rowSums(tmb_matrix)
+                    self$results$tmbOutput$setValues(tmb_values)
+                }
             }
 
             # Update sample summary if enabled with corrected logic

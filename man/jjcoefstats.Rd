@@ -21,8 +21,8 @@ jjcoefstats(
   eventStatus = NULL,
   randomEffects = NULL,
   sortCoefs = FALSE,
-  excludeIntercept = TRUE,
-  showPValues = TRUE,
+  excludeIntercept = FALSE,
+  showPValues = FALSE,
   pSymbols = FALSE,
   ciLevel = 0.95,
   exponentiate = FALSE,
@@ -31,7 +31,7 @@ jjcoefstats(
   plotTheme = "default",
   plotWidth = 700,
   plotHeight = 500,
-  showexplanations = TRUE
+  showexplanations = FALSE
 )
 }
 \arguments{

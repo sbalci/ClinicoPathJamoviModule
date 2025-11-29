@@ -472,10 +472,19 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Generate table based on selected style.
                 if (sty == "arsenal") {
+                    arsenal_control <- arsenal::tableby.control(
+                        test = TRUE,
+                        total = TRUE,
+                        numeric.test = if (self$options$cont == "mean") "anova" else "kwt",
+                        cat.test = if (self$options$pcat == "fisher") "fe" else "chisq",
+                        numeric.stats = if (self$options$cont == "mean") c("Nmiss", "meansd") else c("Nmiss", "median", "q1q3"),
+                        stats.labels = list(meansd = "Mean (SD)", median = "Median", q1q3 = "Q1, Q3")
+                    )
+
                     tablearsenal <- arsenal::tableby(
                         formula = formula,
                         data = mydata,
-                        total = TRUE,
+                        control = arsenal_control,
                         digits = 1,
                         digits.count = 1
                     )
@@ -559,12 +568,26 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 gtsummary_method <- method_mapping[p_adjust_method]
 
+                # Determine number of groups for correct test selection
+                n_groups <- length(unique(na.omit(mydata[[mygroup]])))
+
+                # Map user options to gtsummary syntax
+                stats_cont <- if (self$options$cont == "mean") "{mean} ({sd})" else "{median} ({p25}, {p75})"
+                
+                test_cat <- if (self$options$pcat == "fisher") "fisher.test" else "chisq.test"
+                
+                if (self$options$cont == "mean") {
+                    test_cont <- if (n_groups > 2) "oneway.test" else "t.test"
+                } else {
+                    test_cont <- if (n_groups > 2) "kruskal.test" else "wilcox.test"
+                }
+
                 tablegtsummary <-
                   mydata_subset %>%
                   tbl_summary(
                     by = mygroup,
                     statistic = list(
-                      all_continuous()  ~ "{mean} ({sd})",
+                      all_continuous()  ~ stats_cont,
                       all_categorical() ~ "{n}/{N} ({p}%)"
                     ),
                     digits       = all_continuous() ~ 2,
@@ -573,7 +596,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                   add_n() %>%
                   add_overall() %>%
                   add_p(
-                    # compute p‐values for all variables using gtsummary defaults
+                    test = list(
+                      all_continuous() ~ test_cont,
+                      all_categorical() ~ test_cat
+                    ),
                     pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
                   )
 

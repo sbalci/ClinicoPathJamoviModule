@@ -791,15 +791,17 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_stages <- if (!is.null(private$.processedData)) length(private$.processedData) - 1 else 0
 
             summary_html <- sprintf(
-                "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;'>" ,
-                "<h4 style='margin-top: 0;'>📊 Study Flow Summary</h4>" ,
-                "<p><b>Initial participants:</b> %d</p>" ,
-                "<p><b>Exclusion stages:</b> %d</p>" ,
-                "<p><b>Total excluded:</b> %d (%.1f%%)</p>" ,
-                "<p><b>Final analysis cohort:</b> %d (<span style='color: %s; font-weight: bold;'>%.1f%% retained</span>)</p>" ,
-                "<p style='margin-bottom: 0; font-style: italic; color: #6c757d;'>" ,
-                "A retention rate of %.1f%% indicates %s attrition for this study design." ,
-                "</p></div>",
+                paste0(
+                    "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;'>" ,
+                    "<h4 style='margin-top: 0;'>📊 Study Flow Summary</h4>" ,
+                    "<p><b>Initial participants:</b> %d</p>" ,
+                    "<p><b>Exclusion stages:</b> %d</p>" ,
+                    "<p><b>Total excluded:</b> %d (%.1f%%)</p>" ,
+                    "<p><b>Final analysis cohort:</b> %d (<span style='color: %s; font-weight: bold;'>%.1f%% retained</span>)</p>" ,
+                    "<p style='margin-bottom: 0; font-style: italic; color: #6c757d;'>" ,
+                    "A retention rate of %.1f%% indicates %s attrition for this study design." ,
+                    "</p></div>"
+                ),
                 initial_n,
                 n_stages,
                 total_excluded, (total_excluded / initial_n) * 100,
@@ -833,17 +835,19 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             report_html <- sprintf(
-                "<div style='background-color: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 10px 0;'>" ,
-                "<h4 style='margin-top: 0;'>📝 Copy-Ready Report Sentence</h4>" ,
-                "<p style='font-family: \"Times New Roman\", serif; font-size: 14px; line-height: 1.6;' id='reportText'>" ,
-                "Figure X shows the participant flow through the study. Of %d individuals assessed, " ,
-                "%d (%s%%) completed all study stages and were included in the final analysis.%s" ,
-                "</p>" ,
-                "<button onclick='navigator.clipboard.writeText(document.getElementById(\"reportText\").innerText)' " ,
-                "style='background-color: #0066cc; color: white; border: none; padding: 8px 16px; " ,
-                "border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;'>" ,
-                "📋 Copy to Clipboard</button>" ,
-                "</div>",
+                paste0(
+                    "<div style='background-color: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 10px 0;'>" ,
+                    "<h4 style='margin-top: 0;'>📝 Copy-Ready Report Sentence</h4>" ,
+                    "<p style='font-family: \"Times New Roman\", serif; font-size: 14px; line-height: 1.6;' id='reportText'>" ,
+                    "Figure X shows the participant flow through the study. Of %d individuals assessed, " ,
+                    "%d (%s%%) completed all study stages and were included in the final analysis.%s" ,
+                    "</p>" ,
+                    "<button onclick='navigator.clipboard.writeText(document.getElementById(\"reportText\").innerText)' " ,
+                    "style='background-color: #0066cc; color: white; border: none; padding: 8px 16px; " ,
+                    "border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;'>" ,
+                    "📋 Copy to Clipboard</button>" ,
+                    "</div>"
+                ),
                 initial_n,
                 final_n, retention_pct,
                 if (length(exclusion_details) > 0)
@@ -860,22 +864,24 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             is_consort <- grepl("consort", diagram_type)
 
             about_html <- sprintf(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>" ,
-                "<h4 style='margin-top: 0;'>ℹ️ About This Analysis</h4>" ,
-                "<p><b>Analysis Type:</b> %s</p>" ,
-                "<p><b>Purpose:</b> %s</p>" ,
-                "<p><b>When to Use:</b> %s</p>" ,
-                "<p><b>Key Outputs:</b></p>" ,
-                "<ul style='margin-bottom: 0;'>" ,
-                "<li>Flow diagram showing participant progression through study stages</li>" ,
-                "<li>Exclusion counts and reasons at each stage</li>" ,
-                "<li>Retention percentages from baseline to final analysis</li>" ,
-                "<li>Data quality warnings for high attrition or missing documentation</li>" ,
-                "</ul>" ,
-                "<p style='margin-top: 10px; font-size: 12px; color: #6c757d;'>" ,
-                "📚 <a href='https://www.consort-statement.org/' target='_blank' style='color: #0066cc;'>CONSORT 2010 Guidelines</a> | " ,
-                "<a href='https://www.riinu.me/2024/02/consort/' target='_blank' style='color: #0066cc;'>Implementation Guide</a>" ,
-                "</p></div>",
+                paste0(
+                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>" ,
+                    "<h4 style='margin-top: 0;'>ℹ️ About This Analysis</h4>" ,
+                    "<p><b>Analysis Type:</b> %s</p>" ,
+                    "<p><b>Purpose:</b> %s</p>" ,
+                    "<p><b>When to Use:</b> %s</p>" ,
+                    "<p><b>Key Outputs:</b></p>" ,
+                    "<ul style='margin-bottom: 0;'>" ,
+                    "<li>Flow diagram showing participant progression through study stages</li>" ,
+                    "<li>Exclusion counts and reasons at each stage</li>" ,
+                    "<li>Retention percentages from baseline to final analysis</li>" ,
+                    "<li>Data quality warnings for high attrition or missing documentation</li>" ,
+                    "</ul>" ,
+                    "<p style='margin-top: 10px; font-size: 12px; color: #6c757d;'>" ,
+                    "📚 <a href='https://www.consort-statement.org/' target='_blank' style='color: #0066cc;'>CONSORT 2010 Guidelines</a> | " ,
+                    "<a href='https://www.riinu.me/2024/02/consort/' target='_blank' style='color: #0066cc;'>Implementation Guide</a>" ,
+                    "</p></div>"
+                ),
                 if (is_consort) "CONSORT Flow Diagram" else "Study Flowchart",
                 if (is_consort)
                     "Create publication-ready flow diagrams compliant with CONSORT 2010 reporting standards for clinical trials."

@@ -138,12 +138,10 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 default=TRUE)
             private$..initialSize <- jmvcore::OptionNumber$new(
                 "initialSize",
-                initialSize,
-                min=0)
+                initialSize)
             private$..maxSize <- jmvcore::OptionNumber$new(
                 "maxSize",
-                maxSize,
-                min=0)
+                maxSize)
             private$..predictionTime <- jmvcore::OptionNumber$new(
                 "predictionTime",
                 predictionTime,

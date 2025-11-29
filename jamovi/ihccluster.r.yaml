@@ -178,6 +178,22 @@ items:
             title: Interpretation
             type: text
 
+    - name: consensusPlot
+      title: Consensus Matrix Heatmap
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotConsensus
+      visible: (consensusClustering)
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - autoSelectK
+          - nBootstrap
+          - seed
+
     - name: reproducibilityStats
       title: Cluster Reproducibility (Random Split Validation)
       type: Table

@@ -2,7 +2,7 @@
 
 name: tumorgrowth
 title: Tumor Growth Models
-menuGroup: OncoPathT4
+menuGroup: OncoPathT3
 menuSubgroup: Survival Analysis
 menuTitle: Tumor Growth Models
 
@@ -194,7 +194,6 @@ options:
     - name: initialSize
       title: Initial Tumor Size
       type: Number
-      min: 0
       description:
           R: >
             Initial tumor size (if not measured)
@@ -202,7 +201,6 @@ options:
     - name: maxSize
       title: Maximum Tumor Size
       type: Number
-      min: 0
       description:
           R: >
             Theoretical maximum size for logistic models

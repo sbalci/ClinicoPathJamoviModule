@@ -1,4 +1,3 @@
----
 name: pcacomponenttest
 title: PCA Component Significance Test
 jus: '3.0'
@@ -16,7 +15,6 @@ children:
             name: vars
             isTarget: true
             maxItemCount: 100
-
   - type: LayoutBox
     margin: large
     style: inline
@@ -33,24 +31,20 @@ children:
                 label: Number of Components to Test
                 format: number
                 enable: (vars)
-
               - type: TextBox
                 name: nperm
                 label: Number of Permutations
                 format: number
                 enable: (vars)
-
               - type: TextBox
                 name: conflevel
                 label: Confidence Level
                 format: number
                 enable: (vars)
-
               - type: ComboBox
                 name: adjustmethod
                 label: P-value Adjustment
                 enable: (vars)
-
   - type: LayoutBox
     margin: large
     style: inline
@@ -65,11 +59,9 @@ children:
               - type: CheckBox
                 name: center
                 enable: (vars)
-
               - type: CheckBox
                 name: scale
                 enable: (vars)
-
   - type: CollapseBox
     label: Plot Customization
     collapsed: true
@@ -81,19 +73,16 @@ children:
           - type: CheckBox
             name: showpercent
             enable: (vars)
-
           - type: TextBox
             name: colororiginal
             label: Original VAF Color
             format: string
             enable: (vars)
-
           - type: TextBox
             name: colorpermuted
             label: Permuted VAF Color
             format: string
             enable: (vars)
-
   - type: CollapseBox
     label: Plot Size
     collapsed: true
@@ -107,9 +96,21 @@ children:
             label: Width (pixels)
             format: number
             enable: (vars)
-
           - type: TextBox
             name: plotheight
             label: Height (pixels)
             format: number
             enable: (vars)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showScreePlot
+      - type: CheckBox
+        name: showLoadingsPlot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: nLoadings
+        format: number

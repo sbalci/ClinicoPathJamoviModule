@@ -3,6 +3,12 @@
 
 context("Sequential Testing Analysis - Mathematical Accuracy")
 
+# Source the implementation files
+if (file.exists("../../R/sequentialtests.h.R")) {
+  source("../../R/sequentialtests.h.R")
+  source("../../R/sequentialtests.b.R")
+}
+
 # Helper functions to calculate expected values manually
 calculate_serial_positive_sens <- function(sens1, sens2) {
   sens1 * sens2
@@ -52,8 +58,8 @@ test_that("Serial testing (positive strategy) calculations are mathematically co
   # Expected values for verification
   expect_equal(round(expected_combined_sens, 4), 0.7600, tolerance = 0.0001)
   expect_equal(round(expected_combined_spec, 4), 0.9940, tolerance = 0.0001)
-  expect_equal(round(expected_ppv, 4), 0.9272, tolerance = 0.0001)
-  expect_equal(round(expected_npv, 4), 0.9259, tolerance = 0.0001)
+  expect_equal(round(expected_ppv, 4), 0.9337, tolerance = 0.0001)
+  expect_equal(round(expected_npv, 4), 0.9739, tolerance = 0.0001)
 })
 
 test_that("Serial testing (negative strategy) calculations are mathematically correct", {
@@ -72,8 +78,8 @@ test_that("Serial testing (negative strategy) calculations are mathematically co
   # Expected values
   expect_equal(round(expected_combined_sens, 4), 0.9625, tolerance = 0.0001)
   expect_equal(round(expected_combined_spec, 4), 0.7650, tolerance = 0.0001)
-  expect_equal(round(expected_ppv, 4), 0.1705, tolerance = 0.0001)
-  expect_equal(round(expected_npv, 4), 0.9989, tolerance = 0.0001)
+  expect_equal(round(expected_ppv, 4), 0.1773, tolerance = 0.0001)
+  expect_equal(round(expected_npv, 4), 0.9974, tolerance = 0.0001)
 })
 
 test_that("Parallel testing calculations are mathematically correct", {
@@ -92,8 +98,8 @@ test_that("Parallel testing calculations are mathematically correct", {
   # Expected values
   expect_equal(round(expected_combined_sens, 4), 0.9400, tolerance = 0.0001)
   expect_equal(round(expected_combined_spec, 4), 0.8550, tolerance = 0.0001)
-  expect_equal(round(expected_ppv, 4), 0.5064, tolerance = 0.0001)
-  expect_equal(round(expected_npv, 4), 0.9933, tolerance = 0.0001)
+  expect_equal(round(expected_ppv, 4), 0.5336, tolerance = 0.0001)
+  expect_equal(round(expected_npv, 4), 0.9878, tolerance = 0.0001)
 })
 
 test_that("Edge case calculations work correctly", {
@@ -298,16 +304,6 @@ test_that("Parallel testing provides balanced approach", {
 
 context("Sequential Testing Analysis - Input Validation")
 
-test_that("Input parameter bounds are respected", {
-  # Test that sensitivity and specificity are between 0 and 1
-  expect_error(calculate_ppv(-0.1, 0.9, 0.1))
-  expect_error(calculate_ppv(1.1, 0.9, 0.1))
-  expect_error(calculate_ppv(0.9, -0.1, 0.1))
-  expect_error(calculate_ppv(0.9, 1.1, 0.1))
-  expect_error(calculate_ppv(0.9, 0.9, -0.1))
-  expect_error(calculate_ppv(0.9, 0.9, 1.1))
-})
-
 # Input validation helper function
 validate_probability <- function(value, name) {
   if (value < 0 || value > 1) {
@@ -316,7 +312,7 @@ validate_probability <- function(value, name) {
 }
 
 # Enhanced calculation functions with validation
-calculate_ppv <- function(sens, spec, prev) {
+calculate_ppv_validated <- function(sens, spec, prev) {
   validate_probability(sens, "Sensitivity")
   validate_probability(spec, "Specificity") 
   validate_probability(prev, "Prevalence")
@@ -324,13 +320,25 @@ calculate_ppv <- function(sens, spec, prev) {
   (sens * prev) / ((sens * prev) + ((1 - spec) * (1 - prev)))
 }
 
-calculate_npv <- function(sens, spec, prev) {
+calculate_npv_validated <- function(sens, spec, prev) {
   validate_probability(sens, "Sensitivity")
   validate_probability(spec, "Specificity")
   validate_probability(prev, "Prevalence")
   
   (spec * (1 - prev)) / ((spec * (1 - prev)) + ((1 - sens) * prev))
 }
+
+test_that("Input parameter bounds are respected", {
+  # Test that sensitivity and specificity are between 0 and 1
+  expect_error(calculate_ppv_validated(-0.1, 0.9, 0.1))
+  expect_error(calculate_ppv_validated(1.1, 0.9, 0.1))
+  expect_error(calculate_ppv_validated(0.9, -0.1, 0.1))
+  expect_error(calculate_ppv_validated(0.9, 1.1, 0.1))
+  expect_error(calculate_ppv_validated(0.9, 0.9, -0.1))
+  expect_error(calculate_ppv_validated(0.9, 0.9, 1.1))
+})
+
+
 
 test_that("Population flow calculations are consistent", {
   # Test with a standard scenario

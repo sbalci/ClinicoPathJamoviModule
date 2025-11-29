@@ -116,3 +116,5 @@ children:
     children:
       - type: CheckBox
         name: showLegend
+      - type: Output
+        name: tmbOutput

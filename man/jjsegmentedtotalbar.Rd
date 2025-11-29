@@ -11,10 +11,7 @@ jjsegmentedtotalbar(
   y_var,
   fill_var,
   facet_var = NULL,
-  show_ggplot2_plot = FALSE,
-  show_ggsegmented_plot = FALSE,
-  ggsegmented_labels = TRUE,
-  ggsegmented_alpha = 0.3,
+  show_plot = TRUE,
   chart_style = "clinical",
   color_palette = "clinical",
   show_percentages = TRUE,
@@ -53,14 +50,7 @@ composition.}
 
 \item{facet_var}{Optional variable for creating multiple panels.}
 
-\item{show_ggplot2_plot}{Show plot using built-in ggplot2 implementation.}
-
-\item{show_ggsegmented_plot}{Show plot using ggsegmentedtotalbar package.}
-
-\item{ggsegmented_labels}{Show value labels in ggsegmentedtotalbar plot.}
-
-\item{ggsegmented_alpha}{Transparency of background boxes in
-ggsegmentedtotalbar.}
+\item{show_plot}{Show segmented total bar chart.}
 
 \item{chart_style}{Overall visual style for the chart.}
 
@@ -112,7 +102,6 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot_ggsegmented} \tab \tab \tab \tab \tab an image \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$composition_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$detailed_stats} \tab \tab \tab \tab \tab a table \cr

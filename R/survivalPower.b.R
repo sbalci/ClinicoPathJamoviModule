@@ -662,6 +662,7 @@ survivalPowerClass <- R6::R6Class(
             return(paste("Required Study Duration:", round(total_duration, 1), "months"))
         },
         
+
         .events_needed_log_rank = function(hr, alpha, power, ratio) {
             if (is.null(hr) || hr <= 0 || hr == 1) {
                 stop("Hazard ratio must be positive and different from 1 for log-rank calculations.")

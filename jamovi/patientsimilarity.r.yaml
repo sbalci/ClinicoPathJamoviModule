@@ -119,7 +119,7 @@ items:
     - name: clusterOutcomes
       title: Outcome Distribution by Cluster
       type: Table
-      visible: (performClustering && colorBy)
+      visible: (performClustering)
       rows: 0
       columns:
         - name: cluster

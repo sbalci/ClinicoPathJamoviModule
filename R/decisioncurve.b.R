@@ -429,12 +429,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     }
                 }
 
-                # Check for sufficient valid bootstrap samples
-                valid_samples <- rowSums(!is.na(boot_results))
-                if (any(valid_samples < n_boot * 0.5)) {
-                    warning("Bootstrap CI: Less than 50% of bootstrap samples were valid. Results may be unreliable.")
-                }
-
                 # Calculate confidence intervals with error handling
                 ci_lower <- apply(boot_results, 2, function(x) {
                     if (sum(!is.na(x)) < 10) return(NA)

@@ -1,7 +1,7 @@
 ---
 name:  pcaloadingtest
 title: PCA Loading Significance Test
-menuGroup: ExplorationT3
+menuGroup: ExplorationT2
 menuSubgroup: Multivariate Analysis
 version: '1.0.0'
 jas: '1.2'

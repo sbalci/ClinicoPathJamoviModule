@@ -10,8 +10,8 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.32.35"
-new_date: "2025-11-27"
+new_version: "0.0.32.37"
+new_date: "2025-11-29"
 quick: false
 TEST: true
 meddecide: false
@@ -85,26 +85,6 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     enabled: false  # Automatically enabled when TEST mode is active
     test_patterns:
-      - "menuGroup: JJStatsPlotT4$"
-      - "menuGroup: meddecideT4$"
-      - "menuGroup: SurvivalT4$"
-      - "menuGroup: ExplorationT4$"
-      - "menuGroup: OncoPathT4$"
-      - "menuGroup: JJStatsPlotT3$"
-      - "menuGroup: meddecideT3$"
-      - "menuGroup: SurvivalT3$"
-      - "menuGroup: ExplorationT3$"
-      - "menuGroup: OncoPathT3$"
-      - "menuGroup: JJStatsPlotT2$"
-      - "menuGroup: meddecideT2$"
-      - "menuGroup: SurvivalT2$"
-      - "menuGroup: ExplorationT2$"
-      - "menuGroup: OncoPathT2$"
-      - "menuGroup: JJStatsPlotT1$"
-      - "menuGroup: meddecideT1$"
-      - "menuGroup: SurvivalT1$"
-      - "menuGroup: ExplorationT1$"
-      - "menuGroup: OncoPathT1$"
       - "menuGroup: JJStatsPlotT$"
       - "menuGroup: meddecideT$"
       - "menuGroup: SurvivalT$"

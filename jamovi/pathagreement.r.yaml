@@ -422,7 +422,7 @@ items:
       width: 800
       height: 600
       renderFun: .diagnosticStyleHeatmap
-      visible: (diagnosticStyleAnalysis)
+      visible: (diagnosticStyleAnalysis && styleHeatmap)
     - name: diagnosticStyleCombined
       title: 'Combined Dendrogram + Heatmap (Usubutun Style)'
       type: Image

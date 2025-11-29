@@ -10,21 +10,12 @@ items:
       visible: true
 
     - name: plot
-      title: Segmented Total Bar Chart (ggplot2)
+      title: Segmented Total Bar Chart
       type: Image
       width: 650
       height: 450
       requiresData: true
       renderFun: .plot
-
-    - name: plot_ggsegmented
-      title: Segmented Total Bar Chart (ggsegmentedtotalbar)
-      type: Image
-      width: 650
-      height: 450
-      requiresData: true
-      renderFun: .plot_ggsegmented
-      visible: true
 
     - name: summary
       title: 'Chart Summary'
@@ -151,5 +142,4 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-    - ggsegmentedtotalbar
 ...

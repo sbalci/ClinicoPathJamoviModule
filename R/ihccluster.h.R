@@ -666,6 +666,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         associationTests = function() private$.items[["associationTests"]],
         clinicalComparison = function() private$.items[["clinicalComparison"]],
         consensusStats = function() private$.items[["consensusStats"]],
+        consensusPlot = function() private$.items[["consensusPlot"]],
         reproducibilityStats = function() private$.items[["reproducibilityStats"]],
         supervisedSummary = function() private$.items[["supervisedSummary"]],
         supervisedResults = function() private$.items[["supervisedResults"]],
@@ -933,6 +934,22 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="consensusPlot",
+                title="Consensus Matrix Heatmap",
+                width=700,
+                height=600,
+                renderFun=".plotConsensus",
+                visible="(consensusClustering)",
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "autoSelectK",
+                    "nBootstrap",
+                    "seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="reproducibilityStats",
@@ -1955,6 +1972,7 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$associationTests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$consensusStats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$consensusPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$reproducibilityStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$supervisedSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$supervisedResults} \tab \tab \tab \tab \tab a html \cr

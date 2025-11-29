@@ -2,6 +2,7 @@ penalizedcoxregressionClass <- R6::R6Class(
     "penalizedcoxregressionClass",
     inherit = penalizedcoxregressionBase,
     private = list(
+        .model_results = NULL,
         .init = function() {
             # Set up instructions with comprehensive help text
             private$.initInstructions()
@@ -125,6 +126,7 @@ penalizedcoxregressionClass <- R6::R6Class(
             # Main analysis
             tryCatch({
                 results_list <- private$.fitPenalizedCox(analysis_data)
+                private$.model_results <- results_list
                 private$.populateResults(results_list, analysis_data)
             }, error = function(e) {
                 error_msg <- paste0(
@@ -589,46 +591,69 @@ penalizedcoxregressionClass <- R6::R6Class(
                 stop("ggplot2 is required for plotting")
             }
             
-            # Simulate coefficient path plot (in real implementation, extract from fitted model)
-            n_vars <- length(self$options$predictors)
-            n_lambda <- 50
+            if (is.null(private$.model_results)) return()
             
-            # Create simulated data
-            lambda_seq <- exp(seq(log(0.1), log(0.001), length.out = n_lambda))
+            results <- private$.model_results
             
-            # Simulate coefficient paths
-            coef_data <- data.frame()
-            for (i in 1:min(n_vars, 10)) {  # Show top 10 variables
-                # Simulate different entry points and shrinkage patterns
-                entry_point <- runif(1, 0.02, 0.05)
-                max_coef <- runif(1, -2, 2)
+            # Handle glmnet models
+            if (!is.null(results$model) && "glmnet" %in% class(results$model)) {
+                model <- results$model
                 
-                coefs <- ifelse(lambda_seq > entry_point, 0, 
-                               max_coef * (1 - lambda_seq/entry_point)^2)
+                # Extract path data
+                # model$beta is a sparse matrix of coefficients [nvars x nlambda]
+                beta_mat <- as.matrix(model$beta)
+                lambda_seq <- model$lambda
                 
-                var_data <- data.frame(
-                    lambda = lambda_seq,
-                    coefficient = coefs,
-                    variable = paste0("Var", i)
-                )
-                coef_data <- rbind(coef_data, var_data)
+                # Convert to long format for ggplot
+                coef_data <- data.frame()
+                
+                # Only plot non-zero variables (or top N if too many)
+                active_vars <- which(rowSums(abs(beta_mat)) > 0)
+                if (length(active_vars) > 20) {
+                    # Select top 20 by max absolute coefficient
+                    max_coefs <- apply(abs(beta_mat), 1, max)
+                    active_vars <- order(max_coefs, decreasing = TRUE)[1:20]
+                }
+                
+                for (i in active_vars) {
+                    var_name <- rownames(beta_mat)[i]
+                    
+                    var_data <- data.frame(
+                        lambda = lambda_seq,
+                        coefficient = beta_mat[i, ],
+                        variable = var_name
+                    )
+                    coef_data <- rbind(coef_data, var_data)
+                }
+                
+                # Create plot
+                p <- ggplot2::ggplot(coef_data, ggplot2::aes(x = log(lambda), y = coefficient, color = variable)) +
+                    ggplot2::geom_line(size = 1) +
+                    ggplot2::labs(
+                        title = "Regularization Path",
+                        subtitle = paste("Coefficient paths for", tools::toTitleCase(self$options$penaltyType), "penalty"),
+                        x = "log(Lambda)",
+                        y = "Coefficient Value",
+                        color = "Variable"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(legend.position = "right")
+                
+                # Add vertical line for selected lambda
+                if (!is.null(results$lambda_selected)) {
+                    p <- p + ggplot2::geom_vline(xintercept = log(results$lambda_selected[1]), 
+                                               linetype = "dashed", color = "black", alpha = 0.7)
+                }
+                
+                print(p)
+                TRUE
+            } else {
+                # Basic plot for other methods or fallback
+                # (Keep simulated if model structure unknown, or better: show message)
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "", main = "Plot not available for this method")
+                text(1, 1, "Coefficient path plot available for glmnet models only")
+                TRUE
             }
-            
-            # Create plot
-            p <- ggplot2::ggplot(coef_data, ggplot2::aes(x = log(lambda), y = coefficient, color = variable)) +
-                ggplot2::geom_line(size = 1) +
-                ggplot2::labs(
-                    title = "Regularization Path",
-                    subtitle = paste("Coefficient paths for", tools::toTitleCase(self$options$penaltyType), "penalty"),
-                    x = "log(Lambda)",
-                    y = "Coefficient Value",
-                    color = "Variable"
-                ) +
-                ggplot2::theme_minimal() +
-                ggplot2::theme(legend.position = "right")
-            
-            print(p)
-            TRUE
         },
         
         .crossValidationPlot = function(image, ggtheme, theme, ...) {
@@ -636,53 +661,46 @@ penalizedcoxregressionClass <- R6::R6Class(
                 return()
             }
             
-            # Simulate CV plot (in real implementation, extract from cv.glmnet object)
-            n_lambda <- 30
-            lambda_seq <- exp(seq(log(0.1), log(0.001), length.out = n_lambda))
+            if (is.null(private$.model_results)) return()
             
-            # Simulate CV error curve
-            min_idx <- round(n_lambda * 0.7)
-            cv_errors <- 2 + 0.5 * (1:n_lambda - min_idx)^2 / (n_lambda/4)^2 + 
-                        rnorm(n_lambda, 0, 0.1)
-            cv_ses <- abs(rnorm(n_lambda, 0.15, 0.05))
+            results <- private$.model_results
             
-            cv_data <- data.frame(
-                lambda = lambda_seq,
-                cv_error = cv_errors,
-                cv_upper = cv_errors + cv_ses,
-                cv_lower = cv_errors - cv_ses
-            )
-            
-            # Mark lambda.min and lambda.1se
-            min_error_idx <- which.min(cv_errors)
-            se_threshold <- cv_errors[min_error_idx] + cv_ses[min_error_idx]
-            lambda_1se_idx <- min(which(cv_errors <= se_threshold & 1:n_lambda >= min_error_idx))
-            
-            p <- ggplot2::ggplot(cv_data, ggplot2::aes(x = log(lambda), y = cv_error)) +
-                ggplot2::geom_ribbon(ggplot2::aes(ymin = cv_lower, ymax = cv_upper), 
-                                   alpha = 0.3, fill = "gray") +
-                ggplot2::geom_line(color = "red", size = 1) +
-                ggplot2::geom_point(color = "red", size = 2) +
-                ggplot2::geom_vline(xintercept = log(lambda_seq[min_error_idx]), 
-                                   linetype = "dashed", color = "blue") +
-                ggplot2::geom_vline(xintercept = log(lambda_seq[lambda_1se_idx]), 
-                                   linetype = "dashed", color = "green") +
-                ggplot2::annotate("text", x = log(lambda_seq[min_error_idx]), 
-                                 y = max(cv_data$cv_upper), label = "lambda.min", 
-                                 color = "blue", hjust = -0.1) +
-                ggplot2::annotate("text", x = log(lambda_seq[lambda_1se_idx]), 
-                                 y = max(cv_data$cv_upper), label = "lambda.1se", 
-                                 color = "green", hjust = -0.1) +
-                ggplot2::labs(
-                    title = "Cross-Validation Error",
-                    subtitle = paste(self$options$cvFolds, "-Fold Cross-Validation"),
-                    x = "log(Lambda)",
-                    y = "Cross-Validation Error"
-                ) +
-                ggplot2::theme_minimal()
-            
-            print(p)
-            TRUE
+            # Handle glmnet models
+            if (!is.null(results$cv_model) && "cv.glmnet" %in% class(results$cv_model)) {
+                cv_fit <- results$cv_model
+                
+                cv_data <- data.frame(
+                    lambda = cv_fit$lambda,
+                    cv_error = cv_fit$cvm,
+                    cv_upper = cv_fit$cvup,
+                    cv_lower = cv_fit$cvlo
+                )
+                
+                p <- ggplot2::ggplot(cv_data, ggplot2::aes(x = log(lambda), y = cv_error)) +
+                    ggplot2::geom_ribbon(ggplot2::aes(ymin = cv_lower, ymax = cv_upper), 
+                                       alpha = 0.3, fill = "gray") +
+                    ggplot2::geom_line(color = "red", size = 1) +
+                    ggplot2::geom_point(color = "red", size = 2) +
+                    ggplot2::geom_vline(xintercept = log(cv_fit$lambda.min), 
+                                       linetype = "dashed", color = "blue") +
+                    ggplot2::geom_vline(xintercept = log(cv_fit$lambda.1se), 
+                                       linetype = "dashed", color = "green") +
+                    ggplot2::labs(
+                        title = "Cross-Validation Error",
+                        subtitle = paste(self$options$cvFolds, "-Fold Cross-Validation"),
+                        x = "log(Lambda)",
+                        y = "Cross-Validation Error"
+                    ) +
+                    ggplot2::theme_minimal()
+                
+                print(p)
+                TRUE
+            } else {
+                # Basic plot for other methods
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "", main = "Plot not available for this method")
+                text(1, 1, "CV plot available for glmnet models only")
+                TRUE
+            }
         }
     )
 )

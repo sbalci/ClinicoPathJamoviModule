@@ -1222,15 +1222,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # Competing Risks ----
             # Alive <=> Dead of Disease accounting for Dead of Other Causes
 
-            # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#part_3:_competing_risks
-
-
-            mydata[["myoutcome"]] <- NA_integer_
-
-            mydata[["myoutcome"]][outcome1 == awd] <- 0
-            mydata[["myoutcome"]][outcome1 == awod] <- 0
-            mydata[["myoutcome"]][outcome1 == dod] <- 1
-            mydata[["myoutcome"]][outcome1 == dooc] <- 2
+            # Create factor for Fine-Gray analysis
+            # 0=Censored, 1=Event, 2=Competing
+            
+            temp_outcome <- rep("Censored", length(outcome1))
+            
+            if (!is.null(awd)) temp_outcome[outcome1 == awd] <- "Censored"
+            if (!is.null(awod)) temp_outcome[outcome1 == awod] <- "Censored"
+            if (!is.null(dod)) temp_outcome[outcome1 == dod] <- "Event"
+            if (!is.null(dooc)) temp_outcome[outcome1 == dooc] <- "Competing"
+            
+            mydata[["myoutcome"]] <- factor(temp_outcome, levels = c("Censored", "Event", "Competing"))
 
           }
 
@@ -1812,7 +1814,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # EXPERIMENTAL:           }
         # EXPERIMENTAL:         }
 
-        cox_model <- survival::coxph(coxformula, data = mydata)
+        # Check for competing risks analysis
+        if (self$options$multievent && self$options$analysistype == 'compete') {
+            # Use Fine-Gray model
+            # Create Fine-Gray dataset (outcome is factor from .definemyoutcome)
+            fg_data <- survival::finegray(coxformula, data = mydata, etype = "Event")
+            
+            # Update formula to use Fine-Gray variables
+            fg_formula <- update(coxformula, survival::Surv(fgstart, fgstop, fgstatus) ~ .)
+            
+            # Fit Cox model on expanded data with weights
+            cox_model <- survival::coxph(fg_formula, data = fg_data, weights = fgwt)
+        } else {
+            # Standard Cox model
+            cox_model <- survival::coxph(coxformula, data = mydata)
+        }
 
 
         return(cox_model)
@@ -2509,20 +2525,51 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Set datadist globally
         options(datadist = dd)
 
-        # Create formula and fit model using consolidated function
-        coxformula <- .buildSurvivalFormula(
-          time_var = "mytime",
-          outcome_var = "myoutcome",
-          predictors = var_names,
-          survival_type = "standard"
-        )
+        # Get baseline Cox model (to check for Fine-Gray)
+        cox_model <- private$.cox_model()
+        
+        is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
 
-        # Fit the model
-        f <- rms::cph(formula = coxformula,
-                      data = mydata,
-                      x = TRUE,
-                      y = TRUE,
-                      surv = TRUE)
+        # Fit the model using rms::cph
+        if (is_finegray) {
+             # Re-create Fine-Gray data
+             fg_formula_str <- paste("survival::Surv(mytime, myoutcome) ~", paste(var_names, collapse = " + "))
+             fg_formula_obj <- as.formula(fg_formula_str)
+             fg_data <- survival::finegray(fg_formula_obj, data = mydata, etype = "Event")
+             
+             # Define datadist for expanded data
+             # Note: datadist must use the data used in fit
+             dd_fg <- rms::datadist(fg_data)
+             options(datadist = "dd_fg")
+             
+             # Update formula for Fine-Gray structure
+             # Note: cph uses its own formula parsing, variables must be in data
+             fg_cph_formula <- update(fg_formula_obj, survival::Surv(fgstart, fgstop, fgstatus) ~ .)
+             
+             f <- rms::cph(formula = fg_cph_formula,
+                          data = fg_data,
+                          weights = fgwt,  # Use Fine-Gray weights
+                          x = TRUE,
+                          y = TRUE,
+                          surv = TRUE)
+                          
+             # Restore datadist option later if needed
+        } else {
+             # Standard Cox
+             # Create formula and fit model using consolidated function
+             coxformula <- .buildSurvivalFormula(
+               time_var = "mytime",
+               outcome_var = "myoutcome",
+               predictors = var_names,
+               survival_type = "standard"
+             )
+             
+             f <- rms::cph(formula = coxformula,
+                          data = mydata,
+                          x = TRUE,
+                          y = TRUE,
+                          surv = TRUE)
+        }
 
         # Get prediction timepoints
         pred_times <- as.numeric(unlist(strsplit(self$options$cutp, ",")))
@@ -2533,12 +2580,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Create nomogram
         nom <- try({
-          base_surv <- survival::survfit(cox_model)
+          # Use survfit on the cph object f which handles weights
+          base_surv <- survival::survfit(f)
           surv_at_time <- summary(base_surv, times = pred_times[1])$surv[1]
 
           rms::nomogram(f,
                         fun = function(lp) {
-                          1 - surv_at_time^exp(lp - mean(cox_model$linear.predictors))
+                          1 - surv_at_time^exp(lp - mean(f$linear.predictors))
                         },
                         funlabel = paste("Predicted", pred_times[1], "month risk"),
                         fun.at = seq(0.1, 0.9, by = 0.1))
@@ -3044,26 +3092,57 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
 
-        myformula <- .buildSurvivalFormula(
-          time_var = "mytime",
-          outcome_var = "myoutcome",
-          predictors = formula2,
-          survival_type = "standard"
-        )
-
-        mod <-
-          survival::coxph(formula = myformula, data = mydata)
-
-
         # ggforest ----
 
-        plot3 <- survminer::ggforest(model = mod, data = mydata)
+        # Use the central model (handles Fine-Gray if needed)
+        cox_model <- private$.cox_model()
+        
+        if (is.null(cox_model)) {
+            return()
+        }
+
+        # Check if it is a Fine-Gray model
+        is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
+        
+        if (is_finegray) {
+            # ggforest might not support weighted models directly or might need specific handling
+            # For now, we try passing it. If it fails, we might need a warning.
+            # Note: survminer::ggforest primarily visualizes HRs, which are valid for FG.
+            # However, the data passed to ggforest must match the model (expanded data for FG).
+            
+            # We need to get the expanded data used for the model
+            # .cox_model() creates it internally but doesn't return it.
+            # This is a design issue. 
+            
+            # Solution: Retieve the data from the model object if possible, or re-create it.
+            # Ideally, .cox_model should calculate and store the model AND the data used.
+            # But refactoring .cox_model return type might break other things.
+            
+            # Alternative: Re-run Fine-Gray logic here to get the proper data
+            fg_data <- survival::finegray(survival::Surv(mytime, myoutcome) ~ ., data = mydata, etype = "Event")
+            
+            # Use the expanded data for plotting
+            plot3 <- tryCatch({
+                survminer::ggforest(model = cox_model, data = fg_data)
+            }, error = function(e) {
+                self$results$plot3$setVisible(FALSE) # Hide if fails
+                warning("Forest plot not available for Fine-Gray model: ", e$message)
+                return(NULL)
+            })
+            
+        } else {
+            plot3 <- survminer::ggforest(model = cox_model, data = mydata)
+        }
 
 
         # print plot ----
 
-        print(plot3)
-        TRUE
+        if (!is.null(plot3)) {
+            print(plot3)
+            TRUE
+        } else {
+            FALSE
+        }
 
       }
 
@@ -3970,7 +4049,29 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         myformula <- as.formula(myformula)
 
         # Fit model
-        cox_model <- survival::coxph(myformula, data = mydata)
+        # Use the central model (handles Fine-Gray if needed)
+        cox_model <- private$.cox_model()
+        
+        if (is.null(cox_model)) {
+            return()
+        }
+
+        # Check if it is a Fine-Gray model
+        is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
+        
+        # Use correct data for plotting
+        plot_data <- mydata
+        if (is_finegray) {
+             # Re-create Fine-Gray data for plotting
+             # This duplicates logic from .cox_model but is necessary without refactoring state management
+             # Note: myoutcome is factor "Censored", "Event", "Competing"
+             
+             # Re-construct formula for finegray() call
+             fg_formula_str <- paste("survival::Surv(mytime, myoutcome) ~", paste(formula2, collapse = " + "))
+             fg_formula_obj <- as.formula(fg_formula_str)
+             
+             plot_data <- survival::finegray(fg_formula_obj, data = mydata, etype = "Event")
+        }
 
         # Validate method and try fallback if needed
         method <- self$options$ac_method
@@ -3979,7 +4080,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         plot <- tryCatch({
           survminer::ggadjustedcurves(
             fit = cox_model,
-            data = mydata,
+            data = plot_data,  # Use expanded data if Fine-Gray
             variable = adjexplanatory_name,
             method = method,
             conf.int = self$options$ci95,
@@ -4004,7 +4105,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             warning(.("Marginal method failed, falling back to average method"))
             survminer::ggadjustedcurves(
               fit = cox_model,
-              data = mydata,
+              data = plot_data, # Use expanded data
               variable = adjexplanatory_name,
               method = "average",  # Fallback to average method
               conf.int = self$options$ci95,

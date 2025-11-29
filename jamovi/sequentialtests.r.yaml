@@ -106,6 +106,25 @@ items:
           title: 'True Negatives'
           type: number
 
+    - name: cost_analysis_table
+      title: 'Cost Analysis (Per 1000 Patients)'
+      type: Table
+      visible: (show_cost_analysis)
+      rows: 0
+      columns:
+        - name: item
+          title: 'Item'
+          type: text
+        - name: unit_cost
+          title: 'Unit Cost'
+          type: number
+        - name: number_tests
+          title: 'Number of Tests'
+          type: integer
+        - name: total_cost
+          title: 'Total Cost'
+          type: number
+
     - name: explanation_text
       title: 'Explanation'
       type: Html

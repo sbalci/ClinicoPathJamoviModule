@@ -60,6 +60,11 @@ children:
               below.
             margin: small
             style: list-inline
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_plot
   - type: CollapseBox
     label: Clinical Analysis Templates
     collapsed: false
@@ -86,22 +91,6 @@ children:
           - type: Label
             label: 'Select plots to display:'
             margin: small
-          - type: CheckBox
-            name: show_ggplot2_plot
-            label: Built-in ggplot2 Plot
-          - type: CheckBox
-            name: show_ggsegmented_plot
-            label: ggsegmentedtotalbar Package Plot
-          - type: CheckBox
-            name: ggsegmented_labels
-            enable: (show_ggsegmented_plot)
-            label: Show Labels in ggsegmentedtotalbar
-          - type: TextBox
-            name: ggsegmented_alpha
-            enable: (show_ggsegmented_plot)
-            format: number
-            suffix: ''
-            label: Background Transparency (0-1)
   - type: CollapseBox
     label: Chart Options
     collapsed: false

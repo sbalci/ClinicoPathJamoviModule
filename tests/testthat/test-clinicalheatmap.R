@@ -2,6 +2,16 @@
 # Tests core heatmap functionality, data preparation, annotations, and error handling
 
 library(testthat)
+library(jmvcore)
+library(tidyheatmaps)
+library(dplyr)
+
+# Source the files
+source("../../R/clinicalheatmap.h.R")
+source("../../R/clinicalheatmap.b.R")
+
+# Define . function if not exists
+if (!exists(".")) . <- function(x, ...) x
 
 # Create test data in tidy (long) format
 create_test_data <- function() {
@@ -20,13 +30,12 @@ create_test_data <- function() {
 # Test: Basic heatmap creation
 test_that("Basic heatmap creation works without errors", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
     # Test with minimal required parameters
     result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
@@ -35,20 +44,19 @@ test_that("Basic heatmap creation works without errors", {
     )
 
     # Basic checks
-    expect_s3_class(result, "clinicalheatmapClass")
+    expect_s3_class(result, "clinicalheatmapResults")
     expect_true(!is.null(result))
 })
 
 # Test: Data preparation retains annotation columns
 test_that("Data preparation retains annotation columns", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
     # Create heatmap with annotations
     result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
@@ -59,7 +67,7 @@ test_that("Data preparation retains annotation columns", {
     )
 
     # Check that result was created
-    expect_s3_class(result, "clinicalheatmapClass")
+    expect_s3_class(result, "clinicalheatmapResults")
 
     # Note: Cannot directly test internal data structure without
     # exposing private methods, but we can verify no errors occurred
@@ -68,13 +76,12 @@ test_that("Data preparation retains annotation columns", {
 # Test: Input validation - missing required variables
 test_that("Input validation catches missing required variables", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
     # Test with NULL row variable - should not error, just show instructions
     result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = data,
             rowVar = NULL,
             colVar = "biomarker",
@@ -82,13 +89,12 @@ test_that("Input validation catches missing required variables", {
         )
     )
 
-    expect_s3_class(result, "clinicalheatmapClass")
+    expect_s3_class(result, "clinicalheatmapResults")
 })
 
 # Test: Scaling methods
 test_that("Different scaling methods work correctly", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
@@ -97,7 +103,7 @@ test_that("Different scaling methods work correctly", {
 
     for (method in scaling_methods) {
         result <- suppressWarnings(
-            ClinicoPath::clinicalheatmap(
+            clinicalheatmap(
                 data = data,
                 rowVar = "patient_id",
                 colVar = "biomarker",
@@ -106,21 +112,19 @@ test_that("Different scaling methods work correctly", {
             )
         )
 
-        expect_s3_class(result, "clinicalheatmapClass",
-                        info = paste("Failed for scaleMethod =", method))
+        expect_s3_class(result, "clinicalheatmapResults")
     }
 })
 
 # Test: Clustering options
 test_that("Clustering options work correctly", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
     # Test with clustering enabled
     result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
@@ -130,13 +134,12 @@ test_that("Clustering options work correctly", {
         )
     )
 
-    expect_s3_class(result, "clinicalheatmapClass")
+    expect_s3_class(result, "clinicalheatmapResults")
 })
 
 # Test: Missing data handling
 test_that("Missing data handling strategies work", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
@@ -147,7 +150,7 @@ test_that("Missing data handling strategies work", {
 
     for (method in na_handling_methods) {
         result <- suppressWarnings(
-            ClinicoPath::clinicalheatmap(
+            clinicalheatmap(
                 data = data,
                 rowVar = "patient_id",
                 colVar = "biomarker",
@@ -156,22 +159,20 @@ test_that("Missing data handling strategies work", {
             )
         )
 
-        expect_s3_class(result, "clinicalheatmapClass",
-                        info = paste("Failed for naHandling =", method))
+        expect_s3_class(result, "clinicalheatmapResults")
     }
 })
 
 # Test: Empty dataset handling
 test_that("Empty dataset is handled gracefully", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     # Create empty dataset
     data <- create_test_data()[0, ]
 
     # Should not crash, but show error message
     result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
@@ -179,35 +180,31 @@ test_that("Empty dataset is handled gracefully", {
         )
     )
 
-    expect_s3_class(result, "clinicalheatmapClass")
+    expect_s3_class(result, "clinicalheatmapResults")
 })
 
 # Test: Non-numeric value variable
 test_that("Non-numeric value variable is caught by validation", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
     data$expression <- as.character(data$expression)
 
     # Should show validation error
-    result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+    expect_error(
+        clinicalheatmap(
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
             valueVar = "expression"
-        )
+        ),
+        "Argument 'valueVar' requires a numeric variable"
     )
-
-    expect_s3_class(result, "clinicalheatmapClass")
-    # Error should be shown in results, not crash
 })
 
 # Test: Color palette options
 test_that("Different color palettes work", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
@@ -215,7 +212,7 @@ test_that("Different color palettes work", {
 
     for (palette in palettes) {
         result <- suppressWarnings(
-            ClinicoPath::clinicalheatmap(
+            clinicalheatmap(
                 data = data,
                 rowVar = "patient_id",
                 colVar = "biomarker",
@@ -224,21 +221,19 @@ test_that("Different color palettes work", {
             )
         )
 
-        expect_s3_class(result, "clinicalheatmapClass",
-                        info = paste("Failed for colorPalette =", palette))
+        expect_s3_class(result, "clinicalheatmapResults")
     }
 })
 
 # Test: Display options
 test_that("Display options (row/col names) work", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     data <- create_test_data()
 
     # Test with names shown
     result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
@@ -248,11 +243,11 @@ test_that("Display options (row/col names) work", {
         )
     )
 
-    expect_s3_class(result, "clinicalheatmapClass")
+    expect_s3_class(result, "clinicalheatmapResults")
 
     # Test with names hidden
     result2 <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
@@ -262,13 +257,12 @@ test_that("Display options (row/col names) work", {
         )
     )
 
-    expect_s3_class(result2, "clinicalheatmapClass")
+    expect_s3_class(result2, "clinicalheatmapResults")
 })
 
 # Test: Larger dataset performance
 test_that("Larger dataset is handled correctly", {
     skip_if_not_installed("tidyheatmaps")
-    skip_if_not_installed("ClinicoPath")
 
     # Create larger dataset
     set.seed(456)
@@ -280,7 +274,7 @@ test_that("Larger dataset is handled correctly", {
     )
 
     result <- suppressWarnings(
-        ClinicoPath::clinicalheatmap(
+        clinicalheatmap(
             data = large_data,
             rowVar = "sample_id",
             colVar = "gene",
@@ -291,5 +285,5 @@ test_that("Larger dataset is handled correctly", {
         )
     )
 
-    expect_s3_class(result, "clinicalheatmapClass")
+    expect_s3_class(result, "clinicalheatmapResults")
 })

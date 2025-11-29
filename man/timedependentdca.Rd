@@ -16,9 +16,6 @@ timedependentdca(
   reference_strategy = "both",
   estimate_survival = "kaplan_meier",
   smoothing = FALSE,
-  confidence_intervals = FALSE,
-  bootstrap_samples = 500,
-  confidence_level = 0.95,
   plot_net_benefit = TRUE,
   plot_by_timepoint = FALSE,
   plot_interventions_avoided = FALSE,
@@ -49,14 +46,6 @@ benefit (e.g., "365, 730" for 1 and 2 years)}
 predictor}
 
 \item{smoothing}{apply LOESS smoothing to decision curves for visualization}
-
-\item{confidence_intervals}{calculate confidence intervals for net benefit
-(via bootstrap)}
-
-\item{bootstrap_samples}{number of bootstrap samples for CI calculation}
-
-\item{confidence_level}{confidence level for intervals (default: 0.95 for
-95\\% CI)}
 
 \item{plot_net_benefit}{plot net benefit curves across threshold
 probabilities}

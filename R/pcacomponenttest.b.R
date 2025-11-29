@@ -356,6 +356,79 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(vaf_plot)
             TRUE
 
+        },
+
+        # Scree Plot ----
+        .screePlot = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.pcaResults)) return(FALSE)
+            
+            pca <- private$.pcaResults
+            eigenvalues <- pca$sdev^2
+            ndim <- length(eigenvalues)
+            
+            plot_df <- data.frame(
+                component = factor(paste0('PC', 1:ndim), levels = paste0('PC', 1:ndim)),
+                eigenvalue = eigenvalues
+            )
+            
+            p <- ggplot2::ggplot(plot_df, aes(x = component, y = eigenvalue)) +
+                geom_col(fill = "steelblue", alpha = 0.7) +
+                geom_line(group = 1, color = "black") +
+                geom_point(size = 2) +
+                geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+                labs(title = "Scree Plot", y = "Eigenvalue", x = "Component") +
+                theme_minimal() +
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+            
+            print(p)
+            TRUE
+        },
+
+        # Loadings Plot ----
+        .loadingsPlot = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.pcaResults)) return(FALSE)
+            
+            pca <- private$.pcaResults
+            loadings <- pca$rotation
+            
+            # Determine which components to show
+            # Show significant components, or first 2 if none significant
+            sig_comps <- which(private$.adjPvalues < 0.05)
+            if (length(sig_comps) == 0) {
+                comps_to_show <- 1:min(2, ncol(loadings))
+            } else {
+                comps_to_show <- sig_comps
+            }
+            
+            # Limit to first few significant components to avoid overcrowding
+            if (length(comps_to_show) > 4) comps_to_show <- comps_to_show[1:4]
+            
+            n_top <- self$options$nLoadings
+            plot_data <- data.frame()
+            
+            for (pc in comps_to_show) {
+                pc_loadings <- loadings[, pc]
+                # Get top N variables by absolute loading
+                top_idx <- order(abs(pc_loadings), decreasing = TRUE)[1:min(n_top, length(pc_loadings))]
+                
+                subset_df <- data.frame(
+                    Variable = names(pc_loadings)[top_idx],
+                    Loading = pc_loadings[top_idx],
+                    Component = paste0("PC", pc)
+                )
+                plot_data <- rbind(plot_data, subset_df)
+            }
+            
+            p <- ggplot2::ggplot(plot_data, aes(x = reorder(Variable, abs(Loading)), y = Loading, fill = Loading > 0)) +
+                geom_col() +
+                coord_flip() +
+                facet_wrap(~Component, scales = "free_y") +
+                labs(title = "Top Variable Loadings", x = "Variable", y = "Loading") +
+                scale_fill_manual(values = c("TRUE" = "steelblue", "FALSE" = "firebrick"), guide = "none") +
+                theme_minimal()
+            
+            print(p)
+            TRUE
         }
     )
 )

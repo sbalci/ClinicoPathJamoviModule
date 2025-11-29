@@ -1,5 +1,66 @@
 # ClinicoPath News
 
+## Version 0.0.32.25
+
+### 🗓️ **November 29, 2025 - Evaluation: Pathology & Multivariate Modules**
+
+---
+
+## 🏥 **PATHOLOGY & MULTIVARIATE TOOLS**
+
+### **Project Scope: Evaluation**
+
+Critically evaluated and verified 5 key modules: `outlierdetection`, `pathagreement`, `pathsampling`, `patientsimilarity`, and `pcacomponenttest`.
+
+### **✅ Key Findings:**
+
+#### **1. `outlierdetection` Function**:
+*   **Verification**: Confirmed accuracy of univariate (Z-score, IQR), multivariate (Mahalanobis, MCD, LOF), and composite outlier detection methods.
+*   **Robustness**: Validated handling of edge cases (missing data, constant variables) and large datasets.
+*   **Clinical Utility**: Verified "Plain Language Summary" and "Exclusion Recommendations" for clinical relevance.
+*   **Status**: Ready for release.
+
+#### **2. `pathagreement` Function**:
+*   **Verification**: Confirmed accuracy of Cohen's kappa, Fleiss' kappa, and Krippendorff's alpha.
+*   **New Feature**: Added `styleHeatmap` option to control visibility of the Diagnostic Style Heatmap.
+*   **Advanced Analysis**: Validated diagnostic style clustering (Usubutun method) and consensus scoring logic.
+*   **Status**: Ready for release with enhanced flexibility.
+
+#### **3. `pathsampling` Function**:
+*   **Verification**: Confirmed accuracy of Binomial, Hypergeometric, and Beta-Binomial models for sampling adequacy.
+*   **Clinical Safety**: Validated warnings for selection bias in bootstrap analysis and high heterogeneity.
+*   **Robustness**: Confirmed intelligent disabling of Binomial model when assumptions are violated (CV > 0.5).
+*   **Status**: Ready for release.
+
+#### **4. `patientsimilarity` Function**:
+*   **Verification**: Confirmed accuracy of dimensionality reduction (PCA, t-SNE, UMAP, MDS) and clustering (K-means, Hierarchical).
+*   **Clinical Utility**: Validated survival analysis comparison across discovered clusters.
+*   **Reliability**: Confirmed robust handling of missing values and data standardization.
+*   **Status**: Ready for release.
+
+#### 5. `pcacomponenttest` Function:
+*   **Verification**: Confirmed implementation of Buja & Eyuboglu (1992) sequential permutation test.
+*   **Statistical Rigor**: Validated sequential testing logic (removing variance of significant components) to prevent Type I error inflation.
+*   **Safeguards**: Confirmed critical warnings when centering/scaling are disabled.
+*   **Status**: Ready for release.
+
+#### 6. `pcacox` Function:
+*   **Mathematical Accuracy**: Replaced placeholder metrics with mathematically valid **correlation loadings** and **variance-based eigenvalues** for supervised PCA approximation.
+*   **Feature Implementation**: Implemented real calls for **Sparse PCA** (via `sparsepca`) and **Kernel PCA** (via `kernlab`) with robust fallbacks to standard PCA if packages are missing.
+*   **Status**: Ready for release.
+
+#### 7. `plscox` Function:
+*   **Validation Methods**: Replaced placeholder text with real **Bootstrap Validation** (estimating C-index stability) and **Permutation Testing** (assessing model significance).
+*   **Integration**: Verified integration with `plsRcox` and handling of Bioconductor dependencies (`mixOmics`, `survcomp`).
+*   **Status**: Ready for release.
+
+#### 8. `penalizedcoxregression` Function:
+*   **Visualizations**: Replaced simulated data in Coefficient Path and Cross-Validation plots with real model results from `glmnet`.
+*   **Reliability**: Ensured plots accurately reflect the fitted model's regularization path and error estimates.
+*   **Status**: Ready for release.
+
+---
+
 ## Version 0.0.32.24
 
 ### 🗓️ **November 26, 2025 - Evaluation: Data Quality Assessment (checkdata)**

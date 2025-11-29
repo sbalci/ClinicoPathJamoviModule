@@ -320,6 +320,7 @@ A results object containing:
 \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$imbalanceWarning} \tab \tab \tab \tab \tab Warning and recommendations for imbalanced datasets \cr
 \code{results$results$imbalanceMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$results$precisionRecallTable} \tab \tab \tab \tab \tab Metrics for imbalanced data analysis \cr
 \code{results$results$analysisSummary} \tab \tab \tab \tab \tab Plain language summary of key findings \cr
 \code{results$results$clinicalReport} \tab \tab \tab \tab \tab Copy-ready clinical report sentences for publications and reports \cr
 \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
@@ -337,6 +338,7 @@ A results object containing:
 \code{results$results$clinicalInterpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$rocCurvePlot} \tab \tab \tab \tab \tab ROC curves with optimal cutoff points \cr
+\code{results$results$prcPlot} \tab \tab \tab \tab \tab Precision-Recall curve for imbalanced data \cr
 \code{results$results$comparativeROCPlot} \tab \tab \tab \tab \tab Multiple ROC curves for comparison \cr
 \code{results$results$cutoffAnalysisPlot} \tab \tab \tab \tab \tab Sensitivity and specificity across cutoff values \cr
 \code{results$results$youdenIndexPlot} \tab \tab \tab \tab \tab Youden Index values across cutoff range \cr

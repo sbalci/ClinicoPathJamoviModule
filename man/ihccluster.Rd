@@ -36,6 +36,11 @@ ihccluster(
   multipleTestingCorrection = "bonferroni",
   markerOptimization = FALSE,
   showMarkerCorrelation = FALSE,
+  performMarkerClustering = FALSE,
+  markerClusteringMethod = "chisquared",
+  markerLinkage = "ward",
+  markerSignificanceTest = TRUE,
+  markerCutHeight = TRUE,
   clusterQualityMetrics = TRUE,
   iterativeRefinement = FALSE,
   refinementIterations = 3,
@@ -136,6 +141,19 @@ panel}
 
 \item{showMarkerCorrelation}{Display correlation structure between markers}
 
+\item{performMarkerClustering}{Cluster IHC markers to identify
+co-expression patterns and redundancy}
+
+\item{markerClusteringMethod}{Distance metric for marker clustering}
+
+\item{markerLinkage}{Linkage method for marker dendrogram}
+
+\item{markerSignificanceTest}{Perform statistical tests for marker-marker
+associations}
+
+\item{markerCutHeight}{Automatically identify statistically distinct marker
+groups}
+
 \item{clusterQualityMetrics}{Calculate PPV, purity, and cluster quality
 measures}
 
@@ -220,6 +238,7 @@ A results object containing:
 \code{results$associationTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$consensusStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$consensusPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$reproducibilityStats} \tab \tab \tab \tab \tab a table \cr
 \code{results$supervisedSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$supervisedResults} \tab \tab \tab \tab \tab a html \cr
@@ -239,6 +258,10 @@ A results object containing:
 \code{results$pcaPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$boxplotPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$markerCorrelationPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$markerAssociationTable} \tab \tab \tab \tab \tab Statistical tests for associations between IHC markers \cr
+\code{results$markerClusteringTree} \tab \tab \tab \tab \tab Hierarchical merging sequence showing which markers cluster together \cr
+\code{results$markerGroups} \tab \tab \tab \tab \tab Statistically distinct groups of co-expressed markers \cr
+\code{results$markerDendrogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr

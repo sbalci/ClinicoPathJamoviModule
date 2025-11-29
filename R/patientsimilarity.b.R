@@ -643,11 +643,11 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             method <- projection$method
 
             summary_text <- sprintf(
-                "%s Projection Summary\n\n" +
-                "Method: %s\n" +
-                "Samples analyzed: %d\n" +
-                "Variables used: %d\n" +
-                "Dimensions: %s\n",
+                paste0("%s Projection Summary\n\n",
+                "Method: %s\n",
+                "Samples analyzed: %d\n",
+                "Variables used: %d\n",
+                "Dimensions: %s\n"),
                 method, method, n_samples, n_vars, self$options$dimensions
             )
 

@@ -7,6 +7,14 @@
 #' @import ggrepel
 #'
 
+# The syndromic plot visualization is based on the syndRomics R package
+# (https://github.com/ucsf-ferguson-lab/syndRomics) developed by the Ferguson Lab
+# at UC San Francisco. The triangular design and arrow-based PCA loading visualization
+# methodology was originally described in Ferguson et al. (2013) PLOS ONE 8(3):e59712.
+# This implementation adapts the syndRomics approach for jamovi's interactive
+# analysis environment while maintaining the core geometric principles.
+#
+
 jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjsyndromicplotClass",
     inherit = jjsyndromicplotBase,

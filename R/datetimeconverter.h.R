@@ -46,6 +46,8 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 datetime_format,
                 options=list(
                     "auto",
+                    "excel_serial",
+                    "unix_epoch",
                     "ymdhms",
                     "ymd",
                     "dmy",

@@ -81,7 +81,7 @@ test_that("clinical strategies are summarised for two-test combinations", {
   )
 
   tbl <- as.data.frame(result$combinationTable)
-  parallel_row <- tbl[tbl$pattern == "[Strategy] Parallel (≥1 positive)", ]
+  parallel_row <- tbl[tbl$pattern == "Parallel (≥1 pos)", ]
   expect_equal(parallel_row$tp, 10)
   expect_equal(parallel_row$fp, 5)
   expect_equal(parallel_row$fn, 0)
@@ -93,7 +93,7 @@ test_that("clinical strategies are summarised for two-test combinations", {
   expect_equal(parallel_row$lrNeg, 0, tolerance = 1e-6)
 
   ci_tbl <- as.data.frame(result$combinationTableCI)
-  lr_ci <- ci_tbl[ci_tbl$pattern == "[Strategy] Parallel (≥1 positive)" & ci_tbl$statistic == "LR+", ]
+  lr_ci <- ci_tbl[ci_tbl$pattern == "Parallel (≥1 pos)" & ci_tbl$statistic == "LR+", ]
   expect_equal(nrow(lr_ci), 1L)
   expect_true(all(!is.na(lr_ci$estimate)))
   expect_true(all(lr_ci$lower > 0))
@@ -157,7 +157,7 @@ test_that("majority rule strategy is calculated for three tests", {
   )
 
   tbl <- as.data.frame(result$combinationTable)
-  majority_row <- tbl[tbl$pattern == "[Strategy] Majority rule (≥2 positive)", ]
+  majority_row <- tbl[tbl$pattern == "Majority (≥2/3 pos)", ]
   expect_equal(majority_row$tp, 4)
   expect_equal(majority_row$fp, 4)
   expect_equal(majority_row$fn, 6)

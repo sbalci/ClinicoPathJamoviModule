@@ -16,6 +16,11 @@ This module creates segmented total bar charts using ggplot2, where:
 \item Colors distinguish different segments
 \item Labels can show percentages and/or raw counts
 }
+
+The visualization approach is inspired by the ggsegmentedtotalbar package
+(https://github.com/ozancanozdemir/ggsegmentedtotalbar) by Ozancan Ozdemir.
+This implementation uses a clean ggplot2-based approach optimized for
+clinical research workflows within the jamovi environment
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::jjsegmentedtotalbarBase} -> \code{jjsegmentedtotalbarClass}

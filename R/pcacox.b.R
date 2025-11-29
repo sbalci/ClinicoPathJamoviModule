@@ -264,37 +264,114 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .performSparsePCA = function() {
             
-            # Simplified sparse PCA implementation
-            # In practice would use packages like sparsepca or PMA
-            message("Sparse PCA not fully implemented, using standard PCA")
-            private$.performStandardPCA()
+            if (requireNamespace("sparsepca", quietly = TRUE)) {
+                tryCatch({
+                    # Determine k (number of components)
+                    n_components <- self$options$n_components %||% 5
+                    n_components <- min(n_components, ncol(private$X_matrix), nrow(private$X_matrix))
+                    
+                    # Run Sparse PCA
+                    # Note: sparsepca expects centered data usually, X_matrix is already scaled/centered if requested
+                    spca_res <- sparsepca::spca(private$X_matrix, k = n_components, alpha = 1e-4, beta = 1e-4)
+                    
+                    private$pca_result <- spca_res
+                    
+                    # Store scores
+                    private$pc_scores <- spca_res$transform
+                    colnames(private$pc_scores) <- paste0("PC", 1:ncol(private$pc_scores))
+                    
+                    # Store loadings
+                    private$loadings <- spca_res$loadings
+                    rownames(private$loadings) <- colnames(private$X_matrix)
+                    colnames(private$loadings) <- paste0("PC", 1:ncol(private$loadings))
+                    
+                    # Store eigenvalues
+                    private$eigenvalues <- spca_res$eigenvalues
+                    
+                    # Calculate variance
+                    total_var <- sum(private$eigenvalues) # Approximation for sparse
+                    if (total_var > 0) {
+                        private$prop_variance <- private$eigenvalues / total_var
+                        private$cumul_variance <- cumsum(private$prop_variance)
+                    } else {
+                        private$.approximatePCAMetrics()
+                    }
+                    
+                }, error = function(e) {
+                    message("Sparse PCA failed: ", e$message, ". Falling back to standard PCA.")
+                    private$.performStandardPCA()
+                })
+            } else {
+                message("sparsepca package not available, using standard PCA")
+                private$.performStandardPCA()
+            }
         },
         
         .performKernelPCA = function() {
             
-            # Simplified kernel PCA implementation
-            # In practice would use kernlab package
-            message("Kernel PCA not fully implemented, using standard PCA")
-            private$.performStandardPCA()
+            if (requireNamespace("kernlab", quietly = TRUE)) {
+                tryCatch({
+                    # Determine features
+                    n_components <- self$options$n_components %||% 5
+                    n_components <- min(n_components, nrow(private$X_matrix)) # kpca features limit
+                    
+                    # Run Kernel PCA (Radial Basis Function kernel default)
+                    kpca_res <- kernlab::kpca(private$X_matrix, kernel = "rbfdot", features = n_components)
+                    
+                    private$pca_result <- kpca_res
+                    
+                    # Store scores (rotated data)
+                    private$pc_scores <- kernlab::rotated(kpca_res)
+                    colnames(private$pc_scores) <- paste0("PC", 1:ncol(private$pc_scores))
+                    
+                    # Store eigenvalues
+                    private$eigenvalues <- kernlab::eig(kpca_res)
+                    
+                    # Calculate variance (approximate for Kernel PCA)
+                    total_var <- sum(private$eigenvalues)
+                    if (total_var > 0) {
+                        private$prop_variance <- private$eigenvalues / total_var
+                        private$cumul_variance <- cumsum(private$prop_variance)
+                    }
+                    
+                    # Loadings are not directly available in Kernel PCA (feature space).
+                    # Use correlation loadings approximation
+                    private$.approximatePCAMetrics()
+                    
+                }, error = function(e) {
+                    message("Kernel PCA failed: ", e$message, ". Falling back to standard PCA.")
+                    private$.performStandardPCA()
+                })
+            } else {
+                message("kernlab package not available, using standard PCA")
+                private$.performStandardPCA()
+            }
         },
         
         .approximatePCAMetrics = function() {
             
-            # Approximate eigenvalues and variance explained for supervised PCA
-            n_components <- ncol(private$pc_scores)
+            # Calculate actual variance of the components
+            if (!is.null(private$pc_scores)) {
+                # Eigenvalues approx as variance of scores
+                component_variances <- apply(private$pc_scores, 2, var, na.rm = TRUE)
+                private$eigenvalues <- component_variances
+                
+                # Calculate variance explained
+                # Total variance of standardized data is number of variables (if scaled)
+                total_variance <- if (self$options$scaling) ncol(private$X_matrix) else sum(apply(private$X_matrix, 2, var, na.rm = TRUE))
+                
+                private$prop_variance <- private$eigenvalues / total_variance
+                private$cumul_variance <- cumsum(private$prop_variance)
+            }
             
-            # Simple approximation - would be more sophisticated in practice
-            private$eigenvalues <- seq(from = 10, to = 1, length.out = n_components)
-            private$prop_variance <- private$eigenvalues / sum(private$eigenvalues)
-            private$cumul_variance <- cumsum(private$prop_variance)
-            
-            # Approximate loadings
-            if (is.null(private$loadings)) {
-                private$loadings <- matrix(rnorm(length(private$predictors) * n_components), 
-                                         nrow = length(private$predictors), 
-                                         ncol = n_components)
-                rownames(private$loadings) <- private$predictors
-                colnames(private$loadings) <- paste0("PC", 1:n_components)
+            # Calculate loadings as correlation between variables and components
+            if (is.null(private$loadings) && !is.null(private$X_matrix) && !is.null(private$pc_scores)) {
+                # Compute correlations (structure matrix)
+                # This represents the correlation between original vars and PCs
+                private$loadings <- cor(private$X_matrix, private$pc_scores, use = "pairwise.complete.obs")
+                
+                # If correlations fail (e.g. constant variables), replace NAs with 0
+                private$loadings[is.na(private$loadings)] <- 0
             }
         },
         

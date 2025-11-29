@@ -645,35 +645,6 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' percentage changes. Provides comprehensive response analysis including ORR, 
 #' DCR, and person-time metrics.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Percentage data
-#' data_pct <- data.frame(
-#'     PatientID = paste0("PT", 1:5),
-#'     Response = c(-60, -35, -10, 15, 45)
-#' )
-#' waterfall(
-#'     data = data_pct,
-#'     patientID = "PatientID",
-#'     responseVar = "Response",
-#'     inputType = "percentage"
-#' )
-#'
-#' # Example 2: Raw measurements
-#' data_raw <- data.frame(
-#'     PatientID = rep(paste0("PT", 1:3), each = 3),
-#'     Time = rep(c(0, 2, 4), 3),
-#'     Measurement = c(50, 30, 25, 60, 45, 40, 55, 50, 48)
-#' )
-#' waterfall(
-#'     data = data_raw,
-#'     patientID = "PatientID",
-#'     responseVar = "Measurement",
-#'     timeVar = "Time",
-#'     inputType = "raw"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers (e.g., PT001,
 #'   Patient_1, Study_ID). Each patient should have a unique identifier for

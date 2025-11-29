@@ -18,11 +18,39 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: CheckBox
-        name: showOutliers
-      - type: CheckBox
-        name: showDistribution
-      - type: CheckBox
-        name: showDuplicates
-      - type: CheckBox
-        name: showPatterns
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: CheckBox
+            name: showOutliers
+          - type: CheckBox
+            name: showDistribution
+          - type: CheckBox
+            name: showDuplicates
+          - type: CheckBox
+            name: showPatterns
+      - type: Label
+        label: Advanced Settings
+        margin: large
+        children:
+          - type: LayoutBox
+            margin: small
+            children:
+              - type: ComboBox
+                name: outlierTransform
+              - type: TextBox
+                name: cvMinMean
+                format: number
+              - type: TextBox
+                name: rareCategoryThreshold
+                format: number
+          - type: LayoutBox
+            margin: small
+            children:
+              - type: CheckBox
+                name: clinicalValidation
+              - type: ComboBox
+                name: unitSystem
+                enable: (clinicalValidation)
+              - type: CheckBox
+                name: mcarTest

@@ -1,11 +1,5 @@
 
-#' @title Interactive Recoding
-#' @description Interactive recoding tool for categorical variables (mimicking questionr::irec)
-#' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import dplyr
-#' @import stringr
-
+#' @noRd
 jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jrecodeClass",
     inherit = jrecodeBase,

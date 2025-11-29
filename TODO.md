@@ -60,9 +60,10 @@ use gemini to make Readiness for Clinicians and Pathologists assessment and Use 
 
 You are an expert R-package and jamovi developer.
 You are an expert in biostatistics working with pathologists and clinicians.
-Critically evaluate clinicalheatmap function.
+Critically evaluate consortdiagram function.
 Is it mathematically and statistically accurate?
-Is it ready to be used by clinicians and pathologists? Is it ready for release?
+Is it ready to be used by clinicians and pathologists?
+Is it ready for release? Do not just focus on testing but focus on functionality and accuracy.
 Suggest improvements.
 Do not remove functionality.
 

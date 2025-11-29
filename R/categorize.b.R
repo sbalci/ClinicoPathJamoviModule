@@ -22,6 +22,37 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = categorizeBase,
     private = list(
 
+        # Validate breaks for strict monotonicity and uniqueness
+        .validateBreaks = function(breaks, method) {
+            if (is.null(breaks) || length(breaks) < 2) {
+                return(list(valid = FALSE, message = "Insufficient break points generated."))
+            }
+
+            # Check for NaN or Inf
+            if (any(is.na(breaks)) || any(is.infinite(breaks))) {
+                return(list(valid = FALSE, message = "Break points contain invalid values (NA or Inf)."))
+            }
+
+            # Check for strict monotonicity (no duplicates, strictly increasing)
+            if (any(diff(breaks) <= 0)) {
+                return(list(valid = FALSE,
+                    message = paste0("Break points are not strictly increasing. ",
+                                   "This can occur with: (1) tied/constant values in quantile methods, ",
+                                   "(2) duplicate manual breaks, or (3) zero variance in mean/median±SD methods. ",
+                                   "Please check your data or adjust the binning method.")))
+            }
+
+            # Check minimum separation (relative to range)
+            breaks_range <- max(breaks) - min(breaks)
+            min_diff <- min(diff(breaks))
+            if (breaks_range > 0 && min_diff / breaks_range < 1e-10) {
+                return(list(valid = FALSE,
+                    message = "Break points are too close together (possible numerical precision issue)."))
+            }
+
+            return(list(valid = TRUE, message = NULL))
+        },
+
         # Calculate break points based on method
         .calculateBreaks = function(x, method, nbins, manual_breaks, sdmult) {
             x <- x[!is.na(x)]
@@ -51,10 +82,20 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "meansd" = {
                     m <- mean(x, na.rm = TRUE)
                     s <- sd(x, na.rm = TRUE)
-                    c(min(x), m - sdmult * s, m, m + sdmult * s, max(x))
+                    # Guard against zero variance
+                    if (s == 0 || is.na(s)) {
+                        return(NULL)  # Will trigger validation error
+                    }
+                    breaks_raw <- c(min(x), m - sdmult * s, m, m + sdmult * s, max(x))
+                    # Remove duplicates and ensure strictly increasing
+                    unique(sort(breaks_raw))
                 },
                 "median" = {
                     med <- median(x, na.rm = TRUE)
+                    # Guard against median equals min or max (constant data)
+                    if (med == min(x) || med == max(x)) {
+                        return(NULL)  # Will trigger validation error
+                    }
                     c(min(x), med, max(x))
                 },
                 "jenks" = {
@@ -86,7 +127,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Generate labels based on method and number of bins
-        .generateLabels = function(breaks, label_type, custom_labels, nbins) {
+        .generateLabels = function(breaks, label_type, custom_labels, nbins, include_lowest, right_closed) {
             n_categories <- length(breaks) - 1
 
             if (n_categories <= 0) {
@@ -95,9 +136,20 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             labels <- switch(label_type,
                 "auto" = {
-                    # Generate range labels like "[0-25)", "[25-50)", etc.
+                    # Generate range labels with correct bracket notation
+                    # right=TRUE (right_closed=TRUE): (a, b] except first is [a, b] when include_lowest=TRUE
+                    # right=FALSE (right_closed=FALSE): [a, b) except last is [a, b] when include_lowest=TRUE
                     sapply(1:n_categories, function(i) {
-                        sprintf("[%.1f, %.1f]", breaks[i], breaks[i + 1])
+                        if (right_closed) {
+                            left_bracket <- "("
+                            right_bracket <- "]"
+                            if (i == 1 && include_lowest) left_bracket <- "["
+                        } else {
+                            left_bracket <- "["
+                            right_bracket <- ")"
+                            if (i == n_categories && include_lowest) right_bracket <- "]"
+                        }
+                        sprintf("%s%.1f, %.1f%s", left_bracket, breaks[i], breaks[i + 1], right_bracket)
                     })
                 },
                 "semantic" = {
@@ -184,11 +236,42 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 code <- paste0(code, "labels <- c('",
                               paste(trimws(strsplit(customlabels, ",")[[1]]), collapse = "', '"), "')\n")
             } else if (labels == "semantic") {
-                code <- paste0(code, "# Generate semantic labels based on number of categories\n")
+                # Generate semantic labels based on number of categories
+                code <- paste0(code,
+                    "# Generate semantic labels based on number of categories\n",
+                    "n_categories <- length(breaks) - 1\n",
+                    "if (n_categories == 2) {\n",
+                    "  labels <- c('Low', 'High')\n",
+                    "} else if (n_categories == 3) {\n",
+                    "  labels <- c('Low', 'Medium', 'High')\n",
+                    "} else if (n_categories == 4) {\n",
+                    "  labels <- c('Low', 'Medium-Low', 'Medium-High', 'High')\n",
+                    "} else if (n_categories == 5) {\n",
+                    "  labels <- c('Very Low', 'Low', 'Medium', 'High', 'Very High')\n",
+                    "} else if (n_categories <= 7) {\n",
+                    "  semantic_labels <- c('Very Low', 'Low', 'Medium-Low', 'Medium', 'Medium-High', 'High', 'Very High')\n",
+                    "  labels <- semantic_labels[1:n_categories]\n",
+                    "} else {\n",
+                    "  labels <- paste0('Level ', 1:n_categories)\n",
+                    "}\n")
             } else if (labels == "numbered") {
-                code <- paste0(code, "labels <- 1:(length(breaks) - 1)\n")
+                code <- paste0(code, "labels <- as.character(1:(length(breaks) - 1))\n")
             } else if (labels == "lettered") {
                 code <- paste0(code, "labels <- LETTERS[1:(length(breaks) - 1)]\n")
+            } else if (labels == "auto") {
+                # Generate range labels with correct bracket notation
+                code <- paste0(code,
+                    "# Generate range labels\n",
+                    "n_categories <- length(breaks) - 1\n",
+                    "labels <- sapply(1:n_categories, function(i) {\n",
+                    "  left_bracket <- ifelse(", ifelse(rightclosed, "TRUE", "FALSE"), ", '(', '[')\n",
+                    "  right_bracket <- ifelse(", ifelse(rightclosed, "TRUE", "FALSE"), ", ']', ')')\n",
+                    "  if (i == 1 && ", ifelse(includelowest, "TRUE", "FALSE"), ") left_bracket <- '['\n",
+                    "  sprintf('%s%.1f, %.1f%s', left_bracket, breaks[i], breaks[i + 1], right_bracket)\n",
+                    "})\n")
+            } else {
+                # Fallback to numbered
+                code <- paste0(code, "labels <- as.character(1:(length(breaks) - 1))\n")
             }
 
             # Add cut command
@@ -271,6 +354,16 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 x_clean <- x
             }
 
+            # Basic sanity check for variability
+            if (sum(!is.na(x_clean)) < 2 || sd(x_clean, na.rm = TRUE) == 0) {
+                self$results$warnings$setContent(
+                    paste0("<div style='color: #dc3545;'>Variable '",
+                           htmltools::htmlEscape(varname),
+                           "' has no variability; cannot create categories.</div>")
+                )
+                return()
+            }
+
             n_total <- length(x)
             n_valid <- sum(!is.na(x))
             n_missing <- sum(is.na(x))
@@ -299,20 +392,27 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             breaks <- private$.calculateBreaks(x_clean, method, nbins, manual_breaks, sdmult)
 
-            if (is.null(breaks) || length(breaks) < 2) {
+            # Enforce sorted unique breaks to avoid cut() failures
+            if (!is.null(breaks)) {
+                breaks <- sort(unique(breaks))
+            }
+
+            # Validate breaks with detailed error messages
+            validation <- private$.validateBreaks(breaks, method)
+            if (!validation$valid) {
                 self$results$warnings$setContent(
-                    paste0("<div style='color: #dc3545;'>Could not calculate break points. ",
-                    "Please check your settings.</div>")
+                    paste0("<div style='color: #dc3545;'><strong>Error:</strong> ",
+                           htmltools::htmlEscape(validation$message), "</div>")
                 )
                 return()
             }
 
-            # Check for valid breaks
+            # Additional check for manual breaks
             if (method == "manual") {
                 custom <- as.numeric(trimws(strsplit(manual_breaks, ",")[[1]]))
                 if (any(is.na(custom))) {
                     self$results$warnings$setContent(
-                        "<div style='color: #dc3545;'>Invalid manual break points. ",
+                        "<div style='color: #dc3545;'><strong>Error:</strong> Invalid manual break points. ",
                         "Please enter comma-separated numbers.</div>"
                     )
                     return()
@@ -323,10 +423,23 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_categories <- length(breaks) - 1
             warning_msg <- ""
 
+            # Alert if Jenks falls back to quantile
+            if (method == "jenks" && !requireNamespace("classInt", quietly = TRUE)) {
+                warning_msg <- paste0(
+                    warning_msg,
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
+                    "padding: 10px; margin: 10px 0;'>",
+                    "<strong>Package Missing:</strong> Natural Breaks (Jenks) requires the 'classInt' package. ",
+                    "<strong>Fallback:</strong> Using quantile-based binning instead. ",
+                    "Install classInt with <code>install.packages('classInt')</code> to use true Jenks optimization.</div>"
+                )
+            }
+
             if (self$options$labels == "custom" && self$options$customlabels != "") {
                 custom_labels <- trimws(strsplit(self$options$customlabels, ",")[[1]])
                 if (length(custom_labels) != n_categories) {
                     warning_msg <- paste0(
+                        warning_msg,
                         "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
                         "padding: 10px; margin: 10px 0;'>",
                         "<strong>Warning:</strong> You provided ", length(custom_labels),
@@ -336,12 +449,27 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
+            # Warn if bins collapsed due to ties/insufficient range
+            if (method %in% c("equal", "quantile", "jenks") && n_categories != nbins) {
+                warning_msg <- paste0(
+                    warning_msg,
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
+                    "padding: 10px; margin: 10px 0;'>",
+                    "<strong>Bin Collapse Warning:</strong> Requested ", nbins, " categories but only ", n_categories,
+                    " distinct bins could be created due to tied values or limited range. ",
+                    "<strong>Clinical Impact:</strong> Interpretations based on \"", nbins, "-tiles\" ",
+                    "(e.g., quartiles, tertiles) may be misleading. Verify bin boundaries before use.</div>"
+                )
+            }
+
             # Generate labels ----
             labels_result <- private$.generateLabels(
                 breaks,
                 self$options$labels,
                 self$options$customlabels,
-                nbins
+                nbins,
+                self$options$includelowest,
+                self$options$rightclosed
             )
 
             # Create categorized variable ----
@@ -354,6 +482,59 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ordered_result = self$options$ordered
             )
 
+            # Clinical suitability checks ----
+            # Check bin balance and minimum counts
+            bin_counts <- table(x_cat, useNA = "no")
+            n_valid_for_check <- sum(bin_counts)
+
+            if (length(bin_counts) > 0 && n_valid_for_check > 0) {
+                # Check for very small bins (< 5 observations)
+                small_bins <- sum(bin_counts < 5)
+                if (small_bins > 0) {
+                    warning_msg <- paste0(
+                        warning_msg,
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
+                        "padding: 10px; margin: 10px 0;'>",
+                        "<strong>Small Bin Warning:</strong> ", small_bins, " bin(s) have fewer than 5 observations. ",
+                        "Statistical analyses may be unreliable with such small group sizes.</div>"
+                    )
+                }
+
+                # Check for severe imbalance (one bin has >70% of observations)
+                max_prop <- max(bin_counts) / n_valid_for_check
+                if (max_prop > 0.70) {
+                    warning_msg <- paste0(
+                        warning_msg,
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
+                        "padding: 10px; margin: 10px 0;'>",
+                        "<strong>Bin Imbalance Warning:</strong> One bin contains ",
+                        round(max_prop * 100, 1), "% of observations. ",
+                        "Severe imbalance may reduce statistical power and affect clinical interpretations.</div>"
+                    )
+                }
+            }
+
+            # Outlier sensitivity warning for mean±SD method
+            if (method == "meansd") {
+                # Check if data has extreme outliers using IQR method
+                x_clean_check <- x[!is.na(x)]
+                q1 <- quantile(x_clean_check, 0.25)
+                q3 <- quantile(x_clean_check, 0.75)
+                iqr <- q3 - q1
+                outliers <- sum(x_clean_check < (q1 - 3 * iqr) | x_clean_check > (q3 + 3 * iqr))
+
+                if (outliers > 0) {
+                    warning_msg <- paste0(
+                        warning_msg,
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; ",
+                        "padding: 10px; margin: 10px 0;'>",
+                        "<strong>Outlier Sensitivity Warning:</strong> Detected ", outliers,
+                        " extreme outlier(s). Mean±SD binning is sensitive to outliers, ",
+                        "which can create poorly distributed categories. Consider using quantile or natural breaks methods.</div>"
+                    )
+                }
+            }
+
             # Populate break points table ----
             breakTable <- self$results$breakpointsTable
             for (i in seq_along(breaks)) {
@@ -365,28 +546,75 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Populate frequency table ----
             freqTable <- self$results$freqTable
+
+            # Calculate frequencies
+            # When excl=TRUE, breaks are based on non-missing but x_cat includes NA where x was NA
             freq <- table(x_cat, useNA = "ifany")
 
-            total <- sum(freq)
-            cumsum_freq <- cumsum(freq)
+            # Separate valid and missing counts for clarity
+            n_total_obs <- length(x_cat)
+            n_valid_obs <- sum(!is.na(x_cat))
+            n_missing_obs <- sum(is.na(x_cat))
 
-            for (i in seq_along(freq)) {
+            # Calculate cumulative frequencies (only for valid categories)
+            valid_indices <- which(!is.na(names(freq)))
+            cumsum_freq <- cumsum(as.numeric(freq[valid_indices]))
+
+            # Add valid categories
+            row_idx <- 1
+            for (i in valid_indices) {
                 cat_name <- names(freq)[i]
-                if (is.na(cat_name)) cat_name <- "Missing"
 
-                # Get range for this category
-                if (!is.na(names(freq)[i]) && i <= n_categories) {
-                    range_str <- sprintf("[%.2f, %.2f]", breaks[i], breaks[i + 1])
+                # Get range for this category with correct bracket notation
+                cat_idx <- as.integer(cat_name)
+                if (!is.na(cat_idx) && cat_idx <= n_categories) {
+                    # Determine bracket notation based on cut() logic
+                    # right=TRUE (rightclosed=TRUE): (a, b] except first is [a, b] when include.lowest=TRUE
+                    # right=FALSE (rightclosed=FALSE): [a, b) except last is [a, b] when include.lowest=TRUE
+                    if (self$options$rightclosed) {
+                        # right=TRUE: (a, b]
+                        left_bracket <- "("
+                        right_bracket <- "]"
+                        # First interval with include.lowest becomes [a, b]
+                        if (cat_idx == 1 && self$options$includelowest) {
+                            left_bracket <- "["
+                        }
+                    } else {
+                        # right=FALSE: [a, b)
+                        left_bracket <- "["
+                        right_bracket <- ")"
+                        # Last interval with include.lowest becomes [a, b]
+                        if (cat_idx == n_categories && self$options$includelowest) {
+                            right_bracket <- "]"
+                        }
+                    }
+                    range_str <- sprintf("%s%.2f, %.2f%s", left_bracket, breaks[cat_idx], breaks[cat_idx + 1], right_bracket)
                 } else {
-                    range_str <- "NA"
+                    range_str <- as.character(cat_name)
                 }
 
-                freqTable$addRow(rowKey = i, values = list(
+                # Calculate percentages based on valid observations only
+                pct_val <- freq[i] / n_valid_obs
+                cum_pct_val <- cumsum_freq[row_idx] / n_valid_obs
+
+                freqTable$addRow(rowKey = row_idx, values = list(
                     category = cat_name,
                     range = range_str,
                     n = as.integer(freq[i]),
-                    percent = freq[i] / total,
-                    cumPercent = cumsum_freq[i] / total
+                    percent = pct_val,
+                    cumPercent = cum_pct_val
+                ))
+                row_idx <- row_idx + 1
+            }
+
+            # Add missing row if there are missing values
+            if (n_missing_obs > 0) {
+                freqTable$addRow(rowKey = row_idx, values = list(
+                    category = "Missing",
+                    range = "NA",
+                    n = as.integer(n_missing_obs),
+                    percent = NaN,  # Don't calculate percentage for missing
+                    cumPercent = NaN
                 ))
             }
 
@@ -419,6 +647,17 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 self$results$rcode$setContent(code_html)
             }
+
+            # Add general caution about categorization information loss
+            warning_msg <- paste0(
+                warning_msg,
+                "<div style='background-color: #e8f4fd; border-left: 4px solid #0d6efd; ",
+                "padding: 10px; margin: 10px 0;'>",
+                "<strong>Methodological Note:</strong> Dichotomization and categorization reduce statistical power, ",
+                "obscure dose–response relationships, and can introduce arbitrary thresholds. ",
+                "Continuous analyses are generally preferred unless there is strong clinical justification for categories. ",
+                "See: Altman DG, Royston P. The cost of dichotomising continuous variables. BMJ 2006;332:1080.</div>"
+            )
 
             # Set warnings
             self$results$warnings$setContent(warning_msg)
@@ -454,6 +693,10 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$options$breaks,
                 self$options$sdmult
             )
+
+            if (!is.null(breaks)) {
+                breaks <- sort(unique(breaks))
+            }
 
             if (is.null(breaks) || length(breaks) < 2) {
                 return()

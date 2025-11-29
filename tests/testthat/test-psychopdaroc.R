@@ -7,6 +7,13 @@
 # cutpoint optimization methods, and comprehensive plotting capabilities.
 
 library(testthat)
+library(jmvcore)
+if (!exists(".")) . <- function(x, ...) x
+
+source("../../R/utils.R")
+source("../../R/psychopdaROC_utilities.R")
+source("../../R/psychopdaROC.h.R")
+source("../../R/psychopdaROC.b.R")
 
 # Helper function to create test data
 create_roc_test_data <- function(n = 200, seed = 123) {
@@ -414,7 +421,7 @@ test_that("function handles missing inputs appropriately", {
   data <- create_roc_test_data(n = 50)
   
   # Test missing dependent vars
-  expect_no_error({
+  expect_error({
     result <- psychopdaROC(
       data = data,
       classVar = "outcome",
@@ -423,7 +430,7 @@ test_that("function handles missing inputs appropriately", {
   })
   
   # Test missing class var  
-  expect_no_error({
+  expect_error({
     result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
@@ -444,7 +451,7 @@ test_that("function handles insufficient variables for advanced tests", {
       positiveClass = "Disease", 
       delongTest = TRUE
     )
-  }, "Please specify at least two dependent variables")
+  }, "DeLong's test requires at least 2 test variables")
   
   # Test IDI with only one variable
   expect_error({
@@ -470,7 +477,7 @@ test_that("function handles manual cutpoint without score", {
       method = "oc_manual",
       specifyCutScore = ""
     )
-  }, "Please specify a cut score")
+  }, "Suggestion: Enter a numeric value in the 'Manual Cut Score' field")
 })
 
 # =============================================================================
@@ -568,7 +575,7 @@ test_that("bootstrap IDI calculation works", {
       new_values = new_values,
       ref_values = ref_values,
       actual = actual,
-      n_boot = 50  # Reduced for testing
+      n_boot = 100  # Reduced for testing
     )
   })
   
@@ -576,7 +583,7 @@ test_that("bootstrap IDI calculation works", {
     new_values = new_values,
     ref_values = ref_values,
     actual = actual,
-    n_boot = 50
+    n_boot = 100
   )
   
   expect_type(idi_result, "list")
@@ -597,7 +604,7 @@ test_that("bootstrap NRI calculation works", {
       new_values = new_values,
       ref_values = ref_values,
       actual = actual,
-      n_boot = 50
+      n_boot = 100
     )
   })
   
@@ -605,7 +612,7 @@ test_that("bootstrap NRI calculation works", {
     new_values = new_values,
     ref_values = ref_values,
     actual = actual,
-    n_boot = 50
+    n_boot = 100
   )
   
   expect_type(nri_result, "list")
@@ -659,7 +666,7 @@ test_that("comprehensive analysis with all features works", {
       calculateIDI = TRUE,
       calculateNRI = TRUE,
       refVar = "test1",
-      idiNriBootRuns = 50,  # Reduced for testing
+      idiNriBootRuns = 100,  # Reduced for testing
       compareClassifiers = TRUE,
       precisionRecallCurve = TRUE
     )

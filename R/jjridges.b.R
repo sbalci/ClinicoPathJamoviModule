@@ -1,12 +1,13 @@
 #' @title Advanced Ridge Plot
-#' @description Creates advanced ridgeline plots combining features from ggridges and ggstatsplot
+#' @description Creates advanced ridgeline plots with robust statistical analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
 #' @import ggridges
-#' @importFrom ggstatsplot grouped_ggbetweenstats
 #' @import dplyr
 #' @import tidyr
+#' @importFrom effectsize cohens_d hedges_g eta_squared omega_squared
+#' @importFrom rstatix wilcox_test t_test
 #'
 
 jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -272,20 +273,78 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
+            # Clinical presets optimized for medical research
             if (preset == "biomarker_distribution") {
+                # For comparing biomarker levels across patient groups
                 private$overrides$plot_type <- "density_ridges"
                 private$overrides$add_boxplot <- TRUE
                 private$overrides$add_quantiles <- TRUE
                 private$overrides$quantiles <- "0.25, 0.5, 0.75"
                 private$overrides$theme_style <- "theme_pubr"
+                private$overrides$color_palette <- "clinical_colorblind"
+                private$overrides$show_stats <- TRUE
+                private$overrides$test_type <- "nonparametric"
+                private$overrides$effsize_type <- "cliff_delta"
+                private$overrides$p_adjust_method <- "fdr"
 
             } else if (preset == "treatment_response") {
+                # For comparing treatment outcomes across groups
                 private$overrides$plot_type <- "violin_ridges"
                 private$overrides$show_stats <- TRUE
                 private$overrides$test_type <- "nonparametric"
                 private$overrides$effsize_type <- "cliff_delta"
                 private$overrides$theme_style <- "theme_pubr"
+                private$overrides$color_palette <- "clinical_colorblind"
+                private$overrides$add_boxplot <- TRUE
+                private$overrides$p_adjust_method <- "bonferroni"
 
+            } else if (preset == "age_by_stage") {
+                # For age distribution across disease stages
+                private$overrides$plot_type <- "density_ridges"
+                private$overrides$add_mean <- TRUE
+                private$overrides$add_median <- TRUE
+                private$overrides$theme_style <- "theme_pubr"
+                private$overrides$color_palette <- "viridis"
+                private$overrides$show_stats <- TRUE
+                private$overrides$test_type <- "parametric"
+                private$overrides$effsize_type <- "d"
+
+            } else if (preset == "tumor_size_comparison") {
+                # For tumor size/dimension comparisons
+                private$overrides$plot_type <- "density_ridges"
+                private$overrides$add_boxplot <- TRUE
+                private$overrides$add_quantiles <- TRUE
+                private$overrides$quantiles <- "0.25, 0.5, 0.75"
+                private$overrides$theme_style <- "theme_pubr"
+                private$overrides$color_palette <- "clinical_colorblind"
+                private$overrides$show_stats <- TRUE
+                private$overrides$test_type <- "nonparametric"
+                private$overrides$effsize_type <- "hodges_lehmann"
+                private$overrides$p_adjust_method <- "holm"
+
+            } else if (preset == "lab_values_by_group") {
+                # For laboratory values across patient groups
+                private$overrides$plot_type <- "density_ridges"
+                private$overrides$add_boxplot <- TRUE
+                private$overrides$theme_style <- "theme_pubr"
+                private$overrides$color_palette <- "clinical_colorblind"
+                private$overrides$show_stats <- TRUE
+                private$overrides$test_type <- "robust"
+                private$overrides$effsize_type <- "g"
+                private$overrides$p_adjust_method <- "fdr"
+
+            } else if (preset == "survival_time_distribution") {
+                # For survival time or time-to-event distributions
+                private$overrides$plot_type <- "density_ridges"
+                private$overrides$add_median <- TRUE
+                private$overrides$add_quantiles <- TRUE
+                private$overrides$quantiles <- "0.25, 0.5, 0.75"
+                private$overrides$theme_style <- "theme_pubr"
+                private$overrides$color_palette <- "Set2"
+                private$overrides$show_stats <- TRUE
+                private$overrides$test_type <- "nonparametric"
+                private$overrides$effsize_type <- "hodges_lehmann"
+                private$overrides$p_adjust_method <- "holm"
             }
         },
 
@@ -1055,18 +1114,18 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
-        # Helper method: Calculate effect size with proper confidence intervals
+        # Helper method: Calculate effect size using effectsize package (robust and validated)
         .calculateEffectSizeWithCI = function(data1, data2) {
             effsize_type <- private$.option("effsize_type")
             effect_size <- NA
             ci_lower <- NA
             ci_upper <- NA
+            warning_msg <- NULL
 
             n1 <- length(data1)
             n2 <- length(data2)
 
-            # CRITICAL FIX: Check minimum sample sizes for effect size calculation
-            # Cohen's d and Hedges' g require at least n=3 per group for stable estimates
+            # Check minimum sample sizes
             if (n1 < 3 || n2 < 3) {
                 return(list(
                     effect_size = NA,
@@ -1077,130 +1136,108 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
-            if (effsize_type == "d") {
-                # Cohen's d with proper CI
-                pooled_sd <- sqrt(((n1 - 1) * var(data1) + (n2 - 1) * var(data2)) / (n1 + n2 - 2))
-
-                # CRITICAL FIX: Check for zero or near-zero variance
-                if (is.na(pooled_sd) || pooled_sd < 1e-10) {
-                    return(list(
-                        effect_size = NA,
-                        ci_lower = NA,
-                        ci_upper = NA,
-                        warning = "Cannot calculate Cohen's d: Zero or near-zero variance detected. Data may have constant values."
-                    ))
-                }
-
-                effect_size <- (mean(data1) - mean(data2)) / pooled_sd
-
-                # CI for Cohen's d using approximate formula
-                se_d <- sqrt(((n1 + n2) / (n1 * n2)) + (effect_size^2 / (2 * (n1 + n2))))
-                ci_lower <- effect_size - 1.96 * se_d
-                ci_upper <- effect_size + 1.96 * se_d
-
-            } else if (effsize_type == "g") {
-                # Hedge's g with CI
-                pooled_sd <- sqrt(((n1 - 1) * var(data1) + (n2 - 1) * var(data2)) / (n1 + n2 - 2))
-
-                # CRITICAL FIX: Check for zero or near-zero variance
-                if (is.na(pooled_sd) || pooled_sd < 1e-10) {
-                    return(list(
-                        effect_size = NA,
-                        ci_lower = NA,
-                        ci_upper = NA,
-                        warning = "Cannot calculate Hedges' g: Zero or near-zero variance detected. Data may have constant values."
-                    ))
-                }
-
-                d <- (mean(data1) - mean(data2)) / pooled_sd
-                J <- 1 - (3 / (4 * (n1 + n2 - 2) - 1))
-                effect_size <- d * J
-
-                # CI for Hedge's g
-                se_g <- sqrt(((n1 + n2) / (n1 * n2)) + (effect_size^2 / (2 * (n1 + n2)))) * J
-                ci_lower <- effect_size - 1.96 * se_g
-                ci_upper <- effect_size + 1.96 * se_g
-
-            } else if (effsize_type == "eta") {
-                # Eta squared
-                ss_between <- sum(n1 * (mean(data1) - mean(c(data1, data2)))^2 +
-                                n2 * (mean(data2) - mean(c(data1, data2)))^2)
-                ss_total <- sum((c(data1, data2) - mean(c(data1, data2)))^2)
-                effect_size <- ss_between / ss_total
-
-                # CI for eta-squared (approximate)
-                # Using Fisher's Z transformation
-                if (effect_size > 0 && effect_size < 1) {
-                    z <- 0.5 * log((1 + sqrt(effect_size)) / (1 - sqrt(effect_size)))
-                    se_z <- 1 / sqrt(n1 + n2 - 3)
-                    z_lower <- z - 1.96 * se_z
-                    z_upper <- z + 1.96 * se_z
-                    ci_lower <- tanh(z_lower)^2
-                    ci_upper <- tanh(z_upper)^2
-                }
-
-            } else if (effsize_type == "cliff_delta") {
-                # Cliff's Delta with CI using bootstrap
-                effect_size <- private$.calculateCliffsDelta(data1, data2)
-
-                # Bootstrap CI for Cliff's Delta
-                if (requireNamespace("boot", quietly = TRUE)) {
-                    boot_fn <- function(data, indices) {
-                        d1 <- data[indices[indices <= n1]]
-                        d2 <- data[indices[indices > n1]]
-                        private$.calculateCliffsDelta(d1, d2)
+            # Use effectsize package for robust, validated calculations
+            tryCatch({
+                if (effsize_type == "d") {
+                    # Cohen's d using effectsize package
+                    if (requireNamespace("effectsize", quietly = TRUE)) {
+                        result <- effectsize::cohens_d(data1, data2, pooled_sd = TRUE, ci = 0.95)
+                        effect_size <- as.numeric(result$Cohens_d)
+                        ci_lower <- result$CI_low
+                        ci_upper <- result$CI_high
+                    } else {
+                        warning_msg <- "effectsize package not available for Cohen's d"
                     }
-                    boot_result <- tryCatch({
-                        boot::boot(c(data1, data2), boot_fn, R = 1000)
-                    }, error = function(e) NULL)
 
-                    if (!is.null(boot_result)) {
-                        ci_result <- boot::boot.ci(boot_result, type = "perc")
-                        if (!is.null(ci_result$percent)) {
-                            ci_lower <- ci_result$percent[4]
-                            ci_upper <- ci_result$percent[5]
+                } else if (effsize_type == "g") {
+                    # Hedges' g using effectsize package
+                    if (requireNamespace("effectsize", quietly = TRUE)) {
+                        result <- effectsize::hedges_g(data1, data2, pooled_sd = TRUE, ci = 0.95)
+                        effect_size <- as.numeric(result$Hedges_g)
+                        ci_lower <- result$CI_low
+                        ci_upper <- result$CI_high
+                    } else {
+                        warning_msg <- "effectsize package not available for Hedges' g"
+                    }
+
+                } else if (effsize_type == "eta") {
+                    # Eta squared using effectsize package
+                    if (requireNamespace("effectsize", quietly = TRUE)) {
+                        # Create a simple data frame for eta_squared
+                        df <- data.frame(
+                            value = c(data1, data2),
+                            group = factor(rep(c("g1", "g2"), c(n1, n2)))
+                        )
+                        model <- aov(value ~ group, data = df)
+                        result <- effectsize::eta_squared(model, ci = 0.95)
+                        effect_size <- as.numeric(result$Eta2)
+                        ci_lower <- result$CI_low
+                        ci_upper <- result$CI_high
+                    } else {
+                        warning_msg <- "effectsize package not available for Eta squared"
+                    }
+
+                } else if (effsize_type == "omega") {
+                    # Omega squared using effectsize package
+                    if (requireNamespace("effectsize", quietly = TRUE)) {
+                        df <- data.frame(
+                            value = c(data1, data2),
+                            group = factor(rep(c("g1", "g2"), c(n1, n2)))
+                        )
+                        model <- aov(value ~ group, data = df)
+                        result <- effectsize::omega_squared(model, ci = 0.95)
+                        effect_size <- as.numeric(result$Omega2)
+                        ci_lower <- result$CI_low
+                        ci_upper <- result$CI_high
+                    } else {
+                        warning_msg <- "effectsize package not available for Omega squared"
+                    }
+
+                } else if (effsize_type == "cliff_delta") {
+                    # Cliff's Delta - keep custom implementation (not in effectsize core)
+                    effect_size <- private$.calculateCliffsDelta(data1, data2)
+
+                    # Bootstrap CI for Cliff's Delta
+                    if (requireNamespace("boot", quietly = TRUE)) {
+                        boot_fn <- function(data, indices) {
+                            d1 <- data[indices[indices <= n1]]
+                            d2 <- data[indices[indices > n1]]
+                            private$.calculateCliffsDelta(d1, d2)
+                        }
+                        boot_result <- tryCatch({
+                            boot::boot(c(data1, data2), boot_fn, R = 1000)
+                        }, error = function(e) NULL)
+
+                        if (!is.null(boot_result)) {
+                            ci_result <- boot::boot.ci(boot_result, type = "perc")
+                            if (!is.null(ci_result$percent)) {
+                                ci_lower <- ci_result$percent[4]
+                                ci_upper <- ci_result$percent[5]
+                            }
                         }
                     }
+
+                } else if (effsize_type == "hodges_lehmann") {
+                    # Hodges-Lehmann shift (median of pairwise differences)
+                    effect_size <- private$.calculateHodgesLehmann(data1, data2)
+
+                    # CI from Wilcoxon test
+                    wilcox_result <- wilcox.test(data1, data2, conf.int = TRUE)
+                    if (!is.null(wilcox_result$conf.int)) {
+                        ci_lower <- wilcox_result$conf.int[1]
+                        ci_upper <- wilcox_result$conf.int[2]
+                    }
                 }
 
-            } else if (effsize_type == "hodges_lehmann") {
-                # Hodges-Lehmann shift (median of pairwise differences)
-                effect_size <- private$.calculateHodgesLehmann(data1, data2)
-
-                # CI from Wilcoxon test
-                wilcox_result <- wilcox.test(data1, data2, conf.int = TRUE)
-                if (!is.null(wilcox_result$conf.int)) {
-                    ci_lower <- wilcox_result$conf.int[1]
-                    ci_upper <- wilcox_result$conf.int[2]
-                }
-
-            } else if (effsize_type == "omega") {
-                # CRITICAL FIX: Implement omega-squared
-                # Omega-squared for two groups
-                grand_mean <- mean(c(data1, data2))
-                ss_between <- n1 * (mean(data1) - grand_mean)^2 + n2 * (mean(data2) - grand_mean)^2
-                ss_within <- sum((data1 - mean(data1))^2) + sum((data2 - mean(data2))^2)
-                ms_within <- ss_within / (n1 + n2 - 2)
-
-                effect_size <- (ss_between - ms_within) / (ss_between + ss_within + ms_within)
-                effect_size <- max(0, effect_size)  # Omega-squared can't be negative
-
-                # CI for omega-squared (approximate using eta-squared CI method)
-                if (effect_size > 0 && effect_size < 1) {
-                    z <- 0.5 * log((1 + sqrt(effect_size)) / (1 - sqrt(effect_size)))
-                    se_z <- 1 / sqrt(n1 + n2 - 3)
-                    z_lower <- z - 1.96 * se_z
-                    z_upper <- z + 1.96 * se_z
-                    ci_lower <- max(0, tanh(z_lower)^2)
-                    ci_upper <- min(1, tanh(z_upper)^2)
-                }
-            }
+            }, error = function(e) {
+                warning_msg <<- paste0("Error calculating effect size: ", e$message)
+            })
 
             return(list(
                 effect_size = effect_size,
                 ci_lower = ci_lower,
                 ci_upper = ci_upper,
-                warning = NULL
+                warning = warning_msg
             ))
         },
 

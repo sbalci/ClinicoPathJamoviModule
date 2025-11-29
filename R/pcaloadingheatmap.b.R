@@ -312,7 +312,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' Converts PCA rotation matrices to correlation-style loadings that are
 #' comparable across different `scale` settings. Values are clipped within the
-#' [-1, 1] range to avoid small numerical drifts outside the unit interval.
+#' (-1, 1) range to avoid small numerical drifts outside the unit interval.
 #'
 #' @param pca A `prcomp` object.
 #' @param pca_data Numeric matrix used to fit the PCA.

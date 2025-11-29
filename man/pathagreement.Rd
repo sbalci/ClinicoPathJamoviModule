@@ -36,6 +36,7 @@ pathagreement(
   institutionVar,
   specialtyVar,
   identifyDiscordantCases = FALSE,
+  styleHeatmap = TRUE,
   caseID,
   icc = FALSE,
   bootstrap = FALSE,
@@ -169,6 +170,8 @@ subspecialty information}
 
 \item{identifyDiscordantCases}{Identify cases that distinguish different
 diagnostic styles - useful for training and consensus development.}
+
+\item{styleHeatmap}{Display diagnostic style heatmap.}
 
 \item{caseID}{Optional variable containing case identifiers. If not
 specified, cases will be numbered automatically.}

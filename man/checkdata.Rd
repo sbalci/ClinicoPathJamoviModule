@@ -10,7 +10,13 @@ checkdata(
   showOutliers = TRUE,
   showDistribution = TRUE,
   showDuplicates = TRUE,
-  showPatterns = FALSE
+  showPatterns = FALSE,
+  rareCategoryThreshold = 5,
+  clinicalValidation = TRUE,
+  unitSystem = "auto",
+  outlierTransform = "none",
+  mcarTest = FALSE,
+  cvMinMean = 0.01
 )
 }
 \arguments{
@@ -28,6 +34,24 @@ characteristics.}
 
 \item{showPatterns}{Analyze patterns in missing data and value
 distributions.}
+
+\item{rareCategoryThreshold}{Percentage threshold for flagging rare
+categories (important for chi-squared assumptions and modeling).}
+
+\item{clinicalValidation}{Perform context-specific validation for clinical
+variables (age, lab values, etc.). Heuristic ranges may need adjustment.}
+
+\item{unitSystem}{Unit system for clinical plausibility checks. Auto-detect
+attempts to infer from data ranges.}
+
+\item{outlierTransform}{Apply transformation before outlier detection to
+handle skewed distributions (especially right-skewed lab values).}
+
+\item{mcarTest}{Perform Little's MCAR test if available (requires naniar
+package). Provides formal test vs. heuristic assessment.}
+
+\item{cvMinMean}{Suppress coefficient of variation when absolute mean is
+below this threshold (avoids instability).}
 }
 \value{
 A results object containing:
@@ -37,6 +61,7 @@ A results object containing:
 \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
 \code{results$noOutliers} \tab \tab \tab \tab \tab a html \cr
 \code{results$outliers} \tab \tab \tab \tab \tab Shows outliers detected by at least 2 of 3 methods: Z-score (|z|>3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|>3.5). Points flagged by only 1 method are NOT shown. \cr
+\code{results$outlierMethodSummary} \tab \tab \tab \tab \tab Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting. \cr
 \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
 \code{results$patterns} \tab \tab \tab \tab \tab a table \cr

@@ -26,6 +26,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check if we have variables selected
             if (length(vars) == 0) {
+                self$results$welcome$setVisible(TRUE)
                 self$results$welcome$setContent(
                     "<div class='jmv-welcome' style='margin: 2em; padding: 2em; background: #f8f9fa; border-left: 4px solid #007bff;'>
                     <h3 style='margin-top: 0; color: #007bff;'>Hierarchical Clustering Dendrogram</h3>
@@ -38,6 +39,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 return()
             }
+            self$results$welcome$setVisible(FALSE)
             
             # Get data
             data <- self$data
@@ -130,6 +132,16 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             maxClusters <- nrow(clusterData)
             effectiveClusters <- max(1, min(nClusters, maxClusters))
             clusterMembership <- stats::cutree(hclustResult, k = effectiveClusters)
+
+            # Save cluster membership to dataset if requested
+            if (self$results$clustOutput$isNotFilled()) {
+                # Create full length vector with NAs
+                fullClusterMembership <- rep(NA, nrow(data))
+                # Assign clusters to complete cases
+                fullClusterMembership[completeCases] <- clusterMembership
+                # Set values in output variable
+                self$results$clustOutput$setValues(fullClusterMembership)
+            }
 
             clusterSummary <- self$results$clusterSummary
             if ("clearRows" %in% names(clusterSummary))

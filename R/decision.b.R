@@ -149,6 +149,17 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     return(FALSE)
                 }
 
+                # Warn about CI interpretation when using population prevalence
+                if (self$options$pp && self$options$ci) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ciInterpretationPrevalence',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent('Confidence Intervals Interpretation:\n• The displayed confidence intervals (95% CI) are calculated based on your study sample data.\n• They apply to the sample-based Sensitivity, Specificity, PPV, and NPV.\n• They do NOT apply to the adjusted "Post-test Probabilities" calculated using the fixed population prevalence.')
+                    self$results$insert(1, notice)
+                }
+
                 # Validate that selected levels actually exist in the data
                 goldVar <- jmvcore::constructFormula(terms = self$options$gold) %>%
                           jmvcore::decomposeFormula() %>% unlist()

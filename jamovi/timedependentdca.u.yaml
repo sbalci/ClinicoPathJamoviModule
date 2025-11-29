@@ -69,23 +69,6 @@ children:
       - type: CheckBox
         name: smoothing
       - type: CheckBox
-        name: confidence_intervals
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: bootstrap_samples
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: confidence_level
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
         name: plot_net_benefit
       - type: CheckBox
         name: plot_by_timepoint

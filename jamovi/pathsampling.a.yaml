@@ -432,6 +432,30 @@ options:
         Add cost-benefit interpretation to marginal gain analysis. Auto-enabled when
         Show Binomial Model is checked.
 
+    - name: showPowerAnalysis
+      title: Show Power Analysis
+      type: Bool
+      default: false
+
+    - name: targetPower
+      title: Target Power
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.8
+
+    - name: targetDetectionProb
+      title: Target Detection Probability
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+
+    - name: autoSelectModel
+      title: Auto-Select Best Model
+      type: Bool
+      default: false
+
     - name: appendVariables
       title: Append Calculated Variables to Data
       type: Bool

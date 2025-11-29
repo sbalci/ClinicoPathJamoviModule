@@ -82,5 +82,21 @@ items:
         - plotwidth
         - plotheight
 
+    - name: screePlot
+      title: Scree Plot (Eigenvalues)
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .screePlot
+      visible: (showScreePlot)
+
+    - name: loadingsPlot
+      title: Variable Loadings Plot
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .loadingsPlot
+      visible: (showLoadingsPlot)
+
 refs:
     - glue

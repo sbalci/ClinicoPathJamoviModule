@@ -1,18 +1,23 @@
 
 library(R6)
 
-Parent <- R6::R6Class("Parent",
-    private = list(
-        .items = list(a=1)
-    )
+Parent <- R6Class("Parent",
+  public = list(
+    run = function() {
+      print("Parent run calling private$.run()")
+      private$.run()
+    }
+  )
 )
 
-Child <- R6::R6Class("Child",
-    inherit = Parent,
-    active = list(
-        items = function() private$.items
-    )
+Child <- R6Class("Child",
+  inherit = Parent,
+  private = list(
+    .run = function() {
+      print("Child .run executed")
+    }
+  )
 )
 
-c <- Child$new()
-print(c$items)
+obj <- Child$new()
+obj$run()

@@ -807,6 +807,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     instructions = function() private$.items[["instructions"]],
                     imbalanceWarning = function() private$.items[["imbalanceWarning"]],
                     imbalanceMetrics = function() private$.items[["imbalanceMetrics"]],
+                    precisionRecallTable = function() private$.items[["precisionRecallTable"]],
                     analysisSummary = function() private$.items[["analysisSummary"]],
                     clinicalReport = function() private$.items[["clinicalReport"]],
                     aucSummary = function() private$.items[["aucSummary"]],
@@ -824,6 +825,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     clinicalInterpretationGuide = function() private$.items[["clinicalInterpretationGuide"]],
                     methodsExplanation = function() private$.items[["methodsExplanation"]],
                     rocCurvePlot = function() private$.items[["rocCurvePlot"]],
+                    prcPlot = function() private$.items[["prcPlot"]],
                     comparativeROCPlot = function() private$.items[["comparativeROCPlot"]],
                     cutoffAnalysisPlot = function() private$.items[["cutoffAnalysisPlot"]],
                     youdenIndexPlot = function() private$.items[["youdenIndexPlot"]],
@@ -896,6 +898,42 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="recommendation", 
                                     `title`="Recommendation", 
                                     `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="precisionRecallTable",
+                            title="Precision-Recall Metrics",
+                            visible="(detectImbalance)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="auc_pr", 
+                                    `title`="AUC-PR", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="f1_score", 
+                                    `title`="F1 Score (Max)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="precision", 
+                                    `title`="Precision", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="recall", 
+                                    `title`="Recall", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="average_precision", 
+                                    `title`="Average Precision", 
+                                    `type`="number", 
+                                    `format`="zto"))))
                         self$add(jmvcore::Html$new(
                             options=options,
                             name="analysisSummary",
@@ -1401,6 +1439,14 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             title="ROC Curve Analysis",
                             visible="(rocCurve)",
                             renderFun=".plotROCCurve",
+                            width=600,
+                            height=600))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="prcPlot",
+                            title="Precision-Recall Curve",
+                            visible="(detectImbalance)",
+                            renderFun=".plotPRC",
                             width=600,
                             height=600))
                         self$add(jmvcore::Image$new(
@@ -1917,6 +1963,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$imbalanceWarning} \tab \tab \tab \tab \tab Warning and recommendations for imbalanced datasets \cr
 #'   \code{results$results$imbalanceMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$results$precisionRecallTable} \tab \tab \tab \tab \tab Metrics for imbalanced data analysis \cr
 #'   \code{results$results$analysisSummary} \tab \tab \tab \tab \tab Plain language summary of key findings \cr
 #'   \code{results$results$clinicalReport} \tab \tab \tab \tab \tab Copy-ready clinical report sentences for publications and reports \cr
 #'   \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
@@ -1934,6 +1981,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$clinicalInterpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$rocCurvePlot} \tab \tab \tab \tab \tab ROC curves with optimal cutoff points \cr
+#'   \code{results$results$prcPlot} \tab \tab \tab \tab \tab Precision-Recall curve for imbalanced data \cr
 #'   \code{results$results$comparativeROCPlot} \tab \tab \tab \tab \tab Multiple ROC curves for comparison \cr
 #'   \code{results$results$cutoffAnalysisPlot} \tab \tab \tab \tab \tab Sensitivity and specificity across cutoff values \cr
 #'   \code{results$results$youdenIndexPlot} \tab \tab \tab \tab \tab Youden Index values across cutoff range \cr

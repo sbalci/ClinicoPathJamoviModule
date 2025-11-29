@@ -11,9 +11,13 @@
 #' - Colors distinguish different segments
 #' - Labels can show percentages and/or raw counts
 #'
+#' The visualization approach is inspired by the ggsegmentedtotalbar package
+#' (https://github.com/ozancanozdemir/ggsegmentedtotalbar) by Ozancan Ozdemir.
+#' This implementation uses a clean ggplot2-based approach optimized for
+#' clinical research workflows within the jamovi environment
+#'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom ggsegmentedtotalbar ggsegmentedtotalbar
 #' @importFrom ggplot2 ggplot aes geom_col position_fill coord_flip geom_bar
 #' @importFrom ggplot2 theme_minimal theme_classic theme_bw labs scale_fill_brewer
 #' @importFrom ggplot2 scale_fill_viridis_d geom_text element_text theme element_rect
@@ -78,21 +82,13 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Convert inches to pixels (assuming 72 DPI)
             width_px <- self$options$plot_width * 72
             height_px <- self$options$plot_height * 72
-            
-            # Set visibility and size for ggplot2 plot
-            if (self$options$show_ggplot2_plot) {
+
+            # Set visibility and size for plot
+            if (self$options$show_plot) {
                 self$results$plot$setVisible(TRUE)
                 self$results$plot$setSize(width_px, height_px)
             } else {
                 self$results$plot$setVisible(FALSE)
-            }
-            
-            # Set visibility and size for ggsegmented plot
-            if (self$options$show_ggsegmented_plot) {
-                self$results$plot_ggsegmented$setVisible(TRUE)
-                self$results$plot_ggsegmented$setSize(width_px, height_px)
-            } else {
-                self$results$plot_ggsegmented$setVisible(FALSE)
             }
             
             # Set visibility for statistical tests
@@ -739,9 +735,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Plain, self-contained plot builder for 100% stacked bars
             # Keeps logic local to ensure clear data flow.
-            
+
             # Check if this plot should be shown
-            if (!self$options$show_ggplot2_plot) {
+            if (!self$options$show_plot) {
                 return()
             }
 
@@ -896,191 +892,6 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
 
             return(p)
-        },
-
-        .plot_ggsegmented = function(image, ggtheme, theme, ...) {
-            
-            # Check if this plot should be shown
-            if (!self$options$show_ggsegmented_plot) {
-                return()
-            }
-            
-            # Check if ggsegmentedtotalbar package is available
-            if (!requireNamespace("ggsegmentedtotalbar", quietly = TRUE)) {
-                # Show a message instead of plot
-                plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")
-                text(1, 1, "ggsegmentedtotalbar package not installed\nInstall with: install.packages('ggsegmentedtotalbar')", 
-                     cex = 1.2, col = "red")
-                return(TRUE)
-            }
-            
-            # Validate required options
-            if (is.null(self$options$x_var) ||
-                is.null(self$options$y_var) ||
-                is.null(self$options$fill_var)) {
-                return()
-            }
-
-            df <- private$.processed_data
-            if (is.null(df) || nrow(df) == 0) return()
-
-            x_var <- self$options$x_var
-            fill_var <- self$options$fill_var
-            
-            # CRITICAL FIX: Prepare data for ggsegmentedtotalbar
-            # Preserve original counts before converting to percentages
-            plot_data_pct <- df %>%
-                dplyr::group_by(!!rlang::sym(x_var)) %>%
-                dplyr::mutate(
-                    # CRITICAL FIX: Store original count before converting to percentage
-                    original_count = .data$value,
-                    value = (.data$value / sum(.data$value)) * 100,
-                    total = 100
-                ) %>%
-                dplyr::ungroup() %>%
-                dplyr::rename(
-                    group = !!rlang::sym(x_var),
-                    segment = !!rlang::sym(fill_var)
-                ) %>%
-                dplyr::select(group, segment, value, original_count, total)
-            
-            # Apply sorting if requested (using original data totals)
-            if (self$options$sort_categories != "none") {
-                if (self$options$sort_categories == "total") {
-                    category_order <- df %>%
-                        dplyr::group_by(!!rlang::sym(x_var)) %>%
-                        dplyr::summarise(total = sum(.data$value), .groups = 'drop') %>%
-                        dplyr::arrange(desc(.data$total)) %>%
-                        dplyr::pull(!!rlang::sym(x_var))
-                    plot_data_pct$group <- factor(plot_data_pct$group, levels = unique(category_order))
-                } else if (self$options$sort_categories == "largest_segment") {
-                    category_order <- df %>%
-                        dplyr::group_by(!!rlang::sym(x_var)) %>%
-                        dplyr::summarise(max_segment = max(.data$value), .groups = 'drop') %>%
-                        dplyr::arrange(desc(.data$max_segment)) %>%
-                        dplyr::pull(!!rlang::sym(x_var))
-                    plot_data_pct$group <- factor(plot_data_pct$group, levels = unique(category_order))
-                } else if (self$options$sort_categories == "alpha") {
-                    plot_data_pct$group <- factor(plot_data_pct$group, levels = sort(unique(as.character(plot_data_pct$group))))
-                }
-            }
-            
-            # Create plot using ggsegmentedtotalbar with percentage data
-            tryCatch({
-                # Control labels based on user preferences and threshold
-                show_labels <- self$options$ggsegmented_labels && self$options$show_percentages
-                
-                p <- ggsegmentedtotalbar::ggsegmentedtotalbar(
-                    df = plot_data_pct,
-                    group = "group",
-                    segment = "segment", 
-                    value = "value",
-                    total = "total",
-                    label = show_labels,
-                    alpha = self$options$ggsegmented_alpha,
-                    color = "lightgrey"
-                )
-                
-                # Add titles
-                plot_title <- if (nzchar(self$options$plot_title)) 
-                    paste0(self$options$plot_title, " (ggsegmentedtotalbar)") 
-                else 
-                    .("Segmented Total Bar Chart (ggsegmentedtotalbar)")
-                x_title <- if (nzchar(self$options$x_title)) self$options$x_title else x_var
-                # Y-axis shows percentage values regardless of original y_var, but respect user's custom title
-                y_title <- if (nzchar(self$options$y_title)) self$options$y_title else .("Percentage")
-                legend_title <- if (nzchar(self$options$legend_title)) self$options$legend_title else fill_var
-                
-                p <- p + ggplot2::labs(title = plot_title, x = x_title, y = y_title, fill = legend_title)
-                
-                # Apply color palette using centralized method
-                palette <- self$options$color_palette
-                n_colors <- length(unique(plot_data_pct$segment))
-                
-                if (palette == "viridis") {
-                    p <- p + ggplot2::scale_fill_viridis_d()
-                } else if (palette == "set1") {
-                    p <- p + ggplot2::scale_fill_brewer(type = "qual", palette = "Set1")
-                } else if (palette == "dark2") {
-                    p <- p + ggplot2::scale_fill_brewer(type = "qual", palette = "Dark2")
-                } else if (palette == "paired") {
-                    p <- p + ggplot2::scale_fill_brewer(type = "qual", palette = "Paired")
-                } else {
-                    # Use centralized color palette function
-                    custom_colors <- private$.getColorPalette(palette, n_colors)
-                    if (!is.null(custom_colors)) {
-                        p <- p + ggplot2::scale_fill_manual(values = custom_colors)
-                    }
-                }
-                
-                # Orientation
-                if (identical(self$options$orientation, "horizontal")) {
-                    p <- p + ggplot2::coord_flip()
-                }
-                
-                # Apply chart style using centralized method
-                p <- private$.applyTheme(p)
-                
-                # Ensure title is centered
-                p <- p + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-                
-                # Legend position
-                if (identical(self$options$legend_position, "none")) {
-                    p <- p + ggplot2::theme(legend.position = "none")
-                } else if (!identical(self$options$legend_position, "right")) {
-                    p <- p + ggplot2::theme(legend.position = self$options$legend_position)
-                }
-                
-                # Add custom formatted labels if user wants them and they meet threshold
-                if (isTRUE(self$options$show_percentages) && isTRUE(self$options$ggsegmented_labels)) {
-                    # Filter data based on label threshold
-                    label_data <- plot_data_pct %>%
-                        dplyr::filter(.data$value >= self$options$label_threshold)
-                    
-                    if (nrow(label_data) > 0) {
-                        # Format percentages according to user preference
-                        fmt <- switch(
-                            self$options$percentage_format,
-                            "decimal1" = function(z) paste0(format(round(z, 1), nsmall = 1), "%"),
-                            "decimal2" = function(z) paste0(format(round(z, 2), nsmall = 2), "%"),
-                            function(z) paste0(round(z), "%")
-                        )
-                        label_data$formatted_label <- fmt(label_data$value)
-
-                        # CRITICAL FIX: Add ACTUAL counts if requested
-                        if (isTRUE(self$options$show_counts)) {
-                            # Use the preserved original_count, not the percentage value
-                            label_data$formatted_label <- paste0(
-                                label_data$formatted_label,
-                                "\n(n=", round(label_data$original_count), ")"
-                            )
-                        }
-                        
-                        # Add custom labels on top of the ggsegmentedtotalbar plot
-                        p <- p + ggplot2::geom_text(
-                            data = label_data,
-                            ggplot2::aes(
-                                x = .data$group,
-                                y = .data$value,
-                                label = .data$formatted_label
-                            ),
-                            position = ggplot2::position_fill(vjust = 0.5),
-                            size = 3, color = "white", fontface = "bold",
-                            inherit.aes = FALSE
-                        )
-                    }
-                }
-                
-                print(p)
-                
-            }, error = function(e) {
-                # Show error message in plot area
-                plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")
-                text(1, 1, paste("Error creating ggsegmentedtotalbar plot:\n", e$message), 
-                     cex = 1.0, col = "red")
-            })
-            
-            TRUE
         },
 
         .createClinicalSummary = function() {

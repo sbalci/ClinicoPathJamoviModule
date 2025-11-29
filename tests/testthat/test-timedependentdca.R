@@ -160,35 +160,24 @@ test_that("Kaplan-Meier stratification produces valid probabilities", {
                 info = paste("Mean probabilities by group:", paste(round(mean_prob_by_group, 3), collapse = ", ")))
 })
 
-test_that("At-risk population is correctly defined", {
+test_that("At-risk population is handled correctly by KM", {
     # Create test data with specific patterns
     time <- c(100, 200, 300, 400, 500)
     event <- c(0, 1, 0, 1, 1)  # Events at times 200, 400, 500
     
     # Test at t_eval = 250
     t_eval <- 250
-    has_event_by_t <- (time <= t_eval & event == 1)
     
-    # Correct at-risk definition
-    # At risk = those who were still at risk at t_eval
-    # = those who were censored after t_eval OR had event at/after t_eval
-    at_risk_at_t <- (time > t_eval) | (time >= t_eval & event == 1)
+    # KM estimate at t=250
+    # At t=100: 1 censored, 4 at risk
+    # At t=200: 1 event, 3 at risk. S(200) = 1 * (1 - 1/4) = 0.75
+    # At t=250: S(250) = 0.75
     
-    # Patient 1: time=100, censored - NOT at risk (censored before t_eval)
-    expect_false(at_risk_at_t[1])
+    surv_obj <- Surv(time, event)
+    km_fit <- survfit(surv_obj ~ 1)
+    surv_t <- summary(km_fit, times = t_eval, extend = TRUE)$surv[1]
     
-    # Patient 2: time=200, event - NOT at risk (event BEFORE t_eval)
-    # This patient is not in the risk set at t=250 because they already had event
-    expect_false(at_risk_at_t[2])
-    
-    # Patient 3: time=300, censored - AT RISK (censored after t_eval)
-    expect_true(at_risk_at_t[3])
-    
-    # Patient 4: time=400, event - AT RISK (event after t_eval)
-    expect_true(at_risk_at_t[4])
-    
-    # Patient 5: time=500, event - AT RISK (event after t_eval)
-    expect_true(at_risk_at_t[5])
+    expect_equal(surv_t, 0.75)
 })
 
 context("Time-Dependent DCA - Edge Cases")
@@ -219,13 +208,13 @@ test_that("Function handles all events", {
     event <- rep(1, n)  # All events
     
     t_eval <- median(time)
-    has_event_by_t <- (time <= t_eval & event == 1)
-    at_risk_at_t <- (time > t_eval) | (time >= t_eval & event == 1)
     
-    # NOT all will be at risk - only those with time >= t_eval
-    # This is correct behavior
-    expect_true(sum(at_risk_at_t) >= n/2, 
-                info = paste("At risk:", sum(at_risk_at_t), "of", n))
+    # KM estimate should be valid
+    surv_obj <- Surv(time, event)
+    km_fit <- survfit(surv_obj ~ 1)
+    surv_t <- summary(km_fit, times = t_eval, extend = TRUE)$surv[1]
+    
+    expect_true(surv_t >= 0 && surv_t <= 1)
 })
 
 test_that("Function handles all censored", {
@@ -284,8 +273,9 @@ test_that("Results vary appropriately across time points", {
     
     # Event rate should generally increase with time
     # (more events accumulate over time)
-    expect_true(all(diff(event_rates) >= -0.1), 
-                info = paste("Event rates:", paste(round(event_rates, 3), collapse = ", ")))
+    # Event rate should generally increase with time
+    # (more events accumulate over time)
+    expect_true(all(diff(event_rates) >= -0.1))
 })
 
 test_that("Net benefit respects threshold ordering", {

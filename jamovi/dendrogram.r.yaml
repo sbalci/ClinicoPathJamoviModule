@@ -7,7 +7,7 @@ items:
     - name:  welcome
       title: ''
       type:  Html
-      visible: (vars.length == 0)
+      visible: true
 
     - name:  plot
       title: Dendrogram Plot

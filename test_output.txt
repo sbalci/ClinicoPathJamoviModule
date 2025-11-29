@@ -1,477 +1,208 @@
-ℹ Loading ClinicoPath
-Registered S3 methods overwritten by 'Hmisc':
-  method               from   
-  as.data.frame.impute tangram
-  print.impute         tangram
-  [.impute             tangram
-Registered S3 methods overwritten by 'ggpp':
-  method                  from   
-  heightDetails.titleGrob ggplot2
-  widthDetails.titleGrob  ggplot2
-Registered S3 methods overwritten by 'ggfortify':
-  method          from   
-  autoplot.acf    useful 
-  autoplot.glmnet parsnip
-  fortify.acf     useful 
-  fortify.kmeans  useful 
-  fortify.ts      useful 
-Registered S3 method overwritten by 'spatstat.explore':
-  method   from
-  plot.roc pROC
-Registered S3 method overwritten by 'partitions':
-  method            from
-  print.equivalence lava
-Registered S3 method overwritten by 'DoE.base':
-  method           from       
-  factorize.factor conf.design
-Registered S3 methods overwritten by 'logspline':
-  method               from     
-  plot.logspline       polspline
-  plot.oldlogspline    polspline
-  print.logspline      polspline
-  print.oldlogspline   polspline
-  summary.logspline    polspline
-  summary.oldlogspline polspline
-Registered S3 methods overwritten by 'huge':
-  method    from            
-  plot.roc  spatstat.explore
-  plot.sim  lava            
-  print.roc pROC            
-  print.sim lava            
-Registered S3 method overwritten by 'fit.models':
-  method       from 
-  vcov.default Hmisc
-Registered S3 method overwritten by 'riskRegression':
-  method        from 
-  nobs.multinom broom
-Serdar Balci MD Pathologist 
- https://www.serdarbalci.com/ 
- 
-There were 50 or more warnings (use warnings() to see the first 50)
 
-══ Testing test-jjridges.R ═════════════════════════════════════════════════════
+══ Testing test-sequentialtests.R ══════════════════════════════════════════════
 
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
+
+-- Warning ('test-sequentialtests.R:4:1'): (code run outside of `test_that()`) --
+`context()` was deprecated in the 3rd edition.
+Backtrace:
+    x
+ 1. \-testthat::context("Sequential Testing Analysis - Mathematical Accuracy") at test-sequentialtests.R:4:1
+ 2.   \-testthat:::edition_deprecate(3, "context()")
+ 3.     \-cli::cli_warn(...)
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 1 | SKIP 0 | PASS 1 ]
 [ FAIL 0 | WARN 1 | SKIP 0 | PASS 2 ]
-[ FAIL 0 | WARN 2 | SKIP 0 | PASS 2 ]
-[ FAIL 0 | WARN 2 | SKIP 0 | PASS 3 ]
-[ FAIL 0 | WARN 3 | SKIP 0 | PASS 3 ]
-[ FAIL 0 | WARN 3 | SKIP 0 | PASS 4 ]
-[ FAIL 0 | WARN 3 | SKIP 0 | PASS 5 ]
-[ FAIL 0 | WARN 4 | SKIP 0 | PASS 5 ]
-[ FAIL 0 | WARN 4 | SKIP 0 | PASS 6 ]
-[ FAIL 0 | WARN 5 | SKIP 0 | PASS 6 ]
-[ FAIL 0 | WARN 5 | SKIP 0 | PASS 7 ]
-[ FAIL 0 | WARN 6 | SKIP 0 | PASS 7 ]
-[ FAIL 0 | WARN 6 | SKIP 0 | PASS 8 ]
-[ FAIL 0 | WARN 7 | SKIP 0 | PASS 8 ]
-[ FAIL 0 | WARN 7 | SKIP 0 | PASS 9 ]
-[ FAIL 0 | WARN 8 | SKIP 0 | PASS 9 ]
-[ FAIL 0 | WARN 8 | SKIP 0 | PASS 10 ]
-[ FAIL 0 | WARN 9 | SKIP 0 | PASS 10 ]
-[ FAIL 0 | WARN 9 | SKIP 0 | PASS 11 ]
-[ FAIL 0 | WARN 10 | SKIP 0 | PASS 11 ]
-[ FAIL 0 | WARN 10 | SKIP 0 | PASS 12 ]
-[ FAIL 0 | WARN 11 | SKIP 0 | PASS 12 ]
-[ FAIL 0 | WARN 12 | SKIP 0 | PASS 12 ]
-[ FAIL 0 | WARN 12 | SKIP 0 | PASS 13 ]
-[ FAIL 0 | WARN 13 | SKIP 0 | PASS 13 ]
-[ FAIL 0 | WARN 13 | SKIP 0 | PASS 14 ]
-[ FAIL 0 | WARN 14 | SKIP 0 | PASS 14 ]
-[ FAIL 0 | WARN 14 | SKIP 0 | PASS 15 ]
-[ FAIL 0 | WARN 15 | SKIP 0 | PASS 15 ]
-[ FAIL 0 | WARN 15 | SKIP 0 | PASS 16 ]
-[ FAIL 0 | WARN 16 | SKIP 0 | PASS 16 ]
-[ FAIL 0 | WARN 16 | SKIP 0 | PASS 17 ]
-[ FAIL 0 | WARN 16 | SKIP 0 | PASS 18 ]
-[ FAIL 0 | WARN 16 | SKIP 0 | PASS 19 ]
-[ FAIL 0 | WARN 17 | SKIP 0 | PASS 19 ]
-[ FAIL 0 | WARN 17 | SKIP 0 | PASS 20 ]
-[ FAIL 1 | WARN 17 | SKIP 0 | PASS 20 ]
-[ FAIL 1 | WARN 17 | SKIP 0 | PASS 21 ]
-[ FAIL 1 | WARN 18 | SKIP 0 | PASS 21 ]
-[ FAIL 1 | WARN 18 | SKIP 0 | PASS 22 ]
-[ FAIL 1 | WARN 19 | SKIP 0 | PASS 22 ]
-[ FAIL 1 | WARN 19 | SKIP 0 | PASS 23 ]
-[ FAIL 1 | WARN 20 | SKIP 0 | PASS 23 ]
-[ FAIL 1 | WARN 20 | SKIP 0 | PASS 24 ]
-[ FAIL 1 | WARN 21 | SKIP 0 | PASS 24 ]
-[ FAIL 1 | WARN 21 | SKIP 0 | PASS 25 ]
-[ FAIL 1 | WARN 22 | SKIP 0 | PASS 25 ]
-[ FAIL 1 | WARN 22 | SKIP 0 | PASS 26 ]
-[ FAIL 1 | WARN 23 | SKIP 0 | PASS 26 ]
-[ FAIL 1 | WARN 23 | SKIP 0 | PASS 27 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 2 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 2 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 3 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 4 ]
+[ FAIL 3 | WARN 1 | SKIP 0 | PASS 4 ]
+[ FAIL 4 | WARN 1 | SKIP 0 | PASS 4 ]
+[ FAIL 4 | WARN 1 | SKIP 0 | PASS 5 ]
+[ FAIL 4 | WARN 1 | SKIP 0 | PASS 6 ]
+[ FAIL 5 | WARN 1 | SKIP 0 | PASS 6 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 6 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 7 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 8 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 9 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 10 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 11 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 12 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 13 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 14 ]
+[ FAIL 6 | WARN 1 | SKIP 0 | PASS 15 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 15 ]
 
-── Warning ('test-jjridges.R:6:3'): jjridges works with basic ridgeline plot ───
-Ignoring unknown parameters: `size`
+-- Failure ('test-sequentialtests.R:55:3'): Serial testing (positive strategy) calculations are mathematically correct --
+Expected `round(expected_ppv, 4)` to equal 0.9272.
+Differences:
+  `actual`: 0.9337
+`expected`: 0.9272
+
+
+-- Failure ('test-sequentialtests.R:56:3'): Serial testing (positive strategy) calculations are mathematically correct --
+Expected `round(expected_npv, 4)` to equal 0.9259.
+Differences:
+  `actual`: 0.974
+`expected`: 0.926
+
+
+-- Failure ('test-sequentialtests.R:75:3'): Serial testing (negative strategy) calculations are mathematically correct --
+Expected `round(expected_ppv, 4)` to equal 0.1705.
+Differences:
+  `actual`: 0.1773
+`expected`: 0.1705
+
+
+-- Failure ('test-sequentialtests.R:76:3'): Serial testing (negative strategy) calculations are mathematically correct --
+Expected `round(expected_npv, 4)` to equal 0.9989.
+Differences:
+  `actual`: 0.9974
+`expected`: 0.9989
+
+
+-- Failure ('test-sequentialtests.R:95:3'): Parallel testing calculations are mathematically correct --
+Expected `round(expected_ppv, 4)` to equal 0.5064.
+Differences:
+  `actual`: 0.534
+`expected`: 0.506
+
+
+-- Failure ('test-sequentialtests.R:96:3'): Parallel testing calculations are mathematically correct --
+Expected `round(expected_npv, 4)` to equal 0.9933.
+Differences:
+  `actual`: 0.9878
+`expected`: 0.9933
+
+
+-- Warning ('test-sequentialtests.R:155:1'): (code run outside of `test_that()`) --
+`context()` was deprecated in the 3rd edition.
 Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:6:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
+    x
+ 1. \-testthat::context("Sequential Testing Analysis - Clinical Scenarios") at test-sequentialtests.R:155:1
+ 2.   \-testthat:::edition_deprecate(3, "context()")
+ 3.     \-cli::cli_warn(...)
 
-── Warning ('test-jjridges.R:21:3'): jjridges works with different plot styles ──
-Ignoring unknown parameters: `size`
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 15 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 16 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 17 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 18 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 19 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 20 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 21 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 22 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 23 ]
+[ FAIL 6 | WARN 2 | SKIP 0 | PASS 24 ]
+[ FAIL 7 | WARN 2 | SKIP 0 | PASS 24 ]
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 24 ]
+
+-- Error ('test-sequentialtests.R:220:3'): sequentialtests returns finite combined metrics for typical inputs --
+Error in `sequentialtests(test1_sens = 0.85, test1_spec = 0.9, test2_sens = 0.95, test2_spec = 0.98, strategy = "serial_positive", prevalence = 0.1)`: could not find function "sequentialtests"
+
+-- Warning ('test-sequentialtests.R:250:1'): (code run outside of `test_that()`) --
+`context()` was deprecated in the 3rd edition.
 Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:21:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
+    x
+ 1. \-testthat::context("Sequential Testing Analysis - Strategy Comparisons") at test-sequentialtests.R:250:1
+ 2.   \-testthat:::edition_deprecate(3, "context()")
+ 3.     \-cli::cli_warn(...)
 
-── Warning ('test-jjridges.R:31:3'): jjridges works with different plot styles ──
-Ignoring unknown parameters: `size`
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 24 ]
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 25 ]
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 26 ]
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 27 ]
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 28 ]
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 29 ]
+[ FAIL 7 | WARN 3 | SKIP 0 | PASS 30 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 30 ]
+
+-- Warning ('test-sequentialtests.R:299:1'): (code run outside of `test_that()`) --
+`context()` was deprecated in the 3rd edition.
 Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:31:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createHistogramPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:452:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:718:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
+    x
+ 1. \-testthat::context("Sequential Testing Analysis - Input Validation") at test-sequentialtests.R:299:1
+ 2.   \-testthat:::edition_deprecate(3, "context()")
+ 3.     \-cli::cli_warn(...)
 
-── Warning ('test-jjridges.R:55:3'): jjridges handles customization options ────
-Ignoring unknown parameters: `size`
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 30 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 31 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 32 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 33 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 34 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 35 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 36 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 37 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 38 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 39 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 40 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 41 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 42 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 43 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 44 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 45 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 46 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 47 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 48 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 49 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 50 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 51 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 52 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 53 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 54 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 55 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 56 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 57 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 58 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 59 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 60 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 61 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 62 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 63 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 64 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 65 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 66 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 67 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 68 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 69 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 70 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 71 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 72 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 73 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 74 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 75 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 76 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 77 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 78 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 79 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 80 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 81 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 82 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 83 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 84 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 85 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 86 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 87 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 88 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 89 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 90 ]
+[ FAIL 7 | WARN 4 | SKIP 0 | PASS 91 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 91 ]
+
+-- Warning ('test-sequentialtests.R:434:1'): (code run outside of `test_that()`) --
+`context()` was deprecated in the 3rd edition.
 Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:55:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
+    x
+ 1. \-testthat::context("Sequential Testing Analysis - Clinical Decision Making") at test-sequentialtests.R:434:1
+ 2.   \-testthat:::edition_deprecate(3, "context()")
+ 3.     \-cli::cli_warn(...)
 
-── Warning ('test-jjridges.R:75:5'): jjridges works with different color schemes ──
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:75:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:75:5'): jjridges works with different color schemes ──
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:75:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:75:5'): jjridges works with different color schemes ──
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:75:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:75:5'): jjridges works with different color schemes ──
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:75:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:93:5'): jjridges works with different themes ──────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:93:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:93:5'): jjridges works with different themes ──────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:93:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:93:5'): jjridges works with different themes ──────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:93:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:93:5'): jjridges works with different themes ──────
-The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
-i Please use the `linewidth` argument instead.
-i The deprecated feature was likely used in the ClinicoPath package.
-  Please report the issue at <https://github.com/sbalci/ClinicoPathJamoviModule/issues/>.
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:93:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.applyTheme(p) at ClinicoPathJamoviModule/R/jjridges.b.R:530:13
-  8.           ├─ggplot2::theme(...) at ClinicoPathJamoviModule/R/jjridges.b.R:863:17
-  9.           │ └─ggplot2:::find_args(..., complete = NULL, validate = NULL)
- 10.           │   └─base::mget(args, envir = env)
- 11.           └─ggplot2::element_line(color = "#555555", size = 0.3)
- 12.             └─ggplot2:::deprecate_warn0("3.4.0", "element_line(size)", "element_line(linewidth)")
-
-── Warning ('test-jjridges.R:110:5'): jjridges handles legend positioning ──────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:110:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:110:5'): jjridges handles legend positioning ──────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:110:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:110:5'): jjridges handles legend positioning ──────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:110:5
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:126:3'): jjridges handles custom titles ───────────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:126:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:163:3'): jjridges handles edge cases ──────────────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:163:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Error ('test-jjridges.R:176:3'): jjridges validates input parameters ────────
-Error: Argument 'x_var' contains 'Sepal.Length' which is not present in the dataset
-Backtrace:
-     ▆
-  1. ├─testthat::expect_error(...) at test-jjridges.R:176:3
-  2. │ └─testthat:::expect_condition_matching(...)
-  3. │   └─testthat:::quasi_capture(...)
-  4. │     ├─testthat (local) .capture(...)
-  5. │     │ └─base::withCallingHandlers(...)
-  6. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
-  7. └─ClinicoPath::jjridges(...)
-  8.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  9.     └─self$init()
- 10.       ├─jmvcore (local) try(...)
- 11.       │ └─base::eval(expr)
- 12.       └─self$options$check(checkVars = TRUE)
- 13.         └─option$check(checkValues, checkVars, checkData)
- 14.           └─private$.check(data, checkValues, checkVars, checkData)
- 15.             └─jmvcore::reject(...)
-
-── Warning ('test-jjridges.R:209:3'): jjridges works with histogram parameters ──
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:209:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createHistogramPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:452:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:718:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:224:3'): jjridges works with fill options ─────────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:224:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:234:3'): jjridges works with fill options ─────────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:234:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:668:17
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:253:3'): jjridges handles complex datasets ────────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:253:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:274:3'): jjridges works with many groups ──────────
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:274:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-── Warning ('test-jjridges.R:288:3'): jjridges handles extreme parameter values ──
-Ignoring unknown parameters: `size`
-Backtrace:
-     ▆
-  1. └─ClinicoPath::jjridges(...) at test-jjridges.R:288:3
-  2.   └─analysis$run() at ClinicoPathJamoviModule/R/jjridges.h.R:927:5
-  3.     ├─jmvcore (local) try(...)
-  4.     │ └─base::eval(expr)
-  5.     └─private$.run()
-  6.       └─private$.createPlot(plot_data) at ClinicoPathJamoviModule/R/jjridges.b.R:393:13
-  7.         └─private$.createDensityPlot(data) at ClinicoPathJamoviModule/R/jjridges.b.R:448:17
-  8.           └─ggridges::geom_density_ridges(...) at ClinicoPathJamoviModule/R/jjridges.b.R:654:21
-  9.             └─ggplot2::layer(...)
- 10.               └─cli::cli_warn(...)
-
-[ FAIL 1 | WARN 23 | SKIP 0 | PASS 27 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 91 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 92 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 93 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 94 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 95 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 96 ]
+[ FAIL 7 | WARN 5 | SKIP 0 | PASS 96 ]

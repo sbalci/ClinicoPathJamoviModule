@@ -1,7 +1,7 @@
 ---
 name: datetimeconverter
 title: DateTime Converter
-menuGroup: SurvivalT3
+menuGroup: SurvivalT2
 menuSubgroup: Data Preparation
 menuSubtitle: Convert datetime and extract components
 version: '0.0.31'
@@ -63,6 +63,10 @@ options:
       options:
         - name: auto
           title: Auto-detect Format
+        - name: excel_serial
+          title: Excel Serial (Days since 1900)
+        - name: unix_epoch
+          title: Unix Epoch (Seconds since 1970)
         - name: ymdhms
           title: YYYY-MM-DD HH:MM:SS
         - name: ymd

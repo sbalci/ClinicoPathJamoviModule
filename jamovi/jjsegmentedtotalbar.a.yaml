@@ -1,7 +1,7 @@
 ---
 name: jjsegmentedtotalbar
 title: "Segmented Total Bar Charts"
-menuGroup: JJStatsPlotT3
+menuGroup: JJStatsPlotT2
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
 version: '0.0.32'
@@ -84,39 +84,13 @@ options:
         R: Optional variable for creating multiple panels.
         jamovi: Optional variable to create separate panels.
 
-    - name: show_ggplot2_plot
-      title: "Show ggplot2 Plot"
-      type: Bool
-      default: false
-      description:
-        R: Show plot using built-in ggplot2 implementation.
-        jamovi: Display plot using the built-in ggplot2 implementation.
-
-    - name: show_ggsegmented_plot
-      title: "Show ggsegmentedtotalbar Plot"
-      type: Bool
-      default: false
-      description:
-        R: Show plot using ggsegmentedtotalbar package.
-        jamovi: Display plot using the ggsegmentedtotalbar package.
-
-    - name: ggsegmented_labels
-      title: "Show Labels in ggsegmentedtotalbar"
+    - name: show_plot
+      title: "Show Plot"
       type: Bool
       default: true
       description:
-        R: Show value labels in ggsegmentedtotalbar plot.
-        jamovi: Display value labels on segments and totals.
-
-    - name: ggsegmented_alpha
-      title: "Background Transparency (0-1)"
-      type: Number
-      default: 0.3
-      min: 0
-      max: 1
-      description:
-        R: Transparency of background boxes in ggsegmentedtotalbar.
-        jamovi: Set transparency of background annotation boxes (0=transparent, 1=opaque).
+        R: Show segmented total bar chart.
+        jamovi: Display segmented total bar chart.
 
     - name: chart_style
       title: "Chart Style"

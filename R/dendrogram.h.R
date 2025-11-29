@@ -168,6 +168,8 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showCellBorders",
                 showCellBorders,
                 default=FALSE)
+            private$..clustOutput <- jmvcore::OptionOutput$new(
+                "clustOutput")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..clusterMethod)
@@ -189,6 +191,7 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..heatmapScale)
             self$.addOption(private$..heatmapPalette)
             self$.addOption(private$..showCellBorders)
+            self$.addOption(private$..clustOutput)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -210,7 +213,8 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showColDendro = function() private$..showColDendro$value,
         heatmapScale = function() private$..heatmapScale$value,
         heatmapPalette = function() private$..heatmapPalette$value,
-        showCellBorders = function() private$..showCellBorders$value),
+        showCellBorders = function() private$..showCellBorders$value,
+        clustOutput = function() private$..clustOutput$value),
     private = list(
         ..vars = NA,
         ..clusterMethod = NA,
@@ -231,7 +235,8 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showColDendro = NA,
         ..heatmapScale = NA,
         ..heatmapPalette = NA,
-        ..showCellBorders = NA)
+        ..showCellBorders = NA,
+        ..clustOutput = NA)
 )
 
 dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -269,7 +274,7 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title="",
-                visible="(vars.length == 0)"))
+                visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -346,7 +351,7 @@ dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Dendrogram

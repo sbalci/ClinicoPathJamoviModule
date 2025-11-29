@@ -12,14 +12,12 @@ children:
         margin: large
         children:
           - type: Label
-            label: "Instructions"
+            label: Instructions
             children:
               - type: CheckBox
                 name: showGuidedInstructions
               - type: CheckBox
                 name: showConciseInstructions
-
-
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -146,6 +144,8 @@ children:
             name: showSpatialClustering
           - type: CheckBox
             name: showMultifocalAnalysis
+          - type: CheckBox
+            name: autoSelectModel
   - type: CollapseBox
     label: Stratified Analyses (Requires Sample Type)
     collapsed: true
@@ -304,14 +304,14 @@ children:
         margin: large
         children:
           - type: Label
-            label: "Confidence Interval Method"
+            label: Confidence Interval Method
             children:
               - type: ComboBox
                 name: ciMethod
               - type: CheckBox
                 name: useGeometricCI
           - type: Label
-            label: "Model Assessment"
+            label: Model Assessment
             children:
               - type: CheckBox
                 name: showModelFit
@@ -320,14 +320,19 @@ children:
               - type: CheckBox
                 name: showMarginalInterpretation
           - type: Label
-            label: "Heterogeneity Analysis"
+            label: Heterogeneity Analysis
             children:
               - type: CheckBox
                 name: autoDetectHeterogeneity
               - type: CheckBox
                 name: showHeterogeneityTest
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showPowerAnalysis
           - type: Label
-            label: "Data Export Options"
+            label: Data Export Options
             children:
               - type: CheckBox
                 name: appendVariables
@@ -343,7 +348,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: "Specific Text Outputs"
+            label: Specific Text Outputs
             children:
               - type: CheckBox
                 name: showProbabilityExplanation
@@ -355,6 +360,12 @@ children:
                 name: showInterpretText
               - type: CheckBox
                 name: showReferencesText
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: targetPower
+        format: number
   - type: CollapseBox
     label: Advanced Options
     collapsed: true
@@ -368,3 +379,9 @@ children:
             name: seedValue
             format: number
             enable: (setSeed)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: targetDetectionProb
+        format: number

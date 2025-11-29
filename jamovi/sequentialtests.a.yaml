@@ -1,7 +1,7 @@
 ---
 name: sequentialtests
 title: Sequential Testing Analysis
-menuGroup: meddecideT3
+menuGroup: meddecideT2
 menuSubgroup: Decision Calculators
 menuSubtitle: Sequential Test Analysis
 version: '0.0.32'
@@ -101,6 +101,12 @@ options:
       default: 0.70
       min: 0.01
       max: 0.99
+
+    - name: test1_cost
+      title: Cost
+      type: Number
+      default: 0
+      min: 0
     
     # Second Test (Confirmatory Test) Parameters  
     - name: test2_name
@@ -121,6 +127,12 @@ options:
       default: 0.98
       min: 0.01
       max: 0.99
+
+    - name: test2_cost
+      title: Cost
+      type: Number
+      default: 0
+      min: 0
     
     # Testing Strategy
     - name: strategy
@@ -151,6 +163,11 @@ options:
       
     - name: show_formulas
       title: Show Calculation Formulas
+      type: Bool
+      default: false
+      
+    - name: show_cost_analysis
+      title: Show Cost Analysis
       type: Bool
       default: false
       

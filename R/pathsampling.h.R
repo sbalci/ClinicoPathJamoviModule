@@ -62,6 +62,10 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             showModelFit = FALSE,
             showObsPred = FALSE,
             showMarginalInterpretation = TRUE,
+            showPowerAnalysis = FALSE,
+            targetPower = 0.8,
+            targetDetectionProb = 0.95,
+            autoSelectModel = FALSE,
             appendVariables = FALSE,
             appendPrefix = "ps_",
             autoDetectHeterogeneity = TRUE, ...) {
@@ -376,6 +380,26 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "showMarginalInterpretation",
                 showMarginalInterpretation,
                 default=TRUE)
+            private$..showPowerAnalysis <- jmvcore::OptionBool$new(
+                "showPowerAnalysis",
+                showPowerAnalysis,
+                default=FALSE)
+            private$..targetPower <- jmvcore::OptionNumber$new(
+                "targetPower",
+                targetPower,
+                min=0.5,
+                max=0.99,
+                default=0.8)
+            private$..targetDetectionProb <- jmvcore::OptionNumber$new(
+                "targetDetectionProb",
+                targetDetectionProb,
+                min=0.5,
+                max=0.99,
+                default=0.95)
+            private$..autoSelectModel <- jmvcore::OptionBool$new(
+                "autoSelectModel",
+                autoSelectModel,
+                default=FALSE)
             private$..appendVariables <- jmvcore::OptionBool$new(
                 "appendVariables",
                 appendVariables,
@@ -445,6 +469,10 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..showModelFit)
             self$.addOption(private$..showObsPred)
             self$.addOption(private$..showMarginalInterpretation)
+            self$.addOption(private$..showPowerAnalysis)
+            self$.addOption(private$..targetPower)
+            self$.addOption(private$..targetDetectionProb)
+            self$.addOption(private$..autoSelectModel)
             self$.addOption(private$..appendVariables)
             self$.addOption(private$..appendPrefix)
             self$.addOption(private$..autoDetectHeterogeneity)
@@ -506,6 +534,10 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         showModelFit = function() private$..showModelFit$value,
         showObsPred = function() private$..showObsPred$value,
         showMarginalInterpretation = function() private$..showMarginalInterpretation$value,
+        showPowerAnalysis = function() private$..showPowerAnalysis$value,
+        targetPower = function() private$..targetPower$value,
+        targetDetectionProb = function() private$..targetDetectionProb$value,
+        autoSelectModel = function() private$..autoSelectModel$value,
         appendVariables = function() private$..appendVariables$value,
         appendPrefix = function() private$..appendPrefix$value,
         autoDetectHeterogeneity = function() private$..autoDetectHeterogeneity$value),
@@ -566,6 +598,10 @@ pathsamplingOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..showModelFit = NA,
         ..showObsPred = NA,
         ..showMarginalInterpretation = NA,
+        ..showPowerAnalysis = NA,
+        ..targetPower = NA,
+        ..targetDetectionProb = NA,
+        ..autoSelectModel = NA,
         ..appendVariables = NA,
         ..appendPrefix = NA,
         ..autoDetectHeterogeneity = NA)
@@ -626,6 +662,12 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         betaBinomialText = function() private$.items[["betaBinomialText"]],
         betaBinomialTable = function() private$.items[["betaBinomialTable"]],
         betaBinomialRecommendTable = function() private$.items[["betaBinomialRecommendTable"]],
+        powerAnalysisText = function() private$.items[["powerAnalysisText"]],
+        powerTable = function() private$.items[["powerTable"]],
+        multifocalAnalysisText = function() private$.items[["multifocalAnalysisText"]],
+        multifocalProbTable = function() private$.items[["multifocalProbTable"]],
+        modelSelectionText = function() private$.items[["modelSelectionText"]],
+        modelComparisonTable = function() private$.items[["modelComparisonTable"]],
         lnAnalysisText = function() private$.items[["lnAnalysisText"]],
         lnrClassification = function() private$.items[["lnrClassification"]],
         ajccNStage = function() private$.items[["ajccNStage"]],
@@ -1405,6 +1447,115 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="number"))))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="powerAnalysisText",
+                title="Power Analysis for Sample Size Planning",
+                visible="(showPowerAnalysis)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="powerTable",
+                title="Sample Size for Target Power",
+                visible="(showPowerAnalysis)",
+                clearWith=list(
+                    "targetPower",
+                    "targetDetectionProb"),
+                columns=list(
+                    list(
+                        `name`="scenario", 
+                        `title`="Scenario", 
+                        `type`="text"),
+                    list(
+                        `name`="targetPower", 
+                        `title`="Target Power", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="probDetect", 
+                        `title`="Detection Probability (q)", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="nSamples", 
+                        `title`="Required Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="achievedPower", 
+                        `title`="Achieved Power", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multifocalAnalysisText",
+                title="Multifocal Disease Modeling",
+                visible="(showMultifocalAnalysis)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multifocalProbTable",
+                title="Probability of Detecting Multiple Lesions",
+                visible="(showMultifocalAnalysis)",
+                clearWith=list(
+                    "maxSamples",
+                    "firstDetection"),
+                columns=list(
+                    list(
+                        `name`="nSamples", 
+                        `title`="Samples", 
+                        `type`="integer"),
+                    list(
+                        `name`="detectOne", 
+                        `title`="P(\u22651 lesion)", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="detectTwo", 
+                        `title`="P(\u22652 lesions)", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="detectThree", 
+                        `title`="P(\u22653 lesions)", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="modelSelectionText",
+                title="Automated Model Selection",
+                visible="(autoSelectModel)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparisonTable",
+                title="Model Fit Comparison",
+                visible="(autoSelectModel)",
+                clearWith=list(
+                    "totalSamples",
+                    "firstDetection"),
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number"),
+                    list(
+                        `name`="bic", 
+                        `title`="BIC", 
+                        `type`="number"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-Square", 
+                        `type`="number"),
+                    list(
+                        `name`="pVal", 
+                        `title`="p-value (GOF)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="lnAnalysisText",
                 title="Lymph Node Ratio and Staging Analysis",
                 visible="(showLNAnalysis)"))
@@ -1651,6 +1802,10 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   at each sample number. Visual model validation tool.
 #' @param showMarginalInterpretation Add cost-benefit interpretation to
 #'   marginal gain analysis. Auto-enabled when Show Binomial Model is checked.
+#' @param showPowerAnalysis .
+#' @param targetPower .
+#' @param targetDetectionProb .
+#' @param autoSelectModel .
 #' @param appendVariables Add new columns to dataset with calculated detection
 #'   probabilities and classifications. Variables include cumulative
 #'   probabilities, recommended sample counts, and detection categories.
@@ -1712,6 +1867,12 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$betaBinomialText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$betaBinomialTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$betaBinomialRecommendTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$powerAnalysisText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$powerTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multifocalAnalysisText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multifocalProbTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelSelectionText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$modelComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$lnAnalysisText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$lnrClassification} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ajccNStage} \tab \tab \tab \tab \tab a table \cr
@@ -1789,6 +1950,10 @@ pathsampling <- function(
     showModelFit = FALSE,
     showObsPred = FALSE,
     showMarginalInterpretation = TRUE,
+    showPowerAnalysis = FALSE,
+    targetPower = 0.8,
+    targetDetectionProb = 0.95,
+    autoSelectModel = FALSE,
     appendVariables = FALSE,
     appendPrefix = "ps_",
     autoDetectHeterogeneity = TRUE) {
@@ -1881,6 +2046,10 @@ pathsampling <- function(
         showModelFit = showModelFit,
         showObsPred = showObsPred,
         showMarginalInterpretation = showMarginalInterpretation,
+        showPowerAnalysis = showPowerAnalysis,
+        targetPower = targetPower,
+        targetDetectionProb = targetDetectionProb,
+        autoSelectModel = autoSelectModel,
         appendVariables = appendVariables,
         appendPrefix = appendPrefix,
         autoDetectHeterogeneity = autoDetectHeterogeneity)

@@ -62,6 +62,10 @@ pathsampling(
   showModelFit = FALSE,
   showObsPred = FALSE,
   showMarginalInterpretation = TRUE,
+  showPowerAnalysis = FALSE,
+  targetPower = 0.8,
+  targetDetectionProb = 0.95,
+  autoSelectModel = FALSE,
   appendVariables = FALSE,
   appendPrefix = "ps_",
   autoDetectHeterogeneity = TRUE
@@ -206,6 +210,14 @@ at each sample number. Visual model validation tool.}
 \item{showMarginalInterpretation}{Add cost-benefit interpretation to
 marginal gain analysis. Auto-enabled when Show Binomial Model is checked.}
 
+\item{showPowerAnalysis}{.}
+
+\item{targetPower}{.}
+
+\item{targetDetectionProb}{.}
+
+\item{autoSelectModel}{.}
+
 \item{appendVariables}{Add new columns to dataset with calculated detection
 probabilities and classifications. Variables include cumulative
 probabilities, recommended sample counts, and detection categories.}
@@ -271,6 +283,12 @@ A results object containing:
 \code{results$betaBinomialText} \tab \tab \tab \tab \tab a html \cr
 \code{results$betaBinomialTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$betaBinomialRecommendTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$powerAnalysisText} \tab \tab \tab \tab \tab a html \cr
+\code{results$powerTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$multifocalAnalysisText} \tab \tab \tab \tab \tab a html \cr
+\code{results$multifocalProbTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelSelectionText} \tab \tab \tab \tab \tab a html \cr
+\code{results$modelComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$lnAnalysisText} \tab \tab \tab \tab \tab a html \cr
 \code{results$lnrClassification} \tab \tab \tab \tab \tab a table \cr
 \code{results$ajccNStage} \tab \tab \tab \tab \tab a table \cr

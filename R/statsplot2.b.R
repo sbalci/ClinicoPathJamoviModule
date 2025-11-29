@@ -314,7 +314,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "• Consider robust statistical methods\n",
                         "• Results may have reduced statistical power"
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = jmvcore::NoticeType$STRONG_WARNING)))
                 }
 
                 # Parametric assumption checks
@@ -337,7 +337,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                                 "• Consider robust statistical approach (distribution='r')\n",
                                 "• Outliers may unduly influence parametric results"
                             ))
-                            notices <- append(notices, list(notice))
+                            notices <- append(notices, list(list(notice = notice, type = jmvcore::NoticeType$STRONG_WARNING)))
                         }
                     }
 
@@ -354,7 +354,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             "• Consider nonparametric approach if data appears skewed\n",
                             "• Inspect violin plot shape for distributional form"
                         ))
-                        notices <- append(notices, list(notice))
+                        notices <- append(notices, list(list(notice = notice, type = jmvcore::NoticeType$WARNING)))
                     }
                 }
 
@@ -376,7 +376,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             "• Ratio: {round(max_group/min_group, 1)}:1\n",
                             "• Results may be less reliable with imbalanced designs"
                         ))
-                        notices <- append(notices, list(notice))
+                        notices <- append(notices, list(list(notice = notice, type = jmvcore::NoticeType$WARNING)))
                     }
 
                     # Very small group sizes
@@ -393,7 +393,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             "• Consider exact statistical methods for small samples\n",
                             "• Statistical power may be severely limited"
                         ))
-                        notices <- append(notices, list(notice))
+                        notices <- append(notices, list(list(notice = notice, type = jmvcore::NoticeType$STRONG_WARNING)))
                     }
                 }
 
@@ -415,7 +415,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                                 "• Missing: {total_n - complete_pairs}\n",
                                 "• Only complete pairs will be used in paired analysis"
                             ))
-                            notices <- append(notices, list(notice))
+                            notices <- append(notices, list(list(notice = notice, type = jmvcore::NoticeType$WARNING)))
                         }
                     }
                 }
@@ -486,12 +486,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     warnings <- Filter(function(n) identical(n$type, jmvcore::NoticeType$WARNING), assumption_notices)
 
                     position <- 1
-                    for (notice in strong_warnings) {
-                        self$results$insert(position, notice)
+                    for (item in strong_warnings) {
+                        self$results$insert(position, item$notice)
                         position <- position + 1
                     }
-                    for (notice in warnings) {
-                        self$results$insert(position, notice)
+                    for (item in warnings) {
+                        self$results$insert(position, item$notice)
                         position <- position + 1
                     }
                 }
@@ -520,7 +520,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 success$setContent(glue::glue(
                     "Analysis completed successfully.\n",
                     "• Plot type: {analysis_info$plot_type}\n",
-                    "• Observations: {n_used:,} of {n_total:,}\n",
+                    "• Observations: {format(n_used, big.mark = ',')} of {format(n_total, big.mark = ',')}\n",
                     "• Statistical approach: {analysis_info$distribution}\n",
                     "• Study design: {analysis_info$direction}"
                 ))
@@ -705,7 +705,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     set.seed(42)  # For reproducible sampling
                     sample_size <- 5000
                     mydata <- mydata[sample(nrow(mydata), sample_size), ]
-                    message(glue::glue("Large dataset detected ({original_nrow:,} rows). Sampled {sample_size:,} rows for visualization performance. Disable 'Sample Large Datasets' option to use full dataset."))
+                    message(glue::glue("Large dataset detected ({format(original_nrow, big.mark = ',')} rows). Sampled {format(sample_size, big.mark = ',')} rows for visualization performance. Disable 'Sample Large Datasets' option to use full dataset."))
                 }
                 
                 # Prepare composed terms for use with ggstatsplot

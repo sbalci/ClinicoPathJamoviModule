@@ -1,7 +1,7 @@
 ---
 name: recist
 title: RECIST 1.1 Multi-Lesion Aggregation
-menuGroup: OncoPathT4
+menuGroup: OncoPathT2
 menuSubgroup: Response Evaluation
 menuSubtitle: Automated Best Overall Response
 version: '0.0.32'
@@ -199,6 +199,32 @@ options:
     description:
       R: >
         Use nadir (lowest) sum as reference for PD calculation
+
+  - name: sdMinDuration
+    title: Min SD Duration (weeks)
+    type: Number
+    min: 0
+    default: 6
+    description:
+      R: >
+        Minimum duration from baseline required to qualify for Stable Disease (SD)
+
+  # Response Criteria Mapping
+  - name: nonTargetCR
+    title: Non-Target CR Values
+    type: String
+    default: "absent, disappeared"
+    description:
+      R: >
+        Values in non-target status variable indicating Complete Response (comma separated)
+
+  - name: nonTargetPD
+    title: Non-Target PD Values
+    type: String
+    default: "pd, progression, unequivocal"
+    description:
+      R: >
+        Values in non-target status variable indicating Progressive Disease (comma separated)
 
   # Output Options
   - name: showLesionTable

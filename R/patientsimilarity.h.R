@@ -400,7 +400,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="clusterOutcomes",
                 title="Outcome Distribution by Cluster",
-                visible="(performClustering && colorBy)",
+                visible="(performClustering)",
                 rows=0,
                 columns=list(
                     list(

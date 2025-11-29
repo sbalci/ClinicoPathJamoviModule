@@ -37,6 +37,7 @@ recistClass <- R6::R6Class(
                     <li><b>Automated Target Lesion Selection:</b> Applies max 5 lesions, max 2 per organ rule</li>
                     <li><b>Target Lesion Sum Calculation:</b> Automatic aggregation by assessment</li>
                     <li><b>RECIST Response Classification:</b> CR, PR, SD, PD based on target, non-target, and new lesions</li>
+                    <li><b>Customizable Criteria:</b> Configurable non-target status values and SD minimum duration</li>
                     <li><b>Best Overall Response:</b> Automatic BOR calculation with confirmation requirements</li>
                     <li><b>Lesion Trajectories:</b> Individual lesion plots showing tumor dynamics</li>
                     <li><b>Waterfall Plot:</b> Best percent change visualization</li>
@@ -54,7 +55,7 @@ recistClass <- R6::R6Class(
 
                     <p><b>Optional Variables:</b></p>
                     <ul>
-                    <li><b>Non-Target Status:</b> present, absent, or unequivocal PD</li>
+                    <li><b>Non-Target Status:</b> present, absent, or unequivocal PD (values customizable)</li>
                     <li><b>Organ:</b> Anatomic site (enforces max 2 per organ)</li>
                     <li><b>Grouping Variable:</b> For stratified analysis</li>
                     </ul>
@@ -66,7 +67,7 @@ recistClass <- R6::R6Class(
                     <li><b>CR:</b> All target lesions disappear</li>
                     <li><b>PR:</b> ≥30% decrease in target lesion sum from baseline</li>
                     <li><b>PD:</b> ≥20% increase in sum from nadir + 5mm absolute</li>
-                    <li><b>SD:</b> Neither PR nor PD criteria met</li>
+                    <li><b>SD:</b> Neither PR nor PD criteria met (requires min duration, default 6 weeks)</li>
                     <li><b>Confirmation:</b> CR/PR requires confirmation on ≥2 consecutive scans</li>
                     </ul>
 
@@ -156,10 +157,10 @@ recistClass <- R6::R6Class(
 
             mydata <- self$data
 
-            patientId <- jmvcore::toB64(self$options$patientId)
-            assessmentTime <- jmvcore::toB64(self$options$assessmentTime)
-            lesionId <- jmvcore::toB64(self$options$lesionId)
-            lesionType <- jmvcore::toB64(self$options$lesionType)
+            patientId <- self$options$patientId
+            assessmentTime <- self$options$assessmentTime
+            lesionId <- self$options$lesionId
+            lesionType <- self$options$lesionType
 
             data <- data.frame(
                 patientId = mydata[[patientId]],
@@ -171,7 +172,7 @@ recistClass <- R6::R6Class(
 
             # Add diameter if provided
             if (!is.null(self$options$lesionDiameter)) {
-                lesionDiameter <- jmvcore::toB64(self$options$lesionDiameter)
+                lesionDiameter <- self$options$lesionDiameter
                 data$diameter <- as.numeric(mydata[[lesionDiameter]])
             } else {
                 data$diameter <- NA
@@ -179,7 +180,7 @@ recistClass <- R6::R6Class(
 
             # Add organ if provided
             if (!is.null(self$options$organ)) {
-                organ <- jmvcore::toB64(self$options$organ)
+                organ <- self$options$organ
                 data$organ <- as.character(mydata[[organ]])
             } else {
                 data$organ <- "unknown"
@@ -187,7 +188,7 @@ recistClass <- R6::R6Class(
 
             # Add non-target status if provided
             if (!is.null(self$options$nonTargetStatus)) {
-                nonTarget <- jmvcore::toB64(self$options$nonTargetStatus)
+                nonTarget <- self$options$nonTargetStatus
                 data$nonTargetStatus <- tolower(as.character(mydata[[nonTarget]]))
             } else {
                 data$nonTargetStatus <- NA
@@ -229,10 +230,14 @@ recistClass <- R6::R6Class(
 
                     # Check rules
                     if (length(selected) >= self$options$maxTargetLesions) break
-                    if (organs_count[organ] >= self$options$maxPerOrgan) next
+                    
+                    current_count <- organs_count[organ]
+                    if (is.na(current_count)) current_count <- 0
+                    
+                    if (current_count >= self$options$maxPerOrgan) next
 
                     selected <- c(selected, lesion)
-                    organs_count[organ] <- (organs_count[organ] %||% 0) + 1
+                    organs_count[organ] <- current_count + 1
                 }
 
                 # Mark these lesions as included across all assessments
@@ -252,7 +257,7 @@ recistClass <- R6::R6Class(
                 filter(includedInSum == TRUE) %>%
                 group_by(patientId, assessmentTime) %>%
                 summarise(
-                    targetSum = sum(diameter, na.rm = TRUE),
+                    targetSum = if(any(is.na(diameter))) NA_real_ else sum(diameter),
                     numTargetLesions = n(),
                     .groups = "drop"
                 )
@@ -316,11 +321,22 @@ recistClass <- R6::R6Class(
             prThreshold <- -self$options$prThreshold
             pdThreshold <- self$options$pdThreshold
             pdAbsolute <- self$options$pdAbsolute
+            
+            # Parse custom non-target status strings
+            nt_cr_strings <- trimws(unlist(strsplit(self$options$nonTargetCR, ",")))
+            nt_pd_strings <- trimws(unlist(strsplit(self$options$nonTargetPD, ",")))
+            
+            if (length(nt_cr_strings) == 0) nt_cr_strings <- c("absent", "disappeared")
+            if (length(nt_pd_strings) == 0) nt_pd_strings <- c("pd", "progression", "unequivocal")
+            
+            nt_cr_strings <- tolower(nt_cr_strings)
+            nt_pd_strings <- tolower(nt_pd_strings)
 
             # Classify target lesion response
             data <- data %>%
                 mutate(
                     targetResponse = case_when(
+                        is.na(targetSum) ~ "NE",
                         targetSum == 0 ~ "CR",
                         changeFromBaseline <= prThreshold ~ "PR",
                         !is.na(changeFromNadir) & changeFromNadir >= pdThreshold & absoluteChange >= pdAbsolute ~ "PD",
@@ -336,9 +352,9 @@ recistClass <- R6::R6Class(
                 summarise(
                     nonTargetResponse = {
                         statuses <- tolower(nonTargetStatus)
-                        if (all(statuses %in% c("absent", "disappeared"))) {
+                        if (all(statuses %in% nt_cr_strings)) {
                             "CR"
-                        } else if (any(grepl("pd|progression|unequivocal", statuses))) {
+                        } else if (any(statuses %in% nt_pd_strings)) {
                             "PD"
                         } else {
                             "non-CR/non-PD"
@@ -374,6 +390,9 @@ recistClass <- R6::R6Class(
 
                         # Target PD = PD
                         targetResponse == "PD" ~ "PD",
+
+                        # Target NE = NE
+                        targetResponse == "NE" ~ "NE",
 
                         # Default SD
                         TRUE ~ "SD"
@@ -423,6 +442,7 @@ recistClass <- R6::R6Class(
         .calculateBestResponse = function() {
 
             data <- private$.responseData
+            sdMinDuration <- self$options$sdMinDuration
 
             # Response hierarchy: CR > PR > SD > PD
             bestResponse <- data %>%
@@ -430,22 +450,70 @@ recistClass <- R6::R6Class(
                 arrange(assessmentTime) %>%
                 summarise(
                     bestResponse = {
-                        responses <- overallResponse
-                        if (self$options$requireConfirmation) {
-                            # Only count confirmed CR/PR
-                            responses_confirmed <- overallResponse[confirmed == "Yes" | !overallResponse %in% c("CR", "PR")]
+                        # Get baseline time for this patient
+                        baseline_t <- min(assessmentTime)
+                        
+                        # Filter out baseline assessments for response evaluation
+                        post_baseline <- data.frame(
+                            response = overallResponse[assessmentTime > baseline_t],
+                            time = assessmentTime[assessmentTime > baseline_t],
+                            confirmed = confirmed[assessmentTime > baseline_t],
+                            stringsAsFactors = FALSE
+                        )
+                        
+                        if (nrow(post_baseline) == 0) {
+                            "NE"
                         } else {
-                            responses_confirmed <- responses
-                        }
-
-                        if ("CR" %in% responses_confirmed) {
-                            "CR"
-                        } else if ("PR" %in% responses_confirmed) {
-                            "PR"
-                        } else if ("SD" %in% responses_confirmed) {
-                            "SD"
-                        } else {
-                            "PD"
+                            # Check for PD
+                            first_pd_idx <- which(post_baseline$response == "PD")[1]
+                            
+                            # If PD exists, only consider responses BEFORE the first PD
+                            # RECIST: Best response is the best response recorded from the start of the treatment until disease progression/recurrence.
+                            if (!is.na(first_pd_idx)) {
+                                valid_window <- post_baseline[1:(first_pd_idx-1), ]
+                                has_pd <- TRUE
+                            } else {
+                                valid_window <- post_baseline
+                                has_pd <- FALSE
+                            }
+                            
+                            # Logic for CR/PR confirmation
+                            if (self$options$requireConfirmation) {
+                                # CR must be confirmed
+                                has_cr <- any(valid_window$response == "CR" & valid_window$confirmed == "Yes")
+                                # PR must be confirmed
+                                has_pr <- any(valid_window$response == "PR" & valid_window$confirmed == "Yes")
+                            } else {
+                                has_cr <- any(valid_window$response == "CR")
+                                has_pr <- any(valid_window$response == "PR")
+                            }
+                            
+                            # Logic for SD duration
+                            # SD must be met at least once at time >= sdMinDuration (from baseline)
+                            # We consider all SDs in the valid window (before PD)
+                            # Note: We check if *any* assessment in the valid window is SD (or better? No, just SD/PR/CR qualify for stability) 
+                            # but specifically looking for SD classification here.
+                            # Actually, if a patient has PR, they technically met SD criteria too, but PR trumps SD.
+                            # We only care about SD if CR and PR are not achieved.
+                            
+                            # Find assessments in valid window that are SD (or unconfirmed CR/PR which revert to SD if duration met?)
+                            # Standard practice: Unconfirmed PR/CR -> SD if duration met.
+                            # Simplification: Check if any "SD", "PR" (unconfirmed), "CR" (unconfirmed) exists >= min duration
+                            
+                            candidates_for_sd <- valid_window[valid_window$response %in% c("SD", "PR", "CR"), ]
+                            has_sd <- any(candidates_for_sd$time - baseline_t >= sdMinDuration)
+                            
+                            if (has_cr) {
+                                "CR"
+                            } else if (has_pr) {
+                                "PR"
+                            } else if (has_sd) {
+                                "SD"
+                            } else if (has_pd) {
+                                "PD"
+                            } else {
+                                "NE"
+                            }
                         }
                     },
 
@@ -456,14 +524,15 @@ recistClass <- R6::R6Class(
 
                     confirmed = {
                         if (bestResponse %in% c("CR", "PR") && self$options$requireConfirmation) {
-                            if (any(confirmed == "Yes" & overallResponse == bestResponse)) "Yes" else "No"
+                            # If BOR is CR/PR, it must have been confirmed based on logic above
+                            "Yes"
                         } else {
                             "-"
                         }
                     },
 
-                    nadirSum = min(targetSum),
-                    bestPercentChange = min(changeFromBaseline),
+                    nadirSum = min(targetSum, na.rm=TRUE),
+                    bestPercentChange = min(changeFromBaseline, na.rm=TRUE),
 
                     .groups = "drop"
                 )

@@ -13,7 +13,6 @@ children:
         stretchFactor: 1
         events:
           change: ./sequentialtests.events::onChange_preset
-
   - type: Label
     label: First Test (Screening)
     children:
@@ -30,18 +29,17 @@ children:
           - type: TextBox
             name: test1_sens
             format: number
-            label: 'Sensitivity'
+            label: Sensitivity
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_test1_sens
           - type: TextBox
             name: test1_spec
             format: number
-            label: 'Specificity'
+            label: Specificity
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_test1_spec
-  
   - type: Label
     label: Second Test (Confirmatory)
     children:
@@ -58,18 +56,29 @@ children:
           - type: TextBox
             name: test2_sens
             format: number
-            label: 'Sensitivity'
+            label: Sensitivity
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_test2_sens
           - type: TextBox
             name: test2_spec
             format: number
-            label: 'Specificity'
+            label: Specificity
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_test2_spec
-  
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: test1_cost
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: test2_cost
+        format: number
   - type: Label
     label: Testing Strategy
     children:
@@ -78,7 +87,6 @@ children:
         enable: (preset == 'custom')
         events:
           change: ./sequentialtests.events::onChange_strategy
-  
   - type: Label
     label: Disease Parameters
     children:
@@ -88,11 +96,10 @@ children:
           - type: TextBox
             name: prevalence
             format: number
-            label: 'Prevalence'
+            label: Prevalence
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_prevalence
-  
   - type: Label
     label: Display Options
     children:
@@ -105,3 +112,5 @@ children:
             name: show_formulas
           - type: CheckBox
             name: show_nomogram
+          - type: CheckBox
+            name: show_cost_analysis

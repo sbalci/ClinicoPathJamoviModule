@@ -322,7 +322,11 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "custom",
                     "biomarker_distribution",
-                    "treatment_response"),
+                    "treatment_response",
+                    "age_by_stage",
+                    "tumor_size_comparison",
+                    "lab_values_by_group",
+                    "survival_time_distribution"),
                 default="custom")
 
             self$.addOption(private$..x_var)
@@ -785,7 +789,11 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param width Width of the plot in pixels.
 #' @param height Height of the plot in pixels.
 #' @param dpi Resolution for plot export.
-#' @param clinicalPreset Clinical analysis preset for ridge plots
+#' @param clinicalPreset Clinical analysis preset for ridge plots. Biomarker
+#'   Distribution: nonparametric tests with Cliff's delta. Treatment Response:
+#'   violin plots with Bonferroni correction. Age by Stage: parametric tests
+#'   with Cohen's d. Tumor Size: Hodges-Lehmann shift. Lab Values: robust tests
+#'   with Hedges' g. Survival Time: median with quartiles.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr

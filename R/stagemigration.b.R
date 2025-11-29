@@ -1756,14 +1756,29 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 stage_level <- data[[stage_var]][i]
 
                 # Find corresponding stratum in survival fit
-                stratum_idx <- which(grepl(paste0(stage_var, "=", stage_level), names(fit$strata)))
-
+                # Try exact match first
+                target_stratum <- paste0(stage_var, "=", stage_level)
+                stratum_idx <- which(names(fit$strata) == target_stratum)
+                
+                # Fallback to partial match if exact match fails (e.g. due to spacing)
+                if (length(stratum_idx) == 0) {
+                    stratum_idx <- which(grepl(paste0(stage_var, "=", stage_level), names(fit$strata), fixed = TRUE))
+                }
+                
+                # Take the first match if multiple (shouldn't happen with exact match but safety first)
                 if (length(stratum_idx) > 0) {
+                    stratum_idx <- stratum_idx[1]
+                    
                     # Extract time and survival for this stratum
                     stratum_name <- names(fit$strata)[stratum_idx]
                     stratum_end <- cumsum(fit$strata)[stratum_idx]
-                    stratum_start <- ifelse(stratum_idx == 1, 1, cumsum(fit$strata)[stratum_idx - 1] + 1)
-
+                    
+                    if (stratum_idx == 1) {
+                        stratum_start <- 1
+                    } else {
+                        stratum_start <- cumsum(fit$strata)[stratum_idx - 1] + 1
+                    }
+                    
                     stratum_times <- fit$time[stratum_start:stratum_end]
                     stratum_surv <- fit$surv[stratum_start:stratum_end]
 

@@ -264,6 +264,32 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             non_blank <- !is.na(char_vals)
             numeric_guess <- suppressWarnings(as.numeric(char_vals))
             numeric_guess[!non_blank] <- NA_real_
+            
+            # Check for manual override of heuristics via datetime_format option
+            manual_format <- self$options$datetime_format
+            
+            if (manual_format == "excel_serial") {
+                notes <- c(notes, 'Manual override: forcing Excel serial number interpretation.')
+                return(private$.processNumericVector(
+                    numeric_vector = numeric_guess,
+                    notes = notes,
+                    quality_vector = char_vals,
+                    original_display = char_vals,
+                    force_format = 'excel_serial'
+                ))
+            }
+            
+            if (manual_format == "unix_epoch") {
+                notes <- c(notes, 'Manual override: forcing Unix epoch interpretation.')
+                return(private$.processNumericVector(
+                    numeric_vector = numeric_guess,
+                    notes = notes,
+                    quality_vector = char_vals,
+                    original_display = char_vals,
+                    force_format = 'unix_epoch'
+                ))
+            }
+
             numeric_ratio <- if (sum(non_blank) == 0) 0 else sum(!is.na(numeric_guess[non_blank])) / sum(non_blank)
             if (numeric_ratio >= 0.8) {
                 notes <- c(notes, 'Detected numeric serial values stored as text; automatically converted before parsing.')

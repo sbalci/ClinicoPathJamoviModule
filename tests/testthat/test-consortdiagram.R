@@ -1,7 +1,9 @@
 # Tests for consortdiagram function
+source("../../R/consortdiagram.h.R")
+source("../../R/consortdiagram.b.R")
 
 test_that("consortdiagram works with basic single-arm inputs", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Create simple single-arm trial data
     n <- 100
@@ -13,7 +15,7 @@ test_that("consortdiagram works with basic single-arm inputs", {
     )
 
     # Run analysis
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
         screening_exclusions = "screening_fail",
@@ -27,23 +29,23 @@ test_that("consortdiagram works with basic single-arm inputs", {
     expect_true(!is.null(results$flowSummary))
 
     # Check basic counts are correct
-    flow_table <- results$flowSummary$asDF()
+    flow_table <- results$flowSummary$asDF
 
     # Initial screening should have 100 participants
     initial_row <- flow_table[flow_table$stage == "Assessed for eligibility", ]
     expect_equal(initial_row$n_remaining, 100)
 
     # After screening exclusions: 100 - 10 = 90
-    screening_row <- flow_table[flow_table$stage == "After screening", ]
+    screening_row <- flow_table[flow_table$stage == "Enrolled", ]
     expect_equal(screening_row$n_remaining, 90)
 
     # After enrollment exclusions: 90 - 5 = 85
-    enrollment_row <- flow_table[flow_table$stage == "After enrollment", ]
+    enrollment_row <- flow_table[flow_table$stage == "Randomized/Enrolled", ]
     expect_equal(enrollment_row$n_remaining, 85)
 })
 
 test_that("consortdiagram handles multi-arm randomized trial correctly", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Create multi-arm trial data
     n <- 150
@@ -57,7 +59,7 @@ test_that("consortdiagram handles multi-arm randomized trial correctly", {
     )
 
     # Run analysis with randomization
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
         screening_exclusions = "screening_fail",
@@ -70,9 +72,9 @@ test_that("consortdiagram handles multi-arm randomized trial correctly", {
     expect_s3_class(results, "consortdiagramResults")
 
     # Check arm comparison table exists
-    expect_true(!is.null(results$armComparison))
+    expect_true(!is.null(results$armSummary))
 
-    arm_table <- results$armComparison$asDF()
+    arm_table <- results$armSummary$asDF
 
     # Should have 3 arms
     expect_equal(nrow(arm_table), 3)
@@ -87,7 +89,7 @@ test_that("consortdiagram handles multi-arm randomized trial correctly", {
 })
 
 test_that("consortdiagram handles NA correctly (NA means continued)", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Create data where NA explicitly means "participant continued"
     test_data <- data.frame(
@@ -96,14 +98,14 @@ test_that("consortdiagram handles NA correctly (NA means continued)", {
         enrollment_fail = c(rep(NA, 42), rep("Withdrew", 3), rep(NA, 5))  # Of 45, 42 continued, 3 excluded
     )
 
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
         screening_exclusions = "screening_fail",
         enrollment_exclusions = "enrollment_fail"
     )
 
-    flow_table <- results$flowSummary$asDF()
+    flow_table <- results$flowSummary$asDF
 
     # Initial: 50 participants
     initial_row <- flow_table[1, ]
@@ -119,18 +121,22 @@ test_that("consortdiagram handles NA correctly (NA means continued)", {
 })
 
 test_that("consortdiagram prevents double-counting in arm attrition", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Create scenario where same participant could be double-counted
     test_data <- data.frame(
         id = 1:60,
         arm = c(rep("Treatment", 30), rep("Control", 30)),
         allocation_fail = c(rep("Withdrew", 5), rep(NA, 25), rep("Ineligible", 3), rep(NA, 27)),
-        followup_fail = c(rep("Lost", 2), rep(NA, 3), rep(NA, 25), rep("Moved", 2), rep(NA, 1), rep(NA, 27)),
-        analysis_fail = c(rep("Missing data", 1), rep(NA, 1), rep(NA, 3), rep(NA, 55))
+        # Fix followup_fail to have exclusions for survivors (indices 6-30 for Treatment)
+        # Indices 1-5 already excluded.
+        # Let's exclude 6-7 at followup.
+        followup_fail = c(rep(NA, 5), rep("Lost", 2), rep(NA, 23), rep(NA, 30)),
+        # Analysis fail: exclude 8 at analysis
+        analysis_fail = c(rep(NA, 7), rep("Missing data", 1), rep(NA, 22), rep(NA, 30))
     )
 
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
         randomization_var = "arm",
@@ -139,7 +145,7 @@ test_that("consortdiagram prevents double-counting in arm attrition", {
         analysis_exclusions = "analysis_fail"
     )
 
-    arm_table <- results$armComparison$asDF()
+    arm_table <- results$armSummary$asDF
 
     # Treatment arm: allocated = 30
     treatment_row <- arm_table[arm_table$arm == "Treatment", ]
@@ -166,7 +172,7 @@ test_that("consortdiagram prevents double-counting in arm attrition", {
 })
 
 test_that("consortdiagram calculates exclusion percentages correctly", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Create data with known exclusion rates
     test_data <- data.frame(
@@ -174,13 +180,14 @@ test_that("consortdiagram calculates exclusion percentages correctly", {
         screening_fail = c(rep("Ineligible", 20), rep(NA, 80))  # 20% of 100 entering
     )
 
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
-        screening_exclusions = "screening_fail"
+        screening_exclusions = "screening_fail",
+        show_exclusion_details = TRUE
     )
 
-    excl_table <- results$exclusionBreakdown$asDF()
+    excl_table <- results$exclusionBreakdown$asDF
 
     # Find the exclusion row for "Ineligible"
     ineligible_row <- excl_table[excl_table$reason == "Ineligible", ]
@@ -194,7 +201,7 @@ test_that("consortdiagram calculates exclusion percentages correctly", {
 })
 
 test_that("consortdiagram handles missing required inputs", {
-    skip_on_cran()
+    # skip_on_cran()
 
     test_data <- data.frame(
         id = 1:50,
@@ -202,7 +209,7 @@ test_that("consortdiagram handles missing required inputs", {
     )
 
     # Missing participant_id should handle gracefully
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = NULL,
         screening_exclusions = "screening_fail"
@@ -213,7 +220,7 @@ test_that("consortdiagram handles missing required inputs", {
 })
 
 test_that("consortdiagram handles all participants excluded scenario", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Edge case: everyone excluded at screening
     test_data <- data.frame(
@@ -221,16 +228,16 @@ test_that("consortdiagram handles all participants excluded scenario", {
         screening_fail = rep("Failed criteria", 20)
     )
 
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
         screening_exclusions = "screening_fail"
     )
 
-    flow_table <- results$flowSummary$asDF()
+    flow_table <- results$flowSummary$asDF
 
     # After screening, should have 0 remaining
-    screening_row <- flow_table[flow_table$stage == "After screening", ]
+    screening_row <- flow_table[flow_table$stage == "Enrolled", ]
     expect_equal(screening_row$n_remaining, 0)
 
     # Retention should be 0%
@@ -238,7 +245,7 @@ test_that("consortdiagram handles all participants excluded scenario", {
 })
 
 test_that("consortdiagram handles no exclusions scenario", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Edge case: no one excluded
     test_data <- data.frame(
@@ -247,24 +254,24 @@ test_that("consortdiagram handles no exclusions scenario", {
         enrollment_fail = rep(NA, 50)
     )
 
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
         screening_exclusions = "screening_fail",
         enrollment_exclusions = "enrollment_fail"
     )
 
-    flow_table <- results$flowSummary$asDF()
+    flow_table <- results$flowSummary$asDF
 
     # All stages should have 50 participants
     expect_true(all(flow_table$n_remaining == 50))
 
-    # All retention rates should be 100%
-    expect_true(all(flow_table$pct_retained == 100))
+    # All retention rates should be 100% (1.0)
+    expect_true(all(flow_table$pct_retained == 1))
 })
 
 test_that("consortdiagram handles multiple exclusion reasons per stage", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Multiple reasons for exclusion at same stage
     test_data <- data.frame(
@@ -274,13 +281,14 @@ test_that("consortdiagram handles multiple exclusion reasons per stage", {
         reason3 = c(rep(NA, 25), rep("Reason C", 5), rep(NA, 70))
     )
 
-    results <- jmv::consortdiagram(
+    results <- consortdiagram(
         data = test_data,
         participant_id = "id",
-        screening_exclusions = c("reason1", "reason2", "reason3")
+        screening_exclusions = c("reason1", "reason2", "reason3"),
+        show_exclusion_details = TRUE
     )
 
-    excl_table <- results$exclusionBreakdown$asDF()
+    excl_table <- results$exclusionBreakdown$asDF
 
     # Should have 3 distinct reasons listed
     expect_equal(nrow(excl_table), 3)
@@ -296,13 +304,15 @@ test_that("consortdiagram handles multiple exclusion reasons per stage", {
     expect_equal(reason_c$count, 5)
 
     # Total excluded should be 30
-    flow_table <- results$flowSummary$asDF()
-    screening_row <- flow_table[flow_table$stage == "After screening", ]
-    expect_equal(screening_row$n_remaining, 70)  # 100 - 30 = 70
+    flow_table <- results$flowSummary$asDF
+
+    # After screening: 100 - 30 = 70
+    screening_row <- flow_table[flow_table$stage == "Enrolled", ]
+    expect_equal(screening_row$n_remaining, 70)
 })
 
 test_that("consortdiagram handles participant IDs as characters and numbers", {
-    skip_on_cran()
+    # skip_on_cran()
 
     # Test with character IDs
     test_data_char <- data.frame(
@@ -311,7 +321,7 @@ test_that("consortdiagram handles participant IDs as characters and numbers", {
         stringsAsFactors = FALSE
     )
 
-    results_char <- jmv::consortdiagram(
+    results_char <- consortdiagram(
         data = test_data_char,
         participant_id = "id",
         screening_exclusions = "screening_fail"
@@ -325,7 +335,7 @@ test_that("consortdiagram handles participant IDs as characters and numbers", {
         screening_fail = c(rep(NA, 45), rep("Excluded", 5))
     )
 
-    results_num <- jmv::consortdiagram(
+    results_num <- consortdiagram(
         data = test_data_num,
         participant_id = "id",
         screening_exclusions = "screening_fail"
@@ -334,8 +344,8 @@ test_that("consortdiagram handles participant IDs as characters and numbers", {
     expect_s3_class(results_num, "consortdiagramResults")
 
     # Both should give same counts
-    flow_char <- results_char$flowSummary$asDF()
-    flow_num <- results_num$flowSummary$asDF()
+    flow_char <- results_char$flowSummary$asDF
+    flow_num <- results_num$flowSummary$asDF
 
     expect_equal(flow_char$n_remaining, flow_num$n_remaining)
 })

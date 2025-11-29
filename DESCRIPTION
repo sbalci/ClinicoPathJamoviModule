@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.32.30
-Date: 2025-11-22
+Version: 0.0.32.37
+Date: 2025-11-29
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -116,6 +116,7 @@ Imports:
     ggside,
     BayesFactor,
     effectsize,
+    rstatix,
     boot,
     FFTrees,
     knitr,
@@ -274,7 +275,6 @@ Imports:
     fastICA,
     ResourceSelection,
     PredictABEL,
-    ggsegmentedtotalbar,
     tools,
     base64enc,
     CIfinder
@@ -292,7 +292,7 @@ Remotes:
     mlr-org/mlr3extralearners@v1.0.0,
     CCICB/ggEDA,
     cran/parcor,
-    ozancanozdemir/ggsegmentedtotalbar
+    ClinicoPath/waffle
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -308,6 +308,7 @@ Suggests:
     flexsurvcure,
     cuRe,
     npcure,
+    vdiffr,
     concaveman,
     VGAM,
     effsize,

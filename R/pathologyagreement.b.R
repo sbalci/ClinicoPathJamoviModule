@@ -93,7 +93,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             }
 
             # Enhanced validation based on clinical preset
-            private$.performClinicalValidation(method1, method2)
+            validation_warnings <- private$.performClinicalValidation(method1, method2)
             
             # Perform standard 2-method analysis
             private$.performAgreementAnalysis(method1, method2)
@@ -109,7 +109,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 }
             }
 
-            private$.generateInterpretation(method1, method2)
+            private$.generateInterpretation(method1, method2, validation_warnings)
 
             # Generate copy-ready report, glossary, and ICC guide (if interpretation enabled)
             if (self$options$show_interpretation) {
@@ -383,7 +383,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             TRUE
         },
         
-        .generateInterpretation = function(method1, method2) {
+        .generateInterpretation = function(method1, method2, validation_warnings = "") {
             n <- length(method1)
             spearman_r <- cor(method1, method2, method = "spearman")
             
@@ -409,6 +409,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             sd_diff <- sd(differences)
             
             interpretation <- paste0(
+                validation_warnings,
                 "<h3>Agreement Analysis Summary</h3>",
                 "<p><strong>Sample Size:</strong> ", n, " paired observations</p>",
                 
@@ -626,6 +627,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         # Clinical validation based on preset
         .performClinicalValidation = function(method1, method2) {
             n <- length(method1)
+            warnings_html <- ""
 
             # Sample size warning for pathology studies
             if (n < private$.CLINICAL_CONSTANTS$MIN_SAMPLE_PATHOLOGY) {
@@ -635,7 +637,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                     private$.CLINICAL_CONSTANTS$MIN_SAMPLE_PATHOLOGY, "). ",
                     "Consider increasing sample size for more reliable results.</p>"
                 )
-                self$results$interpretation$setContent(warning_msg)
+                warnings_html <- paste0(warnings_html, warning_msg)
             }
 
             # Biomarker range validation for relevant presets
@@ -647,9 +649,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
                 if (range_check1 || range_check2) {
                     range_warning <- "<p style='color: orange;'><strong>Data Check:</strong> Some biomarker values are outside the typical 0-100% range. Please verify data scaling (e.g., percentage vs. proportion).</p>"
-                    current_content <- self$results$interpretation$state
-                    if (is.null(current_content)) current_content <- ""
-                    self$results$interpretation$setContent(paste0(current_content, range_warning))
+                    warnings_html <- paste0(warnings_html, range_warning)
                 }
             }
 
@@ -664,10 +664,10 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                     "+ for more robust confidence intervals (current: ",
                     self$options$bootstrap_n, ").</p>"
                 )
-                current_content <- self$results$interpretation$state
-                if (is.null(current_content)) current_content <- ""
-                self$results$interpretation$setContent(paste0(current_content, bootstrap_rec))
+                warnings_html <- paste0(warnings_html, bootstrap_rec)
             }
+            
+            return(warnings_html)
         },
 
         .generateReportSentences = function(method1, method2) {

@@ -7,6 +7,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tumorgrowthClass",
     inherit = tumorgrowthBase,
     private = list(
+        growth_model = NULL,
         
         .init = function() {
             # Check for required packages
@@ -91,26 +92,26 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
-        .fitGrowthModel = function(data, time_var, size_var, patient_var, 
+        .fitGrowthModel = function(fit_data, time_var, size_var, patient_var, 
                                   covariates, growth_model, model_approach) {
             
             tryCatch({
                 
                 # Prepare data
-                data$time <- data[[time_var]]
-                data$size <- data[[size_var]]
+                fit_data$time <- fit_data[[time_var]]
+                fit_data$size <- fit_data[[size_var]]
                 if (!is.null(patient_var)) {
-                    data$patient <- as.factor(data[[patient_var]])
+                    fit_data$patient <- as.factor(fit_data[[patient_var]])
                 }
                 
                 # Fit model based on type
                 if (model_approach == "nlme" && !is.null(patient_var)) {
-                    model_fit <- private$.fitNlmeModel(data, growth_model)
+                    model_fit <- private$.fitNlmeModel(fit_data, growth_model)
                 } else if (model_approach == "bayesian" && !is.null(patient_var)) {
-                    model_fit <- private$.fitBrmsModel(data, growth_model)
+                    model_fit <- private$.fitBrmsModel(fit_data, growth_model)
                 }
                 else {
-                    model_fit <- private$.fitNlsModel(data, growth_model)
+                    model_fit <- private$.fitNlsModel(fit_data, growth_model)
                 }
                 
                 # Store model for plotting
@@ -120,7 +121,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.formatGrowthResults(model_fit, growth_model)
                 
                 # Calculate model fit statistics
-                private$.calculateFitStatistics(model_fit, data)
+                private$.calculateFitStatistics(model_fit, fit_data)
                 
                 # Populate growth parameters table if requested
                 if (self$options$growthParameters) {
@@ -232,7 +233,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(model)
         },
         
-        .fitNlmeModel = function(data, growth_model) {
+        .fitNlmeModel = function(fit_data, growth_model) {
             
             library(nlme)
             
@@ -240,119 +241,119 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (growth_model == "exponential") {
                 # V(t) = V0 * exp(k*t)
                 model <- nlme(size ~ V0 * exp(k * time),
-                             data = data,
+                             data = fit_data,
                              fixed = V0 + k ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE), 
+                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE), 
                                                     k = 0.1)),
                              control = nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "gompertz") {
                 # V(t) = V0 * exp(alpha/beta * (1 - exp(-beta*t)))
                 model <- nlme(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
-                             data = data,
+                             data = fit_data,
                              fixed = V0 + alpha + beta ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                                     alpha = 1, beta = 0.1)),
                              control = nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "logistic") {
                 # V(t) = K / (1 + exp(-r*(t-t0)))
-                K_init <- max(data$size, na.rm = TRUE) * 1.2
+                K_init <- max(fit_data$size, na.rm = TRUE) * 1.2
                 model <- nlme(size ~ K / (1 + exp(-r * (time - t0))),
-                             data = data,
+                             data = fit_data,
                              fixed = K + r + t0 ~ 1,
                              random = K ~ 1 | patient,
                              start = list(fixed = c(K = K_init, r = 0.1, 
-                                                    t0 = median(data$time, na.rm = TRUE))),
+                                                    t0 = median(fit_data$time, na.rm = TRUE))),
                              control = nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "bertalanffy") {
                 # von Bertalanffy: V(t) = (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k*t))^3
-                Vinf_init <- max(data$size, na.rm = TRUE) * 1.5
+                Vinf_init <- max(fit_data$size, na.rm = TRUE) * 1.5
                 model <- nlme(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
-                             data = data,
+                             data = fit_data,
                              fixed = V0 + Vinf + k ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                                     Vinf = Vinf_init, k = 0.1)),
                              control = nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "power") {
                 # Power Law: V(t) = V0 * t^alpha
                 model <- nlme(size ~ V0 * (time + 1)^alpha,  # +1 to handle t=0
-                             data = data,
+                             data = fit_data,
                              fixed = V0 + alpha ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                                     alpha = 1.2)),
                              control = nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "linear") {
                 # V(t) = V0 + k*t
                 model <- nlme(size ~ V0 + k * time,
-                             data = data,
+                             data = fit_data,
                              fixed = V0 + k ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                                     k = 1)))
             } else {
                 # Default to exponential
                 model <- nlme(size ~ V0 * exp(k * time),
-                             data = data,
+                             data = fit_data,
                              fixed = V0 + k ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                                     k = 0.1)))
             }
             
             return(model)
         },
         
-        .fitNlsModel = function(data, growth_model) {
+        .fitNlsModel = function(fit_data, growth_model) {
             
             # Simple nonlinear least squares for single patients or pooled data
             if (growth_model == "exponential") {
                 model <- nls(size ~ V0 * exp(k * time),
-                            data = data,
-                            start = list(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                            data = fit_data,
+                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                         k = 0.1))
                                         
             } else if (growth_model == "gompertz") {
                 model <- nls(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
-                            data = data,
-                            start = list(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                            data = fit_data,
+                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                         alpha = 1, beta = 0.1))
                                         
             } else if (growth_model == "logistic") {
-                K_init <- max(data$size, na.rm = TRUE) * 1.2
+                K_init <- max(fit_data$size, na.rm = TRUE) * 1.2
                 model <- nls(size ~ K / (1 + exp(-r * (time - t0))),
-                            data = data,
+                            data = fit_data,
                             start = list(K = K_init, r = 0.1, 
-                                        t0 = median(data$time, na.rm = TRUE)))
+                                        t0 = median(fit_data$time, na.rm = TRUE)))
                                         
             } else if (growth_model == "bertalanffy") {
-                Vinf_init <- max(data$size, na.rm = TRUE) * 1.5
+                Vinf_init <- max(fit_data$size, na.rm = TRUE) * 1.5
                 model <- nls(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
-                            data = data,
-                            start = list(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                            data = fit_data,
+                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                         Vinf = Vinf_init, k = 0.1))
                                         
             } else if (growth_model == "power") {
                 model <- nls(size ~ V0 * (time + 1)^alpha,
-                            data = data,
-                            start = list(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                            data = fit_data,
+                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                         alpha = 1.2))
                                         
             } else if (growth_model == "linear") {
-                model <- lm(size ~ time, data = data)
+                model <- lm(size ~ time, data = fit_data)
                 
             } else {
                 # Default exponential
                 model <- nls(size ~ V0 * exp(k * time),
-                            data = data,
-                            start = list(V0 = mean(data$size[data$time == min(data$time)], na.rm = TRUE),
+                            data = fit_data,
+                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                         k = 0.1))
             }
             
@@ -375,9 +376,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Populate model table
             model_table <- self$results$modelTable
             
+            
             for (i in 1:nrow(coef_summary)) {
                 param_name <- rownames(coef_summary)[i]
-                
                 # Biological interpretation
                 interpretation <- private$.interpretParameter(param_name, growth_model)
                 
@@ -396,14 +397,20 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Get better confidence intervals
                     ci_result <- private$.calculateBetterConfidenceIntervals(model, param_name)
                     
+                    # Extract values safely
+                    est <- if ("Value" %in% colnames(coef_summary)) coef_summary[i, "Value"] else coef_summary[i, "Estimate"]
+                    se <- if ("Std.Error" %in% colnames(coef_summary)) coef_summary[i, "Std.Error"] else coef_summary[i, "Std. Error"]
+                    tval <- if ("t-value" %in% colnames(coef_summary)) coef_summary[i, "t-value"] else coef_summary[i, "t value"]
+                    pval <- if ("p-value" %in% colnames(coef_summary)) coef_summary[i, "p-value"] else coef_summary[i, "Pr(>|t|)"]
+                    
                     model_table$addRow(rowKey = i, values = list(
                         parameter = param_name,
-                        estimate = round(coef_summary[i, "Value"] %||% coef_summary[i, "Estimate"], 4),
-                        std_error = round(coef_summary[i, "Std.Error"] %||% coef_summary[i, "Std. Error"], 4),
-                        t_value = round(coef_summary[i, "t-value"] %||% coef_summary[i, "t value"], 3),
-                        p_value = round(coef_summary[i, "p-value"] %||% coef_summary[i, "Pr(>|t|)"], 4),
-                        ci_lower = round(ci_result$lower, 4),
-                        ci_upper = round(ci_result$upper, 4),
+                        estimate = est,
+                        std_error = se,
+                        t_value = tval,
+                        p_value = pval,
+                        ci_lower = ci_result$lower,
+                        ci_upper = ci_result$upper,
                         interpretation = interpretation
                     ))
                 }

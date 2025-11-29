@@ -36,6 +36,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             institutionVar = NULL,
             specialtyVar = NULL,
             identifyDiscordantCases = FALSE,
+            styleHeatmap = TRUE,
             caseID = NULL,
             icc = FALSE,
             bootstrap = FALSE,
@@ -248,6 +249,10 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "identifyDiscordantCases",
                 identifyDiscordantCases,
                 default=FALSE)
+            private$..styleHeatmap <- jmvcore::OptionBool$new(
+                "styleHeatmap",
+                styleHeatmap,
+                default=TRUE)
             private$..caseID <- jmvcore::OptionVariable$new(
                 "caseID",
                 caseID,
@@ -461,6 +466,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..institutionVar)
             self$.addOption(private$..specialtyVar)
             self$.addOption(private$..identifyDiscordantCases)
+            self$.addOption(private$..styleHeatmap)
             self$.addOption(private$..caseID)
             self$.addOption(private$..icc)
             self$.addOption(private$..bootstrap)
@@ -528,6 +534,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         institutionVar = function() private$..institutionVar$value,
         specialtyVar = function() private$..specialtyVar$value,
         identifyDiscordantCases = function() private$..identifyDiscordantCases$value,
+        styleHeatmap = function() private$..styleHeatmap$value,
         caseID = function() private$..caseID$value,
         icc = function() private$..icc$value,
         bootstrap = function() private$..bootstrap$value,
@@ -594,6 +601,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..institutionVar = NA,
         ..specialtyVar = NA,
         ..identifyDiscordantCases = NA,
+        ..styleHeatmap = NA,
         ..caseID = NA,
         ..icc = NA,
         ..bootstrap = NA,
@@ -1186,7 +1194,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".diagnosticStyleHeatmap",
-                visible="(diagnosticStyleAnalysis)"))
+                visible="(diagnosticStyleAnalysis && styleHeatmap)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticStyleCombined",
@@ -1816,6 +1824,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   subspecialty information
 #' @param identifyDiscordantCases Identify cases that distinguish different
 #'   diagnostic styles - useful for training and consensus development.
+#' @param styleHeatmap Display diagnostic style heatmap.
 #' @param caseID Optional variable containing case identifiers. If not
 #'   specified, cases will be numbered automatically.
 #' @param icc Calculate ICC for continuous or ordinal data. Provides
@@ -1993,6 +2002,7 @@ pathagreement <- function(
     institutionVar,
     specialtyVar,
     identifyDiscordantCases = FALSE,
+    styleHeatmap = TRUE,
     caseID,
     icc = FALSE,
     bootstrap = FALSE,
@@ -2094,6 +2104,7 @@ pathagreement <- function(
         institutionVar = institutionVar,
         specialtyVar = specialtyVar,
         identifyDiscordantCases = identifyDiscordantCases,
+        styleHeatmap = styleHeatmap,
         caseID = caseID,
         icc = icc,
         bootstrap = bootstrap,

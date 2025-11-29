@@ -352,11 +352,18 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
         .correct_with_datefixr = function(date_char) {
             
             tryCatch({
+                # datefixR only accepts "dmy" or "mdy"
+                # Map "auto" and "ymd" to default "dmy"
+                fmt <- self$options$date_format
+                if (fmt == "auto" || fmt == "ymd") {
+                    fmt <- "dmy"
+                }
+                
                 corrected_dates <- datefixR::fix_date_char(
                     date_char,
-                    day.impute = self$options$day_impute,
-                    month.impute = self$options$month_impute,
-                    format = self$options$date_format,
+                    day.impute = as.integer(self$options$day_impute),
+                    month.impute = as.integer(self$options$month_impute),
+                    format = fmt,
                     excel = self$options$handle_excel
                 )
                 
@@ -409,21 +416,22 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             
             tryCatch({
                 date_format <- self$options$date_format
+                tz <- self$options$timezone
                 
                 corrected_dates <- switch(date_format,
-                    "dmy" = lubridate::dmy(date_char),
-                    "mdy" = lubridate::mdy(date_char),
-                    "ymd" = lubridate::ymd(date_char),
+                    "dmy" = lubridate::dmy(date_char, tz = tz),
+                    "mdy" = lubridate::mdy(date_char, tz = tz),
+                    "ymd" = lubridate::ymd(date_char, tz = tz),
                     "auto" = {
                         # Try multiple formats
                         formats <- c("dmy", "mdy", "ymd", "dmy HMS", "mdy HMS", "ymd HMS")
-                        lubridate::parse_date_time(date_char, formats)
+                        lubridate::parse_date_time(date_char, formats, tz = tz)
                     }
                 )
                 
                 # Convert to Date class if it's POSIXct
                 if (inherits(corrected_dates, "POSIXct")) {
-                    corrected_dates <- as.Date(corrected_dates)
+                    corrected_dates <- as.Date(corrected_dates, tz = tz)
                 }
                 
                 success <- !is.na(corrected_dates)

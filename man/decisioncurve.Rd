@@ -19,6 +19,7 @@ decisioncurve(
   showPlot = TRUE,
   plotStyle = "standard",
   showReferenceLinesLabels = TRUE,
+  showCalibrationPlot = FALSE,
   highlightRange = FALSE,
   highlightMin = 0.1,
   highlightMax = 0.3,
@@ -84,6 +85,8 @@ to display in table.}
 
 \item{showReferenceLinesLabels}{Show labels for "Treat All" and "Treat
 None" reference lines.}
+
+\item{showCalibrationPlot}{Display calibration plot to assess model fit.}
 
 \item{highlightRange}{Highlight a clinically relevant threshold range on
 the plot.}

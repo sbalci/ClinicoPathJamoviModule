@@ -1,7 +1,7 @@
 ---
 name: datecorrection
 title: Date Field Correction
-menuGroup: SurvivalT3
+menuGroup: SurvivalT2
 menuSubgroup: Data Preparation
 version: '0.0.3'
 jas: '1.2'

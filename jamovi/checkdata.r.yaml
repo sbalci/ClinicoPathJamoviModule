@@ -48,8 +48,37 @@ items:
         - name: zscore
           title: "Z-Score"
           type: number
+        - name: zscoreFlag
+          title: "Z-score"
+          type: text
+        - name: iqrFlag
+          title: "IQR"
+          type: text
+        - name: madFlag
+          title: "MAD"
+          type: text
         - name: severity
-          title: "Severity"
+          title: "Severity (by Z)"
+          type: text
+
+    - name: outlierMethodSummary
+      title: "Outlier Detection Method Summary (Heuristic)"
+      type: Table
+      description: "Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting."
+      visible: (showOutliers)
+      rows: 0
+      columns:
+        - name: method
+          title: "Method"
+          type: text
+        - name: threshold
+          title: "Threshold"
+          type: text
+        - name: outliers_detected
+          title: "Outliers Found"
+          type: integer
+        - name: note
+          title: "Note"
           type: text
 
     - name: distribution

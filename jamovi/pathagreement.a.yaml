@@ -1,7 +1,7 @@
 ---
 name:  pathagreement
 title: Pathology Interrater Reliability
-menuGroup: OncoPathT4
+menuGroup: OncoPathT2
 menuSubgroup: Agreement
 version: '0.0.31'
 jas: '1.2'
@@ -364,6 +364,14 @@ options:
       description:
           R: >
             Identify cases that distinguish different diagnostic styles - useful for training and consensus development.
+
+    - name: styleHeatmap
+      title: Show Diagnostic Style Heatmap
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display diagnostic style heatmap.
 
     - name: caseID
       title: Case ID Variable

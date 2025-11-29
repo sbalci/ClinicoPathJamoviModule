@@ -21,6 +21,9 @@ recistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             requireConfirmation = TRUE,
             confirmationWindow = 4,
             nadirReference = TRUE,
+            sdMinDuration = 6,
+            nonTargetCR = "absent, disappeared",
+            nonTargetPD = "pd, progression, unequivocal",
             showLesionTable = TRUE,
             showTargetSumTable = TRUE,
             showResponseTable = TRUE,
@@ -118,6 +121,19 @@ recistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "nadirReference",
                 nadirReference,
                 default=TRUE)
+            private$..sdMinDuration <- jmvcore::OptionNumber$new(
+                "sdMinDuration",
+                sdMinDuration,
+                min=0,
+                default=6)
+            private$..nonTargetCR <- jmvcore::OptionString$new(
+                "nonTargetCR",
+                nonTargetCR,
+                default="absent, disappeared")
+            private$..nonTargetPD <- jmvcore::OptionString$new(
+                "nonTargetPD",
+                nonTargetPD,
+                default="pd, progression, unequivocal")
             private$..showLesionTable <- jmvcore::OptionBool$new(
                 "showLesionTable",
                 showLesionTable,
@@ -180,6 +196,9 @@ recistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..requireConfirmation)
             self$.addOption(private$..confirmationWindow)
             self$.addOption(private$..nadirReference)
+            self$.addOption(private$..sdMinDuration)
+            self$.addOption(private$..nonTargetCR)
+            self$.addOption(private$..nonTargetPD)
             self$.addOption(private$..showLesionTable)
             self$.addOption(private$..showTargetSumTable)
             self$.addOption(private$..showResponseTable)
@@ -208,6 +227,9 @@ recistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         requireConfirmation = function() private$..requireConfirmation$value,
         confirmationWindow = function() private$..confirmationWindow$value,
         nadirReference = function() private$..nadirReference$value,
+        sdMinDuration = function() private$..sdMinDuration$value,
+        nonTargetCR = function() private$..nonTargetCR$value,
+        nonTargetPD = function() private$..nonTargetPD$value,
         showLesionTable = function() private$..showLesionTable$value,
         showTargetSumTable = function() private$..showTargetSumTable$value,
         showResponseTable = function() private$..showResponseTable$value,
@@ -235,6 +257,9 @@ recistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..requireConfirmation = NA,
         ..confirmationWindow = NA,
         ..nadirReference = NA,
+        ..sdMinDuration = NA,
+        ..nonTargetCR = NA,
+        ..nonTargetPD = NA,
         ..showLesionTable = NA,
         ..showTargetSumTable = NA,
         ..showResponseTable = NA,
@@ -691,6 +716,12 @@ recistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param confirmationWindow Minimum weeks between confirmation assessments
 #' @param nadirReference Use nadir (lowest) sum as reference for PD
 #'   calculation
+#' @param sdMinDuration Minimum duration from baseline required to qualify for
+#'   Stable Disease (SD)
+#' @param nonTargetCR Values in non-target status variable indicating Complete
+#'   Response (comma separated)
+#' @param nonTargetPD Values in non-target status variable indicating
+#'   Progressive Disease (comma separated)
 #' @param showLesionTable Show individual lesion measurements
 #' @param showTargetSumTable Show aggregated target lesion sums by assessment
 #' @param showResponseTable Show RECIST response categories per assessment
@@ -745,6 +776,9 @@ recist <- function(
     requireConfirmation = TRUE,
     confirmationWindow = 4,
     nadirReference = TRUE,
+    sdMinDuration = 6,
+    nonTargetCR = "absent, disappeared",
+    nonTargetPD = "pd, progression, unequivocal",
     showLesionTable = TRUE,
     showTargetSumTable = TRUE,
     showResponseTable = TRUE,
@@ -831,6 +865,9 @@ recist <- function(
         requireConfirmation = requireConfirmation,
         confirmationWindow = confirmationWindow,
         nadirReference = nadirReference,
+        sdMinDuration = sdMinDuration,
+        nonTargetCR = nonTargetCR,
+        nonTargetPD = nonTargetPD,
         showLesionTable = showLesionTable,
         showTargetSumTable = showTargetSumTable,
         showResponseTable = showResponseTable,

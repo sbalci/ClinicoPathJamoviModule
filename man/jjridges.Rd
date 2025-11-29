@@ -171,7 +171,11 @@ is specified.}
 
 \item{dpi}{Resolution for plot export.}
 
-\item{clinicalPreset}{Clinical analysis preset for ridge plots}
+\item{clinicalPreset}{Clinical analysis preset for ridge plots. Biomarker
+Distribution: nonparametric tests with Cliff's delta. Treatment Response:
+violin plots with Bonferroni correction. Age by Stage: parametric tests
+with Cohen's d. Tumor Size: Hodges-Lehmann shift. Lab Values: robust tests
+with Hedges' g. Survival Time: median with quartiles.}
 }
 \value{
 A results object containing:
