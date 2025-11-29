@@ -40,6 +40,8 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 
 # ClinicoPathDescriptives
 
+- Phenotypic and Genotypic Profile of Enterobacteriaceae Isolated at a Teaching Hospital in Ghana https://pmc.ncbi.nlm.nih.gov/articles/PMC12597788/ 
+
 - COMPARATIVE MORPHOMETRIC ANALYSIS OF VARIOUS GROUPS - "OPTIMAL" AND "UNOPTIMAL" DICHOTOS OF THE INNER-ORDAINED ARTERIAL DRESS OF THE SPLEEN OF A PERSON
 https://discover-journal.ru/jour/index.php/sjlsa/article/view/925
 
