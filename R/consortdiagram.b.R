@@ -95,6 +95,19 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 private$.generateExportInfo()
 
+                # Consistency check: final remaining + total excluded should equal total
+                if (!is.null(private$.flowData)) {
+                    total_n <- private$.flowData[["initial"]]$n_remaining
+                    final_n <- private$.flowData[["analysis"]]$n_remaining
+                    total_excluded <- sum(sapply(private$.flowData, function(x) x$n_excluded))
+                    if (!isTRUE(all.equal(total_n, final_n + total_excluded))) {
+                        notice <- jmvcore::Notice$new(options=self$options, name="imbalance",
+                            type=jmvcore::NoticeType$STRONG_WARNING)
+                        notice$setContent("Flow counts inconsistent: final analyzed + excluded does not equal total participants. Please verify exclusion columns and participant IDs.")
+                        self$results$insert(1, notice)
+                    }
+                }
+
             }, error = function(e) {
                 # Show error in todo section
                 self$results$todo$setVisible(TRUE)
@@ -112,6 +125,22 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .validateInputs = function() {
             if (is.null(self$data) || nrow(self$data) == 0) {
                 return(FALSE)
+            }
+
+            # Enforce unique participant IDs
+            if (!is.null(self$options$participant_id) && length(self$options$participant_id) > 0) {
+                pid <- private$.escapeVar(self$options$participant_id)
+                dup_ids <- self$data[[pid]][duplicated(self$data[[pid]])]
+                if (length(dup_ids) > 0) {
+                    notice <- jmvcore::Notice$new(options=self$options, name="dup_ids",
+                        type=jmvcore::NoticeType$ERROR)
+                    notice$setContent(paste0(
+                        "Duplicate participant IDs detected (e.g., ", paste(head(dup_ids, 3), collapse = ", "),
+                        "). Please ensure one row per participant."
+                    ))
+                    self$results$insert(1, notice)
+                    return(FALSE)
+                }
             }
 
             # Check for participant ID
@@ -261,6 +290,10 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 excluded_analysis_ids <- private$.getExcludedIds(ids_after_followup, self$options$analysis_exclusions)
                 n_analyzed <- n_completed_followup - length(excluded_analysis_ids)
 
+                if (n_received < 0 || n_completed_followup < 0 || n_analyzed < 0) {
+                    warning(paste0("Negative counts detected in arm ", arm, ". Please verify exclusion columns are stage-specific."))
+                }
+
                 arm_data[[as.character(arm)]] <- list(
                     arm = as.character(arm),
                     allocated = n_allocated,
@@ -317,7 +350,8 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     n_remaining = stage_data$n_remaining,
                     n_excluded = stage_data$n_excluded,
                     pct_retained = stage_data$pct_retained / 100,
-                    exclusion_details = stage_data$exclusion_details
+                    exclusion_details = paste0(stage_data$exclusion_details,
+                        " (stage denominator: ", stage_data$n_remaining + stage_data$n_excluded, ")")
                 ))
 
                 row_num <- row_num + 1
@@ -814,6 +848,10 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get unique newly excluded
             newly_excluded <- unique(newly_excluded)
 
+            # Entrants to this stage
+            n_entering_stage <- total_n - length(excluded_ids)
+            n_remaining_stage <- n_entering_stage - length(newly_excluded)
+
             # Format exclusion details
             details_text <- ""
             if (length(exclusion_breakdown) > 0) {
@@ -833,8 +871,8 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(list(
                 stage = stage_name,
                 n_excluded = length(newly_excluded),
-                n_remaining = total_n - length(updated_excluded_ids),
-                pct_retained = round((total_n - length(updated_excluded_ids)) / total_n * 100, 1),
+                n_remaining = n_remaining_stage,
+                pct_retained = if (n_entering_stage > 0) round(n_remaining_stage / n_entering_stage * 100, 1) else 0,
                 exclusion_details = details_text,
                 exclusion_breakdown = exclusion_breakdown,
                 new_excluded_ids = newly_excluded
@@ -925,27 +963,46 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             tryCatch({
                 # Prepare data for consort package
-                # The consort package expects patient-level data with exclusion columns
                 data <- self$data
+
+                # Rename columns to escaped versions used in processing
+                rename_map <- c(
+                    self$options$participant_id,
+                    self$options$randomization_var,
+                    unlist(self$options$screening_exclusions),
+                    unlist(self$options$enrollment_exclusions),
+                    unlist(self$options$allocation_exclusions),
+                    unlist(self$options$followup_exclusions),
+                    unlist(self$options$analysis_exclusions)
+                )
+                rename_map <- rename_map[!is.null(rename_map)]
+                if (length(rename_map) > 0) {
+                    for (col in rename_map) {
+                        esc <- private$.escapeVar(col)
+                        if (esc != col && col %in% names(data)) {
+                            names(data)[names(data) == col] <- esc
+                        }
+                    }
+                }
 
                 # Create a combined exclusion order list for consort_plot
                 # This maps the stages to the exclusion variables
                 exclusion_order <- list()
 
                 if (!is.null(self$options$screening_exclusions) && length(self$options$screening_exclusions) > 0) {
-                    exclusion_order[[self$options$screening_label]] <- self$options$screening_exclusions
+                    exclusion_order[[self$options$screening_label]] <- private$.escapeVar(self$options$screening_exclusions)
                 }
                 if (!is.null(self$options$enrollment_exclusions) && length(self$options$enrollment_exclusions) > 0) {
-                    exclusion_order[[self$options$enrollment_label]] <- self$options$enrollment_exclusions
+                    exclusion_order[[self$options$enrollment_label]] <- private$.escapeVar(self$options$enrollment_exclusions)
                 }
                 if (!is.null(self$options$allocation_exclusions) && length(self$options$allocation_exclusions) > 0) {
-                    exclusion_order[[self$options$allocation_label]] <- self$options$allocation_exclusions
+                    exclusion_order[[self$options$allocation_label]] <- private$.escapeVar(self$options$allocation_exclusions)
                 }
                 if (!is.null(self$options$followup_exclusions) && length(self$options$followup_exclusions) > 0) {
-                    exclusion_order[[self$options$followup_label]] <- self$options$followup_exclusions
+                    exclusion_order[[self$options$followup_label]] <- private$.escapeVar(self$options$followup_exclusions)
                 }
                 if (!is.null(self$options$analysis_exclusions) && length(self$options$analysis_exclusions) > 0) {
-                    exclusion_order[[self$options$analysis_label]] <- self$options$analysis_exclusions
+                    exclusion_order[[self$options$analysis_label]] <- private$.escapeVar(self$options$analysis_exclusions)
                 }
 
                 # Get all exclusion columns
@@ -956,7 +1013,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = data,
                     orders = exclusion_order,
                     side_box = if (self$options$show_exclusion_details) all_exclusion_cols else NULL,
-                    allocation = self$options$randomization_var,
+                    allocation = if (!is.null(self$options$randomization_var)) private$.escapeVar(self$options$randomization_var) else NULL,
                     labels = names(exclusion_order),
                     cex = 0.8,
                     text_width = self$options$text_width

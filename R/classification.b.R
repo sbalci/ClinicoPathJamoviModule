@@ -34,6 +34,21 @@ private = list(
         self$results$add(preformatted)
     },
 
+    .resolvePositiveClass = function(truth_factor) {
+        factor_levels <- levels(truth_factor)
+
+        if (!is.null(self$options$positiveClass) && nchar(self$options$positiveClass) > 0 &&
+            self$options$positiveClass %in% factor_levels) {
+            return(self$options$positiveClass)
+        }
+
+        if (length(factor_levels) >= 2) {
+            return(factor_levels[2])
+        }
+
+        return(factor_levels[1])
+    },
+
     .run = function() {
         library('mlr3')
         library('mlr3pipelines')
@@ -60,6 +75,11 @@ private = list(
 
         if (nrow(self$data) == 0)
             stop('Data contains no (complete) rows')
+
+        # Apply user-defined seed for reproducibility
+        if (!is.null(self$options$seed) && !is.na(self$options$seed)) {
+            set.seed(self$options$seed)
+        }
 
         data <- as.data.table(self$data)
 
@@ -121,9 +141,9 @@ private = list(
             # SMOTE requires mlr3smote package (not smotefamily)
             if (!requireNamespace("smotefamily", quietly = TRUE)) {
                 warning(paste(
-                    "SMOTE requires the 'smotefamily' package which is not installed.",
-                    "Falling back to oversampling method.",
-                    "To use SMOTE, install the package with: install.packages('smotefamily')"
+                    "SMOTE option selected, but the 'smotefamily' package is not installed.",
+                    "Using classbalancing oversampling instead (no synthetic examples generated).",
+                    "To enable SMOTE, install the package with: install.packages('smotefamily')"
                 ))
                 # Fall back to oversampling
                 po_balance <- po("classbalancing",
@@ -186,28 +206,11 @@ private = list(
         }
 
         # Determine positive class
-        factor_levels <- levels(truth_factor)
-
-        # Use user-specified positive class if provided, otherwise default to second level
-        if (!is.null(self$options$positiveClass) && nchar(self$options$positiveClass) > 0) {
-            positive_class <- self$options$positiveClass
-
-            # Validate that the specified class exists
-            if (!(positive_class %in% factor_levels)) {
-                warning(paste(
-                    "Specified positive class '", positive_class, "' not found in data.",
-                    "Available classes are:", paste(factor_levels, collapse = ", "),
-                    ". Using second factor level '", factor_levels[2], "' as positive."
-                ))
-                positive_class <- factor_levels[2]
-            }
-        } else {
-            # Default to second factor level
-            positive_class <- factor_levels[2]
-        }
+        positive_class <- private$.resolvePositiveClass(truth_factor)
 
         # Determine negative class
-        negative_class <- setdiff(factor_levels, positive_class)[1]
+        negative_candidates <- setdiff(levels(truth_factor), positive_class)
+        negative_class <- if (length(negative_candidates) > 0) negative_candidates[1] else positive_class
 
         # Calculate clinical metrics using caret functions
         tryCatch({
@@ -284,6 +287,10 @@ private = list(
         } else {
             # Holdout validation
             resampling <- rsmp("holdout", ratio = 1 - self$options$testSize)
+        }
+
+        if ("stratify" %in% resampling$param_set$ids()) {
+            resampling$param_set$values$stratify <- TRUE
         }
 
         resampling$instantiate(task)
@@ -498,40 +505,66 @@ private = list(
     .trainModel = function(task, learner) {
         private$.printModelParameters(learner$param_set)
 
-        if (self$options$testing == "split" | self$options$testing == "trainSet") {
-            predictions <- private$.trainTestSplit(task, learner)
-            private$.setOutput(predictions, predictions, learner$model)
-        } else {
-            predictions <- private$.crossValidate(task, learner)
-            private$.setOutput(predictions$prediction(), predictions, learner$model)
+        # Map testing option to validation strategy (default from validateMethod)
+        validate_method <- self$options$validateMethod
+        if (self$options$testing == "crossValidation") {
+            validate_method <- "cv"
+        } else if (self$options$testing %in% c("split", "trainSet")) {
+            validate_method <- "holdout"
         }
 
-        return (predictions)
-    },
+        resampling <- switch(validate_method,
+            "bootstrap" = rsmp("bootstrap", ratio = 0.632, repeats = min(self$options$bootstrapSamples, 200)),
+            "cv" = rsmp("cv", folds = self$options$noOfFolds),
+            rsmp("holdout", ratio = 1 - self$options$testSize)
+        )
 
-    .crossValidate = function(task, learner) {
-        resampling <- rsmp("cv", folds = self$options$noOfFolds)
+        if ("stratify" %in% resampling$param_set$ids()) {
+            resampling$param_set$values$stratify <- TRUE
+        }
+
         resampling$instantiate(task)
-
         rr <- resample(task, learner, resampling, store_models = TRUE)
+
+        private$.setOutput(rr$prediction(), rr, learner$model)
 
         return (rr)
     },
 
-    .trainTestSplit = function(task, learner) {
-        trainSet <- sample(task$nrow)
-        testSet <- trainSet
-
-        if (self$options$testing == "split") {
-            trainSet <- sample(task$nrow, (1 - self$options$testSize) * task$nrow)
-            testSet <- setdiff(seq_len(task$nrow), as.numeric(trainSet))
+    .applyThreshold = function(prediction) {
+        # Only adjust for binary classification with probabilities
+        if (length(unique(prediction$truth)) != 2 || is.null(prediction$prob)) {
+            return(list(prediction = prediction, threshold = NA))
         }
 
-        learner$train(task, row_ids = trainSet)
+        truth_factor <- factor(prediction$truth)
+        positive_class <- private$.resolvePositiveClass(truth_factor)
 
-        prediction <- learner$predict(task, row_ids = testSet)
+        prob_mat <- as.data.frame(prediction$prob)
+        if (!(positive_class %in% colnames(prob_mat))) {
+            if (ncol(prob_mat) >= 2) {
+                positive_class <- colnames(prob_mat)[2]
+            } else {
+                positive_class <- colnames(prob_mat)[1]
+            }
+        }
 
-        return (prediction)
+        positive_probs <- prob_mat[[positive_class]]
+
+        threshold <- 0.5
+        if (self$options$thresholdMethod == "manual") {
+            threshold <- self$options$thresholdValue
+        } else {
+            # Youden J optimization
+            try({
+                roc_obj <- pROC::roc(truth_factor, positive_probs, levels = levels(truth_factor), direction = "<", positive = positive_class)
+                coords <- pROC::coords(roc_obj, x = "best", best.method = "youden", ret = "threshold")
+                if (!is.null(coords) && !is.na(coords)) threshold <- as.numeric(coords)
+            }, silent = TRUE)
+        }
+
+        new_pred <- prediction$set_threshold(setNames(threshold, positive_class))
+        return(list(prediction = new_pred, threshold = threshold))
     },
 
     .populateConfusionMatrix = function(confusionMatrix) {
@@ -558,23 +591,20 @@ private = list(
         generalTable <- self$results$classificationMetrics$general
         classTable <- self$results$classificationMetrics$class
 
+        threshold_used <- NA
+        # Apply thresholding for binary tasks
+        thresholded_prediction <- prediction
+        if (length(unique(prediction$truth)) == 2) {
+            threshold_result <- private$.applyThreshold(prediction)
+            thresholded_prediction <- threshold_result$prediction
+            threshold_used <- threshold_result$threshold
+        }
+
         # Create measures for general metrics
         measures <- list(
             msr("classif.ce"),
             msr("classif.acc")
         )
-
-        # Create measures for per-class metrics
-        classMeasures <- list(
-            msr("classif.precision"),
-            msr("classif.recall"),
-            msr("classif.fbeta")
-        )
-
-        # Add AUC if binary classification
-        if (length(unique(prediction$truth)) == 2) {
-            classMeasures <- c(classMeasures, list(msr("classif.auc")))
-        }
 
         reporting <- self$options$reporting
 
@@ -584,17 +614,23 @@ private = list(
         for (i in seq_along(measures)) {
             generalTable$addRow(rowKey = i, values = list(
                 metric = measures[[i]]$id,
-                value = as.numeric(prediction$score(measures[[i]], task = NULL))
+                value = as.numeric(thresholded_prediction$score(measures[[i]], task = NULL))
+            ))
+        }
+        if (!is.na(threshold_used)) {
+            generalTable$addRow(rowKey = "threshold", values = list(
+                metric = "decision_threshold",
+                value = threshold_used
             ))
         }
 
         if (self$options$predictedFreq == TRUE | self$options$predictedFreqRF == TRUE) {
             freqPlot <- self$results$predictedFreqPlot
-            freqPlot$setState(prediction)
+            freqPlot$setState(thresholded_prediction)
         }
         if (self$options$plotDecisionTree == TRUE & classifier == 'singleDecisionTree') {
             treePlot <- self$results$decisionTreeModel
-            treePlot$setState(list(predictions = prediction, model = model))
+            treePlot$setState(list(predictions = thresholded_prediction, model = model))
         }
         if(self$options$printRandForest == TRUE & classifier == 'randomForest') {
             private$.populateRandomForestResults(model)
@@ -603,7 +639,7 @@ private = list(
         if (self$options$reportClinicalMetrics) {
             # Calculate clinical metrics for binary classification
             if (length(unique(prediction$truth)) == 2) {
-                clinical_metrics <- private$.calculateClinicalMetrics(prediction$response, prediction$truth)
+                clinical_metrics <- private$.calculateClinicalMetrics(thresholded_prediction$response, thresholded_prediction$truth)
                 private$.populateClinicalMetrics(clinical_metrics)
             }
         }
@@ -618,37 +654,38 @@ private = list(
         table <- self$results$classificationMetrics$class
         unique_classes <- unique(prediction$truth)
 
-        for (class_name in unique_classes) {
-            row_data <- list(class = as.character(class_name))
-
-            # Calculate per-class metrics
-            for (measure in classMeasures) {
-                if (measure$id == "classif.auc" && length(unique_classes) > 2) {
-                    # Skip AUC for multi-class
-                    next
+        # Compute per-class metrics directly from confusion matrix
+        confusion_matrix <- thresholded_prediction$confusion
+        if (!is.null(confusion_matrix)) {
+            classes <- colnames(confusion_matrix)
+            for (class_name in classes) {
+                tp <- confusion_matrix[class_name, class_name]
+                fp <- sum(confusion_matrix[class_name, , drop = TRUE]) - tp
+                fn <- sum(confusion_matrix[, class_name, drop = TRUE]) - tp
+                precision <- if ((tp + fp) > 0) tp / (tp + fp) else NA
+                recall <- if ((tp + fn) > 0) tp / (tp + fn) else NA
+                beta <- 1
+                fbeta <- if (!is.na(precision) && !is.na(recall) && (precision + recall) > 0) {
+                    (1 + beta^2) * precision * recall / ((beta^2 * precision) + recall)
+                } else {
+                    NA
                 }
 
-                tryCatch({
-                    score <- prediction$score(measure, task = NULL)
-                    if (measure$id %in% c("classif.precision", "classif.recall", "classif.fbeta")) {
-                        # These are per-class metrics, extract the specific class
-                        if (is.numeric(score) && length(score) == 1) {
-                            row_data[[measure$id]] <- score
-                        }
-                    } else {
-                        row_data[[measure$id]] <- score
-                    }
-                }, error = function(e) {
-                    row_data[[measure$id]] <- NA
-                })
+                table$addRow(
+                    rowKey = class_name,
+                    values = list(
+                        class = as.character(class_name),
+                        `classif.precision` = precision,
+                        `classif.recall` = recall,
+                        `classif.fbeta` = fbeta
+                    )
+                )
             }
-
-            table$addRow(rowKey = class_name, values = row_data)
         }
 
         # Populate confusion matrix
         if ('confusionMatrix' %in% reporting) {
-            confusionMatrix <- prediction$confusion
+            confusionMatrix <- thresholded_prediction$confusion
             private$.populateConfusionMatrix(confusionMatrix)
         }
     },
@@ -675,7 +712,23 @@ private = list(
         library(ggplot2)
 
         # Create ROC curve
-        roc_obj <- roc(prediction$truth, prediction$prob[, 2])
+        truth_factor <- factor(prediction$truth)
+        positive_class <- private$.resolvePositiveClass(truth_factor)
+
+        prob_mat <- as.data.frame(prediction$prob)
+        prob_col <- NULL
+        if (positive_class %in% colnames(prob_mat)) {
+            prob_col <- prob_mat[[positive_class]]
+        } else if (ncol(prob_mat) >= 2) {
+            warning(paste0("Positive class '", positive_class, "' not found in probability columns; using second column for ROC."))
+            prob_col <- prob_mat[[2]]
+            positive_class <- colnames(prob_mat)[2]
+        } else {
+            prob_col <- prob_mat[[1]]
+            positive_class <- colnames(prob_mat)[1]
+        }
+
+        roc_obj <- roc(truth_factor, prob_col, levels = levels(truth_factor), direction = "<", positive = positive_class)
 
         # Create data frame for ggplot
         roc_data <- data.frame(

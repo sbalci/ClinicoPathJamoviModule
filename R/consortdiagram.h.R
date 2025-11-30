@@ -510,12 +510,12 @@ consortdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 consortdiagram <- function(
     data,
     participant_id,
-    screening_exclusions,
-    enrollment_exclusions,
-    randomization_var,
-    allocation_exclusions,
-    followup_exclusions,
-    analysis_exclusions,
+    screening_exclusions = NULL,
+    enrollment_exclusions = NULL,
+    randomization_var = NULL,
+    allocation_exclusions = NULL,
+    followup_exclusions = NULL,
+    analysis_exclusions = NULL,
     show_exclusion_details = FALSE,
     diagram_width = 800,
     diagram_height = 600,
@@ -583,4 +583,3 @@ consortdiagram <- function(
 
     analysis$results
 }
-

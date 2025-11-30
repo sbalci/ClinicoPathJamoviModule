@@ -1159,9 +1159,43 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 c_improvement <- new_c - old_c
                 c_improvement_pct <- if (old_c > 0) (c_improvement / old_c) * 100 else NA
 
-                # Calculate standard error for difference using independence assumption
-                # For correlated C-indices, we should ideally use covariance, but this is a reasonable approximation
-                diff_se <- sqrt(old_var + new_var)
+                # CORRECTION FOR INDEPENDENCE ASSUMPTION
+                # Calculate correlation between linear predictors (risk scores) as a proxy for correlation of C-indices
+                # This is a heuristic improvement over assuming independence (r=0)
+                old_lp <- predict(old_cox, type = "lp")
+                new_lp <- predict(new_cox, type = "lp")
+                
+                # Use Spearman correlation of risk scores (rank correlation is relevant for concordance)
+                # We use only complete cases
+                valid_idx <- complete.cases(old_lp, new_lp)
+                if (sum(valid_idx) > 10) {
+                    r_correlation <- cor(old_lp[valid_idx], new_lp[valid_idx], method = "spearman")
+                    message("DEBUG: Correlation between risk scores: ", r_correlation)
+                } else {
+                    r_correlation <- 0
+                    message("DEBUG: Insufficient data for correlation, assuming independence")
+                }
+                
+                # Ensure correlation is valid (between -1 and 1)
+                r_correlation <- max(-1, min(1, if(is.na(r_correlation)) 0 else r_correlation))
+
+                # Calculate standard error for difference accounting for correlation
+                # Var(A-B) = Var(A) + Var(B) - 2*Cov(A,B)
+                # Cov(A,B) = r * SD(A) * SD(B)
+                # This is an approximation but much better than assuming independence
+                if (old_var >= 0 && new_var >= 0) {
+                    old_se_val <- sqrt(old_var)
+                    new_se_val <- sqrt(new_var)
+                    covariance_term <- 2 * r_correlation * old_se_val * new_se_val
+                    diff_var <- old_var + new_var - covariance_term
+                    
+                    # Ensure variance is positive (can happen with approximations)
+                    diff_var <- max(0, diff_var)
+                    diff_se <- sqrt(diff_var)
+                    message("DEBUG: Adjusted SE for C-index difference: ", diff_se, " (vs independent: ", sqrt(old_var + new_var), ")")
+                } else {
+                    diff_se <- NA
+                }
 
                 # Calculate p-value for C-index difference
                 # Use bootstrap for comprehensive/publication analysis types
@@ -1526,7 +1560,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
 
         .calculateNRI = function(data, time_points = NULL) {
-            # Net Reclassification Improvement calculation using WIP methodology
+            # Net Reclassification Improvement calculation using corrected methodology
+            # Uses risks estimated from full dataset models to avoid bias
             if (!self$options$calculateNRI) return(NULL)
 
             # Check dependencies
@@ -1554,182 +1589,154 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             nri_results <- list()
 
-            # Function to calculate NRI at specific time points (WIP approach)
+            # Fit models on FULL data once
+            old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
+            new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+
+            cox_original <- tryCatch({
+                survival::coxph(old_formula, data = data)
+            }, error = function(e) {
+                message("Error fitting original Cox model for NRI: ", e$message)
+                return(NULL)
+            })
+
+            cox_modified <- tryCatch({
+                survival::coxph(new_formula, data = data)
+            }, error = function(e) {
+                message("Error fitting modified Cox model for NRI: ", e$message)
+                return(NULL)
+            })
+
+            if (is.null(cox_original) || is.null(cox_modified)) {
+                return(list(error = "Failed to fit Cox models for NRI"))
+            }
+
+            # Helper to calculate risk at time t
+            get_risk_at_t <- function(model, t, newdata) {
+                # Get baseline survival
+                surv_fit <- survival::survfit(model)
+                
+                # Find baseline survival at time t
+                # surv_fit$time is sorted
+                idx <- findInterval(t, surv_fit$time)
+                if (idx == 0) {
+                    S0_t <- 1
+                } else {
+                    S0_t <- surv_fit$surv[idx]
+                }
+                
+                # Get linear predictors
+                lp <- predict(model, newdata = newdata, type = "lp")
+                
+                # Calculate Risk = 1 - S0(t)^exp(lp)
+                risk <- 1 - (S0_t ^ exp(lp))
+                return(risk)
+            }
+
+            # Calculate NRI at specific time points
             for (time_point in time_points) {
-                # Checkpoint before each time point calculation
+                # Checkpoint
                 private$.checkpoint()
 
                 message("DEBUG: NRI calculation for time ", time_point, " months")
+                
+                # Skip if time point is beyond data range
+                if (time_point > max(data[[time_var]], na.rm = TRUE)) {
+                    message("DEBUG: Time point ", time_point, " exceeds data range, skipping")
+                    next
+                }
 
-                # Create survival data subset for time point
-                data_subset <- data %>%
-                    dplyr::filter(!is.na(.data[[time_var]]) & !is.na(.data[[event_var]])) %>%
-                    dplyr::mutate(
-                        event_at_time = ifelse(.data[[time_var]] <= time_point & .data[[event_var]] == 1, 1, 0),
-                        censored_before_time = ifelse(.data[[time_var]] < time_point & .data[[event_var]] == 0, 1, 0)
-                    ) %>%
-                    dplyr::filter(.data$censored_before_time == 0)  # Remove patients censored before time point
+                # Get risk predictions for ALL patients
+                risk_original <- get_risk_at_t(cox_original, time_point, data)
+                risk_modified <- get_risk_at_t(cox_modified, time_point, data)
 
-                message("DEBUG: Events at time ", time_point, ": ", sum(data_subset$event_at_time))
-                message("DEBUG: Total patients: ", nrow(data_subset))
-
-                if(nrow(data_subset) == 0) {
+                # Identify events and non-events properly accounting for censoring
+                # "Events": Patients who had event before or at time t
+                # "Non-events": Patients who survived past time t
+                # Censored before t are excluded from validation sets (standard KM-approach limitation)
+                # Ideally we would use IPCW, but this is a standard approximation
+                
+                is_event <- data[[time_var]] <= time_point & data[[event_var]] == 1
+                is_nonevent <- data[[time_var]] > time_point
+                
+                # Subset for validation
+                events_idx <- which(is_event)
+                nonevents_idx <- which(is_nonevent)
+                
+                if (length(events_idx) == 0 || length(nonevents_idx) == 0) {
+                    message("DEBUG: Insufficient events or non-events for NRI at time ", time_point)
                     nri_results[[paste0("t", time_point)]] <- list(
                         time_point = time_point,
-                        error = "Failed to fit survival models"
+                        error = "Insufficient events/non-events"
                     )
                     next
                 }
 
-                # Fit models for risk prediction on time-point specific data
-                old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
-                new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
-
-                cox_original <- tryCatch({
-                    survival::coxph(old_formula, data = data_subset)
-                }, error = function(e) {
-                    message("Error fitting original Cox model at time ", time_point, ": ", e$message)
-                    return(NULL)
-                })
-
-                cox_modified <- tryCatch({
-                    survival::coxph(new_formula, data = data_subset)
-                }, error = function(e) {
-                    message("Error fitting modified Cox model at time ", time_point, ": ", e$message)
-                    return(NULL)
-                })
-
-                if (is.null(cox_original) || is.null(cox_modified)) {
-                    nri_results[[paste0("t", time_point)]] <- list(
-                        time_point = time_point,
-                        nri_overall = 0,
-                        nri_events = 0,
-                        nri_nonevents = 0,
-                        ci_lower = 0,
-                        ci_upper = 0,
-                        p_value = NA
-                    )
-                    next
-                }
-
-                # Get risk predictions
-                risk_original <- predict(cox_original, type = "risk")
-                risk_modified <- predict(cox_modified, type = "risk")
-
-                # Define risk categories (tertiles) with unique breaks
+                # Define risk categories (tertiles based on original risk of ALL subjects)
+                # This ensures cutoffs are based on the population distribution
                 risk_cuts_original <- quantile(risk_original, probs = c(0, 1/3, 2/3, 1), na.rm = TRUE)
                 risk_cuts_modified <- quantile(risk_modified, probs = c(0, 1/3, 2/3, 1), na.rm = TRUE)
 
-                # Ensure unique breaks by adding small increments if needed
+                # Ensure unique breaks
                 if(length(unique(risk_cuts_original)) < 4) {
-                    risk_cuts_original <- c(min(risk_original, na.rm = TRUE),
-                                           median(risk_original, na.rm = TRUE),
-                                           max(risk_original, na.rm = TRUE))
-                    if(length(unique(risk_cuts_original)) < 3) {
-                        # If still not unique, use simple binary classification
-                        risk_cuts_original <- c(min(risk_original, na.rm = TRUE),
-                                               median(risk_original, na.rm = TRUE),
-                                               max(risk_original, na.rm = TRUE) + 0.001)
-                    }
+                    risk_cuts_original <- unique(quantile(risk_original, probs = seq(0, 1, length.out = length(unique(risk_original))+1), na.rm = TRUE))
                 }
-
                 if(length(unique(risk_cuts_modified)) < 4) {
-                    risk_cuts_modified <- c(min(risk_modified, na.rm = TRUE),
-                                           median(risk_modified, na.rm = TRUE),
-                                           max(risk_modified, na.rm = TRUE))
-                    if(length(unique(risk_cuts_modified)) < 3) {
-                        # If still not unique, use simple binary classification
-                        risk_cuts_modified <- c(min(risk_modified, na.rm = TRUE),
-                                               median(risk_modified, na.rm = TRUE),
-                                               max(risk_modified, na.rm = TRUE) + 0.001)
-                    }
+                    risk_cuts_modified <- unique(quantile(risk_modified, probs = seq(0, 1, length.out = length(unique(risk_modified))+1), na.rm = TRUE))
                 }
+                
+                # If still not enough breaks for cut(), fallback to min/median/max
+                if(length(risk_cuts_original) < 2) risk_cuts_original <- c(0, 0.5, 1)
+                if(length(risk_cuts_modified) < 2) risk_cuts_modified <- c(0, 0.5, 1)
 
                 # Categorize risks
-                if(length(unique(risk_cuts_original)) >= 4) {
-                    risk_cat_original <- cut(risk_original, breaks = risk_cuts_original, include.lowest = TRUE, labels = c("Low", "Medium", "High"))
-                } else {
-                    risk_cat_original <- cut(risk_original, breaks = unique(risk_cuts_original), include.lowest = TRUE, labels = c("Low", "High"))
-                }
+                risk_cat_original <- cut(risk_original, breaks = risk_cuts_original, include.lowest = TRUE, labels = FALSE)
+                risk_cat_modified <- cut(risk_modified, breaks = risk_cuts_modified, include.lowest = TRUE, labels = FALSE)
 
-                if(length(unique(risk_cuts_modified)) >= 4) {
-                    risk_cat_modified <- cut(risk_modified, breaks = risk_cuts_modified, include.lowest = TRUE, labels = c("Low", "Medium", "High"))
-                } else {
-                    risk_cat_modified <- cut(risk_modified, breaks = unique(risk_cuts_modified), include.lowest = TRUE, labels = c("Low", "High"))
-                }
+                # NRI for events (P(up|event) - P(down|event))
+                # Only consider patients who actually had the event
+                risk_cat_orig_events <- risk_cat_original[events_idx]
+                risk_cat_mod_events <- risk_cat_modified[events_idx]
+                
+                improved_events <- sum(risk_cat_mod_events > risk_cat_orig_events, na.rm = TRUE)
+                worsened_events <- sum(risk_cat_mod_events < risk_cat_orig_events, na.rm = TRUE)
+                n_events_valid <- length(risk_cat_orig_events)
+                
+                nri_events <- (improved_events - worsened_events) / n_events_valid
 
-                # Calculate reclassification
-                events <- data_subset$event_at_time == 1
-                non_events <- data_subset$event_at_time == 0
-
-                # Debug risk category distribution
-                message("DEBUG: Old risk categories: ", paste(table(risk_cat_original), collapse=", "))
-                message("DEBUG: New risk categories: ", paste(table(risk_cat_modified), collapse=", "))
-
-                # NRI for events (those who had events)
-                if(sum(events) > 0) {
-                    # Convert to numeric for comparison
-                    risk_num_orig <- as.numeric(risk_cat_original[events])
-                    risk_num_mod <- as.numeric(risk_cat_modified[events])
-
-                    # Count improvements and deteriorations
-                    improved_events <- sum(risk_num_mod > risk_num_orig, na.rm = TRUE)
-                    worsened_events <- sum(risk_num_mod < risk_num_orig, na.rm = TRUE)
-                    total_events <- sum(events)
-
-                    nri_events <- (improved_events - worsened_events) / total_events
-                } else {
-                    nri_events <- 0
-                    total_events <- 0
-                }
-
-                # NRI for non-events (those who did not have events)
-                if(sum(non_events) > 0) {
-                    risk_num_orig_ne <- as.numeric(risk_cat_original[non_events])
-                    risk_num_mod_ne <- as.numeric(risk_cat_modified[non_events])
-
-                    # For non-events, moving to lower risk category is improvement
-                    improved_non_events <- sum(risk_num_mod_ne < risk_num_orig_ne, na.rm = TRUE)
-                    worsened_non_events <- sum(risk_num_mod_ne > risk_num_orig_ne, na.rm = TRUE)
-                    total_non_events <- sum(non_events)
-
-                    nri_non_events <- (improved_non_events - worsened_non_events) / total_non_events
-                } else {
-                    nri_non_events <- 0
-                    total_non_events <- 0
-                }
+                # NRI for non-events (P(down|nonevent) - P(up|nonevent))
+                # Only consider patients who survived past t
+                risk_cat_orig_nonevents <- risk_cat_original[nonevents_idx]
+                risk_cat_mod_nonevents <- risk_cat_modified[nonevents_idx]
+                
+                improved_nonevents <- sum(risk_cat_mod_nonevents < risk_cat_orig_nonevents, na.rm = TRUE)
+                worsened_nonevents <- sum(risk_cat_mod_nonevents > risk_cat_orig_nonevents, na.rm = TRUE)
+                n_nonevents_valid <- length(risk_cat_orig_nonevents)
+                
+                nri_non_events <- (improved_nonevents - worsened_nonevents) / n_nonevents_valid
 
                 # Overall NRI
                 nri_total <- nri_events + nri_non_events
 
-                message("DEBUG: NRI calculation completed")
+                message("DEBUG: NRI calculation completed for time ", time_point)
                 message("DEBUG: NRI overall = ", nri_total)
 
-                # Calculate standard errors and confidence intervals for NRI
-                # Using simplified variance estimation from WIP code
-                n_events <- sum(events)
-                n_non_events <- sum(non_events)
+                # Calculate standard errors and confidence intervals
+                # Variance of proportions
+                var_events <- (improved_events + worsened_events) / (n_events_valid^2) - (nri_events^2 / n_events_valid)
+                var_nonevents <- (improved_nonevents + worsened_nonevents) / (n_nonevents_valid^2) - (nri_non_events^2 / n_nonevents_valid)
+                
+                # Ensure variance is non-negative (floating point issues)
+                var_events <- max(0, var_events)
+                var_nonevents <- max(0, var_nonevents)
 
-                # Variance calculation for NRI components
-                var_events <- ifelse(n_events > 0, nri_events * (1 - nri_events) / n_events, 0)
-                var_non_events <- ifelse(n_non_events > 0, nri_non_events * (1 - nri_non_events) / n_non_events, 0)
-
-                # Overall NRI variance
-                var_nri <- var_events + var_non_events
-                se_nri <- sqrt(var_nri)
-
-                # 95% Confidence intervals
+                se_nri <- sqrt(var_events + var_nonevents)
+                
                 ci_lower <- nri_total - 1.96 * se_nri
                 ci_upper <- nri_total + 1.96 * se_nri
 
-                message("DEBUG: SE overall = ", se_nri)
-                message("DEBUG: CI = [", ci_lower, ", ", ci_upper, "]")
-
-                # P-value calculation (two-sided test against null hypothesis NRI = 0)
-                z_score <- ifelse(se_nri > 0, nri_total / se_nri, 0)
-                p_value <- ifelse(se_nri > 0, 2 * (1 - pnorm(abs(z_score))), 1)
-
-                message("DEBUG: p-value = ", p_value)
+                z_score <- if (se_nri > 0) nri_total / se_nri else 0
+                p_value <- if (se_nri > 0) 2 * (1 - pnorm(abs(z_score))) else 1
 
                 nri_results[[paste0("t", time_point)]] <- list(
                     time_point = time_point,
@@ -1739,8 +1746,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ci_lower = ci_lower,
                     ci_upper = ci_upper,
                     p_value = p_value,
-                    total_events = n_events,
-                    total_patients = nrow(data_subset)
+                    total_events = n_events_valid,
+                    total_patients = n_events_valid + n_nonevents_valid
                 )
             }
 
@@ -5814,6 +5821,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             table$addRow(rowKey = "new", values = new_row)
+            
+            # Add explanatory note about p-value calculation method
+            is_bootstrap <- self$options$analysisType %in% c("comprehensive", "publication") && self$options$performBootstrap
+            
+            if (is_bootstrap) {
+                table$setNote("p_val_method", "P-values and confidence intervals based on bootstrap validation (optimism-corrected).")
+            } else {
+                table$setNote("p_val_method", "P-values for C-index difference are corrected for model correlation using Spearman correlation of risk scores (heuristic approximation). Enable Bootstrap for exact testing.")
+            }
         },
 
         .populateNRIAnalysis = function(nri_results) {
@@ -9261,12 +9277,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (sum(events) == 0 || sum(non_events) == 0) return(NULL)
 
                 # For events: improvement = proportion with higher new risk score
-                event_improvements <- sum(new_lp[events] > old_lp[events]) - sum(new_lp[events] < old_lp[events])
-                nri_events <- event_improvements / sum(events)
+                n_events <- sum(events)
+                n_up_events <- sum(new_lp[events] > old_lp[events])
+                n_down_events <- sum(new_lp[events] < old_lp[events])
+                nri_events <- (n_up_events - n_down_events) / n_events
 
                 # For non-events: improvement = proportion with lower new risk score  
-                nonevent_improvements <- sum(new_lp[non_events] < old_lp[non_events]) - sum(new_lp[non_events] > old_lp[non_events])
-                nri_non_events <- nonevent_improvements / sum(non_events)
+                n_non_events <- sum(non_events)
+                n_down_nonevents <- sum(new_lp[non_events] < old_lp[non_events])
+                n_up_nonevents <- sum(new_lp[non_events] > old_lp[non_events])
+                nri_non_events <- (n_down_nonevents - n_up_nonevents) / n_non_events
 
                 # Overall category-free NRI
                 nri_total <- nri_events + nri_non_events
@@ -9277,15 +9297,30 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ci_lower <- quantile(bootstrap_nri, 0.025, na.rm = TRUE)
                     ci_upper <- quantile(bootstrap_nri, 0.975, na.rm = TRUE)
                 } else {
-                    # Simple asymptotic CI
-                    se_nri <- sqrt((nri_events * (1 - nri_events) / sum(events)) + (nri_non_events * (1 - nri_non_events) / sum(non_events)))
+                    # Simple asymptotic CI using correct variance for difference of proportions
+                    # Var(p_up - p_down) = (p_up + p_down - (p_up - p_down)^2) / n
+                    p_up_events <- n_up_events / n_events
+                    p_down_events <- n_down_events / n_events
+                    var_events <- (p_up_events + p_down_events - (p_up_events - p_down_events)^2) / n_events
+                    
+                    p_down_nonevents <- n_down_nonevents / n_non_events
+                    p_up_nonevents <- n_up_nonevents / n_non_events
+                    var_non_events <- (p_down_nonevents + p_up_nonevents - (p_down_nonevents - p_up_nonevents)^2) / n_non_events
+                    
+                    se_nri <- sqrt(var_events + var_non_events)
                     ci_lower <- nri_total - 1.96 * se_nri
                     ci_upper <- nri_total + 1.96 * se_nri
                 }
 
                 # P-value (two-sided test)
-                se_nri <- sqrt((nri_events * (1 - nri_events) / sum(events)) + (nri_non_events * (1 - nri_non_events) / sum(non_events)))
-                z_score <- nri_total / se_nri
+                # Re-calculate SE for z-score if bootstrap was used (approximation)
+                if (self$options$performBootstrap) {
+                     se_nri <- (ci_upper - ci_lower) / (2 * 1.96)
+                } else {
+                     # Already calculated
+                }
+                
+                z_score <- if (se_nri > 0) nri_total / se_nri else 0
                 p_value <- 2 * (1 - pnorm(abs(z_score)))
 
                 return(list(
@@ -9328,32 +9363,30 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # NRI for events: moving to high risk is improvement
                 event_up <- sum(events & !old_high_risk & new_high_risk)
                 event_down <- sum(events & old_high_risk & !new_high_risk)
-                nri_events <- (event_up - event_down) / sum(events)
+                n_events <- sum(events)
+                nri_events <- (event_up - event_down) / n_events
 
                 # NRI for non-events: moving to low risk is improvement
                 nonevent_down <- sum(non_events & old_high_risk & !new_high_risk)
                 nonevent_up <- sum(non_events & !old_high_risk & new_high_risk)
-                nri_non_events <- (nonevent_down - nonevent_up) / sum(non_events)
+                n_non_events <- sum(non_events)
+                nri_non_events <- (nonevent_down - nonevent_up) / n_non_events
 
                 # Overall clinical NRI
                 nri_total <- nri_events + nri_non_events
 
                 # Confidence intervals
-                # Use improved SE calculation that handles negative NRI values
-                n_events <- sum(events)
-                n_non_events <- sum(non_events)
+                # Use correct variance formula for difference of proportions
                 
-                # For NRI, use the variance of the proportion of correctly reclassified
-                # This avoids negative values under the square root
-                var_events <- if (n_events > 0) {
-                    p_improve_events <- (event_up + event_down) / n_events
-                    p_improve_events * (1 - p_improve_events) / n_events
-                } else 0
+                # Var(events)
+                p_up_events <- event_up / n_events
+                p_down_events <- event_down / n_events
+                var_events <- (p_up_events + p_down_events - (p_up_events - p_down_events)^2) / n_events
                 
-                var_non_events <- if (n_non_events > 0) {
-                    p_improve_non_events <- (nonevent_down + nonevent_up) / n_non_events
-                    p_improve_non_events * (1 - p_improve_non_events) / n_non_events
-                } else 0
+                # Var(non-events)
+                p_down_nonevents <- nonevent_down / n_non_events
+                p_up_nonevents <- nonevent_up / n_non_events
+                var_non_events <- (p_down_nonevents + p_up_nonevents - (p_down_nonevents - p_up_nonevents)^2) / n_non_events
                 
                 se_total <- sqrt(var_events + var_non_events)
 
@@ -9361,7 +9394,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ci_upper <- nri_total + 1.96 * se_total
 
                 # P-value
-                z_score <- nri_total / se_total
+                z_score <- if (se_total > 0) nri_total / se_total else 0
                 p_value <- 2 * (1 - pnorm(abs(z_score)))
 
                 return(list(
@@ -21157,31 +21190,67 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     stage_contributions <- list()
                     valid_comparisons <- 0
                     
-                    # Map stages between systems (assuming ordered correspondence)
-                    min_stages <- min(length(old_stages), length(new_stages))
+                    # Match stages by name first, then fall back to index if needed
+                    common_stages <- intersect(old_stages, new_stages)
                     
-                    for (j in 1:min_stages) {
-                        old_stage_name <- as.character(old_stages[j])
-                        new_stage_name <- as.character(new_stages[j])
+                    if (length(common_stages) > 0) {
+                        # Case 1: Matching stage names found (e.g., I, II, III in both)
+                        stages_to_compare <- common_stages
+                        message("DEBUG: Matching stages by name: ", paste(stages_to_compare, collapse=", "))
                         
-                        if (old_stage_name %in% names(old_surv_by_stage) && 
-                            new_stage_name %in% names(new_surv_by_stage)) {
+                        for (stage_name in stages_to_compare) {
+                            old_stage_name <- as.character(stage_name)
+                            new_stage_name <- as.character(stage_name)
                             
-                            old_surv <- old_surv_by_stage[[old_stage_name]][[surv_field]]
-                            new_surv <- new_surv_by_stage[[new_stage_name]][[surv_field]]
-                            
-                            if (!is.na(old_surv) && !is.na(new_surv)) {
-                                contribution <- new_surv - old_surv
-                                sme_value <- sme_value + contribution
-                                valid_comparisons <- valid_comparisons + 1
+                            if (old_stage_name %in% names(old_surv_by_stage) && 
+                                new_stage_name %in% names(new_surv_by_stage)) {
                                 
-                                stage_contributions[[paste0("Stage_", j)]] <- list(
-                                    old_stage = old_stage_name,
-                                    new_stage = new_stage_name,
-                                    old_survival = old_surv,
-                                    new_survival = new_surv,
-                                    contribution = contribution
-                                )
+                                old_surv <- old_surv_by_stage[[old_stage_name]][[surv_field]]
+                                new_surv <- new_surv_by_stage[[new_stage_name]][[surv_field]]
+                                
+                                if (!is.na(old_surv) && !is.na(new_surv)) {
+                                    contribution <- new_surv - old_surv
+                                    sme_value <- sme_value + contribution
+                                    valid_comparisons <- valid_comparisons + 1
+                                    
+                                    stage_contributions[[paste0("Stage_", stage_name)]] <- list(
+                                        old_stage = old_stage_name,
+                                        new_stage = new_stage_name,
+                                        old_survival = old_surv,
+                                        new_survival = new_surv,
+                                        contribution = contribution
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        # Case 2: No matching names, fall back to index (ordered comparison)
+                        message("DEBUG: No matching stage names, falling back to index matching")
+                        min_stages <- min(length(old_stages), length(new_stages))
+                        
+                        for (j in 1:min_stages) {
+                            old_stage_name <- as.character(old_stages[j])
+                            new_stage_name <- as.character(new_stages[j])
+                            
+                            if (old_stage_name %in% names(old_surv_by_stage) && 
+                                new_stage_name %in% names(new_surv_by_stage)) {
+                                
+                                old_surv <- old_surv_by_stage[[old_stage_name]][[surv_field]]
+                                new_surv <- new_surv_by_stage[[new_stage_name]][[surv_field]]
+                                
+                                if (!is.na(old_surv) && !is.na(new_surv)) {
+                                    contribution <- new_surv - old_surv
+                                    sme_value <- sme_value + contribution
+                                    valid_comparisons <- valid_comparisons + 1
+                                    
+                                    stage_contributions[[paste0("Stage_", j)]] <- list(
+                                        old_stage = old_stage_name,
+                                        new_stage = new_stage_name,
+                                        old_survival = old_surv,
+                                        new_survival = new_surv,
+                                        contribution = contribution
+                                    )
+                                }
                             }
                         }
                     }

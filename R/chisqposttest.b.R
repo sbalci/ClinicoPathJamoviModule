@@ -178,18 +178,21 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         subtable <- contingency_table[c(i, j), , drop = FALSE]
                         
                         # Skip if insufficient data
-                        if (any(dim(subtable) < 2) || sum(subtable) < 5) next
+                        if (any(dim(subtable) < 2) || sum(subtable) == 0) next
                         
                         # Perform statistical tests based on user selection
                         test_result <- try({
                             # Always compute chi-square for effect size
                             chi_test <- stats::chisq.test(subtable, correct = FALSE)
+                            expected_counts <- chi_test$expected
                             
                             # Determine which tests to run based on test_selection
                             fisher_test <- NULL
-                            if (test_selection == "fisher" || 
-                                (test_selection == "auto" && any(subtable < 5))) {
-                                fisher_test <- stats::fisher.test(subtable)
+                            use_fisher <- test_selection == "fisher" || 
+                                          (test_selection == "auto" && any(expected_counts < 5))
+                            if (use_fisher) {
+                                fisher_test <- try(stats::fisher.test(subtable), silent = TRUE)
+                                if (inherits(fisher_test, "try-error")) fisher_test <- NULL
                             }
                             
                             # Store both test results if available
@@ -197,6 +200,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 comparison = paste(row_names[i], "vs", row_names[j]),
                                 type = "row_comparison",
                                 subtable = subtable,
+                                expected = expected_counts,
                                 chi_statistic = chi_test$statistic,
                                 chi_df = chi_test$parameter,
                                 chi_pvalue = chi_test$p.value,
@@ -208,8 +212,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # Add Fisher's test results if computed
                             if (!is.null(fisher_test)) {
                                 result$fisher_pvalue <- fisher_test$p.value
+                                result$test_used <- "Fisher's exact"
+                                result$actual_pvalue <- fisher_test$p.value
                             } else {
                                 result$fisher_pvalue <- NA
+                                result$test_used <- "Chi-square"
+                                result$actual_pvalue <- chi_test$p.value
                             }
                             
                             result
@@ -231,18 +239,21 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         subtable <- contingency_table[, c(i, j), drop = FALSE]
                         
                         # Skip if insufficient data
-                        if (any(dim(subtable) < 2) || sum(subtable) < 5) next
+                        if (any(dim(subtable) < 2) || sum(subtable) == 0) next
                         
                         # Perform statistical tests based on user selection
                         test_result <- try({
                             # Always compute chi-square for effect size
                             chi_test <- stats::chisq.test(subtable, correct = FALSE)
+                            expected_counts <- chi_test$expected
                             
                             # Determine which tests to run based on test_selection
                             fisher_test <- NULL
-                            if (test_selection == "fisher" || 
-                                (test_selection == "auto" && any(subtable < 5))) {
-                                fisher_test <- stats::fisher.test(subtable)
+                            use_fisher <- test_selection == "fisher" || 
+                                          (test_selection == "auto" && any(expected_counts < 5))
+                            if (use_fisher) {
+                                fisher_test <- try(stats::fisher.test(subtable), silent = TRUE)
+                                if (inherits(fisher_test, "try-error")) fisher_test <- NULL
                             }
                             
                             # Store both test results if available
@@ -250,6 +261,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 comparison = paste(col_names[i], "vs", col_names[j]),
                                 type = "column_comparison",
                                 subtable = subtable,
+                                expected = expected_counts,
                                 chi_statistic = chi_test$statistic,
                                 chi_df = chi_test$parameter,
                                 chi_pvalue = chi_test$p.value,
@@ -261,8 +273,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # Add Fisher's test results if computed
                             if (!is.null(fisher_test)) {
                                 result$fisher_pvalue <- fisher_test$p.value
+                                result$test_used <- "Fisher's exact"
+                                result$actual_pvalue <- fisher_test$p.value
                             } else {
                                 result$fisher_pvalue <- NA
+                                result$test_used <- "Chi-square"
+                                result$actual_pvalue <- chi_test$p.value
                             }
                             
                             result
@@ -280,6 +296,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(pairwise_results) > 0) {
                 chi_pvalues <- sapply(pairwise_results, function(x) x$chi_pvalue)
                 fisher_pvalues <- sapply(pairwise_results, function(x) x$fisher_pvalue)
+                actual_pvalues <- sapply(pairwise_results, function(x) x$actual_pvalue)
+                
+                # Apply correction to the actually used p-values
+                actual_adjusted <- stats::p.adjust(actual_pvalues, method = method)
                 
                 # Apply correction to chi-square p-values (always available)
                 chi_adjusted <- stats::p.adjust(chi_pvalues, method = method)
@@ -295,6 +315,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (i in seq_along(pairwise_results)) {
                     pairwise_results[[i]]$chi_pvalue_adjusted <- chi_adjusted[i]
                     pairwise_results[[i]]$fisher_pvalue_adjusted <- fisher_adjusted[i]
+                    pairwise_results[[i]]$actual_pvalue_adjusted <- actual_adjusted[i]
                     pairwise_results[[i]]$adjustment_method <- method
                 }
             }
@@ -364,18 +385,21 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     
                     # Skip if insufficient data
-                    if (any(dim(subtable) < 2) || sum(subtable) < 5) next
+                    if (any(dim(subtable) < 2) || sum(subtable) == 0) next
                     
                     # Perform statistical tests
                     test_result <- try({
                         # Always compute chi-square for effect size
                         chi_test <- stats::chisq.test(subtable, correct = FALSE)
+                        expected_counts <- chi_test$expected
                         
                         # Determine which tests to run based on test_selection
                         fisher_test <- NULL
-                        if (test_selection == "fisher" || 
-                            (test_selection == "auto" && any(subtable < 5))) {
-                            fisher_test <- stats::fisher.test(subtable)
+                        use_fisher <- test_selection == "fisher" || 
+                                      (test_selection == "auto" && any(expected_counts < 5))
+                        if (use_fisher) {
+                            fisher_test <- try(stats::fisher.test(subtable), silent = TRUE)
+                            if (inherits(fisher_test, "try-error")) fisher_test <- NULL
                         }
                         
                         # Store both test results if available
@@ -383,6 +407,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             comparison = paste(comp_names[i], "vs", comp_names[j]),
                             type = paste0(comp_type, "_comparison"),
                             subtable = subtable,
+                            expected = expected_counts,
                             chi_statistic = chi_test$statistic,
                             chi_df = chi_test$parameter,
                             chi_pvalue = chi_test$p.value,
@@ -394,8 +419,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Add Fisher's test results if computed
                         if (!is.null(fisher_test)) {
                             result$fisher_pvalue <- fisher_test$p.value
+                            result$test_used <- "Fisher's exact"
+                            result$actual_pvalue <- fisher_test$p.value
                         } else {
                             result$fisher_pvalue <- NA
+                            result$test_used <- "Chi-square"
+                            result$actual_pvalue <- chi_test$p.value
                         }
                         
                         result
@@ -430,6 +459,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(all_pairwise_results) > 0) {
                 chi_pvalues <- sapply(all_pairwise_results, function(x) x$chi_pvalue)
                 fisher_pvalues <- sapply(all_pairwise_results, function(x) x$fisher_pvalue)
+                actual_pvalues <- sapply(all_pairwise_results, function(x) x$actual_pvalue)
+                
+                # Apply correction to the actually used p-values
+                actual_adjusted <- stats::p.adjust(actual_pvalues, method = method)
                 
                 # Apply correction to chi-square p-values (always available)
                 chi_adjusted <- stats::p.adjust(chi_pvalues, method = method)
@@ -445,6 +478,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (i in seq_along(all_pairwise_results)) {
                     all_pairwise_results[[i]]$chi_pvalue_adjusted <- chi_adjusted[i]
                     all_pairwise_results[[i]]$fisher_pvalue_adjusted <- fisher_adjusted[i]
+                    all_pairwise_results[[i]]$actual_pvalue_adjusted <- actual_adjusted[i]
                     all_pairwise_results[[i]]$adjustment_method <- method
                 }
             }
@@ -498,9 +532,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 subtable <- result$subtable
                 
                 # Determine test method and significance
-                use_fisher <- any(subtable < 5)
-                p_adj <- if (use_fisher) result$fisher_pvalue_adjusted else result$chi_pvalue_adjusted
-                is_significant <- p_adj < 0.05
+                use_fisher <- identical(result$test_used, "Fisher's exact")
+                p_adj <- result$actual_pvalue_adjusted
+                is_significant <- p_adj < self$options$sig
                 
                 # Create significance indicator
                 sig_indicator <- if (is_significant) {
@@ -511,7 +545,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Test results summary
                 test_method <- if (use_fisher) "Fisher's exact test" else "Chi-square test"
-                p_value <- if (use_fisher) result$fisher_pvalue else result$chi_pvalue
+                p_value <- result$actual_pvalue
                 
                 test_results <- htmltools::div(
                     style = "margin-bottom: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 3px;",
@@ -825,8 +859,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_significant_pairs <- 0
             if (!is.null(pairwise_results) && length(pairwise_results) > 0) {
                 n_significant_pairs <- sum(sapply(pairwise_results, function(x) {
-                    adj_p <- if (!is.na(x$fisher_pvalue_adjusted)) x$fisher_pvalue_adjusted else x$chi_pvalue_adjusted
-                    adj_p < self$options$sig
+                    x$actual_pvalue_adjusted < self$options$sig
                 }))
             }
             
@@ -1309,21 +1342,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     
                     tables_html <- lapply(pairwise_results, function(result) {
-                        # Determine which test method was used
-                        if (self$options$testSelection == "fisher") {
-                            test_used <- "Fisher's exact"
-                            p_value <- result$fisher_pvalue
-                            p_adj <- result$fisher_pvalue_adjusted
-                        } else if (self$options$testSelection == "chisquare") {
-                            test_used <- "Chi-square"
-                            p_value <- result$chi_pvalue
-                            p_adj <- result$chi_pvalue_adjusted
-                        } else { # auto
-                            use_fisher <- any(result$subtable < 5)
-                            test_used <- if (use_fisher) "Fisher's exact" else "Chi-square"
-                            p_value <- if (use_fisher) result$fisher_pvalue else result$chi_pvalue
-                            p_adj <- if (use_fisher) result$fisher_pvalue_adjusted else result$chi_pvalue_adjusted
-                        }
+                        # Determine which test method was used (stored in result)
+                        test_used <- result$test_used
+                        p_value <- result$actual_pvalue
+                        p_adj <- result$actual_pvalue_adjusted
                         
                         # Create the 2x2 table HTML
                         table_html <- private$.createContingencyTableHTML(result$subtable)
@@ -1411,34 +1433,37 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             pairwise_results <- private$.robustPairwiseTests(contTable, adjustMethod, self$options$testSelection)
             
             if (length(pairwise_results) > 0) {
+                fisher_used <- any(sapply(pairwise_results, function(x) identical(x$test_used, "Fisher's exact")))
+                fisher_notice <- NULL
+                if (fisher_used) {
+                    fisher_notice <- htmltools::div(
+                        style = "padding: 10px; background-color: #e3f2fd; border-left: 4px solid #1976d2; margin: 8px 0;",
+                        htmltools::strong(.("Method notice: ")),
+                        .("Pairwise comparisons with expected cell counts < 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method.")
+                    )
+                }
+                
                 # Create multiple testing correction panel (conditional)
                 if (self$options$showEducational) {
                     correction_panel <- private$.createEducationalPanel("multiple_testing", 
                                                                         length(pairwise_results), 
                                                                         self$options$sig)
-                    self$results$multipleTestingInfo$setContent(as.character(correction_panel))
+                    if (!is.null(fisher_notice)) {
+                        combined <- htmltools::div(correction_panel, fisher_notice)
+                        self$results$multipleTestingInfo$setContent(as.character(combined))
+                    } else {
+                        self$results$multipleTestingInfo$setContent(as.character(correction_panel))
+                    }
+                } else if (!is.null(fisher_notice)) {
+                    self$results$multipleTestingInfo$setContent(as.character(fisher_notice))
                 }
                 
                 # Populate pairwise results table
                 for (i in seq_along(pairwise_results)) {
                     result <- pairwise_results[[i]]
-                    
-                    # Determine which test method to use based on user selection and data
-                    if (self$options$testSelection == "fisher") {
-                        use_fisher <- TRUE
-                        test_used <- "Fisher's exact"
-                    } else if (self$options$testSelection == "chisquare") {
-                        use_fisher <- FALSE
-                        test_used <- "Chi-square"
-                    } else { # auto selection
-                        use_fisher <- any(result$subtable < 5) || is.na(result$fisher_pvalue) == FALSE
-                        test_used <- if (use_fisher) "Fisher's exact" else "Chi-square"
-                    }
-                    
-                    # Use appropriate p-values
-                    primary_p_adj <- result$chi_pvalue_adjusted
-                    fisher_p_adj <- result$fisher_pvalue_adjusted
-                    final_p_adj <- if (use_fisher && !is.na(fisher_p_adj)) fisher_p_adj else primary_p_adj
+                    test_used <- result$test_used
+                    p_raw <- result$actual_pvalue
+                    p_adj <- result$actual_pvalue_adjusted
                     
                     self$results$posthocTable$addRow(
                         rowKey = i,
@@ -1446,10 +1471,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             comparison = result$comparison,
                             test_method = test_used,
                             chi = result$chi_statistic,
-                            p = if (use_fisher) result$fisher_pvalue else result$chi_pvalue,
-                            padj = final_p_adj,
+                            p = p_raw,
+                            padj = p_adj,
                             effect_size = round(result$effect_size, 3),
-                            sig = ifelse(final_p_adj < self$options$sig, .("Yes"), .("No"))
+                            sig = ifelse(p_adj < self$options$sig, .("Yes"), .("No"))
                         )
                     )
                 }
@@ -1560,13 +1585,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     for (i in seq_along(pairwise_results)) {
                         result <- pairwise_results[[i]]
                         
-                        # Determine which test to use
-                        use_fisher <- self$options$testSelection == "fisher" || 
-                                     (self$options$testSelection == "auto" && any(result$subtable < 5))
-                        
-                        test_name <- if (use_fisher) "Fisher's Exact" else "Chi-square"
-                        p_value <- if (use_fisher) result$fisher_pvalue else result$chi_pvalue
-                        p_adj <- if (use_fisher) result$fisher_pvalue_adjusted else result$chi_pvalue_adjusted
+                        test_name <- result$test_used
+                        p_value <- result$actual_pvalue
+                        p_adj <- result$actual_pvalue_adjusted
                         
                         export_data[[row_index]] <- list(
                             category = "Pairwise Comparisons",

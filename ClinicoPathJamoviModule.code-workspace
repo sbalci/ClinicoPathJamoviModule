@@ -32,6 +32,21 @@
 		},
 		{
 			"path": "../JamoviTest"
+		},
+		{
+			"path": "../patoloji-ve-bilisim"
+		},
+		{
+			"path": "../patoloji-bilgi-yonetim-sistemi"
+		},
+		{
+			"path": "../pathology_atlas_pipeline"
+		},
+		{
+			"path": "../patolojiatlasi.github.io"
+		},
+		{
+			"path": "../sbalci.github.io"
 		}
 	],
 	"settings": {}

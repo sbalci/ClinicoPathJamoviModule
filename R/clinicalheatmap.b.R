@@ -339,12 +339,22 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 self$results$annotations$rowAnnotations$setContent(row_ann_html)
             }
 
+            # Build scaled matrix once for clustering/export/survival to match plotted heatmap
+            matrix_state <- private$.buildScaledMatrix(
+                heatmap_data,
+                row_var,
+                col_var,
+                value_var,
+                self$options$scaleMethod
+            )
+
             # Store plot data for visualization
             plot_data <- list(
                 data = heatmap_data,
                 row_var = row_var,
                 col_var = col_var,
                 value_var = value_var,
+                scaled_matrix = matrix_state$matrix,
                 options = list(
                     scale_method = self$options$scaleMethod,
                     cluster_rows = self$options$clusterRows,
@@ -373,7 +383,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
             # Perform optimal K analysis if requested
             if (self$options$findOptimalK && self$options$clusterRows) {
-                private$.performOptimalKAnalysis(heatmap_data, row_var, col_var, value_var)
+                private$.performOptimalKAnalysis(matrix_state$matrix)
             }
 
             # Export cluster assignments if requested
@@ -381,7 +391,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             if ((self$options$exportRowClusters || self$options$exportColClusters) &&
                 (self$options$clusterRows || self$options$clusterCols)) {
                 cluster_assignments <- private$.extractClusterAssignments(
-                    heatmap_data, row_var, col_var, value_var
+                    matrix_state$matrix
                 )
             }
 
@@ -389,20 +399,31 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             if (self$options$survivalAnalysis &&
                 !is.null(self$options$survivalTime) &&
                 !is.null(self$options$survivalEvent) &&
-                !is.null(cluster_assignments$row_clusters)) {
-                private$.performSurvivalAnalysis(
-                    dataset, cluster_assignments$row_clusters, row_var
-                )
+                self$options$clusterRows) {
+                # Ensure we have row clusters even if export disabled
+                if (is.null(cluster_assignments) || is.null(cluster_assignments$row_clusters)) {
+                    cluster_assignments <- private$.extractClusterAssignments(matrix_state$matrix)
+                }
+                if (!is.null(cluster_assignments$row_clusters)) {
+                    private$.performSurvivalAnalysis(
+                        dataset, cluster_assignments$row_clusters, row_var
+                    )
+                }
             }
 
             # Perform cluster comparison if requested
             if (self$options$clusterComparison &&
                 !is.null(self$options$comparisonVars) &&
                 length(self$options$comparisonVars) > 0 &&
-                !is.null(cluster_assignments$row_clusters)) {
-                private$.performClusterComparison(
-                    dataset, cluster_assignments$row_clusters, row_var
-                )
+                self$options$clusterRows) {
+                if (is.null(cluster_assignments) || is.null(cluster_assignments$row_clusters)) {
+                    cluster_assignments <- private$.extractClusterAssignments(matrix_state$matrix)
+                }
+                if (!is.null(cluster_assignments$row_clusters)) {
+                    private$.performClusterComparison(
+                        dataset, cluster_assignments$row_clusters, row_var
+                    )
+                }
             }
         },
 
@@ -666,6 +687,39 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
         #     })
         # },
 
+        .buildScaledMatrix = function(heatmap_data, row_var, col_var, value_var, scale_method) {
+            wide_data <- heatmap_data %>%
+                dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
+                tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var))
+
+            mat <- wide_data %>%
+                tibble::column_to_rownames(row_var) %>%
+                as.matrix()
+
+            # Impute any residual NAs with column means to stabilize scaling/clustering
+            if (anyNA(mat)) {
+                for (j in seq_len(ncol(mat))) {
+                    col_mean <- mean(mat[, j], na.rm = TRUE)
+                    if (is.na(col_mean)) col_mean <- 0
+                    na_idx <- is.na(mat[, j])
+                    if (any(na_idx)) mat[na_idx, j] <- col_mean
+                }
+            }
+
+            if (scale_method == "row") {
+                mat <- t(scale(t(mat)))
+            } else if (scale_method == "column") {
+                mat <- scale(mat)
+            } else if (scale_method == "both") {
+                scaled_vec <- scale(as.vector(mat))
+                mat <- matrix(scaled_vec, nrow = nrow(mat), ncol = ncol(mat))
+                rownames(mat) <- rownames(wide_data %>% tibble::column_to_rownames(row_var))
+                colnames(mat) <- colnames(wide_data)[-1]
+            }
+
+            return(list(matrix = mat))
+        },
+
         .prepareHeatmapData = function(dataset, row_var, col_var, value_var) {
             # Prepare data for heatmap visualization
             tryCatch({
@@ -682,6 +736,13 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 # Select only the variables we need (core + annotations)
                 analysis_data <- dataset %>%
                     dplyr::select(dplyr::all_of(vars_to_keep))
+
+                # Aggregate duplicate row/col combinations (mean)
+                analysis_data <- analysis_data %>%
+                    dplyr::group_by(!!rlang::sym(row_var), !!rlang::sym(col_var)) %>%
+                    dplyr::summarise(!!rlang::sym(value_var) := mean(!!rlang::sym(value_var), na.rm = TRUE),
+                                     dplyr::across(dplyr::all_of(setdiff(vars_to_keep, c(row_var, col_var, value_var))), dplyr::first),
+                                     .groups = "drop")
 
                 # Handle missing data based on user selection
                 na_handling <- self$options$naHandling
@@ -1076,6 +1137,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 "<li><strong>Clustering:</strong> Uses hierarchical clustering with default distance measures</li>",
                 "<li><strong>Performance:</strong> Large datasets (>1000 rows/columns) may require optimization</li>",
                 "<li><strong>Export:</strong> High-resolution outputs available for publication</li>",
+                sprintf("<li><strong>Scaling Applied:</strong> %s; <strong>NA handling:</strong> %s</li>", self$options$scaleMethod, self$options$naHandling),
                 "</ul>",
 
                 "<h5>Clinical Considerations:</h5>",
@@ -1093,26 +1155,14 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
         # === ADVANCED FEATURES IMPLEMENTATION ===
 
-        .performOptimalKAnalysis = function(data, row_var, col_var, value_var) {
+        .performOptimalKAnalysis = function(mat_data) {
             tryCatch({
+                if (is.null(mat_data) || nrow(mat_data) < 3 || ncol(mat_data) < 2) return()
+
                 # Parse K range
                 k_range_str <- self$options$kRange
                 k_range <- eval(parse(text = k_range_str))
                 if (length(k_range) < 2) k_range <- 2:8
-
-                # Prepare data matrix for clustering
-                mat_data <- data %>%
-                    dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
-                    tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var)) %>%
-                    tibble::column_to_rownames(row_var) %>%
-                    as.matrix()
-
-                # Scale if needed
-                if (self$options$scaleMethod == "row") {
-                    mat_data <- t(scale(t(mat_data)))
-                } else if (self$options$scaleMethod == "column") {
-                    mat_data <- scale(mat_data)
-                }
 
                 # Store data for plotting
                 self$results$optimalKAnalysis$elbowPlot$setState(list(
@@ -1134,30 +1184,19 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     stringsAsFactors = FALSE
                 )
 
-                # Within-cluster sum of squares (elbow method)
-                wss <- sapply(k_range, function(k) {
-                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
-                    km$tot.withinss
-                })
+                # Silhouette on hierarchical clustering (consistent with heatmap)
+                dist_rows <- stats::dist(mat_data, method = self$options$clusterDistanceRows)
+                hc_rows <- stats::hclust(dist_rows, method = self$options$clusterMethodRows)
 
-                # Find elbow using simple difference method
-                elbow_k <- k_range[which.max(diff(diff(wss)))] + 1
-                optimal_k_results <- rbind(optimal_k_results, data.frame(
-                    method = "Elbow Method",
-                    optimal_k = as.integer(elbow_k),
-                    metric_value = wss[k_range == elbow_k]
-                ))
-
-                # Silhouette method
                 sil_scores <- sapply(k_range[k_range > 1], function(k) {
-                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
-                    sil <- cluster::silhouette(km$cluster, stats::dist(mat_data))
+                    clusters <- stats::cutree(hc_rows, k = k)
+                    sil <- cluster::silhouette(clusters, dist_rows)
                     mean(sil[, 3])
                 })
 
                 best_sil_k <- k_range[k_range > 1][which.max(sil_scores)]
                 optimal_k_results <- rbind(optimal_k_results, data.frame(
-                    method = "Silhouette",
+                    method = "Hierarchical Silhouette",
                     optimal_k = as.integer(best_sil_k),
                     metric_value = max(sil_scores)
                 ))
@@ -1176,19 +1215,23 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             })
         },
 
-        .extractClusterAssignments = function(data, row_var, col_var, value_var) {
+        .extractClusterAssignments = function(data, row_var = NULL, col_var = NULL, value_var = NULL) {
             tryCatch({
                 # Prepare data matrix
-                mat_data <- data %>%
-                    dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
-                    tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var)) %>%
-                    tibble::column_to_rownames(row_var) %>%
-                    as.matrix()
+                if (is.matrix(data)) {
+                    mat_data <- data
+                } else {
+                    mat_data <- data %>%
+                        dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
+                        tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var)) %>%
+                        tibble::column_to_rownames(row_var) %>%
+                        as.matrix()
+                }
 
                 result <- list(row_clusters = NULL, col_clusters = NULL)
 
-                # Extract row clusters if requested
-                if (self$options$exportRowClusters && self$options$clusterRows) {
+                # Extract row clusters if clustering requested
+                if (self$options$clusterRows) {
                     # Perform hierarchical clustering on rows
                     dist_rows <- stats::dist(mat_data, method = self$options$clusterDistanceRows)
                     hc_rows <- stats::hclust(dist_rows, method = self$options$clusterMethodRows)
@@ -1204,17 +1247,19 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                         stringsAsFactors = FALSE
                     )
 
-                    # Populate table
-                    for (i in seq_len(nrow(result$row_clusters))) {
-                        self$results$clusterAssignments$rowClusterTable$addRow(rowKey = i, values = list(
-                            row_id = result$row_clusters$row_id[i],
-                            cluster = result$row_clusters$cluster[i]
-                        ))
+                    # Populate table only if export requested
+                    if (self$options$exportRowClusters) {
+                        for (i in seq_len(nrow(result$row_clusters))) {
+                            self$results$clusterAssignments$rowClusterTable$addRow(rowKey = i, values = list(
+                                row_id = result$row_clusters$row_id[i],
+                                cluster = result$row_clusters$cluster[i]
+                            ))
+                        }
                     }
                 }
 
-                # Extract column clusters if requested
-                if (self$options$exportColClusters && self$options$clusterCols) {
+                # Extract column clusters if clustering requested
+                if (self$options$clusterCols) {
                     # Perform hierarchical clustering on columns
                     dist_cols <- stats::dist(t(mat_data), method = self$options$clusterDistanceCols)
                     hc_cols <- stats::hclust(dist_cols, method = self$options$clusterMethodCols)
@@ -1229,12 +1274,13 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                         stringsAsFactors = FALSE
                     )
 
-                    # Populate table
-                    for (i in seq_len(nrow(result$col_clusters))) {
-                        self$results$clusterAssignments$colClusterTable$addRow(rowKey = i, values = list(
-                            col_id = result$col_clusters$col_id[i],
-                            cluster = result$col_clusters$cluster[i]
-                        ))
+                    if (self$options$exportColClusters) {
+                        for (i in seq_len(nrow(result$col_clusters))) {
+                            self$results$clusterAssignments$colClusterTable$addRow(rowKey = i, values = list(
+                                col_id = result$col_clusters$col_id[i],
+                                cluster = result$col_clusters$cluster[i]
+                            ))
+                        }
                     }
                 }
 
@@ -1274,6 +1320,16 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 fit <- survival::survfit(surv_obj ~ cluster, data = surv_data)
 
                 # Log-rank test
+                # Guard against too few events per cluster
+                if (length(unique(surv_data$cluster)) < 2) {
+                    warning("Survival analysis skipped: fewer than 2 clusters available.")
+                    return(invisible(NULL))
+                }
+                events_per_cluster <- tapply(surv_data$event, surv_data$cluster, sum)
+                if (length(events_per_cluster) < 2 || any(events_per_cluster == 0)) {
+                    warning("Survival analysis skipped: insufficient events per cluster for log-rank test.")
+                    return(invisible(NULL))
+                }
                 log_rank <- survival::survdiff(surv_obj ~ cluster, data = surv_data)
 
                 # Populate results

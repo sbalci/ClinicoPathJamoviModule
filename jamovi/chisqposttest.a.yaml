@@ -1,26 +1,21 @@
 ---
 name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
-menuGroup: ExplorationT2
+menuGroup: ExplorationT1
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.31'
 jas: '1.2'
 
 description:
     main: >
-        Performs Chi-Square test and post-hoc pairwise comparisons.
-
-        ⚠️ IMPORTANT LIMITATIONS:
-
-        - Post-hoc pairwise comparisons are ONLY performed when the overall chi-square
+          Performs Chi-Square test and post-hoc pairwise comparisons.
+          Post-hoc pairwise comparisons are ONLY performed when the overall chi-square
           test is significant (p < α). This enforces proper statistical workflow and
           prevents data dredging.
-
-        - Selecting 'None' for post-hoc method DISABLES all pairwise testing. If you
+          Selecting 'None' for post-hoc method DISABLES all pairwise testing. If you
           want unadjusted pairwise comparisons, this feature is not available (by design,
           as it would encourage inappropriate multiple testing).
-
-        - No automated validation against established packages exists. Use with caution
+          No automated validation against established packages exists. Use with caution
           for clinical decision-making.
     R:
         dontrun: true
