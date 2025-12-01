@@ -26,6 +26,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Sample size adequacy thresholds
             MIN_DISCORDANT_PAIRS = 10, # Minimum for reliable McNemar's test
+            ZERO_CELL_CONTINUITY = 0.5, # Continuity correction for LR stability
 
             # Cache for test results to avoid redundant calculations
             .cached_test_results = NULL,
@@ -261,6 +262,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$pp && self$options$ci) {
                     stop(jmvcore::.("Prior probability and confidence intervals cannot both be enabled. Please choose one option."))
                 }
+
+                # Inform user about prevalence source
+                if (self$options$pp) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ppvNpvPrevalenceSource',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent('PPV/NPV will be calculated using the supplied population prevalence (pp=TRUE). Confidence intervals are unavailable in this mode.')
+                    self$results$insert(1, notice)
+                }
             },
 
             # Data preparation and cleaning
@@ -415,12 +427,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (length(test_levels) > 2) {
                     extra_levels <- setdiff(test_levels, testPLevel)
                     warning(jmvcore::format(
-                        "⚠️ {test} has {n} levels: {levels}. Only '{pos}' is treated as positive; all other levels ({extra}) are treated as NEGATIVE. This may inflate specificity/NPV if these represent equivocal or invalid results. Consider excluding these cases or using a binary variable.",
+                        "⚠️ {test} has {n} levels: {levels}. Only '{pos}' is treated as positive; all other levels ({extra}) are treated as NEGATIVE. This may inflate specificity/NPV if these represent equivocal/invalid results. Consider excluding these cases or using a binary variable. Count of non-positive levels: {count_extra}.",
                         test = testVariable,
                         n = length(test_levels),
                         levels = paste(test_levels, collapse = ", "),
                         pos = testPLevel,
-                        extra = paste(extra_levels, collapse = ", ")
+                        extra = paste(extra_levels, collapse = ", "),
+                        count_extra = sum(!is.na(mydata[[testVariable]]) & mydata[[testVariable]] %in% extra_levels)
                     ), call. = FALSE)
                 }
 
@@ -434,6 +447,34 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         pos = goldPLevel,
                         extra = paste(extra_levels, collapse = ", ")
                     ), call. = FALSE)
+                }
+
+                # Optionally exclude indeterminate/equivocal levels instead of collapsing to Negative
+                if (self$options$excludeIndeterminate) {
+                    valid_test_levels <- c(testPLevel, setdiff(test_levels, testPLevel))
+                    valid_gold_levels <- c(goldPLevel, setdiff(gold_levels, goldPLevel))
+
+                    rows_before <- nrow(mydata)
+                    mydata <- mydata %>%
+                        dplyr::filter(
+                            (.data[[testVariable]] %in% valid_test_levels) &
+                            (.data[[goldVariable]] %in% valid_gold_levels)
+                        )
+                    rows_after <- nrow(mydata)
+                    if (rows_after < rows_before) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('excludedIndeterminate_', private$.escapeVar(testVariable)),
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(jmvcore::format(
+                            "Excluded {n} rows for {test} (and gold) with indeterminate/equivocal levels; retained {kept} rows.",
+                            n = rows_before - rows_after,
+                            test = testVariable,
+                            kept = rows_after
+                        ))
+                        self$results$insert(1, notice)
+                    }
                 }
 
                 # Recode data to positive/negative with explicit handling of missing values
@@ -518,23 +559,46 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     PriorProb <- private$.computeRate(DiseaseP, TotalPop, "prevalence", test_label)
                 }
 
-                # Likelihood ratios
+                # Likelihood ratios with stability handling
                 spec_is_one <- !is.na(Spec) && abs(Spec - 1) < sqrt(.Machine$double.eps)
                 spec_is_zero <- !is.na(Spec) && abs(Spec - 0) < sqrt(.Machine$double.eps)
+
+                # Apply continuity correction for LR stability only; do not alter reported counts
+               zero_cells <- any(c(TP, FP, FN, TN) == 0)
+                if (zero_cells) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('lrContinuity_', private$.escapeVar(test_label)),
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(jmvcore::format(
+                        "Zero cell detected for {test}. LR+/LR- computed with a {cc} continuity correction to avoid infinite/undefined values; interpret cautiously.",
+                        test = test_label,
+                        cc = private$ZERO_CELL_CONTINUITY
+                    ))
+                    self$results$insert(1, notice)
+
+                    TP_cc <- TP + private$ZERO_CELL_CONTINUITY
+                    FP_cc <- FP + private$ZERO_CELL_CONTINUITY
+                    FN_cc <- FN + private$ZERO_CELL_CONTINUITY
+                    TN_cc <- TN + private$ZERO_CELL_CONTINUITY
+                } else {
+                    TP_cc <- TP; FP_cc <- FP; FN_cc <- FN; TN_cc <- TN
+                }
 
                 LRP <- if (is.na(Sens) || is.na(Spec)) {
                     NA_real_
                 } else if (spec_is_one) {
                     Inf
                 } else {
-                    private$.computeRate(Sens, 1 - Spec, "positive likelihood ratio", test_label)
+                    private$.computeRate(TP_cc / (TP_cc + FN_cc), 1 - (TN_cc / (TN_cc + FP_cc)), "positive likelihood ratio", test_label)
                 }
                 LRN <- if (is.na(Sens) || is.na(Spec)) {
                     NA_real_
                 } else if (spec_is_zero) {
                     Inf
                 } else {
-                    private$.computeRate(1 - Sens, Spec, "negative likelihood ratio", test_label)
+                    private$.computeRate(1 - (TP_cc / (TP_cc + FN_cc)), TN_cc / (TN_cc + FP_cc), "negative likelihood ratio", test_label)
                 }
 
                 return(list(
@@ -577,6 +641,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # Add footnotes if requested
                     if (self$options$fnote) {
                         private$.addContingencyTableFootnotes(cTable)
+                        if (any(c(TP, FP, FN, TN) == 0)) {
+                            cTable$addFootnote(rowKey = "Total", col = "Total", "Zero cell detected; LR+/LR- computed with continuity correction (0.5). Interpret cautiously.")
+                        }
                     }
                 }
             },
@@ -602,6 +669,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # Use escaped variable name consistently for row keys
                     escaped_test_name <- private$.escapeVar(test_name)
 
+                    prevalence_note <- if (self$options$pp) " (population prevalence)" else " (sample prevalence)"
+
                     comparisonTable$addRow(
                         rowKey = escaped_test_name,
                         values = list(
@@ -622,7 +691,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     comparisonTable$addRow(
                         rowKey = paste0(escaped_test_name, "_interp"),
                         values = list(
-                            test = paste0("  → ", clinical_interpretation),
+                            test = paste0("  → ", clinical_interpretation, ifelse(zero_cells, " (zero cell; LR may be unstable)", "")),
                             Sens = "", Spec = "", AccurT = "", PPV = "", NPV = "", LRP = "", LRN = ""
                         )
                     )
@@ -631,6 +700,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # Add footnotes if requested
                     if (self$options$fnote) {
                         private$.addComparisonTableFootnotes(comparisonTable, escaped_test_name)
+                        comparisonTable$addFootnote(
+                            rowKey = escaped_test_name, col = "PPV",
+                            paste0("PPV uses", prevalence_note, ".")
+                        )
+                        comparisonTable$addFootnote(
+                            rowKey = escaped_test_name, col = "NPV",
+                            paste0("NPV uses", prevalence_note, ".")
+                        )
                     }
                 }
             },
@@ -1067,8 +1144,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         ), call. = FALSE)
                         return()
                     }
+                    row_key <- paste(comparison_name, metric_key, sep = "_")
                     diffTable$addRow(
-                        rowKey = paste(comparison_name, metric_key, sep = "_"),
+                        rowKey = row_key,
                         values = list(
                             comparison = comparison_name,
                             metric = metric_label,
@@ -1077,6 +1155,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             upper = result$upper
                         )
                     )
+                    # Add small-sample/stability note
+                    if (!is.null(result$n) && (result$n < 30 || any(result$counts < 5))) {
+                        diffTable$addFootnote(
+                            rowKey = row_key,
+                            col = "diff",
+                            jmvcore::.("Small paired sample/discordant counts; CI may be unstable (n={n}, discordant counts: {counts}).",
+                                n = result$n,
+                                counts = paste(result$counts, collapse = ", "))
+                        )
+                    }
                 }
 
                 # Sensitivity difference (gold positive)

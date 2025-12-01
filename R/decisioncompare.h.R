@@ -20,6 +20,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             fnote = FALSE,
             ci = FALSE,
             plot = FALSE,
+            excludeIndeterminate = FALSE,
             radarplot = FALSE,
             statComp = FALSE,
             showSummary = FALSE,
@@ -103,6 +104,10 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "plot",
                 plot,
                 default=FALSE)
+            private$..excludeIndeterminate <- jmvcore::OptionBool$new(
+                "excludeIndeterminate",
+                excludeIndeterminate,
+                default=FALSE)
             private$..radarplot <- jmvcore::OptionBool$new(
                 "radarplot",
                 radarplot,
@@ -138,6 +143,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
             self$.addOption(private$..plot)
+            self$.addOption(private$..excludeIndeterminate)
             self$.addOption(private$..radarplot)
             self$.addOption(private$..statComp)
             self$.addOption(private$..showSummary)
@@ -159,6 +165,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value,
         plot = function() private$..plot$value,
+        excludeIndeterminate = function() private$..excludeIndeterminate$value,
         radarplot = function() private$..radarplot$value,
         statComp = function() private$..statComp$value,
         showSummary = function() private$..showSummary$value,
@@ -179,6 +186,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..fnote = NA,
         ..ci = NA,
         ..plot = NA,
+        ..excludeIndeterminate = NA,
         ..radarplot = NA,
         ..statComp = NA,
         ..showSummary = NA,
@@ -750,4 +758,3 @@ decisioncompare <- function(
 
     analysis$results
 }
-

@@ -255,6 +255,33 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     mydata[[var]] <- forcats::as_factor(mydata[[var]])
                 }
 
+                # Validate that specified positive levels exist in data
+                required_levels <- list(
+                    gold = list(var = goldVar, level = self$options$goldPositive, label = "gold standard"),
+                    test1 = list(var = test1Var, level = self$options$test1Positive, label = "Test 1")
+                )
+
+                if (!is.null(self$options$test2) && self$options$test2 != "") {
+                    required_levels$test2 <- list(var = self$options$test2, level = self$options$test2Positive, label = "Test 2")
+                }
+                if (!is.null(self$options$test3) && self$options$test3 != "") {
+                    required_levels$test3 <- list(var = self$options$test3, level = self$options$test3Positive, label = "Test 3")
+                }
+
+                for (rl in required_levels) {
+                    if (!rl$level %in% levels(mydata[[rl$var]])) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('missingLevel_', rl$var),
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf('The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
+                                                  rl$level, rl$var, rl$label))
+                        self$results$insert(1, notice)
+                        return(NULL)
+                    }
+                }
+
                 # Recode gold standard
                 mydata <- mydata %>%
                     dplyr::mutate(
@@ -369,6 +396,31 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     return()
                 }
 
+                # Apply continuity correction for zero cells to avoid infinite estimates
+                use_continuity <- any(c(tp, fp, fn, tn) == 0)
+                if (use_continuity) {
+                    tp_adj <- tp + 0.5
+                    fp_adj <- fp + 0.5
+                    fn_adj <- fn + 0.5
+                    tn_adj <- tn + 0.5
+                    cont_table_for_epi <- matrix(c(tp_adj, fp_adj, fn_adj, tn_adj),
+                                                 nrow = 2, byrow = TRUE,
+                                                 dimnames = list(c("Positive", "Negative"), c("Positive", "Negative")))
+
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('continuityCorrectionApplied_test', test_num),
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf(
+                        'Continuity correction (+0.5) applied to Test %d due to zero cell count(s).',
+                        test_num
+                    ))
+                    self$results$insert(1, notice)
+                } else {
+                    cont_table_for_epi <- cont_table
+                }
+
                 # Get results tables
                 if (test_num == 1) {
                     contTable <- self$results$individualTest1$test1Contingency
@@ -402,7 +454,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 ))
 
                 # Calculate statistics using epiR
-                result <- epiR::epi.tests(cont_table, conf.level = 0.95)
+                result <- epiR::epi.tests(cont_table_for_epi, conf.level = 0.95)
 
                 # Extract values - epiR returns $detail as a data frame
                 detail_df <- as.data.frame(result$detail)
@@ -433,6 +485,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
             .analyzeCombinations = function(data_prep) {
                 # Generate and analyze all test combinations
+
+                # Inform users that PPV/NPV are based on sample prevalence
+                prevalence_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'ppvNpvSamplePrevalence',
+                    type = jmvcore::NoticeType$INFO
+                )
+                prevalence_notice$setContent('Positive/Negative Predictive Values are calculated using the sample prevalence. Interpret cautiously if your sample does not reflect the target clinical population.')
+                self$results$insert(1, prevalence_notice)
 
                 has_test2 <- "test2Variable2" %in% names(data_prep)
                 has_test3 <- "test3Variable2" %in% names(data_prep)
@@ -667,9 +728,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 # LR+ with CI (log-scale transformation for CI, using adjusted counts)
                 if (!is.na(lr_pos) && lr_pos > 0) {
                     log_lr_pos <- log(lr_pos)
-                    # Approximate SE for log(LR+) using delta method with adjusted values
-                    se_log_lr_pos <- sqrt((1 - sens_adj) / (sens_adj * (tp_adj + fn_adj)) +
-                                        spec_adj / ((1 - spec_adj) * (fp_adj + tn_adj)))
+                    # Standard SE for log(LR+) using adjusted counts
+                    se_log_lr_pos <- sqrt((1 / tp_adj) - (1 / (tp_adj + fn_adj)) +
+                                          (1 / fp_adj) - (1 / (fp_adj + tn_adj)))
                     lr_pos_lower <- exp(log_lr_pos - 1.96 * se_log_lr_pos)
                     lr_pos_upper <- exp(log_lr_pos + 1.96 * se_log_lr_pos)
                 } else {
@@ -687,9 +748,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 # LR- with CI (log-scale transformation for CI, using adjusted counts)
                 if (!is.na(lr_neg) && lr_neg > 0) {
                     log_lr_neg <- log(lr_neg)
-                    # Approximate SE for log(LR-) using delta method with adjusted values
-                    se_log_lr_neg <- sqrt(sens_adj / ((1 - sens_adj) * (tp_adj + fn_adj)) +
-                                        (1 - spec_adj) / (spec_adj * (fp_adj + tn_adj)))
+                    # Standard SE for log(LR-) using adjusted counts
+                    se_log_lr_neg <- sqrt((1 / fn_adj) - (1 / (tp_adj + fn_adj)) +
+                                          (1 / tn_adj) - (1 / (fp_adj + tn_adj)))
                     lr_neg_lower <- exp(log_lr_neg - 1.96 * se_log_lr_neg)
                     lr_neg_upper <- exp(log_lr_neg + 1.96 * se_log_lr_neg)
                 } else {
@@ -875,12 +936,23 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 table_df <- combTable$asDF()
 
                 # Find pattern with highest Youden's J
-                max_youden_idx <- which.max(table_df$youden)
-                best_pattern <- table_df[max_youden_idx, ]
+                # Prefer patterns with reasonable cell counts to avoid unstable choices
+                table_df$min_cell <- apply(table_df[, c("tp", "fp", "fn", "tn")], 1, min)
+                stable_df <- table_df[table_df$min_cell >= 5, ]
+                if (nrow(stable_df) == 0) {
+                    stable_df <- table_df  # fallback to all if none meet threshold
+                    stability_note <- "No pattern meets the minimum cell count of 5; recommendation is based on all patterns (may be unstable). "
+                } else {
+                    stability_note <- ""
+                }
+
+                max_youden_idx <- which.max(stable_df$youden)
+                best_pattern <- stable_df[max_youden_idx, ]
 
                 # Generate rationale
                 rationale <- sprintf(
-                    "Highest Youden's J (%.3f) indicates optimal balance of sensitivity and specificity. ",
+                    "%sHighest Youden's J (%.3f) indicates optimal balance of sensitivity and specificity. ",
+                    stability_note,
                     best_pattern$youden
                 )
 
@@ -1072,9 +1144,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Pattern filtering logic
                 if (filter_type == "allPositive") {
-                    pattern <- grep("^\\+/\\+(/\\+)?$", data$pattern)
+                    pattern <- grep("^\\+(/\\+)+$", data$pattern)
                 } else if (filter_type == "allNegative") {
-                    pattern <- grep("^-/-(/-)$", data$pattern)
+                    pattern <- grep("^-(/-)+$", data$pattern)
                 } else if (filter_type == "mixed") {
                     pattern <- grep("[+-]/[+-]", data$pattern)
                     pattern <- pattern[!grepl("^\\+/\\+|^-/-", data$pattern[pattern])]

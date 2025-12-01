@@ -1,7 +1,7 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecideT2
+menuGroup: meddecideT1
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
 version: '0.0.32'
@@ -217,6 +217,16 @@ options:
             Useful for visualizing differences in sensitivity, specificity, PPV, NPV, and accuracy.
           R: >
             Generate comparison plot showing test performance metrics.
+
+    - name: excludeIndeterminate
+      title: Exclude Indeterminate/Equivocal Levels
+      type: Bool
+      default: false
+      description:
+          ui: >
+            When a test or the gold standard has more than two levels (e.g., indeterminate/equivocal), exclude those rows instead of treating them as negative.
+          R: >
+            If TRUE, drop rows where test/gold values are neither the specified positive level nor a clear negative level to avoid inflating specificity/NPV from equivocal results.
 
     - name: radarplot
       title: 'Radar Plot'
