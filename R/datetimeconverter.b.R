@@ -56,10 +56,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 notice$setContent('No valid datetime values found for format detection.\n• All values in the selected variable are missing (NA).\n• Select a different variable or check your data source.')
                 self$results$insert(1, notice)
-                return(list(format = "ymd", warnings = 'Defaulted to YYYY-MM-DD (YMD) because no valid values were available.'))
+                return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
             }
 
-            sample_dates <- head(sample_dates, min(20, length(sample_dates)))
+            sample_dates <- head(sample_dates, min(40, length(sample_dates)))
             formats_to_try <- c(
                 "ymd_hms", "dmy_hms", "mdy_hms",
                 "ymd_hm", "dmy_hm", "mdy_hm",
@@ -71,14 +71,19 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (fmt in formats_to_try)
                 eval_results[[fmt]] <- private$.evaluateFormat(sample_dates, fmt)
 
-            for (fmt in formats_to_try) {
-                info <- eval_results[[fmt]]
-                if (info$success_rate > 0.8) {
-                    ambiguity <- private$.warnAmbiguousFormat(fmt, eval_results)
-                    if (length(ambiguity) > 0)
-                        format_warnings <- c(format_warnings, ambiguity)
-                    return(list(format = fmt, warnings = format_warnings))
+            # Find top two formats by success rate
+            success_vec <- vapply(eval_results, function(x) x$success_rate, numeric(1))
+            top_order <- names(sort(success_vec, decreasing = TRUE))
+            top_fmt <- top_order[1]
+            second_fmt <- top_order[2]
+
+            # Require top format to clear 0.8; if close competitor disagrees, mark ambiguous
+            if (!is.null(top_fmt) && success_vec[[top_fmt]] > 0.8) {
+                ambiguity <- private$.warnAmbiguousFormat(top_fmt, eval_results, second_fmt = second_fmt)
+                if (length(ambiguity) > 0) {
+                    format_warnings <- c(format_warnings, ambiguity)
                 }
+                return(list(format = top_fmt, warnings = format_warnings))
             }
 
             notice <- jmvcore::Notice$new(
@@ -86,10 +91,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name = 'formatDetectionFailed',
                 type = jmvcore::NoticeType$WARNING
             )
-            notice$setContent('Could not reliably detect datetime format.\n• Defaulting to YYYY-MM-DD (YMD).\n• If results look incorrect, manually specify the format.\n• Review the preview table to verify parsing accuracy.')
+            notice$setContent('Could not reliably detect datetime format.\n• Format remains UNSURE; parsing will not proceed without manual selection.\n• Review preview and specify the correct format (e.g., DMY, MDY).')
             self$results$insert(2, notice)
 
-            return(list(format = "ymd", warnings = c(format_warnings, 'Auto-detection failed and defaulted to YYYY-MM-DD (YMD).')))
+            return(list(format = "unsure", warnings = c(format_warnings, 'Auto-detection failed; specify format manually.')))
         },
 
         .evaluateFormat = function(sample_dates, fmt) {
@@ -108,7 +113,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
 
-        .warnAmbiguousFormat = function(primary_fmt, eval_results) {
+        .warnAmbiguousFormat = function(primary_fmt, eval_results, second_fmt = NULL) {
             ambiguity_pairs <- list(
                 dmy = "mdy",
                 mdy = "dmy",
@@ -118,7 +123,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mdy_hm = "dmy_hm"
             )
 
-            alt_fmt <- ambiguity_pairs[[primary_fmt]]
+            alt_fmt <- if (!is.null(second_fmt)) second_fmt else ambiguity_pairs[[primary_fmt]]
             if (is.null(alt_fmt) || is.null(eval_results[[alt_fmt]]))
                 return(character())
 
@@ -132,7 +137,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(character())
 
             msg <- sprintf(
-                'Ambiguous day/month order detected: both %s and %s parsed most values but produced different dates. Applied %s – verify the preview before continuing.',
+                'Ambiguous day/month order detected: %s and %s both parsed >80%% but produced different dates. Format set to %s—verify preview or choose explicitly.',
                 private$.formatLabel(primary_fmt),
                 private$.formatLabel(alt_fmt),
                 private$.formatLabel(primary_fmt))
@@ -334,11 +339,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             excel_like <- all(non_missing >= 0 & non_missing <= 600000)
+            excel_1904_like <- all(non_missing >= -1461 & non_missing <= 598539) # offset difference
             unix_like <- all(non_missing >= 1e9 & non_missing <= 4e9)
+            unix_ms_like <- all(non_missing >= 1e12 & non_missing <= 4e12)
 
             if (excel_like) {
                 parsed_dates <- as.POSIXct(numeric_vector, origin = '1899-12-30', tz = 'UTC')
-                notes <- c(notes, 'Detected Excel serial numbers; converted using origin 1899-12-30 (UTC).')
+                notes <- c(notes, 'Detected Excel serial numbers (1900 system); converted using origin 1899-12-30 (UTC).')
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -346,6 +353,20 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     parsed_dates = parsed_dates,
                     already_parsed = TRUE,
                     format_hint = 'excel_serial',
+                    notes = notes
+                ))
+            }
+
+            if (excel_1904_like) {
+                parsed_dates <- as.POSIXct(numeric_vector, origin = '1904-01-01', tz = 'UTC')
+                notes <- c(notes, 'Detected Excel serial numbers (1904 system); converted using origin 1904-01-01 (UTC).')
+                return(list(
+                    original_display = original_display,
+                    parsing_vector = parsed_dates,
+                    quality_vector = quality_vector,
+                    parsed_dates = parsed_dates,
+                    already_parsed = TRUE,
+                    format_hint = 'excel_serial_1904',
                     notes = notes
                 ))
             }
@@ -360,6 +381,20 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     parsed_dates = parsed_dates,
                     already_parsed = TRUE,
                     format_hint = 'unix_epoch',
+                    notes = notes
+                ))
+            }
+
+            if (unix_ms_like) {
+                parsed_dates <- as.POSIXct(numeric_vector/1000, origin = '1970-01-01', tz = 'UTC')
+                notes <- c(notes, 'Detected Unix epoch milliseconds; converted using origin 1970-01-01 (UTC).')
+                return(list(
+                    original_display = original_display,
+                    parsing_vector = parsed_dates,
+                    quality_vector = quality_vector,
+                    parsed_dates = parsed_dates,
+                    already_parsed = TRUE,
+                    format_hint = 'unix_epoch_ms',
                     notes = notes
                 ))
             }
@@ -412,35 +447,46 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # DATETIME PARSING
         # ===================================================================
 
-        # Parse datetime using detected or selected format
-        # @param datetime_vector Character/numeric vector to parse
-        # @param format Format string (e.g., "ymd", "dmy_hms")
-        # @param tz Timezone (default: "" for system timezone)
-        # @return POSIXct datetime vector
-        .parseDatetime = function(datetime_vector, format, tz = "") {
             # Parse datetime using detected or selected format
+            # @param datetime_vector Character/numeric vector to parse
+            # @param format Format string (e.g., "ymd", "dmy_hms")
+            # @param tz Timezone (default: "" for system timezone)
+            # @return POSIXct datetime vector
+            .parseDatetime = function(datetime_vector, format, tz = "") {
+                # Parse datetime using detected or selected format
 
-            parser <- private$.getParser(format)
+                parser <- private$.getParser(format)
 
-            tryCatch({
-                # Apply timezone if parser supports it
-                parsed_dates <- parser(datetime_vector, tz = tz)
-                return(parsed_dates)
-            }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'parsingError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
-                    'Error parsing datetimes with format "%s".\n• Parser error: %s\n• Try selecting a different format.\n• Check that your data matches the selected format.',
-                    format, e$message
-                ))
-                self$results$insert(1, notice)
-                # Return NA vector to allow analysis to continue
-                return(rep(as.POSIXct(NA), length(datetime_vector)))
-            })
-        },
+                tryCatch({
+                    # Apply timezone if parser supports it
+                    parsed_dates <- parser(datetime_vector, tz = tz)
+                    # Plausibility check: flag years out of range
+                    yrs <- suppressWarnings(as.integer(format(parsed_dates, "%Y")))
+                    if (any(!is.na(yrs) & (yrs < 1900 | yrs > as.integer(format(Sys.Date() + 365, "%Y"))))) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'implausibleDates',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent("Detected parsed dates outside plausible range (<1900 or >1 year in future). Review preview to confirm correct parsing.")
+                        self$results$insert(2, notice)
+                    }
+                    return(parsed_dates)
+                }, error = function(e) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'parsingError',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf(
+                        'Error parsing datetimes with format "%s".\n• Parser error: %s\n• Try selecting a different format.\n• Check that your data matches the selected format.',
+                        format, e$message
+                    ))
+                    self$results$insert(1, notice)
+                    # Return NA vector to allow analysis to continue
+                    return(rep(as.POSIXct(NA), length(datetime_vector)))
+                })
+            },
 
         .resolveTimezone = function() {
             tz_option <- self$options$timezone
@@ -517,12 +563,17 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 NA_real_
             }
 
+            # Ambiguity: parsed values that differ between dmy/mdy when both succeed
+            ambiguity_flag <- logical(length(parsed))
+            # Placeholder: rely on ambiguousFormatDetected notice; mark any NA parsed as potential failure
+
             quality_metrics <- list(
                 total_observations = total_obs,
                 original_missing = original_na,
                 successfully_parsed = successful,
                 failed_parsing = failed_parsing,
                 success_rate = success_rate,
+                ambiguous = sum(ambiguity_flag, na.rm = TRUE),
                 min_datetime = if (successful > 0) min(parsed, na.rm = TRUE) else NA,
                 max_datetime = if (successful > 0) max(parsed, na.rm = TRUE) else NA
             )
@@ -727,15 +778,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     as.character(parsed[i])
                 }
 
-                # Status: success if parsed is not NA (unless original was NA)
-                if (is.na(original[i])) {
-                    status <- "<span style='color: #6c757d;'>-</span>"
-                } else if (is.na(parsed[i])) {
-                    status <- "<span style='color: #dc3545;'>✗</span>"
-                    row_bg <- "#ffebee"
-                } else {
-                    status <- "<span style='color: #28a745;'>✓</span>"
-                }
+            # Status: success if parsed is not NA (unless original was NA)
+            if (is.na(original[i])) {
+                status <- "<span style='color: #6c757d;'>-</span>"
+            } else if (is.na(parsed[i])) {
+                status <- "<span style='color: #dc3545;'>✗</span>"
+                row_bg <- "#ffebee"
+            } else {
+                status <- "<span style='color: #28a745;'>✓</span>"
+            }
 
                 table_html <- paste0(table_html,
                     "<tr style='background-color: ", row_bg, ";'>",

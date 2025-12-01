@@ -256,4 +256,65 @@ test_that("Either Test Positive Rule", {
     expect_equal(res_either$postProb, 0.421, tolerance = 1e-3)
 })
 
+test_that("Dependent either-positive uses realized joint probabilities", {
+    options <- create_options(
+        test1_sens = 0.95, test1_spec = 0.95,
+        test2_sens = 0.95, test2_spec = 0.95,
+        prevalence = 0.1, indep = FALSE,
+        cond_dep_pos = 0.9, cond_dep_neg = 0.9
+    )
+    
+    analysis <- cotestClass$new(options)
+    analysis$run()
+    
+    # Recompute using the same internal dependent routine to ensure coherence
+    pretest_odds <- options$prevalence / (1 - options$prevalence)
+    dep <- analysis$.__enclos_env__$private$.calculateDependentTestProbabilities(
+        options$test1_sens, options$test1_spec,
+        options$test2_sens, options$test2_spec,
+        options$cond_dep_pos, options$cond_dep_neg,
+        pretest_odds
+    )
+    p_either_pos_D <- 1 - dep$p_both_neg_D
+    p_either_pos_nD <- 1 - dep$p_both_neg_nD
+    lr_either <- p_either_pos_D / p_either_pos_nD
+    post_odds <- pretest_odds * lr_either
+    expected <- post_odds / (1 + post_odds)
+    
+    res_either <- analysis$results$cotestResultsTable$rows[["either_pos"]]
+    expect_equal(res_either$postProb, expected, tolerance = 1e-6)
+})
+
+test_that("Negative dependence parameters are accepted and reported", {
+    options <- create_options(
+        test1_sens = 0.85, test1_spec = 0.9,
+        test2_sens = 0.8, test2_spec = 0.9,
+        prevalence = 0.15, indep = FALSE,
+        cond_dep_pos = -0.4, cond_dep_neg = -0.4
+    )
+    
+    analysis <- cotestClass$new(options)
+    analysis$run()
+    
+    expect_true(grepl("Realized phi", analysis$results$dependenceInfo$content))
+})
+
+test_that("Fagan plot uses parallel rule (either-positive, both-negative)", {
+    options <- create_options(
+        test1_sens = 0.8, test1_spec = 0.9,
+        test2_sens = 0.75, test2_spec = 0.95,
+        prevalence = 0.1, indep = TRUE,
+        fagan = TRUE
+    )
+    
+    analysis <- cotestClass$new(options)
+    analysis$run()
+    
+    state <- analysis$results$plot1$state
+    p_either_pos_D <- 1 - ((1 - options$test1_sens) * (1 - options$test2_sens))
+    p_either_pos_nD <- 1 - (options$test1_spec * options$test2_spec)
+    expect_equal(state$Plr_PositiveRule, p_either_pos_D / p_either_pos_nD, tolerance = 1e-6)
+    expect_equal(state$Nlr_NegativeRule, (1 - options$test1_sens) * (1 - options$test2_sens) / (options$test1_spec * options$test2_spec), tolerance = 1e-6)
+})
+
 print("Verification Script Created Successfully")

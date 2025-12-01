@@ -154,6 +154,37 @@
     })
 }
 
+# Wrapper for gtsummary to automatically choose Fisher vs chi-square based on expected counts
+.cat_test_auto <- function(data, variable, by, test_preference = "auto", min_expected = 5, ...) {
+    tbl <- table(data[[variable]], data[[by]])
+    sel <- .selectAppropriateTest(tbl, test_preference = test_preference, min_expected = min_expected)
+    if (sel$test == "fisher") {
+        res <- fisher.test(tbl)
+    } else {
+        res <- suppressWarnings(chisq.test(tbl, correct = FALSE))
+    }
+    res
+}
+
+# Wrapper for gtsummary to use Welch/oneway vs Wilcoxon/Kruskal depending on chosen central tendency
+.cont_test_auto <- function(data, variable, by, method = c("mean", "median"), ...) {
+    method <- match.arg(method)
+    groups <- factor(data[[by]])
+    if (length(levels(groups)) > 2) {
+        if (method == "mean") {
+            stats::oneway.test(data[[variable]] ~ groups, var.equal = FALSE)
+        } else {
+            stats::kruskal.test(data[[variable]] ~ groups)
+        }
+    } else {
+        if (method == "mean") {
+            stats::t.test(data[[variable]] ~ groups, var.equal = FALSE)
+        } else {
+            stats::wilcox.test(data[[variable]] ~ groups, exact = FALSE)
+        }
+    }
+}
+
 # Helper function to validate sample size and data quality
 .validateAnalysisAssumptions <- function(mydata, myvars, mygroup) {
     issues <- list()
@@ -314,6 +345,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$todo2$setContent(warning_msg)
                 }
 
+                # If any user-specified variable could not be matched, block analysis
+                if (length(myvars) == 0 || length(mygroup) == 0) {
+                    stop("Selected variables could not be matched to the dataset after cleaning labels. Please reselect variables.")
+                }
+
                 return(list(
                     "mydata" = mydata,
                     "myvars" = myvars,
@@ -334,7 +370,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     "Q-values represent the False Discovery Rate (FDR) - the expected proportion of false positives among rejected hypotheses when testing multiple variables simultaneously.</p>",
                     
                     "<p><strong>Why use Q-values in this table?</strong><br>",
-                    "When comparing multiple variables across groups (as in this cross-table), the chance of finding at least one false positive increases. Q-values control this family-wise error rate.</p>",
+                    "When comparing multiple variables across groups (as in this cross-table), the chance of false positives increases. Q-values (FDR control) limit the expected false discovery proportion, whereas Bonferroni/Holm control the family-wise error rate.</p>",
                     
                     "<p><strong>Interpretation Guidelines:</strong></p>",
                     "<ul>",
@@ -343,7 +379,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     "<li><strong>Q < 0.20:</strong> Suggestive evidence - warrants further investigation</li>",
                     "</ul>",
                     
-                    "<p><strong>Method:</strong> Benjamini-Hochberg FDR correction applied to p-values from gtsummary's automatic test selection (chi-square/Fisher for categorical, t-test/ANOVA for continuous).</p>",
+                    "<p><strong>Method:</strong> Benjamini-Hochberg FDR correction applied to p-values from gtsummary's automatic test selection (chi-square/Fisher for categorical, Welch/Wilcoxon/Kruskal or Welch ANOVA for continuous).</p>",
                     
                     "<p><em>💡 Focus on q-values when interpreting results from tables with multiple comparisons to reduce false discoveries.</em></p>",
                     "</div>"
@@ -554,6 +590,22 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 analysis_vars <- c(myvars, mygroup)
                 mydata_subset <- mydata[, analysis_vars, drop = FALSE]
 
+                # Ensure grouping variable is a factor with labelled levels
+                if (!is.factor(mydata_subset[[mygroup]])) {
+                    mydata_subset[[mygroup]] <- factor(mydata_subset[[mygroup]])
+                }
+
+                # Heuristic: treat numeric variables with few unique values as categorical to avoid t/ANOVA on encoded factors
+                cat_vars <- names(mydata_subset)[vapply(mydata_subset, function(v) {
+                    is.factor(v) || is.character(v) || (is.numeric(v) && length(unique(na.omit(v))) <= 6)
+                }, logical(1))]
+                cont_vars <- setdiff(myvars, cat_vars)
+
+                mydata_subset[cat_vars] <- lapply(mydata_subset[cat_vars], function(v) {
+                    if (is.factor(v)) return(v)
+                    factor(v)
+                })
+
                 # Get p-value adjustment method
                 p_adjust_method <- self$options$p_adjust
 
@@ -574,13 +626,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Map user options to gtsummary syntax
                 stats_cont <- if (self$options$cont == "mean") "{mean} ({sd})" else "{median} ({p25}, {p75})"
                 
-                test_cat <- if (self$options$pcat == "fisher") "fisher.test" else "chisq.test"
-                
-                if (self$options$cont == "mean") {
-                    test_cont <- if (n_groups > 2) "oneway.test" else "t.test"
-                } else {
-                    test_cont <- if (n_groups > 2) "kruskal.test" else "wilcox.test"
-                }
+                # Automatic tests with sparse-table guard for categorical and Welch/Wilcoxon for continuous
+                test_cat <- function(data, variable, by, ...) .cat_test_auto(data, variable, by, test_preference = self$options$pcat, min_expected = 5)
+                test_cont <- function(data, variable, by, ...) .cont_test_auto(data, variable, by, method = self$options$cont)
 
                 tablegtsummary <-
                   mydata_subset %>%
@@ -591,7 +639,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                       all_categorical() ~ "{n}/{N} ({p}%)"
                     ),
                     digits       = all_continuous() ~ 2,
-                    missing_text = "(Missing)"
+                    missing_text = "(Missing)",
+                    type = list(
+                        all_of(cat_vars) ~ "categorical",
+                        all_of(cont_vars) ~ "continuous"
+                    )
                   ) %>%
                   add_n() %>%
                   add_overall() %>%
@@ -657,9 +709,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     
                     "<p><strong>How to interpret:</strong></p>",
                     "<ul>",
-                    "<li>A q-value of 0.05 means that 5% of significant results are expected to be false positives</li>",
-                    "<li>Q-values are typically larger than p-values</li>",
-                    "<li>Use q < 0.05 (or q < 0.10) as significance threshold for multiple testing</li>",
+                    "<li>For FDR methods (BH/BY): a q-value of 0.05 means that, on average, 5% of declared discoveries are expected to be false positives.</li>",
+                    "<li>For FWER methods (Bonferroni/Holm): adjusted p-values control the probability of any false positive across all tests.</li>",
+                    "<li>Q-values are typically larger than raw p-values.</li>",
                     "</ul>",
                     
                     "<p><strong>When to use q-values:</strong></p>",
@@ -671,8 +723,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     
                     "<p><strong>Important limitations:</strong></p>",
                     "<ul>",
-                    "<li>⚠️ Adjusted p-values assume tests are independent (may not be true for correlated variables)</li>",
-                    "<li>⚠️ With few tests (<10), corrections may be overly conservative</li>",
+                    "<li>⚠️ FDR control (BH/BY) assumes independence or positive dependence; violations may yield conservative or liberal control.</li>",
+                    "<li>⚠️ With few tests (<10), corrections may be overly conservative.</li>",
                     "<li>⚠️ Should not replace careful hypothesis planning and clinical judgment</li>",
                     "</ul>",
 
@@ -1438,6 +1490,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         ))
                     }
 
+                    # Apply Haldane-Anscombe correction if any zero cell to stabilize OR/CI
+                    if (any(tbl_3way == 0)) {
+                        tbl_3way <- tbl_3way + 0.5
+                    }
+
                     # Perform Mantel-Haenszel test (base R function)
                     mh_result <- stats::mantelhaen.test(
                         x = tbl_3way,
@@ -1489,43 +1546,19 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         }
                     }
 
-                    # Breslow-Day statistic calculation
-                    # This is a simplified implementation
-                    # For production, consider using DescTools::BreslowDayTest()
-
-                    # Calculate Mantel-Haenszel common OR
-                    mh_result <- private$.performMantelHaenszel(row_var, col_var, strata_var, data)
-                    if (!mh_result$success) {
-                        return(list(success = FALSE, error = "Cannot compute Breslow-Day without valid MH test"))
+                    # Prefer robust implementation if available
+                    if (requireNamespace("DescTools", quietly = TRUE)) {
+                        bd <- DescTools::BreslowDayTest(tbl_3way, correct = TRUE)
+                        bd_chisq <- as.numeric(bd$statistic)
+                        bd_df <- as.numeric(bd$parameter)
+                        bd_p <- as.numeric(bd$p.value)
+                    } else {
+                        # Fallback: signal limitation
+                        return(list(
+                            success = FALSE,
+                            error = "Breslow-Day test requires DescTools::BreslowDayTest; install DescTools for this feature."
+                        ))
                     }
-
-                    common_or <- mh_result$common_or
-
-                    # Breslow-Day chi-square statistic
-                    bd_chisq <- 0
-                    for (k in 1:n_strata) {
-                        if (!is.na(or_vec[k])) {
-                            tbl_2x2 <- tbl_3way[,,k]
-                            n_k <- sum(tbl_2x2)
-
-                            # Expected values under common OR assumption
-                            # (Simplified calculation)
-                            a_obs <- tbl_2x2[1,1]
-                            row1_total <- sum(tbl_2x2[1,])
-                            col1_total <- sum(tbl_2x2[,1])
-
-                            # Approximate expected a under H0: OR constant
-                            a_exp <- (row1_total * col1_total) / n_k
-
-                            if (a_exp > 0) {
-                                bd_chisq <- bd_chisq + ((a_obs - a_exp)^2 / a_exp)
-                            }
-                        }
-                    }
-
-                    # Degrees of freedom: number of strata - 1
-                    bd_df <- n_strata - 1
-                    bd_p <- pchisq(bd_chisq, df = bd_df, lower.tail = FALSE)
 
                     return(list(
                         success = TRUE,
@@ -1534,7 +1567,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         p_value = bd_p,
                         strata_or = or_vec,
                         strata_names = strata_names,
-                        common_or = common_or
+                        common_or = NA
                     ))
                 }, error = function(e) {
                     return(list(

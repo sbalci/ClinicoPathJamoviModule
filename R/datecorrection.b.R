@@ -303,7 +303,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             results <- list()
             
             for (var in date_vars) {
-                var_data <- data[[private$.escapeVar(var)]]
+                var_data <- data[[var]]
 
                 # Skip if all NA
                 if (all(is.na(var_data))) {
@@ -343,6 +343,8 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 }
                 
                 correction_result$original <- var_data
+                # Plausibility flags appended to errors
+                correction_result <- private$.apply_plausibility_checks(correction_result, var)
                 results[[var]] <- correction_result
             }
             
@@ -352,45 +354,73 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
         .correct_with_datefixr = function(date_char) {
             
             tryCatch({
-                # datefixR only accepts "dmy" or "mdy"
-                # Map "auto" and "ymd" to default "dmy"
                 fmt <- self$options$date_format
-                if (fmt == "auto" || fmt == "ymd") {
-                    fmt <- "dmy"
+                # datefixR supports dmy/mdy; handle auto/ymd explicitly
+                if (fmt == "auto") {
+                    res_dmy <- private$.attempt_datefixr(date_char, "dmy")
+                    res_mdy <- private$.attempt_datefixr(date_char, "mdy")
+                    # choose format with more successes; mark disagreements as ambiguous
+                    success_dmy <- sum(res_dmy$success, na.rm = TRUE)
+                    success_mdy <- sum(res_mdy$success, na.rm = TRUE)
+                    use_dmy <- success_dmy >= success_mdy
+                    chosen <- if (use_dmy) res_dmy else res_mdy
+                    ambiguous <- (!is.na(res_dmy$corrected) & !is.na(res_mdy$corrected) &
+                        as.Date(res_dmy$corrected) != as.Date(res_mdy$corrected))
+                    chosen$ambiguous <- ambiguous
+                    chosen$method_used[ambiguous] <- paste0(chosen$method_used[ambiguous], " (ambiguous dmy/mdy)")
+                    if (any(ambiguous)) {
+                        chosen$errors[ambiguous] <- "Ambiguous day/month; chose best-fit format"
+                    }
+                    return(chosen)
                 }
                 
-                corrected_dates <- datefixR::fix_date_char(
-                    date_char,
-                    day.impute = as.integer(self$options$day_impute),
-                    month.impute = as.integer(self$options$month_impute),
-                    format = fmt,
-                    excel = self$options$handle_excel
-                )
+                if (fmt == "ymd") {
+                    # datefixR can't do ymd; fall back to lubridate ymd with imputation fallback
+                    lres <- private$.correct_with_lubridate(date_char, force_format = "ymd")
+                    lres$method_used <- "lubridate (ymd)"
+                    return(lres)
+                }
                 
-                success <- !is.na(corrected_dates)
-                errors <- ifelse(success, "", "Could not parse date")
-                
-                return(list(
-                    corrected = corrected_dates,
-                    success = success,
-                    method_used = "datefixR",
-                    errors = errors
-                ))
+                return(private$.attempt_datefixr(date_char, fmt))
                 
             }, error = function(e) {
                 return(list(
                     corrected = rep(as.Date(NA), length(date_char)),
                     success = rep(FALSE, length(date_char)),
                     method_used = "datefixR",
-                    errors = rep(paste("Error:", e$message), length(date_char))
+                    errors = rep(paste("Error:", e$message), length(date_char)),
+                    ambiguous = rep(FALSE, length(date_char)),
+                    plausibility_flag = rep(FALSE, length(date_char))
                 ))
             })
+        },
+
+        .attempt_datefixr = function(date_char, fmt) {
+            corrected_dates <- datefixR::fix_date_char(
+                date_char,
+                day.impute = as.integer(self$options$day_impute),
+                month.impute = as.integer(self$options$month_impute),
+                format = fmt,
+                excel = self$options$handle_excel
+            )
+            
+            success <- !is.na(corrected_dates)
+            errors <- ifelse(success, "", "Could not parse date")
+            
+            list(
+                corrected = corrected_dates,
+                success = success,
+                method_used = paste0("datefixR (", fmt, ")"),
+                errors = errors,
+                ambiguous = rep(FALSE, length(date_char)),
+                plausibility_flag = rep(FALSE, length(date_char))
+            )
         },
 
         .correct_with_anytime = function(date_char) {
             
             tryCatch({
-                corrected_dates <- anytime::anydate(date_char, tz = self$options$timezone)
+                corrected_dates <- anytime::anytime(date_char, tz = self$options$timezone)
                 
                 success <- !is.na(corrected_dates)
                 errors <- ifelse(success, "", "Could not parse date")
@@ -399,7 +429,9 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     corrected = corrected_dates,
                     success = success,
                     method_used = "anytime",
-                    errors = errors
+                    errors = errors,
+                    ambiguous = rep(FALSE, length(date_char)),
+                    plausibility_flag = rep(FALSE, length(date_char))
                 ))
                 
             }, error = function(e) {
@@ -407,15 +439,17 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     corrected = rep(as.Date(NA), length(date_char)),
                     success = rep(FALSE, length(date_char)),
                     method_used = "anytime",
-                    errors = rep(paste("Error:", e$message), length(date_char))
+                    errors = rep(paste("Error:", e$message), length(date_char)),
+                    ambiguous = rep(FALSE, length(date_char)),
+                    plausibility_flag = rep(FALSE, length(date_char))
                 ))
             })
         },
 
-        .correct_with_lubridate = function(date_char) {
+        .correct_with_lubridate = function(date_char, force_format = NULL) {
             
             tryCatch({
-                date_format <- self$options$date_format
+                date_format <- if (!is.null(force_format)) force_format else self$options$date_format
                 tz <- self$options$timezone
                 
                 corrected_dates <- switch(date_format,
@@ -429,11 +463,6 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     }
                 )
                 
-                # Convert to Date class if it's POSIXct
-                if (inherits(corrected_dates, "POSIXct")) {
-                    corrected_dates <- as.Date(corrected_dates, tz = tz)
-                }
-                
                 success <- !is.na(corrected_dates)
                 errors <- ifelse(success, "", "Could not parse date")
                 
@@ -441,7 +470,9 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     corrected = corrected_dates,
                     success = success,
                     method_used = "lubridate",
-                    errors = errors
+                    errors = errors,
+                    ambiguous = rep(FALSE, length(date_char)),
+                    plausibility_flag = rep(FALSE, length(date_char))
                 ))
                 
             }, error = function(e) {
@@ -449,7 +480,9 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     corrected = rep(as.Date(NA), length(date_char)),
                     success = rep(FALSE, length(date_char)),
                     method_used = "lubridate",
-                    errors = rep(paste("Error:", e$message), length(date_char))
+                    errors = rep(paste("Error:", e$message), length(date_char)),
+                    ambiguous = rep(FALSE, length(date_char)),
+                    plausibility_flag = rep(FALSE, length(date_char))
                 ))
             })
         },
@@ -469,6 +502,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             consensus_success <- rep(FALSE, n)
             consensus_errors <- rep("", n)
             method_used <- rep("", n)
+            ambiguous_vec <- rep(FALSE, n)
             
             for (i in 1:n) {
                 results <- list(
@@ -495,18 +529,19 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                         consensus_success[i] <- TRUE
                         method_used[i] <- paste(names(valid_results), collapse = "+")
                     } else {
-                        # Methods disagree - use datefixR as primary
+                        # Methods disagree - flag ambiguity, prefer datefixR if available
                         conflict_count <- conflict_count + 1
+                        ambiguous_vec[i] <- TRUE
                         if (!is.na(results$datefixr)) {
                             consensus_dates[i] <- results$datefixr
                             consensus_success[i] <- TRUE
-                            method_used[i] <- "datefixr (conflict)"
-                            consensus_errors[i] <- "Methods disagreed, used datefixR"
+                            method_used[i] <- "datefixR (ambiguous)"
+                            consensus_errors[i] <- "Ambiguous format (d/m swap); defaulted to datefixR"
                         } else {
                             consensus_dates[i] <- valid_results[[1]]
                             consensus_success[i] <- TRUE
-                            method_used[i] <- paste0(names(valid_results)[1], " (conflict)")
-                            consensus_errors[i] <- "Methods disagreed"
+                            method_used[i] <- paste0(names(valid_results)[1], " (ambiguous)")
+                            consensus_errors[i] <- "Ambiguous format; defaulted to first successful method"
                         }
                     }
                 }
@@ -530,7 +565,9 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 corrected = consensus_dates,
                 success = consensus_success,
                 method_used = method_used,
-                errors = consensus_errors
+                errors = consensus_errors,
+                ambiguous = ambiguous_vec,
+                plausibility_flag = rep(FALSE, length(date_char))
             ))
         },
 
@@ -631,6 +668,8 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             successful_corrections <- 0
             failed_corrections <- 0
             originally_na <- 0
+            plausibility_flags <- 0
+            ambiguous_flags <- 0
             
             common_errors <- list()
             method_performance <- list()
@@ -642,6 +681,12 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 successful_corrections <- successful_corrections + sum(result$success, na.rm = TRUE)
                 failed_corrections <- failed_corrections + sum(!result$success, na.rm = TRUE)
                 originally_na <- originally_na + sum(is.na(result$original))
+                if (!is.null(result$plausibility_flag)) {
+                    plausibility_flags <- plausibility_flags + sum(result$plausibility_flag, na.rm = TRUE)
+                }
+                if (!is.null(result$ambiguous)) {
+                    ambiguous_flags <- ambiguous_flags + sum(result$ambiguous, na.rm = TRUE)
+                }
                 
                 # Collect error patterns
                 error_msgs <- result$errors[result$errors != ""]
@@ -672,6 +717,8 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Successful Corrections:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", successful_corrections, " (", success_rate, "%)</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Failed Corrections:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", failed_corrections, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Originally Missing:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", originally_na, "</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Plausibility Flags (out of range/future):</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", plausibility_flags, "</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Ambiguous Formats (d/m swap):</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", ambiguous_flags, "</td></tr>",
                 "</table>"
             )
 
@@ -797,7 +844,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             if (grepl("^\\d{1,2}/\\d{1,2}/\\d{2}$", date_str)) return("Short US (MM/DD/YY)")
             if (grepl("^\\d{1,2}-\\d{1,2}-\\d{4}$", date_str)) return("Dash separated (DD-MM-YYYY)")
             if (grepl("^\\d{4}/\\d{1,2}/\\d{1,2}$", date_str)) return("ISO with slash (YYYY/MM/DD)")
-            if (grepl("^\\d+$", date_str)) return("Numeric (Excel?)")
+            if (grepl("^\\d+$", date_str)) return("Numeric (Excel/Unix?)")
             if (grepl("[A-Za-z]", date_str)) return("Text month")
             return("Other/Complex")
         },
@@ -892,6 +939,33 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             
             return(interpretation_html)
         },
+
+        .apply_plausibility_checks = function(correction_result, var_name) {
+            corrected <- correction_result$corrected
+            flags <- correction_result$plausibility_flag
+            errors <- correction_result$errors
+            if (is.null(flags)) flags <- rep(FALSE, length(corrected))
+
+            # Convert to Date for range checks while keeping POSIXct possible
+            corrected_date <- corrected
+            if (inherits(corrected_date, "POSIXct")) {
+                corrected_date <- as.Date(corrected_date)
+            }
+
+            today <- Sys.Date()
+            upper <- today + 365
+            years <- suppressWarnings(as.integer(format(corrected_date, "%Y")))
+
+            out_of_range <- !is.na(corrected_date) & (years < 1900 | corrected_date > upper)
+            if (any(out_of_range, na.rm = TRUE)) {
+                errors[out_of_range] <- paste0(errors[out_of_range], ifelse(errors[out_of_range] != "", "; ", ""), "Out of plausible range (pre-1900 or >1 year in future)")
+            }
+            flags <- flags | out_of_range
+
+            correction_result$plausibility_flag <- flags
+            correction_result$errors <- errors
+            correction_result
+        }
 
         .get_method_description = function() {
             method <- self$options$correction_method

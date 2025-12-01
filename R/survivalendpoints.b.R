@@ -296,6 +296,79 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
 
             # Store derived data for use in other functions
+            
+            # -----------------------------------------------------------
+            # QUALITY CHECKS AND WARNINGS
+            # -----------------------------------------------------------
+            warnings <- c()
+            
+            # 1. Check for negative times
+            time_cols <- grep("_time", names(derivedData), value = TRUE)
+            if (length(time_cols) > 0) {
+                total_neg <- 0
+                for (col in time_cols) {
+                    neg_count <- sum(derivedData[[col]] < 0, na.rm = TRUE)
+                    if (neg_count > 0) {
+                        total_neg <- total_neg + neg_count
+                        # Set negative times to NA to avoid analysis errors
+                        derivedData[[col]][derivedData[[col]] < 0] <- NA
+                    }
+                }
+                
+                if (total_neg > 0) {
+                    warnings <- c(warnings, paste0(
+                        "<strong>Negative Times Detected:</strong> ", total_neg, 
+                        " value(s) resulted in negative times (Event Date < Start Date). ",
+                        "These have been set to missing (NA). Please check your dates."
+                    ))
+                }
+            }
+            
+            # 2. Check for Imputed Events (Event = 1 but Date is Missing)
+            # PFS / TTP Imputation
+            if ((self$options$calculatePFS || self$options$calculateTTP) && 
+                !is.null(progressionEvent) && !is.null(progressionDate)) {
+                
+                imputed_prog <- sum(progressionEvent == 1 & is.na(progressionDate), na.rm = TRUE)
+                if (imputed_prog > 0) {
+                    warnings <- c(warnings, paste0(
+                        "<strong>Progression Date Missing:</strong> ", imputed_prog, 
+                        " patient(s) have a progression event but no date. ",
+                        "Time was imputed using the Last Follow-up Date. This may overestimate time-to-event."
+                    ))
+                }
+            }
+            
+            # OS Imputation
+            if ((self$options$calculateOS || self$options$calculatePFS) && 
+                !is.null(deathEvent) && !is.null(deathDate)) {
+                
+                imputed_death <- sum(deathEvent == 1 & is.na(deathDate), na.rm = TRUE)
+                if (imputed_death > 0) {
+                    warnings <- c(warnings, paste0(
+                        "<strong>Death Date Missing:</strong> ", imputed_death, 
+                        " patient(s) have a death event but no date. ",
+                        "Time was imputed using the Last Follow-up Date."
+                    ))
+                }
+            }
+            
+            # Display warnings if any
+            if (length(warnings) > 0) {
+                warning_html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Data Quality Warnings</h4>",
+                    "<ul style='margin-left: 20px; color: #856404;'>",
+                    paste0("<li>", warnings, "</li>", collapse = ""),
+                    "</ul>",
+                    "</div>"
+                )
+                # Append to existing warning content or replace
+                current_content <- self$results$dataWarning$content
+                if (is.null(current_content)) current_content <- ""
+                self$results$dataWarning$setContent(paste0(current_content, warning_html))
+            }
+            
             private$.derivedData <- derivedData
 
             # Populate data info table

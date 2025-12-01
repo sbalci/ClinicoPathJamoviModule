@@ -1231,6 +1231,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Validate sample size and provide clinical guidance
                 private$.validateSampleSize(conf_table)
 
+                # Apply Haldane-Anscombe correction for zero cells to stabilize LR/OR
+                conf_table_cc <- conf_table
+                continuity_used <- FALSE
+                if (any(conf_table == 0)) {
+                    conf_table_cc <- conf_table + 0.5
+                    continuity_used <- TRUE
+                }
 
 
                 # Extract confusion matrix values with error handling
@@ -1240,6 +1247,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         FP = conf_table[1, 2],
                         FN = conf_table[2, 1],
                         TN = conf_table[2, 2]
+                        ,
+                        TPc = conf_table_cc[1, 1],
+                        FPc = conf_table_cc[1, 2],
+                        FNc = conf_table_cc[2, 1],
+                        TNc = conf_table_cc[2, 2]
                     )
                 }, error = function(e) {
                     notice <- jmvcore::Notice$new(
@@ -1260,6 +1272,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 FP <- extraction_result$FP
                 FN <- extraction_result$FN
                 TN <- extraction_result$TN
+                TPc <- extraction_result$TPc
+                FPc <- extraction_result$FPc
+                FNc <- extraction_result$FNc
+                TNc <- extraction_result$TNc
 
                 # Validate extracted values
                 if (any(is.na(c(TP, FP, FN, TN))) || any(c(TP, FP, FN, TN) < 0)) {
@@ -1430,27 +1446,30 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
 
-                # Calculate likelihood ratios with proper statistical handling
+                # Calculate likelihood ratios with proper statistical handling (use continuity-corrected counts when needed)
                 if (is.na(Sens) || is.na(Spec)) {
                     LRP <- NA
                     LRN <- NA
                 } else {
-                    # LR+ = Sensitivity / (1 - Specificity) = True Positive Rate / False Positive Rate
-                    LRP <- if (Spec < 1) {
-                        Sens / (1 - Spec)
-                    } else if (Sens == 1 && Spec == 1) {
+                    sens_cc <- TPc / (TPc + FNc)
+                    spec_cc <- TNc / (TNc + FPc)
+
+                    # LR+ = Sensitivity / (1 - Specificity)
+                    LRP <- if (spec_cc < 1) {
+                        sens_cc / (1 - spec_cc)
+                    } else if (sens_cc == 1 && spec_cc == 1) {
                         NA  # Perfect test - undefined
                     } else {
-                        Inf  # No false positives
+                        Inf
                     }
 
-                    # LR- = (1 - Sensitivity) / Specificity = False Negative Rate / True Negative Rate
-                    LRN <- if (Spec > 0) {
-                        (1 - Sens) / Spec
-                    } else if (Sens == 1 && Spec == 1) {
-                        NA  # Perfect test - undefined
+                    # LR- = (1 - Sensitivity) / Specificity
+                    LRN <- if (spec_cc > 0) {
+                        (1 - sens_cc) / spec_cc
+                    } else if (sens_cc == 1 && spec_cc == 1) {
+                        NA
                     } else {
-                        Inf  # No true negatives
+                        Inf
                     }
                 }
 
@@ -1465,6 +1484,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(sprintf('Likelihood ratio adjustments applied:\n• %s\n• Results have been adjusted for statistical validity.', paste(lr_validation$issues, collapse = "\n• ")))
+                    self$results$insert(1, notice)
+                }
+
+                if (continuity_used) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'continuityApplied',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent("Zero cells detected; applied Haldane-Anscombe 0.5 continuity correction for LR/OR calculations (sensitivity/specificity still use observed counts).")
                     self$results$insert(1, notice)
                 }
 

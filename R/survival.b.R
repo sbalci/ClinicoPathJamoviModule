@@ -1631,6 +1631,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .cox = function(results) {
                 ### Cox Regression ----
+                
+                # Skip if competing risk analysis
+                if (private$.isCompetingRisk()) {
+                    return()
+                }
 
 
                 mytime <- results$name1time
@@ -2079,6 +2084,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Survival Table Function ----
             ,
             .survTable = function(results) {
+                # Skip if competing risk analysis
+                if (private$.isCompetingRisk()) {
+                    return()
+                }
+                
                 mytime <- results$name1time
                 myoutcome <- results$name2outcome
                 myfactor <- results$name3explanatory
@@ -2198,6 +2208,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .pairwise = function(results) {
                 ##  pairwise comparison ----
+                
+                # Skip if competing risk analysis
+                if (private$.isCompetingRisk()) {
+                    return()
+                }
 
                 mytime <- results$name1time
                 myoutcome <- results$name2outcome
@@ -2348,8 +2363,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ci_lower <- (stats::qchisq(0.025, 2*total_events) / 2) / total_time * rate_multiplier
                 ci_upper <- (stats::qchisq(0.975, 2*(total_events + 1)) / 2) / total_time * rate_multiplier
 
+                # Initialize global row counter
+                rowKey_counter <- 1
+
                 # Add to personTimeTable - first the overall row
-                self$results$personTimeTable$addRow(rowKey=1, values=list(
+                self$results$personTimeTable$addRow(rowKey=rowKey_counter, values=list(
                     interval=paste0("Overall (0-max)"),
                     events=total_events,
                     person_time=round(total_time, 2),
@@ -2357,6 +2375,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     rate_ci_lower=round(ci_lower, 2),
                     rate_ci_upper=round(ci_upper, 2)
                 ))
+                rowKey_counter <- rowKey_counter + 1
 
                 # FIX: Add group-stratified person-time analysis
                 # If explanatory variable exists, calculate person-time for each group
@@ -2365,8 +2384,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Get unique groups
                     groups <- unique(mydata[[myexplanatory]])
                     groups <- groups[!is.na(groups)]  # Remove NA groups
-
-                    rowKey_counter <- 2  # Start after overall row
 
                     for (group in groups) {
                         # Filter data for this group
@@ -2473,7 +2490,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             }
 
                             # Add to personTimeTable
-                            self$results$personTimeTable$addRow(rowKey=i+1, values=list(
+                            self$results$personTimeTable$addRow(rowKey=rowKey_counter, values=list(
                                 interval=paste0(start_time, "-", end_time),
                                 events=events_in_interval,
                                 person_time=round(person_time_in_interval, 2),
@@ -2481,6 +2498,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 rate_ci_lower=round(interval_ci_lower, 2),
                                 rate_ci_upper=round(interval_ci_upper, 2)
                             ))
+                            rowKey_counter <- rowKey_counter + 1
                         }
                     }
                 }
@@ -2531,6 +2549,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Survival Curve ----
             ,
             .plot = function(image, ggtheme, theme, ...) {
+                # Skip if competing risk analysis
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    return()
+                }
+                
                 sc <- self$options$sc
 
                 if (!sc)
@@ -2606,6 +2629,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # https://rpkgs.datanovia.com/survminer/survminer_cheatsheet.pdf
             ,
             .plot2 = function(image2, ggtheme, theme, ...) {
+                # Skip if competing risk analysis
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    return()
+                }
+                
                 ce <- self$options$ce
 
                 if (!ce)
@@ -2679,6 +2707,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Cumulative Hazard ----
             ,
             .plot3 = function(image3, ggtheme, theme, ...) {
+                # Skip if competing risk analysis
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    return()
+                }
+                
                 ch <- self$options$ch
 
                 if (!ch)
@@ -2751,6 +2784,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Log-Log Survival Plot (for PH assumption) ----
             ,
             .plot7 = function(image7, ggtheme, theme, ...) {
+                # Skip if competing risk analysis
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    return()
+                }
+                
                 loglog <- self$options$loglog
 
                 if (!loglog)
@@ -2853,6 +2891,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # KMunicate Style ----
             ,
             .plot6 = function(image6, ggtheme, theme, ...) {
+                # Skip if competing risk analysis
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    return()
+                }
+                
                 kmunicate <- self$options$kmunicate
 
                 if (!kmunicate)
@@ -2922,6 +2965,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Residuals Plot ----
             ,
             .plot9 = function(image9, ggtheme, theme, ...) {
+                # Skip if competing risk analysis
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    return()
+                }
+                
                 residual_diagnostics <- self$options$residual_diagnostics
 
                 if (!residual_diagnostics)
@@ -2961,6 +3009,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # cox.zph ----
             ,
             .plot8 = function(image8, ggtheme, theme, ...) {
+                # Skip if competing risk analysis
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    return()
+                }
 
                 ph_cox <- self$options$ph_cox
 

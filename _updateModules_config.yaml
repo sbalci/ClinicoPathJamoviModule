@@ -81,6 +81,7 @@ modules:
     r_files:
       - "utils.R"
       - "ihc_utilities.R"
+      - "stagemigration_helpers.R"
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     enabled: false  # Automatically enabled when TEST mode is active
@@ -98,6 +99,7 @@ modules:
       - "ihc_utilities.R"
       - "psychopdaROC_utilities.R"
       - "nomogrammer.R"
+      - "stagemigration_helpers.R"
     vignette_files: []
     test_files: []
     required_directories:

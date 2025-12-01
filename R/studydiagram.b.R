@@ -229,7 +229,14 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             total_participants <- nrow(data)
 
             # Get unique steps (excluding NA)
-            steps <- sort(unique(data[[step_var]][!is.na(data[[step_var]])]))
+            # Respect factor levels if available, otherwise sort
+            if (is.factor(data[[step_var]])) {
+                steps <- levels(data[[step_var]])
+                # Only keep levels that actually exist in the data (and are not NA)
+                steps <- steps[steps %in% unique(data[[step_var]][!is.na(data[[step_var]])])]
+            } else {
+                steps <- sort(unique(data[[step_var]][!is.na(data[[step_var]])]))
+            }
 
             # Calculate participants remaining at each step
             flow_data <- list()
@@ -256,7 +263,10 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     step_reasons <- data[[reason_var]][data[[step_var]] == step_num & !is.na(data[[step_var]])]
                     if (length(step_reasons) > 0) {
                         reason_table <- table(step_reasons)
-                        reasons <- paste(names(reason_table), "(", reason_table, ")", collapse = "; ")
+                        reason_table <- reason_table[reason_table > 0] # Filter zero counts
+                        if (length(reason_table) > 0) {
+                            reasons <- paste(names(reason_table), "(", reason_table, ")", collapse = "; ")
+                        }
                     }
                 }
 
@@ -382,7 +392,12 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Create exclusion reason summary
                     if (excluded_at_step > 0) {
                         reason_counts <- table(data[[reason_var]][data[[reason_var]] %in% step_exclusions])
-                        reasons <- paste(names(reason_counts), "(", reason_counts, ")", collapse = "; ")
+                        reason_counts <- reason_counts[reason_counts > 0] # Filter zero counts
+                        if (length(reason_counts) > 0) {
+                            reasons <- paste(names(reason_counts), "(", reason_counts, ")", collapse = "; ")
+                        } else {
+                            reasons <- ""
+                        }
                     } else {
                         reasons <- ""
                     }
@@ -409,6 +424,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 retention_rate = round((remaining / total_participants) * 100, 1)
             )
         },
+
 
         .populateSummaryTable = function() {
             if (is.null(private$.processedData)) return()
@@ -587,9 +603,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     excluded = vapply(flow_data, function(s) s$excluded, numeric(1)),
                     exclusion_text = vapply(flow_data, function(s) {
                         if (s$excluded > 0 && s$exclusion_reasons != "") {
-                            paste0("Excluded: n=", s$excluded, "\n",
-                                   substr(s$exclusion_reasons, 1, 40),
-                                   if(nchar(s$exclusion_reasons) > 40) "..." else "")
+                            wrapped_text <- paste(strwrap(s$exclusion_reasons, width = 30), collapse = "\n")
+                            paste0("Excluded: n=", s$excluded, "\n", wrapped_text)
                         } else if (s$excluded > 0) {
                             paste0("Excluded: n=", s$excluded)
                         } else {
@@ -720,8 +735,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (retention_pct < 50) {
                     warnings <- c(warnings, sprintf(
-                        "⚠️ <b>High Attrition:</b> Only %.1f%% of participants reached final analysis (%d/%d). ",
-                        "Consider discussing attrition bias in your manuscript and performing sensitivity analyses.",
+                        "⚠️ <b>High Attrition:</b> Only %.1f%% of participants reached final analysis (%d/%d). Consider discussing attrition bias in your manuscript and performing sensitivity analyses.",
                         retention_pct, summary$total_final, summary$total_initial
                     ))
                 }
@@ -737,8 +751,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(missing_reasons)) {
                     n_missing <- sum(missing_reasons)
                     warnings <- c(warnings, sprintf(
-                        "⚠️ <b>Missing Exclusion Reasons:</b> %d stage(s) have exclusions without documented reasons. ",
-                        "CONSORT 2010 requires reporting all exclusion criteria and reasons.",
+                        "⚠️ <b>Missing Exclusion Reasons:</b> %d stage(s) have exclusions without documented reasons. CONSORT 2010 requires reporting all exclusion criteria and reasons.",
                         n_missing
                     ))
                 }

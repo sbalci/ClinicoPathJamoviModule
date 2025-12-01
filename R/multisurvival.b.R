@@ -1649,6 +1649,27 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         adjexplanatory_name <- cleaneddata$adjexplanatory_name
 
         mydata <- cleanData <- cleaneddata$cleanData
+        # Basic time/outcome validation
+        if (any(is.na(mydata$mytime) | is.na(mydata$myoutcome))) {
+          dropped <- sum(!complete.cases(mydata[, c("mytime", "myoutcome")]))
+          notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'missingTimeOutcome',
+            type = jmvcore::NoticeType$WARNING
+          )
+          notice$setContent(sprintf("Missing time/outcome values detected; %d row(s) may be excluded from the Cox model.", dropped))
+          self$results$insert(2, notice)
+        }
+        if (any(mydata$mytime < 0, na.rm = TRUE)) {
+          notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'negativeTime',
+            type = jmvcore::NoticeType$ERROR
+          )
+          notice$setContent("Negative survival times detected. Please correct time variables before fitting the model.")
+          self$results$insert(2, notice)
+          return(NULL)
+        }
 
         mytime_labelled <- cleaneddata$mytime_labelled
         myoutcome_labelled <- cleaneddata$myoutcome_labelled
@@ -1663,17 +1684,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Add stratification variables
         mystratvar <- NULL
-
         if (self$options$use_stratify && !is.null(self$options$stratvar)) {
           mystratvar <- as.vector(cleaneddata$mystratvar_labelled)
-          if (length(mystratvar) > 0) {
-            # FIXED: Each strata variable should be in its own strata() function
-            mystratvar <- paste(sprintf("survival::strata(%s)", mystratvar), collapse = " + ")
-
-            # # Only create strata terms if we have variables
-            # mystratvar <- paste0("survival::strata(", paste(mystratvar, collapse = "+"), ")")
+          if (length(mystratvar) == 0) {
+            mystratvar <- NULL
           }
-
         }
 
 
@@ -1688,24 +1703,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           mycontexpl <- as.vector(mycontexpl_labelled)
         }
 
-        # Build formula parts
+        # Build formula parts (exclude strata from covariates)
         formula_parts <- c(myexplanatory, mycontexpl)
 
-        # Add strata term only if it exists
-        if (!is.null(mystratvar) && mystratvar != "") {
-          formula_parts <- c(formula_parts, mystratvar)
-        }
-        # formula2 <- c(myexplanatory, mycontexpl, mystratvar)
-
-
-
-        # Build Cox regression formula using consolidated function
+        # Build Cox regression formula using consolidated function with proper strata
         coxformula <- .buildSurvivalFormula(
-          time_var = mytime,
-          outcome_var = myoutcome,
+          time_var = "mytime",
+          outcome_var = "myoutcome",
           predictors = formula_parts,
           survival_type = "standard",
-          strata_vars = if (!is.null(mystratvar) && mystratvar != "") mystratvar else NULL
+          strata_vars = mystratvar
         )
 
 
@@ -1818,6 +1825,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$multievent && self$options$analysistype == 'compete') {
             # Use Fine-Gray model
             # Create Fine-Gray dataset (outcome is factor from .definemyoutcome)
+            if (is.factor(mydata$myoutcome) && !"Event" %in% levels(mydata$myoutcome)) {
+              notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'invalidEtype',
+                type = jmvcore::NoticeType$ERROR
+              )
+              notice$setContent("Competing risk mode requires an event level named 'Event' in the outcome variable. Adjust coding before running Fine-Gray.")
+              self$results$insert(2, notice)
+              return(NULL)
+            }
+
             fg_data <- survival::finegray(coxformula, data = mydata, etype = "Event")
             
             # Update formula to use Fine-Gray variables
@@ -1828,6 +1846,31 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         } else {
             # Standard Cox model
             cox_model <- survival::coxph(coxformula, data = mydata)
+        }
+
+        if (self$options$multievent && self$options$analysistype == 'compete') {
+          notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'competeNote',
+            type = jmvcore::NoticeType$INFO
+          )
+          notice$setContent("Competing-risk mode fits a Fine-Gray subdistribution model; HRs reflect subdistribution hazards and are not directly comparable to cause-specific Cox HRs.")
+          self$results$insert(3, notice)
+        }
+
+        # Proportional hazards diagnostic
+        ph_diag <- try(survival::cox.zph(cox_model), silent = TRUE)
+        if (!inherits(ph_diag, "try-error")) {
+          ph_p <- ph_diag$table[, "p"]
+          if (any(ph_p[!is.na(ph_p)] < 0.05)) {
+            notice <- jmvcore::Notice$new(
+              options = self$options,
+              name = 'phViolation',
+              type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent("Proportional hazards test (cox.zph) indicates potential violations (p < 0.05) for one or more terms. Interpret HRs with caution or consider time-varying effects/stratification.")
+            self$results$insert(3, notice)
+          }
         }
 
 
@@ -2492,6 +2535,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           var_names <- var_names[!var_names %in% mystratvar_labelled]
         }
 
+        strata_vars <- if (self$options$use_stratify && !is.null(self$options$stratvar)) mystratvar_labelled else NULL
+
         # First create datadist object
         dd <- rms::datadist(mydata[, var_names])
 
@@ -2530,11 +2575,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         
         is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
 
+        base_formula <- .buildSurvivalFormula(
+          time_var = "mytime",
+          outcome_var = "myoutcome",
+          predictors = var_names,
+          survival_type = "standard",
+          strata_vars = strata_vars
+        )
+
         # Fit the model using rms::cph
         if (is_finegray) {
              # Re-create Fine-Gray data
-             fg_formula_str <- paste("survival::Surv(mytime, myoutcome) ~", paste(var_names, collapse = " + "))
-             fg_formula_obj <- as.formula(fg_formula_str)
+             fg_formula_obj <- base_formula
              fg_data <- survival::finegray(fg_formula_obj, data = mydata, etype = "Event")
              
              # Define datadist for expanded data
@@ -2557,12 +2609,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         } else {
              # Standard Cox
              # Create formula and fit model using consolidated function
-             coxformula <- .buildSurvivalFormula(
-               time_var = "mytime",
-               outcome_var = "myoutcome",
-               predictors = var_names,
-               survival_type = "standard"
-             )
+             coxformula <- base_formula
              
              f <- rms::cph(formula = coxformula,
                           data = mydata,
@@ -7044,4 +7091,3 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
     )  # Close private list
 )
-

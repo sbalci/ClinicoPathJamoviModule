@@ -50,6 +50,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
 <li><strong>Chest X-ray + Sputum Culture</strong>: Tuberculosis diagnosis (dependent tests)</li>
 </ul>
 
+<p><strong>Data provenance:</strong> Preset values are literature-informed exemplars; confirm against your local population and guideline updates. Prevalence and test performance are treated as fixed without confidence intervals—interpret cautiously.</p>
+
 <p><strong>Tip:</strong> Enable "Display Footnotes" for detailed explanations of each metric. Enable "Fagan Nomogram" for visual representation of probability updates.</p>
 </div>'
 
@@ -142,21 +144,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     p_either_pos_D <- 1 - ((1 - test1_sens) * (1 - test2_sens))
                     p_either_pos_nD <- 1 - (test1_spec * test2_spec)
                 } else {
-                    # For dependent tests, use the joint probabilities already calculated
-                    dep_results <- results  # Already has the joint probabilities
-                    # P(Either+) = P(Test1+ only) + P(Test2+ only) + P(Both+)
-                    # We need to recalculate from the dependent probability structure
-                    # P(Either+ | D+) = 1 - P(Both- | D+)
-                    # From dependent calculation results, we can derive this
-                    p_either_pos_D <- test1_sens + test2_sens - (test1_sens * test2_sens + cond_dep_pos * sqrt(
-                        test1_sens * (1 - test1_sens) * test2_sens * (1 - test2_sens)
-                    ))
-                    p_either_pos_nD <- (1 - test1_spec) + (1 - test2_spec) - ((1 - test1_spec) * (1 - test2_spec) + cond_dep_neg * sqrt(
-                        (1 - test1_spec) * test1_spec * (1 - test2_spec) * test2_spec
-                    ))
-                    # Clamp to valid range
-                    p_either_pos_D <- max(0, min(1, p_either_pos_D))
-                    p_either_pos_nD <- max(0, min(1, p_either_pos_nD))
+                    # For dependent tests, use clamped joint probabilities to maintain coherence
+                    p_either_pos_D <- 1 - results$p_both_neg_D
+                    p_either_pos_nD <- 1 - results$p_both_neg_nD
                 }
 
                 lr_either_pos <- private$.calculateLikelihoodRatio(p_either_pos_D, p_either_pos_nD, "Either Positive LR")
@@ -223,7 +213,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # Store data for Fagan nomogram if requested
                 if (self$options$fagan) {
                     private$.prepareFaganPlotData(prevalence, test1_sens, test1_spec, test2_sens, test2_spec,
-                                                 indep, test1_plr, test1_nlr, test2_plr, test2_nlr, results)
+                                                 indep, lr_either_pos, if (indep) test1_nlr * test2_nlr else results$lr_both_neg)
                 }
             },
 
@@ -231,13 +221,13 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 plotData <- image1$state
 
                 # Check cache to avoid expensive recalculations
-                params_key <- paste(plotData$Prevalence, plotData$Plr_Both, plotData$Nlr_Both, sep="_")
+                params_key <- paste(plotData$Prevalence, plotData$Plr_PositiveRule, plotData$Nlr_NegativeRule, sep="_")
 
                 if (is.null(private$.lastNomogramParams) || private$.lastNomogramParams != params_key) {
                     private$.nomogramCache <- nomogrammer(
                         Prevalence = plotData$Prevalence,
-                        Plr = plotData$Plr_Both,
-                        Nlr = plotData$Nlr_Both,
+                        Plr = plotData$Plr_PositiveRule,
+                        Nlr = plotData$Nlr_NegativeRule,
                         Detail = TRUE,
                         NullLine = TRUE,
                         LabelSize = private$NOMOGRAM_LABEL_SIZE,
@@ -267,11 +257,11 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 if (prevalence <= 0 || prevalence >= 1) {
                     stop("Disease prevalence must be between 0 and 1. Consider realistic clinical prevalences: rare diseases (0.001-0.01), common conditions (0.05-0.20).")
                 }
-                if (!indep && (cond_dep_pos < 0 || cond_dep_pos > 1)) {
-                    stop("Conditional dependence for positive cases must be between 0 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence).")
+                if (!indep && (cond_dep_pos < -1 || cond_dep_pos > 1)) {
+                    stop("Conditional dependence for positive cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
                 }
-                if (!indep && (cond_dep_neg < 0 || cond_dep_neg > 1)) {
-                    stop("Conditional dependence for negative cases must be between 0 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence).")
+                if (!indep && (cond_dep_neg < -1 || cond_dep_neg > 1)) {
+                    stop("Conditional dependence for negative cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
                 }
                 
                 # Additional clinical validity checks
@@ -415,12 +405,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     postest_odds_both <- dep_results$postest_odds_both
                     postest_odds_both_neg <- dep_results$postest_odds_both_neg
                     dependence_info <- dep_results$dependence_info
+                    p_both_neg_D <- dep_results$p_both_neg_D
+                    p_both_neg_nD <- dep_results$p_both_neg_nD
                 }
                 
                 # Store LRs for plot data (set to NA for independent case)
                 if (indep) {
                     lr_both_pos <- test1_plr * test2_plr
                     lr_both_neg <- test1_nlr * test2_nlr
+                    p_both_neg_D <- (1 - test1_sens) * (1 - test2_sens)
+                    p_both_neg_nD <- test1_spec * test2_spec
                 } else {
                     lr_both_pos <- dep_results$lr_both_pos
                     lr_both_neg <- dep_results$lr_both_neg
@@ -436,6 +430,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     postest_odds_both = postest_odds_both,
                     postest_odds_both_neg = postest_odds_both_neg,
                     dependence_info = dependence_info,
+                    p_both_neg_D = p_both_neg_D,
+                    p_both_neg_nD = p_both_neg_nD,
                     lr_both_pos = lr_both_pos,
                     lr_both_neg = lr_both_neg
                 ))
@@ -456,6 +452,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 upper_pos_D <- min(test1_sens, test2_sens)
                 p_both_pos_D <- private$.clampProbability(p_both_pos_D_raw, lower_pos_D, upper_pos_D,
                                                           "P(Test1+, Test2+ | Disease+)")
+                if (abs(p_both_pos_D_raw - p_both_pos_D) > private$NUMERICAL_TOLERANCE) {
+                    private$.addNotice("Dependence parameter for diseased group exceeded feasible bounds; joint positive probability truncated.", "info")
+                }
 
                 p_t1_only_D <- private$.clampProbability(test1_sens - p_both_pos_D, 0, test1_sens,
                                                          "P(Test1+, Test2- | Disease+)")
@@ -471,6 +470,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 upper_pos_nD <- min(fp_test1, fp_test2)
                 p_both_pos_nD <- private$.clampProbability(p_both_pos_nD_raw, lower_pos_nD, upper_pos_nD,
                                                           "P(Test1+, Test2+ | Disease-)")
+                if (abs(p_both_pos_nD_raw - p_both_pos_nD) > private$NUMERICAL_TOLERANCE) {
+                    private$.addNotice("Dependence parameter for non-diseased group exceeded feasible bounds; joint false-positive probability truncated.", "info")
+                }
 
                 p_t1_only_nD <- private$.clampProbability(fp_test1 - p_both_pos_nD, 0, fp_test1,
                                                           "P(Test1+, Test2- | Disease-)")
@@ -507,10 +509,21 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 postest_odds_both_neg <- pretest_odds * lr_both_neg
                 postest_prob_both_neg <- postest_odds_both_neg / (1 + postest_odds_both_neg)
 
+                # Compute realized phi coefficients
+                phi_calc <- function(p11, p10, p01, p00) {
+                    denom <- sqrt((p11 + p10) * (p01 + p00) * (p11 + p01) * (p10 + p00))
+                    if (denom <= private$NUMERICAL_TOLERANCE) return(NA_real_)
+                    (p11 * p00 - p10 * p01) / denom
+                }
+                phi_d <- phi_calc(p_both_pos_D, p_t1_only_D, p_t2_only_D, p_both_neg_D)
+                phi_n <- phi_calc(p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD)
+
                 dependence_info <- sprintf(
                     "<p>Tests are modeled with conditional dependence:<br>
                 Dependence for subjects with disease: %.2f<br>
-                Dependence for subjects without disease: %.2f</p>
+                Dependence for subjects without disease: %.2f<br>
+                Realized phi (disease): %s<br>
+                Realized phi (no disease): %s</p>
                 <p>Joint probabilities after accounting for dependence:<br>
                 P(Test1+,Test2+ | Disease+): %.4f<br>
                 P(Test1+,Test2- | Disease+): %.4f<br>
@@ -521,6 +534,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 P(Test1-,Test2+ | Disease-): %.4f<br>
                 P(Test1-,Test2- | Disease-): %.4f</p>",
                     cond_dep_pos, cond_dep_neg,
+                    ifelse(is.na(phi_d), "NA", sprintf("%.2f", phi_d)),
+                    ifelse(is.na(phi_n), "NA", sprintf("%.2f", phi_n)),
                     p_both_pos_D, p_t1_only_D, p_t2_only_D, p_both_neg_D,
                     p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD
                 )
@@ -536,7 +551,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     postest_odds_both_neg = postest_odds_both_neg,
                     dependence_info = dependence_info,
                     lr_both_pos = lr_both_pos,
-                    lr_both_neg = lr_both_neg
+                    lr_both_neg = lr_both_neg,
+                    p_both_neg_D = p_both_neg_D,
+                    p_both_neg_nD = p_both_neg_nD
                 ))
             },
 
@@ -628,7 +645,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
             # Prepare Fagan nomogram plot data
             .prepareFaganPlotData = function(prevalence, test1_sens, test1_spec, test2_sens, test2_spec, 
-                                            indep, test1_plr, test1_nlr, test2_plr, test2_nlr, results) {
+                                            indep, lr_positive_rule, lr_negative_rule) {
                 # Checkpoint before potentially expensive nomogram calculation
                 private$.checkpoint()
                 
@@ -638,8 +655,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     "Test1Spec" = test1_spec,
                     "Test2Sens" = test2_sens,
                     "Test2Spec" = test2_spec,
-                    "Plr_Both" = if (indep) test1_plr * test2_plr else results$lr_both_pos,
-                    "Nlr_Both" = if (indep) test1_nlr * test2_nlr else results$lr_both_neg
+                    "Plr_PositiveRule" = lr_positive_rule,
+                    "Nlr_NegativeRule" = lr_negative_rule
                 )
 
                 image1 <- self$results$plot1
@@ -782,11 +799,13 @@ cotestClass <- if (requireNamespace("jmvcore"))
   <li>P(Test1− and Test2− | Disease−) = P(Test1− | Disease−) × P(Test2− | Disease−) = Spec₁ × Spec₂</li>
 </ul>
 
-<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as ρ or ψ) that ranges from 0 (independence) to 1 (maximum possible dependence):</p>
+<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as ρ or ψ) that ranges from -1 (inverse correlation) to 1 (maximum possible dependence):</p>
 <ul>
   <li>P(Test1+ and Test2+ | Disease+) = (Sens₁ × Sens₂) + ρᵨₒₛ × √(Sens₁ × (1−Sens₁) × Sens₂ × (1−Sens₂))</li>
   <li>P(Test1+ and Test2+ | Disease−) = ((1−Spec₁) × (1−Spec₂)) + ρₙₑ𝑔 × √((1−Spec₁) × Spec₁ × (1−Spec₂) × Spec₂)</li>
 </ul>
+
+<p>Extreme values are automatically truncated to stay within feasible joint bounds; the realized correlation after truncation is reported.</p>
 
 <p>Note: Similar adjustments are made for the other joint probabilities.</p>
 

@@ -6,6 +6,7 @@ library(survival)
 
 # Source the function files
 source("R/stagemigration.h.R")
+source("R/stagemigration_helpers.R")
 source("R/stagemigration.b.R")
 
 # Helper function to run analysis

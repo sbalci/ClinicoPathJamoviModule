@@ -42,7 +42,6 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             <ul>
             <li><b>Recurrence prediction:</b> Serial biopsy surveillance decisions</li>
             <li><b>Survival models:</b> Treatment vs palliative care thresholds</li>
-            <li><b>Competing risks:</b> Recurrence vs death decision making</li>
             </ul>"
 
             self$results$instructionsText$setContent(html)
@@ -180,17 +179,25 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             estimate_method <- self$options$estimate_survival
             results_by_time <- list()
+            
+            # Optimization: Fit Cox model once if selected
+            cox_fit_global <- NULL
+            if (estimate_method == "cox") {
+                surv_obj <- Surv(time, event)
+                tryCatch({
+                    cox_fit_global <- coxph(surv_obj ~ predictor)
+                }, error = function(e) {
+                    warning("Cox model fitting failed: ", e$message)
+                })
+            }
 
             # 1. Calculate risk scores (probabilities) for all patients
-            # This part remains similar - we need P(T <= t | X) for each patient
-            
-            # Pre-calculate risk scores for all time points if possible, or loop
-            # For simplicity and correctness with the existing structure, we loop by time point
             
             for (t_eval in time_points) {
 
                 # --- Step A: Calculate Risk Scores (Probabilities) ---
                 if (estimate_method == "direct") {
+                    # Ensure predictor is numeric and in [0,1] range if possible, or just use as is
                     prob_event <- predictor
                 } else if (estimate_method == "kaplan_meier") {
                     # Stratified KM
@@ -238,38 +245,42 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     })
                     
                 } else { # cox
-                    surv_obj <- Surv(time, event)
-                    tryCatch({
-                        cox_fit <- coxph(surv_obj ~ predictor)
-                        newdata <- data.frame(predictor = predictor)
-                        surv_fit <- survfit(cox_fit, newdata = newdata)
-                        
-                        # Extract survival at t_eval for each patient
-                        surv_times <- surv_fit$time
-                        surv_probs <- surv_fit$surv
-                        
-                        prob_event <- numeric(n)
-                        
-                        # Optimization: find time index once
-                        time_idx <- which(surv_times <= t_eval)
-                        last_time_idx <- if(length(time_idx) > 0) max(time_idx) else 0
-                        
-                        if (last_time_idx == 0) {
-                            prob_event <- rep(0, n)
-                        } else {
-                            if (is.matrix(surv_probs)) {
-                                prob_event <- 1 - surv_probs[last_time_idx, ]
+                    if (!is.null(cox_fit_global)) {
+                        tryCatch({
+                            newdata <- data.frame(predictor = predictor)
+                            surv_fit <- survfit(cox_fit_global, newdata = newdata)
+                            
+                            # Extract survival at t_eval for each patient
+                            surv_times <- surv_fit$time
+                            surv_probs <- surv_fit$surv
+                            
+                            prob_event <- numeric(n)
+                            
+                            # Optimization: find time index once
+                            time_idx <- which(surv_times <= t_eval)
+                            last_time_idx <- if(length(time_idx) > 0) max(time_idx) else 0
+                            
+                            if (last_time_idx == 0) {
+                                prob_event <- rep(0, n)
                             } else {
-                                prob_event <- rep(1 - surv_probs[last_time_idx], n)
+                                if (is.matrix(surv_probs)) {
+                                    prob_event <- 1 - surv_probs[last_time_idx, ]
+                                } else {
+                                    prob_event <- rep(1 - surv_probs[last_time_idx], n)
+                                }
                             }
-                        }
-                        
-                    }, error = function(e) {
-                        warning("Cox model failed: ", e$message)
-                        km_overall <- survfit(surv_obj ~ 1)
-                        surv_t <- summary(km_overall, times = t_eval, extend = TRUE)$surv[1]
-                        prob_event <<- rep(1 - surv_t, n)
-                    })
+                            
+                        }, error = function(e) {
+                            warning("Cox prediction failed: ", e$message)
+                            prob_event <- numeric(n) # Will default to 0 or fallback below
+                        })
+                    } else {
+                         # Fallback if fit failed
+                         surv_obj <- Surv(time, event)
+                         km_overall <- survfit(surv_obj ~ 1)
+                         surv_t <- summary(km_overall, times = t_eval, extend = TRUE)$surv[1]
+                         prob_event <<- rep(1 - surv_t, n)
+                    }
                 }
                 
                 prob_event <- pmin(pmax(prob_event, 0), 1)
@@ -323,9 +334,8 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     # TP_all = event_rate, FP_all = 1 - event_rate
                     nb_treat_all[i] <- event_rate - (1 - event_rate) * (pt / (1 - pt))
                     
-                    # Interventions Avoided
-                    # (N_all - N_treated) / N * 100
-                    interventions_avoided[i] <- (n - n_high_risk) / n * 100
+                    # Interventions Avoided (Placeholder - calculated after smoothing)
+                    interventions_avoided[i] <- 0
                     
                     # Events Detected (Sensitivity)
                     # TP_model / TP_all
@@ -341,6 +351,22 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     smooth_span <- 0.2
                     nb_model <- suppressWarnings(predict(loess(nb_model ~ thresholds, span = smooth_span)))
                     nb_treat_all <- suppressWarnings(predict(loess(nb_treat_all ~ thresholds, span = smooth_span)))
+                }
+
+                # Calculate Standardized Net Reduction in Interventions (per 100 patients)
+                # Formula: (NB_model - NB_all) / (pt / (1 - pt)) * 100
+                for (i in seq_along(thresholds)) {
+                    pt <- thresholds[i]
+                    u <- pt / (1 - pt)
+                    
+                    if (pt > 0 && pt < 1) {
+                        net_reduction <- (nb_model[i] - nb_treat_all[i]) / u * 100
+                        # Determine if model is better than treating all
+                        # If NB_model < NB_all, reduction is negative (harm equivalent to treating more people)
+                        interventions_avoided[i] <- net_reduction
+                    } else {
+                        interventions_avoided[i] <- 0
+                    }
                 }
 
                 # Find optimal threshold
@@ -522,9 +548,9 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             thresholds <- private$.thresholds
 
             plot(NULL, xlim = c(min(thresholds), max(thresholds)),
-                 ylim = c(0, 100),
+                 ylim = range(unlist(lapply(private$.results_by_time, function(r) r$interventions_avoided)), na.rm = TRUE),
                  xlab = "Threshold Probability",
-                 ylab = "Interventions Avoided (per 100 patients)",
+                 ylab = "Net Reduction in Interventions (per 100 patients)",
                  main = "Interventions Avoided")
 
             grid()

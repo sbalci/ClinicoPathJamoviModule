@@ -66,6 +66,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             analysis_vars <- c(time_var, size_var)
             if (!is.null(patient_var)) analysis_vars <- c(analysis_vars, patient_var)
             if (length(covariates) > 0) analysis_vars <- c(analysis_vars, covariates)
+            if (!is.null(self$options$treatmentEffect)) analysis_vars <- c(analysis_vars, self$options$treatmentEffect)
             
             # Clean data and validate
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
@@ -465,6 +466,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 model <- private$growth_model
                 growth_model <- self$options$growthModel %||% "gompertz"
                 
+                dt_type <- "Doubling Time"
+                doubling_time <- NA
+                
                 # Calculate doubling time based on model type
                 if (growth_model == "exponential") {
                     if (inherits(model, "nlme")) {
@@ -473,15 +477,18 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         k <- coef(model)["k"]
                     }
                     doubling_time <- log(2) / k
+                    dt_type <- "Constant Doubling Time"
                     
                 } else if (growth_model == "gompertz") {
                     # Doubling time varies for Gompertz - calculate at initial time
                     if (inherits(model, "nlme")) {
-                        beta <- fixef(model)["beta"]
+                        alpha <- fixef(model)["alpha"]
                     } else {
-                        beta <- coef(model)["beta"]
+                        alpha <- coef(model)["alpha"]
                     }
-                    doubling_time <- log(2) / beta  # Approximate initial doubling time
+                    # SGR(0) = alpha. Initial DT = ln(2)/alpha
+                    doubling_time <- log(2) / alpha 
+                    dt_type <- "Initial Doubling Time"
                     
                 } else if (growth_model == "linear") {
                     # For linear growth, calculate time to double from initial size
@@ -493,20 +500,23 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         V0 <- coef(model)["V0"]
                     }
                     doubling_time <- V0 / k  # Time to add V0 to initial size
+                    dt_type <- "Time to Double Initial Size"
                     
                 } else {
                     doubling_time <- NA
                 }
                 
                 # Populate doubling time table
-                doubling_table <- self$results$doublingTimeTable
-                doubling_table$addRow(rowKey = "overall", values = list(
-                    group = "Overall",
-                    doubling_time = round(doubling_time, 2),
-                    unit = "time units",
-                    ci_lower = round(doubling_time * 0.8, 2),  # Approximate CI
-                    ci_upper = round(doubling_time * 1.2, 2)
-                ))
+                if (!is.na(doubling_time)) {
+                    doubling_table <- self$results$doublingTimeTable
+                    doubling_table$addRow(rowKey = "overall", values = list(
+                        group = dt_type,
+                        doubling_time = round(doubling_time, 2),
+                        unit = "time units",
+                        ci_lower = round(doubling_time * 0.8, 2),  # Approximate CI
+                        ci_upper = round(doubling_time * 1.2, 2)
+                    ))
+                }
                 
             }, error = function(e) {
                 message("Doubling time calculation failed: ", e$message)

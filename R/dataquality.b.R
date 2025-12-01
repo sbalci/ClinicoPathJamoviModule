@@ -90,20 +90,104 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
 
         quality_results <- list()
+        summary_rows <- list()
+
+        # Helper to record per-variable summary for structured HTML
+        add_summary_row <- function(var, data_vec) {
+            n_total <- length(data_vec)
+            n_missing <- sum(is.na(data_vec))
+            missing_pct <- if (n_total > 0) round(n_missing / n_total * 100, 1) else NA
+            n_nonmiss <- n_total - n_missing
+            n_unique <- length(unique(na.omit(data_vec)))
+            dup_pct <- if (n_nonmiss > 0) round((n_nonmiss - n_unique) / n_nonmiss * 100, 1) else NA
+            vtype <- paste(class(data_vec), collapse = "/")
+
+            near_zero_var <- FALSE
+            high_card <- FALSE
+            outlier_n <- NA
+            if (is.numeric(data_vec)) {
+                sdv <- stats::sd(data_vec, na.rm = TRUE)
+                near_zero_var <- !is.na(sdv) && sdv < .Machine$double.eps
+                high_card <- n_unique > 50 && n_unique > 0.5 * n_nonmiss
+                if (n_nonmiss > 10) {
+                    q <- stats::quantile(data_vec, probs = c(0.25, 0.75), na.rm = TRUE, names = FALSE)
+                    iqr <- q[2] - q[1]
+                    if (!is.na(iqr) && iqr > 0) {
+                        lower <- q[1] - 1.5 * iqr
+                        upper <- q[2] + 1.5 * iqr
+                        outlier_n <- sum(data_vec < lower | data_vec > upper, na.rm = TRUE)
+                    } else {
+                        outlier_n <- 0
+                    }
+                }
+            } else {
+                high_card <- n_unique > 50 && n_unique > 0.5 * n_nonmiss
+            }
+
+            summary_rows[[length(summary_rows) + 1]] <<- data.frame(
+                variable = var,
+                type = vtype,
+                n = n_total,
+                missing = n_missing,
+                missing_pct = missing_pct,
+                unique = n_unique,
+                dup_pct = dup_pct,
+                near_zero_var = near_zero_var,
+                high_card = high_card,
+                outlier_n = outlier_n,
+                stringsAsFactors = FALSE
+            )
+        }
+
+        # Pre-compute per-variable summaries for downstream reporting
+        for (nm in names(analysis_data)) {
+            add_summary_row(nm, analysis_data[[nm]])
+        }
 
         # Missing value analysis
         if (self$options$check_missing) {
-            missing_summary <- sapply(analysis_data, function(x) {
-                total <- length(x)
-                missing <- sum(is.na(x))
-                missing_pct <- round(missing / total * 100, 1)
+            missing_summary <- vapply(names(analysis_data), function(nm) {
+                row <- summary_rows[[which(vapply(summary_rows, function(r) r$variable, character(1)) == nm)]]
+                paste0("Missing: ", row$missing, "/", row$n, " (", row$missing_pct, "%)")
+            }, character(1))
 
-                paste0("Missing: ", missing, "/", total, " (", missing_pct, "%)")
-            })
+            # Case-level missingness distribution
+            case_missing <- rowSums(is.na(analysis_data))
+            case_summary <- sprintf("Case-level missing: median %d, mean %.1f, max %d (of %d vars)",
+                                    stats::median(case_missing),
+                                    mean(case_missing),
+                                    max(case_missing),
+                                    ncol(analysis_data))
+
+            # Little's MCAR test if available and >1 var
+            mcar_msg <- ""
+            if (ncol(analysis_data) > 1 && requireNamespace("BaylorEdPsych", quietly = TRUE)) {
+                try({
+                    mcar <- BaylorEdPsych::LittleMCAR(analysis_data)
+                    mcar_msg <- sprintf("Little's MCAR test: chi-square=%.2f, df=%s, p=%.4f",
+                                        mcar$chi.square, mcar$df, mcar$p.value)
+                }, silent = TRUE)
+            } else if (ncol(analysis_data) > 1) {
+                mcar_msg <- "Little's MCAR test skipped (BaylorEdPsych not installed)."
+            }
+
+            # Threshold flagging
+            threshold <- self$options$missing_threshold_visual
+            flags <- vapply(summary_rows, function(row) ifelse(!is.na(row$missing_pct) && row$missing_pct > threshold, row$variable, NA_character_), character(1))
+            flags <- flags[!is.na(flags)]
+
+            flag_html <- if (length(flags) > 0) {
+                paste0("<p><strong>Variables exceeding ", threshold, "% missing:</strong> ", paste(flags, collapse = ", "), "</p>")
+            } else {
+                ""
+            }
 
             quality_results$missing <- paste0(
                 "<h4>Missing Value Analysis</h4>",
-                paste(names(missing_summary), missing_summary, sep = ": ", collapse = "<br>")
+                paste(names(missing_summary), missing_summary, sep = ": ", collapse = "<br>"),
+                "<br>", case_summary,
+                if (mcar_msg != "") paste0("<br>", mcar_msg) else "",
+                flag_html
             )
         }
 
@@ -116,11 +200,23 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 duplicate_rows <- total_rows - unique_rows
                 duplicate_pct <- round(duplicate_rows / total_rows * 100, 1)
 
+                # Identify top duplicated row signatures
+                dup_keys <- NA
+                if (duplicate_rows > 0) {
+                    key_freq <- as.data.frame(table(do.call(paste, c(analysis_data, sep = "||"))))
+                    key_freq <- key_freq[key_freq$Freq > 1, ]
+                    key_freq <- key_freq[order(-key_freq$Freq), ]
+                    top_keys <- head(key_freq, 5)
+                    dup_keys <- paste0("<br><em>Top duplicated patterns (first 5):</em><br>",
+                                       paste(paste(top_keys$Var1, "(n=", top_keys$Freq, ")", sep = ""), collapse = "<br>"))
+                }
+
                 quality_results$duplicates <- paste0(
                     "<h4>Duplicate Row Analysis</h4>",
                     "Total rows: ", total_rows, "<br>",
                     "Unique rows: ", unique_rows, "<br>",
-                    "Duplicate rows: ", duplicate_rows, " (", duplicate_pct, "%)"
+                    "Duplicate rows: ", duplicate_rows, " (", duplicate_pct, "%)",
+                    if (!is.na(dup_keys)) dup_keys else ""
                 )
             } else {
                 # Check for duplicates within each variable
@@ -168,6 +264,25 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             self$options$plot_data_types) {
             visdat_results <- private$.generate_visdat_analysis(analysis_data)
             quality_results$visual <- visdat_results
+        }
+
+        # Always provide structured summary table
+        if (length(summary_rows) > 0) {
+            df <- do.call(rbind, summary_rows)
+            # Basic HTML table
+            summary_table <- paste(
+                apply(df, 1, function(r) paste0("<tr>", paste0("<td>", r, "</td>", collapse = ""), "</tr>")),
+                collapse = "\n"
+            )
+            header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Near-zero var</th><th>High card</th><th>Outliers</th></tr>")
+            quality_results$summary_table <- paste0(
+                "<h4>Variable Quality Summary</h4>",
+                "<p><em>Flags:</em> near-zero variance, high cardinality (many unique values), and IQR-based outlier counts for numeric variables.</p>",
+                "<table border='1' cellspacing='0' cellpadding='4'>",
+                header,
+                summary_table,
+                "</table>"
+            )
         }
 
         # Combine all results

@@ -1,5 +1,42 @@
 # ClinicoPath News
 
+## Version 0.0.32.26
+
+### 🗓️ **November 30, 2025 - Critical Fixes: Survival & Decision Analysis**
+
+---
+
+## 🏥 **SURVIVAL & DECISION ANALYSIS**
+
+### **Project Scope: Critical Evaluation & Fixes**
+
+Critically evaluated and fixed fundamental issues in 4 key modules: `survivalcont`, `survivalendpoints`, `survivalPower`, and `timedependentdca`.
+
+### **✅ Key Findings & Fixes:**
+
+#### **1. `survivalcont` Function**:
+*   **Critical Fix**: Corrected **Competing Risk** analysis logic. Previously, competing events (status=2) were passed to standard Cox/KM tools causing errors. Now safely defaults to **Cause-Specific Hazard** (censoring competing events) with explicit user warnings.
+*   **Accuracy Fix**: Updated **Person-Time** incidence rate calculation to strictly count events of interest, excluding competing events from the numerator.
+*   **Safety**: Added statistical warnings to **Cut-off Analysis** results, flagging p-values as exploratory due to post-hoc optimization (preventing p-hacking).
+*   **Transparency**: Added caveats to **RMST** results regarding the approximate nature of standard errors.
+
+#### **2. `survivalPower` Function**:
+*   **Critical Fix**: Completely rewrote the **Simulation** logic (`.run_simulation_analysis`). Previous version ignored censoring (accrual/follow-up), effectively assuming infinite follow-up. New logic correctly simulates time-to-event and administrative censoring, providing accurate empirical power.
+*   **New Feature**: Enabled **Competing Risks** and **RMST** power analysis modes, which were previously implemented but blocked in the UI.
+*   **Status**: Validated against analytical methods using the new simulation engine.
+
+#### **3. `timedependentdca` Function**:
+*   **Methodology Fix**: Updated **Interventions Avoided** calculation to use the standard **Net Reduction** formula: `(NB_model - NB_all) / (pt / (1-pt)) * 100`. Previous version used a non-standard percentage metric.
+*   **Consistency**: Moved metrics calculation after the smoothing step to ensure tables match the visual curves.
+*   **Visualization**: Updated **Interventions Plot** to use dynamic Y-axis scaling (allowing negative values) and correct axis labels.
+*   **Documentation**: Removed unsupported "Competing Risks" claim from instructions to prevent misuse.
+
+#### **4. `survivalendpoints` Function**:
+*   **Safety Fix**: Added robust detection for **Negative Survival Times** (data entry errors where Start > End). These are now automatically set to NA with a summary warning.
+*   **Transparency**: Added detection and warnings for **Imputed Event Times** (e.g., "Progression=Yes" but "Date=Missing"), where time is inferred from last follow-up.
+
+---
+
 ## Version 0.0.32.25
 
 ### 🗓️ **November 29, 2025 - Evaluation: Pathology & Multivariate Modules**

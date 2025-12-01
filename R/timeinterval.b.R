@@ -32,6 +32,11 @@
 #'   \item Export capabilities for downstream analysis
 #' }
 #'
+#' @note
+#'   **Landmark Analysis Exclusion:** When landmark analysis is enabled, participants with missing
+#'   follow-up times (NA values) are implicitly excluded from the "at-risk" cohort because their
+#'   eligibility for landmark criteria cannot be determined.
+#'
 #' @examples
 #' # Basic time interval calculation:
 #' timeinterval(
@@ -107,65 +112,28 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(TRUE)
         },
         
-        .detectDateFormat = function(start_vector, end_vector = NULL, specified_format = NULL) {
-            # FIX: Enhanced date format detection that validates BOTH columns
-            # @param start_vector Start date column for format detection
-            # @param end_vector End date column for format validation (optional)
-            # @param specified_format User-specified format or "auto"
-
-            # If format explicitly specified, validate it works for both columns
+        .detectDateFormat = function(date_vector, specified_format = NULL) {
+            # Automatic date format detection if not specified
             if (!is.null(specified_format) && specified_format != "auto") {
-                # Validate specified format works for both columns
-                if (!is.null(end_vector)) {
-                    start_sample <- start_vector[!is.na(start_vector)]
-                    end_sample <- end_vector[!is.na(end_vector)]
-
-                    if (length(start_sample) > 0 && length(end_sample) > 0) {
-                        # Test the specified format on both columns
-                        parser <- switch(specified_format,
-                            "ymdhms" = lubridate::ymd_hms,
-                            "ymd" = lubridate::ymd,
-                            "ydm" = lubridate::ydm,
-                            "mdy" = lubridate::mdy,
-                            "myd" = lubridate::myd,
-                            "dmy" = lubridate::dmy,
-                            "dym" = lubridate::dym,
-                            stop(paste("Unsupported date format:", specified_format))
-                        )
-
-                        start_parsed <- parser(head(start_sample, 10), quiet = TRUE)
-                        end_parsed <- parser(head(end_sample, 10), quiet = TRUE)
-
-                        start_success_rate <- sum(!is.na(start_parsed)) / length(start_parsed)
-                        end_success_rate <- sum(!is.na(end_parsed)) / length(end_parsed)
-
-                        if (start_success_rate < 0.8 || end_success_rate < 0.8) {
-                            stop(paste0(
-                                "Specified date format '", specified_format, "' does not work for both columns.\n",
-                                "Start column parse rate: ", round(start_success_rate * 100, 1), "%\n",
-                                "End column parse rate: ", round(end_success_rate * 100, 1), "%\n",
-                                "Please verify your date format setting matches your data."
-                            ))
-                        }
-                    }
-                }
                 return(specified_format)
             }
-
-            # Auto-detect format using start column
+            
             # Remove missing values for format detection
-            sample_dates <- start_vector[!is.na(start_vector)]
+            sample_dates <- date_vector[!is.na(date_vector)]
             if (length(sample_dates) == 0) {
-                stop("No valid dates found in start column for format detection")
+                stop("No valid dates found for format detection")
             }
-
-            # Take a sample for format detection
-            sample_dates <- head(sample_dates, min(10, length(sample_dates)))
-
+            
+            # Take a larger sample for format detection to handle ambiguity better
+            sample_size <- min(50, length(sample_dates))
+            sample_dates <- head(sample_dates, sample_size)
+            
             # Test common formats
             formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
-
-            detected_format <- NULL
+            
+            best_format <- "ymd"
+            best_score <- -1
+            
             for (fmt in formats_to_try) {
                 parser <- switch(fmt,
                     "ymdhms" = lubridate::ymd_hms,
@@ -176,62 +144,27 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "dmy" = lubridate::dmy,
                     "dym" = lubridate::dym
                 )
-
+                
                 tryCatch({
                     parsed_dates <- parser(sample_dates, quiet = TRUE)
-                    # If most dates parse successfully, consider this format
-                    if (sum(!is.na(parsed_dates)) / length(sample_dates) > 0.8) {
-                        # FIX: CRITICAL - Validate this format also works for END column
-                        if (!is.null(end_vector)) {
-                            end_sample <- end_vector[!is.na(end_vector)]
-                            if (length(end_sample) > 0) {
-                                end_parsed <- parser(head(end_sample, 10), quiet = TRUE)
-                                end_success_rate <- sum(!is.na(end_parsed)) / length(end_parsed)
-
-                                # Only accept format if it works for BOTH columns
-                                if (end_success_rate > 0.8) {
-                                    detected_format <- fmt
-                                    break  # Found a format that works for both!
-                                } else {
-                                    # Format works for start but NOT end - CRITICAL ERROR
-                                    warning(paste0(
-                                        "Format '", fmt, "' works for start column (",
-                                        round(sum(!is.na(parsed_dates)) / length(sample_dates) * 100, 1),
-                                        "% success) but NOT for end column (",
-                                        round(end_success_rate * 100, 1), "% success). ",
-                                        "Trying other formats..."
-                                    ))
-                                }
-                            } else {
-                                detected_format <- fmt
-                                break
-                            }
-                        } else {
-                            detected_format <- fmt
-                            break
-                        }
+                    success_rate <- sum(!is.na(parsed_dates)) / length(sample_dates)
+                    
+                    # Keep track of the best format
+                    if (success_rate > best_score) {
+                        best_score <- success_rate
+                        best_format <- fmt
                     }
                 }, error = function(e) {
                     # Continue to next format
                 })
             }
-
-            if (is.null(detected_format)) {
-                # No format worked for both columns
-                stop(paste0(
-                    "Could not find a date format that works for BOTH start and end columns.\n",
-                    "This suggests:\n",
-                    "  - Start and end columns use different date formats (CRITICAL ERROR)\n",
-                    "  - Dates are stored inconsistently within columns\n",
-                    "  - Date format is not standard (ymd, dmy, mdy, etc.)\n\n",
-                    "Action required:\n",
-                    "  1. Review both date columns for format consistency\n",
-                    "  2. Ensure all dates in a column use the same format\n",
-                    "  3. Manually specify the correct format if auto-detection fails"
-                ))
+            
+            if (best_score < 0.5) {
+                warning("Could not reliably detect date format. Using YMD format. Please specify format manually if incorrect.")
+                return("ymd")
             }
-
-            return(detected_format)
+            
+            return(best_format)
         },
         
         .parseDate = function(date_vector, format, tz = "") {
@@ -280,7 +213,18 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             intervals <- lubridate::interval(start_dates, end_dates)
             
             # Convert to specified time unit
-            calculated_time <- lubridate::time_length(intervals, output_unit)
+            # For statistical accuracy in survival analysis, we use fixed duration lengths
+            # for months (30.44 days) and years (365.25 days) rather than calendar units.
+            # This ensures that 'time' represents a consistent quantity of risk exposure.
+            
+            if (output_unit %in% c("months", "years")) {
+                # Convert to duration first (seconds) then to unit
+                # This uses standard length: Month = 30.4375 days, Year = 365.25 days
+                calculated_time <- lubridate::time_length(lubridate::as.duration(intervals), output_unit)
+            } else {
+                # Days and weeks are standard
+                calculated_time <- lubridate::time_length(intervals, output_unit)
+            }
             
             return(calculated_time)
         },
@@ -302,8 +246,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Identify cases before landmark time
+            # Handle NAs by treating them as excluded from valid set (FALSE)
             valid_cases <- calculated_time >= landmark_time
-            excluded_count <- sum(!valid_cases, na.rm = TRUE)
+            valid_cases[is.na(valid_cases)] <- FALSE
+            excluded_count <- sum(!valid_cases)
             
             # Filter and adjust times
             adjusted_time <- calculated_time - landmark_time
@@ -381,12 +327,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Comprehensive input validation
             private$.validateInputData(data, dx_date, fu_date)
 
-            # FIX: Detect date format validating BOTH columns
-            detected_format <- private$.detectDateFormat(
-                data[[dx_date]],
-                data[[fu_date]],  # Pass BOTH columns for validation
-                time_format
-            )
+            # Detect date format if needed
+            detected_format <- private$.detectDateFormat(data[[dx_date]], time_format)
 
             # Convert timezone setting to lubridate format
             tz <- if (timezone_setting == "utc") "UTC" else ""
@@ -409,58 +351,12 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Calculate time intervals
             calculated_time <- private$.calculateTimeIntervals(start_dates, end_dates, output_unit)
 
-            # FIX: CRITICAL - Validate for negative intervals BEFORE proceeding
-            # Negative intervals (end before start) indicate data errors and corrupt person-time calculations
-            n_negative <- sum(calculated_time < 0, na.rm = TRUE)
-            if (n_negative > 0) {
-                # Find examples of negative intervals for error message
-                neg_idx <- which(calculated_time < 0)
-                n_examples <- min(3, length(neg_idx))
-                example_rows <- head(neg_idx, n_examples)
-
-                # Build detailed error message
-                error_msg <- paste0(
-                    "CRITICAL: ", n_negative, " negative time interval(s) detected (end date before start date).\n\n",
-                    "This indicates data entry errors that would corrupt person-time calculations and survival analysis.\n\n",
-                    "Example(s):\n"
-                )
-
-                for (i in 1:n_examples) {
-                    row_idx <- example_rows[i]
-                    error_msg <- paste0(
-                        error_msg,
-                        "  Row ", row_idx, ": ",
-                        "Start = ", start_dates[row_idx], ", ",
-                        "End = ", end_dates[row_idx], ", ",
-                        "Interval = ", round(calculated_time[row_idx], 2), " ", output_unit, "\n"
-                    )
-                }
-
-                error_msg <- paste0(
-                    error_msg,
-                    "\nPossible causes:\n",
-                    "  - Start and end date columns were swapped\n",
-                    "  - Dates entered in wrong format (e.g., month/day confusion)\n",
-                    "  - Typos in year, month, or day values\n",
-                    "  - Mixed date formats in the same column\n\n",
-                    "Action required:\n",
-                    "  1. Review your date columns for errors\n",
-                    "  2. Ensure start dates occur before or on the same day as end dates\n",
-                    "  3. Check date format consistency\n\n",
-                    "Only after fixing the data errors, you may optionally enable 'Remove Negative Intervals' to filter them."
-                )
-
-                stop(error_msg)
-            }
-
             # Apply data quality filters if requested (combined for performance)
             original_data <- data
             valid_idx <- rep(TRUE, length(calculated_time))
             filter_applied <- FALSE
 
             if (self$options$remove_negative) {
-                # User explicitly requested to remove any remaining negatives (defensive programming)
-                # Note: Should not reach here due to validation above, but kept for safety
                 valid_idx <- valid_idx & (calculated_time >= 0 | is.na(calculated_time))
                 filter_applied <- TRUE
             }
@@ -673,27 +569,47 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ""
                 }
 
-                summary_text <- glue::glue("
-                    <br><b>Time Interval Summary ({self$options$output_unit})</b><br>
-                    Number of observations: {summary_stats$n}<br>
-                    Total person-time: {round(summary_stats$total_person_time, 2)} person-{self$options$output_unit}<br>
-                    Mean time: {round(summary_stats$mean, 2)}{ci_text}<br>
-                    Median time: {round(summary_stats$median, 2)}<br>
-                    Standard deviation: {round(summary_stats$sd, 2)}<br>
-                    Range: {round(summary_stats$min, 2)} to {round(summary_stats$max, 2)}<br>
-                    Missing values: {summary_stats$missing}<br>
-                    {if(summary_stats$negative > 0) paste('Warning:', summary_stats$negative, 'negative time intervals detected') else ''}
+                                summary_text <- glue::glue("
 
-                    <div style='background-color: #e8f5e9; padding: 12px; margin-top: 12px; border-left: 3px solid #4caf50;'>
-                        <strong>💡 Interpretation Example:</strong><br>
-                        With a mean follow-up of {round(summary_stats$mean, 1)} {self$options$output_unit}
-                        (range: {round(summary_stats$min, 1)} to {round(summary_stats$max, 1)} {self$options$output_unit}),
-                        this cohort provides {if(summary_stats$mean > summary_stats$median) 'adequate' else 'good'} observation time.
-                        The total person-time ({round(summary_stats$total_person_time, 1)} person-{self$options$output_unit})
-                        serves as the denominator for calculating incidence rates
-                        (e.g., events per 100 person-{self$options$output_unit}).
-                    </div>
-                ")
+                                    <br><b>Time Interval Summary ({self$options$output_unit})</b><br>
+
+                                    Number of observations: {summary_stats$n}<br>
+
+                                    Total person-time: {round(summary_stats$total_person_time, 2)} person-{self$options$output_unit}<br>
+
+                                    Mean time: {round(summary_stats$mean, 2)}{ci_text}<br>
+
+                                    Median time: {round(summary_stats$median, 2)}<br>
+
+                                    Standard deviation: {round(summary_stats$sd, 2)}<br>
+
+                                    Range: {round(summary_stats$min, 2)} to {round(summary_stats$max, 2)}<br>
+
+                                    Missing values: {summary_stats$missing}<br>
+
+                                    {if(summary_stats$negative > 0) paste('Warning:', summary_stats$negative, 'negative time intervals detected') else ''}
+
+                
+
+                                    <div style='background-color: #e8f5e9; padding: 12px; margin-top: 12px; border-left: 3px solid #4caf50;'>
+
+                                        <strong>💡 Interpretation Example:</strong><br>
+
+                                        With a mean follow-up of {round(summary_stats$mean, 1)} {self$options$output_unit}
+
+                                        (range: {round(summary_stats$min, 1)} to {round(summary_stats$max, 1)} {self$options$output_unit}),
+
+                                        this cohort provides {if(summary_stats$mean > summary_stats$median) 'adequate' else 'good'} observation time.
+
+                                        The total person-time ({round(summary_stats$total_person_time, 1)} person-{self$options$output_unit})
+
+                                        serves as the denominator for calculating incidence rates
+
+                                        (e.g., events per 100 person-{self$options$output_unit}).
+
+                                    </div>
+
+                                ")
 
                 self$results$summary$setContent(summary_text)
             } else {
@@ -863,48 +779,48 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 is.list(calculated_times) && !is.null(calculated_times$quality)) {
                 quality <- calculated_times$quality
 
-                quality_html <- glue::glue("
-                    <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0;'>
-                        <h4 style='margin-top: 0; color: #004085;'>📊 Data Quality Assessment</h4>
+                quality_html <- glue::glue(
+                    "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0;'>",
+                        "<h4 style='margin-top: 0; color: #004085;'>📊 Data Quality Assessment</h4>",
 
-                        <p><strong>Overall Quality:</strong> {quality$overall_quality}</p>
+                        "<p><strong>Overall Quality:</strong> {quality$overall_quality}</p>",
 
-                        <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
-                            <tr style='background-color: #e9ecef;'>
-                                <th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Metric</th>
-                                <th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>Count</th>
-                                <th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>%</th>
-                            </tr>
-                            <tr>
-                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Total Observations</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$total_observations}</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>100%</td>
-                            </tr>
-                            <tr style='background-color: #fff3cd;'>
-                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Missing Values</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_values}</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_values/quality$total_observations, 1)}%</td>
-                            </tr>
-                            <tr style='background-color: #f8d7da;'>
-                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Negative Intervals</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$negative_intervals}</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$negative_intervals/quality$total_observations, 1)}%</td>
-                            </tr>
-                            <tr>
-                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Zero Intervals</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$zero_intervals}</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$zero_intervals/quality$total_observations, 1)}%</td>
-                            </tr>
-                            <tr style='background-color: #fff3cd;'>
-                                <td style='padding: 8px; border: 1px solid #dee2e6;'>Extreme Values</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$extreme_values}</td>
-                                <td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>
-                            </tr>
-                        </table>
+                        "<table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>",
+                            "<tr style='background-color: #e9ecef;'>",
+                                "<th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Metric</th>",
+                                "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>Count</th>",
+                                "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>%</th>",
+                            "</tr>",
+                            "<tr>",
+                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Total Observations</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$total_observations}</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>100%</td>",
+                            "</tr>",
+                            "<tr style='background-color: #fff3cd;'>",
+                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Missing Values</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_values}</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_values/quality$total_observations, 1)}%</td>",
+                            "</tr>",
+                            "<tr style='background-color: #f8d7da;'>",
+                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Negative Intervals</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$negative_intervals}</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$negative_intervals/quality$total_observations, 1)}%</td>",
+                            "</tr>",
+                            "<tr>",
+                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Zero Intervals</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$zero_intervals}</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$zero_intervals/quality$total_observations, 1)}%</td>",
+                            "</tr>",
+                            "<tr style='background-color: #fff3cd;'>",
+                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Extreme Values</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$extreme_values}</td>",
+                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>",
+                            "</tr>",
+                        "</table>",
 
-                        {if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong>⚠️ Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}
-                    </div>
-                ")
+                        "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong>⚠️ Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
+                    "</div>"
+                )
 
                 self$results$qualityAssessment$setContent(quality_html)
 
@@ -913,6 +829,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <div style='background-color: #fff8e1; padding: 15px; border-left: 4px solid #ff9800; margin: 15px 0;'>
                         <h4 style='margin-top: 0; color: #7f5006;'>⚠️ Important Assumptions</h4>
                         <ul style='margin: 5px 0;'>
+                            <li><strong>Time Units (Months/Years):</strong> To ensure statistical consistency for survival analysis, this tool uses <strong>standardized durations</strong> (1 month = 30.4375 days, 1 year = 365.25 days) rather than calendar units. This prevents bias from varying month lengths (28-31 days).</li>
                             <li><strong>End dates should occur on or after start dates</strong> - Negative intervals usually indicate data entry errors</li>
                             <li><strong>Date formats must be consistent</strong> - All dates in a column should use the same format</li>
                             <li><strong>Landmark analysis excludes participants</strong> - Only those with follow-up ≥ landmark time are included</li>

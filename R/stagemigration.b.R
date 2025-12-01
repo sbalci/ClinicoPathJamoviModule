@@ -1094,664 +1094,19 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         },
 
         .calculateAdvancedMetrics = function(data) {
-            # Advanced discrimination and calibration metrics with comprehensive error handling
-            message("DEBUG: calculateAdvancedMetrics STARTED")
-            message("DEBUG: Input data dimensions: ", nrow(data), "x", ncol(data))
-            message("DEBUG: Column names: ", paste(names(data), collapse=", "))
-
-            old_stage <- self$options$oldStage
-            new_stage <- self$options$newStage
-            time_var <- self$options$survivalTime
-            event_var <- "event_binary"
-
-            message("DEBUG: Options - oldStage: ", old_stage)
-            message("DEBUG: Options - newStage: ", new_stage)
-            message("DEBUG: Options - survivalTime: ", time_var)
-
-            # Validate required columns exist
-            required_cols <- c(old_stage, new_stage, time_var, event_var)
-            missing_cols <- setdiff(required_cols, names(data))
-            if (length(missing_cols) > 0) {
-                stop(paste("Missing required columns for advanced metrics:", paste(missing_cols, collapse=", ")))
-            }
-
-            # Ensure staging variables are factors
-            if (!is.factor(data[[old_stage]])) {
-                data[[old_stage]] <- as.factor(data[[old_stage]])
-            }
-            if (!is.factor(data[[new_stage]])) {
-                data[[new_stage]] <- as.factor(data[[new_stage]])
-            }
-
-            # Fit Cox models
-            old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-            new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
-
-            message("DEBUG: Fitting Cox models")
-
-            tryCatch({
-                # Checkpoint before fitting Cox models (computationally expensive)
-                private$.checkpoint()
-                
-                # Fit old Cox model
-                old_cox <- survival::coxph(old_formula, data = data)
-                message("DEBUG: Old Cox model fitted successfully")
-
-                # Fit new Cox model
-                new_cox <- survival::coxph(new_formula, data = data)
-                message("DEBUG: New Cox model fitted successfully")
-
-                # Calculate concordance indices
-                old_concordance <- survival::concordance(old_cox)
-                new_concordance <- survival::concordance(new_cox)
-
-                message("DEBUG: Concordance indices calculated")
-                message("DEBUG: Old C-index: ", old_concordance$concordance)
-                message("DEBUG: New C-index: ", new_concordance$concordance)
-
-                # Extract values safely
-                old_c <- old_concordance$concordance
-                new_c <- new_concordance$concordance
-                old_var <- old_concordance$var
-                new_var <- new_concordance$var
-
-                # Calculate improvement
-                c_improvement <- new_c - old_c
-                c_improvement_pct <- if (old_c > 0) (c_improvement / old_c) * 100 else NA
-
-                # CORRECTION FOR INDEPENDENCE ASSUMPTION
-                # Calculate correlation between linear predictors (risk scores) as a proxy for correlation of C-indices
-                # This is a heuristic improvement over assuming independence (r=0)
-                old_lp <- predict(old_cox, type = "lp")
-                new_lp <- predict(new_cox, type = "lp")
-                
-                # Use Spearman correlation of risk scores (rank correlation is relevant for concordance)
-                # We use only complete cases
-                valid_idx <- complete.cases(old_lp, new_lp)
-                if (sum(valid_idx) > 10) {
-                    r_correlation <- cor(old_lp[valid_idx], new_lp[valid_idx], method = "spearman")
-                    message("DEBUG: Correlation between risk scores: ", r_correlation)
-                } else {
-                    r_correlation <- 0
-                    message("DEBUG: Insufficient data for correlation, assuming independence")
-                }
-                
-                # Ensure correlation is valid (between -1 and 1)
-                r_correlation <- max(-1, min(1, if(is.na(r_correlation)) 0 else r_correlation))
-
-                # Calculate standard error for difference accounting for correlation
-                # Var(A-B) = Var(A) + Var(B) - 2*Cov(A,B)
-                # Cov(A,B) = r * SD(A) * SD(B)
-                # This is an approximation but much better than assuming independence
-                if (old_var >= 0 && new_var >= 0) {
-                    old_se_val <- sqrt(old_var)
-                    new_se_val <- sqrt(new_var)
-                    covariance_term <- 2 * r_correlation * old_se_val * new_se_val
-                    diff_var <- old_var + new_var - covariance_term
-                    
-                    # Ensure variance is positive (can happen with approximations)
-                    diff_var <- max(0, diff_var)
-                    diff_se <- sqrt(diff_var)
-                    message("DEBUG: Adjusted SE for C-index difference: ", diff_se, " (vs independent: ", sqrt(old_var + new_var), ")")
-                } else {
-                    diff_se <- NA
-                }
-
-                # Calculate p-value for C-index difference
-                # Use bootstrap for comprehensive/publication analysis types
-                use_bootstrap <- self$options$analysisType %in% c("comprehensive", "publication") &&
-                               self$options$performBootstrap
-
-                if (use_bootstrap) {
-                    message("DEBUG: Using bootstrap for C-index comparison")
-                    # Checkpoint before bootstrap comparison (computationally expensive)
-                    private$.checkpoint()
-                    c_bootstrap <- private$.compareBootstrapCIndex(
-                        data, old_stage, new_stage, time_var, event_var,
-                        n_boot = self$options$bootstrapReps %||% 200
-                    )
-                    p_value <- c_bootstrap$p_value
-                    diff_se <- c_bootstrap$se
-                    c_improvement_ci_lower <- c_bootstrap$ci_lower
-                    c_improvement_ci_upper <- c_bootstrap$ci_upper
-                } else {
-                    # Use asymptotic approximation
-                    c_bootstrap <- NULL
-                    z_stat <- if (diff_se > 0) c_improvement / diff_se else NA
-                    p_value <- if (!is.na(z_stat)) 2 * (1 - pnorm(abs(z_stat))) else NA
-                    c_improvement_ci_lower <- if (!is.na(c_improvement) && !is.na(diff_se)) {
-                        c_improvement - 1.96 * diff_se
-                    } else NA
-                    c_improvement_ci_upper <- if (!is.na(c_improvement) && !is.na(diff_se)) {
-                        c_improvement + 1.96 * diff_se
-                    } else NA
-                }
-
-                # Calculate AIC and BIC
-                aic_old <- AIC(old_cox)
-                aic_new <- AIC(new_cox)
-                aic_improvement <- aic_old - aic_new
-
-                bic_old <- BIC(old_cox)
-                bic_new <- BIC(new_cox)
-                bic_improvement <- bic_old - bic_new
-
-                # Likelihood ratio test
-                lr_test <- tryCatch({
-                    # Create a combined model for LR test
-                    combined_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~ ",
-                                                        old_stage, " + ", new_stage))
-                    combined_cox <- survival::coxph(combined_formula, data = data)
-
-                    # LR test old vs combined
-                    lr_old <- 2 * (combined_cox$loglik[2] - old_cox$loglik[2])
-                    df_old <- length(coef(combined_cox)) - length(coef(old_cox))
-                    p_old <- pchisq(lr_old, df_old, lower.tail = FALSE)
-
-                    # LR test new vs combined
-                    lr_new <- 2 * (combined_cox$loglik[2] - new_cox$loglik[2])
-                    df_new <- length(coef(combined_cox)) - length(coef(new_cox))
-                    p_new <- pchisq(lr_new, df_new, lower.tail = FALSE)
-
-                    list(
-                        lr_stat = lr_new - lr_old,
-                        df = df_new,
-                        p_value = p_new
-                    )
-                }, error = function(e) {
-                    list(lr_stat = NA, df = NA, p_value = NA)
-                })
-
-                # Linear Trend Chi-square test for ordinal staging trends
-                linear_trend_test <- private$.calculateLinearTrendTest(data, old_stage, new_stage, time_var, event_var)
-
-                # Calculate pseudo R-squared measures if requested
-                pseudo_r2 <- NULL
-                if (self$options$calculatePseudoR2) {
-                    message("DEBUG: Calculating pseudo R-squared measures")
-
-                    pseudo_r2 <- tryCatch({
-                        # For Cox models, we use the null log-likelihood from the model objects
-                        # The loglik[1] is the null model (baseline hazard only)
-                        # The loglik[2] is the fitted model with covariates
-
-                        null_loglik_old <- old_cox$loglik[1]  # Null model for old staging
-                        null_loglik_new <- new_cox$loglik[1]  # Null model for new staging
-
-                        # Use the average null log-likelihood for consistency
-                        null_loglik <- (null_loglik_old + null_loglik_new) / 2
-
-                        message("DEBUG: Null loglik (old): ", null_loglik_old, ", Null loglik (new): ", null_loglik_new)
-                        message("DEBUG: Average null loglik: ", null_loglik)
-
-                        # Extract log-likelihoods from fitted models
-                        old_loglik <- old_cox$loglik[2]
-                        new_loglik <- new_cox$loglik[2]
-
-                        # Calculate pseudo R-squared measures
-                        message("DEBUG: Log-likelihoods - Null: ", null_loglik, ", Old: ", old_loglik, ", New: ", new_loglik)
-                        message("DEBUG: Sample size: ", nrow(data))
-
-                        # 1. Nagelkerke R-squared
-                        # First calculate Cox-Snell R-squared components
-                        cox_snell_old_raw <- 1 - exp(2 * (null_loglik - old_loglik) / nrow(data))
-                        cox_snell_new_raw <- 1 - exp(2 * (null_loglik - new_loglik) / nrow(data))
-                        nagelkerke_max <- 1 - exp(2 * null_loglik / nrow(data))
-
-                        message("DEBUG: Cox-Snell raw - Old: ", cox_snell_old_raw, ", New: ", cox_snell_new_raw)
-                        message("DEBUG: Nagelkerke max: ", nagelkerke_max)
-
-                        # Nagelkerke normalization
-                        nagelkerke_old <- if (nagelkerke_max > 0) cox_snell_old_raw / nagelkerke_max else NA
-                        nagelkerke_new <- if (nagelkerke_max > 0) cox_snell_new_raw / nagelkerke_max else NA
-
-                        # 2. McFadden R-squared (likelihood ratio index)
-                        mcfadden_old <- 1 - (old_loglik / null_loglik)
-                        mcfadden_new <- 1 - (new_loglik / null_loglik)
-
-                        message("DEBUG: McFadden - Old: ", mcfadden_old, ", New: ", mcfadden_new)
-
-                        # 3. Cox-Snell R-squared (use the already calculated values)
-                        cox_snell_old <- cox_snell_old_raw
-                        cox_snell_new <- cox_snell_new_raw
-
-                        message("DEBUG: Cox-Snell - Old: ", cox_snell_old, ", New: ", cox_snell_new)
-
-                        # 4. Adjusted McFadden R-squared
-                        k_old <- length(coef(old_cox))
-                        k_new <- length(coef(new_cox))
-                        adj_mcfadden_old <- 1 - ((old_loglik - k_old) / null_loglik)
-                        adj_mcfadden_new <- 1 - ((new_loglik - k_new) / null_loglik)
-
-                        message("DEBUG: Adjusted McFadden - Old: ", adj_mcfadden_old, ", New: ", adj_mcfadden_new)
-                        message("DEBUG: Final Nagelkerke - Old: ", nagelkerke_old, ", New: ", nagelkerke_new)
-
-                        # 5. Royston & Sauerbrei R-squared (explained variation approach)
-                        royston_old <- tryCatch({
-                            private$.calculateRoystonR2(old_cox)
-                        }, error = function(e) {
-                            message("DEBUG: Error calculating Royston R² for old model: ", e$message)
-                            NA
-                        })
-
-                        royston_new <- tryCatch({
-                            private$.calculateRoystonR2(new_cox)
-                        }, error = function(e) {
-                            message("DEBUG: Error calculating Royston R² for new model: ", e$message)
-                            NA
-                        })
-
-                        message("DEBUG: Royston & Sauerbrei - Old: ", royston_old, ", New: ", royston_new)
-
-                        message("DEBUG: Pseudo R-squared calculated successfully")
-
-                        list(
-                            nagelkerke_old = nagelkerke_old,
-                            nagelkerke_new = nagelkerke_new,
-                            nagelkerke_improvement = nagelkerke_new - nagelkerke_old,
-                            mcfadden_old = mcfadden_old,
-                            mcfadden_new = mcfadden_new,
-                            mcfadden_improvement = mcfadden_new - mcfadden_old,
-                            cox_snell_old = cox_snell_old,
-                            cox_snell_new = cox_snell_new,
-                            cox_snell_improvement = cox_snell_new - cox_snell_old,
-                            adj_mcfadden_old = adj_mcfadden_old,
-                            adj_mcfadden_new = adj_mcfadden_new,
-                            adj_mcfadden_improvement = adj_mcfadden_new - adj_mcfadden_old,
-                            royston_old = royston_old,
-                            royston_new = royston_new,
-                            royston_improvement = royston_new - royston_old
-                        )
-                    }, error = function(e) {
-                        message("ERROR calculating pseudo R-squared: ", e$message)
-                        NULL
-                    })
-                }
-
-                message("DEBUG: pseudo_r2 result: ", if(is.null(pseudo_r2)) "NULL" else "calculated")
-
-                # Extract individual model LR chi-square values (for enhanced LR chi-square comparison table)
-                message("DEBUG: About to extract individual LR stats")
-                individual_lr_stats <- tryCatch({
-                    message("DEBUG: Inside LR stats extraction")
-                    # Extract LR chi-square for old model
-                    old_summary <- summary(old_cox)
-                    message("DEBUG: Got old_summary")
-                    old_lr_chi2 <- if (!is.null(old_summary$logtest) && length(old_summary$logtest) > 0) {
-                        old_summary$logtest["test"]
-                    } else {
-                        NA
-                    }
-                    old_lr_df <- if (!is.null(old_summary$logtest) && length(old_summary$logtest) > 1) {
-                        old_summary$logtest["df"]
-                    } else {
-                        NA
-                    }
-                    old_lr_p <- if (!is.null(old_summary$logtest) && length(old_summary$logtest) > 2) {
-                        old_summary$logtest["pvalue"]
-                    } else {
-                        NA
-                    }
-                    
-                    # Extract LR chi-square for new model
-                    new_summary <- summary(new_cox)
-                    new_lr_chi2 <- if (!is.null(new_summary$logtest) && length(new_summary$logtest) > 0) {
-                        new_summary$logtest["test"]
-                    } else {
-                        NA
-                    }
-                    new_lr_df <- if (!is.null(new_summary$logtest) && length(new_summary$logtest) > 1) {
-                        new_summary$logtest["df"]
-                    } else {
-                        NA
-                    }
-                    new_lr_p <- if (!is.null(new_summary$logtest) && length(new_summary$logtest) > 2) {
-                        new_summary$logtest["pvalue"]
-                    } else {
-                        NA
-                    }
-                    
-                    list(
-                        old_lr_chi2 = old_lr_chi2,
-                        old_lr_df = old_lr_df,
-                        old_lr_p = old_lr_p,
-                        new_lr_chi2 = new_lr_chi2,
-                        new_lr_df = new_lr_df,
-                        new_lr_p = new_lr_p
-                    )
-                }, error = function(e) {
-                    message("ERROR extracting individual LR stats: ", e$message)
-                    NULL
-                })
-                
-                message("DEBUG: individual_lr_stats result: ", ifelse(is.null(individual_lr_stats), "NULL", "NOT NULL"))
-                if (!is.null(individual_lr_stats)) {
-                    message("DEBUG: individual_lr_stats names: ", paste(names(individual_lr_stats), collapse=", "))
-                }
-
-                # Create the final result list explicitly
-                final_result <- list(
-                    old_cox = old_cox,
-                    new_cox = new_cox,
-                    old_concordance = old_concordance,
-                    new_concordance = new_concordance,
-                    c_improvement = c_improvement,
-                    c_improvement_pct = c_improvement_pct,
-                    c_improvement_se = diff_se,
-                    c_improvement_p = p_value,
-                    c_improvement_ci_lower = c_improvement_ci_lower,
-                    c_improvement_ci_upper = c_improvement_ci_upper,
-                    c_bootstrap = c_bootstrap,
-                    aic_old = aic_old,
-                    aic_new = aic_new,
-                    aic_improvement = aic_improvement,
-                    bic_old = bic_old,
-                    bic_new = bic_new,
-                    bic_improvement = bic_improvement,
-                    lr_test = lr_test,
-                    linear_trend_test = linear_trend_test,
-                    individual_lr_stats = individual_lr_stats,
-                    pseudo_r2 = pseudo_r2
-                )
-
-                message("DEBUG: Final result structure created, returning list")
-                message("DEBUG: individual_lr_stats in final_result: ", ifelse(is.null(final_result$individual_lr_stats), "NULL", "NOT NULL"))
-                return(final_result)
-
-            }, error = function(e) {
-                message("ERROR in calculateAdvancedMetrics: ", e$message)
-                # Return NA structure on error
-                return(list(
-                    old_cox = NULL,
-                    new_cox = NULL,
-                    old_concordance = list(concordance = NA, var = NA),
-                    new_concordance = list(concordance = NA, var = NA),
-                    c_improvement = NA,
-                    c_improvement_pct = NA,
-                    c_improvement_se = NA,
-                    c_improvement_p = NA,
-                    c_improvement_ci_lower = NA,
-                    c_improvement_ci_upper = NA,
-                    c_bootstrap = NULL,
-                    aic_old = NA,
-                    aic_new = NA,
-                    aic_improvement = NA,
-                    bic_old = NA,
-                    bic_new = NA,
-                    bic_improvement = NA,
-                    lr_test = list(lr_stat = NA, df = NA, p_value = NA),
-                    linear_trend_test = list(old_trend = list(stat = NA, p_value = NA), new_trend = list(stat = NA, p_value = NA)),
-                    individual_lr_stats = NULL,
-                    pseudo_r2 = NULL,
-                    error = e$message
-                ))
-            })
+            # Delegated to stagemigration_helpers.R
+            return(stagemigration_calculateAdvancedMetrics(data, self$options, function() private$.checkpoint()))
         },
 
         .compareBootstrapCIndex = function(data, old_stage, new_stage, time_var, event_var, n_boot = 200) {
-            # Bootstrap comparison of C-indices for correlated data
-            # This provides more accurate p-values than the asymptotic approximation
-
-            tryCatch({
-                n <- nrow(data)
-                c_diffs <- numeric(n_boot)
-
-                # Original C-index difference
-                old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-                new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
-
-                old_cox_orig <- survival::coxph(old_formula, data = data)
-                new_cox_orig <- survival::coxph(new_formula, data = data)
-
-                old_c_orig <- survival::concordance(old_cox_orig)$concordance
-                new_c_orig <- survival::concordance(new_cox_orig)$concordance
-                c_diff_orig <- new_c_orig - old_c_orig
-
-                # Bootstrap
-                for (i in 1:n_boot) {
-                    # Checkpoint before each bootstrap iteration (allows user to cancel long-running bootstrap)
-                    if (i %% 50 == 1) {  # Check every 50 iterations to avoid too much overhead
-                        private$.checkpoint()
-                    }
-                    
-                    # Sample with replacement
-                    boot_idx <- sample(1:n, n, replace = TRUE)
-                    boot_data <- data[boot_idx, ]
-
-                    # Fit models on bootstrap sample
-                    old_cox_boot <- survival::coxph(old_formula, data = boot_data)
-                    new_cox_boot <- survival::coxph(new_formula, data = boot_data)
-
-                    # Calculate C-index difference
-                    old_c_boot <- survival::concordance(old_cox_boot)$concordance
-                    new_c_boot <- survival::concordance(new_cox_boot)$concordance
-                    c_diffs[i] <- new_c_boot - old_c_boot
-                }
-
-                # Calculate bootstrap p-value (two-sided)
-                # Proportion of bootstrap samples where the null hypothesis (diff = 0) is more extreme
-                p_value <- 2 * min(
-                    mean(c_diffs <= 0),  # Proportion <= 0
-                    mean(c_diffs >= 0)   # Proportion >= 0
-                )
-
-                # Bootstrap confidence interval
-                ci_lower <- quantile(c_diffs, 0.025, na.rm = TRUE)
-                ci_upper <- quantile(c_diffs, 0.975, na.rm = TRUE)
-
-                return(list(
-                    c_diff = c_diff_orig,
-                    p_value = p_value,
-                    ci_lower = ci_lower,
-                    ci_upper = ci_upper,
-                    se = sd(c_diffs, na.rm = TRUE)
-                ))
-
-            }, error = function(e) {
-                return(list(
-                    c_diff = NA,
-                    p_value = NA,
-                    ci_lower = NA,
-                    ci_upper = NA,
-                    se = NA
-                ))
-            })
+            # Delegated to stagemigration_helpers.R
+            return(stagemigration_compareBootstrapCIndex(data, old_stage, new_stage, time_var, event_var, n_boot, function() private$.checkpoint()))
         },
 
 
         .calculateNRI = function(data, time_points = NULL) {
-            # Net Reclassification Improvement calculation using corrected methodology
-            # Uses risks estimated from full dataset models to avoid bias
-            if (!self$options$calculateNRI) return(NULL)
-
-            # Check dependencies
-            if (is.null(self$options$oldStage) || is.null(self$options$newStage) ||
-                is.null(self$options$survivalTime) || is.null(self$options$event)) {
-                warning("NRI requires staging and survival variables to be specified")
-                return(list(error = "Missing required variables for NRI"))
-            }
-
-            # Parse time points
-            if (is.null(time_points)) {
-                time_points_str <- self$options$nriTimePoints
-                time_points <- as.numeric(unlist(strsplit(time_points_str, "\\s*,\\s*")))
-                time_points <- time_points[!is.na(time_points)]
-            }
-
-            if (length(time_points) == 0) {
-                time_points <- c(12, 24, 60)  # Default time points
-            }
-
-            old_stage <- self$options$oldStage
-            new_stage <- self$options$newStage
-            time_var <- self$options$survivalTime
-            event_var <- "event_binary"
-
-            nri_results <- list()
-
-            # Fit models on FULL data once
-            old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-            new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
-
-            cox_original <- tryCatch({
-                survival::coxph(old_formula, data = data)
-            }, error = function(e) {
-                message("Error fitting original Cox model for NRI: ", e$message)
-                return(NULL)
-            })
-
-            cox_modified <- tryCatch({
-                survival::coxph(new_formula, data = data)
-            }, error = function(e) {
-                message("Error fitting modified Cox model for NRI: ", e$message)
-                return(NULL)
-            })
-
-            if (is.null(cox_original) || is.null(cox_modified)) {
-                return(list(error = "Failed to fit Cox models for NRI"))
-            }
-
-            # Helper to calculate risk at time t
-            get_risk_at_t <- function(model, t, newdata) {
-                # Get baseline survival
-                surv_fit <- survival::survfit(model)
-                
-                # Find baseline survival at time t
-                # surv_fit$time is sorted
-                idx <- findInterval(t, surv_fit$time)
-                if (idx == 0) {
-                    S0_t <- 1
-                } else {
-                    S0_t <- surv_fit$surv[idx]
-                }
-                
-                # Get linear predictors
-                lp <- predict(model, newdata = newdata, type = "lp")
-                
-                # Calculate Risk = 1 - S0(t)^exp(lp)
-                risk <- 1 - (S0_t ^ exp(lp))
-                return(risk)
-            }
-
-            # Calculate NRI at specific time points
-            for (time_point in time_points) {
-                # Checkpoint
-                private$.checkpoint()
-
-                message("DEBUG: NRI calculation for time ", time_point, " months")
-                
-                # Skip if time point is beyond data range
-                if (time_point > max(data[[time_var]], na.rm = TRUE)) {
-                    message("DEBUG: Time point ", time_point, " exceeds data range, skipping")
-                    next
-                }
-
-                # Get risk predictions for ALL patients
-                risk_original <- get_risk_at_t(cox_original, time_point, data)
-                risk_modified <- get_risk_at_t(cox_modified, time_point, data)
-
-                # Identify events and non-events properly accounting for censoring
-                # "Events": Patients who had event before or at time t
-                # "Non-events": Patients who survived past time t
-                # Censored before t are excluded from validation sets (standard KM-approach limitation)
-                # Ideally we would use IPCW, but this is a standard approximation
-                
-                is_event <- data[[time_var]] <= time_point & data[[event_var]] == 1
-                is_nonevent <- data[[time_var]] > time_point
-                
-                # Subset for validation
-                events_idx <- which(is_event)
-                nonevents_idx <- which(is_nonevent)
-                
-                if (length(events_idx) == 0 || length(nonevents_idx) == 0) {
-                    message("DEBUG: Insufficient events or non-events for NRI at time ", time_point)
-                    nri_results[[paste0("t", time_point)]] <- list(
-                        time_point = time_point,
-                        error = "Insufficient events/non-events"
-                    )
-                    next
-                }
-
-                # Define risk categories (tertiles based on original risk of ALL subjects)
-                # This ensures cutoffs are based on the population distribution
-                risk_cuts_original <- quantile(risk_original, probs = c(0, 1/3, 2/3, 1), na.rm = TRUE)
-                risk_cuts_modified <- quantile(risk_modified, probs = c(0, 1/3, 2/3, 1), na.rm = TRUE)
-
-                # Ensure unique breaks
-                if(length(unique(risk_cuts_original)) < 4) {
-                    risk_cuts_original <- unique(quantile(risk_original, probs = seq(0, 1, length.out = length(unique(risk_original))+1), na.rm = TRUE))
-                }
-                if(length(unique(risk_cuts_modified)) < 4) {
-                    risk_cuts_modified <- unique(quantile(risk_modified, probs = seq(0, 1, length.out = length(unique(risk_modified))+1), na.rm = TRUE))
-                }
-                
-                # If still not enough breaks for cut(), fallback to min/median/max
-                if(length(risk_cuts_original) < 2) risk_cuts_original <- c(0, 0.5, 1)
-                if(length(risk_cuts_modified) < 2) risk_cuts_modified <- c(0, 0.5, 1)
-
-                # Categorize risks
-                risk_cat_original <- cut(risk_original, breaks = risk_cuts_original, include.lowest = TRUE, labels = FALSE)
-                risk_cat_modified <- cut(risk_modified, breaks = risk_cuts_modified, include.lowest = TRUE, labels = FALSE)
-
-                # NRI for events (P(up|event) - P(down|event))
-                # Only consider patients who actually had the event
-                risk_cat_orig_events <- risk_cat_original[events_idx]
-                risk_cat_mod_events <- risk_cat_modified[events_idx]
-                
-                improved_events <- sum(risk_cat_mod_events > risk_cat_orig_events, na.rm = TRUE)
-                worsened_events <- sum(risk_cat_mod_events < risk_cat_orig_events, na.rm = TRUE)
-                n_events_valid <- length(risk_cat_orig_events)
-                
-                nri_events <- (improved_events - worsened_events) / n_events_valid
-
-                # NRI for non-events (P(down|nonevent) - P(up|nonevent))
-                # Only consider patients who survived past t
-                risk_cat_orig_nonevents <- risk_cat_original[nonevents_idx]
-                risk_cat_mod_nonevents <- risk_cat_modified[nonevents_idx]
-                
-                improved_nonevents <- sum(risk_cat_mod_nonevents < risk_cat_orig_nonevents, na.rm = TRUE)
-                worsened_nonevents <- sum(risk_cat_mod_nonevents > risk_cat_orig_nonevents, na.rm = TRUE)
-                n_nonevents_valid <- length(risk_cat_orig_nonevents)
-                
-                nri_non_events <- (improved_nonevents - worsened_nonevents) / n_nonevents_valid
-
-                # Overall NRI
-                nri_total <- nri_events + nri_non_events
-
-                message("DEBUG: NRI calculation completed for time ", time_point)
-                message("DEBUG: NRI overall = ", nri_total)
-
-                # Calculate standard errors and confidence intervals
-                # Variance of proportions
-                var_events <- (improved_events + worsened_events) / (n_events_valid^2) - (nri_events^2 / n_events_valid)
-                var_nonevents <- (improved_nonevents + worsened_nonevents) / (n_nonevents_valid^2) - (nri_non_events^2 / n_nonevents_valid)
-                
-                # Ensure variance is non-negative (floating point issues)
-                var_events <- max(0, var_events)
-                var_nonevents <- max(0, var_nonevents)
-
-                se_nri <- sqrt(var_events + var_nonevents)
-                
-                ci_lower <- nri_total - 1.96 * se_nri
-                ci_upper <- nri_total + 1.96 * se_nri
-
-                z_score <- if (se_nri > 0) nri_total / se_nri else 0
-                p_value <- if (se_nri > 0) 2 * (1 - pnorm(abs(z_score))) else 1
-
-                nri_results[[paste0("t", time_point)]] <- list(
-                    time_point = time_point,
-                    nri_overall = nri_total,
-                    nri_events = nri_events,
-                    nri_nonevents = nri_non_events,
-                    ci_lower = ci_lower,
-                    ci_upper = ci_upper,
-                    p_value = p_value,
-                    total_events = n_events_valid,
-                    total_patients = n_events_valid + n_nonevents_valid
-                )
-            }
-
-            return(nri_results)
+            # Delegated to stagemigration_helpers.R
+            return(stagemigration_calculateNRI(data, self$options, time_points, function() private$.checkpoint()))
         },
 
 
@@ -1813,104 +1168,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         },
 
         .calculateIDI = function(data) {
-            # Integrated Discrimination Improvement calculation
-            if (!self$options$calculateIDI) return(NULL)
-
-            # Check dependencies
-            if (is.null(self$options$oldStage) || is.null(self$options$newStage) ||
-                is.null(self$options$survivalTime) || is.null(self$options$event)) {
-                warning("IDI requires staging and survival variables to be specified")
-                return(list(error = "Missing required variables for IDI"))
-            }
-
-            old_stage <- self$options$oldStage
-            new_stage <- self$options$newStage
-            time_var <- self$options$survivalTime
-            event_var <- "event_binary"
-
-            # Fit Cox models and get linear predictors
-            old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
-            new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
-
-            old_cox <- coxph(old_formula, data = data)
-            new_cox <- coxph(new_formula, data = data)
-
-            # Get linear predictors (risk scores)
-            old_lp <- predict(old_cox, type = "lp")
-            new_lp <- predict(new_cox, type = "lp")
-
-            # Convert to probabilities (relative risk)
-            old_prob <- exp(old_lp) / (1 + exp(old_lp))
-            new_prob <- exp(new_lp) / (1 + exp(new_lp))
-
-            # Calculate discrimination slopes
-            events <- data[[event_var]]
-
-            # Discrimination slope for old model
-            old_disc_events <- mean(old_prob[events == 1], na.rm = TRUE)
-            old_disc_nonevents <- mean(old_prob[events == 0], na.rm = TRUE)
-            old_discrimination_slope <- old_disc_events - old_disc_nonevents
-
-            # Discrimination slope for new model
-            new_disc_events <- mean(new_prob[events == 1], na.rm = TRUE)
-            new_disc_nonevents <- mean(new_prob[events == 0], na.rm = TRUE)
-            new_discrimination_slope <- new_disc_events - new_disc_nonevents
-
-            # IDI calculation
-            idi <- new_discrimination_slope - old_discrimination_slope
-
-            # Calculate standard error and confidence intervals for IDI
-            # Using Delta method for variance estimation
-            n_events <- sum(events == 1, na.rm = TRUE)
-            n_non_events <- sum(events == 0, na.rm = TRUE)
-            n_total <- n_events + n_non_events
-
-            # Variance of discrimination slopes
-            var_old_events <- if (n_events > 1) var(old_prob[events == 1], na.rm = TRUE) / n_events else 0
-            var_old_non_events <- if (n_non_events > 1) var(old_prob[events == 0], na.rm = TRUE) / n_non_events else 0
-            var_new_events <- if (n_events > 1) var(new_prob[events == 1], na.rm = TRUE) / n_events else 0
-            var_new_non_events <- if (n_non_events > 1) var(new_prob[events == 0], na.rm = TRUE) / n_non_events else 0
-
-            # IDI standard error (assuming independence)
-            se_idi <- sqrt((var_new_events + var_new_non_events) + (var_old_events + var_old_non_events))
-
-            # 95% Confidence intervals
-            ci_lower <- idi - 1.96 * se_idi
-            ci_upper <- idi + 1.96 * se_idi
-
-            # P-value (two-sided test)
-            z_score <- if (se_idi > 0) idi / se_idi else 0
-            p_value <- if (se_idi > 0) 2 * (1 - pnorm(abs(z_score))) else 1
-
-            # Bootstrap confidence interval for IDI if requested
-            if (self$options$performBootstrap && n_total > 50) {
-                idi_bootstrap <- private$.bootstrapIDI(data, old_formula, new_formula)
-            } else {
-                idi_bootstrap <- NULL
-            }
-
-            message("DEBUG: IDI calculation completed")
-            message("DEBUG: IDI = ", round(idi, 4))
-            message("DEBUG: SE = ", round(se_idi, 4))
-            message("DEBUG: 95% CI = [", round(ci_lower, 4), ", ", round(ci_upper, 4), "]")
-            message("DEBUG: P-value = ", format.pval(p_value, digits = 3))
-
-            return(list(
-                idi = idi,
-                idi_se = se_idi,
-                idi_ci_lower = ci_lower,
-                idi_ci_upper = ci_upper,
-                idi_p_value = p_value,
-                old_discrimination_slope = old_discrimination_slope,
-                new_discrimination_slope = new_discrimination_slope,
-                old_prob_events = old_disc_events,
-                old_prob_nonevents = old_disc_nonevents,
-                new_prob_events = new_disc_events,
-                new_prob_nonevents = new_disc_nonevents,
-                n_events = n_events,
-                n_non_events = n_non_events,
-                idi_bootstrap = idi_bootstrap
-            ))
+            # Delegated to stagemigration_helpers.R
+            return(stagemigration_calculateIDI(data, self$options, function() private$.checkpoint()))
         },
 
         .calculateLinearTrendTest = function(data, old_stage, new_stage, time_var, event_var) {
@@ -2194,7 +1453,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         roc_simple = new_roc_simple
                                     )
 
-                                    message("DEBUG: Time ", t, " - Old AUC: ", round(old_auc, 3), ", New AUC: ", round(new_auc, 3))
 
                                     roc_results[[paste0("t", t)]] <- list(
                                         time_point = t,
@@ -2578,7 +1836,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # For Cox models, we need to fit a proper null model for comparison
             # IMPORTANT: In multifactorial analysis, the null model should include covariates!
 
-            message("DEBUG: .calculatePseudoR2 function started")
 
             tryCatch({
                 # Extract fitted model log-likelihoods
@@ -2827,14 +2084,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 royston_old <- tryCatch({
                     private$.calculateRoystonR2(old_cox)
                 }, error = function(e) {
-                    message("DEBUG: Error calculating Royston R² for old model: ", e$message)
                     NA
                 })
 
                 royston_new <- tryCatch({
                     private$.calculateRoystonR2(new_cox)
                 }, error = function(e) {
-                    message("DEBUG: Error calculating Royston R² for new model: ", e$message)
                     NA
                 })
 
@@ -2844,7 +2099,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     NA
                 }
 
-                message("DEBUG: Royston & Sauerbrei - Old: ", royston_old, ", New: ", royston_new, ", Improvement: ", royston_improvement)
 
                 result <- list(
                     nagelkerke_old = nagelkerke_old,
@@ -2864,14 +2118,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     royston_improvement = royston_improvement
                 )
 
-                message("DEBUG: .calculatePseudoR2 successful completion")
-                message("DEBUG: Nagelkerke results - Old: ", nagelkerke_old, ", New: ", nagelkerke_new, ", Improvement: ", nagelkerke_improvement)
 
                 return(result)
 
             }, error = function(e) {
                 # If anything fails, return NA values
-                message("DEBUG: .calculatePseudoR2 ERROR: ", e$message)
                 return(list(
                     nagelkerke_old = NA, nagelkerke_new = NA, nagelkerke_improvement = NA,
                     mcfadden_old = NA, mcfadden_new = NA, mcfadden_improvement = NA,
@@ -2887,7 +2138,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # This function is also needed for trend tests, so run if either option is enabled
             if (!self$options$performHomogeneityTests && !self$options$performTrendTests) return(NULL)
 
-            message("DEBUG: .performHomogeneityTests function started")
 
             old_stage <- self$options$oldStage
             new_stage <- self$options$newStage
@@ -3428,7 +2678,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                 }
             }, error = function(e) {
-                message("DEBUG: Error accessing lr_test p-value: ", e$message)
                 lr_p <<- NA
             })
             assessment$lr_p_value <- lr_p
@@ -3451,7 +2700,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     NA
                 }
             }, error = function(e) {
-                message("DEBUG: Error accessing c_improvement: ", e$message)
                 NA
             })
 
@@ -3466,7 +2714,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     FALSE
                 }
             }, error = function(e) {
-                message("DEBUG: Error assessing clinical significance: ", e$message)
                 FALSE
             })
 
@@ -3739,18 +2986,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             all_results$basic_migration <- private$.calculateBasicMigration(data)
 
             # Advanced metrics
-            message("DEBUG: About to call calculateAdvancedMetrics from main .run")
             all_results$advanced_metrics <- private$.calculateAdvancedMetrics(data)
-            message("DEBUG: calculateAdvancedMetrics call completed, result type: ", class(all_results$advanced_metrics))
             
             # Cross-validation (independent of other analysis options)
             if (self$options$performCrossValidation) {
-                message("DEBUG: Calling performCrossValidation from main .run")
                 tryCatch({
                     private$.performCrossValidation(data, all_results)
-                    message("DEBUG: performCrossValidation from main .run completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performCrossValidation from main .run failed: ", e$message)
                 })
                 
                 # Add explanatory text for cross-validation
@@ -3894,8 +3136,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # This ensures users can get homogeneity tests even with basic/standard analysis
             # Trend tests require the same underlying calculations as homogeneity tests
             if (self$options$performHomogeneityTests || self$options$performTrendTests) {
-                message("DEBUG: Calculating homogeneity tests (performHomogeneityTests: ",
-                       self$options$performHomogeneityTests, ", performTrendTests: ", self$options$performTrendTests, ")")
+                # Debug message removed
                 all_results$homogeneity_tests <- private$.performHomogeneityTests(data)
             }
 
@@ -3920,9 +3161,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 
                 if (length(available_continuous) > 0 || length(available_categorical) > 0) {
-                    message("DEBUG: Multifactorial analysis enabled with available covariates")
-                    message("DEBUG: Available continuous:", paste(available_continuous, collapse = ", "))
-                    message("DEBUG: Available categorical:", paste(available_categorical, collapse = ", "))
                     
                     multifactorial_result <- private$.performMultifactorialAnalysis(data)
                     if (!is.null(multifactorial_result) && !is.null(multifactorial_result$error)) {
@@ -3932,9 +3170,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                 } else {
                     message("Multifactorial analysis skipped: No covariates available in data")
-                    message("DEBUG: Requested continuous:", paste(continuous_vars, collapse = ", "))
-                    message("DEBUG: Requested categorical:", paste(categorical_vars, collapse = ", "))
-                    message("DEBUG: Available columns:", paste(names(data), collapse = ", "))
                 }
             } else if (self$options$performInteractionTests) {
                 # Create interaction tests even when multifactorial analysis is disabled
@@ -4414,14 +3649,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             # Pseudo R-squared Results
-            message("DEBUG: Checking pseudo R-squared population conditions:")
-            message("DEBUG: self$options$calculatePseudoR2 = ", self$options$calculatePseudoR2)
-            message("DEBUG: all_results$advanced_metrics exists = ", !is.null(all_results$advanced_metrics))
-            message("DEBUG: all_results$advanced_metrics$pseudo_r2 exists = ",
-                    !is.null(all_results$advanced_metrics) && !is.null(all_results$advanced_metrics$pseudo_r2))
 
             if (self$options$calculatePseudoR2 && !is.null(all_results$advanced_metrics$pseudo_r2)) {
-                message("DEBUG: Populating pseudo R-squared results")
 
                 # Add explanatory text for pseudo R-squared
                 if (isTRUE(self$options$showExplanations)) {
@@ -4454,9 +3683,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 private$.populatePseudoR2Results(all_results$advanced_metrics$pseudo_r2)
             } else {
-                message("DEBUG: Pseudo R-squared table NOT populated - conditions not met")
                 if (!self$options$calculatePseudoR2) {
-                    message("DEBUG: calculatePseudoR2 option is disabled")
                     # Add note to table explaining why it's empty
                     if (self$results$pseudoR2Results$rowCount == 0) {
                         self$results$pseudoR2Results$setNote("disabled",
@@ -4464,9 +3691,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                 }
                 if (is.null(all_results$advanced_metrics)) {
-                    message("DEBUG: advanced_metrics is NULL")
                 } else if (is.null(all_results$advanced_metrics$pseudo_r2)) {
-                    message("DEBUG: pseudo_r2 is NULL in advanced_metrics")
                     # Add note to table explaining calculation failed
                     if (self$results$pseudoR2Results$rowCount == 0) {
                         self$results$pseudoR2Results$setNote("calculation_failed",
@@ -4524,9 +3749,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (self$options$showWillRogersAnalysis) {
                 # Generate will_rogers data if not already present
                 if (is.null(all_results$will_rogers)) {
-                    message("DEBUG: Generating basic Will Rogers data for ", nrow(data), " patients")
                     all_results$will_rogers <- private$.calculateBasicWillRogersData(data)
-                    message("DEBUG: Generated Will Rogers data with ", length(all_results$will_rogers), " stages")
                 }
                 
                 if (!is.null(all_results$will_rogers)) {
@@ -4678,8 +3901,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Populate trend tests if enabled
             if (self$options$performTrendTests) {
-                message("DEBUG: performTrendTests is enabled, populating trend tests")
-                message("DEBUG: all_results$homogeneity_tests exists: ", !is.null(all_results$homogeneity_tests))
 
                 # Add explanatory text for trend tests
                 if (isTRUE(self$options$showExplanations)) {
@@ -4795,8 +4016,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Perform advanced migration analyses
-                message("DEBUG: About to call performAdvancedMigrationAnalysis")
-                message("DEBUG: all_results structure: ", paste(names(all_results), collapse = ", "))
                 private$.performAdvancedMigrationAnalysis(all_results)
 
                 # SME, RMST, Competing Risks population moved inside .performAdvancedMigrationAnalysis
@@ -5474,12 +4693,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             table <- self$results$statisticalComparison
 
             # Debug the input
-            message("DEBUG: populateStatisticalComparison STARTED")
-            message("DEBUG: advanced_results is NULL: ", is.null(advanced_results))
             if (!is.null(advanced_results)) {
-                message("DEBUG: advanced_results names: ", paste(names(advanced_results), collapse=", "))
-                message("DEBUG: old_concordance is NULL: ", is.null(advanced_results$old_concordance))
-                message("DEBUG: new_concordance is NULL: ", is.null(advanced_results$new_concordance))
             }
 
             # Get concordance objects
@@ -5875,8 +5089,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Debug what we're trying to set
-                message("DEBUG: Adding NRI row for ", res_name)
-                message("DEBUG: row_values = ", paste(names(row_values), row_values, sep="=", collapse=", "))
 
                 table$addRow(rowKey = res_name, values = row_values)
             }
@@ -6199,16 +5411,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateWillRogersAnalysis = function(will_rogers_results) {
             table <- self$results$willRogersBasicAnalysis
-            message("DEBUG: Populating Will Rogers table with ", length(will_rogers_results), " stages")
             if (is.null(table)) {
-                message("DEBUG: willRogersBasicAnalysis table is NULL!")
                 return()
             }
             for (stage_name in names(will_rogers_results)) {
                 res <- will_rogers_results[[stage_name]]
-                message("DEBUG: Processing stage ", stage_name, " with structure: ", paste(names(res), collapse = ", "))
                 if (!is.null(res$median_survival)) {
-                    message("DEBUG: Median survival names: ", paste(names(res$median_survival), collapse = ", "))
                 }
 
                 unchanged_median <- NA
@@ -6227,7 +5435,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                 }
 
-                message("DEBUG: Adding row for ", stage_name, " - Unchanged N: ", res$unchanged_n, ", Migrated N: ", res$migrated_n, ", p-value: ", res$p_value)
                 table$addRow(rowKey = stage_name, values = list(
                     Stage = stage_name,
                     Unchanged_N = res$unchanged_n,
@@ -6462,13 +5669,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             # Check if we have a linearTrendTest table in the results structure
             if (!"linearTrendTest" %in% names(self$results)) {
-                message("DEBUG: linearTrendTest table not found in results structure")
                 return()
             }
             
             table <- self$results$linearTrendTest
             if (is.null(table)) {
-                message("DEBUG: linearTrendTest table is NULL")
                 return()
             }
             
@@ -6575,7 +5780,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (!is.null(table) && !is.null(sme_results$calculations)) {
                     
                     # Add results for each timepoint
-                    message("DEBUG: Populating SME table. Timepoints: ", paste(names(sme_results$calculations), collapse=", "))
                     for (timepoint in names(sme_results$calculations)) {
                         calc <- sme_results$calculations[[timepoint]]
                         
@@ -6939,8 +6143,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             table <- self$results$idiResults
             if (is.null(table)) return()
             
-            message("DEBUG: Populating IDI results")
-            message("DEBUG: IDI = ", idi_results$idi)
             
             # Add overall IDI result
             table$addRow(rowKey = "overall", values = list(
@@ -7024,16 +6226,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populatePseudoR2Results = function(pseudo_r2_results) {
             # Populate pseudo R-squared results table
-            message("DEBUG: .populatePseudoR2Results called")
             if (is.null(pseudo_r2_results)) {
-                message("DEBUG: pseudo_r2_results is NULL, returning")
                 return()
             }
-
-            message("DEBUG: pseudo_r2_results structure: ", paste(names(pseudo_r2_results), collapse=", "))
-            message("DEBUG: Nagelkerke values - Old: ", pseudo_r2_results$nagelkerke_old,
-                    ", New: ", pseudo_r2_results$nagelkerke_new,
-                    ", Improvement: ", pseudo_r2_results$nagelkerke_improvement)
 
             table <- self$results$pseudoR2Results
 
@@ -7239,29 +6434,20 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateTrendTests = function(homogeneity_results) {
             # Populate trend test results table
-            message("DEBUG: .populateTrendTests called")
             table <- self$results$trendTests
 
             if (is.null(homogeneity_results)) {
-                message("DEBUG: homogeneity_results is NULL for trend tests")
                 return()
             }
 
-            message("DEBUG: homogeneity_results structure: ", paste(names(homogeneity_results), collapse=", "))
             old_staging <- homogeneity_results$old_staging
             new_staging <- homogeneity_results$new_staging
 
-            message("DEBUG: old_staging exists: ", !is.null(old_staging))
-            message("DEBUG: new_staging exists: ", !is.null(new_staging))
 
             if (!is.null(old_staging)) {
-                message("DEBUG: old_staging structure: ", paste(names(old_staging), collapse=", "))
-                message("DEBUG: old_staging$trend_test exists: ", !is.null(old_staging$trend_test))
             }
 
             if (!is.null(new_staging)) {
-                message("DEBUG: new_staging structure: ", paste(names(new_staging), collapse=", "))
-                message("DEBUG: new_staging$trend_test exists: ", !is.null(new_staging$trend_test))
             }
 
             # Add trend test results for original staging system
@@ -7541,71 +6727,51 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .performAdvancedMigrationAnalysis = function(all_results) {
             # Main dispatcher for advanced migration analyses
             tryCatch({
-                message("DEBUG: Getting data for advanced analysis")
                 # Get the data the same way as in the main .run function
                 all_vars <- c(self$options$oldStage, self$options$newStage, self$options$survivalTime, self$options$event)
                 data <- self$data[all_vars]
-                message("DEBUG: Got data with ", nrow(data), " rows and ", ncol(data), " columns")
-                message("DEBUG: Column names: ", paste(names(data), collapse = ", "))
-                message("DEBUG: Advanced migration analysis starting with ", nrow(data), " rows")
                 if (nrow(data) == 0) return()
 
                 # Perform individual analyses
-                message("DEBUG: Calling checkMonotonicity")
                 tryCatch({
                     private$.checkMonotonicity(data)
-                    message("DEBUG: checkMonotonicity completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: checkMonotonicity failed: ", e$message)
                 })
                 
                 # Add calibration analysis as part of advanced migration analysis
                 # Only if calibration analysis hasn't already been performed
-                message("DEBUG: Calling advanced calibration analysis")
                 tryCatch({
                     if (!self$options$performCalibration) {  # Only do if not already done by main calibration
                         if (!is.null(all_results$advanced_metrics) &&
                             !is.null(all_results$advanced_metrics$old_cox) &&
                             !is.null(all_results$advanced_metrics$new_cox)) {
                             all_results$calibration_analysis <- private$.performCalibrationAnalysis(data, all_results$advanced_metrics)
-                            message("DEBUG: Advanced calibration analysis completed successfully")
                             
                             # Populate calibration results if we have them
                             if (!is.null(all_results$calibration_analysis)) {
                                 private$.populateCalibrationAnalysis(all_results$calibration_analysis)
-                                message("DEBUG: Calibration results populated")
                             }
                         } else {
-                            message("DEBUG: Advanced calibration analysis skipped - Cox models not available")
                         }
                     } else {
-                        message("DEBUG: Advanced calibration analysis skipped - already performed by main calibration option")
                     }
                 }, error = function(e) {
-                    message("DEBUG: Advanced calibration analysis failed: ", e$message)
                 })
                 
-                message("DEBUG: Calling analyzeWillRogers")
                 tryCatch({
                     private$.analyzeWillRogers(data, all_results)
-                    message("DEBUG: analyzeWillRogers completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: analyzeWillRogers failed: ", e$message)
                 })
 
                 # ========== PHASE 1 ADVANCED ENHANCEMENTS ==========
                 
                 # Advanced Will Rogers Evidence Assessment Framework
-                message("DEBUG: Calling performAdvancedWillRogersAssessment")
                 tryCatch({
                     private$.performAdvancedWillRogersAssessment(data, all_results)
-                    message("DEBUG: performAdvancedWillRogersAssessment completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performAdvancedWillRogersAssessment failed: ", e$message)
                 })
                 
                 # Enhanced Migration Heatmap Data Generation
-                message("DEBUG: Calling generateEnhancedMigrationHeatmapData")
                 tryCatch({
                     enhanced_heatmap_data <- private$.generateEnhancedMigrationHeatmapData(
                         data, self$options$oldStage, self$options$newStage
@@ -7613,13 +6779,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (!is.null(enhanced_heatmap_data)) {
                         all_results$enhanced_migration_heatmap <- enhanced_heatmap_data
                     }
-                    message("DEBUG: generateEnhancedMigrationHeatmapData completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: generateEnhancedMigrationHeatmapData failed: ", e$message)
                 })
                 
                 # Landmark Analysis Integration
-                message("DEBUG: Calling performLandmarkAnalysis")
                 tryCatch({
                     # Define landmark times based on cancer type or use defaults
                     landmark_times <- switch(self$options$cancerType %||% "general",
@@ -7636,27 +6799,21 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (!is.null(landmark_results) && !is.null(landmark_results$error)) {
                         all_results$landmark_analysis <- landmark_results
                     }
-                    message("DEBUG: performLandmarkAnalysis completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performLandmarkAnalysis failed: ", e$message)
                 })
 
                 # ========== PHASE 2 ADVANCED ANALYTICS INTEGRATION ==========
                 
                 # Advanced Time-Dependent Calibration Assessment
-                message("DEBUG: Calling performAdvancedCalibrationAssessment")
                 tryCatch({
                     advanced_calibration <- private$.performAdvancedCalibrationAssessment(data, all_results)
                     if (!is.null(advanced_calibration) && is.null(advanced_calibration$error)) {
                         all_results$advanced_calibration <- advanced_calibration
                     }
-                    message("DEBUG: performAdvancedCalibrationAssessment completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performAdvancedCalibrationAssessment failed: ", e$message)
                 })
                 
                 # Comprehensive Stage Homogeneity Testing
-                message("DEBUG: Calling performComprehensiveHomogeneityTesting")
                 tryCatch({
                     homogeneity_results <- private$.performComprehensiveHomogeneityTesting(
                         data, self$options$oldStage, self$options$newStage, 
@@ -7665,14 +6822,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (!is.null(homogeneity_results) && is.null(homogeneity_results$error)) {
                         all_results$comprehensive_homogeneity <- homogeneity_results
                     }
-                    message("DEBUG: performComprehensiveHomogeneityTesting completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performComprehensiveHomogeneityTesting failed: ", e$message)
                 })
                 
                 # Stage Migration Effect Formula (SME) calculation
                 if (self$options$calculateSME) {
-                    message("DEBUG: Calling calculateStageMigrationEffect")
                     tryCatch({
                         sme_results <- private$.calculateStageMigrationEffect(
                             data, self$options$oldStage, self$options$newStage, 
@@ -7684,13 +6838,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             private$.populateStageMigrationEffect(sme_results)
                         }
                     }, error = function(e) {
-                        message("DEBUG: calculateStageMigrationEffect failed: ", e$message)
                     })
                 }
                 
                 # Restricted Mean Survival Time (RMST) analysis
                 if (self$options$calculateRMST) {
-                    message("DEBUG: Calling calculateRMSTMetrics")
                     tryCatch({
                         rmst_results <- private$.calculateRMSTMetrics(
                             data, self$options$oldStage, self$options$newStage, 
@@ -7699,15 +6851,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         if (!is.null(rmst_results) && is.null(rmst_results$error)) {
                             all_results$rmst_analysis <- rmst_results
                         }
-                        message("DEBUG: calculateRMSTMetrics completed successfully")
                     }, error = function(e) {
-                        message("DEBUG: calculateRMSTMetrics failed: ", e$message)
                     })
                 }
                 
                 # Competing Risks Analysis
                 if (self$options$performCompetingRisks) {
-                    message("DEBUG: Calling performCompetingRisksAnalysis")
                     tryCatch({
                         competing_results <- private$.performCompetingRisksAnalysis(
                             data, self$options$oldStage, self$options$newStage, 
@@ -7716,14 +6865,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         if (!is.null(competing_results) && is.null(competing_results$error)) {
                             all_results$competing_risks_analysis <- competing_results
                         }
-                        message("DEBUG: performCompetingRisksAnalysis completed successfully")
                     }, error = function(e) {
-                        message("DEBUG: performCompetingRisksAnalysis failed: ", e$message)
                     })
                 }
                 
                 # Time-Varying Coefficient Analysis
-                message("DEBUG: Calling performTimeVaryingCoefficientAnalysis")
                 tryCatch({
                     time_varying_results <- private$.performTimeVaryingCoefficientAnalysis(
                         data, self$options$oldStage, self$options$newStage,
@@ -7732,13 +6878,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (!is.null(time_varying_results) && is.null(time_varying_results$error)) {
                         all_results$time_varying_analysis <- time_varying_results
                     }
-                    message("DEBUG: performTimeVaryingCoefficientAnalysis completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performTimeVaryingCoefficientAnalysis failed: ", e$message)
                 })
                 
                 # Enhanced Model Diagnostics Suite
-                message("DEBUG: Calling performEnhancedModelDiagnostics")
                 tryCatch({
                     if (!is.null(all_results$advanced_metrics) && 
                         !is.null(all_results$advanced_metrics$old_cox) && 
@@ -7754,86 +6897,58 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             all_results$enhanced_diagnostics <- model_diagnostics
                         }
                     } else {
-                        message("DEBUG: Cox models not available for enhanced diagnostics")
                     }
-                    message("DEBUG: performEnhancedModelDiagnostics completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performEnhancedModelDiagnostics failed: ", e$message)
                 })
                 
                 # Perform enhanced Will Rogers analysis with statistical tests
-                message("DEBUG: Calling performEnhancedWillRogersAnalysis")
                 tryCatch({
                     private$.performEnhancedWillRogersAnalysis(data, all_results)
-                    message("DEBUG: performEnhancedWillRogersAnalysis completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performEnhancedWillRogersAnalysis failed: ", e$message)
                 })
                 
                 # Perform detailed Will Rogers stage-specific analysis
-                message("DEBUG: Calling performDetailedWillRogersAnalysis")
                 tryCatch({
                     private$.performDetailedWillRogersAnalysis(data, all_results)
-                    message("DEBUG: performDetailedWillRogersAnalysis completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: performDetailedWillRogersAnalysis failed: ", e$message)
                 })
                 
                 # Cross-validation is now called from main .run method independently
                 
-                message("DEBUG: Calling calculateStageSpecificCIndex")
                 tryCatch({
                     private$.calculateStageSpecificCIndex(data)
-                    message("DEBUG: calculateStageSpecificCIndex completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: calculateStageSpecificCIndex failed: ", e$message)
                 })
                 
-                message("DEBUG: Calling calculateEnhancedPseudoR2")
                 tryCatch({
                     private$.calculateEnhancedPseudoR2(data, all_results)
-                    message("DEBUG: calculateEnhancedPseudoR2 completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: calculateEnhancedPseudoR2 failed: ", e$message)
                 })
 
-                message("DEBUG: Calling calculateEnhancedReclassificationMetrics")
                 tryCatch({
                     private$.calculateEnhancedReclassificationMetrics(data, all_results)
-                    message("DEBUG: calculateEnhancedReclassificationMetrics completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: calculateEnhancedReclassificationMetrics failed: ", e$message)
                 })
 
-                message("DEBUG: Calling testProportionalHazardsAssumption")
                 tryCatch({
                     private$.testProportionalHazardsAssumption(data, all_results)
-                    message("DEBUG: testProportionalHazardsAssumption completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: testProportionalHazardsAssumption failed: ", e$message)
                 })
 
-                message("DEBUG: Calling calculateDecisionCurveAnalysis")
                 tryCatch({
                     private$.calculateDecisionCurveAnalysis(data, all_results)
-                    message("DEBUG: calculateDecisionCurveAnalysis completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: calculateDecisionCurveAnalysis failed: ", e$message)
                 })
 
-                message("DEBUG: Calling calculateIntegratedAUCAnalysis")
                 tryCatch({
                     private$.calculateIntegratedAUCAnalysis(data, all_results)
-                    message("DEBUG: calculateIntegratedAUCAnalysis completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: calculateIntegratedAUCAnalysis failed: ", e$message)
                 })
 
                 # ========== PHASE 3 CUTTING-EDGE FEATURES ==========
                 
                 # Optimal Cut-point Determination for Continuous Variables
                 if (self$options$performOptimalCutpoint && !is.null(self$options$continuousStageVariable)) {
-                    message("DEBUG: Calling performOptimalCutpointDetermination")
                     tryCatch({
                         cutpoint_results <- private$.performOptimalCutpointDetermination(data)
                         if (!is.null(cutpoint_results) && is.null(cutpoint_results$error)) {
@@ -7841,15 +6956,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             # Populate results immediately
                             private$.populateOptimalCutpointResults(cutpoint_results)
                         }
-                        message("DEBUG: performOptimalCutpointDetermination completed successfully")
                     }, error = function(e) {
-                        message("DEBUG: performOptimalCutpointDetermination failed: ", e$message)
                     })
                 }
                 
                 # SHAP Model Interpretability Analysis
                 if (self$options$performSHAPAnalysis) {
-                    message("DEBUG: Calling performSHAPAnalysis")
                     tryCatch({
                         shap_results <- private$.performSHAPAnalysis(data, all_results)
                         if (!is.null(shap_results) && is.null(shap_results$error)) {
@@ -7857,146 +6969,114 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             # Populate results immediately
                             private$.populateSHAPResults(shap_results)
                         }
-                        message("DEBUG: performSHAPAnalysis completed successfully")
                     }, error = function(e) {
-                        message("DEBUG: performSHAPAnalysis failed: ", e$message)
                     })
                 }
 
                 # Competing Risks Analysis with Fine-Gray Models
                 if (self$options$performCompetingRisksAdvanced) {
-                    message("DEBUG: Calling performCompetingRisksAdvanced")
                     tryCatch({
                         cr_results <- private$.performCompetingRisksAdvanced(data, all_results)
                         if (!is.null(cr_results) && is.character(cr_results)) {
                             all_results$competing_risks_analysis <- cr_results
-                            message("DEBUG: performCompetingRisksAdvanced completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performCompetingRisksAdvanced failed: ", e$message)
                     })
                 }
 
                 # Multi-State Models for Complex Disease Transitions
                 if (self$options$performMultiStateAnalysis) {
-                    message("DEBUG: Calling performMultiStateAnalysis")
                     tryCatch({
                         ms_results <- private$.performMultiStateAnalysis(data, all_results)
                         if (!is.null(ms_results) && is.character(ms_results)) {
                             all_results$multi_state_analysis <- ms_results
-                            message("DEBUG: performMultiStateAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performMultiStateAnalysis failed: ", e$message)
                     })
                 }
 
                 # Random Survival Forests for Non-Parametric Modeling
                 if (self$options$performRandomForestAnalysis) {
-                    message("DEBUG: Calling performRandomForestAnalysis")
                     tryCatch({
                         rf_results <- private$.performRandomForestAnalysis(data, all_results)
                         if (!is.null(rf_results) && is.character(rf_results)) {
                             all_results$random_forest_analysis <- rf_results
-                            message("DEBUG: performRandomForestAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performRandomForestAnalysis failed: ", e$message)
                     })
                 }
 
                 # Cure Models for Populations with Cured Fraction
                 if (self$options$performCureModelAnalysis) {
-                    message("DEBUG: Calling performCureModelAnalysis")
                     tryCatch({
                         cure_results <- private$.performCureModelAnalysis(data, all_results)
                         if (!is.null(cure_results) && is.character(cure_results)) {
                             all_results$cure_model_analysis <- cure_results
-                            message("DEBUG: performCureModelAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performCureModelAnalysis failed: ", e$message)
                     })
                 }
 
                 # Interval Censoring Analysis
                 if (self$options$performIntervalCensoringAnalysis) {
                     tryCatch({
-                        message("DEBUG: Starting performIntervalCensoringAnalysis")
                         interval_results <- self$.performIntervalCensoringAnalysis(data, all_results)
                         if (!is.null(interval_results) && is.character(interval_results)) {
                             all_results$interval_censoring_analysis <- interval_results
-                            message("DEBUG: performIntervalCensoringAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performIntervalCensoringAnalysis failed: ", e$message)
                     })
                 }
 
                 # Informative Censoring Analysis
                 if (self$options$performInformativeCensoringAnalysis) {
                     tryCatch({
-                        message("DEBUG: Starting performInformativeCensoringAnalysis")
                         informative_results <- self$.performInformativeCensoringAnalysis(data, all_results)
                         if (!is.null(informative_results) && is.character(informative_results)) {
                             all_results$informative_censoring_analysis <- informative_results
-                            message("DEBUG: performInformativeCensoringAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performInformativeCensoringAnalysis failed: ", e$message)
                     })
                 }
 
                 # Concordance Probability Analysis
                 if (self$options$performConcordanceProbabilityAnalysis) {
                     tryCatch({
-                        message("DEBUG: Starting performConcordanceProbabilityAnalysis")
                         concordance_results <- self$.performConcordanceProbabilityAnalysis(data, all_results)
                         if (!is.null(concordance_results) && is.character(concordance_results)) {
                             all_results$concordance_probability_analysis <- concordance_results
-                            message("DEBUG: performConcordanceProbabilityAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performConcordanceProbabilityAnalysis failed: ", e$message)
                     })
                 }
 
                 # Perform Win Ratio Analysis if requested
                 if (self$options$performWinRatioAnalysis) {
                     tryCatch({
-                        message("DEBUG: Starting performWinRatioAnalysis")
                         winratio_results <- self$.performWinRatioAnalysis(data, all_results)
                         if (!is.null(winratio_results)) {
-                            message("DEBUG: performWinRatioAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performWinRatioAnalysis failed: ", e$message)
                     })
                 }
 
                 # Perform Frailty Models Analysis if requested
                 if (self$options$performFrailtyModelsAnalysis) {
                     tryCatch({
-                        message("DEBUG: Starting performFrailtyModelsAnalysis")
                         frailty_results <- self$.performFrailtyModelsAnalysis(data, all_results)
                         if (!is.null(frailty_results)) {
-                            message("DEBUG: performFrailtyModelsAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performFrailtyModelsAnalysis failed: ", e$message)
                     })
                 }
 
                 # Perform Clinical Utility Index Analysis if requested
                 if (self$options$performClinicalUtilityAnalysis) {
                     tryCatch({
-                        message("DEBUG: Starting performClinicalUtilityAnalysis")
                         utility_results <- self$.performClinicalUtilityAnalysis(data, all_results)
                         if (!is.null(utility_results)) {
-                            message("DEBUG: performClinicalUtilityAnalysis completed successfully")
                         }
                     }, error = function(e) {
-                        message("DEBUG: performClinicalUtilityAnalysis failed: ", e$message)
                     })
                 }
 
@@ -8295,56 +7375,38 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # ========== PHASE 1 TABLE POPULATION ==========
                 
                 # Populate Will Rogers Evidence Summary
-                message("DEBUG: Calling populateWillRogersEvidenceSummary")
                 tryCatch({
                     private$.populateWillRogersEvidenceSummary(all_results)
-                    message("DEBUG: populateWillRogersEvidenceSummary completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: populateWillRogersEvidenceSummary failed: ", e$message)
                 })
 
                 # Populate Will Rogers Clinical Recommendation
-                message("DEBUG: Calling populateWillRogersClinicalRecommendation")
                 tryCatch({
                     private$.populateWillRogersClinicalRecommendation(all_results)
-                    message("DEBUG: populateWillRogersClinicalRecommendation completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: populateWillRogersClinicalRecommendation failed: ", e$message)
                 })
 
                 # Populate Enhanced Migration Pattern Analysis
-                message("DEBUG: Calling populateEnhancedMigrationPatternAnalysis")
                 tryCatch({
                     private$.populateEnhancedMigrationPatternAnalysis(all_results)
-                    message("DEBUG: populateEnhancedMigrationPatternAnalysis completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: populateEnhancedMigrationPatternAnalysis failed: ", e$message)
                 })
 
                 # Populate Landmark Analysis Results
-                message("DEBUG: Calling populateLandmarkAnalysisResults")
                 tryCatch({
                     private$.populateLandmarkAnalysisResults(all_results)
-                    message("DEBUG: populateLandmarkAnalysisResults completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: populateLandmarkAnalysisResults failed: ", e$message)
                 })
 
                 # Populate Advanced Migration Heatmap Statistics
-                message("DEBUG: Calling populateAdvancedMigrationHeatmapStats")
                 tryCatch({
                     private$.populateAdvancedMigrationHeatmapStats(all_results)
-                    message("DEBUG: populateAdvancedMigrationHeatmapStats completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: populateAdvancedMigrationHeatmapStats failed: ", e$message)
                 })
 
-                message("DEBUG: Calling populateComparativeAnalysisDashboard")
                 tryCatch({
                     private$.populateComparativeAnalysisDashboard(all_results)
-                    message("DEBUG: populateComparativeAnalysisDashboard completed successfully")
                 }, error = function(e) {
-                    message("DEBUG: populateComparativeAnalysisDashboard failed: ", e$message)
                 })
 
                 # Add bootstrap validation if enabled
@@ -8401,30 +7463,23 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 # ========== PHASE 3 CLINICAL INTEGRATION ==========
                 
-                message("DEBUG: Starting Phase 3 clinical integration features")
                 if (self$options$advancedMigrationAnalysis) {
                     # Clinical Decision Support
-                    message("DEBUG: Calling performClinicalDecisionSupport")
                     tryCatch({
                         clinical_support <- private$.performClinicalDecisionSupport(data, all_results)
                         if (!is.null(clinical_support) && is.null(clinical_support$error)) {
                             all_results$clinical_decision_support <- clinical_support
                         }
-                        message("DEBUG: performClinicalDecisionSupport completed successfully")
                     }, error = function(e) {
-                        message("DEBUG: performClinicalDecisionSupport failed: ", e$message)
                     })
                     
                     # Publication Report
-                    message("DEBUG: Calling generatePublicationReport")
                     tryCatch({
                         publication_report <- private$.generatePublicationReport(data, all_results)
                         if (!is.null(publication_report) && is.null(publication_report$error)) {
                             all_results$publication_report <- publication_report
                         }
-                        message("DEBUG: generatePublicationReport completed successfully")
                     }, error = function(e) {
-                        message("DEBUG: generatePublicationReport failed: ", e$message)
                     })
                 }
 
@@ -8436,7 +7491,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .checkMonotonicity = function(data) {
             # Implement monotonicity checks for both staging systems
             table <- self$results$monotonicityCheck
-            message("DEBUG: checkMonotonicity - table is ", if(is.null(table)) "NULL" else "available")
             if (is.null(table)) return()
 
             tryCatch({
@@ -8688,7 +7742,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         
         .calculateBasicWillRogersData = function(data) {
             # Generate basic Will Rogers data structure for populateWillRogersAnalysis
-            message("DEBUG: calculateBasicWillRogersData called with ", nrow(data), " rows")
             tryCatch({
                 old_col <- self$options$oldStage
                 new_col <- self$options$newStage
@@ -8762,7 +7815,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     })
                 }
                 
-                message("DEBUG: Returning Will Rogers results with ", length(will_rogers_results), " stages: ", paste(names(will_rogers_results), collapse = ", "))
                 return(will_rogers_results)
                 
             }, error = function(e) {
@@ -8904,7 +7956,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .calculateEnhancedPseudoR2 = function(data, all_results) {
             # Calculate multiple pseudo R-squared measures
             table <- self$results$enhancedPseudoR2
-            message("DEBUG: calculateEnhancedPseudoR2 - table is ", if(is.null(table)) "NULL" else "available")
             if (is.null(table)) return()
 
             tryCatch({
@@ -8933,22 +7984,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 null_cox <- survival::coxph(null_formula, data = data)
 
                 # Calculate various pseudo R-squared measures
-                message("DEBUG: Calculating pseudo R-squared measures")
 
                 # 1. Nagelkerke R-squared (most common)
                 old_nagelkerke <- private$.calculateNagelkerkeR2(old_cox, null_cox, nrow(data))
                 new_nagelkerke <- private$.calculateNagelkerkeR2(new_cox, null_cox, nrow(data))
-                message("DEBUG: Nagelkerke - Old: ", old_nagelkerke, ", New: ", new_nagelkerke)
 
                 # 2. Cox & Snell R-squared
                 old_cox_snell <- private$.calculateCoxSnellR2(old_cox, null_cox, nrow(data))
                 new_cox_snell <- private$.calculateCoxSnellR2(new_cox, null_cox, nrow(data))
-                message("DEBUG: Cox-Snell - Old: ", old_cox_snell, ", New: ", new_cox_snell)
 
                 # 3. McFadden R-squared (likelihood ratio based)
                 old_mcfadden <- private$.calculateMcFaddenR2(old_cox, null_cox)
                 new_mcfadden <- private$.calculateMcFaddenR2(new_cox, null_cox)
-                message("DEBUG: McFadden - Old: ", old_mcfadden, ", New: ", new_mcfadden)
 
                 # 4. Royston & Sauerbrei R-squared (explained variation)
                 old_royston <- private$.calculateRoystonR2(old_cox)
@@ -9023,12 +8070,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .calculateNagelkerkeR2 = function(model, null_model, n) {
             tryCatch({
                 # Nagelkerke R-squared
-                message("DEBUG: Nagelkerke - model loglik: ", paste(model$loglik, collapse=", "))
-                message("DEBUG: Nagelkerke - null_model loglik: ", paste(null_model$loglik, collapse=", "))
                 ll_model <- model$loglik[2]
                 # For null model, use the available log-likelihood (usually the first one)
                 ll_null <- if(length(null_model$loglik) >= 2) null_model$loglik[2] else null_model$loglik[1]
-                message("DEBUG: Nagelkerke - ll_model: ", ll_model, ", ll_null: ", ll_null)
                 cox_snell <- 1 - exp((2/n) * (ll_null - ll_model))
                 max_r2 <- 1 - exp((2/n) * ll_null)
                 nagelkerke <- cox_snell / max_r2
@@ -14122,30 +13166,21 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Enhanced stepwise model selection with bootstrap stability
             stepwise_results <- NULL
             if (self$options$multifactorialComparisonType %in% c("stepwise", "comprehensive")) {
-                message("DEBUG: Bootstrap model selection triggered by multifactorialComparisonType: ", self$options$multifactorialComparisonType)
                 stepwise_results <- private$.performBootstrapModelSelection(covariate_data, all_covariates, old_stage, new_stage, survival_time)
             }
 
             # Advanced interaction detection if requested
             interaction_tests <- NULL
             if (self$options$performInteractionTests) {
-                message("DEBUG: About to call advanced interaction detection")
                 if (length(all_covariates) > 0) {
-                  message("DEBUG: all_covariates: ", paste(all_covariates, collapse = ", "))
                 } else {
-                  message("DEBUG: all_covariates: EMPTY")
                 }
-                message("DEBUG: old_stage: ", old_stage)
-                message("DEBUG: new_stage: ", new_stage)
-                message("DEBUG: survival_time: ", survival_time)
-                message("DEBUG: nrow(covariate_data): ", nrow(covariate_data))
                 
                 # Use advanced interaction detection method
                 interaction_analysis <- private$.performAdvancedInteractionDetection(covariate_data, all_covariates, old_stage, new_stage, survival_time)
                 interaction_tests <- interaction_analysis$interaction_results
                 interaction_summary <- interaction_analysis$summary_stats
                 
-                message("DEBUG: Interaction analysis completed, result type: ", class(interaction_tests))
                 
                 # Store the advanced interaction results
                 advanced_interaction_tests <- interaction_tests
@@ -15832,12 +14867,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         stability <- stability_metrics[[var_name]]
                         
                         # Debug the stability object
-                        message("DEBUG: Processing stepwise var ", var_name)
-                        message("DEBUG: stability class: ", class(stability))
-                        message("DEBUG: stability names: ", paste(names(stability), collapse = ", "))
                         if (!is.null(stability$mean_aic_impact)) {
-                            message("DEBUG: mean_aic_impact class: ", class(stability$mean_aic_impact))
-                            message("DEBUG: mean_aic_impact value: ", stability$mean_aic_impact)
                         }
                         
                         # Determine stability status
@@ -15974,10 +15004,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 table <- self$results$interactionTests
                 
                 # Check if interaction_tests is a data frame (new format) or list (old format)
-                message("DEBUG: Interaction tests type: ", class(multifactorial_results$interaction_tests))
-                message("DEBUG: Is data frame: ", is.data.frame(multifactorial_results$interaction_tests))
                 if (is.data.frame(multifactorial_results$interaction_tests)) {
-                    message("DEBUG: Using NEW format - advanced interaction detection")
                     # New format: advanced interaction detection results
                     interaction_df <- multifactorial_results$interaction_tests
                     
@@ -15985,10 +15012,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         row_data <- interaction_df[i, ]
                         row_key <- paste0("interaction_", i)
                         
-                        message("DEBUG: Processing row ", i, " with Variable: ", row_data$Variable)
-                        message("DEBUG: Clinical_Significance: ", row_data$Clinical_Significance)
-                        message("DEBUG: Old_Stage_Interaction_P: ", row_data$Old_Stage_Interaction_P)
-                        message("DEBUG: New_Stage_Interaction_P: ", row_data$New_Stage_Interaction_P)
                         
                         # Create interaction description
                         interaction_desc <- paste0(row_data$Variable, " Interaction")
@@ -16026,7 +15049,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         ))
                     }
                 } else {
-                    message("DEBUG: Using OLD format - legacy interaction tests")
                     # Old format: legacy interaction tests
                     for (int_name in names(multifactorial_results$interaction_tests)) {
                         int_info <- multifactorial_results$interaction_tests[[int_name]]
@@ -16435,10 +15457,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ))
                 }
 
-                message("DEBUG: Will Rogers Evidence Summary table populated with ", nrow(evidence_summary), " criteria")
 
             }, error = function(e) {
-                message("DEBUG: populateWillRogersEvidenceSummary failed: ", e$message)
             })
         },
 
@@ -16483,10 +15503,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                 }
 
-                message("DEBUG: Will Rogers Clinical Recommendation table populated")
 
             }, error = function(e) {
-                message("DEBUG: populateWillRogersClinicalRecommendation failed: ", e$message)
             })
         },
 
@@ -16547,10 +15565,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ))
                 }
 
-                message("DEBUG: Enhanced Migration Pattern Analysis table populated")
 
             }, error = function(e) {
-                message("DEBUG: populateEnhancedMigrationPatternAnalysis failed: ", e$message)
             })
         },
 
@@ -16561,37 +15577,45 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             tryCatch({
                 landmark_results <- all_results$landmark_analysis
+                
+                # Check if the entire result is an error list
+                if (!is.null(landmark_results$error)) {
+                     # Optionally log or handle global error
+                     # For now, we just don't populate the table or populate a single error row if structure permits
+                     # But the table expects specific columns.
+                     return()
+                }
 
                 for (landmark_name in names(landmark_results)) {
                     landmark_data <- landmark_results[[landmark_name]]
                     
-                    if (!is.null(landmark_data$error)) {
-                        table$addRow(rowKey = landmark_name, values = list(
-                            Landmark_Time = as.numeric(gsub("month_", "", landmark_name)),
-                            N_Patients = NA,
-                            N_Events = NA,
-                            Old_C_Index = NA,
-                            New_C_Index = NA,
-                            C_Improvement = NA,
-                            Interpretation = landmark_data$error
-                        ))
-                    } else {
-                        table$addRow(rowKey = landmark_name, values = list(
-                            Landmark_Time = landmark_data$landmark_time,
-                            N_Patients = landmark_data$n_patients,
-                            N_Events = landmark_data$n_events,
-                            Old_C_Index = landmark_data$old_c_index,
-                            New_C_Index = landmark_data$new_c_index,
-                            C_Improvement = landmark_data$c_improvement,
-                            Interpretation = landmark_data$interpretation
-                        ))
+                    if (is.list(landmark_data)) {
+                        if (!is.null(landmark_data$error)) {
+                            table$addRow(rowKey = landmark_name, values = list(
+                                Landmark_Time = as.numeric(gsub("month_", "", landmark_name)),
+                                N_Patients = NA,
+                                N_Events = NA,
+                                Old_C_Index = NA,
+                                New_C_Index = NA,
+                                C_Improvement = NA,
+                                Interpretation = landmark_data$error
+                            ))
+                        } else {
+                            table$addRow(rowKey = landmark_name, values = list(
+                                Landmark_Time = landmark_data$landmark_time,
+                                N_Patients = landmark_data$n_patients,
+                                N_Events = landmark_data$n_events,
+                                Old_C_Index = landmark_data$old_c_index,
+                                New_C_Index = landmark_data$new_c_index,
+                                C_Improvement = landmark_data$c_improvement,
+                                Interpretation = landmark_data$interpretation
+                            ))
+                        }
                     }
                 }
 
-                message("DEBUG: Landmark Analysis Results table populated with ", length(landmark_results), " landmarks")
 
             }, error = function(e) {
-                message("DEBUG: populateLandmarkAnalysisResults failed: ", e$message)
             })
         },
 
@@ -16641,10 +15665,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                 }
 
-                message("DEBUG: Advanced Migration Heatmap Statistics table populated")
 
             }, error = function(e) {
-                message("DEBUG: populateAdvancedMigrationHeatmapStats failed: ", e$message)
             })
         },
 
@@ -17141,27 +16163,21 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .plotWillRogersEffect = function(image, ...) {
             # Create visualization of Will Rogers effect
-            message("DEBUG: plotWillRogersEffect called")
             
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                message("DEBUG: Missing oldStage or newStage options")
                 return(NULL)
             }
 
             tryCatch({
-                message("DEBUG: Starting Will Rogers plot generation")
                 
                 # Get data from parent's private method
                 all_vars <- c(image$parent$options$oldStage, image$parent$options$newStage,
                              image$parent$options$survivalTime, image$parent$options$event)
-                message("DEBUG: Variables needed: ", paste(all_vars, collapse = ", "))
                 
                 # Get state data (like other plots)
                 plot_state <- image$state
-                message("DEBUG: Plot state is null? ", is.null(plot_state))
                 
                 if (is.null(plot_state)) {
-                    message("DEBUG: No state data available, creating error plot")
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text", x = 0.5, y = 0.5, 
                                         label = "No state data available for Will Rogers plot\nEnsure 'Will Rogers Visualization' is enabled",
@@ -17179,8 +16195,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 event_var <- plot_state$event_var
                 event_level <- plot_state$event_level
                 
-                message("DEBUG: Got data from state - dimensions: ", nrow(data), " x ", ncol(data))
-                message("DEBUG: State variables - old:", old_stage, " new:", new_stage, " time:", time_var, " event:", event_var)
                 
                 # Use the variables from state (they're already set up correctly)
                 time_col <- time_var
@@ -17188,40 +16202,31 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # The event_binary should already be in the data from setState
                 if (!"event_binary" %in% colnames(data)) {
-                    message("DEBUG: event_binary not found, creating it")
                     # Prepare event variable
                     if (!is.null(event_level) && event_level != "") {
                         data$event_binary <- ifelse(data[[event_col]] == event_level, 1, 0)
-                        message("DEBUG: Created event_binary using level:", event_level)
                     } else {
                         data$event_binary <- as.numeric(data[[event_col]])
-                        message("DEBUG: Created event_binary using numeric conversion")
                     }
                 } else {
-                    message("DEBUG: event_binary already exists in data")
                 }
                 
-                message("DEBUG: Event binary summary - events:", sum(data$event_binary, na.rm=TRUE), " total:", nrow(data))
                 
                 # Find stages with significant migration
                 migration_table <- table(data[[old_stage]], data[[new_stage]])
-                message("DEBUG: Migration table:")
                 message(capture.output(print(migration_table)))
                 
                 # Select stages to visualize (those with most migration)
                 migration_counts <- migration_table
                 diag(migration_counts) <- 0  # Exclude unchanged patients
                 
-                message("DEBUG: Migration counts (excluding diagonal):")
                 message(capture.output(print(migration_counts)))
-                message("DEBUG: Max migration count:", max(migration_counts))
                 
                 # Find the most common migration pattern
                 max_migration <- which(migration_counts == max(migration_counts), arr.ind = TRUE)[1, ]
                 from_stage <- rownames(migration_counts)[max_migration[1]]
                 to_stage <- colnames(migration_counts)[max_migration[2]]
                 
-                message("DEBUG: Migration pattern selected - from:", from_stage, " to:", to_stage)
                 
                 # Create plot data
                 plot_list <- list()
@@ -17235,7 +16240,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Skip if no migration found
                 if (max(migration_counts) == 0) {
-                    message("DEBUG: No migration found, creating no-migration plot")
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text", x = 0.5, y = 0.5, 
                                         label = "No stage migration detected\nfor Will Rogers visualization",
@@ -17245,7 +16249,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     return(p)
                 }
                 
-                message("DEBUG: Migration found, proceeding with survival calculations")
                 
                 # Create a simpler ggplot visualization instead of survminer
                 # Prepare data for ggplot
@@ -17255,45 +16258,33 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 before_from <- data[data[[old_stage]] == from_stage, ]
                 before_to <- data[data[[old_stage]] == to_stage, ]
                 
-                message("DEBUG: Before migration - from stage n=", nrow(before_from), " to stage n=", nrow(before_to))
                 
                 # Calculate survival summaries
                 library(survival)
-                message("DEBUG: Loaded survival library")
                 
                 # Get survival summaries for annotation
-                message("DEBUG: Calculating before_from survival")
                 before_from_surv <- survival::Surv(before_from[[time_col]], before_from$event_binary)
                 before_from_fit <- survival::survfit(before_from_surv ~ 1)
                 before_from_median <- summary(before_from_fit)$table["median"]
-                message("DEBUG: before_from_median =", before_from_median)
                 
-                message("DEBUG: Calculating before_to survival")
                 before_to_surv <- survival::Surv(before_to[[time_col]], before_to$event_binary)
                 before_to_fit <- survival::survfit(before_to_surv ~ 1)
                 before_to_median <- summary(before_to_fit)$table["median"]
-                message("DEBUG: before_to_median =", before_to_median)
                 
                 # After migration data
                 after_from <- data[data[[new_stage]] == from_stage, ]
                 after_to <- data[data[[new_stage]] == to_stage, ]
                 
-                message("DEBUG: After migration - from stage n=", nrow(after_from), " to stage n=", nrow(after_to))
                 
-                message("DEBUG: Calculating after_from survival")
                 after_from_surv <- survival::Surv(after_from[[time_col]], after_from$event_binary)
                 after_from_fit <- survival::survfit(after_from_surv ~ 1)
                 after_from_median <- summary(after_from_fit)$table["median"]
-                message("DEBUG: after_from_median =", after_from_median)
                 
-                message("DEBUG: Calculating after_to survival")
                 after_to_surv <- survival::Surv(after_to[[time_col]], after_to$event_binary)
                 after_to_fit <- survival::survfit(after_to_surv ~ 1)
                 after_to_median <- summary(after_to_fit)$table["median"]
-                message("DEBUG: after_to_median =", after_to_median)
                 
                 # Create summary data for visualization
-                message("DEBUG: Creating summary data frame")
                 summary_data <- data.frame(
                     Stage = rep(c(from_stage, to_stage), 2),
                     Period = rep(c("Before Migration", "After Migration"), each = 2),
@@ -17303,15 +16294,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                   nrow(after_from), nrow(after_to))
                 )
                 
-                message("DEBUG: Summary data created:")
                 message(capture.output(print(summary_data)))
                 
                 # Handle NA values
                 na_count <- sum(is.na(summary_data$Median_Survival))
-                message("DEBUG: Number of NA values in Median_Survival:", na_count)
                 summary_data$Median_Survival[is.na(summary_data$Median_Survival)] <- 0
                 
-                message("DEBUG: Creating ggplot")
                 # Create bar plot showing median survival changes
                 p <- ggplot2::ggplot(summary_data, ggplot2::aes(x = Stage, y = Median_Survival, fill = Period)) +
                     ggplot2::geom_col(position = "dodge", alpha = 0.8) +
@@ -17338,13 +16326,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                     hjust = 0.5, vjust = 1, size = 3, color = "darkred",
                                     fontface = "italic")
                 
-                message("DEBUG: About to return plot")
                 return(p)
-                message("DEBUG: Plot returned successfully")
                 
             }, error = function(e) {
-                message("DEBUG: ERROR in plotWillRogersEffect: ", e$message)
-                message("DEBUG: Error traceback:")
                 message(capture.output(traceback()))
                 
                 # Create error message plot
@@ -17355,28 +16339,22 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ggplot2::theme_void() +
                     ggplot2::labs(title = "Will Rogers Visualization - Error")
                 return(p)
-                message("DEBUG: Error plot returned")
             })
         },
 
         .plotMigrationSurvivalComparison = function(image, ...) {
             # Create Kaplan-Meier survival curve comparison before/after migration
-            message("DEBUG: plotMigrationSurvivalComparison called")
             
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                message("DEBUG: Missing oldStage or newStage options")
                 return(NULL)
             }
 
             tryCatch({
-                message("DEBUG: Starting migration survival comparison plot generation")
                 
                 # Get state data
                 plot_state <- image$state
-                message("DEBUG: Plot state is null? ", is.null(plot_state))
                 
                 if (is.null(plot_state)) {
-                    message("DEBUG: No state data available, creating error plot")
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text", x = 0.5, y = 0.5, 
                                         label = "No state data available for survival comparison\nEnsure 'Migration Survival Curve Comparison' is enabled",
@@ -17394,33 +16372,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 event_var <- plot_state$event_var
                 event_level <- plot_state$event_level
                 
-                message("DEBUG: Got data from state - dimensions: ", nrow(data), " x ", ncol(data))
-                message("DEBUG: State variables - old:", old_stage, " new:", new_stage, " time:", time_var, " event:", event_var)
                 
                 # Ensure event_binary exists
                 if (!"event_binary" %in% colnames(data)) {
-                    message("DEBUG: event_binary not found, creating it")
                     if (!is.null(event_level) && event_level != "") {
                         data$event_binary <- ifelse(data[[event_var]] == event_level, 1, 0)
-                        message("DEBUG: Created event_binary using level:", event_level)
                     } else {
                         data$event_binary <- as.numeric(data[[event_var]])
-                        message("DEBUG: Created event_binary using numeric conversion")
                     }
                 } else {
-                    message("DEBUG: event_binary already exists in data")
                 }
                 
-                message("DEBUG: Event binary summary - events:", sum(data$event_binary, na.rm=TRUE), " total:", nrow(data))
                 
                 # Load required packages
                 library(survival)
                 library(ggplot2)
-                message("DEBUG: Loaded survival and ggplot2 libraries")
                 
                 # Get unique stages for comparison
                 all_stages <- sort(unique(c(as.character(data[[old_stage]]), as.character(data[[new_stage]]))))
-                message("DEBUG: All stages for comparison: ", paste(all_stages, collapse=", "))
                 
                 # Select 2-3 most common stages for cleaner visualization
                 stage_counts_old <- table(data[[old_stage]])
@@ -17434,7 +16403,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     adequate_stages <- names(sort(stage_counts_old, decreasing = TRUE))[1:min(2, length(stage_counts_old))]
                 }
                 
-                message("DEBUG: Stages with adequate sample sizes: ", paste(adequate_stages, collapse=", "))
                 
                 # Create survival data for plotting
                 plot_data_list <- list()
@@ -17478,7 +16446,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 
                 if (length(plot_data_list) == 0) {
-                    message("DEBUG: No adequate data for survival curves, creating no-data plot")
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text", x = 0.5, y = 0.5, 
                                         label = "Insufficient data for survival curve comparison\n(Need at least 5 patients per stage/period)",
@@ -17490,10 +16457,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Combine all plot data
                 plot_data <- do.call(rbind, plot_data_list)
-                message("DEBUG: Combined plot data dimensions: ", nrow(plot_data), " x ", ncol(plot_data))
                 
                 # Create the survival curve comparison plot
-                message("DEBUG: Creating survival curve comparison plot")
                 p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = surv, color = period, linetype = period)) +
                     ggplot2::geom_step(size = 1, alpha = 0.8) +
                     ggplot2::facet_wrap(~ stage, scales = "free", 
@@ -17537,12 +16502,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                              size = 3, color = ifelse(period_name == "Before Migration", "#E41A1C", "#377EB8"))
                 }
                 
-                message("DEBUG: About to return survival comparison plot")
                 return(p)
                 
             }, error = function(e) {
-                message("DEBUG: ERROR in plotMigrationSurvivalComparison: ", e$message)
-                message("DEBUG: Error traceback:")
                 message(capture.output(traceback()))
                 
                 # Create error message plot
@@ -17558,22 +16520,17 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .plotSankeyDiagram = function(image, ...) {
             # Create Sankey-style flow diagram showing stage migration patterns
-            message("DEBUG: plotSankeyDiagram called")
             
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                message("DEBUG: Missing oldStage or newStage options")
                 return(NULL)
             }
 
             tryCatch({
-                message("DEBUG: Starting Sankey diagram generation")
                 
                 # Get state data
                 plot_state <- image$state
-                message("DEBUG: Plot state is null? ", is.null(plot_state))
                 
                 if (is.null(plot_state)) {
-                    message("DEBUG: No state data available, creating error plot")
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text", x = 0.5, y = 0.5, 
                                         label = "No state data available for Sankey diagram\nEnsure 'Stage Migration Flow Diagram' is enabled",
@@ -17588,8 +16545,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 old_stage <- plot_state$old_stage
                 new_stage <- plot_state$new_stage
                 
-                message("DEBUG: Got migration matrix - dimensions: ", nrow(migration_matrix), " x ", ncol(migration_matrix))
-                message("DEBUG: Migration matrix:")
                 message(capture.output(print(migration_matrix)))
                 
                 # Convert migration matrix to flow data
@@ -17622,13 +16577,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                                 ifelse(flow_data$target_numeric == flow_data$source_numeric, "No change", "No change")))
                 }
                 
-                message("DEBUG: Flow data - ", nrow(flow_data), " flows with patients (", 
-                        sum(flow_data$direction == "Upstaged"), " upstaged, ", 
-                        sum(flow_data$direction == "Downstaged"), " downstaged, ",
-                        sum(flow_data$direction == "No change"), " unchanged)")
-                
                 if (nrow(flow_data) == 0) {
-                    message("DEBUG: No flows found")
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text", x = 0.5, y = 0.5, 
                                         label = "No data for flow diagram",
@@ -17639,7 +16588,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 
                 # Create a simple, robust Sankey-style visualization using ggplot2
-                message("DEBUG: Creating Sankey-style plot with ggplot2")
                 
                 # Prepare nodes and positions
                 source_stages <- unique(flow_data$source)
@@ -17675,7 +16623,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 node_positions <- rbind(source_positions, target_positions)
                 
                 # Create the plot
-                message("DEBUG: Building Sankey plot")
                 p <- ggplot2::ggplot() +
                     # Draw nodes as rectangles
                     ggplot2::geom_rect(data = node_positions,
@@ -17742,12 +16689,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ggplot2::annotate("text", x = x_target, y = max(node_positions$y) + 50,
                                     label = paste("New", new_stage), hjust = 0.5, size = 4, fontface = "bold")
                 
-                message("DEBUG: About to return Sankey plot")
                 return(p)
                 
             }, error = function(e) {
-                message("DEBUG: ERROR in plotSankeyDiagram: ", e$message)
-                message("DEBUG: Error traceback:")
                 message(capture.output(traceback()))
                 
                 # Create error message plot
@@ -19095,14 +18039,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             event_col <- self$options$event
             
             # Debug input parameters
-            message("DEBUG: Interaction detection started")
-            message("DEBUG: Number of covariates: ", length(all_covariates))
             if (length(all_covariates) > 0) {
-              message("DEBUG: Covariates: ", paste(all_covariates, collapse = ", "))
             } else {
-              message("DEBUG: Covariates: NONE")
             }
-            message("DEBUG: Sample size: ", nrow(covariate_data))
             
             # Validate inputs
             if (length(all_covariates) == 0) {
@@ -19120,9 +18059,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             survival_times <- covariate_data[[survival_time]]
             events <- covariate_data[[event_col]]
             
-            message("DEBUG: Survival times length: ", length(survival_times))
-            message("DEBUG: Events length: ", length(events))
-            message("DEBUG: Event level: ", self$options$eventLevel)
             
             # Create survival object
             surv_obj <- Surv(survival_times, events == self$options$eventLevel)
@@ -19146,13 +18082,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
               if (covar %in% names(covariate_data)) {
                 
                 # Test interaction with old staging system
-                message("DEBUG: Testing interaction for covariate: ", covar)
                 
                 # Build formulas with debugging
                 old_int_formula_str <- paste("surv_obj ~", old_stage, "*", covar)
                 old_main_formula_str <- paste("surv_obj ~", old_stage, "+", covar)
                 
-                message("DEBUG: Old interaction formula: ", old_int_formula_str)
                 
                 old_interaction_formula <- as.formula(old_int_formula_str)
                 old_main_formula <- as.formula(old_main_formula_str)
@@ -19160,14 +18094,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 old_interaction_fit <- tryCatch({
                   coxph(old_interaction_formula, data = covariate_data)
                 }, error = function(e) {
-                  message("DEBUG: Old interaction model failed: ", e$message)
                   NULL
                 })
                 
                 old_main_fit <- tryCatch({
                   coxph(old_main_formula, data = covariate_data)
                 }, error = function(e) {
-                  message("DEBUG: Old main model failed: ", e$message)
                   NULL
                 })
                 
@@ -19184,14 +18116,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                   # Likelihood ratio tests for interactions
                   old_interaction_p <- tryCatch({
                     if (is.null(old_main_fit) || is.null(old_interaction_fit)) {
-                      message("DEBUG: Skipping old LR test - one or both models are NULL")
                       NA
                     } else {
                       lr_test <- anova(old_main_fit, old_interaction_fit, test = "Chisq")
                       
                       # Debug anova output structure
-                      message("DEBUG: anova output class: ", class(lr_test))
-                      message("DEBUG: anova output names: ", paste(names(lr_test), collapse = ", "))
                       
                       # Try different ways to extract p-value
                       p_val <- if ("Pr(>|Chi|)" %in% names(lr_test)) {
@@ -19204,30 +18133,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         # Try to get from the data frame structure
                         lr_test[2, ncol(lr_test)]
                       } else {
-                        message("DEBUG: Could not find p-value column in anova output")
                         NA
                       }
                       
-                      message("DEBUG: Old interaction p-value: ", ifelse(is.null(p_val) || length(p_val) == 0, "NULL/empty", p_val))
                       
                       # Return NA if p_val is NULL or empty
                       if (is.null(p_val) || length(p_val) == 0) NA else p_val
                     }
                   }, error = function(e) {
-                    message("DEBUG: Old LR test failed: ", e$message)
                     NA
                   })
                   
                   new_interaction_p <- tryCatch({
                     if (is.null(new_main_fit) || is.null(new_interaction_fit)) {
-                      message("DEBUG: Skipping new LR test - one or both models are NULL")
                       NA
                     } else {
                       lr_test <- anova(new_main_fit, new_interaction_fit, test = "Chisq")
                       
                       # Debug anova output structure
-                      message("DEBUG: anova output class: ", class(lr_test))
-                      message("DEBUG: anova output names: ", paste(names(lr_test), collapse = ", "))
                       
                       # Try different ways to extract p-value
                       p_val <- if ("Pr(>|Chi|)" %in% names(lr_test)) {
@@ -19240,17 +18163,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         # Try to get from the data frame structure
                         lr_test[2, ncol(lr_test)]
                       } else {
-                        message("DEBUG: Could not find p-value column in anova output")
                         NA
                       }
                       
-                      message("DEBUG: New interaction p-value: ", ifelse(is.null(p_val) || length(p_val) == 0, "NULL/empty", p_val))
                       
                       # Return NA if p_val is NULL or empty
                       if (is.null(p_val) || length(p_val) == 0) NA else p_val
                     }
                   }, error = function(e) {
-                    message("DEBUG: New LR test failed: ", e$message)
                     NA
                   })
                   
@@ -19354,11 +18274,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             )
             
             # Debug output
-            message("DEBUG: Advanced interaction detection completed")
-            message("DEBUG: Number of interaction results: ", nrow(interaction_results))
             if (nrow(interaction_results) > 0) {
-              message("DEBUG: First result Variable: ", interaction_results$Variable[1])
-              message("DEBUG: First result Clinical_Significance: ", interaction_results$Clinical_Significance[1])
             }
             
             return(list(
@@ -19406,9 +18322,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             survival_times <- covariate_data[[survival_time]]
             events <- covariate_data[[event_col]]
             
-            message("DEBUG: Survival times length: ", length(survival_times))
-            message("DEBUG: Events length: ", length(events))
-            message("DEBUG: Event level: ", self$options$eventLevel)
             
             # Create survival object
             surv_obj <- Surv(survival_times, events == self$options$eventLevel)
@@ -19805,7 +18718,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Will Rogers Phenomenon Evidence Assessment Framework
         .performAdvancedWillRogersAssessment = function(data, all_results) {
             tryCatch({
-                message("DEBUG: Performing advanced Will Rogers evidence assessment")
                 
                 # Initialize evidence summary
                 evidence_summary <- data.frame(
@@ -19861,11 +18773,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 all_results$will_rogers_evidence_summary <- evidence_summary
                 all_results$will_rogers_recommendation <- recommendation
 
-                message("DEBUG: Advanced Will Rogers assessment completed successfully")
                 return(TRUE)
 
             }, error = function(e) {
-                message("DEBUG: Advanced Will Rogers assessment failed: ", e$message)
                 return(FALSE)
             })
         },
@@ -20455,7 +19365,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ))
 
             }, error = function(e) {
-                message("DEBUG: Enhanced heatmap data generation failed: ", e$message)
                 return(NULL)
             })
         },
@@ -20467,7 +19376,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Perform landmark analysis with time-based cutoffs
         .performLandmarkAnalysis = function(data, time_var, event_var, landmark_times = c(3, 6, 12)) {
             tryCatch({
-                message("DEBUG: Performing landmark analysis with cutoffs: ", paste(landmark_times, collapse = ", "))
                 
                 landmark_results <- list()
                 old_stage <- self$options$oldStage
@@ -20522,7 +19430,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(landmark_results)
 
             }, error = function(e) {
-                message("DEBUG: Landmark analysis failed: ", e$message)
                 return(list(error = paste("Landmark analysis failed:", e$message)))
             })
         },
@@ -20534,7 +19441,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Advanced Time-Dependent Calibration Assessment
         .performAdvancedCalibrationAssessment = function(data, all_results) {
             tryCatch({
-                message("DEBUG: Performing advanced calibration assessment")
                 
                 old_stage <- self$options$oldStage
                 new_stage <- self$options$newStage
@@ -20545,7 +19451,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (is.null(all_results$advanced_metrics) || 
                     is.null(all_results$advanced_metrics$old_cox) || 
                     is.null(all_results$advanced_metrics$new_cox)) {
-                    message("DEBUG: Cox models not available for calibration assessment")
                     return(NULL)
                 }
                 
@@ -20588,7 +19493,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(calibration_results)
 
             }, error = function(e) {
-                message("DEBUG: Advanced calibration assessment failed: ", e$message)
                 return(list(error = paste("Advanced calibration assessment failed:", e$message)))
             })
         },
@@ -20674,7 +19578,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Comprehensive Stage Homogeneity Testing
         .performComprehensiveHomogeneityTesting = function(data, old_stage, new_stage, time_var, event_var) {
             tryCatch({
-                message("DEBUG: Performing comprehensive homogeneity testing")
                 
                 homogeneity_results <- list()
                 
@@ -20743,7 +19646,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(homogeneity_results)
 
             }, error = function(e) {
-                message("DEBUG: Comprehensive homogeneity testing failed: ", e$message)
                 return(list(error = paste("Homogeneity testing failed:", e$message)))
             })
         },
@@ -20789,7 +19691,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Time-Varying Coefficient Analysis
         .performTimeVaryingCoefficientAnalysis = function(data, old_stage, new_stage, time_var, event_var) {
             tryCatch({
-                message("DEBUG: Performing time-varying coefficient analysis")
                 
                 # Test for time-varying effects using interaction with time
                 time_varying_results <- list()
@@ -20848,7 +19749,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(time_varying_results)
 
             }, error = function(e) {
-                message("DEBUG: Time-varying coefficient analysis failed: ", e$message)
                 return(list(error = paste("Time-varying analysis failed:", e$message)))
             })
         },
@@ -20860,7 +19760,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Phase 2 Model Diagnostics Suite
         .performPhase2ModelDiagnostics = function(data, old_cox, new_cox, old_stage, new_stage) {
             tryCatch({
-                message("DEBUG: Performing enhanced model diagnostics")
                 
                 diagnostics_results <- list()
                 
@@ -20902,7 +19801,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(diagnostics_results)
 
             }, error = function(e) {
-                message("DEBUG: Enhanced model diagnostics failed: ", e$message)
                 return(list(error = paste("Model diagnostics failed:", e$message)))
             })
         },
@@ -21182,7 +20080,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 for (i in 1:4) {
                     timepoint <- timepoints_names[i]
-                    message("DEBUG: Calculating SME for timepoint: ", timepoint)
                     surv_field <- paste0("survival_", timepoint)
                     
                     # Calculate SME = Σ(S_new - S_old) for corresponding stages
@@ -21196,7 +20093,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (length(common_stages) > 0) {
                         # Case 1: Matching stage names found (e.g., I, II, III in both)
                         stages_to_compare <- common_stages
-                        message("DEBUG: Matching stages by name: ", paste(stages_to_compare, collapse=", "))
                         
                         for (stage_name in stages_to_compare) {
                             old_stage_name <- as.character(stage_name)
@@ -21225,7 +20121,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         }
                     } else {
                         # Case 2: No matching names, fall back to index (ordered comparison)
-                        message("DEBUG: No matching stage names, falling back to index matching")
                         min_stages <- min(length(old_stages), length(new_stages))
                         
                         for (j in 1:min_stages) {
@@ -22277,7 +21172,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Clinical Decision Support System
         .performClinicalDecisionSupport = function(data, all_results) {
             tryCatch({
-                message("DEBUG: Performing clinical decision support analysis")
                 
                 decision_support <- list()
                 
@@ -22458,7 +21352,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # Publication Report Generator
         .generatePublicationReport = function(data, all_results) {
             tryCatch({
-                message("DEBUG: Generating publication-ready report")
                 
                 report <- list()
                 
@@ -23440,7 +22333,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Check for SHAP package availability (simulate check)
                 # Note: In production, would check for actual SHAP package availability
-                message("DEBUG: SHAP package validation passed")
                 
                 return(list(valid = TRUE))
                 
@@ -23978,7 +22870,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 
             }, error = function(e) {
-                message("DEBUG: Error populating SHAP results: ", e$message)
             })
         },
         
@@ -26508,7 +25399,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 surv_obj <- surv_obj[complete_cases]
                 stage <- stage[complete_cases]
                 
-                message("DEBUG: Created interval-censored survival object with ", sum(complete_cases), " complete observations")
                 
                 results <- list()
                 
@@ -26580,11 +25470,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$.populateIntervalCensoringSummary(summary_results)
                 results$summary <- summary_results
                 
-                message("DEBUG: Interval censoring analysis completed successfully")
                 return("Interval Censoring Analysis completed successfully")
                 
             }, error = function(e) {
-                message("DEBUG: Error in interval censoring analysis: ", e$message)
                 stop("Error in interval censoring analysis: ", e$message)
             })
         },
@@ -26643,7 +25531,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in NPMLE analysis: ", e$message)
                 return(list())
             })
         },
@@ -26733,7 +25620,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in parametric IC analysis: ", e$message)
                 return(list())
             })
         },
@@ -26783,7 +25669,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(models)
                 
             }, error = function(e) {
-                message("DEBUG: Error in IC model comparison: ", e$message)
                 return(list())
             })
         },
@@ -26821,7 +25706,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in IC diagnostics: ", e$message)
                 return(list())
             })
         },
@@ -26865,7 +25749,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(summary_results)
                 
             }, error = function(e) {
-                message("DEBUG: Error generating IC summary: ", e$message)
                 return(list())
             })
         },
@@ -26980,7 +25863,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 time <- time[complete_cases]
                 event <- event[complete_cases]
                 
-                message("DEBUG: Created survival object with ", sum(complete_cases), " complete observations for informative censoring analysis")
                 
                 results <- list()
                 
@@ -27055,11 +25937,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$.populateInformativeCensoringSummary(summary_results)
                 results$summary <- summary_results
                 
-                message("DEBUG: Informative censoring analysis completed successfully")
                 return("Informative Censoring Analysis completed successfully")
                 
             }, error = function(e) {
-                message("DEBUG: Error in informative censoring analysis: ", e$message)
                 stop("Error in informative censoring analysis: ", e$message)
             })
         },
@@ -27196,7 +26076,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in informative censoring tests: ", e$message)
                 return(list())
             })
         },
@@ -27250,7 +26129,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in censoring by stage analysis: ", e$message)
                 return(list())
             })
         },
@@ -27315,7 +26193,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in informative censoring adjustment: ", e$message)
                 return(list())
             })
         },
@@ -27394,7 +26271,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in sensitivity analysis: ", e$message)
                 return(list())
             })
         },
@@ -27487,7 +26363,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in informative censoring diagnostics: ", e$message)
                 return(list())
             })
         },
@@ -27538,7 +26413,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(summary_results)
                 
             }, error = function(e) {
-                message("DEBUG: Error generating informative censoring summary: ", e$message)
                 return(list())
             })
         },
@@ -27667,7 +26541,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 time <- time[complete_cases]
                 event <- event[complete_cases]
                 
-                message("DEBUG: Created survival object with ", sum(complete_cases), " complete observations for concordance analysis")
                 
                 results <- list()
                 
@@ -27745,11 +26618,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$.populateConcordanceProbabilitySummary(summary_results)
                 results$summary <- summary_results
                 
-                message("DEBUG: Concordance probability analysis completed successfully")
                 return("Concordance Probability Analysis completed successfully")
                 
             }, error = function(e) {
-                message("DEBUG: Error in concordance probability analysis: ", e$message)
                 stop("Error in concordance probability analysis: ", e$message)
             })
         },
@@ -27847,7 +26718,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error calculating concordance probabilities: ", e$message)
                 return(list())
             })
         },
@@ -28156,7 +27026,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in time-dependent concordance: ", e$message)
                 return(list())
             })
         },
@@ -28277,7 +27146,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in concordance comparison: ", e$message)
                 return(list())
             })
         },
@@ -28355,7 +27223,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in robustness analysis: ", e$message)
                 return(list())
             })
         },
@@ -28415,7 +27282,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(results)
                 
             }, error = function(e) {
-                message("DEBUG: Error in concordance diagnostics: ", e$message)
                 return(list())
             })
         },
@@ -28484,7 +27350,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(summary_results)
                 
             }, error = function(e) {
-                message("DEBUG: Error generating concordance summary: ", e$message)
                 return(list())
             })
         },
@@ -28589,7 +27454,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .performWinRatioAnalysis = function(data, all_results) {
             tryCatch({
-                message("DEBUG: Starting Win Ratio Analysis")
                 
                 # Check required variables
                 time_var <- self$options$timeVar
@@ -28653,7 +27517,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 old_levels <- levels(complete_data[[old_stage_var]])
                 new_levels <- levels(complete_data[[new_stage_var]])
                 
-                message("DEBUG: Win Ratio Analysis - Processing staging comparisons")
                 
                 # Perform win ratio analysis for each staging comparison
                 for (old_stage in old_levels) {
@@ -28705,7 +27568,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Perform sensitivity analysis if requested
                 if (self$options$wrSensitivityAnalysis) {
-                    message("DEBUG: Win Ratio Analysis - Performing sensitivity analysis")
                     
                     # Vary follow-up time cutoffs
                     time_cutoffs <- c(0.5, 0.75, 1.0, 1.25, 1.5) * max(complete_data[[time_var]], na.rm = TRUE)
@@ -28783,7 +27645,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                 }
                 
-                message("DEBUG: Win Ratio Analysis completed successfully")
                 return(list(
                     win_ratio_results = win_ratio_results,
                     endpoint_results = endpoint_results,
@@ -28792,7 +27653,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ))
                 
             }, error = function(e) {
-                message("DEBUG: Win Ratio Analysis failed: ", e$message)
                 return(NULL)
             })
         },
@@ -28982,7 +27842,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ))
                 
             }, error = function(e) {
-                message("DEBUG: calculateWinRatio failed: ", e$message)
                 return(NULL)
             })
         },
@@ -29091,7 +27950,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .performFrailtyModelsAnalysis = function(data, all_results) {
             tryCatch({
-                message("DEBUG: Starting Frailty Models Analysis")
                 
                 # Check required variables
                 time_var <- self$options$timeVar
@@ -29136,13 +27994,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     stop("Insufficient number of clusters for frailty modeling (minimum 3 clusters required)")
                 }
                 
-                message("DEBUG: Frailty Models Analysis - Processing cluster characteristics")
                 
                 # Check if coxme package is available
                 coxme_available <- requireNamespace("coxme", quietly = TRUE)
                 
                 if (!coxme_available) {
-                    message("DEBUG: coxme package not available, using simplified frailty analysis")
                     # Use survival::coxph with frailty() function as fallback
                     simplified_results <- self$.performSimplifiedFrailtyAnalysis(complete_data, time_var, event_var, old_stage_var, new_stage_var, cluster_var)
                     return(simplified_results)
@@ -29155,20 +28011,17 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 surv_formula_old <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage_var, "+ (1|", cluster_var, ")"))
                 surv_formula_new <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage_var, "+ (1|", cluster_var, ")"))
                 
-                message("DEBUG: Frailty Models Analysis - Fitting models")
                 
                 # Fit frailty models
                 model_old <- tryCatch({
                     coxme(surv_formula_old, data = complete_data)
                 }, error = function(e) {
-                    message("DEBUG: coxme model fitting failed for old staging, using simplified approach")
                     return(NULL)
                 })
                 
                 model_new <- tryCatch({
                     coxme(surv_formula_new, data = complete_data)
                 }, error = function(e) {
-                    message("DEBUG: coxme model fitting failed for new staging, using simplified approach")
                     return(NULL)
                 })
                 
@@ -29254,7 +28107,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Cluster-specific analysis if requested
                 if (self$options$frailtyClusterComparison) {
-                    message("DEBUG: Frailty Models Analysis - Performing cluster-specific analysis")
                     
                     cluster_levels <- levels(complete_data[[cluster_var]])
                     
@@ -29284,7 +28136,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Bootstrap validation if requested
                 if (self$options$frailtyBootstrap) {
-                    message("DEBUG: Frailty Models Analysis - Performing bootstrap validation")
                     
                     n_bootstrap <- min(self$options$frailtyBootstrapSamples, 200)  # Limit for performance
                     
@@ -29338,7 +28189,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Model diagnostics if requested
                 if (self$options$frailtyDiagnostics) {
-                    message("DEBUG: Frailty Models Analysis - Performing model diagnostics")
                     
                     # Likelihood ratio test
                     lr_test_stat <- 2 * (as.numeric(new_loglik) - as.numeric(old_loglik))
@@ -29418,7 +28268,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     self$.populateFrailtyModelsSummary(summary_results)
                 }
                 
-                message("DEBUG: Frailty Models Analysis completed successfully")
                 return(list(
                     overview = overview_results,
                     comparison = comparison_results,
@@ -29430,14 +28279,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ))
                 
             }, error = function(e) {
-                message("DEBUG: Frailty Models Analysis failed: ", e$message)
                 return(NULL)
             })
         },
 
         .performSimplifiedFrailtyAnalysis = function(complete_data, time_var, event_var, old_stage_var, new_stage_var, cluster_var) {
             tryCatch({
-                message("DEBUG: Performing simplified frailty analysis using survival package")
                 
                 # Use survival::coxph with frailty() term
                 surv_formula_old <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage_var, "+ frailty(", cluster_var, ")"))
@@ -29463,7 +28310,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(list(overview = overview_results))
                 
             }, error = function(e) {
-                message("DEBUG: Simplified frailty analysis failed: ", e$message)
                 return(NULL)
             })
         },
@@ -29568,7 +28414,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .performClinicalUtilityAnalysis = function(data, all_results) {
             tryCatch({
-                message("DEBUG: Starting Clinical Utility Index Analysis")
                 
                 # Check required variables
                 time_var <- self$options$timeVar
@@ -29617,7 +28462,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     "comprehensive" = seq(0.05, 0.95, by = 0.10)
                 )
                 
-                message("DEBUG: Clinical Utility Analysis - Fitting Cox models")
                 
                 # Fit Cox models for both staging systems
                 cox_formula_old <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage_var))
@@ -29626,14 +28470,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 model_old <- tryCatch({
                     coxph(cox_formula_old, data = complete_data)
                 }, error = function(e) {
-                    message("DEBUG: Cox model fitting failed for old staging")
                     return(NULL)
                 })
                 
                 model_new <- tryCatch({
                     coxph(cox_formula_new, data = complete_data)
                 }, error = function(e) {
-                    message("DEBUG: Cox model fitting failed for new staging")
                     return(NULL)
                 })
                 
@@ -29665,7 +28507,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Create binary event indicator at time point
                 event_at_time <- complete_data[[event_var]] == 1 & complete_data[[time_var]] <= time_point
                 
-                message("DEBUG: Clinical Utility Analysis - Processing utility metrics")
                 
                 # Overview results
                 overview_results[[1]] <- list(
@@ -29813,7 +28654,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Time-varying analysis if requested
                 if (self$options$clinicalUtilityTimeVarying) {
-                    message("DEBUG: Clinical Utility Analysis - Performing time-varying analysis")
                     
                     time_points <- c(12, 24, 36, 48, 60, 72)
                     
@@ -29848,7 +28688,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Bootstrap validation if requested
                 if (self$options$clinicalUtilityBootstrap) {
-                    message("DEBUG: Clinical Utility Analysis - Performing bootstrap validation")
                     
                     n_bootstrap <- min(self$options$clinicalUtilityBootstrapSamples, 100)  # Limit for performance
                     
@@ -29957,7 +28796,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     self$.populateClinicalUtilitySummary(summary_results)
                 }
                 
-                message("DEBUG: Clinical Utility Analysis completed successfully")
                 return(list(
                     overview = overview_results,
                     comparison = comparison_results,
@@ -29969,7 +28807,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ))
                 
             }, error = function(e) {
-                message("DEBUG: Clinical Utility Analysis failed: ", e$message)
                 return(NULL)
             })
         },

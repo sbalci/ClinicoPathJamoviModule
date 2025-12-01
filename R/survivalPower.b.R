@@ -885,11 +885,23 @@ survivalPowerClass <- R6::R6Class(
         },
         
         .calculate_competing_risks = function() {
-            return("Competing risks calculations are temporarily unavailable pending validated Fine-Gray implementation")
+            # Return summary string for main table
+            # Detailed results are populated in specialized table
+            
+            hr <- private$.get_effect_hr()
+            rate <- self$options$competing_risk_rate
+            
+            return(paste("Calculating power with Competing Risk Rate =", rate, 
+                         "(See 'Competing Risks Analysis' table for details)"))
         },
         
         .calculate_rmst = function() {
-            return("RMST-based calculations are temporarily unavailable pending validated RMST variance implementation")
+            # Return summary string for main table
+            # Detailed results are populated in specialized table
+            
+            tau <- self$options$rmst_tau
+            return(paste("RMST Analysis at tau =", tau, 
+                         "(See 'RMST Analysis' table for details)"))
         },
 
         .calculate_rmst_variance = function(lambda, tau) {
@@ -1313,6 +1325,12 @@ survivalPowerClass <- R6::R6Class(
             
             if (test_type == "non_inferiority") {
                 private$.populate_non_inferiority_table()
+            } else if (test_type == "competing_risks") {
+                private$.populate_competing_risks_table()
+            } else if (test_type == "rmst_test") {
+                private$.populate_rmst_analysis_table()
+            } else if (test_type == "snp_survival") {
+                private$.populate_snp_analysis_table()
             }
 
             if (self$options$study_design == "multi_arm") {
@@ -3245,16 +3263,19 @@ survivalPowerClass <- R6::R6Class(
         },
 
         .run_simulation_analysis = function() {
-            # Enhanced simulation-based power analysis using self$options$simulation_runs
+            # Enhanced simulation-based power analysis
             if (!self$options$sensitivity_analysis) return(NULL)
 
             n_sims <- self$options$simulation_runs
-            if (n_sims < 1000) n_sims <- 1000  # Minimum for stability
+            if (is.null(n_sims) || n_sims < 100) n_sims <- 100
+            if (n_sims > 2000) n_sims <- 2000  # Limit for UI responsiveness
 
             tryCatch({
                 # Get base parameters
-                hr_true <- self$options$effect_size
+                hr_true <- private$.get_effect_hr()
                 alpha <- self$options$alpha_level
+                
+                # Determine sample size
                 n_total <- if (self$options$analysis_type == "sample_size") {
                     # Extract from calculated result
                     result <- private$.calculate_primary_result()
@@ -3266,41 +3287,58 @@ survivalPowerClass <- R6::R6Class(
                 } else {
                     self$options$sample_size_input
                 }
+                
+                if (is.na(n_total) || n_total < 10) n_total <- 200
 
-                # Vectorized Monte Carlo simulation for 10-100x performance improvement
                 lambda_control <- log(2) / self$options$control_median_survival
                 lambda_treatment <- lambda_control * hr_true
-                n_per_group <- n_total / 2
+                
+                accrual <- self$options$accrual_period
+                follow_up <- self$options$follow_up_period
+                total_study_time <- accrual + follow_up
+                n_per_group <- ceiling(n_total / 2)
 
-                # Generate all survival times at once (vectorized)
-                surv_control_matrix <- matrix(rexp(n_sims * n_per_group, lambda_control),
-                                            nrow = n_sims, ncol = n_per_group)
-                surv_treatment_matrix <- matrix(rexp(n_sims * n_per_group, lambda_treatment),
-                                              nrow = n_sims, ncol = n_per_group)
+                p_values <- numeric(n_sims)
 
-                # Vectorized log-rank test approximation
-                # For each simulation, calculate z-statistic
-                p_values <- vapply(1:n_sims, function(i) {
+                # Monte Carlo Simulation
+                for (i in 1:n_sims) {
+                    # Generate Event Times (Exponential)
+                    t_event_c <- rexp(n_per_group, lambda_control)
+                    t_event_t <- rexp(n_per_group, lambda_treatment)
+                    
+                    # Generate Accrual Times (Uniform)
+                    t_entry_c <- runif(n_per_group, 0, accrual)
+                    t_entry_t <- runif(n_per_group, 0, accrual)
+                    
+                    # Calculate Administrative Censoring Time
+                    # Time from entry until end of study
+                    t_censor_c <- total_study_time - t_entry_c
+                    t_censor_t <- total_study_time - t_entry_t
+                    
+                    # Observed Time & Event Indicator
+                    time_c <- pmin(t_event_c, t_censor_c)
+                    status_c <- as.numeric(t_event_c <= t_censor_c)
+                    
+                    time_t <- pmin(t_event_t, t_censor_t)
+                    status_t <- as.numeric(t_event_t <= t_censor_t)
+                    
+                    # Combine for Log-rank Test
+                    times <- c(time_c, time_t)
+                    status <- c(status_c, status_t)
+                    group <- c(rep(0, n_per_group), rep(1, n_per_group))
+                    
+                    # Perform Log-rank test
+                    # Using tryCatch to handle cases with 0 events
                     tryCatch({
-                        # All events observed for simplicity
-                        o1 <- n_per_group  # events in treatment
-                        o2 <- n_per_group  # events in control
-                        e1 <- n_per_group * (o1 + o2) / n_total  # expected events
-                        var_o1 <- n_per_group * n_per_group * (o1 + o2) * (n_total - o1 - o2) / (n_total^2 * (n_total - 1))
-
-                        if (var_o1 > 0) {
-                            z_stat <- (o1 - e1) / sqrt(var_o1)
-                            2 * (1 - pnorm(abs(z_stat)))  # two-sided p-value
-                        } else {
-                            1  # No power if no variance
-                        }
+                        sdf <- survival::survdiff(survival::Surv(times, status) ~ group)
+                        p_values[i] <- 1 - pchisq(sdf$chisq, df=1)
                     }, error = function(e) {
-                        1  # Conservative p-value on error
+                        p_values[i] <- 1.0 # Non-significant if test fails (e.g. no events)
                     })
-                }, numeric(1))
+                }
 
                 # Calculate empirical power
-                empirical_power <- mean(p_values < alpha)
+                empirical_power <- mean(p_values < alpha, na.rm = TRUE)
 
                 # Add simulation note to assumptions table
                 assumptions_note <- sprintf(
