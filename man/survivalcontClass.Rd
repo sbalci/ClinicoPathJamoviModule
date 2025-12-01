@@ -49,7 +49,7 @@ lung$status_binary <- ifelse(lung$status == 2, 1, 0)
 result1 <- survivalcont(
   data = lung,
   elapsedtime = "time",
-  outcome = "status_binary", 
+  outcome = "status_binary",
   contexpl = "age",
   findcut = TRUE,
   sc = TRUE

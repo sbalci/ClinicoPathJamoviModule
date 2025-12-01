@@ -21,6 +21,9 @@ recist(
   requireConfirmation = TRUE,
   confirmationWindow = 4,
   nadirReference = TRUE,
+  sdMinDuration = 6,
+  nonTargetCR = "absent, disappeared",
+  nonTargetPD = "pd, progression, unequivocal",
   showLesionTable = TRUE,
   showTargetSumTable = TRUE,
   showResponseTable = TRUE,
@@ -71,6 +74,15 @@ RECIST 1.1)}
 
 \item{nadirReference}{Use nadir (lowest) sum as reference for PD
 calculation}
+
+\item{sdMinDuration}{Minimum duration from baseline required to qualify for
+Stable Disease (SD)}
+
+\item{nonTargetCR}{Values in non-target status variable indicating Complete
+Response (comma separated)}
+
+\item{nonTargetPD}{Values in non-target status variable indicating
+Progressive Disease (comma separated)}
 
 \item{showLesionTable}{Show individual lesion measurements}
 

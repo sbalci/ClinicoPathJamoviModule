@@ -965,7 +965,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             correction_result$plausibility_flag <- flags
             correction_result$errors <- errors
             correction_result
-        }
+        },
 
         .get_method_description = function() {
             method <- self$options$correction_method

@@ -10,10 +10,7 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             indep = NULL,
             testSize = 0.33,
             noOfFolds = 10,
-        testing = NULL,
-        seed = NA,
-        thresholdMethod = "youden",
-        thresholdValue = 0.5,
+            testing = NULL,
             reporting = list(
                 "classifMetrices"),
             classifier = NULL,
@@ -81,24 +78,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "trainSet",
                     "split",
                     "crossValidation"))
-            private$..seed <- jmvcore::OptionNumber$new(
-                "seed",
-                seed,
-                default=NA,
-                min=0)
-            private$..thresholdMethod <- jmvcore::OptionList$new(
-                "thresholdMethod",
-                thresholdMethod,
-                options=list(
-                    "youden",
-                    "manual"),
-                default="youden")
-            private$..thresholdValue <- jmvcore::OptionNumber$new(
-                "thresholdValue",
-                thresholdValue,
-                default=0.5,
-                min=0,
-                max=1)
             private$..reporting <- jmvcore::OptionNMXList$new(
                 "reporting",
                 reporting,
@@ -259,9 +238,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..testSize)
             self$.addOption(private$..noOfFolds)
             self$.addOption(private$..testing)
-            self$.addOption(private$..seed)
-            self$.addOption(private$..thresholdMethod)
-            self$.addOption(private$..thresholdValue)
             self$.addOption(private$..reporting)
             self$.addOption(private$..classifier)
             self$.addOption(private$..minSplit)
@@ -297,9 +273,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         testSize = function() private$..testSize$value,
         noOfFolds = function() private$..noOfFolds$value,
         testing = function() private$..testing$value,
-        seed = function() private$..seed$value,
-        thresholdMethod = function() private$..thresholdMethod$value,
-        thresholdValue = function() private$..thresholdValue$value,
         reporting = function() private$..reporting$value,
         classifier = function() private$..classifier$value,
         minSplit = function() private$..minSplit$value,
@@ -334,9 +307,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..testSize = NA,
         ..noOfFolds = NA,
         ..testing = NA,
-        ..seed = NA,
-        ..thresholdMethod = NA,
-        ..thresholdValue = NA,
         ..reporting = NA,
         ..classifier = NA,
         ..minSplit = NA,
@@ -623,9 +593,6 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param testSize .
 #' @param noOfFolds .
 #' @param testing .
-#' @param seed Random seed for reproducible resampling.
-#' @param thresholdMethod Method for choosing decision threshold ('youden' or 'manual').
-#' @param thresholdValue Manual threshold (0-1) when thresholdMethod='manual'.
 #' @param reporting .
 #' @param classifier .
 #' @param minSplit .
@@ -689,9 +656,6 @@ classification <- function(
     testSize = 0.33,
     noOfFolds = 10,
     testing,
-    seed = NA,
-    thresholdMethod = "youden",
-    thresholdValue = 0.5,
     reporting = list(
                 "classifMetrices"),
     classifier,
@@ -741,9 +705,6 @@ classification <- function(
         testSize = testSize,
         noOfFolds = noOfFolds,
         testing = testing,
-        seed = seed,
-        thresholdMethod = thresholdMethod,
-        thresholdValue = thresholdValue,
         reporting = reporting,
         classifier = classifier,
         minSplit = minSplit,
@@ -781,3 +742,4 @@ classification <- function(
 
     analysis$results
 }
+

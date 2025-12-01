@@ -23,6 +23,11 @@ This function provides comprehensive time interval calculation capabilities incl
 \item Export capabilities for downstream analysis
 }
 }
+\note{
+\strong{Landmark Analysis Exclusion:} When landmark analysis is enabled, participants with missing
+follow-up times (NA values) are implicitly excluded from the "at-risk" cohort because their
+eligibility for landmark criteria cannot be determined.
+}
 \examples{
 # Basic time interval calculation:
 timeinterval(

@@ -475,23 +475,14 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Chi-Square Post-Hoc Tests
 #'
-#' Performs Chi-Square test and post-hoc pairwise comparisons.
-#' ⚠️ IMPORTANT LIMITATIONS:
-#' - Post-hoc pairwise comparisons are ONLY performed when the overall 
-#' chi-square
-#'   test is significant (p < alpha). This enforces proper statistical 
-#' workflow and
-#'   prevents data dredging.
-#' 
-#' - Selecting 'None' for post-hoc method DISABLES all pairwise testing. If 
-#' you
-#'   want unadjusted pairwise comparisons, this feature is not available (by 
-#' design,
-#'   as it would encourage inappropriate multiple testing).
-#' 
-#' - No automated validation against established packages exists. Use with 
-#' caution
-#'   for clinical decision-making.
+#' Performs Chi-Square test and post-hoc pairwise comparisons. Post-hoc 
+#' pairwise comparisons are ONLY performed when the overall chi-square test is 
+#' significant (p < alpha). This enforces proper statistical workflow and 
+#' prevents data dredging. Selecting 'None' for post-hoc method DISABLES all 
+#' pairwise testing. If you want unadjusted pairwise comparisons, this feature 
+#' is not available (by design, as it would encourage inappropriate multiple 
+#' testing). No automated validation against established packages exists. Use 
+#' with caution for clinical decision-making.
 #' 
 #'
 #' @examples

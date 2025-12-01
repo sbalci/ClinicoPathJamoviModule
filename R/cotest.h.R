@@ -56,13 +56,13 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "cond_dep_pos",
                 cond_dep_pos,
                 default=0.05,
-                min=-1,
+                min=0,
                 max=1)
             private$..cond_dep_neg <- jmvcore::OptionNumber$new(
                 "cond_dep_neg",
                 cond_dep_neg,
                 default=0.05,
-                min=-1,
+                min=0,
                 max=1)
             private$..prevalence <- jmvcore::OptionNumber$new(
                 "prevalence",
@@ -381,3 +381,4 @@ cotest <- function(
 
     analysis$results
 }
+

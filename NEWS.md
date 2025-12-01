@@ -1,5 +1,30 @@
 # ClinicoPath News
 
+## Version 0.0.32.38
+
+### 🗓️ **December 1, 2025 - Project Organization & Documentation**
+
+---
+
+## 📁 **PROJECT ORGANIZATION**
+
+### **File Structure Reorganization**
+
+*   **Development Documentation**: Moved 80+ bug fix reports, evaluation summaries, and session logs from project root to `development-ideas/bug-fixes-and-evaluations/` for better organization.
+*   **CSV Data Files**: Verified all CSV data files are properly organized in `data/` folder, with test data appropriately located in `tests/testthat/`.
+*   **Data Generation Scripts**: Confirmed all data generation scripts are properly located in `data-raw/` folder with appropriate naming conventions.
+*   **Documentation Files**: Cleaned project root to contain only essential files (README.md, NEWS.md, TODO.md, LICENSE.md, CONTRIBUTING.md, CLAUDE.md, GEMINI.md, AGENTS.md).
+*   **Version Update**: Updated DESCRIPTION file version to 0.0.32.38 and date to 2025-12-01.
+
+### **Benefits**
+
+*   **Cleaner Repository**: Root directory now contains only essential project files.
+*   **Better Organization**: Development documentation and bug reports are now systematically organized.
+*   **Improved Navigation**: Easier to find files in their appropriate locations.
+*   **Standards Compliance**: File organization follows R package best practices.
+
+---
+
 ## Version 0.0.32.26
 
 ### 🗓️ **November 30, 2025 - Critical Fixes: Survival & Decision Analysis**
