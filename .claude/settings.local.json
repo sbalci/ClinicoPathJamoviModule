@@ -137,7 +137,8 @@
       "Bash(if grep -q \"self$options$$opt\" R/diagnosticmeta.b.R)",
       "Bash(if grep -q \"self$results$$output$set\" R/diagnosticmeta.b.R)",
       "Bash(pkill:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(quarto render:*)"
     ],
     "deny": [],
     "ask": [],
