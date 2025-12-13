@@ -43,3 +43,12 @@ test_that("loadings are consistent with scale settings", {
   expect_equal(scaled_loadings, scaled_loadings_expected, tolerance = 1e-8)
   expect_equal(unscaled_loadings, unscaled_loadings_expected, tolerance = 1e-8)
 })
+
+test_that("variance info matches prcomp output and respects ncomp", {
+  var_info <- ClinicoPath:::pcaloadingheatmap_variance_info(scaled_pca, ncomp = 3)
+  expected_prop <- (scaled_pca$sdev ^ 2) / sum(scaled_pca$sdev ^ 2)
+  expect_equal(nrow(var_info), 3)
+  expect_equal(var_info$variance, expected_prop[1:3], tolerance = 1e-8)
+  expect_equal(var_info$cumulative, cumsum(expected_prop)[1:3], tolerance = 1e-8)
+  expect_true(all(diff(var_info$cumulative) >= 0))
+})

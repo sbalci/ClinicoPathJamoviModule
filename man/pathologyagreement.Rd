@@ -15,6 +15,7 @@ pathologyagreement(
   show_plots = TRUE,
   icc_type = "consistency",
   correlation_method = "both",
+  missing_data = "listwise",
   show_interpretation = TRUE
 )
 }
@@ -41,12 +42,15 @@ pathology scenarios}
 
 \item{correlation_method}{correlation method(s) to calculate}
 
+\item{missing_data}{method for handling missing values}
+
 \item{show_interpretation}{provide clinical interpretation of agreement
 statistics}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$agreementtable} \tab \tab \tab \tab \tab ICC, CCC, and Bland-Altman metrics \cr
 \code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr

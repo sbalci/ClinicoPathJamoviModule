@@ -1,7 +1,7 @@
 ---
 name: jjoncoplot
 title: Genomic Landscape Visualization
-menuGroup: OncoPathT2
+menuGroup: OncoPathT1
 menuSubgroup: 'Molecular Pathology Plots'
 menuSubtitle: 'Oncoplot, Mutation Landscape, Clinical Annotations'
 version: '0.0.1'
@@ -244,6 +244,16 @@ options:
             Display tumor mutation burden (TMB) bar plot.
           jamovi: >
             🧬 Display total mutations per sample. High TMB (>10-20 mutations/Mb) may predict immunotherapy response in many cancer types.
+
+    - name: showTMBTable
+      title: Show TMB Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show per-sample mutation burden table alongside the plot.
+          jamovi: >
+            Show a per-sample mutation burden table (can be hidden while keeping TMB bars).
 
     - name: log10TransformTMB
       title: Log10 Transform TMB

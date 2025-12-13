@@ -20,6 +20,7 @@ decisioncompare(
   fnote = FALSE,
   ci = FALSE,
   plot = FALSE,
+  excludeIndeterminate = FALSE,
   radarplot = FALSE,
   statComp = FALSE,
   showSummary = FALSE,
@@ -64,6 +65,10 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 \item{ci}{.}
 
 \item{plot}{Generate comparison plot showing test performance metrics.}
+
+\item{excludeIndeterminate}{If TRUE, drop rows where test/gold values are
+neither the specified positive level nor a clear negative level to avoid
+inflating specificity/NPV from equivocal results.}
 
 \item{radarplot}{Generate radar plot for comprehensive test comparison
 visualization.}

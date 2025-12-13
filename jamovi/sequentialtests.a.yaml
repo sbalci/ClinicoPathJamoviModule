@@ -1,7 +1,7 @@
 ---
 name: sequentialtests
 title: Sequential Testing Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT1
 menuSubgroup: Decision Calculators
 menuSubtitle: Sequential Test Analysis
 version: '0.0.32'
@@ -154,6 +154,16 @@ options:
       default: 0.10
       min: 0.001
       max: 0.999
+
+    - name: population_size
+      title: Illustrative Population Size
+      type: Integer
+      default: 1000
+      min: 100
+      max: 100000
+      description:
+        R: >
+          Population size used to illustrate population flow counts. Does not affect probabilities.
     
     # Display Options
     - name: show_explanation

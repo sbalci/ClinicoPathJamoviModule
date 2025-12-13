@@ -25,7 +25,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
-        # getData function to properly handle the data labels
+        # getData function to properly handle the data labels with robust mapping
         .getData = function() {
             # Get the data
             mydata <- self$data
@@ -37,12 +37,12 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata$row_names <- rownames(mydata)
             }
 
-            # Get original names
+            # Get original names from the dataframe passed by jamovi
             original_names <- names(mydata)
-
-            # Create labels vector
-            labels <- stats::setNames(original_names, original_names)
-
+            
+            # Create a mapping of original names to cleaned names using INDICES
+            # This is robust because janitor::clean_names preserves column order
+            
             # Clean names safely
             mydata_cleaned <- try({
                 janitor::clean_names(mydata)
@@ -52,47 +52,51 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop('Error cleaning variable names. Please check column names.')
             }
 
-            # Create corrected labels
-            corrected_labels <- stats::setNames(original_names, names(mydata_cleaned))
+            # Map original variables to cleaned variables by INDEX
+            # This avoids ambiguity if multiple original vars map to similar clean names
+            # or if labels are not unique
+            
+            get_cleaned_var <- function(original_var_name) {
+                if (is.null(original_var_name)) return(NULL)
+                
+                # Find index of original variable
+                idx <- which(original_names == original_var_name)
+                
+                if (length(idx) == 0) return(NULL)
+                
+                # Return cleaned variable name at same index
+                return(names(mydata_cleaned)[idx])
+            }
+            
+            # Map the specific option variables
+            outcome_var <- get_cleaned_var(self$options$outcome)
+            recurrence_var <- get_cleaned_var(self$options$recurrence)
+            id_var <- get_cleaned_var(self$options$patientID)
 
-            # Apply labels
+            # Apply labels using correct mapping
+            # We use the original names as labels for the cleaned variables
+            labels_list <- as.list(original_names)
+            names(labels_list) <- names(mydata_cleaned)
+            
+            # Filter to only columns that exist (though they should all exist)
+            valid_cols <- intersect(names(labels_list), names(mydata_cleaned))
+            labels_list <- labels_list[valid_cols]
+            
             mydata_labelled <- try({
-                labelled::set_variable_labels(.data = mydata_cleaned, .labels = corrected_labels)
+                labelled::set_variable_labels(.data = mydata_cleaned, .labels = labels_list)
             }, silent = TRUE)
 
             if (inherits(mydata_labelled, "try-error")) {
-                stop('Error setting variable labels')
-            }
-
-            # Get all labels
-            all_labels <- labelled::var_label(mydata_labelled)
-
-            # Get variable names from labels
-            outcome_var <- try({
-                names(all_labels)[all_labels == self$options$outcome]
-            }, silent = TRUE)
-
-            # Get recurrence/progression variable if specified
-            recurrence_var <- NULL
-            if (!is.null(self$options$recurrence)) {
-                recurrence_var <- try({
-                    names(all_labels)[all_labels == self$options$recurrence]
-                }, silent = TRUE)
-            }
-
-            # Get patient ID variable if specified
-            id_var <- NULL
-            if (!is.null(self$options$patientID)) {
-                id_var <- try({
-                    names(all_labels)[all_labels == self$options$patientID]
-                }, silent = TRUE)
+                # Fallback if labelling fails
+                mydata_labelled <- mydata_cleaned
             }
 
             return(list(
                 "mydata_labelled" = mydata_labelled,
                 "outcome_var" = outcome_var,
                 "recurrence_var" = recurrence_var,
-                "id_var" = id_var
+                "id_var" = id_var,
+                "original_outcome" = self$options$outcome
             ))
         },
 
@@ -109,7 +113,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # 1. Check if required variables exist in data
             if (!is.null(outcome_var) && length(outcome_var) > 0 && !outcome_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Outcome variable '", outcome_var, "' not found in dataset.", sep=""))
+                    paste("Outcome variable '", outcome_var, "' not found in dataset (possibly lost during name cleaning).", sep=""))
                 validation_results$should_stop <- TRUE
             }
             
@@ -137,6 +141,12 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outcome_data <- mydata[[outcome_var]]
                 outcome_data_clean <- outcome_data[!is.na(outcome_data)]
                 
+                # Check for ordered factors
+                if (is.ordered(outcome_data)) {
+                    validation_results$info <- c(validation_results$info,
+                        "Outcome variable is an ordered factor. It will be treated as nominal (unordered) for analysis to avoid contrast issues.")
+                }
+                
                 if (length(outcome_data_clean) == 0) {
                     validation_results$errors <- c(validation_results$errors,
                         "Outcome variable contains no non-missing values.")
@@ -153,7 +163,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else {
                         validation_results$info <- c(validation_results$info,
                             paste("Outcome variable has ", outcome_count, " unique values: ", 
-                                  paste(unique_outcomes, collapse=", "), sep=""))
+                                  paste(head(unique_outcomes, 5), collapse=", "), 
+                                  if(outcome_count > 5) "..." else "", sep=""))
                     }
                 }
             }
@@ -167,10 +178,24 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 validation_results$should_stop <- TRUE
             }
             
-            # 6. Check analysis type requirements
+            # 6. Check analysis type requirements - STRICTER NOW
             if (analysistype %in% c("rfs", "pfs", "dfs", "ttp") && is.null(recurrence_var)) {
+                # This remains a warning as technically one could abuse these modes without recurrence, 
+                # but strongly advised against.
                 validation_results$warnings <- c(validation_results$warnings,
-                    paste("Analysis type '", analysistype, "' typically requires a recurrence/progression variable.", sep=""))
+                    paste("Analysis type '", analysistype, "' typically requires a recurrence/progression variable. You are analyzing death/event only.", sep=""))
+            }
+
+            if (analysistype == "multistate" && !multievent) {
+                validation_results$errors <- c(validation_results$errors,
+                    "Multistate models require multiple event types. Please enable 'Multiple Event Types' option.")
+                validation_results$should_stop <- TRUE
+            }
+            
+            if (analysistype == "compete" && !multievent) {
+                validation_results$errors <- c(validation_results$errors,
+                    "Competing risks analysis requires multiple event types. Please enable 'Multiple Event Types' option.")
+                validation_results$should_stop <- TRUE
             }
             
             # 7. Combined data quality checks
@@ -200,6 +225,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             paste("Missing outcome data: ", round(missing_proportion * 100, 1),
                                   "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
                     }
+                    
+                    # Check for rare events (separation issue warning)
+                    if (length(unique(mydata[[outcome_var]])) == 2) {
+                        tbl <- table(mydata[[outcome_var]])
+                        min_cell <- min(tbl)
+                        if (min_cell < 5) {
+                            validation_results$warnings <- c(validation_results$warnings,
+                                paste("Rare event detected (min cell count =", min_cell, "). Logistic regression may suffer from separation. Consider penalized methods."))
+                        }
+                    }
                 }
             }
 
@@ -209,20 +244,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Cause-specific survival typically requires distinguishing between disease deaths and other deaths. Consider enabling 'Multiple Event Types' or switch to 'Overall Survival'.")
             }
 
-            if (analysistype == "compete" && !multievent) {
-                validation_results$warnings <- c(validation_results$warnings,
-                    "Competing risks analysis requires multiple event types. Please enable 'Multiple Event Types' and specify event levels.")
-            }
-
             if (analysistype %in% c("rfs", "pfs", "dfs") && is.null(recurrence_var)) {
                 validation_results$warnings <- c(validation_results$warnings,
                     paste0(toupper(analysistype), " analysis typically requires both a recurrence/progression variable AND an outcome variable. Currently only outcome is specified."))
-            }
-
-            if (analysistype == "multistate" && !multievent) {
-                validation_results$errors <- c(validation_results$errors,
-                    "Multistate models require multiple event types. Please enable 'Multiple Event Types'.")
-                validation_results$should_stop <- TRUE
             }
             
             return(validation_results)
@@ -254,6 +278,12 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!multievent) {
                 # Check for simple binary outcome coding (0/1)
                 outcome1 <- mydata[[outcome_var]]
+                
+                # Convert ordered factors to character/unordered factor to avoid issues
+                if (is.ordered(outcome1)) {
+                    outcome1 <- as.character(outcome1)
+                }
+
                 contin <- c("integer", "numeric", "double")
 
                 if (inherits(outcome1, contin)) {

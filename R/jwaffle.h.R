@@ -134,6 +134,7 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        warnings = function() private$.items[["warnings"]],
         analysisSummary = function() private$.items[["analysisSummary"]],
         plot = function() private$.items[["plot"]],
         methodExplanation = function() private$.items[["methodExplanation"]]),
@@ -164,6 +165,23 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Messages",
+                visible=TRUE,
+                clearWith=list(
+                    "counts",
+                    "groups",
+                    "facet",
+                    "rows",
+                    "flip",
+                    "color_palette",
+                    "show_legend",
+                    "mytitle",
+                    "legendtitle",
+                    "showSummaries",
+                    "showExplanations")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -240,6 +258,7 @@ jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr

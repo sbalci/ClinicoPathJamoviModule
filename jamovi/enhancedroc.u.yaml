@@ -208,6 +208,11 @@ children:
                   - type: TextBox
                     name: prevalence
                     format: number
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: useObservedPrevalence
           - type: LayoutBox
             cell:
               column: 1

@@ -1,7 +1,9 @@
 ---
 name: pathologyagreement
 title: Pathology Agreement Analysis
-menuGroup: OncoPathT2
+menuGroup: OncoPathT1
+menuSubgroup: Agreement
+menuSubtitle: Agreement on Continuous Data
 version: '1.0.0'
 jas: '1.2'
 
@@ -142,6 +144,22 @@ options:
             Pearson correlation assumes normal distribution and linear relationships. Spearman rank
             correlation is robust to outliers and non-normal distributions. Both (default) provides
             comprehensive assessment for most digital pathology studies.
+    
+    - name: missing_data
+      title: Missing Data Handling
+      type: List
+      options:
+        - name: listwise
+          title: 'Listwise Deletion (Complete Cases Analysis)'
+        - name: pairwise
+          title: 'Pairwise Deletion (Available Data)'
+      default: listwise
+      description:
+        R: >
+          method for handling missing values
+        ui: >
+          Choose how to handle missing data. Listwise deletion removes cases with any missing values across chosen variables. 
+          Pairwise deletion uses all available data for each specific correlation/agreement pair.
 
     - name: show_interpretation
       title: Show Clinical Interpretation

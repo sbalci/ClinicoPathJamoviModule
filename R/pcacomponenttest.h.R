@@ -9,6 +9,8 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             vars = NULL,
             ncomp = 5,
             nperm = 1000,
+            stop_rule = TRUE,
+            seed = 123,
             center = TRUE,
             scale = TRUE,
             conflevel = 0.95,
@@ -47,6 +49,14 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 min=100,
                 max=10000,
                 default=1000)
+            private$..stop_rule <- jmvcore::OptionBool$new(
+                "stop_rule",
+                stop_rule,
+                default=TRUE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=123)
             private$..center <- jmvcore::OptionBool$new(
                 "center",
                 center,
@@ -115,6 +125,8 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..vars)
             self$.addOption(private$..ncomp)
             self$.addOption(private$..nperm)
+            self$.addOption(private$..stop_rule)
+            self$.addOption(private$..seed)
             self$.addOption(private$..center)
             self$.addOption(private$..scale)
             self$.addOption(private$..conflevel)
@@ -132,6 +144,8 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         vars = function() private$..vars$value,
         ncomp = function() private$..ncomp$value,
         nperm = function() private$..nperm$value,
+        stop_rule = function() private$..stop_rule$value,
+        seed = function() private$..seed$value,
         center = function() private$..center$value,
         scale = function() private$..scale$value,
         conflevel = function() private$..conflevel$value,
@@ -148,6 +162,8 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..vars = NA,
         ..ncomp = NA,
         ..nperm = NA,
+        ..stop_rule = NA,
+        ..seed = NA,
         ..center = NA,
         ..scale = NA,
         ..conflevel = NA,
@@ -167,6 +183,7 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        warnings = function() private$.items[["warnings"]],
         results = function() private$.items[["results"]],
         vafplot = function() private$.items[["vafplot"]],
         screePlot = function() private$.items[["screePlot"]],
@@ -184,6 +201,11 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="todo",
                 title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Analysis Messages",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -349,6 +371,10 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param nperm Number of permutations to generate null distribution
 #'   (100-10000). Higher values provide more accurate p-values but take longer.
 #'   Minimum p-value = 1/(nperm+1). For p<0.001, use nperm>=1000.
+#' @param stop_rule Stop testing after the first non-significant component
+#'   (Sequential Testing). Recommended: TRUE to prevent Type I error inflation.
+#'   If FALSE, all components up to ncomp are tested (Batch Testing).
+#' @param seed Random seed for reproducibility of permutation results.
 #' @param center Center variables to have mean = 0 before PCA. Recommended:
 #'   TRUE for most analyses.
 #' @param scale Scale variables to have standard deviation = 1 before PCA.
@@ -372,6 +398,7 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results} \tab \tab \tab \tab \tab Statistical significance of principal components based on permutation testing \cr
 #'   \code{results$vafplot} \tab \tab \tab \tab \tab Visualization comparing original VAF to permuted null distribution \cr
 #'   \code{results$screePlot} \tab \tab \tab \tab \tab an image \cr
@@ -390,6 +417,8 @@ pcacomponenttest <- function(
     vars,
     ncomp = 5,
     nperm = 1000,
+    stop_rule = TRUE,
+    seed = 123,
     center = TRUE,
     scale = TRUE,
     conflevel = 0.95,
@@ -417,6 +446,8 @@ pcacomponenttest <- function(
         vars = vars,
         ncomp = ncomp,
         nperm = nperm,
+        stop_rule = stop_rule,
+        seed = seed,
         center = center,
         scale = scale,
         conflevel = conflevel,

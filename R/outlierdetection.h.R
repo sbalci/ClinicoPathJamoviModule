@@ -156,6 +156,7 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        warnings = function() private$.items[["warnings"]],
         plot = function() private$.items[["plot"]],
         outlier_table = function() private$.items[["outlier_table"]],
         method_comparison = function() private$.items[["method_comparison"]],
@@ -178,6 +179,20 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="todo",
                 title="Instructions",
                 visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Analysis Messages",
+                visible=TRUE,
+                clearWith=list(
+                    "vars",
+                    "method_category",
+                    "univariate_methods",
+                    "multivariate_methods",
+                    "composite_threshold",
+                    "zscore_threshold",
+                    "iqr_multiplier",
+                    "confidence_level")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -333,6 +348,7 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$outlier_table} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$method_comparison} \tab \tab \tab \tab \tab a html \cr

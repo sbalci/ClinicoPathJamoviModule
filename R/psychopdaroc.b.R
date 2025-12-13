@@ -1661,6 +1661,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     .init = function() {
       # Keep main tables visible but empty them to prevent loading animations
       self$results$simpleResultsTable$setVisible(TRUE)
+      self$results$runSummary$setVisible(TRUE)
       self$results$aucSummaryTable$setVisible(TRUE)
       self$results$clinicalInterpretationTable$setVisible(TRUE)
       
@@ -1718,6 +1719,14 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # Execute the ROC analysis
     .run = function() {
       print("DEBUG: Starting .run")
+      
+      # -----------------------------------------------------------------------
+      # 0. SET SEED FOR REPRODUCIBILITY
+      # -----------------------------------------------------------------------
+      if (!is.null(self$options$seed)) {
+        set.seed(self$options$seed)
+      }
+
       # -----------------------------------------------------------------------
       # 1. INSTRUCTIONS AND PRELIMINARY CHECKS
       # -----------------------------------------------------------------------
@@ -1880,6 +1889,57 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         classVar <- data[, self$options$classVar]
         positiveClass <- levels(factor(classVar))[1]
       }
+      
+      # -----------------------------------------------------------------------
+      # 2.5. VALIDATION AND SAFEGUARDS
+      # -----------------------------------------------------------------------
+      
+      # Check class imbalance
+      n_pos <- sum(classVar == positiveClass)
+      n_total <- length(classVar)
+      prevalence <- n_pos / n_total
+      
+      summary_status <- list()
+      summary_status$warnings <- character()
+      
+      if (prevalence < 0.1 || prevalence > 0.9) {
+        summary_status$warnings <- c(summary_status$warnings, 
+          sprintf("Class imbalance detected (Prevalence: %.1f%%). Consider using Precision-Recall curves.", prevalence * 100))
+      }
+      
+      # Gating incompatible options
+      if (!is.null(self$options$subGroup)) {
+        if (self$options$delongTest) {
+           summary_status$warnings <- c(summary_status$warnings, "DeLong test disabled because subgroup analysis is active.")
+        }
+        if (self$options$calculateIDI || self$options$calculateNRI) {
+           summary_status$warnings <- c(summary_status$warnings, "IDI/NRI disabled because subgroup analysis is active.")
+        }
+      }
+      
+      # Populate Run Summary
+      run_summary_html <- paste0(
+        "<div style='padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 15px;'>",
+        "<h4>Analysis Status</h4>",
+        "<ul>",
+        "<li><strong>Seed:</strong> ", self$options$seed, "</li>",
+        "<li><strong>Positive Class:</strong> ", positiveClass, " (Prevalence: ", round(prevalence * 100, 1), "%)</li>", 
+        "<li><strong>Analysis Mode:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>"
+      )
+      
+      if (length(summary_status$warnings) > 0) {
+        run_summary_html <- paste0(run_summary_html, 
+          "</ul><div style='background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
+          "<strong>Warnings:</strong><ul>")
+        for (w in summary_status$warnings) {
+          run_summary_html <- paste0(run_summary_html, "<li>", w, "</li>")
+        }
+        run_summary_html <- paste0(run_summary_html, "</ul></div>")
+      } else {
+        run_summary_html <- paste0(run_summary_html, "</ul></div>")
+      }
+      
+      self$results$runSummary$setContent(run_summary_html)
 
       # Set up cutpoint method
       if (self$options$method == "oc_manual") {

@@ -1,7 +1,7 @@
 ---
 name:  outcomeorganizer
 title: Outcome Organizer for Survival Analysis
-menuGroup: SurvivalT2
+menuGroup: SurvivalT1
 menuSubgroup: Data Preparation
 menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
 version: '0.0.3'

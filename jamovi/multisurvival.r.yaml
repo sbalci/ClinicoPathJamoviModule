@@ -19,7 +19,7 @@ items:
           - dxdate
           - tint
           - multievent
-          # - use_modelSelection
+          - use_modelSelection
 
     # - name:  mydataview
     #   title: mydataview
@@ -48,7 +48,7 @@ items:
           - dxdate
           - tint
           - multievent
-          # - use_modelSelection
+          - use_modelSelection
       
 
     - name:  text2
@@ -65,7 +65,7 @@ items:
           - dxdate
           - tint
           - multievent
-          # - use_modelSelection
+          - use_modelSelection
 
     # Multivariable Cox Summary (right after main analysis)
     - name: multivariableCoxSummaryHeading
@@ -88,6 +88,17 @@ items:
           - tint
           - multievent
 
+    # Statistical Glossary Panel
+    - name: glossaryPanel
+      title: '📖 Statistical Glossary'
+      type: Html
+      visible: (showExplanations)
+
+    # Assumptions Checklist Panel
+    - name: assumptionsPanel
+      title: 'Assumptions & Caveats'
+      type: Html
+      visible: (showExplanations)
 
     # AFT Model Results (Accelerated Failure Time)
     - name: aftModelHeading
@@ -946,7 +957,7 @@ items:
     #   title: ''
     #   type:  Html
     #   refs: finalfit
-    #   visible: (use_modelSelection)          
+    #   visible: (use_modelSelection)
     #   clearWith:
     #       - outcome
     #       - outcomeLevel

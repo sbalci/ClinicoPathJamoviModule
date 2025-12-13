@@ -43,6 +43,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             showImbalanceWarning = TRUE,
             recommendPRC = TRUE,
             prevalence = 0.1,
+            useObservedPrevalence = TRUE,
             clinicalContext = "general",
             clinicalPresets = "custom",
             comprehensive_output = FALSE,
@@ -294,6 +295,10 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 default=0.1,
                 min=0.001,
                 max=0.999)
+            private$..useObservedPrevalence <- jmvcore::OptionBool$new(
+                "useObservedPrevalence",
+                useObservedPrevalence,
+                default=TRUE)
             private$..clinicalContext <- jmvcore::OptionList$new(
                 "clinicalContext",
                 clinicalContext,
@@ -562,6 +567,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..showImbalanceWarning)
             self$.addOption(private$..recommendPRC)
             self$.addOption(private$..prevalence)
+            self$.addOption(private$..useObservedPrevalence)
             self$.addOption(private$..clinicalContext)
             self$.addOption(private$..clinicalPresets)
             self$.addOption(private$..comprehensive_output)
@@ -649,6 +655,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         showImbalanceWarning = function() private$..showImbalanceWarning$value,
         recommendPRC = function() private$..recommendPRC$value,
         prevalence = function() private$..prevalence$value,
+        useObservedPrevalence = function() private$..useObservedPrevalence$value,
         clinicalContext = function() private$..clinicalContext$value,
         clinicalPresets = function() private$..clinicalPresets$value,
         comprehensive_output = function() private$..comprehensive_output$value,
@@ -735,6 +742,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..showImbalanceWarning = NA,
         ..recommendPRC = NA,
         ..prevalence = NA,
+        ..useObservedPrevalence = NA,
         ..clinicalContext = NA,
         ..clinicalPresets = NA,
         ..comprehensive_output = NA,
@@ -1884,6 +1892,8 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param recommendPRC Recommend using Precision-Recall curves when imbalance
 #'   is detected
 #' @param prevalence Disease prevalence for calculating predictive values
+#' @param useObservedPrevalence Use the prevalence observed in the data for
+#'   PPV/NPV and clinical impact calculations (recommended)
 #' @param clinicalContext Clinical application context for interpretation
 #' @param clinicalPresets Pre-configured settings for common clinical
 #'   scenarios
@@ -2042,6 +2052,7 @@ enhancedROC <- function(
     showImbalanceWarning = TRUE,
     recommendPRC = TRUE,
     prevalence = 0.1,
+    useObservedPrevalence = TRUE,
     clinicalContext = "general",
     clinicalPresets = "custom",
     comprehensive_output = FALSE,
@@ -2141,6 +2152,7 @@ enhancedROC <- function(
         showImbalanceWarning = showImbalanceWarning,
         recommendPRC = recommendPRC,
         prevalence = prevalence,
+        useObservedPrevalence = useObservedPrevalence,
         clinicalContext = clinicalContext,
         clinicalPresets = clinicalPresets,
         comprehensive_output = comprehensive_output,

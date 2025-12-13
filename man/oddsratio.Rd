@@ -9,6 +9,7 @@ oddsratio(
   explanatory,
   outcome,
   outcomeLevel,
+  diagnosticPredictor = NULL,
   showNomogram = FALSE,
   showSummaries = FALSE,
   showExplanations = FALSE
@@ -24,6 +25,9 @@ oddsratio(
 \item{outcomeLevel}{Specify which outcome level represents the positive
 case for likelihood ratio calculations. If not specified, the function will
 use the second level alphabetically.}
+
+\item{diagnosticPredictor}{Specify the predictor to drive likelihood
+ratios; must be binary. Defaults to the first explanatory variable.}
 
 \item{showNomogram}{Display an interactive nomogram for converting pre-test
 to post-test  probabilities using likelihood ratios calculated from the

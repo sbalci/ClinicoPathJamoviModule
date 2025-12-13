@@ -16,6 +16,7 @@ jjcorrmat(
   padjustmethod = "holm",
   k = 2,
   partial = FALSE,
+  naHandling = "listwise",
   clinicalpreset = "custom",
   lowcolor = "#E69F00",
   midcolor = "white",
@@ -60,6 +61,10 @@ insignificant.}
 correlations. Partial correlations control for all other variables in the
 analysis.}
 
+\item{naHandling}{Choose how missing values are handled. Listwise drops
+rows with missing values in selected variables; pairwise uses available
+data for each pair.}
+
 \item{clinicalpreset}{Pre-configured settings optimized for common clinical
 correlation scenarios. Biomarker: Focus on molecular correlations with
 robust methods. Lab Values: Emphasize clinical laboratory parameter
@@ -94,7 +99,14 @@ A results object containing:
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$table} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$table$asDF}
+
+\code{as.data.frame(results$table)}
 }
 \description{
 Wrapper Function for ggstatsplot::ggcorrmat and

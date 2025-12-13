@@ -90,7 +90,11 @@ children:
       - type: CheckBox
         name: showTMB
       - type: CheckBox
+        name: showTMBTable
+        enable: (showTMB)
+      - type: CheckBox
         name: log10TransformTMB
+        enable: (showTMB)
       - type: CheckBox
         name: showClinicalAnnotation
   - type: LayoutBox

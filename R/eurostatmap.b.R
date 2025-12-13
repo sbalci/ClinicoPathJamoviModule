@@ -5,7 +5,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import eurostat
-#' @import tmap
+#' @importFrom tmap tmap_mode tm_shape tm_fill tm_borders tm_layout
 #' @import sf
 #' @import dplyr
 #' @import giscoR

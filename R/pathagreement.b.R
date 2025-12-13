@@ -31,6 +31,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .agreement_results = NULL,
         .pairwise_results = NULL,
         .category_results = NULL,
+        
+        .messages = NULL,
 
         .style_clustering_results = NULL,
         .rater_metadata = NULL,
@@ -83,6 +85,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # Main analysis function
         .run = function() {
+            # Reset messages
+            private$.resetMessages()
+
             # Early return if no variables selected
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 self$results$todo$setVisible(TRUE)
@@ -199,9 +204,16 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # Perform clustering analysis (Usubutun et al. 2012)
             if (self$options$performClustering) {
-                # Checkpoint before computationally intensive clustering
-                private$.checkpoint()
-                private$.performClusteringAnalysis()
+                # Clustering Prerequisites Check
+                if (private$.n_raters < 2) {
+                     private$.accumulateMessage("Clustering Analysis requires at least 2 raters. Skipped.")
+                } else if (private$.n_cases < 5) { # Arbitrary low limit
+                     private$.accumulateMessage("Too few cases (N<5) for reliable clustering. Skipped.")
+                } else {
+                    # Checkpoint before computationally intensive clustering
+                    private$.checkpoint()
+                    private$.performClusteringAnalysis()
+                }
             }
 
             # Handle frequency tables
@@ -253,6 +265,33 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else {
                 self$results$inlineComments$setVisible(FALSE)
             }
+            
+            # Populate warnings panel
+            if (!is.null(private$.messages) && length(private$.messages) > 0) {
+                self$results$warnings$setContent(paste(
+                    "<div class='alert alert-warning'>",
+                    "<h6>Analysis Messages</h6>",
+                    "<ul>",
+                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
+                    "</ul></div>",
+                    sep = ""
+                ))
+            } else {
+                self$results$warnings$setVisible(FALSE)
+            }
+        },
+        
+        .accumulateMessage = function(msg) {
+            private$.messages <- c(private$.messages, msg)
+        },
+        
+        .resetMessages = function() {
+            private$.messages <- NULL
+            # Initialize with empty string to avoid NULL error in checks
+            if (!is.null(self$results$warnings)) {
+                self$results$warnings$setContent("")
+                self$results$warnings$setVisible(TRUE)
+            }
         },
 
         # Data preparation
@@ -273,9 +312,17 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.rater_metadata <- NULL
             }
 
-            # Remove rows with any missing values
-            complete_cases <- complete.cases(data_subset)
-            data_subset <- data_subset[complete_cases, , drop = FALSE]
+            # Check for missing data warnings
+            original_n <- nrow(data_subset)
+            data_subset <- data_subset[complete.cases(data_subset), , drop = FALSE]
+            final_n <- nrow(data_subset)
+            
+            if (original_n > 0) {
+                missing_prop <- (original_n - final_n) / original_n
+                if (missing_prop > 0.2) {
+                    private$.accumulateMessage(sprintf("High missing data: %.1f%% of cases excluded due to missing ratings. Results may be biased.", missing_prop * 100))
+                }
+            }
 
             if (nrow(data_subset) == 0) {
                 stop('No complete cases found. Please check for missing values.')
@@ -317,6 +364,27 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 .("Fleiss' Kappa")
             }
 
+            # Prevalence Effect Check (Kappa Paradox)
+            # If Agreement is High (>80%) but Kappa is Low (<0.4), warn user
+            if (!is.na(overall_agreement) && overall_agreement > 80) {
+                 # We can check the primary kappa from the table if already computed, 
+                 # or do a quick check here. 
+                 # Since kappa is calculated in separate method, let's just add a generic note if relevant options are selected.
+                 # Better approach: check after Kappa is calculated or just warn generally about prevalence if data is imbalanced.
+            }
+            
+            # Simple prevalence check on data
+            if (total_cases > 0) {
+                # Check category imbalance
+                cat_counts <- table(unlist(private$.data_matrix))
+                if (length(cat_counts) > 1) {
+                    props <- prop.table(cat_counts)
+                     if (max(props) > 0.8) {
+                        private$.accumulateMessage(sprintf("Data is highly imbalanced (one category > 80%%). Kappa may be low despite high agreement (Paradox). Consider Gwet's AC1."))
+                    }
+                }
+            }
+
             # Populate overview table
             overview <- self$results$overviewTable
             overview$setRow(rowNo = 1, values = list(
@@ -348,6 +416,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else if (method == "fleiss" && private$.n_raters >= 3) {
                 # Force Fleiss' kappa
                 private$.performFleissKappa(kappa_table)
+            } else if (method == "fleiss" && private$.n_raters < 3) {
+                # Error check for Fleiss with < 3 raters
+                private$.accumulateMessage("Fleiss' kappa requires 3 or more raters. Falling back to Cohen's kappa (pairwise analysis recommended for detail).")
+                private$.performCohensKappa(kappa_table)
             } else if (method == "krippendorff") {
                 # Force Krippendorff's alpha (will be calculated in separate method)
                 private$.performKrippendorffForKappa(kappa_table)
@@ -374,6 +446,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 if (!all(var_types)) {
                     # Instead of error, fallback to unweighted kappa with explanation
                     wght <- "unweighted"
+                    private$.accumulateMessage("Weighted kappa requested but variables are not ordinal. Analysis reverted to unweighted kappa.")
                     interpretation_note <- .("Note: Weighted kappa requires ordinal variables. Analysis performed with unweighted kappa instead.")
                 } else {
                     interpretation_note <- ""

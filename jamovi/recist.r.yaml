@@ -4,6 +4,11 @@ title: RECIST 1.1 Multi-Lesion Aggregation
 jrs: '1.1'
 
 items:
+  - name: runSummary
+    title: Analysis Status
+    type: Html
+    visible: true
+
   - name: instructions
     title: Instructions
     type: Html

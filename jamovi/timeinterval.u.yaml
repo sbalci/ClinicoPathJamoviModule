@@ -31,6 +31,8 @@ children:
       - type: ComboBox
         name: output_unit
       - type: ComboBox
+        name: time_basis
+      - type: ComboBox
         name: timezone
   - type: CollapseBox
     label: Landmark Analysis

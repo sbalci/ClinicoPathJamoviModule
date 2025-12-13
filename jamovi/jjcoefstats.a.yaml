@@ -1,7 +1,7 @@
 ---
 name:  jjcoefstats
 title: Coefficient Forest Plot (ggcoefstats)
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT1
 menuSubgroup: Regression Plots
 version: '0.0.32'
 jas: '1.2'
@@ -109,7 +109,6 @@ options:
     - name: degreesOfFreedom
       title: Degrees of Freedom (Optional)
       type: Integer
-      default: 999
       description: >
         Degrees of freedom for t-distribution. If provided, t-distribution will be used
         for confidence intervals and p-values instead of normal approximation.
@@ -198,12 +197,19 @@ options:
       description: >
         Display p-values alongside coefficients.
 
-    - name: pSymbols
-      title: Use P-Value Symbols
-      type: Bool
-      default: false
+    - name: pValueDisplay
+      title: P-Value Display
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Numeric
+          name: numeric
+        - title: Symbols (*, **, ***)
+          name: symbols
+      default: numeric
       description: >
-        Use symbols (*, **, ***) instead of numeric p-values.
+        How to display p-values in the table and plot.
 
     - name: ciLevel
       title: Confidence Level
@@ -221,12 +227,26 @@ options:
       description: >
         Exponentiate coefficients (for odds ratios or hazard ratios).
 
+    - name: expScaleLabel
+      title: Exponentiated Scale Label
+      type: List
+      options:
+        - title: Odds Ratio
+          name: or
+        - title: Hazard Ratio
+          name: hr
+        - title: Exp(Estimate)
+          name: exp
+      default: exp
+      description: >
+        Label to apply to exponentiated coefficients in pre-computed mode.
+
     - name: referenceValue
       title: Reference Value
       type: Number
       default: 0
       description: >
-        Reference value for plotting (0 for differences, 1 for ratios).
+        Reference value for plotting (0 for differences, 1 for ratios; will auto-switch to 1 when exponentiating).
 
     - name: colorScheme
       title: Color Scheme

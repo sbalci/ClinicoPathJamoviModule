@@ -105,6 +105,10 @@ children:
           - type: CheckBox
             name: exponentiate
             label: Exponentiate (OR/HR)
+          - type: ComboBox
+            name: expScaleLabel
+            label: Exponentiated Scale Label
+            enable: (exponentiate)
           - type: TextBox
             name: ciLevel
             label: Confidence Level
@@ -131,9 +135,9 @@ children:
           - type: CheckBox
             name: showPValues
             label: Show P-Values
-          - type: CheckBox
-            name: pSymbols
-            label: Use P-Value Symbols (*, **, ***)
+          - type: ComboBox
+            name: pValueDisplay
+            label: P-Value Display
             enable: (showPValues)
   - type: LayoutBox
     margin: large

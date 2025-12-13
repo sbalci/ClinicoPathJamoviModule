@@ -157,6 +157,10 @@ children:
             format: number
             label: Bootstrap Iterations
             enable: (method:maximize_boot_metric || method:minimize_boot_metric)
+          - type: TextBox
+            name: seed
+            format: number
+            label: Random Seed
   - type: CollapseBox
     label: Analysis Options
     margin: normal

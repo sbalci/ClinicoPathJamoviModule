@@ -175,10 +175,7 @@ mock_jmvcore$. <- function(text) text
 if ("package:jmvcore" %in% search()) detach("package:jmvcore", unload = TRUE)
 attach(mock_jmvcore, name = "jmvcore_mock", warn.conflicts = FALSE)
 
-# Source the enhancedROC implementation
-source("R/enhancedROC.b.R")
-
-# Define enhancedROCBase for inheritance
+# Define enhancedROCBase for inheritance (minimal stub)
 enhancedROCBase <- R6::R6Class(
     "enhancedROCBase",
     inherit = Analysis,
@@ -189,6 +186,10 @@ enhancedROCBase <- R6::R6Class(
         }
     )
 )
+assign("enhancedROCBase", enhancedROCBase, envir = .GlobalEnv)
+
+# Source the enhancedROC implementation
+source("../R/enhancedroc.b.R")
 
 # 2. Test Data Generation -------------------------------------------------
 
@@ -222,6 +223,9 @@ test_that("Single ROC Analysis", {
         specificityThreshold = 0,
         confidenceLevel = 95,
         useBootstrap = FALSE,
+        bootstrapMethod = "bca",
+        stratifiedBootstrap = TRUE,
+        bootstrapSamples = 200,
         aucTable = TRUE,
         optimalCutoffs = TRUE,
         cutoffTable = TRUE,
@@ -235,6 +239,15 @@ test_that("Single ROC Analysis", {
         comprehensive_output = FALSE,
         clinical_interpretation = FALSE,
         detectImbalance = FALSE,
+        calibrationAnalysis = FALSE,
+        clinicalImpact = FALSE,
+        decisionImpactTable = FALSE,
+        clinicalUtilityCurve = FALSE,
+        multiClassROC = FALSE,
+        timeDependentROC = FALSE,
+        survivalROC = FALSE,
+        internalValidation = FALSE,
+        useObservedPrevalence = TRUE,
         smoothMethod = "none",
         customCutoffs = "",
         clinicalPresets = "custom",
@@ -276,6 +289,9 @@ test_that("Comparative ROC Analysis", {
         specificityThreshold = 0,
         confidenceLevel = 95,
         useBootstrap = FALSE,
+        bootstrapMethod = "bca",
+        stratifiedBootstrap = TRUE,
+        bootstrapSamples = 200,
         aucTable = TRUE,
         optimalCutoffs = TRUE,
         cutoffTable = TRUE,
@@ -290,6 +306,15 @@ test_that("Comparative ROC Analysis", {
         comprehensive_output = FALSE,
         clinical_interpretation = FALSE,
         detectImbalance = FALSE,
+        calibrationAnalysis = FALSE,
+        clinicalImpact = FALSE,
+        decisionImpactTable = FALSE,
+        clinicalUtilityCurve = FALSE,
+        multiClassROC = FALSE,
+        timeDependentROC = FALSE,
+        survivalROC = FALSE,
+        internalValidation = FALSE,
+        useObservedPrevalence = TRUE,
         smoothMethod = "none",
         customCutoffs = "",
         clinicalPresets = "custom",
@@ -332,6 +357,9 @@ test_that("Input Validation", {
         specificityThreshold = 0,
         confidenceLevel = 95,
         useBootstrap = FALSE,
+        bootstrapMethod = "bca",
+        stratifiedBootstrap = TRUE,
+        bootstrapSamples = 200,
         aucTable = TRUE,
         optimalCutoffs = TRUE,
         cutoffTable = TRUE,
@@ -345,6 +373,15 @@ test_that("Input Validation", {
         comprehensive_output = FALSE,
         clinical_interpretation = FALSE,
         detectImbalance = FALSE,
+        calibrationAnalysis = FALSE,
+        clinicalImpact = FALSE,
+        decisionImpactTable = FALSE,
+        clinicalUtilityCurve = FALSE,
+        multiClassROC = FALSE,
+        timeDependentROC = FALSE,
+        survivalROC = FALSE,
+        internalValidation = FALSE,
+        useObservedPrevalence = TRUE,
         smoothMethod = "none",
         customCutoffs = "",
         clinicalPresets = "custom",
@@ -375,6 +412,9 @@ test_that("Clinical Presets", {
         specificityThreshold = 0,
         confidenceLevel = 95,
         useBootstrap = FALSE,
+        bootstrapMethod = "bca",
+        stratifiedBootstrap = TRUE,
+        bootstrapSamples = 200,
         aucTable = TRUE,
         optimalCutoffs = TRUE,
         cutoffTable = TRUE,
@@ -388,6 +428,15 @@ test_that("Clinical Presets", {
         comprehensive_output = FALSE,
         clinical_interpretation = FALSE,
         detectImbalance = FALSE,
+        calibrationAnalysis = FALSE,
+        clinicalImpact = FALSE,
+        decisionImpactTable = FALSE,
+        clinicalUtilityCurve = FALSE,
+        multiClassROC = FALSE,
+        timeDependentROC = FALSE,
+        survivalROC = FALSE,
+        internalValidation = FALSE,
+        useObservedPrevalence = TRUE,
         smoothMethod = "none",
         customCutoffs = "",
         clinicalPresets = "biomarker_screening",

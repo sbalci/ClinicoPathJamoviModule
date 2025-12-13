@@ -147,6 +147,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         preset <- self$options$clinical_preset
 
+        # Advisory note: presets are informational only for now
+        preset_note <- glue::glue(
+          "Clinical preset '{preset}' selected. Presets are advisory; please verify plot/time settings (cutpoints, time units, plots) match your scenario."
+        )
+        try(jmvcore::note(self$results$medianTable, preset_note), silent = TRUE)
+
         # FIX: Implement functional presets that actually modify options
         # Note: In jamovi, we can't directly modify self$options after initialization,
         # but we can set intelligent defaults based on the preset.
@@ -254,10 +260,20 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       .systematicSample = function(data, target_size = 50) {
         n <- nrow(data)
         if (n <= target_size) return(data)
-        
+
         # Use systematic sampling to preserve distribution
         keep_indices <- round(seq(1, n, length.out = target_size))
         return(data[keep_indices, ])
+      },
+
+      .parseNumericList = function(x, default_vals) {
+        nums <- suppressWarnings(as.numeric(trimws(unlist(strsplit(x, ",")))))
+        nums <- nums[!is.na(nums)]
+        nums <- unique(nums)
+        if (length(nums) == 0 && !missing(default_vals)) {
+          nums <- default_vals
+        }
+        return(nums)
       },
 
       .assessDataQuality = function(results) {
@@ -328,10 +344,23 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         subcondition2b2 <- !is.null(self$options$dxdate)
         subcondition2b3 <- !is.null(self$options$fudate)
 
-        # Outcome validation: either simple outcome OR multi-event with at least one event type
-        outcome_valid <- (subcondition1a && !subcondition1b1) ||
-                        (subcondition1b1 && subcondition1b2) ||
-                        (subcondition1b1 && subcondition1b3)
+        # Outcome validation: either simple outcome OR multi-event with all necessary levels
+        if (!subcondition1b1) {
+          outcome_valid <- subcondition1a
+        } else {
+          required_levels <- c(self$options$dod, self$options$dooc, self$options$awd, self$options$awod)
+          outcome_valid <- all(!is.null(required_levels))
+          # Must also exist in data
+          if (outcome_valid) {
+            level_vars <- c("dod", "dooc", "awd", "awod")
+            for (v in level_vars) {
+              val <- self$options[[v]]
+              if (!is.null(val) && !val %in% levels(self$data[[self$options$outcome]])) {
+                outcome_valid <- FALSE
+              }
+            }
+          }
+        }
 
         # Time validation: either date calculation OR pre-calculated time
         time_valid <- (subcondition2b1 && subcondition2b2 && subcondition2b3) ||
@@ -341,9 +370,16 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (subcondition1a && !self$options$outcome %in% names(self$data)) {
             outcome_valid <- FALSE
         }
-        
+
         if (subcondition2a && !self$options$elapsedtime %in% names(self$data)) {
             time_valid <- FALSE
+        }
+        if (subcondition2b1) {
+            if (is.null(self$options$dxdate) || is.null(self$options$fudate)) {
+              time_valid <- FALSE
+            } else if (!all(c(self$options$dxdate, self$options$fudate) %in% names(self$data))) {
+              time_valid <- FALSE
+            }
         }
 
         return(list(
@@ -472,6 +508,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!tint) {
           ## Precalculated Time ----
 
+          jmvcore::note(self$results$medianTable,
+                        "Using pre-calculated elapsed time; output time unit labels follow the selected display unit but values are taken as provided.")
+
           mydata[["mytime"]] <-
             jmvcore::toNumeric(mydata[[mytime_labelled]])
 
@@ -550,7 +589,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         df_time <- mydata %>% jmvcore::select(c("row_names", "mytime"))
 
-
+        if (any(is.na(df_time$mytime))) {
+          stop("Calculated/entered time contains missing values. Please check date parsing or supplied elapsed time.")
+        }
+        if (any(df_time$mytime <= 0, na.rm = TRUE)) {
+          stop("Time values must be strictly positive. Please verify dates/elapsed time and landmark settings.")
+        }
 
         return(df_time)
 
@@ -661,6 +705,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           }
 
+          unmatched_levels <- setdiff(unique(outcome1[!is.na(outcome1)]),
+                                      c(awd, awod, dod, dooc))
+          if (length(unmatched_levels) > 0) {
+            stop(glue::glue("Outcome includes levels not mapped to event/censoring: {paste(unmatched_levels, collapse = ', ')}. Please adjust level selections."))
+          }
+
+        }
+
+        # Validate recoded outcome values
+        if (any(!mydata[["myoutcome"]] %in% c(0, 1, 2), na.rm = TRUE)) {
+          stop("Outcome recode failed: values must be 0 (censored), 1 (event of interest), or 2 (competing event). Please check selected levels.")
         }
 
         df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
@@ -716,9 +771,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           landmark <- jmvcore::toNumeric(self$options$landmark)
 
+          n_before <- nrow(cleanData)
           cleanData <- cleanData %>%
             dplyr::filter(mytime >= landmark) %>%
             dplyr::mutate(mytime = mytime - landmark)
+          n_after <- nrow(cleanData)
+          if (n_after < n_before) {
+            jmvcore::note(self$results$medianTable,
+                          glue::glue("Landmark analysis removed {n_before - n_after} subjects with time < {landmark}."))
+          }
         }
 
         # Time Dependent Covariate ----
@@ -813,6 +874,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         validation_result <- private$.validateInputs()
 
         if (!validation_result$continue_analysis) {
+          jmvcore::note(self$results$medianTable,
+                        "Time/outcome inputs incomplete or not found. Please check required variables and multi-event level selections.")
           private$.todo()
           self$results$todo$setVisible(TRUE)
           return()
@@ -989,6 +1052,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             x0_95lcl = median_lower,  # Approximate
             x0_95ucl = median_upper   # Approximate
           )
+          if (is.na(median_time)) {
+            jmvcore::note(self$results$medianTable,
+                          "Cumulative incidence did not reach 50%; median time to event not estimable.")
+          }
 
         } else {
           # STANDARD SURVIVAL ANALYSIS using Kaplan-Meier
@@ -1024,6 +1091,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # results1table is already created above (either from CIF or KM)
 
         medianTable <- self$results$medianTable
+        if (private$.isCompetingRisk()) {
+          jmvcore::note(medianTable,
+                        "Median time refers to cumulative incidence of event of interest (competing risks).")
+        }
         data_frame <- results1table
 
         # Handle NA values for competing risk (rmean not applicable)
@@ -1249,11 +1320,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             stop("Unable to perform competing risk analysis. Please check your data.")
           }
           
-          utimes <- self$options$cutp
-          utimes <- strsplit(utimes, ",")
-          utimes <- purrr::reduce(utimes, as.vector)
-          utimes <- as.numeric(utimes)
-          if (length(utimes) == 0) utimes <- private$.getDefaultCutpoints()
+          utimes <- private$.parseNumericList(self$options$cutp, private$.getDefaultCutpoints())
           
           s_summary <- summary(fit_mstate, times = utimes, extend = TRUE)
           
@@ -1326,16 +1393,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           stop("Unable to perform survival analysis. Please check your data.")
         }
 
-        utimes <- self$options$cutp
-
-        utimes <- strsplit(utimes, ",")
-        utimes <- purrr::reduce(utimes, as.vector)
-        utimes <- as.numeric(utimes)
-
-        if (length(utimes) == 0) {
-          # FIX: Use time-unit aware default cutpoints
-          utimes <- private$.getDefaultCutpoints()
-        }
+        utimes <- private$.parseNumericList(self$options$cutp, private$.getDefaultCutpoints())
 
         private$.checkpoint()
 
@@ -1518,14 +1576,24 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myoutcome <- results$name2outcome
         mydata <- results$cleanData
 
+        if (private$.isCompetingRisk()) {
+          jmvcore::note(self$results$personTimeTable,
+                        "Person-time rates use the event of interest (code 1); competing events are not counted.")
+        }
+
         # Ensure time is numeric
         mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
 
         # Get total observed time
         total_time <- sum(mydata[[mytime]])
 
-        # FIX: Count events properly - any non-zero value is an event (handles competing risk with code 2)
-        total_events <- sum(mydata[[myoutcome]] >= 1, na.rm = TRUE)
+        # Define event indicator consistently
+        if (private$.isCompetingRisk()) {
+          event_indicator <- mydata[[myoutcome]] == 1  # event of interest only
+        } else {
+          event_indicator <- mydata[[myoutcome]] >= 1  # any event
+        }
+        total_events <- sum(event_indicator, na.rm = TRUE)
 
         # Get time unit
         time_unit <- self$options$timetypeoutput
@@ -1551,8 +1619,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         ))
 
         # Parse time intervals for stratified analysis
-        time_intervals <- as.numeric(unlist(strsplit(self$options$time_intervals, ",")))
-        time_intervals <- sort(unique(time_intervals))
+        time_intervals <- private$.parseNumericList(self$options$time_intervals)
+        time_intervals <- sort(time_intervals)
 
         if (length(time_intervals) > 0) {
           # Create time intervals
@@ -1570,7 +1638,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               # But truncate follow-up time to the interval end
               follow_up_times <- pmin(mydata[[mytime]], end_time)
               # Count only events that occurred within this interval
-              events_in_interval <- sum(mydata[[myoutcome]] == 1 & mydata[[mytime]] <= end_time)
+              events_in_interval <- sum(event_indicator & mydata[[mytime]] <= end_time, na.rm = TRUE)
             } else {
               # For later intervals, include only patients who survived past the previous cutpoint
               survivors <- mydata[[mytime]] > start_time
@@ -1587,9 +1655,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               follow_up_times <- adjusted_exit_time - adjusted_entry_time
 
               # Count only events that occurred within this interval
-              events_in_interval <- sum(interval_data[[myoutcome]] == 1 &
+              interval_events_flag <- event_indicator[survivors]
+              events_in_interval <- sum(interval_events_flag &
                                           interval_data[[mytime]] <= end_time &
-                                          interval_data[[mytime]] > start_time)
+                                          interval_data[[mytime]] > start_time,
+                                        na.rm = TRUE)
             }
 
             # Sum person-time in this interval
@@ -1716,6 +1786,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return()
         }
 
+        # Baseline hazard not appropriate for competing risk multi-state coding
+        if (private$.isCompetingRisk()) {
+          jmvcore::note(self$results$baselineHazardTable,
+                        "Baseline hazard is not computed for competing risk analyses.")
+          return()
+        }
+
         # Extract data
         mytime <- results$name1time
         myoutcome <- results$name2outcome
@@ -1723,6 +1800,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Ensure time is numeric
         mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+
+        if (sum(mydata[[myoutcome]] >= 1, na.rm = TRUE) == 0) {
+          jmvcore::note(self$results$baselineHazardTable,
+                        "Baseline hazard not estimated because no events were observed.")
+          return()
+        }
 
         # Create survival object
         surv_obj <- survival::Surv(time = mydata[[mytime]], event = mydata[[myoutcome]])
@@ -1933,6 +2016,27 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return()
         }
 
+        if (self$options$endplot <= 0) {
+          stop("Plot end time must be positive.")
+        }
+        if (self$options$ybegin_plot >= self$options$yend_plot) {
+          stop("Start y-axis must be smaller than end y-axis for plots.")
+        }
+
+        if (self$options$endplot <= 0) {
+          stop("Plot end time must be positive.")
+        }
+        if (self$options$ybegin_plot >= self$options$yend_plot) {
+          stop("Start y-axis must be smaller than end y-axis for plots.")
+        }
+
+        if (self$options$endplot <= 0) {
+          stop("Plot end time must be positive.")
+        }
+        if (self$options$ybegin_plot >= self$options$yend_plot) {
+          stop("Start y-axis must be smaller than end y-axis for plots.")
+        }
+
         mytime <- results$name1time
         mytime_orig <- jmvcore::constructFormula(terms = mytime) # Keep original for plotting labels
 
@@ -1987,7 +2091,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 xlab = paste0('Time (', self$options$timetypeoutput, ')'),
                 # The colors are automatically set by ggcompetingrisks based on event types
                 # surv.median.line is not applicable to CIF
-                censor = self$options$censored,
                 xlim = c(0, self$options$endplot),
                 ylim = c(self$options$ybegin_plot, self$options$yend_plot),
                 risk.table = FALSE # Risk table not directly supported by ggcompetingrisks in same way as ggsurvplot

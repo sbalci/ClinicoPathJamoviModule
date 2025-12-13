@@ -160,3 +160,56 @@ test_that("irecist handles pseudoprogression", {
     # I will assert current behavior for now or skip.
     expect_true(TRUE) 
 })
+
+test_that("threshold options are respected", {
+    data <- data.frame(
+        patient = c("P5", "P5"),
+        time = c(0, 8),
+        target_sum = c(100, 55), # 45% decrease
+        new_lesions = c(0, 0),
+        stringsAsFactors = FALSE
+    )
+
+    results <- irecistClass$new(
+        options = irecistOptions$new(
+            patientId = "patient",
+            assessmentTime = "time",
+            targetLesionSum = "target_sum",
+            newLesions = "new_lesions",
+            prThreshold = 40, # stricter PR threshold
+            requireConfirmation = FALSE
+        ),
+        data = data
+    )
+    results$run()
+
+    resp <- results$results$responseTable$asDF
+    expect_equal(resp$irecistCategory[2], "iPR")
+})
+
+test_that("non-target PD triggers iUPD", {
+    data <- data.frame(
+        patient = c("P6", "P6"),
+        time = c(0, 8),
+        target_sum = c(100, 102), # small increase
+        new_lesions = c(0, 0),
+        non_target = c("non-CR/non-PD", "PD"),
+        stringsAsFactors = FALSE
+    )
+
+    results <- irecistClass$new(
+        options = irecistOptions$new(
+            patientId = "patient",
+            assessmentTime = "time",
+            targetLesionSum = "target_sum",
+            newLesions = "new_lesions",
+            nonTargetStatus = "non_target",
+            requireConfirmation = TRUE
+        ),
+        data = data
+    )
+    results$run()
+
+    resp <- results$results$responseTable$asDF
+    expect_equal(resp$irecistCategory[2], "iUPD")
+})

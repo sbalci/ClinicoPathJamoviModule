@@ -9,6 +9,8 @@ pcacomponenttest(
   vars,
   ncomp = 5,
   nperm = 1000,
+  stop_rule = TRUE,
+  seed = 123,
   center = TRUE,
   scale = TRUE,
   conflevel = 0.95,
@@ -36,6 +38,12 @@ components.}
 \item{nperm}{Number of permutations to generate null distribution
 (100-10000). Higher values provide more accurate p-values but take longer.
 Minimum p-value = 1/(nperm+1). For p<0.001, use nperm>=1000.}
+
+\item{stop_rule}{Stop testing after the first non-significant component
+(Sequential Testing). Recommended: TRUE to prevent Type I error inflation.
+If FALSE, all components up to ncomp are tested (Batch Testing).}
+
+\item{seed}{Random seed for reproducibility of permutation results.}
 
 \item{center}{Center variables to have mean = 0 before PCA. Recommended:
 TRUE for most analyses.}
@@ -73,6 +81,7 @@ components.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$results} \tab \tab \tab \tab \tab Statistical significance of principal components based on permutation testing \cr
 \code{results$vafplot} \tab \tab \tab \tab \tab Visualization comparing original VAF to permuted null distribution \cr
 \code{results$screePlot} \tab \tab \tab \tab \tab an image \cr

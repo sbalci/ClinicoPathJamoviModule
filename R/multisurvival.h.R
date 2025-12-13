@@ -43,6 +43,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             adjexplanatory = NULL,
             ac_method = "average",
             showNomogram = FALSE,
+            use_modelSelection = FALSE,
+            modelSelection = "enter",
+            selectionCriteria = "aic",
+            pEntry = 0.05,
+            pRemoval = 0.1,
             use_stratify = FALSE,
             stratvar = NULL,
             use_aft = FALSE,
@@ -57,7 +62,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             survmetrics_ibs_points = 100,
             survmetrics_show_plots = FALSE,
             showExplanations = FALSE,
-            showSummaries = FALSE, ...) {
+            showSummaries = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -142,7 +147,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..dod <- jmvcore::OptionLevel$new(
                 "dod",
                 dod,
@@ -296,6 +302,39 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showNomogram",
                 showNomogram,
                 default=FALSE)
+            private$..use_modelSelection <- jmvcore::OptionBool$new(
+                "use_modelSelection",
+                use_modelSelection,
+                default=FALSE,
+                hidden=TRUE)
+            private$..modelSelection <- jmvcore::OptionList$new(
+                "modelSelection",
+                modelSelection,
+                options=list(
+                    "enter",
+                    "forward",
+                    "backward",
+                    "both"),
+                default="enter")
+            private$..selectionCriteria <- jmvcore::OptionList$new(
+                "selectionCriteria",
+                selectionCriteria,
+                options=list(
+                    "aic",
+                    "lrt"),
+                default="aic")
+            private$..pEntry <- jmvcore::OptionNumber$new(
+                "pEntry",
+                pEntry,
+                min=0,
+                max=1,
+                default=0.05)
+            private$..pRemoval <- jmvcore::OptionNumber$new(
+                "pRemoval",
+                pRemoval,
+                min=0,
+                max=1,
+                default=0.1)
             private$..use_stratify <- jmvcore::OptionBool$new(
                 "use_stratify",
                 use_stratify,
@@ -368,7 +407,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showSummaries <- jmvcore::OptionBool$new(
                 "showSummaries",
                 showSummaries,
-                default=FALSE)
+                default=TRUE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -411,6 +450,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..adjexplanatory)
             self$.addOption(private$..ac_method)
             self$.addOption(private$..showNomogram)
+            self$.addOption(private$..use_modelSelection)
+            self$.addOption(private$..modelSelection)
+            self$.addOption(private$..selectionCriteria)
+            self$.addOption(private$..pEntry)
+            self$.addOption(private$..pRemoval)
             self$.addOption(private$..use_stratify)
             self$.addOption(private$..stratvar)
             self$.addOption(private$..use_aft)
@@ -469,6 +513,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         adjexplanatory = function() private$..adjexplanatory$value,
         ac_method = function() private$..ac_method$value,
         showNomogram = function() private$..showNomogram$value,
+        use_modelSelection = function() private$..use_modelSelection$value,
+        modelSelection = function() private$..modelSelection$value,
+        selectionCriteria = function() private$..selectionCriteria$value,
+        pEntry = function() private$..pEntry$value,
+        pRemoval = function() private$..pRemoval$value,
         use_stratify = function() private$..use_stratify$value,
         stratvar = function() private$..stratvar$value,
         use_aft = function() private$..use_aft$value,
@@ -526,6 +575,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..adjexplanatory = NA,
         ..ac_method = NA,
         ..showNomogram = NA,
+        ..use_modelSelection = NA,
+        ..modelSelection = NA,
+        ..selectionCriteria = NA,
+        ..pEntry = NA,
+        ..pRemoval = NA,
         ..use_stratify = NA,
         ..stratvar = NA,
         ..use_aft = NA,
@@ -553,6 +607,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         text2 = function() private$.items[["text2"]],
         multivariableCoxSummaryHeading = function() private$.items[["multivariableCoxSummaryHeading"]],
         multivariableCoxSummary = function() private$.items[["multivariableCoxSummary"]],
+        glossaryPanel = function() private$.items[["glossaryPanel"]],
+        assumptionsPanel = function() private$.items[["assumptionsPanel"]],
         aftModelHeading = function() private$.items[["aftModelHeading"]],
         aftModelTable = function() private$.items[["aftModelTable"]],
         aftSummaryHeading = function() private$.items[["aftSummaryHeading"]],
@@ -634,7 +690,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "use_modelSelection")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="multivariableCoxHeading",
@@ -653,7 +710,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "use_modelSelection")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
@@ -668,7 +726,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "use_modelSelection")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="multivariableCoxSummaryHeading",
@@ -689,6 +748,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossaryPanel",
+                title="\uD83D\uDCD6 Statistical Glossary",
+                visible="(showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptionsPanel",
+                title="Assumptions & Caveats",
+                visible="(showExplanations)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="aftModelHeading",
@@ -1603,6 +1672,22 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param adjexplanatory .
 #' @param ac_method Method for computing adjusted survival curves
 #' @param showNomogram .
+#' @param use_modelSelection (DEPRECATED - Not used) Model selection is
+#'   controlled by the 'modelSelection' option below. Set modelSelection to
+#'   'forward', 'backward', or 'both' to enable selection, or 'enter' to include
+#'   all variables without selection. This boolean flag is maintained for
+#'   backward compatibility but has no effect on the analysis.
+#' @param modelSelection The method used to select variables: - enter:
+#'   Includes all variables (no selection) - forward: Adds variables one at a
+#'   time if they improve the model - backward: Removes variables that do not
+#'   significantly contribute - both: Combination of forward and backward steps
+#' @param selectionCriteria The criterion used for adding or removing
+#'   variables in model selection: - aic: Balances model fit and complexity -
+#'   lrt: Uses likelihood ratio tests to decide inclusion/removal
+#' @param pEntry Significance level at which a variable enters the model
+#'   during forward or stepwise selection.
+#' @param pRemoval Significance level at which a variable is removed from the
+#'   model during backward or stepwise selection.
 #' @param use_stratify If true, uses stratification to handle variables that
 #'   violate the proportional hazards assumption. Stratification creates
 #'   separate baseline hazard functions for different groups.
@@ -1648,8 +1733,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   component to help interpret the statistical methods and results.
 #' @param showSummaries Display natural language summaries alongside tables
 #'   and plots. These summaries provide plain-language interpretations of the
-#'   statistical results. Turn off to reduce visual clutter when summaries are
-#'   not needed.
+#'   statistical results. Recommended for clinical users. Turn off to reduce
+#'   visual clutter when summaries are not needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1658,6 +1743,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aftModelHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$aftModelTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$aftSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1757,6 +1844,11 @@ multisurvival <- function(
     adjexplanatory = NULL,
     ac_method = "average",
     showNomogram = FALSE,
+    use_modelSelection = FALSE,
+    modelSelection = "enter",
+    selectionCriteria = "aic",
+    pEntry = 0.05,
+    pRemoval = 0.1,
     use_stratify = FALSE,
     stratvar = NULL,
     use_aft = FALSE,
@@ -1771,7 +1863,7 @@ multisurvival <- function(
     survmetrics_ibs_points = 100,
     survmetrics_show_plots = FALSE,
     showExplanations = FALSE,
-    showSummaries = FALSE) {
+    showSummaries = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -1838,6 +1930,11 @@ multisurvival <- function(
         adjexplanatory = adjexplanatory,
         ac_method = ac_method,
         showNomogram = showNomogram,
+        use_modelSelection = use_modelSelection,
+        modelSelection = modelSelection,
+        selectionCriteria = selectionCriteria,
+        pEntry = pEntry,
+        pRemoval = pRemoval,
         use_stratify = use_stratify,
         stratvar = stratvar,
         use_aft = use_aft,

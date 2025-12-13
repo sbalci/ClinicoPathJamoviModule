@@ -81,6 +81,7 @@ detection results and methodological notes.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$outlier_table} \tab \tab \tab \tab \tab a html \cr
 \code{results$method_comparison} \tab \tab \tab \tab \tab a html \cr

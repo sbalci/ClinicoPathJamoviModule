@@ -18,6 +18,13 @@ recistClass <- R6::R6Class(
         .responseData = NULL,
         .bestResponseData = NULL,
         .baselineData = NULL,
+        .summaryStatus = list(
+             warnings = character(),
+             exclusions = character(),
+             n_patients = 0,
+             n_lesions_total = 0,
+             n_lesions_tracked = 0
+        ),
 
         # ---- Initialization ----
         .init = function() {
@@ -90,6 +97,11 @@ recistClass <- R6::R6Class(
                 self$options$stratifiedAnalysis && !is.null(self$options$groupVar)
             )
         },
+        
+        # ---- Helper: Add Warning ----
+        .addWarning = function(msg) {
+             private$.summaryStatus$warnings <- c(private$.summaryStatus$warnings, msg)
+        },
 
         # ---- Main Analysis ----
         .run = function() {
@@ -134,6 +146,8 @@ recistClass <- R6::R6Class(
                 if (self$options$showReference) {
                     private$.populateReferenceInfo()
                 }
+                
+                private$.populateRunSummary()
 
             }, error = function(e) {
                 self$results$instructions$setContent(
@@ -204,46 +218,92 @@ recistClass <- R6::R6Class(
         .selectTargetLesions = function() {
 
             data <- private$.rawData
+            
+            # Reset status
+            private$.summaryStatus$n_patients <- length(unique(data$patientId))
+            private$.summaryStatus$n_lesions_total <- length(unique(data$lesionId[data$lesionType == "target"]))
 
             # Mark target lesions for inclusion
             data$includedInSum <- FALSE
+            data$exclusionReason <- NA_character_
 
             # Get baseline (first assessment per patient)
             baseline <- data %>%
                 group_by(patientId) %>%
-                filter(assessmentTime == min(assessmentTime))
+                arrange(assessmentTime) %>%
+                filter(row_number() == 1) %>%
+                ungroup()
 
-            # For each patient at baseline, select target lesions
+            # For each patient, select largest valid target lesions at baseline
+            tracked_lesions_list <- list()
+
             for (pid in unique(baseline$patientId)) {
+                # Get target lesions at baseline
                 patient_baseline <- baseline %>%
                     filter(patientId == pid, lesionType == "target") %>%
                     arrange(desc(diameter))
-
-                if (nrow(patient_baseline) == 0) next
+                
+                # Check if patient has NO target lesions at baseline
+                if (nrow(patient_baseline) == 0) {
+                     private$.addWarning(paste0("Patient ", pid, ": No target lesions found at baseline."))
+                     next
+                }
 
                 selected <- character(0)
                 organs_count <- table(character(0))
-
+                
+                # Select up to max
                 for (i in 1:nrow(patient_baseline)) {
                     lesion <- patient_baseline$lesionId[i]
                     organ <- patient_baseline$organ[i]
 
-                    # Check rules
-                    if (length(selected) >= self$options$maxTargetLesions) break
+                    # CAPS: Max Total
+                    if (length(selected) >= self$options$maxTargetLesions) {
+                         data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max total lesions"
+                         next
+                    }
                     
+                    # CAPS: Max Per Organ
                     current_count <- organs_count[organ]
                     if (is.na(current_count)) current_count <- 0
                     
-                    if (current_count >= self$options$maxPerOrgan) next
+                    if (current_count >= self$options$maxPerOrgan) {
+                         data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max per organ"
+                         next
+                    }
 
                     selected <- c(selected, lesion)
                     organs_count[organ] <- current_count + 1
+                    
+                    # Track this lesion ID for this patient FOREVER
+                    # (RECIST: "Target lesions should be selected at baseline and followed...")
                 }
-
-                # Mark these lesions as included across all assessments
+                
+                tracked_lesions_list[[pid]] <- selected
+                
+                # Mark selected matches in the FULL dataset
+                # Only mark if it MATCHES the ID selected at baseline
                 data$includedInSum[data$patientId == pid & data$lesionId %in% selected] <- TRUE
+                
+                # Identify non-selected target lesions (orphans or late appearances)
+                # Any target lesion for this patient NOT in 'selected' is excluded
+                # Note: This handles "new" lesions appearing as 'target' type incorrectly by user - they should be 'new' type.
+                # If they appear later with type='target', they are ignored from sum.
+                
+                # Log exclusions for baseline items
+                excluded_at_baseline <- patient_baseline$lesionId[!patient_baseline$lesionId %in% selected]
+                if (length(excluded_at_baseline) > 0) {
+                     msg <- paste0("Patient ", pid, ": Lesions excluded at baseline (max limits): ", paste(excluded_at_baseline, collapse=", "))
+                     private$.summaryStatus$exclusions <- c(private$.summaryStatus$exclusions, msg)
+                }
             }
-
+            
+            # Global check for target lesions appearing mid-stream that were NOT at baseline
+            # (Valid targets must be present at baseline)
+            # We already set includedInSum=TRUE only for those matching baseline IDs.
+            # So any target lesion with includedInSum=FALSE is effectively excluded.
+            
+            private$.summaryStatus$n_lesions_tracked <- sum(data$includedInSum & data$assessmentTime == min(data$assessmentTime)) 
             private$.lesionData <- data
         },
 
@@ -257,10 +317,34 @@ recistClass <- R6::R6Class(
                 filter(includedInSum == TRUE) %>%
                 group_by(patientId, assessmentTime) %>%
                 summarise(
-                    targetSum = if(any(is.na(diameter))) NA_real_ else sum(diameter),
-                    numTargetLesions = n(),
+                    targetSum = if(any(is.na(diameter))) NA_real_ else sum(diameter, na.rm=TRUE),
+                    # NE Logic: If any expected target lesion is missing (NA), sum is suspect.
+                    # We need to know if ALL tracked lesions are present.
+                    # This simple group_by might miss lesions that are completely missing rows for a timepoint.
+                    # Strict way: Count tracked lesions per patient.
+                    n_present = n(), 
                     .groups = "drop"
                 )
+            
+            # Post-hoc strictness: 
+            # We need to look up how many lesions were tracked for each patient at baseline.
+            baseline_counts <- data %>%
+                 filter(includedInSum == TRUE) %>%
+                 group_by(patientId) %>%
+                 summarise(n_tracked = length(unique(lesionId)), .groups="drop")
+            
+            targetSums <- targetSums %>%
+                 left_join(baseline_counts, by="patientId") %>%
+                 mutate(
+                      is_missing_lesions = n_present < n_tracked,
+                      targetSum = ifelse(is_missing_lesions, NA_real_, targetSum)
+                 )
+            
+            if (any(targetSums$is_missing_lesions, na.rm=TRUE)) {
+                 affected <- unique(targetSums$patientId[which(targetSums$is_missing_lesions)])
+                 if (length(affected) > 0)
+                    private$.addWarning(paste0("Incomplete target lesion data (NE) for patients: ", paste(head(affected, 5), collapse=", ")))
+            }
 
             # Count non-target lesions
             nonTargetCounts <- data %>%
@@ -369,44 +453,42 @@ recistClass <- R6::R6Class(
                     nonTargetResponse = ifelse(is.na(nonTargetResponse), "N/A", nonTargetResponse)
                 )
 
-            # Overall response combining target, non-target, and new lesions
-            data <- data %>%
-                mutate(
+             data <- data %>%
+                 mutate(
                     overallResponse = case_when(
-                        # New lesions = PD
+                        # 1. New Lesions = PD ALWAYS
                         newLesions == "Yes" ~ "PD",
 
-                        # Non-target PD = PD
+                        # 2. Non-target PD = PD ALWAYS
                         nonTargetResponse == "PD" ~ "PD",
-
-                        # Target CR + Non-target CR = CR
-                        targetResponse == "CR" & nonTargetResponse %in% c("CR", "N/A") ~ "CR",
-
-                        # Target PR + Non-target non-PD = PR
-                        targetResponse == "PR" & nonTargetResponse %in% c("CR", "non-CR/non-PD", "N/A") ~ "PR",
-
-                        # Target SD or PR + Non-target non-CR/non-PD = SD
-                        targetResponse %in% c("SD", "PR") & nonTargetResponse == "non-CR/non-PD" ~ "SD",
-
-                        # Target PD = PD
+                        
+                        # 3. Target PD = PD
                         targetResponse == "PD" ~ "PD",
-
-                        # Target NE = NE
+                        
+                        # 4. If Target is NE, and no PD above -> NE
                         targetResponse == "NE" ~ "NE",
-
-                        # Default SD
-                        TRUE ~ "SD"
+                        
+                        # 5. Non-target CR logic
+                        targetResponse == "CR" & nonTargetResponse %in% c("CR", "N/A") ~ "CR",
+                        
+                        # 6. PR
+                        targetResponse == "PR" & nonTargetResponse %in% c("CR", "non-CR/non-PD", "N/A") ~ "PR",
+                        
+                        # 7. SD
+                        targetResponse %in% c("SD", "PR") & nonTargetResponse == "non-CR/non-PD" ~ "SD",
+                        
+                        TRUE ~ "SD" # Fallback, usually implies target=SD and NT=missing/ok
                     ),
-
+                    
                     confirmed = "No"
-                )
-
-            # Apply confirmation logic if required
-            if (self$options$requireConfirmation) {
-                data <- private$.applyConfirmation(data)
-            }
-
-            private$.responseData <- data
+                 )
+                 
+                 # Apply confirmation logic if required
+                 if (self$options$requireConfirmation) {
+                      data <- private$.applyConfirmation(data)
+                 }
+                 
+                 private$.responseData <- data
         },
 
         # ---- Confirmation Logic ----
@@ -765,6 +847,41 @@ recistClass <- R6::R6Class(
             )
 
             self$results$referenceInfo$setContent(html)
+        },
+
+        
+        .populateRunSummary = function() {
+             
+             status <- private$.summaryStatus
+             
+             html <- paste0(
+                  "<div style='font-size: 13px;'>",
+                  "<h4>Analysis Summary</h4>",
+                  "<ul>",
+                  "<li><b>Patients Processed:</b> ", status$n_patients, "</li>",
+                  "<li><b>Total Lesions:</b> ", status$n_lesions_total, "</li>",
+                  "<li><b>Tracked Target Lesions:</b> ", status$n_lesions_tracked, "</li>",
+                  "</ul>"
+             )
+             
+             if (length(status$exclusions) > 0) {
+                  html <- paste0(html, "<h5 style='color: orange;'>Excluded Lesions (Rules)</h5><ul>")
+                  for(m in status$exclusions) {
+                       html <- paste0(html, "<li>", m, "</li>")
+                  }
+                  html <- paste0(html, "</ul>")
+             }
+             
+             if (length(status$warnings) > 0) {
+                  html <- paste0(html, "<h5 style='color: red;'>Warnings</h5><ul>")
+                  for(w in status$warnings) {
+                       html <- paste0(html, "<li>", w, "</li>")
+                  }
+                  html <- paste0(html, "</ul>")
+             }
+             
+             html <- paste0(html, "</div>")
+             self$results$runSummary$setContent(html)
         },
 
         # ---- Plotting Functions ----

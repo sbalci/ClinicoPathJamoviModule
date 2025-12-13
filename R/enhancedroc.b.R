@@ -6,7 +6,7 @@
 #' @import jmvcore
 #' @import pROC
 #' @importFrom caret confusionMatrix
-#' @importFrom stats quantile
+#' @importFrom stats quantile binom.test glm predict
 #' @importFrom dplyr arrange desc
 #' @export
 
@@ -16,10 +16,12 @@ enhancedROCClass <- R6::R6Class(
     private = list(
         .rocResults = NULL,
         .data = NULL,
+        .binaryData = NULL,
         .outcome = NULL,
         .predictors = NULL,
         .rocObjects = NULL,
         .positiveClass = NULL,
+        .multiClassOutcome = NULL,
         .presetConfig = NULL,
 
         # Variable name escaping utility for special characters
@@ -69,6 +71,7 @@ enhancedROCClass <- R6::R6Class(
             # This ensures all downstream confusion matrix and metric calculations
             # use the same sample as the ROC analysis (same NA removal, same outcome re-leveling)
             private$.data <- analysisData
+            private$.binaryData <- analysisData[[private$.outcome]]
 
             # Checkpoint before expensive ROC analysis
             private$.checkpoint()
@@ -79,6 +82,7 @@ enhancedROCClass <- R6::R6Class(
             # Check for class imbalance
             if (self$options$detectImbalance) {
                 private$.checkClassImbalance(analysisData)
+                private$.populatePrecisionRecall(analysisData)
             }
 
             # Checkpoint after ROC analysis, before populating tables
@@ -278,6 +282,7 @@ enhancedROCClass <- R6::R6Class(
             
             # Validate binary nature
             levels_count <- length(levels(outcome_var))
+            positive_class <- NULL
             if (levels_count < 2) {
                 self$results$results$instructions$setContent(
                     paste0("<div style='padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;'>",
@@ -319,8 +324,14 @@ enhancedROCClass <- R6::R6Class(
                         paste(private$.getInstructions(), info_msg)
                     )
                     
-                    # Do NOT convert to binary here
-                    
+                    # Keep original outcome for multi-class calculations
+                    private$.multiClassOutcome <- outcome_var
+                    # Binary fallback for downstream metrics
+                    binary_outcome <- factor(ifelse(outcome_var == private$.positiveClass, private$.positiveClass, "Other"),
+                                             levels = c("Other", private$.positiveClass))
+                    data[[private$.outcome]] <- binary_outcome
+                    private$.binaryData <- binary_outcome
+                    outcome_var <- binary_outcome
                 } else {
                     # Convert multi-level outcome to binary using selected positive class
                     available_levels <- levels(outcome_var)
@@ -407,6 +418,9 @@ enhancedROCClass <- R6::R6Class(
             # CRITICAL FIX: Store the determined positive class for use in imbalance detection
             # positive_class was set in the multi-level (line 255) or binary (lines 297, 320) branches above
             private$.positiveClass <- positive_class
+            if (is.null(private$.binaryData)) {
+                private$.binaryData <- data[[private$.outcome]]
+            }
 
             # Check predictor variables are numeric
             non_numeric_preds <- c()
@@ -506,6 +520,35 @@ enhancedROCClass <- R6::R6Class(
                         response_var <- outcome_col
                     }
 
+                    # Configure CI method and bootstrap behavior
+                    use_boot <- isTRUE(self$options$useBootstrap)
+                    ci_method <- if (use_boot) "bootstrap" else "delong"
+                    boot_n <- if (use_boot) (self$options$bootstrapSamples %||% 200) else 0
+                    boot_strat <- if (use_boot) {
+                        if (is.null(self$options$stratifiedBootstrap)) TRUE else self$options$stratifiedBootstrap
+                    } else {
+                        TRUE
+                    }
+                    boot_type <- if (use_boot) {
+                        switch(self$options$bootstrapMethod,
+                            bca = "bca",
+                            percentile = "perc",
+                            basic = "basic",
+                            "bca"
+                        )
+                    } else {
+                        "bca"
+                    }
+
+                    # Warn when custom tied handling is requested (not supported by pROC)
+                    if (!is.null(self$options$tiedScoreHandling) && self$options$tiedScoreHandling != "average") {
+                        current_msg <- self$results$results$instructions$content %||% private$.getInstructions()
+                        self$results$results$instructions$setContent(
+                            paste0(current_msg,
+                                   "<p><strong>Note:</strong> Custom tied score handling is not supported by pROC; using default averaging.</p>")
+                        )
+                    }
+
                     # Create ROC object with optional smoothing
                     roc_obj <- pROC::roc(
                         response = response_var,
@@ -513,7 +556,10 @@ enhancedROCClass <- R6::R6Class(
                         direction = direction,
                         ci = TRUE,
                         conf.level = self$options$confidenceLevel / 100,
-                        boot.n = if(self$options$useBootstrap) self$options$bootstrapSamples else 0
+                        ci.method = ci_method,
+                        boot.n = boot_n,
+                        boot.stratified = boot_strat,
+                        boot.ci.type = boot_type
                     )
 
                     # Apply smoothing if requested
@@ -595,9 +641,9 @@ enhancedROCClass <- R6::R6Class(
 
         .calculateOptimalCutoff = function(roc_obj, data, predictor) {
             # Determine thresholds based on presets or options
-            sens_threshold <- self$options$sensitivityThreshold
-            spec_threshold <- self$options$specificityThreshold
-            use_optimization <- self$options$youdenOptimization
+            sens_threshold <- self$options$sensitivityThreshold %||% 0
+            spec_threshold <- self$options$specificityThreshold %||% 0
+            use_optimization <- isTRUE(self$options$youdenOptimization)
 
             if (!is.null(private$.presetConfig)) {
                 config <- private$.presetConfig
@@ -955,10 +1001,10 @@ enhancedROCClass <- R6::R6Class(
                 optimal <- result$optimal_cutoff
                 cm <- optimal$confusion_matrix
 
-                # Calculate confidence intervals for sensitivity and specificity
-                sens_ci <- private$.calculateBinomialCI(optimal$sensitivity,
+                # Calculate confidence intervals for sensitivity and specificity (exact)
+                sens_ci <- private$.calculateBinomialCI(optimal$true_positive,
                                                       optimal$true_positive + optimal$false_negative)
-                spec_ci <- private$.calculateBinomialCI(optimal$specificity,
+                spec_ci <- private$.calculateBinomialCI(optimal$true_negative,
                                                       optimal$true_negative + optimal$false_positive)
 
                 # Calculate balanced accuracy
@@ -982,7 +1028,20 @@ enhancedROCClass <- R6::R6Class(
         .populateClinicalMetrics = function() {
             clinTable <- self$results$results$clinicalApplicationMetrics
 
-            prevalence <- self$options$prevalence
+            observed_prevalence <- mean(private$.binaryData == levels(private$.binaryData)[2])
+            prevalence <- if (isTRUE(self$options$useObservedPrevalence)) {
+                observed_prevalence
+            } else if (!is.null(self$options$prevalence) && !is.na(self$options$prevalence)) {
+                self$options$prevalence
+            } else {
+                observed_prevalence
+            }
+            if (!is.na(prevalence) && abs(prevalence - observed_prevalence) > 0.05 && !isTRUE(self$options$useObservedPrevalence)) {
+                note_html <- sprintf("<p><strong>Prevalence note:</strong> Calculations use a user-specified prevalence of %.3f (observed %.3f).</p>",
+                                     prevalence, observed_prevalence)
+                current_msg <- self$results$results$instructions$content %||% private$.getInstructions()
+                self$results$results$instructions$setContent(paste0(current_msg, note_html))
+            }
 
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
@@ -1432,7 +1491,10 @@ enhancedROCClass <- R6::R6Class(
 
         .checkClassImbalance = function(analysisData) {
             # Get outcome variable
-            outcome <- analysisData[[private$.outcome]]
+            outcome <- private$.binaryData
+            if (is.null(outcome)) {
+                outcome <- analysisData[[private$.outcome]]
+            }
 
             # Convert to factor if needed
             if (!is.factor(outcome)) {
@@ -1447,15 +1509,28 @@ enhancedROCClass <- R6::R6Class(
 
             # CRITICAL FIX: Use stored positive class instead of option (which may be empty)
             # private$.positiveClass was set in .prepareData() after determining positive class
-            positive_class_label <- if (!is.null(private$.positiveClass) && private$.positiveClass != "") {
+            positive_class_label <- if (!is.null(private$.positiveClass) &&
+                                       length(private$.positiveClass) > 0 &&
+                                       private$.positiveClass != "") {
                 private$.positiveClass
             } else {
                 # Fallback: assume second level is positive
                 levels(outcome)[2]
             }
 
+            if (!positive_class_label %in% names(class_counts)) {
+                positive_class_label <- names(class_counts)[2]
+            }
+
             n_positive <- as.integer(class_counts[positive_class_label])
             n_negative <- sum(class_counts) - n_positive
+
+            # If counts are missing or zero, exit gracefully
+            if (length(n_positive) == 0 || length(n_negative) == 0 ||
+                is.na(n_positive) || is.na(n_negative) ||
+                n_positive == 0 || n_negative == 0) {
+                return()
+            }
 
             # Calculate ratio (always express as larger:smaller)
             if (n_positive > n_negative) {
@@ -1472,6 +1547,9 @@ enhancedROCClass <- R6::R6Class(
 
             # Determine if imbalanced
             threshold <- self$options$imbalanceThreshold
+            if (is.null(threshold) || length(threshold) == 0 || is.na(threshold)) {
+                threshold <- 3
+            }
             is_imbalanced <- ratio_value >= threshold
 
             # Determine severity
@@ -1791,11 +1869,64 @@ enhancedROCClass <- R6::R6Class(
             }
         },
 
-        .calculateBinomialCI = function(proportion, n) {
-            # Simple Wald confidence interval
-            se <- sqrt(proportion * (1 - proportion) / n)
-            margin <- 1.96 * se
-            return(c(max(0, proportion - margin), min(1, proportion + margin)))
+        .calculateBinomialCI = function(successes, n) {
+            # Exact (Clopper-Pearson) confidence interval
+            bt <- suppressWarnings(binom.test(successes, n))
+            return(bt$conf.int)
+        },
+
+        .computePRMetrics = function(scores, labels, positive_label) {
+            # Simple PR curve and AUPRC calculation without extra dependencies
+            y <- as.integer(labels == positive_label)
+            if (length(unique(y)) < 2) {
+                return(NULL)
+            }
+            ord <- order(scores, decreasing = TRUE)
+            y_sorted <- y[ord]
+            tp_cum <- cumsum(y_sorted)
+            fp_cum <- cumsum(1 - y_sorted)
+            total_pos <- sum(y_sorted)
+            recall <- tp_cum / total_pos
+            precision <- tp_cum / (tp_cum + fp_cum)
+
+            # prepend (0,1) for proper step interpolation
+            recall <- c(0, recall)
+            precision <- c(1, precision)
+
+            auprc <- sum(diff(recall) * precision[-1], na.rm = TRUE)
+            f1_scores <- 2 * precision * recall / (precision + recall)
+            best_f1 <- max(f1_scores, na.rm = TRUE)
+
+            list(
+                auprc = auprc,
+                max_f1 = best_f1,
+                precision = ifelse(length(precision) > 1, precision[2], NA),
+                recall = ifelse(length(recall) > 1, recall[2], NA),
+                avg_precision = auprc
+            )
+        },
+
+        .populatePrecisionRecall = function(analysisData) {
+            if (!self$options$detectImbalance) return()
+
+            prTable <- self$results$results$precisionRecallTable
+            outcome <- analysisData[[private$.outcome]]
+
+            for (predictor in private$.predictors) {
+                scores <- analysisData[[predictor]]
+                pr <- private$.computePRMetrics(scores, outcome,
+                                               private$.positiveClass %||% levels(outcome)[2])
+                if (!is.null(pr)) {
+                    prTable$addRow(rowKey = predictor, values = list(
+                        predictor = predictor,
+                        auc_pr = pr$auprc,
+                        f1_score = pr$max_f1,
+                        precision = pr$precision,
+                        recall = pr$recall,
+                        average_precision = pr$avg_precision
+                    ))
+                }
+            }
         },
 
         .cleanupROCObjects = function() {
@@ -3111,7 +3242,11 @@ enhancedROCClass <- R6::R6Class(
             avgTable <- self$results$results$multiClassAverage
             
             # Check if outcome has > 2 levels
-            outcome <- private$.data[[private$.outcome]]
+            outcome <- if (!is.null(private$.multiClassOutcome)) {
+                private$.multiClassOutcome
+            } else {
+                private$.data[[private$.outcome]]
+            }
             if (nlevels(outcome) < 3) {
                 self$results$results$instructions$setContent(
                     "<p><b>Note:</b> Multi-class ROC analysis requires an outcome variable with 3 or more levels.</p>"
@@ -3126,7 +3261,6 @@ enhancedROCClass <- R6::R6Class(
                     pred_vals <- data[[predictor]]
                     
                     # Run Multi-class ROC
-                    # pROC::multiclass.roc
                     mc_roc <- pROC::multiclass.roc(
                         response = outcome,
                         predictor = pred_vals,
@@ -3222,7 +3356,11 @@ enhancedROCClass <- R6::R6Class(
                 library(ggplot2)
                 
                 plot_data <- data.frame()
-                outcome <- private$.data[[private$.outcome]]
+                outcome <- if (!is.null(private$.multiClassOutcome)) {
+                    private$.multiClassOutcome
+                } else {
+                    private$.data[[private$.outcome]]
+                }
                 
                 if (nlevels(outcome) < 3) return(FALSE)
                 
@@ -3296,31 +3434,73 @@ enhancedROCClass <- R6::R6Class(
                     pred_vals <- data[[predictor]]
                     y_binary <- as.numeric(outcome == levels(outcome)[2])
                     n <- length(y_binary)
-                    prevalence <- mean(y_binary)
+                    prevalence <- if (isTRUE(self$options$useObservedPrevalence)) {
+                        mean(y_binary)
+                    } else if (!is.null(self$options$prevalence) && !is.na(self$options$prevalence)) {
+                        self$options$prevalence
+                    } else {
+                        mean(y_binary)
+                    }
                     
-                    # Calculate optimal cutoff metrics
-                    optimal <- private$.rocResults[[predictor]]$optimal_cutoff
-                    sens <- optimal$sensitivity
-                    spec <- optimal$specificity
+                    # Get predicted probabilities (use raw if already probabilities)
+                    probs <- if (all(pred_vals >= 0 & pred_vals <= 1, na.rm = TRUE)) {
+                        pred_vals
+                    } else {
+                        stats::predict(glm(y_binary ~ pred_vals, family = binomial), type = "response")
+                    }
                     
-                    # NNT/NND Calculation (at optimal cutoff)
-                    # NNT = 1 / (ARR) or similar, but for diagnostic:
-                    # Number Needed to Diagnose = 1 / (Sensitivity + Specificity - 1) = 1 / Youden
-                    youden <- sens + spec - 1
-                    nnd <- if (youden > 0) 1 / youden else NA
+                    # Decision threshold based on prevalence (user provided or observed)
+                    threshold_prob <- min(max(self$options$prevalence %||% prevalence, 0.01), 0.99)
+                    classified_positive <- probs >= threshold_prob
                     
-                    # Populate Impact Table (at optimal cutoff)
+                    tp <- sum(classified_positive & y_binary == 1)
+                    fp <- sum(classified_positive & y_binary == 0)
+                    fn <- sum(!classified_positive & y_binary == 1)
+                    tn <- sum(!classified_positive & y_binary == 0)
+                    
+                    sens <- ifelse((tp + fn) > 0, tp / (tp + fn), NA)
+                    spec <- ifelse((tn + fp) > 0, tn / (tn + fp), NA)
+                    youden <- if (!is.na(sens) && !is.na(spec)) sens + spec - 1 else NA
+                    nnd <- if (!is.na(youden) && youden > 0) 1 / youden else NA
+                    
+                    tested_positive <- (tp + fp) / n
+                    false_positive_rate <- 1 - spec
+                    net_benefit <- (tp / n) - (fp / n) * (threshold_prob / (1 - threshold_prob))
+                    
                     row <- list(
                         predictor = predictor,
-                        threshold = optimal$cutoff,
-                        sensitivity = sens,
-                        specificity = spec,
-                        ppv = (sens * prevalence) / (sens * prevalence + (1 - spec) * (1 - prevalence)),
-                        npv = (spec * (1 - prevalence)) / (spec * (1 - prevalence) + (1 - sens) * prevalence),
+                        threshold = threshold_prob,
+                        nnt = NA,
                         nnd = nnd,
-                        net_benefit = (sens * prevalence) - ((1 - spec) * (1 - prevalence) * (optimal$cutoff / (1 - optimal$cutoff)))
+                        tested_positive = tested_positive,
+                        true_positive_rate = sens,
+                        false_positive_rate = false_positive_rate,
+                        net_benefit_per_100 = net_benefit * 100
                     )
                     impactTable$addRow(rowKey = predictor, values = row)
+                    
+                    if (self$options$decisionImpactTable) {
+                        thresholds <- unique(pmin(pmax(c(0.1, 0.2, 0.3, threshold_prob), 0.01), 0.99))
+                        for (thr in thresholds) {
+                            pred_pos <- probs >= thr
+                            tp_thr <- sum(pred_pos & y_binary == 1)
+                            fp_thr <- sum(pred_pos & y_binary == 0)
+                            fn_thr <- sum(!pred_pos & y_binary == 1)
+                            tn_thr <- sum(!pred_pos & y_binary == 0)
+                            
+                            ppv <- ifelse((tp_thr + fp_thr) > 0, tp_thr / (tp_thr + fp_thr), NA)
+                            npv <- ifelse((tn_thr + fn_thr) > 0, tn_thr / (tn_thr + fn_thr), NA)
+                            
+                            decisionTable$addRow(rowKey = paste0(predictor, "_", thr), values = list(
+                                threshold = thr,
+                                n_high_risk = tp_thr + fp_thr,
+                                n_high_risk_with_event = tp_thr,
+                                n_high_risk_without_event = fp_thr,
+                                ppv = ppv,
+                                npv = npv
+                            ))
+                        }
+                    }
                     
                 }, error = function(e) {
                     warning(paste("Clinical impact analysis failed for", predictor, ":", e$message))

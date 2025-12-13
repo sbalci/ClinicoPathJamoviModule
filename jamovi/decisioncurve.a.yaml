@@ -1,7 +1,7 @@
 ---
 name: decisioncurve
 title: Decision Curve Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT1
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
 version: '0.0.32'
@@ -277,15 +277,22 @@ options:
           R: >
             Add clinical decision rule analysis and comparison with models.
 
-    - name: decisionRuleThreshold
-      title: Decision Rule Threshold
-      type: Number
-      default: 0.15
-      min: 0.001
-      max: 0.999
+    - name: decisionRuleVar
+      title: Clinical Decision Rule (binary)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
       description:
           R: >
-            Threshold probability for clinical decision rule (e.g., "screen if risk > 15%").
+            Binary variable indicating whether the clinical rule recommends intervention (1/0 or yes/no).
+
+    - name: decisionRulePositive
+      title: Decision Rule Positive Level
+      type: Level
+      variable: (decisionRuleVar)
+      description:
+          R: >
+            Which level of the rule variable indicates a positive recommendation (treat/intervene).
 
     - name: decisionRuleLabel
       title: Decision Rule Label

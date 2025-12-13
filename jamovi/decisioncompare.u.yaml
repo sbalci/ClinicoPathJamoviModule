@@ -48,7 +48,6 @@ children:
           - type: LevelSelector
             name: test3Positive
             enable: (test3)
-
   - type: CollapseBox
     label: Statistical Options
     collapsed: true
@@ -58,7 +57,6 @@ children:
         enable: (!pp)
       - type: CheckBox
         name: statComp
-
   - type: CollapseBox
     label: Prevalence Settings
     collapsed: true
@@ -71,7 +69,6 @@ children:
         label: Prior Probability
         format: number
         enable: (pp)
-
   - type: CollapseBox
     label: Visualizations
     collapsed: true
@@ -80,7 +77,6 @@ children:
         name: plot
       - type: CheckBox
         name: radarplot
-
   - type: CollapseBox
     label: Display Options
     collapsed: true
@@ -95,3 +91,8 @@ children:
         name: showExplanations
       - type: CheckBox
         name: showReportSentence
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excludeIndeterminate

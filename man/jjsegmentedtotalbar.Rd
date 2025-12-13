@@ -109,6 +109,8 @@ A results object containing:
 \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
 \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
+\code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 }
 

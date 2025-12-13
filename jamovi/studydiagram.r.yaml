@@ -55,10 +55,19 @@ items:
           title: Exclusion Reasons
           type: text
 
+    - name: plot
+      title: Consistency Diagram
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot
+      visible: true
+
     - name: diagram
-      title: Study Diagram
+      title: Diagram Description
       type: Html
       description: Interactive study flow diagram
+      visible: true
       clearWith:
         - data_format
         - diagram_type

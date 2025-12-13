@@ -467,7 +467,7 @@ irecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="efficacyMetrics",
                 title="Efficacy Metrics",
-                visible="(calculateORR)",
+                visible="(calculateORR || calculateDCR || showPseudoprogressionRate)",
                 rows=0,
                 clearWith=list(
                     "patientId",

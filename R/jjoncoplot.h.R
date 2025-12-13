@@ -22,6 +22,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showGeneFreq = FALSE,
             drawMarginalPlots = FALSE,
             showTMB = FALSE,
+            showTMBTable = TRUE,
             log10TransformTMB = TRUE,
             showClinicalAnnotation = FALSE,
             plotWidth = 800,
@@ -146,6 +147,10 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showTMB",
                 showTMB,
                 default=FALSE)
+            private$..showTMBTable <- jmvcore::OptionBool$new(
+                "showTMBTable",
+                showTMBTable,
+                default=TRUE)
             private$..log10TransformTMB <- jmvcore::OptionBool$new(
                 "log10TransformTMB",
                 log10TransformTMB,
@@ -195,6 +200,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showGeneFreq)
             self$.addOption(private$..drawMarginalPlots)
             self$.addOption(private$..showTMB)
+            self$.addOption(private$..showTMBTable)
             self$.addOption(private$..log10TransformTMB)
             self$.addOption(private$..showClinicalAnnotation)
             self$.addOption(private$..plotWidth)
@@ -220,6 +226,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showGeneFreq = function() private$..showGeneFreq$value,
         drawMarginalPlots = function() private$..drawMarginalPlots$value,
         showTMB = function() private$..showTMB$value,
+        showTMBTable = function() private$..showTMBTable$value,
         log10TransformTMB = function() private$..log10TransformTMB$value,
         showClinicalAnnotation = function() private$..showClinicalAnnotation$value,
         plotWidth = function() private$..plotWidth$value,
@@ -244,6 +251,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showGeneFreq = NA,
         ..drawMarginalPlots = NA,
         ..showTMB = NA,
+        ..showTMBTable = NA,
         ..log10TransformTMB = NA,
         ..showClinicalAnnotation = NA,
         ..plotWidth = NA,
@@ -262,6 +270,7 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         main = function() private$.items[["main"]],
         mutationSummary = function() private$.items[["mutationSummary"]],
         sampleSummary = function() private$.items[["sampleSummary"]],
+        tmbTable = function() private$.items[["tmbTable"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
         cooccurrence = function() private$.items[["cooccurrence"]],
         plotInfo = function() private$.items[["plotInfo"]],
@@ -312,7 +321,11 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "drawMarginalPlots",
                     "showTMB",
                     "log10TransformTMB",
-                    "showGeneFreq")))
+                    "showGeneFreq",
+                    "showMutationLoad",
+                    "showClinicalAnnotation",
+                    "showLegend",
+                    "clinicalPreset")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="mutationSummary",
@@ -381,6 +394,38 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="pc"))))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="tmbTable",
+                title="Per-sample Mutation Burden",
+                rows=0,
+                visible="(showTMB && showMutationLoad && showTMBTable)",
+                clearWith=list(
+                    "geneVars",
+                    "sampleVar",
+                    "topn",
+                    "genesToInclude",
+                    "genesToIgnore",
+                    "maxSamples",
+                    "sortBy",
+                    "showMutationLoad",
+                    "showTMB",
+                    "log10TransformTMB",
+                    "showTMBTable"),
+                columns=list(
+                    list(
+                        `name`="sample", 
+                        `title`="Sample ID", 
+                        `type`="text"),
+                    list(
+                        `name`="total_mutations", 
+                        `title`="Total Mutations", 
+                        `type`="integer"),
+                    list(
+                        `name`="tmb_log10", 
+                        `title`="Log10(TMB + 1)", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="clinicalSummary",
                 title="Clinical Annotation Summary",
                 rows=0,
@@ -439,8 +484,18 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Association", 
                         `type`="text"),
                     list(
+                        `name`="odds_ratio", 
+                        `title`="Odds Ratio", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="p_value", 
                         `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="fdr", 
+                        `title`="FDR", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
@@ -527,6 +582,8 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param drawMarginalPlots Integrate gene frequency and TMB plots as margins
 #'   of the main oncoplot.
 #' @param showTMB Display tumor mutation burden (TMB) bar plot.
+#' @param showTMBTable Show per-sample mutation burden table alongside the
+#'   plot.
 #' @param log10TransformTMB Apply log10 transformation to TMB values for
 #'   better visualization.
 #' @param showClinicalAnnotation Display clinical annotations as heatmap.
@@ -541,6 +598,7 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$main} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$mutationSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sampleSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$tmbTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cooccurrence} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plotInfo} \tab \tab \tab \tab \tab a table \cr
@@ -572,6 +630,7 @@ jjoncoplot <- function(
     showGeneFreq = FALSE,
     drawMarginalPlots = FALSE,
     showTMB = FALSE,
+    showTMBTable = TRUE,
     log10TransformTMB = TRUE,
     showClinicalAnnotation = FALSE,
     plotWidth = 800,
@@ -613,6 +672,7 @@ jjoncoplot <- function(
         showGeneFreq = showGeneFreq,
         drawMarginalPlots = drawMarginalPlots,
         showTMB = showTMB,
+        showTMBTable = showTMBTable,
         log10TransformTMB = log10TransformTMB,
         showClinicalAnnotation = showClinicalAnnotation,
         plotWidth = plotWidth,

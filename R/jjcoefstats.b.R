@@ -174,9 +174,9 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         stringsAsFactors = FALSE
     )
 
-    # Determine whether to use t-distribution or normal approximation
-    use_t_dist <- !is.null(self$options$degreesOfFreedom) && self$options$degreesOfFreedom > 0
-    df <- if (use_t_dist) self$options$degreesOfFreedom else NULL
+            # Determine whether to use t-distribution or normal approximation
+            use_t_dist <- !is.null(self$options$degreesOfFreedom) && self$options$degreesOfFreedom > 0
+            df <- if (use_t_dist) self$options$degreesOfFreedom else NULL
 
     # Add CI bounds if provided
     if (!is.null(self$options$confLow)) {
@@ -228,22 +228,21 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
     }
 
-    # Filter out intercept if requested
+    # Filter out intercept if requested (broader match)
     if (self$options$excludeIntercept) {
-        tidy_coefs <- tidy_coefs[!grepl("intercept", tolower(tidy_coefs$term)), ]
+        tidy_coefs <- tidy_coefs[!grepl("intercept|\\(intercept\\)|const", tolower(tidy_coefs$term)), ]
     }
 
     # Exponentiate if requested
     if (self$options$exponentiate) {
-        # Use delta method to transform std.error: SE_exp = SE * exp(estimate)
-        tidy_coefs$std.error <- tidy_coefs$std.error * exp(tidy_coefs$estimate)
+        if ("std.error" %in% names(tidy_coefs)) {
+            tidy_coefs$std.error <- tidy_coefs$std.error * exp(tidy_coefs$estimate)
+        }
 
-        # Exponentiate estimates and CI bounds
         tidy_coefs$estimate <- exp(tidy_coefs$estimate)
         tidy_coefs$conf.low <- exp(tidy_coefs$conf.low)
         tidy_coefs$conf.high <- exp(tidy_coefs$conf.high)
 
-        # Remove statistic as it's not meaningful on exponentiated scale
         if ("statistic" %in% names(tidy_coefs)) {
             tidy_coefs$statistic <- NULL
         }
@@ -306,10 +305,14 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                    " unique values. Expected exactly 2 (e.g., 0/1, TRUE/FALSE)."))
                     }
 
-                    if (!all(outcome_unique %in% c(0, 1, TRUE, FALSE))) {
-                        warning(paste0("Outcome variable '", outcome_var, "' will be treated as binary ",
-                                      "but values are not standard (0/1 or TRUE/FALSE). Values found: ",
-                                      paste(outcome_unique, collapse = ", ")))
+                    # Force to 0/1 if logical
+                    if (is.logical(mydata[[outcome_var]])) {
+                        mydata[[outcome_var]] <- as.numeric(mydata[[outcome_var]])
+                    }
+
+                    if (!all(outcome_unique %in% c(0, 1))) {
+                        stop(paste0("Outcome variable '", outcome_var, "' must be coded as 0/1 for logistic regression. Values found: ",
+                                   paste(outcome_unique, collapse = ", ")))
                     }
 
                     model <- glm(formula, data = mydata, family = binomial(link = "logit"))
@@ -331,20 +334,27 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     event_unique <- unique(mydata[[event_var]])
                     event_unique <- event_unique[!is.na(event_unique)]
 
-                    if (!all(event_unique %in% c(0, 1, TRUE, FALSE))) {
-                        stop(paste0("Event status for Cox model must be coded as 0/1 or TRUE/FALSE. ",
-                                   "Found values: ", paste(event_unique, collapse = ", "),
+                    if (is.logical(mydata[[event_var]])) {
+                        mydata[[event_var]] <- as.numeric(mydata[[event_var]])
+                        event_unique <- unique(mydata[[event_var]])
+                    }
+
+                    if (!all(event_unique %in% c(0, 1))) {
+                        stop(paste0("Event status for Cox model must be coded as 0/1 or TRUE/FALSE. Found values: ",
+                                   paste(event_unique, collapse = ", "),
                                    ". Use 0 for censored and 1 for events."))
                     }
 
-                    # Validate survival time is positive
+                    # Validate survival time is positive; warn and drop non-positive
                     if (any(mydata[[time_var]] <= 0, na.rm = TRUE)) {
-                        warning("Survival time contains non-positive values. These will cause errors in Cox model.")
+                        warning("Survival time contains non-positive values; these rows will be removed.")
+                        mydata <- mydata[mydata[[time_var]] > 0, ]
                     }
 
-                    # Create Surv object and formula
-                    surv_formula <- as.formula(paste0("survival::Surv(", time_var, ", ", event_var, ") ~ ",
-                                                     paste(predictor_vars, collapse = " + ")))
+                    # Create Surv object and formula with escaped predictors
+                    predictors_safe <- sapply(predictor_vars, private$.escapeVar)
+                    surv_formula <- as.formula(paste0("survival::Surv(", private$.escapeVar(time_var), ", ", private$.escapeVar(event_var), ") ~ ",
+                                                     paste(predictors_safe, collapse = " + ")))
                     model <- survival::coxph(surv_formula, data = mydata)
 
                 } else if (model_type == "mixed") {
@@ -360,9 +370,10 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     random_var <- janitor::make_clean_names(self$options$randomEffects)
 
                     # Construct formula with random intercept: outcome ~ predictors + (1|group)
-                    mixed_formula <- as.formula(paste0(outcome_var, " ~ ",
-                                                      paste(predictor_vars, collapse = " + "),
-                                                      " + (1|", random_var, ")"))
+                    predictors_safe <- sapply(predictor_vars, private$.escapeVar)
+                    mixed_formula <- as.formula(paste0(private$.escapeVar(outcome_var), " ~ ",
+                                                      paste(predictors_safe, collapse = " + "),
+                                                      " + (1|", private$.escapeVar(random_var), ")"))
 
                     # Determine whether to use lmer (continuous) or glmer (binary)
                     outcome_unique <- sort(unique(mydata[[outcome_var]][!is.na(mydata[[outcome_var]])]))
@@ -444,24 +455,57 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Adjust table titles if exponentiating
             if (self$options$exponentiate) {
-                if (self$options$modelType == "glm") {
-                    table$setColumnTitle("estimate", "Odds Ratio")
+                estTitle <- if (self$options$inputMode == "precomputed") {
+                    if (self$options$expScaleLabel == "or") {
+                        "Odds Ratio"
+                    } else if (self$options$expScaleLabel == "hr") {
+                        "Hazard Ratio"
+                    } else {
+                        "Exp(Estimate)"
+                    }
+                } else if (self$options$modelType == "glm") {
+                    "Odds Ratio"
                 } else if (self$options$modelType == "cox") {
-                    table$setColumnTitle("estimate", "Hazard Ratio")
+                    "Hazard Ratio"
                 } else {
-                    table$setColumnTitle("estimate", "Exp(Estimate)")
+                    "Exp(Estimate)"
                 }
-                table$setColumnVisible("statistic", FALSE)
+                table$getColumn("estimate")$setTitle(estTitle)
+                if (!is.null(table$getColumn("statistic"))) {
+                    table$getColumn("statistic")$setVisible(FALSE)
+                }
             }
 
-
             for (i in 1:nrow(tidy_coefs)) {
+                # Optional p-value symbols
+                p_out <- NA
+                if ("p.value" %in% names(tidy_coefs)) {
+                    p_val <- tidy_coefs$p.value[i]
+                    if (self$options$showPValues) {
+                        if (self$options$pSymbols) {
+                            if (is.na(p_val)) {
+                                p_out <- NA
+                            } else if (p_val < 0.001) {
+                                p_out <- "***"
+                            } else if (p_val < 0.01) {
+                                p_out <- "**"
+                            } else if (p_val < 0.05) {
+                                p_out <- "*"
+                            } else {
+                                p_out <- ""
+                            }
+                        } else {
+                            p_out <- p_val
+                        }
+                    }
+                }
+
                 table$addRow(rowKey = i, values = list(
                     term = tidy_coefs$term[i],
                     estimate = round(tidy_coefs$estimate[i], 3),
                     std_error = if ("std.error" %in% names(tidy_coefs)) round(tidy_coefs$std.error[i], 3) else NA,
                     statistic = if ("statistic" %in% names(tidy_coefs)) round(tidy_coefs$statistic[i], 3) else NA,
-                    p_value = if ("p.value" %in% names(tidy_coefs)) tidy_coefs$p.value[i] else NA,
+                    p_value = p_out,
                     conf_low = round(tidy_coefs$conf.low[i], 3),
                     conf_high = round(tidy_coefs$conf.high[i], 3)
                 ))
@@ -555,22 +599,32 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ref_val <- 1  # For ratios, reference is 1
             }
 
-            # Determine axis labels
-            xlab <- if (self$options$exponentiate) {
-                switch(self$options$modelType,
-                    "glm" = "Odds Ratio",
-                    "cox" = "Hazard Ratio",
-                    "Exponentiated Coefficient"
-                )
-            } else {
-                "Coefficient Estimate"
-            }
+                # Determine axis labels
+                xlab <- if (self$options$exponentiate) {
+                    if (self$options$inputMode == "precomputed") {
+                        if (self$options$expScaleLabel == "or") {
+                            "Odds Ratio"
+                        } else if (self$options$expScaleLabel == "hr") {
+                            "Hazard Ratio"
+                        } else {
+                            "Exponentiated Coefficient"
+                        }
+                    } else {
+                        switch(self$options$modelType,
+                            "glm" = "Odds Ratio",
+                            "cox" = "Hazard Ratio",
+                            "Exponentiated Coefficient"
+                        )
+                    }
+                } else {
+                    "Coefficient Estimate"
+                }
 
 
             tryCatch({
                 # Determine stats label args based on p-value options
-                stats_label_args <- if (self$options$showPValues) {
-                    if (self$options$pSymbols) {
+                stats_label_args <- if (self$options$showPValues && self$options$pValueDisplay != "none") {
+                    if (self$options$pValueDisplay == "symbols") {
                         list(p.value = TRUE, p.value.label = "symbol")
                     } else {
                         list(p.value = TRUE)

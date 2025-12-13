@@ -1,7 +1,7 @@
 ---
 name:  jjsyndromicplot
 title: Syndromic Plot (PCA Loadings)
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT1
 menuSubgroup: Multivariate Analysis
 version: '0.0.32'
 jas: '1.2'
@@ -67,6 +67,20 @@ options:
             Continuous variables to include in Principal Component Analysis.
             Select at least 3 numeric variables (e.g., biomarker levels, clinical measurements,
             gene expression values). PCA will identify patterns of correlation among these variables.
+
+    - name: missing
+      title: Missing Data Handling
+      type: List
+      options:
+        - name: listwise
+          title: Exclude cases listwise
+        - name: mean_imputation
+          title: Mean Imputation
+      default: listwise
+      description:
+          R: >
+            How to handle missing values. 'listwise' excludes cases with any missing values.
+            'mean_imputation' replaces missing values with the variable mean.
 
     - name: component
       title: Principal Component

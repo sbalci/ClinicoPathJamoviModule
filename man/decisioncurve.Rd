@@ -33,7 +33,8 @@ decisioncurve(
   compareModels = FALSE,
   weightedAUC = FALSE,
   clinicalDecisionRule = FALSE,
-  decisionRuleThreshold = 0.15,
+  decisionRuleVar,
+  decisionRulePositive,
   decisionRuleLabel = "Clinical Rule",
   showClinicalImpactPlot = FALSE,
   showNetBenefitCI = FALSE,
@@ -122,8 +123,11 @@ performance.}
 \item{clinicalDecisionRule}{Add clinical decision rule analysis and
 comparison with models.}
 
-\item{decisionRuleThreshold}{Threshold probability for clinical decision
-rule (e.g., "screen if risk > 15\\%").}
+\item{decisionRuleVar}{Binary variable indicating whether the clinical rule
+recommends intervention (1/0 or yes/no).}
+
+\item{decisionRulePositive}{Which level of the rule variable indicates a
+positive recommendation (treat/intervene).}
 
 \item{decisionRuleLabel}{Label for the clinical decision rule in plots and
 tables.}

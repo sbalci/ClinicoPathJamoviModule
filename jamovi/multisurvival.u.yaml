@@ -322,6 +322,32 @@ children:
                         name: addRiskGroup
                         enable: (calculateRiskScore)
   - type: CollapseBox
+    label: Model Selection
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Model Selection Options
+        children:
+          - type: ComboBox
+            name: modelSelection
+            enable: (use_modelSelection)
+          - type: ComboBox
+            name: selectionCriteria
+            enable: (use_modelSelection)
+          - type: TextBox
+            name: pEntry
+            format: number
+            enable: >-
+              (use_modelSelection && (modelSelection == 'forward' ||
+              modelSelection == 'both'))
+          - type: TextBox
+            name: pRemoval
+            format: number
+            enable: >-
+              (use_modelSelection && (modelSelection == 'backward' ||
+              modelSelection == 'both'))
+  - type: CollapseBox
     label: Adjusted Survival Analysis
     collapsed: true
     stretchFactor: 1

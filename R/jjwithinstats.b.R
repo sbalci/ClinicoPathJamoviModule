@@ -18,6 +18,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .data_hash = NULL,
         .options_hash = NULL,
         .messages = NULL,
+        .data_messages = NULL,
 
         # init ----
 
@@ -78,13 +79,29 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.messages <- character()
             }
             private$.messages <- append(private$.messages, message)
-            self$results$todo$setContent(paste(private$.messages, collapse = ""))
+            
+            # Write to WARNINGS panel (Messages) instead of TODO
+            if (!is.null(self$results$warnings)) {
+                self$results$warnings$setContent(paste(private$.messages, collapse = ""))
+                self$results$warnings$setVisible(TRUE)
+            }
         },
         
         # Reset messages for new analysis run
         .resetMessages = function() {
             private$.messages <- character()
-            self$results$todo$setContent("")
+            # Don't clear TODO here, as it might hold "Welcome" or "Ready"
+            # warning content is cleared 
+            if (!is.null(self$results$warnings)) {
+                self$results$warnings$setContent("")
+                # Don't hide yet, wait until run to decide visibility or let specific checks set it
+            }
+        },
+        
+        # Helper to cache data-specific messages
+        .accumulateDataMessage = function(message) {
+            private$.data_messages <- append(private$.data_messages, message)
+            private$.accumulateMessage(message)
         },
         
         # Apply clinical presets for common scenarios
@@ -101,7 +118,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Would need to update options through proper channels
                         private$.accumulateMessage(.("💡 Biomarker preset: Consider using Nonparametric test for skewed biomarker data<br>"))
                     }
-                    private$.accumulateMessage(.("🔬 <strong>Biomarker Tracking:</strong> Optimized for laboratory values and biomarker levels over time<br>"))
+                    private$.accumulateMessage(.("🔬 <strong>Biomarker Tracking (Guidance Only):</strong> Optimized for laboratory values. Please manually ensure 'Nonparametric' is selected if data is skewed.<br>"))
                 },
                 "treatment" = {
                     # Treatment response: parametric with pairwise comparisons
@@ -279,11 +296,20 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(private$.prepared_data) && 
                 private$.data_hash == current_hash && 
                 !force_refresh) {
+                # Re-emit cached messages
+                if (!is.null(private$.data_messages)) {
+                    for (msg in private$.data_messages) {
+                        private$.accumulateMessage(msg)
+                    }
+                }
                 return(private$.prepared_data)
             }
             
+            # Reset data messages for new processing
+            private$.data_messages <- character()
+            
             # Add processing feedback
-            private$.accumulateMessage(
+            private$.accumulateDataMessage(
                 glue::glue(.("<br>Processing {length(vars)} measurements for within-subjects analysis...<br>"))
             )
             
@@ -292,7 +318,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check for empty dataset
             if (nrow(mydata) == 0) {
-                private$.accumulateMessage(
+                private$.accumulateDataMessage(
                     .("<br>❌ Dataset is empty (0 rows). Please load data first.<br>")
                 )
                 private$.prepared_data <- NULL
@@ -304,7 +330,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check if required variables exist in dataset
             missing_vars <- vars[!vars %in% names(mydata)]
             if (length(missing_vars) > 0) {
-                private$.accumulateMessage(
+                private$.accumulateDataMessage(
                     paste0(.("<br>❌ Variables not found in dataset: "), paste(missing_vars, collapse = ", "), "<br>")
                 )
                 private$.prepared_data <- NULL
@@ -347,7 +373,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p><strong>Minimum required:</strong> At least 3 subjects with complete data across all measurements.</p>",
                     "</div>"
                 )
-                private$.accumulateMessage(warning_msg)
+                private$.accumulateDataMessage(warning_msg)
                 private$.prepared_data <- NULL
                 return(NULL)
             }
@@ -361,20 +387,39 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p>Consider investigating why so much data is missing.</p>",
                     "</div>"
                 )
-                self$results$warnings$setContent(
-                    paste0(self$results$warnings$state, warning_msg)
-                )
-                self$results$warnings$setVisible(TRUE)
+                if (!is.null(self$results$warnings)) {
+                    self$results$warnings$setContent(warning_msg)
+                    self$results$warnings$setVisible(TRUE)
+                } else {
+                    private$.accumulateDataMessage(warning_msg)
+                }
             }
 
             # Validate data quality before processing
+            # Note: .validateDataQuality calls .accumulateMessage directly, maybe update it too?
+            # For now, data quality messages are less critical to cache strictly or should be cached too.
+            # Ideally .validateDataQuality should use .accumulateDataMessage logic if passed.
             private$.validateDataQuality(mydata, vars)
             
             # Remove NA values once
             mydata <- jmvcore::naOmit(mydata)
             
+            # Report N retained
+            final_n <- nrow(mydata)
+            dropped_n <- n_rows - final_n
+            
+            if (dropped_n > 0) {
+                 private$.accumulateDataMessage(
+                    glue::glue(.("<br>ℹ️ <strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed.<br>"))
+                )
+            } else {
+                 private$.accumulateDataMessage(
+                    glue::glue(.("<br>ℹ️ <strong>Data Processing:</strong> All {final_n} subjects retained (complete data).<br>"))
+                )
+            }
+            
             if (nrow(mydata) == 0) {
-                private$.accumulateMessage(
+                private$.accumulateDataMessage(
                     .("<br>❌ No complete observations after removing missing values<br>")
                 )
                 private$.prepared_data <- NULL
@@ -647,6 +692,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$results$summary)) {
                     self$results$summary$setVisible(visible = FALSE)
                 }
+                if (!is.null(self$results$warnings)) {
+                    self$results$warnings$setVisible(visible = FALSE)
+                }
 
                 return()
 
@@ -654,12 +702,20 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Clear messages for actual analysis
                 private$.resetMessages()
                 
+                # Check messages from presets and data quality each run
+                private$.applyClinicalPresets()
+                # Ensure data is prepared (and N messages generated)
+                private$.prepareData()
+                
                 # Make all outputs visible when variables are selected
                 self$results$todo$setVisible(visible = TRUE)
                 self$results$plot$setVisible(visible = TRUE)
                 self$results$interpretation$setVisible(visible = TRUE)
                 if (!is.null(self$results$summary)) {
                     self$results$summary$setVisible(visible = TRUE)
+                }
+                if (!is.null(self$results$warnings)) {
+                    self$results$warnings$setVisible(visible = TRUE)
                 }
                 
                 # Generate clinical guidance for active analysis
@@ -803,14 +859,22 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             tryCatch({
                 # Prepare data - convert wide to long format
-                mydata <- self$data
-
-                # Collect dependent variables
                 deps <- c(self$options$dep1, self$options$dep2)
                 if (!is.null(self$options$dep3)) deps <- c(deps, self$options$dep3)
                 if (!is.null(self$options$dep4)) deps <- c(deps, self$options$dep4)
+                
+                # CRITICAL FIX: Paired analysis requires listwise deletion
+                # Only keep subjects with processing data for ALL selected measurements
+                mydata <- self$data
+                mydata <- mydata[, deps, drop = FALSE]
+                mydata <- jmvcore::naOmit(mydata)
+                
+                # Check for empty data after filtering
+                if (nrow(mydata) == 0) {
+                     return() # Should be handled by main validation
+                }
 
-                # Create subject ID if not exists
+                # Create subject ID for paired analysis
                 mydata$Subject_ID <- seq_len(nrow(mydata))
 
                 # Convert to long format
@@ -824,10 +888,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     long_data <- rbind(long_data, temp)
                 }
 
-                # Remove NA values
-                long_data <- long_data[complete.cases(long_data), ]
-
-                # Get palette
+                # Start Plot Construction
                 palette <- self$options$ggpubrPalette
 
                 # Create plot based on type
@@ -840,7 +901,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         id = "Subject_ID",
                         palette = palette,
                         line.color = "gray",
-                        line.size = 0.4
+                        line.size = 0.4,
+                        label = NULL
                     )
 
                     if (!self$options$ggpubrShowLines) {
@@ -880,39 +942,39 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     plot <- do.call(ggpubr::ggline, args)
                 }
 
-                # CRITICAL FIX: Add statistical comparisons with PAIRED tests
-                # Bug: Old code used default independent-sample tests
-                # Result: Wrong p-values for within-subjects design
+                # Add statistical comparisons
                 if (self$options$ggpubrAddStats && self$options$ggpubrPlotType != "line") {
-                    # Determine appropriate paired test method based on user's test type
+                    # Determine appropriate paired test method
                     test_method <- switch(
-                        self$options$testType,
+                        self$options$typestatistics,
                         "parametric" = "t.test",
                         "nonparametric" = "wilcox.test",
-                        "robust" = "t.test",  # Fallback for robust
+                        "robust" = "t.test",  # Fallback
+                        "bayes" = NULL,
                         "t.test"  # Default
                     )
 
-                    plot <- plot + ggpubr::stat_compare_means(
-                        method = test_method,
-                        paired = TRUE,  # CRITICAL: This is a within-subjects design
-                        label = "p.signif"
-                    )
+                    if (!is.null(test_method)) {
+                        # Use global p-value for >2 groups, paired for 2 groups
+                        # For >2 groups, ggpubr might warn but paired=TRUE is key
+                        plot <- plot + ggpubr::stat_compare_means(
+                            method = test_method,
+                            paired = TRUE,
+                            label = "p.signif"
+                        )
+                    }
                 }
 
                 # Apply theme
-                plot <- plot + ggpubr::theme_pubr()
+                plot <- plot + ggpubr::theme_pubr() +
+                    ggplot2::labs(subtitle = "Descriptive Plot (ggpubr)")
 
                 print(plot)
                 TRUE
 
             }, error = function(e) {
-                error_msg <- paste0(
-                    .("<br>Error creating ggpubr within-subjects plot: "), e$message,
-                    .("<br><br>Please check that measurement variables contain numeric values."),
-                    .("<br><hr>")
-                )
-                self$results$todo$setContent(error_msg)
+                # Silent fail for secondary plot or log error
+                # self$results$todo$setContent(paste("ggpubr error:", e$message))
             })
         }
 

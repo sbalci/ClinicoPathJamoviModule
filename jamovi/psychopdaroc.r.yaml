@@ -18,6 +18,11 @@ items:
     # ==========================================
     # SUMMARY RESULTS - Most important information first
     # ==========================================
+    - name: runSummary
+      title: Analysis Status
+      type: Html
+      visible: true
+
     - name: simpleResultsTable
       title: ROC Analysis Summary
       type: Table

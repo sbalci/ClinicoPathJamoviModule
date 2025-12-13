@@ -16,6 +16,8 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Private fields ----
         .pcaResults = NULL,
         .pcaData = NULL,
+        .rowInfo = NULL,
+        .varianceInfo = NULL,
 
         # init ----
 
@@ -27,6 +29,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$heatmap$setSize(plotwidth, plotheight)
             self$results$barmap$setSize(plotwidth, plotheight)
+            self$results$scree$setSize(plotwidth, plotheight)
 
         },
 
@@ -77,15 +80,9 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_data <- self$data[, vars, drop = FALSE]
                 non_numeric <- vars[!vapply(var_data, is.numeric, logical(1))]
                 if (length(non_numeric) > 0) {
-                    stop(paste0('All selected variables must be numeric. Non-numeric variables detected: ',
+                    stop(paste0('PCA requires a numeric variable for each selection. Non-numeric variables detected: ',
                                 paste(non_numeric, collapse = ', ')))
                 }
-
-                # todo ----
-                todo <- glue::glue(
-                    "<br>PCA Loading Heatmap generated.<br><hr>")
-
-                self$results$todo$setContent(todo)
 
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
@@ -93,6 +90,50 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Run PCA ----
             private$.runPCA()
+
+            # Informational summary for users ----
+            pca <- private$.pcaResults
+            row_info <- private$.rowInfo
+            ncomp_available <- ncol(pca$rotation)
+            ncomp_used <- min(self$options$ncomp, ncomp_available)
+            var_explained <- (pca$sdev ^ 2) / sum(pca$sdev ^ 2)
+            var_fmt <- paste0(
+                paste0('PC', seq_len(ncomp_used), ': ', sprintf('%.1f', 100 * var_explained[seq_len(ncomp_used)]), '%'),
+                collapse = '; ')
+            cum_var <- sum(var_explained[seq_len(ncomp_used)])
+            cum_var_fmt <- sprintf('Cumulative (PC1–PC%d): %.1f%%', ncomp_used, 100 * cum_var)
+
+            star_note <- if (isTRUE(self$options$textvalues) && isTRUE(self$options$starvalues)) {
+                "<br><i>Stars are hidden while numeric loadings are shown; uncheck \"Show Loading Values\" to show stars.</i>"
+            } else {
+                ""
+            }
+
+            center_note <- if (!isTRUE(self$options$center)) {
+                "<br><b>Note:</b> Centering is off; PCA without centering is uncommon and may bias loadings."
+            } else {
+                ""
+            }
+
+            trunc_note <- if (self$options$ncomp > ncomp_available) {
+                glue::glue("<br><b>Requested {self$options$ncomp} components but only {ncomp_available} are available; plots show PC1–PC{ncomp_available}.</b>")
+            } else {
+                ""
+            }
+
+            todo <- glue::glue(
+                "<br>PCA run with {length(vars)} variables; {row_info$rows_used} observations used (removed {row_info$rows_removed} rows with missing values).",
+                "<br>Center: {ifelse(self$options$center, 'Yes', 'No')}; Scale: {ifelse(self$options$scale, 'Yes', 'No')}; Components displayed: PC1–PC{ncomp_used} (requested {self$options$ncomp}, available {ncomp_available}).",
+                "<br>Variance explained: {var_fmt}; {cum_var_fmt}.",
+                "<br>Loadings cutoff for stars/lines: ±{self$options$cutoff}.",
+                "{star_note}",
+                "{center_note}",
+                "{trunc_note}",
+                "<br><hr>"
+            )
+
+            self$results$todo$setContent(todo)
+            private$.variance()
 
         },
 
@@ -107,7 +148,14 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             pca_data <- mydata[, vars, drop = FALSE]
 
             # Remove missing values
+            n_rows_before <- nrow(pca_data)
             pca_data <- na.omit(pca_data)
+            rows_used <- nrow(pca_data)
+            private$.rowInfo <- list(
+                rows_total = n_rows_before,
+                rows_used = rows_used,
+                rows_removed = n_rows_before - rows_used
+            )
 
             # Convert to numeric matrix
             pca_matrix <- as.matrix(sapply(pca_data, as.numeric))
@@ -123,6 +171,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Store PCA results for plotting
             private$.pcaResults <- pca
             private$.pcaData <- pca_matrix
+            private$.varianceInfo <- pcaloadingheatmap_variance_info(pca, ncomp = self$options$ncomp)
 
         },
 
@@ -298,6 +347,47 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         },
 
+        # variance table ----
+        .variance = function(...) {
+
+            if (is.null(private$.varianceInfo))
+                return()
+
+            var_df <- private$.varianceInfo
+            table <- self$results$variance
+
+            table$clear()
+            for (i in seq_len(nrow(var_df))) {
+                table$addRow(rowKey = i, values = list(
+                    component = paste0('PC', var_df$component[i]),
+                    variance = var_df$variance[i],
+                    cumulative = var_df$cumulative[i]
+                ))
+            }
+        },
+
+        # scree plot ----
+        .scree = function(image, ggtheme, theme, ...) {
+
+            if (is.null(private$.varianceInfo))
+                return()
+
+            var_df <- private$.varianceInfo
+
+            s_plot <- ggplot(var_df, aes(x = factor(component, levels = component),
+                                         y = variance)) +
+                geom_col(fill = self$options$colorhigh, alpha = 0.8) +
+                geom_line(aes(y = cumulative), group = 1, color = self$options$colorlow) +
+                geom_point(aes(y = cumulative), color = self$options$colorlow) +
+                scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+                labs(x = 'Component', y = 'Variance explained (proportion)',
+                     title = 'Variance Explained') +
+                theme_minimal()
+
+            print(s_plot)
+            TRUE
+        },
+
         # helper to extract standardized/correlation loadings ----
         .stand_loadings = function(pca, pca_data) {
             loadings <- pcaloadingheatmap_normalized_loadings(pca, pca_data, self$options$scale)
@@ -332,4 +422,20 @@ pcaloadingheatmap_normalized_loadings <- function(pca, pca_data, scaled) {
 
     loadings <- pmax(pmin(loadings, 1), -1)
     loadings
+}
+
+#' Variance explained by PCA components
+#'
+#' @keywords internal
+pcaloadingheatmap_variance_info <- function(pca, ncomp) {
+    var <- pca$sdev ^ 2
+    prop <- var / sum(var)
+    cum <- cumsum(prop)
+    n_use <- min(length(prop), ncomp)
+    data.frame(
+        component = seq_len(n_use),
+        variance = prop[seq_len(n_use)],
+        cumulative = cum[seq_len(n_use)],
+        stringsAsFactors = FALSE
+    )
 }

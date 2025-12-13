@@ -71,8 +71,8 @@ items:
     - name:  modelMetrics
       title: Model Fit Metrics
       type:  Table
-      visible: true
-      rows: 1
+      visible: (inputMode == 'fitmodel')
+      rows: 0
       columns:
           - name: metric
             title: 'Metric'

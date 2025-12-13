@@ -25,14 +25,15 @@ test_that("timeinterval handles missing inputs gracefully", {
     end_date = c("2020-06-01", "2020-08-01")
   )
   
-  # Test with NULL date columns (should not error during initialization)
-  expect_error({
-    result <- timeinterval(
+  # Test with NULL date columns (should provide a clear error)
+  expect_error(
+    timeinterval(
       data = test_data,
       dx_date = NULL,
       fu_date = NULL
-    )
-  }, NA)
+    ),
+    regexp = "Please provide both start \\(dx_date\\) and end \\(fu_date\\) date variables\\."
+  )
 })
 
 test_that("timeinterval basic functionality works", {
@@ -53,7 +54,7 @@ test_that("timeinterval basic functionality works", {
     output_unit = "months"
   )
   
-  expect_s3_class(result, "timeintervalClass")
+  expect_true(inherits(result, "timeintervalResults"))
   expect_true("start_date" %in% names(test_data))
   expect_true("end_date" %in% names(test_data))
 })

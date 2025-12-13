@@ -201,9 +201,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 bf.message = self$options$bfmessage,
                 k = self$options$k,
                 marginal = self$options$marginal,
-                marginal.type = self$options$marginalType,  # CRITICAL FIX: Use actual option value
+                marginal.type = self$options$marginalType,
                 point.size = self$options$pointsize,
                 point.alpha = self$options$pointalpha,
+                method = self$options$smoothMethod,  # Wire smoothMethod
                 smooth.line.args = list(
                     size = self$options$smoothlinesize,
                     color = self$options$smoothlinecolor
@@ -216,6 +217,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             plot <- do.call(ggstatsplot::ggscatterstats, .args)
+
+            if (self$options$showRugPlot) {
+                plot <- plot + ggplot2::geom_rug(alpha = 0.5)
+            }
 
             if (!self$options$originaltheme) {
                 plot <- plot + ggplot2::theme_bw()
@@ -278,6 +283,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     marginal.type = !!self$options$marginalType,  # CRITICAL FIX: Use actual option value
                     point.size = !!self$options$pointsize,
                     point.alpha = !!self$options$pointalpha,
+                    method = !!self$options$smoothMethod, # Wire smoothMethod
                     smooth.line.args = !!list(
                         size = self$options$smoothlinesize,
                         color = self$options$smoothlinecolor
@@ -302,11 +308,12 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         bf.message = !!self$options$bfmessage,
                         k = !!self$options$k,
                         marginal = !!self$options$marginal,
-                        marginal.type = "histogram",
+                        marginal.type = !!self$options$marginalType, # Correctly use option
                         xfill = !!self$options$xsidefill,
                         yfill = !!self$options$ysidefill,
                         point.size = !!self$options$pointsize,
                         point.alpha = !!self$options$pointalpha,
+                        method = !!self$options$smoothMethod,
                         smooth.line.args = !!list(
                             size = self$options$smoothlinesize,
                             color = self$options$smoothlinecolor
@@ -317,6 +324,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Evaluate the call
             plot <- eval(plot_call)
+
+            if (self$options$showRugPlot) {
+                plot <- plot + ggplot2::geom_rug(alpha = 0.5)
+            }
 
             if (!self$options$originaltheme) {
                 plot <- plot + ggplot2::theme_bw()

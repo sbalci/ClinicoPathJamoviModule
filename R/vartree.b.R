@@ -122,6 +122,15 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             prunebelow <- labeledData$prunebelow
             follow <- labeledData$follow
             all_labels <- labeledData$all_labels
+            
+            # Select only columns needed for analysis to avoid dropping rows
+            columns_to_select <- c(myvars)
+            if (!is.null(percvar)) columns_to_select <- c(columns_to_select, percvar)
+            if (!is.null(summaryvar)) columns_to_select <- c(columns_to_select, summaryvar)
+            if (!is.null(prunebelow)) columns_to_select <- c(columns_to_select, prunebelow)
+            if (!is.null(follow)) columns_to_select <- c(columns_to_select, follow)
+            columns_to_select <- unique(columns_to_select)
+            mydata <- jmvcore::select(df = mydata, columnNames = columns_to_select)
 
             # Input validation using cleaned data
             if (!is.null(myvars)) {
@@ -138,6 +147,12 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Validate percentage variable if specified
                 if (!is.null(percvar) && !percvar %in% names(mydata)) {
                     stop(.("Percentage variable not found in dataset."))
+                } else if (!is.null(percvar)) {
+                    # Ensure requested level exists
+                    if (!is.null(self$options$percvarLevel) &&
+                        !self$options$percvarLevel %in% levels(as.factor(mydata[[percvar]]))) {
+                        stop(.("Selected percentage level is not present in the percentage variable."))
+                    }
                 }
                 
                 # Validate summary variable if specified
@@ -223,12 +238,13 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             original_n <- nrow(mydata)
             original_complete <- sum(complete.cases(mydata[, myvars, drop = FALSE]))
 
-            excl <- self$options$excl
+            excl <- self.options$excl
             excluded_n <- 0
 
             if (excl) {
+                before_n <- nrow(mydata)
                 mydata <- jmvcore::naOmit(mydata)
-                excluded_n <- original_n - nrow(mydata)
+                excluded_n <- before_n - nrow(mydata)
 
                 # CRITICAL WARNING: Report case loss to user
                 if (excluded_n > 0) {
@@ -236,9 +252,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     warning_msg <- paste0(
                         "\n\n⚠️ CASE EXCLUSION: ",
                         excluded_n, " cases (", excluded_pct, "%) ",
-                        "excluded due to missing values.\n",
+                        "excluded due to missing values in selected variables.\n",
                         "Original N = ", original_n, ", ",
-                        "Final N = ", nrow(mydata), "\n",
+                        "Final N (complete for selected vars) = ", nrow(mydata), "\n",
                         "Tree counts and percentages reflect the ",
                         nrow(mydata), " complete cases only."
                     )
@@ -250,16 +266,6 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 private$.excluded_warning <- NULL
             }
-
-            # Prepare Data
-            # Select only the columns we need, handling NULL values
-            columns_to_select <- c(myvars)
-            if (!is.null(percvar)) columns_to_select <- c(columns_to_select, percvar)
-            if (!is.null(summaryvar)) columns_to_select <- c(columns_to_select, summaryvar)
-            if (!is.null(prunebelow)) columns_to_select <- c(columns_to_select, prunebelow)
-            if (!is.null(follow)) columns_to_select <- c(columns_to_select, follow)
-            
-            mydata <- jmvcore::select(df = mydata, columnNames = unique(columns_to_select))
 
             # Create label mapping for vtree display
             # This will show original variable names in the tree display
@@ -273,7 +279,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             xsummary <- NULL
 
             # Handle Percentage Variable - FIXED: Now properly passed to vtree
-            if (!is.null(percvar) && !is.null(self$options$percvarLevel)) {
+            if (!is.null(percvar) && !is.null(self$options$percvarLevel) && self$options$pct) {
                 # Build percentage summary spec following vtree syntax
                 # Format: "varname=level" tells vtree to show % for that level
                 perc_spec <- paste0(percvar, "=", self$options$percvarLevel)

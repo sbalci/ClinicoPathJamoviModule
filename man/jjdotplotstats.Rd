@@ -135,10 +135,10 @@ A results object containing:
 }
 }
 \description{
-Wrapper Function for ggstatsplot::ggdotplotstats and
-ggstatsplot::grouped_ggdotplotstats to generate dot plots
-comparing continuous variables between groups with statistical
-annotations and significance testing.
+Wrapper Function for ggstatsplot::ggbetweenstats and
+ggstatsplot::grouped_ggbetweenstats to generate dot-style
+comparisons of continuous variables between groups with
+statistical annotations and significance testing.
 }
 \examples{
 # Basic dot plot with iris dataset

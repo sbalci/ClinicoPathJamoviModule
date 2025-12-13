@@ -140,26 +140,25 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Get variable data
                 mydep <- self$data[[self$options$dep]]
                 mygroup <- self$data[[self$options$group]]
-                
-                # Define continuous types
-                contin <- c("integer", "numeric", "double")
-                
-                # Determine variable types using inherits with contin array
-                dep_type <- if (inherits(mydep, "factor")) {
-                    "factor"
-                } else if (inherits(mydep, contin)) {
-                    "continuous"
-                } else {
-                    "unknown"
+
+                # Helper: treat integer-coded small-cardinality variables as categorical
+                .infer_type <- function(v) {
+                    contin <- c("integer", "numeric", "double")
+                    if (inherits(v, "factor")) return("factor")
+                    if (inherits(v, "ordered")) return("factor")
+                    if (inherits(v, contin)) {
+                        unique_vals <- length(unique(v[!is.na(v)]))
+                        # Heuristic: <=10 unique whole-number values => likely categorical
+                        if (unique_vals > 0 && unique_vals <= 10 && all(abs(v[!is.na(v)] - round(v[!is.na(v)])) < .Machine$double.eps^0.5)) {
+                            return("factor")
+                        }
+                        return("continuous")
+                    }
+                    return("unknown")
                 }
                 
-                group_type <- if (inherits(mygroup, "factor")) {
-                    "factor"
-                } else if (inherits(mygroup, contin)) {
-                    "continuous"
-                } else {
-                    "unknown"
-                }
+                dep_type <- .infer_type(mydep)
+                group_type <- .infer_type(mygroup)
                 
                 # Get other options
                 direction <- self$options$direction
@@ -242,6 +241,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 } else if (analysis_info$direction == "repeated") {
                     notes <- c(notes, "Alluvial style option only applies to repeated factor vs factor comparisons.")
                 }
+
+                notes <- c(notes, glue::glue("Selected plot type: {analysis_info$plot_type}. Variable types inferred as {dep_desc} (y) and {group_desc} (x)."))
                 
                 # Combine messages
                 if (length(notes) > 0) {
@@ -499,6 +500,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Generate explanation message using the new function
                 stat_exp <- private$.generateExplanationMessage(analysis_info)
 
+                # Prepare data for plotting and counts
+                prepared_data <- private$.prepareDataForPlot(analysis_info)
+
                 # Generate clinical interpretation
                 clinical_interpretation <- private$.generateClinicalInterpretation(analysis_info)
 
@@ -515,12 +519,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     type = jmvcore::NoticeType$INFO
                 )
                 n_total <- nrow(self$data)
-                n_used <- n_total  # Will be updated if sampling occurred
+                n_used <- nrow(prepared_data$data)
 
                 success$setContent(glue::glue(
                     "Analysis completed successfully.\n",
                     "• Plot type: {analysis_info$plot_type}\n",
-                    "• Observations: {format(n_used, big.mark = ',')} of {format(n_total, big.mark = ',')}\n",
+                    "• Observations used: {format(n_used, big.mark = ',')} of {format(n_total, big.mark = ',')}\n",
                     "• Statistical approach: {analysis_info$distribution}\n",
                     "• Study design: {analysis_info$direction}"
                 ))
@@ -601,7 +605,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 if (analysis_info$plot_type != "repeated_factor_factor" && 
                     !is.null(self$options$alluvsty)) {
-                    # Note: Alluvial style only applies to repeated factor comparisons
+                    # Alluvial style not applicable
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'alluvialNotApplicable',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent("Alluvial style option applies only to repeated factor vs factor data; it is ignored for this combination.")
+                    self$results$insert(1, notice)
                 }
             },
             
@@ -696,7 +707,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 # Handle NA exclusion if requested
                 if (self$options$excl) {
+                    before_n <- nrow(mydata)
                     mydata <- jmvcore::naOmit(mydata)
+                    after_n <- nrow(mydata)
+                } else {
+                    before_n <- nrow(mydata)
+                    after_n <- before_n
                 }
                 
                 # Handle large dataset sampling if requested
@@ -706,6 +722,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     sample_size <- 5000
                     mydata <- mydata[sample(nrow(mydata), sample_size), ]
                     message(glue::glue("Large dataset detected ({format(original_nrow, big.mark = ',')} rows). Sampled {format(sample_size, big.mark = ',')} rows for visualization performance. Disable 'Sample Large Datasets' option to use full dataset."))
+                    sampled_flag <- TRUE
+                } else {
+                    sampled_flag <- FALSE
                 }
                 
                 # Prepare composed terms for use with ggstatsplot
@@ -721,7 +740,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     group = group_var,
                     grvar = grvar,
                     distribution = analysis_info$distribution,
-                    alluvsty = analysis_info$alluvsty
+                    alluvsty = analysis_info$alluvsty,
+                    dropped = before_n - after_n,
+                    sampled = sampled_flag
                 )
             },
             
@@ -1088,6 +1109,32 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 # Prepare data for plotting
                 prepared_data <- private$.prepareDataForPlot(analysis_info)
+                n_total <- nrow(self$data)
+                n_used <- nrow(prepared_data$data)
+                # Notify if sampling applied
+                if (!is.null(prepared_data$sampled) && prepared_data$sampled) {
+                    sample_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'samplingApplied',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    sample_notice$setContent(glue::glue(
+                        "Large dataset detected; sampled 5,000 of {n_total} rows for plotting. Disable 'Sample Large Datasets' to use full data."
+                    ))
+                    self$results$insert(1, sample_notice)
+                }
+                # Notify if rows dropped due to NA exclusion
+                if (!is.null(prepared_data$dropped) && prepared_data$dropped > 0) {
+                    drop_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'naDropped',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    drop_notice$setContent(glue::glue(
+                        "{prepared_data$dropped} row(s) removed due to missing values."
+                    ))
+                    self$results$insert(1, drop_notice)
+                }
                 
                 # Adjust plot size if grouping variable is used
                 if (!is.null(prepared_data$grvar)) {

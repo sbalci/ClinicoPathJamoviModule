@@ -1,7 +1,7 @@
 ---
 name:  oddsratio
 title: Odds Ratio Table and Plot
-menuGroup: SurvivalT2
+menuGroup: SurvivalT1
 menuSubgroup: General Statistics
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
 version: '0.0.31'
@@ -85,6 +85,19 @@ options:
           R: >
             Specify which outcome level represents the positive case for likelihood ratio calculations.
             If not specified, the function will use the second level alphabetically.
+
+    - name: diagnosticPredictor
+      title: Diagnostic Predictor (for LRs)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      default: null
+      description:
+          main: >
+              Choose which binary predictor to use for sensitivity/specificity and likelihood ratios in the nomogram.
+              If left empty, the first explanatory variable is used. Ensure it has exactly two levels.
+          R: >
+              Specify the predictor to drive likelihood ratios; must be binary. Defaults to the first explanatory variable.
 
 
 # Nomogram ----

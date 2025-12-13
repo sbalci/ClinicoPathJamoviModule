@@ -297,6 +297,7 @@ computationally intensive operations like bootstrap calculations.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr

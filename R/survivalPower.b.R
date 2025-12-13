@@ -52,6 +52,11 @@ survivalPowerClass <- R6::R6Class(
                 ))
                 return()
             }
+            # Surface validation warnings (non-fatal) as notes
+            if (length(validation_result$warnings) > 0) {
+                warn_note <- paste(validation_result$warnings, collapse = " ")
+                jmvcore::note(self$results$power_summary, warn_note)
+            }
 
             # Check required packages
             if (!private$.check_required_packages()) {
@@ -365,6 +370,16 @@ survivalPowerClass <- R6::R6Class(
             primary_endpoint <- private$.format_primary_endpoint(self$options$primary_endpoint)
             effect_size_type <- private$.format_effect_size_type(self$options$effect_size_type)
             
+            # Highlight key assumptions/limitations
+            assumption_note <- "Assumes exponential survival with log-rank/Cox methodology; competing risks, RMST, SNP, and weighted log-rank options are not implemented in this version."
+            if (!is.null(self$options$survival_distribution) && self$options$survival_distribution != "exponential") {
+                assumption_note <- paste(assumption_note, "Input survival distribution set to exponential for calculations.")
+                jmvcore::note(summary_table, "Non-exponential distributions are not supported; calculations use exponential assumption.")
+            }
+            if (self$options$test_type %in% c("competing_risks", "rmst_test", "snp_survival", "weighted_log_rank")) {
+                jmvcore::note(summary_table, "Selected test type is not implemented; please choose log-rank, Cox regression, or non-inferiority.")
+            }
+            
             # Calculate the primary result based on analysis type
             calculated_value <- private$.calculate_primary_result()
             confidence_level <- paste0((1 - self$options$alpha_level) * 100, "%")
@@ -378,6 +393,8 @@ survivalPowerClass <- R6::R6Class(
                 calculated_value = calculated_value,
                 confidence_level = confidence_level
             ))
+            
+            jmvcore::note(summary_table, assumption_note)
         },
         
         .format_study_design = function(design) {

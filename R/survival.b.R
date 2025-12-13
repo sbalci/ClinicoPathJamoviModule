@@ -920,6 +920,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     }
 
+                    # Ensure all outcome levels were mapped
+                    unmapped <- setdiff(unique(outcome1), c(awd, awod, dod, dooc))
+                    unmapped <- unmapped[!is.na(unmapped)]
+                    if (length(unmapped) > 0) {
+                        stop(glue::glue("Outcome contains levels not mapped to event/censoring: {paste(unmapped, collapse = ', ')}. Please select all four levels for multievent analysis."))
+                    }
+
+                }
+
+                # Validate recode set is limited to 0/1/2
+                if (any(!mydata[["myoutcome"]] %in% c(0, 1, 2), na.rm = TRUE)) {
+                    stop("Outcome recode produced values outside {0,1,2}. Please check level selections.")
                 }
 
                 df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
@@ -987,9 +999,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                   landmark <- jmvcore::toNumeric(self$options$landmark)
 
-                    cleanData <- cleanData %>%
-                        dplyr::filter(mytime >= landmark) %>%
-                        dplyr::mutate(mytime = mytime - landmark)
+                  n_before <- nrow(cleanData)
+                  cleanData <- cleanData %>%
+                    dplyr::filter(mytime >= landmark) %>%
+                    dplyr::mutate(mytime = mytime - landmark)
+                  n_after <- nrow(cleanData)
+                  if (n_after < n_before) {
+                    jmvcore::note(self$results$medianTable,
+                                  glue::glue("Landmark analysis removed {n_before - n_after} subject(s) with time < {landmark}."))
+                  }
                 }
 
                 # Time Dependent Covariate ----
@@ -1266,7 +1284,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Cox ----
+                if (!(self$options$multievent && self$options$analysistype == "compete")) {
                     private$.cox(results)
+                } else {
+                    jmvcore::note(self$results$coxTable, "Cox model is not run for competing risk analyses in this module.")
+                }
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Survival Table ----
@@ -1287,7 +1309,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$pw
                     # && !self$options$sas
                     ) {
-                    private$.pairwise(results)
+                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                        private$.pairwise(results)
+                    } else {
+                        jmvcore::note(self$results$pairwiseTable, "Pairwise group tests are skipped for competing risk analyses.")
+                    }
                 }
 
 
@@ -1296,7 +1322,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Run person-time analysis if enabled
                 if (self$options$person_time) {
-                    private$.personTimeAnalysis(results)
+                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                        private$.personTimeAnalysis(results)
+                    } else {
+                        jmvcore::note(self$results$personTimeTable, "Person-time incidence rates are not computed for competing risk (multi-state) outcomes.")
+                    }
                 }
                 
                 ## Additional Model Diagnostics ----
@@ -2424,8 +2454,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Parse time intervals for stratified analysis
-                time_intervals <- as.numeric(unlist(strsplit(self$options$time_intervals, ",")))
-                time_intervals <- sort(unique(time_intervals))
+                time_intervals <- suppressWarnings(as.numeric(unlist(strsplit(self$options$time_intervals, ","))))
+                time_intervals <- sort(unique(time_intervals[!is.na(time_intervals) & time_intervals > 0]))
 
                 if (length(time_intervals) > 0) {
                     # Create time intervals

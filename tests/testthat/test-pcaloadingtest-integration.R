@@ -1,8 +1,6 @@
 # Integration tests for pcaloadingtest module
 # Tests the permV permutation test implementation
 
-context("test-pcaloadingtest-integration")
-
 library(ClinicoPath)
 
 test_that("permV permutation test is mathematically sound", {
@@ -435,4 +433,39 @@ test_that("Color customization options work", {
 
     # Should complete without errors
     expect_s3_class(result, "pcaloadingtestResults")
+})
+
+
+test_that("Setting a seed yields reproducible permutation results", {
+    skip_if_not_installed("ClinicoPath")
+
+    set.seed(2024)
+    n <- 30
+    testData <- data.frame(
+        var1 = rnorm(n),
+        var2 = rnorm(n),
+        var3 = rnorm(n)
+    )
+
+    res1 <- pcaloadingtest(
+        data = testData,
+        vars = c("var1", "var2", "var3"),
+        ncomp = 2,
+        nperm = 100,
+        seed = 42,
+        center = TRUE,
+        scale = TRUE
+    )
+
+    res2 <- pcaloadingtest(
+        data = testData,
+        vars = c("var1", "var2", "var3"),
+        ncomp = 2,
+        nperm = 100,
+        seed = 42,
+        center = TRUE,
+        scale = TRUE
+    )
+
+    expect_equal(res1$results$asDF, res2$results$asDF)
 })

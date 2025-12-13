@@ -1,8 +1,3 @@
-# Critical numerical tests for dendrogram module
-# Tests cover distance/linkage validation, cluster assignments, group coloring
-
-context("test-dendrogram-critical-fixes")
-
 library(ClinicoPath)
 
 test_that("Invalid distance/linkage combinations are rejected", {
@@ -480,4 +475,62 @@ test_that("Different plot types all use same clustering", {
     expect_s3_class(result3, "dendrogramResults")
 
     # All should produce valid results with same clustering underneath
+})
+
+test_that("clustering matrix state matches standardization flag", {
+    skip_if_not_installed("ClinicoPath")
+
+    testData <- data.frame(
+        x = c(1, 2, 3, 4),
+        y = c(10, 20, 30, 40)
+    )
+
+    res_std <- dendrogram(
+        data = testData,
+        vars = c("x", "y"),
+        standardize = TRUE
+    )
+
+    res_raw <- dendrogram(
+        data = testData,
+        vars = c("x", "y"),
+        standardize = FALSE
+    )
+
+    mat_std <- res_std$plot$state$clusteringMatrix
+    mat_raw <- res_raw$plot$state$clusteringMatrix
+
+    # Standardized columns should have mean 0 and sd 1
+    expect_equal(round(colMeans(mat_std), 6), c(0, 0))
+    expect_equal(round(apply(mat_std, 2, sd), 6), c(1, 1))
+
+    # Raw matrix should preserve original scale
+    expect_equal(mat_raw[, "x"], testData$x)
+    expect_equal(mat_raw[, "y"], testData$y)
+})
+
+test_that("heatmap plot uses precomputed clustering and row dendrogram", {
+    skip_if_not_installed("ClinicoPath")
+    skip_if_not_installed("tidyHeatmap")
+    skip_if_not_installed("ComplexHeatmap")
+
+    testData <- data.frame(
+        a = c(1, 2, 3),
+        b = c(1, 2, 2),
+        c = c(2, 3, 4)
+    )
+
+    res <- dendrogram(
+        data = testData,
+        vars = c("a", "b", "c"),
+        plotType = "heatmap",
+        showRowDendro = TRUE,
+        showColDendro = TRUE,
+        standardize = TRUE
+    )
+
+    # Should carry precomputed clustering into state for heatmap rendering
+    expect_true(!is.null(res$plot$state$hclustResult))
+    expect_true(!is.null(res$plot$state$clusteringMatrix))
+    expect_equal(length(res$plot$state$clusterMembership), nrow(testData))
 })

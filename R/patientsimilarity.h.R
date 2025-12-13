@@ -7,6 +7,7 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     public = list(
         initialize = function(
             vars = NULL,
+            seed = 123,
             method = "tsne",
             dimensions = "2",
             colorBy = NULL,
@@ -17,6 +18,8 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             performClustering = FALSE,
             clusterMethod = "kmeans",
             nClusters = 3,
+            dbscan_eps = 0.5,
+            dbscan_minpts = 5,
             showClusterStats = TRUE,
             survivalAnalysis = FALSE,
             survivalTime = NULL,
@@ -41,6 +44,10 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 permitted=list(
                     "numeric"),
                 default=NULL)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=123)
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -110,6 +117,18 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 default=3,
                 min=2,
                 max=10)
+            private$..dbscan_eps <- jmvcore::OptionNumber$new(
+                "dbscan_eps",
+                dbscan_eps,
+                default=0.5,
+                min=0.1,
+                max=10)
+            private$..dbscan_minpts <- jmvcore::OptionInteger$new(
+                "dbscan_minpts",
+                dbscan_minpts,
+                default=5,
+                min=2,
+                max=100)
             private$..showClusterStats <- jmvcore::OptionBool$new(
                 "showClusterStats",
                 showClusterStats,
@@ -163,6 +182,7 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "exportCoordinates")
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..seed)
             self$.addOption(private$..method)
             self$.addOption(private$..dimensions)
             self$.addOption(private$..colorBy)
@@ -173,6 +193,8 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..performClustering)
             self$.addOption(private$..clusterMethod)
             self$.addOption(private$..nClusters)
+            self$.addOption(private$..dbscan_eps)
+            self$.addOption(private$..dbscan_minpts)
             self$.addOption(private$..showClusterStats)
             self$.addOption(private$..survivalAnalysis)
             self$.addOption(private$..survivalTime)
@@ -187,6 +209,7 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         }),
     active = list(
         vars = function() private$..vars$value,
+        seed = function() private$..seed$value,
         method = function() private$..method$value,
         dimensions = function() private$..dimensions$value,
         colorBy = function() private$..colorBy$value,
@@ -197,6 +220,8 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         performClustering = function() private$..performClustering$value,
         clusterMethod = function() private$..clusterMethod$value,
         nClusters = function() private$..nClusters$value,
+        dbscan_eps = function() private$..dbscan_eps$value,
+        dbscan_minpts = function() private$..dbscan_minpts$value,
         showClusterStats = function() private$..showClusterStats$value,
         survivalAnalysis = function() private$..survivalAnalysis$value,
         survivalTime = function() private$..survivalTime$value,
@@ -210,6 +235,7 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         exportCoordinates = function() private$..exportCoordinates$value),
     private = list(
         ..vars = NA,
+        ..seed = NA,
         ..method = NA,
         ..dimensions = NA,
         ..colorBy = NA,
@@ -220,6 +246,8 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..performClustering = NA,
         ..clusterMethod = NA,
         ..nClusters = NA,
+        ..dbscan_eps = NA,
+        ..dbscan_minpts = NA,
         ..showClusterStats = NA,
         ..survivalAnalysis = NA,
         ..survivalTime = NA,
@@ -239,6 +267,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     active = list(
         instructions = function() private$.items[["instructions"]],
         summaryText = function() private$.items[["summaryText"]],
+        warnings = function() private$.items[["warnings"]],
         projectionPlot = function() private$.items[["projectionPlot"]],
         projection3D = function() private$.items[["projection3D"]],
         varianceTable = function() private$.items[["varianceTable"]],
@@ -284,6 +313,11 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="summaryText",
                 title="Analysis Summary",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Analysis Messages",
                 visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -581,6 +615,8 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param vars Continuous variables to use for calculating patient similarity.
 #'   These will be used to compute distances between patients. Categorical
 #'   variables should be converted to numeric or one-hot encoded.
+#' @param seed Random seed for reproducibility of t-SNE, UMAP, and clustering
+#'   results.
 #' @param method Method for dimensionality reduction: - PCA: Linear method,
 #'   preserves global structure - t-SNE: Non-linear, excellent for
 #'   visualization, preserves local structure - UMAP: Non-linear, preserves both
@@ -606,6 +642,10 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param clusterMethod Method for clustering patients in the reduced space.
 #' @param nClusters Number of clusters for k-means or hierarchical clustering.
 #'   For DBSCAN, this is ignored.
+#' @param dbscan_eps The radius of the neighborhood around a point (eps) for
+#'   DBSCAN.
+#' @param dbscan_minpts The minimum number of points required to form a dense
+#'   region (MinPts) for DBSCAN.
 #' @param showClusterStats Display summary statistics for each cluster
 #'   including size, characteristics, and outcome distribution.
 #' @param survivalAnalysis If survival data is available, compare survival
@@ -626,6 +666,7 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$projectionPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$projection3D} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$varianceTable} \tab \tab \tab \tab \tab a table \cr
@@ -654,6 +695,7 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 patientsimilarity <- function(
     data,
     vars = NULL,
+    seed = 123,
     method = "tsne",
     dimensions = "2",
     colorBy = NULL,
@@ -664,6 +706,8 @@ patientsimilarity <- function(
     performClustering = FALSE,
     clusterMethod = "kmeans",
     nClusters = 3,
+    dbscan_eps = 0.5,
+    dbscan_minpts = 5,
     showClusterStats = TRUE,
     survivalAnalysis = FALSE,
     survivalTime = NULL,
@@ -692,6 +736,7 @@ patientsimilarity <- function(
 
     options <- patientsimilarityOptions$new(
         vars = vars,
+        seed = seed,
         method = method,
         dimensions = dimensions,
         colorBy = colorBy,
@@ -702,6 +747,8 @@ patientsimilarity <- function(
         performClustering = performClustering,
         clusterMethod = clusterMethod,
         nClusters = nClusters,
+        dbscan_eps = dbscan_eps,
+        dbscan_minpts = dbscan_minpts,
         showClusterStats = showClusterStats,
         survivalAnalysis = survivalAnalysis,
         survivalTime = survivalTime,

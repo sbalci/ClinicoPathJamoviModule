@@ -644,6 +644,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        warnings = function() private$.items[["warnings"]],
         overviewTable = function() private$.items[["overviewTable"]],
         kappaTable = function() private$.items[["kappaTable"]],
         iccTable = function() private$.items[["iccTable"]],
@@ -719,6 +720,15 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="todo",
                 title="Getting Started"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Analysis Messages",
+                visible=TRUE,
+                clearWith=list(
+                    "vars",
+                    "multiraterMethod",
+                    "wght")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overviewTable",
@@ -1913,6 +1923,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr

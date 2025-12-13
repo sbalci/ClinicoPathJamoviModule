@@ -30,7 +30,10 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             outlier_method = "iqr",
             normality_test = FALSE,
             comparison_test = FALSE,
-            comparison_method = "auto", ...) {
+            comparison_method = "auto",
+            adjust_method = "none",
+            effect_size = FALSE,
+            log_transform = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -211,6 +214,23 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "anova",
                     "kruskal"),
                 default="auto")
+            private$..adjust_method <- jmvcore::OptionList$new(
+                "adjust_method",
+                adjust_method,
+                options=list(
+                    "none",
+                    "holm",
+                    "bonferroni",
+                    "BH"),
+                default="none")
+            private$..effect_size <- jmvcore::OptionBool$new(
+                "effect_size",
+                effect_size,
+                default=FALSE)
+            private$..log_transform <- jmvcore::OptionBool$new(
+                "log_transform",
+                log_transform,
+                default=FALSE)
 
             self$.addOption(private$..dep_var)
             self$.addOption(private$..group_var)
@@ -237,6 +257,9 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..normality_test)
             self$.addOption(private$..comparison_test)
             self$.addOption(private$..comparison_method)
+            self$.addOption(private$..adjust_method)
+            self$.addOption(private$..effect_size)
+            self$.addOption(private$..log_transform)
         }),
     active = list(
         dep_var = function() private$..dep_var$value,
@@ -263,7 +286,10 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         outlier_method = function() private$..outlier_method$value,
         normality_test = function() private$..normality_test$value,
         comparison_test = function() private$..comparison_test$value,
-        comparison_method = function() private$..comparison_method$value),
+        comparison_method = function() private$..comparison_method$value,
+        adjust_method = function() private$..adjust_method$value,
+        effect_size = function() private$..effect_size$value,
+        log_transform = function() private$..log_transform$value),
     private = list(
         ..dep_var = NA,
         ..group_var = NA,
@@ -289,7 +315,10 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..outlier_method = NA,
         ..normality_test = NA,
         ..comparison_test = NA,
-        ..comparison_method = NA)
+        ..comparison_method = NA,
+        ..adjust_method = NA,
+        ..effect_size = NA,
+        ..log_transform = NA)
 )
 
 raincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -563,4 +592,3 @@ raincloud <- function(
 
     analysis$results
 }
-

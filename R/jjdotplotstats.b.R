@@ -76,6 +76,19 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     'Please select a valid grouping variable.'
                 ))
             }
+
+            # Require at least two groups with complete data
+            relevant_cols <- c(self$options$dep, self$options$group)
+            if (!is.null(self$options$grvar))
+                relevant_cols <- c(relevant_cols, self$options$grvar)
+            complete_rows <- complete.cases(self$data[relevant_cols])
+            group_levels <- nlevels(droplevels(as.factor(self$data[[self$options$group]][complete_rows])))
+            if (group_levels < 2) {
+                private$.accumulateMessage(
+                    "<br>⚠️ At least two groups with data are required for a comparison.<br>"
+                )
+                return(FALSE)
+            }
             
             # Validate centrality parameter consistency
             private$.validateCentralityOptions()
@@ -291,15 +304,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Apply settings based on preset
             if (preset == "basic") {
-                self$options$resultssubtitle <- TRUE
                 preset_message <- "Using basic analysis settings optimized for straightforward comparisons."
             } else if (preset == "publication") {
-                self$options$resultssubtitle <- TRUE
-                self$options$originaltheme <- TRUE
                 preset_message <- "Using publication-ready settings with comprehensive statistical reporting."
             } else if (preset == "clinical") {
-                self$options$centralityplotting <- TRUE
-                self$options$centralitytype <- "median"
                 preset_message <- "Using clinical settings optimized for medical decision-making."
             }
 
@@ -579,6 +587,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .prepareOptions = function(force_refresh = FALSE) {
             # Create robust hash of current options to detect changes
             current_options_hash <- digest::digest(list(
+                dep = self$options$dep,
+                group = self$options$group,
+                grvar = self$options$grvar,
                 typestatistics = self$options$typestatistics,
                 effsizetype = self$options$effsizetype,
                 centralityplotting = self$options$centralityplotting,
@@ -614,6 +625,20 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Process variables
             dep <- self$options$dep
             group <- self$options$group
+
+            # Centrality settings mapped to ggstatsplot arguments
+            centrality_plotting <- isTRUE(self$options$centralityplotting) && self$options$centralityparameter != "none"
+            centrality_type <- self$options$centralitytype
+            if (self$options$centralityparameter == "median")
+                centrality_type <- "nonparametric"
+            if (is.null(centrality_type) || centrality_type == "")
+                centrality_type <- typestatistics
+
+            # Compute axis labels respecting orientation flip (values on x-axis)
+            xlab <- self$options$ytitle
+            if (xlab == '') xlab <- group
+            ylab <- self$options$xtitle
+            if (ylab == '') ylab <- dep
             
             # Process titles
             mytitle <- self$options$mytitle
@@ -631,6 +656,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dep = dep,
                 group = group,
                 mytitle = mytitle,
+                xlab = xlab,
+                ylab = ylab,
                 xtitle = xtitle,
                 ytitle = ytitle,
                 effsizetype = self$options$effsizetype,
@@ -639,20 +666,40 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 testvalue = self$options$testvalue,
                 bfmessage = self$options$bfmessage,
                 conflevel = self$options$conflevel,
-                k = self$options$k,
+                digits = self$options$k,
                 testvalueline = self$options$testvalueline,
                 centralityparameter = self$options$centralityparameter,
                 centralityk = self$options$centralityk,
                 resultssubtitle = self$options$resultssubtitle,
                 originaltheme = self$options$originaltheme
             )
+
+            # Apply preset overrides without mutating options object
+            if (private$.currentPreset == "basic") {
+                options_list$resultssubtitle <- TRUE
+            } else if (private$.currentPreset == "publication") {
+                options_list$resultssubtitle <- TRUE
+                options_list$originaltheme <- TRUE
+            } else if (private$.currentPreset == "clinical") {
+                centrality_plotting <- TRUE
+                centrality_type <- "nonparametric"
+                options_list$centralityplotting <- TRUE
+                options_list$centralityparameter <- "median"
+            }
             
             # Process centrality parameters if enabled
-            if (options_list$centralityplotting) {
-                options_list$centrality.plotting <- TRUE
-                options_list$centrality.type <- options_list$centralitytype
-            } else {
-                options_list$centrality.plotting <- FALSE
+            options_list$centrality.plotting <- centrality_plotting
+            options_list$centrality.type <- centrality_type
+            options_list$ggplot.component <- list(ggplot2::coord_flip())
+            if (isTRUE(self$options$testvalueline)) {
+                options_list$ggplot.component <- c(
+                    options_list$ggplot.component,
+                    list(ggplot2::geom_hline(
+                        yintercept = self$options$testvalue,
+                        linetype = "dashed",
+                        color = "red"
+                    ))
+                )
             }
             
             private$.processedOptions <- options_list
@@ -675,7 +722,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br><br>
                 This tool will help you generate Dot Charts.
                 <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggdotplotstats.html' target='_blank'>ggdotplotstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggdotplotstats.html' target='_blank'>grouped_ggdotplotstats</a>.
+                This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>ggbetweenstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>grouped_ggbetweenstats</a>.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -731,37 +778,30 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             options_data <- private$.prepareOptions()
 
 
-            # ggdotplotstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggdotplotstats.html
+            # ggbetweenstats ----
+            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html
 
             # Checkpoint before expensive ggstatsplot computation
             private$.checkpoint()
 
-            plot <- ggstatsplot::ggdotplotstats(
+            plot <- ggstatsplot::ggbetweenstats(
                 data = mydata,
-                x = !!rlang::sym(options_data$dep),
-                y = !!rlang::sym(options_data$group),
+                x = !!rlang::sym(options_data$group),
+                y = !!rlang::sym(options_data$dep),
                 title = options_data$mytitle,
-                xlab = options_data$xtitle,
-                ylab = options_data$ytitle,
+                xlab = options_data$xlab,
+                ylab = options_data$ylab,
                 type = options_data$typestatistics,
-                test.value = options_data$testvalue,
                 effsize.type = options_data$effsizetype,
                 conf.level = options_data$conflevel,
-                k = options_data$k,
+                digits = options_data$digits,
                 bf.message = options_data$bfmessage,
-                test.value.line = options_data$testvalueline,
-                centrality.parameter = options_data$centralityparameter,
-                centrality.k = options_data$centralityk,
-                results.subtitle = options_data$resultssubtitle
+                centrality.plotting = options_data$centrality.plotting,
+                centrality.type = options_data$centrality.type,
+                results.subtitle = options_data$resultssubtitle,
+                ggplot.component = options_data$ggplot.component,
+                ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
             )
-
-
-            if (!options_data$originaltheme) {
-                plot <- plot + ggtheme
-            } else {
-                plot <- plot + ggstatsplot::theme_ggstatsplot()
-            }
 
             # Print Plot ----
 
@@ -783,34 +823,35 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             options_data <- private$.prepareOptions()
 
 
-            # grouped_ggdotplotstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggdotplotstats.html
+            # grouped_ggbetweenstats ----
+            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html
 
 
 
             if (!is.null(self$options$grvar)) {
-                selected_theme <- if (!options_data$originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
                 grvar <- self$options$grvar
 
                 # Checkpoint before expensive grouped ggstatsplot computation
                 private$.checkpoint()
                 
-                plot2 <- ggstatsplot::grouped_ggdotplotstats(
+                plot2 <- ggstatsplot::grouped_ggbetweenstats(
                     data = mydata,
-                    x = !!rlang::sym(options_data$dep),
-                    y = !!rlang::sym(options_data$group),
+                    x = !!rlang::sym(options_data$group),
+                    y = !!rlang::sym(options_data$dep),
                     grouping.var = !!rlang::sym(grvar),
                     type = options_data$typestatistics,
-                    test.value = options_data$testvalue,
                     effsize.type = options_data$effsizetype,
                     conf.level = options_data$conflevel,
-                    k = options_data$k,
+                    digits = options_data$digits,
                     bf.message = options_data$bfmessage,
-                    test.value.line = options_data$testvalueline,
-                    centrality.parameter = options_data$centralityparameter,
-                    centrality.k = options_data$centralityk,
                     results.subtitle = options_data$resultssubtitle,
-                    ggtheme = selected_theme
+                    centrality.plotting = options_data$centrality.plotting,
+                    centrality.type = options_data$centrality.type,
+                    ggplot.component = options_data$ggplot.component,
+                    ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme,
+                    xlab = options_data$xlab,
+                    ylab = options_data$ylab,
+                    title = options_data$mytitle
                 )
             }
 
@@ -828,11 +869,3 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     )
 )
-
-
-
-
-
-
-
-

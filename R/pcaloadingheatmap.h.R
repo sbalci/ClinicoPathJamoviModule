@@ -166,7 +166,9 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     active = list(
         todo = function() private$.items[["todo"]],
         heatmap = function() private$.items[["heatmap"]],
-        barmap = function() private$.items[["barmap"]]),
+        barmap = function() private$.items[["barmap"]],
+        variance = function() private$.items[["variance"]],
+        scree = function() private$.items[["scree"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -181,6 +183,30 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="todo",
                 title="Instructions",
                 visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="variance",
+                title="Variance Explained",
+                clearWith=list(
+                    "vars",
+                    "ncomp",
+                    "center",
+                    "scale"),
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Component", 
+                        `type`="text"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="cumulative", 
+                        `title`="Cumulative", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="heatmap",
@@ -226,6 +252,21 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "colorlow",
                     "colormid",
                     "colorhigh",
+                    "plotwidth",
+                    "plotheight")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="scree",
+                title="Variance Explained Plot",
+                width=600,
+                height=450,
+                renderFun=".scree",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "center",
+                    "scale",
+                    "ncomp",
                     "plotwidth",
                     "plotheight")))}))
 
@@ -369,4 +410,3 @@ pcaloadingheatmap <- function(
 
     analysis$results
 }
-

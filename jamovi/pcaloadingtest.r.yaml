@@ -17,6 +17,7 @@ items:
         - vars
         - ncomp
         - nperm
+        - seed
         - componentfilter
         - center
         - scale
@@ -66,6 +67,28 @@ items:
           type: text
           content: '($key)'
 
+    - name: variance
+      title: Variance Explained
+      type: Table
+      clearWith:
+        - vars
+        - ncomp
+        - seed
+        - center
+        - scale
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+          type: number
+          format: zto
+        - name: cumulative
+          title: Cumulative
+          type: number
+          format: zto
+
     - name: loadingplot
       title: Loading Barplot with Permutation CIs
       type: Image
@@ -78,6 +101,7 @@ items:
         - vars
         - ncomp
         - nperm
+        - seed
         - componentfilter
         - center
         - scale
@@ -85,6 +109,23 @@ items:
         - colorlow
         - colormid
         - colorhigh
+        - plotwidth
+        - plotheight
+
+    - name: scree
+      title: Variance Explained Plot
+      type: Image
+      description: Scree/variance explained plot
+      width:  700
+      height: 450
+      renderFun: .scree
+      requiresData: true
+      clearWith:
+        - vars
+        - ncomp
+        - seed
+        - center
+        - scale
         - plotwidth
         - plotheight
 

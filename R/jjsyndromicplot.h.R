@@ -7,6 +7,7 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     public = list(
         initialize = function(
             vars = NULL,
+            missing = "listwise",
             component = 1,
             cutoff = 0.5,
             center = TRUE,
@@ -38,6 +39,13 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..missing <- jmvcore::OptionList$new(
+                "missing",
+                missing,
+                options=list(
+                    "listwise",
+                    "mean_imputation"),
+                default="listwise")
             private$..component <- jmvcore::OptionInteger$new(
                 "component",
                 component,
@@ -129,6 +137,7 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=TRUE)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..missing)
             self$.addOption(private$..component)
             self$.addOption(private$..cutoff)
             self$.addOption(private$..center)
@@ -149,6 +158,7 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         }),
     active = list(
         vars = function() private$..vars$value,
+        missing = function() private$..missing$value,
         component = function() private$..component$value,
         cutoff = function() private$..cutoff$value,
         center = function() private$..center$value,
@@ -168,6 +178,7 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         showExplanations = function() private$..showExplanations$value),
     private = list(
         ..vars = NA,
+        ..missing = NA,
         ..component = NA,
         ..cutoff = NA,
         ..center = NA,
@@ -192,6 +203,8 @@ jjsyndromicplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        warnings = function() private$.items[["warnings"]],
+        explanations = function() private$.items[["explanations"]],
         loadings = function() private$.items[["loadings"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
@@ -208,7 +221,37 @@ jjsyndromicplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="todo",
                 title="Instructions",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "vars",
+                    "component",
+                    "cutoff",
+                    "center",
+                    "scale")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Messages",
+                visible=TRUE,
+                clearWith=list(
+                    "vars",
+                    "component",
+                    "cutoff",
+                    "center",
+                    "scale",
+                    "clinicalPreset")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="Explanations",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "vars",
+                    "component",
+                    "cutoff",
+                    "center",
+                    "scale",
+                    "showExplanations")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="loadings",
@@ -335,6 +378,9 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   Analysis. Select at least 3 numeric variables (e.g., biomarker levels,
 #'   clinical measurements, gene expression values). PCA will identify patterns
 #'   of correlation among these variables.
+#' @param missing How to handle missing values. 'listwise' excludes cases with
+#'   any missing values. 'mean_imputation' replaces missing values with the
+#'   variable mean.
 #' @param component Which principal component to visualize (1 = PC1, 2 = PC2,
 #'   etc.). PC1 typically explains the most variance in the data.
 #' @param cutoff Minimum absolute loading value to display a variable (0 to
@@ -370,6 +416,8 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$loadings} \tab \tab \tab \tab \tab Standardized loadings for the selected principal component \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab Syndromic visualization of PCA loadings \cr
 #' }
@@ -384,6 +432,7 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 jjsyndromicplot <- function(
     data,
     vars,
+    missing = "listwise",
     component = 1,
     cutoff = 0.5,
     center = TRUE,
@@ -414,6 +463,7 @@ jjsyndromicplot <- function(
 
     options <- jjsyndromicplotOptions$new(
         vars = vars,
+        missing = missing,
         component = component,
         cutoff = cutoff,
         center = center,

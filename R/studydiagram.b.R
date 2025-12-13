@@ -78,49 +78,158 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Checkpoint before validation
-            private$.checkpoint()
+            # 1. Validation
+            if (is.null(self$options$data_format)) return()
 
-            # Check for required variables based on format
-            if (!private$.validateVariables()) {
-                return()
+            data <- self$data
+            format <- self$options$data_format
+            
+            # Helper to add warning
+            add_warning <- function(msg) {
+                 self$results$diagram$setContent(paste0(self$results$diagram$content, "<div style='color:orange;'>Warning: ", msg, "</div>"))
             }
+            
+            # Data Preparation & Attrition Logic
+            flow_data <- NULL # Structure: step, n, excluded, retention_pct
+            
+            if (format == "participant_step") {
+                 # Not fully implemented in this pass - focus on the other two common ones
+                 self$results$diagram$setContent("Participant Tracking format is under construction.")
+                 return()
+                 
+            } else if (format == "step_summary") {
+                 # Check vars
+                 if (is.null(self$options$step_name) || is.null(self$options$participant_count)) return()
+                 
+                 step_col <- self$options$step_name
+                 count_col <- self$options$participant_count
+                 
+                 # Ensure proper types
+                 if (!is.numeric(data[[count_col]])) {
+                      add_warning("Participant count must be numeric.")
+                      return()
+                 }
+                 
+                 # Extract standard flow
+                 flow_data <- data.frame(
+                      step = as.character(data[[step_col]]),
+                      n = as.numeric(data[[count_col]]),
+                      stringsAsFactors = FALSE
+                 )
+                 
+                 # Calc exclusions sequentially
+                 flow_data$excluded <- c(0, -diff(flow_data$n))
+                 
+                 # Check logic
+                 if (any(flow_data$excluded < 0)) {
+                      add_warning("Participant counts increase between steps. Exclusions clamped to 0.")
+                      flow_data$excluded[flow_data$excluded < 0] <- 0
+                 }
+                 
+                 # Reasons?
+                 if (!is.null(self$options$exclusion_reason_summary)) {
+                      flow_data$reason <- as.character(data[[self$options$exclusion_reason_summary]])
+                 } else {
+                      flow_data$reason <- ""
+                 }
 
-            # Checkpoint before data processing
-            private$.checkpoint()
+            } else if (format == "exclusion_mapping") {
+                 # Sequential Exclusion Logic
+                 if (is.null(self$options$participant_id_mapping) || is.null(self$options$exclusion_reason_mapping)) return()
+                 
+                 pid_col <- self$options$participant_id_mapping
+                 reason_col <- self$options$exclusion_reason_mapping
+                 
+                 # Unique IDs check
+                 if (any(duplicated(data[[pid_col]]))) {
+                      add_warning("Duplicate Participant IDs found. Analysis assumes one row per participant.")
+                 }
+                 
+                 current_data <- data
+                 n_initial <- nrow(current_data)
+                 
+                 # Steps
+                 steps <- list()
+                 # Step 1 (Initial)
+                 steps[[1]] <- list(name=self$options$step1_label, n=n_initial, excluded=0, reason="")
+                 
+                 # Defined Exclusion Steps
+                 verify_step <- function(label, levels, current_df) {
+                      if (is.null(levels) || length(levels) == 0) return(list(n=nrow(current_df), excluded=0, kept_df=current_df))
+                      
+                      # Identify excluded IDs
+                      is_excluded <- current_df[[reason_col]] %in% levels
+                      n_excl <- sum(is_excluded)
+                      kept_df <- current_df[!is_excluded, ]
+                      
+                      return(list(n=nrow(kept_df), excluded=n_excl, kept_df=kept_df))
+                 }
+                 
+                 # Step 2
+                 res2 <- verify_step(self$options$step2_label, self$options$step1_exclusions, current_data) # Exclusions happen BETWEEN 1 and 2 usually, or AT step 1 leading to 2.
+                 # Convention: Step 1 is "Assessed". Step 1 Exclusions remove people from Step 2 "Enrolled".
+                 steps[[2]] <- list(name=self$options$step2_label, n=res2$n, excluded=res2$excluded, reason=paste(self$options$step1_exclusions, collapse=", "))
+                 current_data <- res2$kept_df
+                 
+                 # Step 3
+                 res3 <- verify_step(self$options$step3_label, self$options$step2_exclusions, current_data)
+                 steps[[3]] <- list(name=self$options$step3_label, n=res3$n, excluded=res3$excluded, reason=paste(self$options$step2_exclusions, collapse=", "))
+                 current_data <- res3$kept_df
+                 
+                 # Step 4
+                 res4 <- verify_step(self$options$step4_label, self$options$step3_exclusions, current_data)
+                 steps[[4]] <- list(name=self$options$step4_label, n=res4$n, excluded=res4$excluded, reason=paste(self$options$step3_exclusions, collapse=", "))
+                 current_data <- res4$kept_df
+                 
+                 # Step 5
+                 res5 <- verify_step(self$options$step5_label, self$options$step4_exclusions, current_data)
+                 steps[[5]] <- list(name=self$options$step5_label, n=res5$n, excluded=res5$excluded, reason=paste(self$options$step4_exclusions, collapse=", "))
+                 current_data <- res5$kept_df
 
-            # Process data based on selected format
-            data_format <- self$options$data_format
-
-            if (data_format == "participant_step") {
-                private$.processParticipantStep()
-            } else if (data_format == "step_summary") {
-                private$.processStepSummary()
-            } else if (data_format == "exclusion_mapping") {
-                private$.processExclusionMapping()
+                 # Convert to DF
+                 flow_data <- do.call(rbind, lapply(steps, as.data.frame))
             }
-
-            # Checkpoint before output generation
-            private$.checkpoint()
-
-            # Generate outputs if data processing succeeded
-            if (!is.null(private$.processedData)) {
-                private$.populateSummaryTable()
-                private$.generateDiagram()
-
-                # Always check data quality
-                private$.checkDataQuality()
-
-                # Checkpoint before plot rendering
-                private$.checkpoint()
-
-                private$.generatePlot()
-
-                if (self$options$show_interpretation) {
-                    private$.generateClinicalOutputs()
-                }
+            
+            # --- Results Populating ---
+            private$.processedData <- flow_data
+            
+            # Text Description
+            if (self$options$show_interpretation) {
+                 n_start <- flow_data$n[1]
+                 n_end <- tail(flow_data$n, 1)
+                 retention <- round(n_end/n_start * 100, 1)
+                 
+                 desc <- paste0(
+                      "<h4>Flow Summary</h4>",
+                      "<ul>",
+                      "<li><b>Initial N:</b> ", n_start, "</li>",
+                      "<li><b>Final N:</b> ", n_end, "</li>",
+                      "<li><b>Retention:</b> ", retention, "%</li>",
+                      "</ul>"
+                 )
+                 self$results$diagram$setContent(desc)
+            } else {
+                 self$results$diagram$setContent("")
             }
+            
+            # Table
+            table <- self$results$summary
+            for(i in 1:nrow(flow_data)) {
+                 row <- list(
+                      step = flow_data$step[i],
+                      count = flow_data$n[i],
+                      excluded = flow_data$excluded[i],
+                      retention = paste0(round(flow_data$n[i] / flow_data$n[1] * 100, 1), "%")
+                 )
+                 table$addRow(rowKey = i, values = row)
+            }
+            
+            # Trigger plot
+            self$results$plot$setState(flow_data)
+
         },
+
+
 
         .validateVariables = function() {
             data_format <- self$options$data_format

@@ -331,6 +331,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         clinical_summary = function() private$.items[["clinical_summary"]],
         statistical_tests = function() private$.items[["statistical_tests"]],
         preset_guidance = function() private$.items[["preset_guidance"]],
+        presetInfo = function() private$.items[["presetInfo"]],
+        warnings = function() private$.items[["warnings"]],
         explanations = function() private$.items[["explanations"]]),
     private = list(),
     public=list(
@@ -489,6 +491,22 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "analysis_preset")))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="presetInfo",
+                title="Preset Information",
+                visible=FALSE,
+                clearWith=list(
+                    "analysis_preset")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=TRUE,
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "fill_var")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="explanations",
                 title="Explanations",
                 visible=FALSE,
@@ -572,6 +590,8 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'

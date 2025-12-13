@@ -211,7 +211,28 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<h3>Hierarchical Clustering Results</h3>",
                 "<ul><li>",
                 paste(infoBullets, collapse = "</li><li>"),
-                "</li></ul>"
+                "</li></ul>",
+                "<div style='margin-top: 10px;'>",
+                "<p><strong>Clinical interpretation (pathologist-friendly):</strong></p>",
+                "<ul style='margin-top: 4px;'>",
+                "<li><strong>What the tree shows:</strong> Samples that join at short branch heights are more similar; long branches indicate greater separation.</li>",
+                if (highlightClusters && effectiveClusters > 1) {
+                    "<li><strong>Colored clusters:</strong> Highlighted colors mark the requested clusters. Look for clusters that merge at low heights for the tightest groups.</li>"
+                } else {
+                    "<li><strong>Clusters:</strong> You can highlight clusters to see where natural groupings occur; low merge heights = stronger similarity.</li>"
+                },
+                if (prep$standardizeApplied) {
+                    "<li><strong>Scaling:</strong> Variables were z-scored (mean 0, SD 1) so each marker contributes equally.</li>"
+                } else {
+                    "<li><strong>Scaling:</strong> Distances are on the original scale; high-variance markers can dominate clustering.</li>"
+                },
+                if (!is.null(groupData) && colorGroups) {
+                    "<li><strong>Group colours:</strong> Leaf colours reflect the selected grouping variable; grey leaves mean the group was missing/unmatched.</li>"
+                } else {
+                    "<li><strong>Group colours:</strong> You can colour leaves by a grouping variable to see whether clinical categories align with clusters.</li>"
+                },
+                "<li><strong>Height axis:</strong> The y-axis shows the clustering distance; focus on where clusters fuse to judge separation.</li>",
+                "</ul></div>"
             )
             self$results$clusterInfo$setContent(clusterInfoText)
 
@@ -220,6 +241,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             image$setSize(plotWidth, plotHeight)
             image$setState(list(
                 hclustResult = hclustResult,
+                clusteringMatrix = clusteringMatrix,
                 data = clusterData,
                 originalData = data,
                 showLabels = showLabels,
@@ -237,7 +259,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clusterMembership = clusterMembership,
                 clusterSummary = clusterCounts,
                 maxLabels = maxLabels,
-                standardizeApplied = prep$standardizeApplied
+                standardizeApplied = prep$standardizeApplied,
+                distanceMethod = distanceMethod,
+                clusterMethod = clusterMethod
             ))
         },
         
@@ -250,6 +274,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             hclustResult <- state$hclustResult
             data <- state$data
+            clusteringMatrix <- state$clusteringMatrix
             showLabels <- state$showLabels
             colorGroups <- state$colorGroups
             groupData <- state$groupData
@@ -261,6 +286,8 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clusterMembership <- state$clusterMembership
             effectiveClusters <- state$effectiveClusters
             groupLevels <- state$groupLevels
+            distanceMethod <- state$distanceMethod
+            clusterMethod <- state$clusterMethod
 
             # Convert to dendrogram
             dendro <- as.dendrogram(hclustResult)
@@ -269,7 +296,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # tidyHeatmap-based heatmap with dendrograms
                 # CRITICAL FIX: Pass precomputed hclustResult to avoid reclustering
                 return(private$.plotTidyHeatmap(
-                    data = data,
+                    dataMatrix = clusteringMatrix,
                     hclustResult = hclustResult,
                     showRowDendro = self$options$showRowDendro,
                     showColDendro = self$options$showColDendro,
@@ -281,7 +308,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     colorGroups = colorGroups,
                     groupData = groupData,
                     groupLevels = groupLevels,
-                    colorScheme = colorScheme
+                    colorScheme = colorScheme,
+                    distanceMethod = distanceMethod,
+                    clusterMethod = clusterMethod
                 ))
             } else if (plotType == "base") {
                 # Basic R dendrogram plot
@@ -320,9 +349,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(FALSE)
         },
         
-        .plotTidyHeatmap = function(data, hclustResult, showRowDendro, showColDendro,
+        .plotTidyHeatmap = function(dataMatrix, hclustResult, showRowDendro, showColDendro,
                                    heatmapScale, heatmapPalette, showCellBorders, showLabels, maxLabels,
-                                   colorGroups, groupData, groupLevels, colorScheme) {
+                                   colorGroups, groupData, groupLevels, colorScheme, distanceMethod, clusterMethod) {
 
             tidyHeatmapAvailable <- requireNamespace('tidyHeatmap', quietly = TRUE) &&
                 requireNamespace('ComplexHeatmap', quietly = TRUE) &&
@@ -339,9 +368,10 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # The hclustResult clusters samples (rows), which become columns after transpose
             # This ensures heatmap displays the SAME clustering reported in summary tables
 
-            # Prepare data in tidy format for tidyHeatmap
-            # Convert matrix to long format: row, column, value
-            dataMatrix <- t(as.matrix(data))  # Transpose: features as rows, samples as columns
+            # Ensure matrix with dimnames for consistency
+            dataMatrix <- as.matrix(dataMatrix)
+            # Transpose: features as rows, samples as columns
+            dataMatrix <- t(dataMatrix)
 
             # Convert hclustResult to dendrogram for column clustering
             columnDendro <- as.dendrogram(hclustResult)
@@ -374,7 +404,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .value = quote(value),
                 scale = scaleOption,
                 palette_value = palette,
-                cluster_rows = showRowDendro,      # Cluster features (rows)
+                cluster_rows = if (!is.null(rowDendro)) rowDendro else showRowDendro,  # Feature clustering
                 cluster_columns = columnDendro,     # Use precomputed sample clustering
                 show_row_names = showRowLabels,
                 show_column_names = showColLabels,
@@ -385,6 +415,26 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CRITICAL FIX: Add cell borders BEFORE annotation to ensure they persist
             if (showCellBorders) {
                 heatmapParams$rect_gp <- grid::gpar(col = "white", lwd = 0.5)
+            }
+
+            # Optional row dendrogram using user-selected distance/method
+            rowDendro <- NULL
+            if (showRowDendro) {
+                # Validate compatibility for row clustering
+                rowValid <- private$.validateDistanceLinkage(distanceMethod, clusterMethod)
+                if (!rowValid$valid) {
+                    warning("Row dendrogram skipped: ", gsub("<[^>]+>", "", rowValid$message))
+                } else {
+                    rowDendro <- tryCatch({
+                        stats::as.dendrogram(stats::hclust(
+                            stats::dist(t(dataMatrix), method = distanceMethod),
+                            method = clusterMethod
+                        ))
+                    }, error = function(e) {
+                        warning("Row dendrogram skipped: ", conditionMessage(e))
+                        NULL
+                    })
+                }
             }
 
             # Create base heatmap with all parameters

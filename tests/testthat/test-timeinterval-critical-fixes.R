@@ -8,7 +8,8 @@ library(testthat)
 
 # Skip all tests if timeinterval function not available
 skip_if_not_installed <- function() {
-  if (!exists("timeinterval") || !is.function(timeinterval)) {
+  if (!exists("timeinterval") || !is.function(timeinterval) ||
+      !exists("timeintervalOptions") || !exists("timeintervalClass")) {
     skip("timeinterval function not available")
   }
 }
@@ -37,7 +38,7 @@ test_that("Negative intervals: Rejected with clear error message", {
       time_format = "ymd",
       output_unit = "months"
     ),
-    regexp = "negative.*interval"  # Should mention negative interval
+    regexp = "Negative time intervals detected"  # Should mention negative interval
   )
 })
 
@@ -59,7 +60,7 @@ test_that("Negative intervals: Error shows example rows", {
       time_format = "ymd",
       output_unit = "days"
     ),
-    regexp = "Row.*Start.*End"  # Should show row example
+    regexp = "Row 1: Start=.*End=.*"  # Should show row example
   )
 })
 
@@ -108,7 +109,7 @@ test_that("Mixed formats: YMD start, DMY end - REJECTED", {
       time_format = "auto",  # Auto should detect problem
       output_unit = "months"
     ),
-    regexp = "both.*column"  # Should mention both columns
+    regexp = "common date format.*start_ymd.*end_dmy"  # Should mention both columns
   )
 })
 
@@ -153,7 +154,7 @@ test_that("Explicit wrong format: Catches parse failure in END column", {
       time_format = "dmy",  # WRONG format
       output_unit = "months"
     ),
-    regexp = "format.*column|parse"  # Should mention format/parsing problem
+    regexp = "Date parsing failed for column 'start_date'"  # Should mention format/parsing problem
   )
 })
 
@@ -171,20 +172,55 @@ test_that("Interval calculation: 6 months exactly", {
     stringsAsFactors = FALSE
   )
   
-  # This is a placeholder since we can't easily access internal calculated values
-  # In a real test, you'd need to access the result object
-  expect_no_error(
-    result <- timeinterval(
-      data = test_data,
-      dx_date = "start_date",
-      fu_date = "end_date",
-      time_format = "ymd",
-      output_unit = "months"
-    )
+  opts <- timeintervalOptions$new(
+    dx_date = "start_date",
+    fu_date = "end_date",
+    time_format = "ymd",
+    output_unit = "months"
+  )
+  analysis <- timeintervalClass$new(options = opts, data = test_data)
+  calc <- analysis$.__enclos_env__$private$.calculate_survival_time(
+    data = test_data,
+    dx_date = "start_date",
+    fu_date = "end_date",
+    time_format = "ymd",
+    output_unit = "months",
+    landmark_time = NULL,
+    timezone_setting = "system"
   )
   
-  # Interval should be approximately 6 months
-  # (Exact value depends on lubridate's month calculation)
+  expect_equal(round(calc$time, 3), 5.979, tolerance = 1e-3)
+})
+
+test_that("Calendar basis uses actual month length", {
+  skip_if_not_installed()
+  
+  test_data <- data.frame(
+    start_date = "2020-01-01",
+    end_date = "2020-02-01",  # 31 days (Jan)
+    stringsAsFactors = FALSE
+  )
+  
+  opts <- timeintervalOptions$new(
+    dx_date = "start_date",
+    fu_date = "end_date",
+    time_format = "ymd",
+    output_unit = "months",
+    time_basis = "calendar"
+  )
+  analysis <- timeintervalClass$new(options = opts, data = test_data)
+  calc <- analysis$.__enclos_env__$private$.calculate_survival_time(
+    data = test_data,
+    dx_date = "start_date",
+    fu_date = "end_date",
+    time_format = "ymd",
+    output_unit = "months",
+    time_basis = "calendar",
+    landmark_time = NULL,
+    timezone_setting = "system"
+  )
+  
+  expect_equal(round(calc$time, 3), 1.000, tolerance = 1e-3)
 })
 
 test_that("Interval calculation: Different units give consistent results", {
@@ -197,18 +233,34 @@ test_that("Interval calculation: Different units give consistent results", {
     stringsAsFactors = FALSE
   )
   
-  # All units should work
-  for (unit in c("days", "weeks", "months", "years")) {
-    expect_no_error(
-      timeinterval(
-        data = test_data,
-        dx_date = "start_date",
-        fu_date = "end_date",
-        time_format = "ymd",
-        output_unit = unit
-      )
+  calc_for_unit <- function(unit) {
+    opts <- timeintervalOptions$new(
+      dx_date = "start_date",
+      fu_date = "end_date",
+      time_format = "ymd",
+      output_unit = unit
     )
+    analysis <- timeintervalClass$new(options = opts, data = test_data)
+    analysis$.__enclos_env__$private$.calculate_survival_time(
+      data = test_data,
+      dx_date = "start_date",
+      fu_date = "end_date",
+      time_format = "ymd",
+      output_unit = unit,
+      landmark_time = NULL,
+      timezone_setting = "system"
+    )$time
   }
+  
+  days <- calc_for_unit("days")
+  weeks <- calc_for_unit("weeks")
+  months <- calc_for_unit("months")
+  years <- calc_for_unit("years")
+  
+  expect_equal(round(days, 0), 366)  # leap year accounted for
+  expect_equal(round(weeks, 3), round(days / 7, 3))
+  expect_equal(round(months, 3), round(as.numeric(days) / 30.4375, 3))
+  expect_equal(round(years, 3), round(as.numeric(days) / 365.25, 3))
 })
 
 test_that("Zero intervals: Same day start and end", {
@@ -221,16 +273,24 @@ test_that("Zero intervals: Same day start and end", {
     stringsAsFactors = FALSE
   )
   
-  # Should calculate as 0, not error
-  expect_no_error(
-    timeinterval(
-      data = test_data,
-      dx_date = "start_date",
-      fu_date = "end_date",
-      time_format = "ymd",
-      output_unit = "days"
-    )
+  opts <- timeintervalOptions$new(
+    dx_date = "start_date",
+    fu_date = "end_date",
+    time_format = "ymd",
+    output_unit = "days"
   )
+  analysis <- timeintervalClass$new(options = opts, data = test_data)
+  calc <- analysis$.__enclos_env__$private$.calculate_survival_time(
+    data = test_data,
+    dx_date = "start_date",
+    fu_date = "end_date",
+    time_format = "ymd",
+    output_unit = "days",
+    landmark_time = NULL,
+    timezone_setting = "system"
+  )
+  
+  expect_equal(calc$time, c(0, 0))
 })
 
 # =============================================================================

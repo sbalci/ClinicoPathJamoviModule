@@ -1,7 +1,7 @@
 ---
 name: timeinterval
 title: Comprehensive Time Interval Calculator
-menuGroup: SurvivalT2
+menuGroup: SurvivalT1
 menuSubgroup: Data Preparation
 menuSubtitle: Advanced time interval analysis with quality assessment
 version: '0.0.3'
@@ -117,6 +117,21 @@ options:
           R: >
             Unit for calculated time intervals. Affects person-time calculations and 
             statistical summaries. Choose based on study duration and event frequency.
+
+    - name: time_basis
+      title: Time Basis
+      type: List
+      options:
+        - name: standardized
+          title: Standardized (30.44-day months, 365.25-day years)
+        - name: calendar
+          title: Calendar-aware (actual month lengths)
+      default: standardized
+      description:
+          R: >
+            Controls how months/years are computed. Standardized uses fixed lengths (30.44 days per
+            month, 365.25 days per year) suited for person-time denominators. Calendar-aware respects
+            actual month lengths (28–31 days) when converting intervals to months/years.
 
     # === LANDMARK ANALYSIS ===
     - name: use_landmark

@@ -1,7 +1,7 @@
 ---
 name:  jjcorrmat
 title: Correlation Matrix
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT1
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
 version: '0.0.32'
@@ -186,9 +186,23 @@ options:
       type: Bool
       default: false
       description:
-          R: >
+        R: >
             Compute partial correlations instead of zero-order correlations.
             Partial correlations control for all other variables in the analysis.
+
+    - name: naHandling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Listwise (drop rows with any missing in selected vars)
+          name: listwise
+        - title: Pairwise (compute correlations on available pairs)
+          name: pairwise
+      default: listwise
+      description:
+        R: >
+            Choose how missing values are handled. Listwise drops rows with missing
+            values in selected variables; pairwise uses available data for each pair.
 
     - name: clinicalpreset
       title: Clinical Preset

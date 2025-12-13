@@ -1,7 +1,7 @@
 ---
 name: jjpubr
 title: Publication-Ready Plots (ggpubr)
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT1
 menuSubgroup: All-In-One
 menuTitle: ggpubr Plots
 menuSubtitle: Publication-ready visualizations
@@ -184,6 +184,7 @@ options:
             post-hoc pairwise comparisons (with Bonferroni correction) only if the omnibus
             test is significant. For 2 groups, performs direct comparison (t-test or Wilcoxon).
             Parametric tests assume normal distributions; non-parametric tests are robust to skewness.
+            In Automatic mode, normality and variance checks are used to switch to Kruskal-Wallis/Wilcoxon when assumptions are violated.
           R: >
             Method for statistical comparison. For >2 groups: omnibus test followed by post-hoc
             pairwise comparisons if significant. For 2 groups: direct comparison. Bonferroni

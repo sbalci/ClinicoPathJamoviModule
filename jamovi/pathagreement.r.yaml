@@ -9,6 +9,15 @@ items:
       type: Html
 
 
+    - name: warnings
+      title: Analysis Messages
+      type: Html
+      visible: true
+      clearWith:
+        - vars
+        - multiraterMethod
+        - wght
+
     - name: overviewTable
       title: Agreement Analysis Summary
       type: Table

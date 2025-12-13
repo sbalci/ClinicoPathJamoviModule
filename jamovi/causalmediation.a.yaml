@@ -1,7 +1,7 @@
 ---
 name: causalmediation
 title: Causal Mediation Analysis
-menuGroup: meddecideT4
+menuGroup: meddecideD
 menuSubgroup: Medical Decision Analysis
 menuTitle: Causal Mediation Analysis
 menuSubtitle: Mediation with DAGs and high-dimensional mediators

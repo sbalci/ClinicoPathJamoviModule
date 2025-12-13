@@ -20,7 +20,8 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             show_explanation = TRUE,
             show_formulas = FALSE,
             show_cost_analysis = FALSE,
-            show_nomogram = FALSE, ...) {
+            show_nomogram = FALSE,
+            population_size = 1000, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -113,6 +114,12 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "show_nomogram",
                 show_nomogram,
                 default=FALSE)
+            private$..population_size <- jmvcore::OptionInteger$new(
+                "population_size",
+                population_size,
+                min=100,
+                max=100000,
+                default=1000)
 
             self$.addOption(private$..preset)
             self$.addOption(private$..test1_name)
@@ -129,6 +136,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..show_formulas)
             self$.addOption(private$..show_cost_analysis)
             self$.addOption(private$..show_nomogram)
+            self$.addOption(private$..population_size)
         }),
     active = list(
         preset = function() private$..preset$value,
@@ -145,7 +153,8 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         show_explanation = function() private$..show_explanation$value,
         show_formulas = function() private$..show_formulas$value,
         show_cost_analysis = function() private$..show_cost_analysis$value,
-        show_nomogram = function() private$..show_nomogram$value),
+        show_nomogram = function() private$..show_nomogram$value,
+        population_size = function() private$..population_size$value),
     private = list(
         ..preset = NA,
         ..test1_name = NA,
@@ -161,7 +170,8 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..show_explanation = NA,
         ..show_formulas = NA,
         ..show_cost_analysis = NA,
-        ..show_nomogram = NA)
+        ..show_nomogram = NA,
+        ..population_size = NA)
 )
 
 sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -543,4 +553,3 @@ sequentialtests <- function(
 
     analysis$results
 }
-

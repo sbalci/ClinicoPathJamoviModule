@@ -1,7 +1,7 @@
 ---
 name:  pcaloadingtest
 title: PCA Loading Significance Test
-menuGroup: ExplorationT2
+menuGroup: ExplorationT1
 menuSubgroup: Multivariate Analysis
 version: '1.0.0'
 jas: '1.2'
@@ -77,6 +77,14 @@ options:
             Number of permutations per variable (100-5000).
             Total permutations = nperm × number of variables.
             Higher values provide more accurate p-values but take longer.
+
+    - name: seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: >
+            Seed for permutation reproducibility. Use the same seed to obtain identical results.
 
     - name: componentfilter
       title: Display Component (0 = All)

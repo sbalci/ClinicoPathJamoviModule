@@ -1,7 +1,7 @@
 ---
 name: irecist
 title: iRECIST Analysis
-menuGroup: OncoPathT2
+menuGroup: OncoPathT1
 menuSubgroup: Response Evaluation
 menuSubtitle: Immune-related Response Criteria
 version: '0.0.32'

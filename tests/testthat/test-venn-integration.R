@@ -331,3 +331,23 @@ test_that("venn calculates overlap counts correctly", {
     # This tests the FIXED overlap/discern/unite processing
     expect_s3_class(result, "vennResults")
 })
+
+test_that("validation fails when selected true level not present", {
+    skip_if_not_installed("ClinicoPath")
+
+    data <- data.frame(
+        a = factor(c("Yes", "Yes")),
+        b = factor(c("No", "No"))
+    )
+
+    expect_error(
+        venn(
+            data = data,
+            var1 = "a",
+            var1true = "Maybe",  # not present
+            var2 = "b",
+            var2true = "No"
+        ),
+        "does not exist"
+    )
+})

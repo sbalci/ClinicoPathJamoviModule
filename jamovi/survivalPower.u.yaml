@@ -20,6 +20,8 @@ children:
             name: analysis_type
           - type: ComboBox
             name: test_type
+          - type: Label
+            label: "Supported tests in this version: Log-rank, Cox regression, Non-inferiority (exponential assumption). Other choices are not yet implemented."
           - type: ComboBox
             name: study_design
           - type: ComboBox

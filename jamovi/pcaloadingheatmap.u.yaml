@@ -43,10 +43,12 @@ children:
 
               - type: CheckBox
                 name: center
+                label: Center variables
                 enable: (vars)
 
               - type: CheckBox
                 name: scale
+                label: Scale variables
                 enable: (vars)
 
   - type: CollapseBox
@@ -59,10 +61,12 @@ children:
         children:
           - type: CheckBox
             name: textvalues
+            label: Show loading values
             enable: (vars)
 
           - type: CheckBox
             name: starvalues
+            label: Show significance stars
             enable: (vars)
 
           - type: TextBox
@@ -73,14 +77,17 @@ children:
 
           - type: CheckBox
             name: plotlegend
+            label: Show legend (barmap)
             enable: (vars)
 
           - type: CheckBox
             name: plotcutoff
+            label: Show cutoff lines (barmap)
             enable: (vars)
 
           - type: CheckBox
             name: gradientcolor
+            label: Use gradient colors (barmap)
             enable: (vars)
 
   - type: CollapseBox

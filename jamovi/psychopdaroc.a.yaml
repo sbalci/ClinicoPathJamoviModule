@@ -1,7 +1,7 @@
 ---
 name: psychopdaROC
 title: Advanced ROC Analysis
-menuGroup: meddecideT2
+menuGroup: meddecideT1
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
 version: '0.0.32'
@@ -271,6 +271,14 @@ options:
           R: >
             Number of bootstrap iterations for methods using bootstrapping.
             Set to 0 to disable bootstrapping.
+
+    - name: seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: >
+            Random seed for reproducibility of bootstrap and permutation tests.
 
     - name: usePriorPrev
       title: Use Prior Prevalence

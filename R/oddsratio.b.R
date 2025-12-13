@@ -176,10 +176,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         if (min_count < 5) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                .(paste("Outcome variable has very few observations in one category ({min_count} out of {total_count}). Results may be unreliable.")))
+                                glue::glue("Outcome variable has very few observations in one category ({min_count} out of {total_count}). Results may be unreliable."))
                         } else if (min_proportion < 0.05) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                .(paste("Outcome variable is severely imbalanced ({proportion}% in minority class). Consider using specialized methods for imbalanced data.")))
+                                glue::glue("Outcome variable is severely imbalanced ({sprintf('%.1f%%', min_proportion * 100)} in minority class). Consider using specialized methods for imbalanced data."))
                         }
                         
                         # Require and validate user-specified outcome level
@@ -191,6 +191,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             validation_results$errors <- c(validation_results$errors,
                                 paste("Specified positive outcome level '", user_outcome_level, "' not found in outcome variable. Available levels: ", paste(outcome_levels, collapse=", "), sep=""))
                             validation_results$should_stop <- TRUE
+                        } else {
+                            validation_results$info <- c(validation_results$info,
+                                glue::glue("Outcome level modeled as the event: '{user_outcome_level}'."))
                         }
                         
                         validation_results$info <- c(validation_results$info,
@@ -208,10 +211,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         if (length(var_data_clean) == 0) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                paste(.("Explanatory variable '{var_name}' contains no non-missing values.")))
+                                glue::glue("Explanatory variable '{var_name}' contains no non-missing values."))
                         } else if (length(unique(var_data_clean)) == 1) {
                             validation_results$warnings <- c(validation_results$warnings,
-                                paste(.("Explanatory variable '{var_name}' has no variation (all values are the same). It will not contribute to the model.")))
+                                glue::glue("Explanatory variable '{var_name}' has no variation (all values are the same). It will not contribute to the model."))
                         } else if (is.factor(var_data)) {
                             # Factor variable validation
                             factor_levels <- levels(var_data)
@@ -245,6 +248,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 validation_results$info <- c(validation_results$info,
                                     paste(.("Explanatory variable '{var_name}' may contain extreme outliers ({outliers} potential outliers).")))
                             }
+                        } else if (is.ordered(var_data)) {
+                            validation_results$info <- c(validation_results$info,
+                                glue::glue("Ordered factor '{var_name}' will be treated as nominal (unordered) for modeling and output."))
                         }
                     }
                 }
@@ -412,19 +418,29 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Create validation summary for display
                 validation_summary <- ""
-                if (length(validation_results$warnings) > 0) {
-                    validation_summary <- paste0(validation_summary, 
-                        "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
-                        "<b>⚠️ Warnings:</b><br>", 
-                        paste(validation_results$warnings, collapse = "<br>"),
-                        "</div>")
-                }
-                if (length(validation_results$info) > 0) {
-                    validation_summary <- paste0(validation_summary,
-                        "<div style='background-color: #d1ecf1; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
-                        "<b>ℹ️ Information:</b><br>", 
-                        paste(validation_results$info, collapse = "<br>"),
-                        "</div>")
+                # Build a concise validation summary panel for the UI
+                if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
+                    validation_summary <- paste0(
+                        "<div style='border:1px solid #dee2e6; padding:10px; margin:10px 0; border-radius:5px;'>",
+                        "<b>Data checks:</b><br>"
+                    )
+                    if (length(validation_results$warnings) > 0) {
+                        validation_summary <- paste0(
+                            validation_summary,
+                            "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
+                            paste(validation_results$warnings, collapse = "<br>"),
+                            "</div>"
+                        )
+                    }
+                    if (length(validation_results$info) > 0) {
+                        validation_summary <- paste0(
+                            validation_summary,
+                            "<div style='background-color:#d1ecf1; padding:8px; border-radius:4px; margin-top:6px;'>",
+                            paste(validation_results$info, collapse = "<br>"),
+                            "</div>"
+                        )
+                    }
+                    validation_summary <- paste0(validation_summary, "</div>")
                 }
 
                 mydata <- jmvcore::naOmit(mydata)
@@ -456,6 +472,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Retrieve the variable name from the label
                 dependent_variable_name_from_label <- names(all_labels)[all_labels == self$options$outcome]
+                if (length(dependent_variable_name_from_label) > 1) {
+                    # Ambiguous label; pick first but warn
+                    validation_results$warnings <- c(validation_results$warnings,
+                        glue::glue("Outcome label matches multiple variables after cleaning; using '{dependent_variable_name_from_label[1]}'. Please verify selection."))
+                    dependent_variable_name_from_label <- dependent_variable_name_from_label[1]
+                }
 
                 # FIX: Relevel outcome variable to match user's selected positive outcome level
                 # This ensures logistic regression models the correct event
@@ -500,10 +522,93 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
+                if (length(extra_warnings) > 0) {
+                    validation_results$warnings <- c(validation_results$warnings, extra_warnings)
+                }
+
+                # Rebuild validation summary with any new warnings/info
+                validation_summary <- ""
+                if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
+                    validation_summary <- paste0(
+                        "<div style='border:1px solid #dee2e6; padding:10px; margin:10px 0; border-radius:5px;'>",
+                        "<b>Data checks:</b><br>"
+                    )
+                    if (length(validation_results$warnings) > 0) {
+                        validation_summary <- paste0(
+                            validation_summary,
+                            "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
+                            paste(validation_results$warnings, collapse = "<br>"),
+                            "</div>"
+                        )
+                    }
+                    if (length(validation_results$info) > 0) {
+                        validation_summary <- paste0(
+                            validation_summary,
+                            "<div style='background-color:#d1ecf1; padding:8px; border-radius:4px; margin-top:6px;'>",
+                            paste(validation_results$info, collapse = "<br>"),
+                            "</div>"
+                        )
+                    }
+                    validation_summary <- paste0(validation_summary, "</div>")
+                }
+
                 # Retrieve the variable names vector from the label vector
                 labels <- self$options$explanatory
 
                 explanatory_variable_names <- names(all_labels)[match(labels, all_labels)]
+                # Handle ambiguous mappings
+                if (any(is.na(explanatory_variable_names))) {
+                    missing_labels <- labels[is.na(explanatory_variable_names)]
+                    validation_results$warnings <- c(validation_results$warnings,
+                        glue::glue("Could not map some explanatory variables after cleaning: {paste(missing_labels, collapse=', ')}"))
+                    explanatory_variable_names <- explanatory_variable_names[!is.na(explanatory_variable_names)]
+                }
+
+                # Convert ordered factors to unordered factors to avoid polynomial contrasts / mislabeling
+                if (!is.null(explanatory_variable_names)) {
+                    for (v in explanatory_variable_names) {
+                        if (!is.null(v) && v %in% names(mydata) && is.ordered(mydata[[v]])) {
+                            mydata[[v]] <- factor(mydata[[v]], ordered = FALSE)
+                        }
+                    }
+                }
+
+                # Additional diagnostics: EPV and separation checks
+                extra_warnings <- c()
+                if (!is.null(dependent_variable_name_from_label) && !is.null(self$options$outcomeLevel)) {
+                    evt_count <- sum(mydata[[dependent_variable_name_from_label]] == self$options$outcomeLevel, na.rm = TRUE)
+                    df_predictors <- 0
+                    for (v in explanatory_variable_names) {
+                        if (!is.null(v) && v %in% names(mydata)) {
+                            if (is.factor(mydata[[v]])) {
+                                df_predictors <- df_predictors + max(1, nlevels(mydata[[v]]) - 1)
+                            } else {
+                                df_predictors <- df_predictors + 1
+                            }
+                        }
+                    }
+                    if (df_predictors > 0) {
+                        epv <- evt_count / df_predictors
+                        if (epv < 5) {
+                            extra_warnings <- c(extra_warnings,
+                                glue::glue("Low events-per-variable (EPV ≈ {round(epv,2)}). Odds ratios may be unstable; consider penalized/Firth logistic regression."))
+                        } else if (epv < 10) {
+                            extra_warnings <- c(extra_warnings,
+                                glue::glue("Borderline events-per-variable (EPV ≈ {round(epv,2)}). Interpret odds ratios with caution."))
+                        }
+                    }
+
+                    # Simple separation check for binary predictors
+                    for (v in explanatory_variable_names) {
+                        if (!is.null(v) && v %in% names(mydata) && is.factor(mydata[[v]]) && nlevels(mydata[[v]]) == 2) {
+                            tab <- table(mydata[[v]], mydata[[dependent_variable_name_from_label]])
+                            if (any(tab == 0)) {
+                                extra_warnings <- c(extra_warnings,
+                                    glue::glue("Possible separation detected for '{v}' (zero cells in 2x2 table). Consider penalized/Firth logistic regression."))
+                            }
+                        }
+                    }
+                }
 
 
                 formulaDependent <- jmvcore::constructFormula(
@@ -612,12 +717,75 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (self$options$showNomogram) {
                     private$.checkpoint()
 
+                    # Select predictor for diagnostic metrics
+                    diagnostic_predictor <- NULL
+                    if (!is.null(self$options$diagnosticPredictor)) {
+                        diagnostic_predictor <- names(all_labels)[match(self$options$diagnosticPredictor, all_labels)]
+                        if (length(diagnostic_predictor) > 1) {
+                            validation_results$warnings <- c(validation_results$warnings,
+                                glue::glue("Diagnostic predictor label matches multiple variables; using '{diagnostic_predictor[1]}'."))
+                            diagnostic_predictor <- diagnostic_predictor[1]
+                        }
+                    }
+                    if (is.null(diagnostic_predictor) && length(explanatory_variable_names) > 0) {
+                        diagnostic_predictor <- explanatory_variable_names[1]
+                        if (length(explanatory_variable_names) > 1) {
+                            validation_results$warnings <- c(validation_results$warnings,
+                                "Multiple explanatory variables selected; diagnostic metrics use the first variable by default. Use 'Diagnostic Predictor' to choose a binary predictor.")
+                        }
+                    }
+                    # Rebuild validation summary if new warnings added
+                    if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
+                        validation_summary <- paste0(
+                            "<div style='border:1px solid #dee2e6; padding:10px; margin:10px 0; border-radius:5px;'>",
+                            "<b>Data checks:</b><br>"
+                        )
+                        if (length(validation_results$warnings) > 0) {
+                            validation_summary <- paste0(
+                                validation_summary,
+                                "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
+                                paste(validation_results$warnings, collapse = "<br>"),
+                                "</div>"
+                            )
+                        }
+                        if (length(validation_results$info) > 0) {
+                            validation_summary <- paste0(
+                                validation_summary,
+                                "<div style='background-color:#d1ecf1; padding:8px; border-radius:4px; margin-top:6px;'>",
+                                paste(validation_results$info, collapse = "<br>"),
+                                "</div>"
+                            )
+                        }
+                        validation_summary <- paste0(validation_summary, "</div>")
+                    }
+
+                    # Ensure diagnostic predictor is binary
+                    if (is.null(diagnostic_predictor) || !(diagnostic_predictor %in% names(mydata))) {
+                        validation_results$warnings <- c(validation_results$warnings,
+                            "No diagnostic predictor available; skipping likelihood ratios/nomogram.")
+                        self$results$text2$setContent(validation_summary)
+                        return()
+                    }
+
+                    if (!is.factor(mydata[[diagnostic_predictor]])) {
+                        mydata[[diagnostic_predictor]] <- factor(mydata[[diagnostic_predictor]])
+                    }
+                    if (nlevels(mydata[[diagnostic_predictor]]) != 2) {
+                        validation_results$warnings <- c(validation_results$warnings,
+                            glue::glue("Diagnostic predictor '{diagnostic_predictor}' is not binary; likelihood ratios require exactly two levels."))
+                        validation_summary <- paste0(validation_summary,
+                            "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
+                            paste(validation_results$warnings, collapse = "<br>"),
+                            "</div>")
+                        self$results$text2$setContent(validation_summary)
+                        return()
+                    }
 
                     # Calculate likelihood ratios
                     lr_results <- private$.calculateLikelihoodRatios(
                         mydata,
                         dependent_variable_name_from_label,
-                        explanatory_variable_names[1],  # Start with first variable
+                        diagnostic_predictor,
                         self$options$outcomeLevel  # User-specified positive outcome level
                     )
                     
@@ -1543,24 +1711,36 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Process each row in the first column
                 for (i in seq_along(first_col)) {
                     current_name <- first_col[i]
+                    trimmed_name <- trimws(current_name)
                     
                     # Skip if it's not a string or is empty
-                    if (is.na(current_name) || current_name == "" || !is.character(current_name)) next
+                    if (is.na(trimmed_name) || trimmed_name == "" || !is.character(trimmed_name)) next
                     
                     # Handle different finalfit naming patterns:
                     # 1. Direct variable name match
-                    if (current_name %in% names(name_mapping)) {
-                        first_col[i] <- name_mapping[current_name]
+                    if (trimmed_name %in% names(name_mapping)) {
+                        first_col[i] <- name_mapping[trimmed_name]
                     }
                     # 2. Variable name with factor level (e.g., "variable_nameLevel1")
                     else {
                         # Try to find a matching cleaned name that's a prefix
                         for (clean_name in names(name_mapping)) {
-                            if (startsWith(current_name, clean_name)) {
+                            if (startsWith(trimmed_name, clean_name)) {
                                 # Replace the cleaned prefix with original name
-                                suffix <- substring(current_name, nchar(clean_name) + 1)
-                                first_col[i] <- paste0(name_mapping[clean_name], suffix)
+                                suffix <- substring(trimmed_name, nchar(clean_name) + 1)
+                                suffix <- trimws(gsub("^[:=]", "", suffix))
+                                first_col[i] <- paste0(name_mapping[clean_name], if (suffix != "") paste0(" ", suffix) else "")
                                 break
+                            }
+                        }
+                        # 3. For ordered/indented rows (leading spaces/dashes), try loose match
+                        if (first_col[i] == current_name && grepl(" ", trimmed_name, fixed = TRUE)) {
+                            for (clean_name in names(name_mapping)) {
+                                if (grepl(paste0("^", clean_name, "\\b"), trimmed_name)) {
+                                    level_part <- trimws(sub(clean_name, "", trimmed_name, fixed = TRUE))
+                                    first_col[i] <- paste0(name_mapping[clean_name], if (level_part != "") paste0(" ", level_part) else "")
+                                    break
+                                }
                             }
                         }
                     }

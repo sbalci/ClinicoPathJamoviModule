@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: SurvivalT2
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.32'
@@ -261,6 +261,7 @@ options:
       title: Event Level
       type: Level
       variable: (outcome)
+      allowNone: true
       description:
         R: >
           The level of `outcome` considered as the event. For example, if `outcome` is a factor,
@@ -667,70 +668,73 @@ options:
 
 # Model Selection ----
 
-    # - name: use_modelSelection
-    #   title: Use Models
-    #   type: Bool
-    #   default: false
-    #   description:
-    #     R: >
-    #       If true, applies a variable selection procedure to find the best-fitting model based on
-    #       criteria like AIC or likelihood ratio tests.
+    - name: use_modelSelection
+      title: Use Model Selection
+      type: Bool
+      default: false
+      hidden: true
+      description:
+        R: >
+          (DEPRECATED - Not used) Model selection is controlled by the 'modelSelection' option below.
+          Set modelSelection to 'forward', 'backward', or 'both' to enable selection, or 'enter' to
+          include all variables without selection. This boolean flag is maintained for backward
+          compatibility but has no effect on the analysis.
 
-    # - name: modelSelection
-    #   title: Model Selection Method
-    #   type: List
-    #   options:
-    #     - title: Enter (No Selection)
-    #       name: enter
-    #     - title: Forward Selection
-    #       name: forward
-    #     - title: Backward Selection
-    #       name: backward
-    #     - title: Stepwise (Both)
-    #       name: both
-    #   default: enter
-    #   description:
-    #     R: >
-    #       The method used to select variables:
-    #       - enter: Includes all variables (no selection)
-    #       - forward: Adds variables one at a time if they improve the model
-    #       - backward: Removes variables that do not significantly contribute
-    #       - both: Combination of forward and backward steps
+    - name: modelSelection
+      title: Model Selection Method
+      type: List
+      options:
+        - title: Enter (No Selection)
+          name: enter
+        - title: Forward Selection
+          name: forward
+        - title: Backward Selection
+          name: backward
+        - title: Stepwise (Both)
+          name: both
+      default: enter
+      description:
+        R: >
+          The method used to select variables:
+          - enter: Includes all variables (no selection)
+          - forward: Adds variables one at a time if they improve the model
+          - backward: Removes variables that do not significantly contribute
+          - both: Combination of forward and backward steps
 
-    # - name: selectionCriteria
-    #   title: Selection Criteria
-    #   type: List
-    #   options:
-    #     - title: AIC (Akaike Information Criterion)
-    #       name: aic
-    #     - title: Likelihood Ratio Test
-    #       name: lrt
-    #   default: aic
-    #   description:
-    #     R: >
-    #       The criterion used for adding or removing variables in model selection:
-    #       - aic: Balances model fit and complexity
-    #       - lrt: Uses likelihood ratio tests to decide inclusion/removal
+    - name: selectionCriteria
+      title: Selection Criteria
+      type: List
+      options:
+        - title: AIC (Akaike Information Criterion)
+          name: aic
+        - title: Likelihood Ratio Test
+          name: lrt
+      default: aic
+      description:
+        R: >
+          The criterion used for adding or removing variables in model selection:
+          - aic: Balances model fit and complexity
+          - lrt: Uses likelihood ratio tests to decide inclusion/removal
 
-    # - name: pEntry
-    #   title: Entry Significance
-    #   type: Number
-    #   min: 0
-    #   max: 1
-    #   default: 0.05
-    #   description:
-    #     R: >
-    #       Significance level at which a variable enters the model during forward or stepwise selection.
+    - name: pEntry
+      title: Entry Significance
+      type: Number
+      min: 0
+      max: 1
+      default: 0.05
+      description:
+        R: >
+          Significance level at which a variable enters the model during forward or stepwise selection.
 
-    # - name: pRemoval
-    #   title: Removal Significance
-    #   type: Number
-    #   min: 0
-    #   max: 1
-    #   default: 0.10
-    #   description:
-    #     R: >
-    #       Significance level at which a variable is removed from the model during backward or stepwise selection.
+    - name: pRemoval
+      title: Removal Significance
+      type: Number
+      min: 0
+      max: 1
+      default: 0.10
+      description:
+        R: >
+          Significance level at which a variable is removed from the model during backward or stepwise selection.
 
 
 
@@ -1147,11 +1151,158 @@ options:
     - name: showSummaries
       title: "Show Natural Language Summaries"
       type: Bool
-      default: false
+      default: true
       description: >-
         Display natural language summaries alongside tables and plots. These
         summaries provide plain-language interpretations of the statistical
-        results. Turn off to reduce visual clutter when summaries are not needed.
+        results. Recommended for clinical users. Turn off to reduce visual
+        clutter when summaries are not needed.
+
+    # ============================================================================
+    # PLANNED FEATURES (Future Development)
+    # ============================================================================
+    # The following features were identified in code review (2025-12-07) as
+    # beneficial enhancements for clinical usability but deferred for future
+    # implementation based on priority and development effort required.
+    # ============================================================================
+
+    # PLANNED FEATURE: Configurable Alpha Level for Hypothesis Tests
+    # Priority: Medium
+    # Benefit: Allow users to adjust significance threshold for multiple testing
+    #          or domain-specific alpha levels (e.g., 0.01 for conservative tests)
+    # Implementation: Add alpha_level option (default 0.05) and use throughout
+    #                 PH diagnostics, log-rank tests, and other hypothesis tests
+    # - name: alpha_level
+    #   title: "Significance Level (Alpha)"
+    #   type: Number
+    #   min: 0.001
+    #   max: 0.10
+    #   default: 0.05
+    #   description: >-
+    #     Significance level for hypothesis tests. Default 0.05 corresponds to
+    #     95% confidence. Adjust for multiple testing corrections or stricter
+    #     criteria (e.g., 0.01 for 99% confidence).
+
+    # PLANNED FEATURE: Guided Wizard Mode
+    # Priority: Medium
+    # Benefit: Step-by-step interface for novice clinical users
+    # Implementation: Add wizard mode that progressively reveals options and
+    #                 provides contextual help at each step
+    # - name: guidedMode
+    #   title: "Use Guided Wizard (Step-by-Step)"
+    #   type: Bool
+    #   default: false
+    #   description: >-
+    #     Enable step-by-step guided mode with progressive disclosure of options.
+    #     Recommended for users new to survival analysis. Advanced users can
+    #     disable to see all options at once.
+
+    # PLANNED FEATURE: Clinical Presets
+    # Priority: Medium-Low
+    # Benefit: One-click configuration for common clinical scenarios
+    # Implementation: Preset configurations that auto-populate multiple options
+    #                 based on common analysis types
+    # - name: analysisPreset
+    #   title: "Analysis Preset (Quick Start)"
+    #   type: List
+    #   options:
+    #     - name: none
+    #       title: "Custom (Advanced Users)"
+    #     - name: basic_survival
+    #       title: "Basic Survival Analysis (KM + Cox)"
+    #     - name: risk_stratification
+    #       title: "Risk Stratification (3-group prognostic model)"
+    #     - name: competing_risk
+    #       title: "Competing Risk Analysis (Fine-Gray)"
+    #     - name: diagnostic_test
+    #       title: "Diagnostic Test Evaluation (time-dependent ROC)"
+    #   default: none
+    #   description: >-
+    #     Pre-configured analysis templates for common clinical scenarios.
+    #     Selecting a preset will automatically configure relevant options.
+    #     Choose 'Custom' to manually configure all options.
+
+    # PLANNED FEATURE: Advanced Model Performance Metrics
+    # Priority: Low
+    # Benefit: Additional validation metrics beyond C-index
+    # Implementation: Add Brier score, time-dependent AUC, calibration plots
+    # - name: advancedMetrics
+    #   title: "Show Advanced Performance Metrics"
+    #   type: Bool
+    #   default: false
+    #   description: >-
+    #     Calculate and display advanced model performance metrics including
+    #     Brier score (overall prediction accuracy), time-dependent AUC
+    #     (discrimination over time), and calibration plots.
+    # - name: brierTimepoints
+    #   title: "Brier Score Timepoints"
+    #   type: String
+    #   default: "12, 24, 36, 60"
+    #   description: >-
+    #     Comma-separated timepoints for Brier score calculation (in outcome time units).
+    # - name: tdAUC_method
+    #   title: "Time-Dependent AUC Method"
+    #   type: List
+    #   options:
+    #     - name: heagerty
+    #       title: "Heagerty & Zheng (Incident/Dynamic)"
+    #     - name: chambless
+    #       title: "Chambless & Diao (Cumulative/Dynamic)"
+    #   default: heagerty
+
+    # PLANNED FEATURE: Residual Diagnostic Plots
+    # Priority: Low
+    # Benefit: Visual assessment of model assumptions and influential observations
+    # Implementation: Add residual plotting options for Schoenfeld, martingale,
+    #                 deviance, and dfbeta residuals
+    # - name: showResidualDiagnostics
+    #   title: "Show Residual Diagnostic Plots"
+    #   type: Bool
+    #   default: false
+    #   description: >-
+    #     Generate diagnostic plots for model validation including Schoenfeld
+    #     residuals (PH assumption), martingale residuals (functional form),
+    #     deviance residuals (outliers), and dfbeta (influential observations).
+    # - name: residualTypes
+    #   title: "Residual Plot Types"
+    #   type: List
+    #   options:
+    #     - name: schoenfeld
+    #       title: "Schoenfeld (Proportional Hazards)"
+    #     - name: martingale
+    #       title: "Martingale (Functional Form)"
+    #     - name: deviance
+    #       title: "Deviance (Outlier Detection)"
+    #     - name: dfbeta
+    #       title: "DfBeta (Influence Analysis)"
+    #   default: schoenfeld
+
+    # PLANNED FEATURE: Color-Blind Safe Palettes
+    # Priority: Low
+    # Benefit: Accessibility for users with color vision deficiency
+    # Implementation: Add palette selector with Viridis, ColorBrewer safe options
+    # - name: colorPalette
+    #   title: "Plot Color Palette"
+    #   type: List
+    #   options:
+    #     - name: default
+    #       title: "Default"
+    #     - name: viridis
+    #       title: "Viridis (Color-Blind Safe)"
+    #     - name: plasma
+    #       title: "Plasma (Color-Blind Safe)"
+    #     - name: colorbrewer_set1
+    #       title: "ColorBrewer Set1"
+    #     - name: tableau10
+    #       title: "Tableau 10"
+    #   default: viridis
+    #   description: >-
+    #     Color palette for plots. Viridis and Plasma are recommended for
+    #     accessibility (color-blind safe and grayscale-friendly).
+
+    # ============================================================================
+    # END PLANNED FEATURES
+    # ============================================================================
 
     # Machine Learning Survival Methods
     # Machine Learning Options ---- (EXPERIMENTAL - will be implemented later)

@@ -43,6 +43,11 @@ multisurvival(
   adjexplanatory = NULL,
   ac_method = "average",
   showNomogram = FALSE,
+  use_modelSelection = FALSE,
+  modelSelection = "enter",
+  selectionCriteria = "aic",
+  pEntry = 0.05,
+  pRemoval = 0.1,
   use_stratify = FALSE,
   stratvar = NULL,
   use_aft = FALSE,
@@ -57,7 +62,7 @@ multisurvival(
   survmetrics_ibs_points = 100,
   survmetrics_show_plots = FALSE,
   showExplanations = FALSE,
-  showSummaries = FALSE
+  showSummaries = TRUE
 )
 }
 \arguments{
@@ -185,6 +190,27 @@ based on their calculated risk scores and plots their survival curves.}
 
 \item{showNomogram}{.}
 
+\item{use_modelSelection}{(DEPRECATED - Not used) Model selection is
+controlled by the 'modelSelection' option below. Set modelSelection to
+'forward', 'backward', or 'both' to enable selection, or 'enter' to include
+all variables without selection. This boolean flag is maintained for
+backward compatibility but has no effect on the analysis.}
+
+\item{modelSelection}{The method used to select variables: - enter:
+Includes all variables (no selection) - forward: Adds variables one at a
+time if they improve the model - backward: Removes variables that do not
+significantly contribute - both: Combination of forward and backward steps}
+
+\item{selectionCriteria}{The criterion used for adding or removing
+variables in model selection: - aic: Balances model fit and complexity -
+lrt: Uses likelihood ratio tests to decide inclusion/removal}
+
+\item{pEntry}{Significance level at which a variable enters the model
+during forward or stepwise selection.}
+
+\item{pRemoval}{Significance level at which a variable is removed from the
+model during backward or stepwise selection.}
+
 \item{use_stratify}{If true, uses stratification to handle variables that
 violate the proportional hazards assumption. Stratification creates
 separate baseline hazard functions for different groups.}
@@ -244,8 +270,8 @@ component to help interpret the statistical methods and results.}
 
 \item{showSummaries}{Display natural language summaries alongside tables
 and plots. These summaries provide plain-language interpretations of the
-statistical results. Turn off to reduce visual clutter when summaries are
-not needed.}
+statistical results. Recommended for clinical users. Turn off to reduce
+visual clutter when summaries are not needed.}
 }
 \value{
 A results object containing:
@@ -256,6 +282,8 @@ A results object containing:
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$aftModelHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$aftModelTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$aftSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr

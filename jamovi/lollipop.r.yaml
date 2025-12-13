@@ -9,6 +9,19 @@ items:
       type: Html
       visible: true
 
+    - name: warnings
+      title: Messages
+      type: Html
+      visible: true
+      clearWith:
+        - dep
+        - group
+        - useHighlight
+        - highlight
+        - aggregation
+        - conditionalColor
+        - colorThreshold
+
     - name: summary
       title: Data Summary
       type: Table

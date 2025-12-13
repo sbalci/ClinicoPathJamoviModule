@@ -17,6 +17,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .data_hash = NULL,
         .validation_passed = FALSE,
         .plotTheme = NULL,
+        .effectiveOptions = NULL,
 
         # init ----
 
@@ -70,41 +71,66 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Clinical Enhancement Methods ----
         
-        .applyClinicalPreset = function() {
-            preset <- self$options$clinicalpreset %||% "custom"
+        .effectiveOptionsList = function() {
+            # Build a derived options list without mutating self$options
+            opts <- list(
+                dep = self$options$dep,
+                group = self$options$group,
+                grvar = self$options$grvar,
+                typestatistics = self$options$typestatistics,
+                counts = self$options$counts,
+                ratio_raw = self$options$ratio,
+                paired = self$options$paired %||% FALSE,
+                label = self$options$label %||% "percentage",
+                digits = self$options$digits %||% 2L,
+                conflevel = self$options$conflevel %||% 0.95,
+                proportiontest = self$options$proportiontest %||% TRUE,
+                bfmessage = self$options$bfmessage %||% TRUE,
+                messages = self$options$messages %||% FALSE,
+                resultssubtitle = self$options$resultssubtitle,
+                originaltheme = self$options$originaltheme,
+                clinicalpreset = self$options$clinicalpreset %||% "custom"
+            )
 
-            # Skip if custom preset (user settings)
-            if (preset == "custom") return(invisible(NULL))
+            preset <- opts$clinicalpreset
+            if (!is.null(preset) && preset != "custom") {
+                if (preset == "diagnostic") {
+                    opts$resultssubtitle <- TRUE
+                    opts$proportiontest <- TRUE
+                    opts$conflevel <- 0.95
+                } else if (preset == "treatment") {
+                    opts$typestatistics <- "parametric"
+                    opts$resultssubtitle <- TRUE
+                    opts$proportiontest <- TRUE
+                } else if (preset == "biomarker") {
+                    opts$typestatistics <- "robust"
+                    opts$resultssubtitle <- TRUE
+                    opts$label <- "both"
+                }
+            }
 
-            tryCatch({
-                switch(preset,
-                    "diagnostic" = {
-                        # Optimize for diagnostic test analysis
-                        if (is.null(self$options$resultssubtitle) || !self$options$resultssubtitle) {
-                            # Only set if not already explicitly set by user
-                            self$options$resultssubtitle <- TRUE
-                        }
-                        self$options$proportiontest <- TRUE
-                        self$options$conflevel <- 0.95
-                    },
-                    "treatment" = {
-                        # Optimize for treatment response comparison
-                        self$options$typestatistics <- "parametric"
-                        self$options$resultssubtitle <- TRUE
-                        self$options$proportiontest <- TRUE
-                    },
-                    "biomarker" = {
-                        # Optimize for biomarker distribution analysis
-                        self$options$typestatistics <- "robust"
-                        self$options$resultssubtitle <- TRUE
-                        self$options$label <- "both"
-                    }
+            # Parse ratio once; capture and muffle warnings to avoid noisy console output
+            ratio_warnings <- character()
+            opts$ratio <- withCallingHandlers(
+                private$.parseRatio(opts$ratio_raw),
+                warning = function(w) {
+                    ratio_warnings <<- c(ratio_warnings, conditionMessage(w))
+                    invokeRestart("muffleWarning")
+                }
+            )
+            if (length(ratio_warnings) > 0 && isTRUE(self$options$messages)) {
+                ratio_warnings <- unique(ratio_warnings)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'ratioParseNotice',
+                    type = jmvcore::NoticeType$INFO
                 )
-            }, error = function(e) {
-                # If preset application fails, continue with custom settings
-                warning(glue::glue(.('Clinical preset application failed: {error}. Using custom settings.'),
-                                 error = e$message))
-            })
+                notice$setContent(paste(ratio_warnings, collapse = "<br>"))
+                self$results$insert(1, notice)
+            }
+
+            private$.effectiveOptions <- opts
+            opts
         },
         
         .getPlotTheme = function() {
@@ -209,7 +235,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Unweighted contingency table
                         contingency_table <- table(self$data[[self$options$dep]], self$data[[self$options$group]])
                     }
-                    expected_counts <- chisq.test(contingency_table)$expected
+                    expected_counts <- suppressWarnings(chisq.test(contingency_table)$expected)
                     
                     if (any(expected_counts < 5)) {
                         warnings_list <- c(warnings_list, 
@@ -495,7 +521,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Calculate expected counts
-                expected <- chisq.test(cont_table)$expected
+                expected <- suppressWarnings(chisq.test(cont_table)$expected)
 
                 # Count cells with expected count < 5
                 low_count_cells <- sum(expected < 5)
@@ -594,8 +620,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # ENHANCEMENT #2: Warn about extreme prevalence affecting PPV/NPV generalizability
             # Only relevant for diagnostic preset with 2x2 contingency tables
 
+            opts <- private$.effectiveOptionsList()
+
             # Only check for diagnostic preset
-            if (is.null(self$options$clinicalpreset) || self$options$clinicalpreset != "diagnostic") {
+            if (is.null(opts$clinicalpreset) || opts$clinicalpreset != "diagnostic") {
                 return()
             }
 
@@ -618,11 +646,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Calculate prevalence (proportion in first group level - typically "positive/diseased")
+            # Calculate prevalence and report which level is used
             group_totals <- colSums(cont_table)
             total_n <- sum(group_totals)
 
-            # Assuming first level of grouping variable represents "diseased/positive"
+            # Assuming first column/level represents "diseased/positive"
+            diseased_level <- colnames(cont_table)[1]
             prevalence <- group_totals[1] / total_n
 
             # Warn if prevalence is extreme (<10% or >90%)
@@ -635,7 +664,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 direction <- if (prevalence < 0.10) "low" else "high"
                 notice$setContent(sprintf(
-                    'Disease prevalence in this dataset is %.1f%% (%s prevalence setting). Positive Predictive Value (PPV) and Negative Predictive Value (NPV) are highly dependent on prevalence and may not generalize to populations with substantially different disease rates. Consider reporting sensitivity, specificity, and likelihood ratios which are less affected by prevalence.',
+                    'Disease prevalence (level "%s") in this dataset is %.1f%% (%s prevalence setting). Positive Predictive Value (PPV) and Negative Predictive Value (NPV) are highly dependent on prevalence and may not generalize to populations with substantially different disease rates. Consider reporting sensitivity, specificity, and likelihood ratios which are less affected by prevalence.',
+                    diseased_level,
                     prevalence * 100,
                     direction
                 ))
@@ -651,16 +681,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop(.('Dependent variable is required but not properly set'))
             }
 
+            opts <- private$.effectiveOptionsList()
+
             # Build list of relevant columns for hash
-            relevant_cols <- c(self$options$dep)
-            if (!is.null(self$options$group) && length(self$options$group) > 0 && self$options$group != "") {
-                relevant_cols <- c(relevant_cols, self$options$group)
+            relevant_cols <- c(opts$dep)
+            if (!is.null(opts$group) && length(opts$group) > 0 && opts$group != "") {
+                relevant_cols <- c(relevant_cols, opts$group)
             }
-            if (!is.null(self$options$grvar) && length(self$options$grvar) > 0 && self$options$grvar != "") {
-                relevant_cols <- c(relevant_cols, self$options$grvar)
+            if (!is.null(opts$grvar) && length(opts$grvar) > 0 && opts$grvar != "") {
+                relevant_cols <- c(relevant_cols, opts$grvar)
             }
-            if (!is.null(self$options$counts) && length(self$options$counts) > 0 && self$options$counts != "") {
-                relevant_cols <- c(relevant_cols, self$options$counts)
+            if (!is.null(opts$counts) && length(opts$counts) > 0 && opts$counts != "") {
+                relevant_cols <- c(relevant_cols, opts$counts)
             }
 
             # Filter to columns that actually exist
@@ -686,12 +718,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data_dim = dim(self$data),
                 data_names = names(self$data),
                 data_content = data_content_hash,  # ✅ NOW INCLUDES ACTUAL DATA VALUES
-                options = list(
-                    dep = self$options$dep,
-                    group = self$options$group,
-                    grvar = self$options$grvar,
-                    counts = self$options$counts
-                )
+                options = opts
             ), algo = "md5")
 
             # Return cached data if hash matches and validation passed
@@ -769,7 +796,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            if (nrow(mydata) == 0) {
+            if (nrow(mydata) == 0 || nrow(mydata) < 3) {
                 stop(.('No complete data rows available after handling missing values. Please check your data for the selected variables.'))
             }
 
@@ -814,42 +841,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 glue::glue("<br>{msg}<br><hr>", msg = .('Preparing pie chart analysis options...'))
             )
 
-            # Process options with defensive checks
-            dep <- self$options$dep
-            group <- self$options$group
-            grvar <- self$options$grvar
-            typestatistics <- self$options$typestatistics
-
             # Defensive validation: ensure dep is not zero-length
-            if (is.null(dep) || length(dep) == 0 || (length(dep) == 1 && dep == "")) {
+            if (is.null(self$options$dep) || length(self$options$dep) == 0 || (length(self$options$dep) == 1 && self$options$dep == "")) {
                 stop(.('Dependent variable is not properly set'))
             }
             
-            # Parse ratio if provided
-            # Checkpoint before ratio parsing (can be computationally intensive for complex ratios)
-            private$.checkpoint(flush = FALSE)
-            ratio_parsed <- private$.parseRatio(self$options$ratio)
+            # Build effective options (includes preset and parsed ratio)
+            opts <- private$.effectiveOptionsList()
             
-            # Cache the processed options
-            options_list <- list(
-                dep = dep,
-                group = group,
-                grvar = grvar,
-                typestatistics = typestatistics,
-                counts = self$options$counts,
-                ratio = ratio_parsed,
-                paired = self$options$paired %||% FALSE,
-                label = self$options$label %||% "percentage",
-                digits = self$options$digits %||% 2L,
-                conflevel = self$options$conflevel %||% 0.95,
-                proportiontest = self$options$proportiontest %||% TRUE,
-                bfmessage = self$options$bfmessage %||% TRUE,
-                messages = self$options$messages %||% FALSE,
-                resultssubtitle = self$options$resultssubtitle,
-                originaltheme = self$options$originaltheme
-            )
-            private$.processedOptions <- options_list
-            return(options_list)
+            private$.processedOptions <- opts
+            return(opts)
         }
 
 
@@ -858,9 +859,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
         .run = function() {
 
-            # Apply clinical preset if specified
-            private$.applyClinicalPreset()
-            
             # Generate clinical interpretation panels
             private$.generateClinicalPanels()
 
@@ -898,12 +896,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         stop(.('Dataset is empty. Please ensure your data contains observations.'))
                     }
                     
-                    # Use cached data validation and preparation
-                    start_time <- Sys.time()
-                    # Checkpoint before data validation and preparation
-                    private$.checkpoint()
-                    prepared_data <- private$.getCachedData()
-                    prep_time <- round(difftime(Sys.time(), start_time, units = "secs"), 2)
+            # Use cached data validation and preparation
+            start_time <- Sys.time()
+            # Checkpoint before data validation and preparation
+            private$.checkpoint()
+            prepared_data <- private$.getCachedData()
+            prep_time <- round(difftime(Sys.time(), start_time, units = "secs"), 2)
                     
                     # Enhanced success message with timing and caching info
                     cache_status <- if (private$.validation_passed && !is.null(private$.processedData)) {
@@ -977,7 +975,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         check4 = .('Confirm variables have adequate variation (≥2 categories)')
                     )
                     self$results$todo$setContent(error_msg)
-                    return()
+                    stop(e)
                 })
                 
                 # Add checkpoint for user feedback
@@ -1124,64 +1122,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # ENHANCEMENT #6: Enhanced ratio parsing with notice-based feedback
-            ratio_vec <- NULL
-            if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
-                tryCatch({
-                    ratio_parts <- strsplit(self$options$ratio, ",")[[1]]
-                    ratio_vec <- as.numeric(trimws(ratio_parts))
-
-                    if (any(is.na(ratio_vec))) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'invalidRatioValues',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(sprintf(
-                            .('Invalid ratio values in "%s". Expected comma-separated numbers (e.g., "0.5,0.5"). Using equal proportions instead.'),
-                            self$options$ratio
-                        ))
-                        self$results$insert(999, notice)
-                        ratio_vec <- NULL
-                    } else if (abs(sum(ratio_vec) - 1.0) > 0.001) {
-                        normalized <- ratio_vec / sum(ratio_vec)
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'ratioNormalized',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent(sprintf(
-                            .('Ratio values normalized to sum to 1.0 (original sum: %.3f). Using: %s'),
-                            sum(ratio_vec),
-                            paste(round(normalized, 3), collapse = ", ")
-                        ))
-                        self$results$insert(999, notice)
-                        ratio_vec <- normalized
-                    } else if (any(ratio_vec <= 0)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'ratioNonPositive',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(
-                            .('Ratio values must be positive. Using equal proportions instead.')
-                        )
-                        self$results$insert(999, notice)
-                        ratio_vec <- NULL
-                    }
-                }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'ratioParseError',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
-                        .('Error parsing ratio "%s": %s. Using equal proportions.'),
-                        self$options$ratio, e$message
-                    ))
-                    self$results$insert(999, notice)
-                    ratio_vec <- NULL
-                })
-            }
+                ratio_vec <- options_data$ratio
 
             # CRITICAL FIX #3: Validate paired data before McNemar test
             if (options_data$paired) {
@@ -1319,63 +1260,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # ENHANCEMENT #6: Enhanced ratio parsing with notice-based feedback
                 ratio_vec <- NULL
-                if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
-                    tryCatch({
-                        ratio_parts <- strsplit(self$options$ratio, ",")[[1]]
-                        ratio_vec <- as.numeric(trimws(ratio_parts))
-
-                        if (any(is.na(ratio_vec))) {
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'invalidRatioValues',
-                                type = jmvcore::NoticeType$WARNING
-                            )
-                            notice$setContent(sprintf(
-                                .('Invalid ratio values in "%s". Expected comma-separated numbers (e.g., "0.5,0.5"). Using equal proportions instead.'),
-                                self$options$ratio
-                            ))
-                            self$results$insert(999, notice)
-                            ratio_vec <- NULL
-                        } else if (abs(sum(ratio_vec) - 1.0) > 0.001) {
-                            normalized <- ratio_vec / sum(ratio_vec)
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'ratioNormalized',
-                                type = jmvcore::NoticeType$INFO
-                            )
-                            notice$setContent(sprintf(
-                                .('Ratio values normalized to sum to 1.0 (original sum: %.3f). Using: %s'),
-                                sum(ratio_vec),
-                                paste(round(normalized, 3), collapse = ", ")
-                            ))
-                            self$results$insert(999, notice)
-                            ratio_vec <- normalized
-                        } else if (any(ratio_vec <= 0)) {
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'ratioNonPositive',
-                                type = jmvcore::NoticeType$WARNING
-                            )
-                            notice$setContent(
-                                .('Ratio values must be positive. Using equal proportions instead.')
-                            )
-                            self$results$insert(999, notice)
-                            ratio_vec <- NULL
-                        }
-                    }, error = function(e) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'ratioParseError',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(sprintf(
-                            .('Error parsing ratio "%s": %s. Using equal proportions.'),
-                            self$options$ratio, e$message
-                        ))
-                        self$results$insert(999, notice)
-                        ratio_vec <- NULL
-                    })
-                }
+            ratio_vec <- options_data$ratio
 
                 # CRITICAL FIX #3: Validate paired data before McNemar test
                 if (options_data$paired) {

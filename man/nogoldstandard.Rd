@@ -64,6 +64,8 @@ and method recommendations.}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$agreement_stats} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$method_guide} \tab \tab \tab \tab \tab a html \cr
 \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
@@ -76,9 +78,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$prevalence$asDF}
+\code{results$agreement_stats$asDF}
 
-\code{as.data.frame(results$prevalence)}
+\code{as.data.frame(results$agreement_stats)}
 }
 \description{
 Analysis of diagnostic tests without a gold standard reference using

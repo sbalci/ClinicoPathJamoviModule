@@ -222,35 +222,51 @@ children:
                 name: marginalType
               - type: ComboBox
                 name: smoothMethod
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Publication Scatter Plots (ggpubr)
+    collapsed: true
     children:
-      - type: CheckBox
-        name: addGGPubrPlot
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: addGGPubrPlot
+      - type: Label
+        label: Appearance
+        fitToGrid: true
+        children:
+            - type: LayoutBox
+              margin: large
+              children:
+                - type: ComboBox
+                  name: ggpubrPalette
+      - type: Label
+        label: Statistics & Lines
+        fitToGrid: true
+        children:
+            - type: LayoutBox
+              margin: large
+              children:
+                - type: CheckBox
+                  name: ggpubrAddCorr
+                - type: CheckBox
+                  name: ggpubrAddSmooth
+            - type: LayoutBox
+              margin: large
+              children:
+                - type: ComboBox
+                  name: ggpubrCorrMethod
+  - type: CollapseBox
+    label: Clinical Presets & Options
+    collapsed: false
     children:
-      - type: ComboBox
-        name: ggpubrPalette
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: ggpubrAddCorr
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: ggpubrCorrMethod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: ggpubrAddSmooth
-      - type: CheckBox
-        name: showExplanations
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: clinicalPreset
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: clinicalPreset
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showExplanations

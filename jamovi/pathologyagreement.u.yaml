@@ -65,3 +65,8 @@ children:
     children:
       - type: CheckBox
         name: show_interpretation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: missing_data

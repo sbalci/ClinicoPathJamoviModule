@@ -110,6 +110,10 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.populateNetBenefitTable()
             private$.populateSummaryTable()
             private$.populateInterventionsTable()
+            
+            # Add method note on approximations
+            jmvcore::note(self$results$netBenefitTable,
+                          "Net benefit uses KM-based group survival at each threshold; IPCW/time-dependent censoring adjustments are not implemented. Interpret with caution when censoring is heavy.")
         },
 
         #---------------------------------------------
@@ -127,6 +131,14 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             event <- as.numeric(data[[event_var]])
             predictor <- as.numeric(data[[predictor_var]])
 
+            if (any(time <= 0, na.rm = TRUE)) {
+                stop("Time variable must be positive.")
+            }
+            event_unique <- unique(event[!is.na(event)])
+            if (!all(event_unique %in% c(0, 1))) {
+                stop("Event indicator must be coded 0=censored, 1=event.")
+            }
+
             # Check for missing values
             if (any(is.na(time)) || any(is.na(event)) || any(is.na(predictor))) {
                 complete_cases <- !is.na(time) & !is.na(event) & !is.na(predictor)
@@ -143,6 +155,10 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             if (length(time_points) == 0) {
                 stop("No valid time points specified")
+            }
+            max_time <- max(time, na.rm = TRUE)
+            if (any(time_points > max_time)) {
+                warning("Some time points exceed observed follow-up; estimates will be extrapolated using KM extension.")
             }
 
             # Generate threshold sequence

@@ -20,6 +20,12 @@ source .venv/bin/activate
 marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf --output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/
 <https://github.com/datalab-to/marker>
 
+## Oncoplot follow-ups
+
+- Draft: expose a dedicated per-sample mutation burden result if users need TMB-like summaries outside the marginal plot.
+- Draft: add UI gating so `log10TransformTMB` is only available/active when `showTMB` is enabled.
+- Draft: penalized/Firth logistic fallback and manual positive-predictor level control for oddsratio LRs/nomogram
+
 > /review-article-stats '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.html'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.pdf'
@@ -60,10 +66,12 @@ use gemini to make Readiness for Clinicians and Pathologists assessment and Use 
 
 You are an expert R-package and jamovi developer.
 You are an expert in biostatistics working with pathologists and clinicians.
-Critically evaluate consortdiagram function.
+Critically evaluate multisurvival function.
 Is it mathematically and statistically accurate?
+Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 Is it ready to be used by clinicians and pathologists?
-Is it ready for release? Do not just focus on testing but focus on functionality and accuracy.
+Is it ready for release? Do not focus just on testing. Focus on functionality and accuracy. After you are
+satisfied with function then update and use tests.
 Suggest improvements.
 Do not remove functionality.
 
@@ -111,6 +119,10 @@ To lower the computation make all default checkboxes to be false in .a.yaml
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"
 ! Rscript -e "devtools::load_all()"
+
+Rscript _updateModules.R
+
+
 
 update DECSRIPTION, NEWS, README, and function Roxygen documentations.
 
@@ -2451,6 +2463,11 @@ This roadmap provides a comprehensive, **jamovi-compatible** enhancement plan fo
 4. Begin implementation starting with Q1 Year 1 features
 
 For questions or suggestions, please open an issue on the ClinicoPathJamoviModule repository.
+
+---
+
+## Drafts / Next steps (to implement later)
+- jjoncoplot: expose a dedicated result for per-sample mutation burden (currently only in plot logic), and add UI enable/disable logic (e.g., enable `log10TransformTMB` only when `showTMB` is TRUE).
 
 ---
 

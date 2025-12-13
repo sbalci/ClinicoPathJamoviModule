@@ -42,6 +42,21 @@ items:
       title: To Do
       type:  Html
 
+    - name:  presetInfo
+      title: Clinical Preset Info
+      type:  Html
+      visible: (clinicalPreset != "custom")
+
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: true
+
+    - name:  explanations
+      title: Explanations
+      type:  Html
+      visible: (showExplanations)
+
     - name: plot2
       title: '`${dep} vs {group} by {grvar}`'
       type: Image

@@ -66,13 +66,10 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             analysis_vars <- c(time_var, size_var)
             if (!is.null(patient_var)) analysis_vars <- c(analysis_vars, patient_var)
             if (length(covariates) > 0) analysis_vars <- c(analysis_vars, covariates)
-            if (!is.null(self$options$treatmentEffect)) analysis_vars <- c(analysis_vars, self$options$treatmentEffect)
+                if (!is.null(self$options$treatmentEffect)) analysis_vars <- c(analysis_vars, self$options$treatmentEffect)
             
             # Clean data and validate
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
-            
-            # Enhanced data validation
-            private$.validateTumorData(clean_data, time_var, size_var)
             
             if (nrow(clean_data) < 10) {
                 stop("Insufficient data for tumor growth modeling (minimum 10 complete observations required)")
@@ -104,7 +101,20 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(patient_var)) {
                     fit_data$patient <- as.factor(fit_data[[patient_var]])
                 }
+
+                # Record filtering info
+                if (!is.null(self$data)) {
+                    removed <- nrow(self$data) - nrow(fit_data)
+                    if (removed > 0) {
+                        self$results$summary$setContent(glue::glue(
+                            "<p><strong>Data note:</strong> {removed} row(s) removed due to missing required fields.</p>"
+                        ))
+                    }
+                }
                 
+                # Validate longitudinal structure and time ordering
+                private$.validateTumorData(fit_data, time_var, size_var)
+
                 # Fit model based on type
                 if (model_approach == "nlme" && !is.null(patient_var)) {
                     model_fit <- private$.fitNlmeModel(fit_data, growth_model)
@@ -140,6 +150,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             library(brms)
             
+            iter_val <- max(self$options$mcmcSamples %||% 2000, 1000)
+            conf_level <- (self$options$confidenceLevel %||% 95) / 100
+            
             # Define priors
             priors <- c(
                 prior(normal(0, 10), class = "b") 
@@ -155,8 +168,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 model <- brm(bform, 
                              data = data, 
                              prior = priors,
-                             iter = 2000, chains = 2, cores = 2,
-                             control = list(adapt_delta = 0.95))
+                             iter = iter_val, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95),
+                             prob = conf_level)
                 
             } else if (growth_model == "gompertz") {
                 # V(t) = V0 * exp(alpha/beta * (1 - exp(-beta*t)))
@@ -167,8 +181,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 model <- brm(bform, 
                              data = data, 
                              prior = priors,
-                             iter = 2000, chains = 2, cores = 2,
-                             control = list(adapt_delta = 0.95))
+                             iter = iter_val, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95),
+                             prob = conf_level)
                 
             } else if (growth_model == "logistic") {
                 # V(t) = K / (1 + exp(-r*(t-t0)))
@@ -179,8 +194,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 model <- brm(bform, 
                              data = data, 
                              prior = priors,
-                             iter = 2000, chains = 2, cores = 2,
-                             control = list(adapt_delta = 0.95))
+                             iter = iter_val, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95),
+                             prob = conf_level)
                 
             } else if (growth_model == "bertalanffy") {
                 # von Bertalanffy: V(t) = (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k*t))^3
@@ -191,8 +207,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 model <- brm(bform, 
                              data = data, 
                              prior = priors,
-                             iter = 2000, chains = 2, cores = 2,
-                             control = list(adapt_delta = 0.95))
+                             iter = iter_val, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95),
+                             prob = conf_level)
                 
             } else if (growth_model == "power") {
                 # Power Law: V(t) = V0 * t^alpha
@@ -203,8 +220,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 model <- brm(bform, 
                              data = data, 
                              prior = priors,
-                             iter = 2000, chains = 2, cores = 2,
-                             control = list(adapt_delta = 0.95))
+                             iter = iter_val, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95),
+                             prob = conf_level)
                 
             } else if (growth_model == "linear") {
                 # V(t) = V0 + k*t
@@ -239,13 +257,14 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             library(nlme)
             
             # Define growth model functions
+            V0_start <- self$options$initialSize %||% mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE)
             if (growth_model == "exponential") {
                 # V(t) = V0 * exp(k*t)
                 model <- nlme(size ~ V0 * exp(k * time),
                              data = fit_data,
                              fixed = V0 + k ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE), 
+                             start = list(fixed = c(V0 = V0_start, 
                                                     k = 0.1)),
                              control = nlmeControl(maxIter = 200))
                              
@@ -255,13 +274,13 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              data = fit_data,
                              fixed = V0 + alpha + beta ~ 1,
                              random = V0 ~ 1 | patient,
-                             start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
+                             start = list(fixed = c(V0 = V0_start,
                                                     alpha = 1, beta = 0.1)),
                              control = nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "logistic") {
                 # V(t) = K / (1 + exp(-r*(t-t0)))
-                K_init <- max(fit_data$size, na.rm = TRUE) * 1.2
+                K_init <- self$options$maxSize %||% (max(fit_data$size, na.rm = TRUE) * 1.2)
                 model <- nlme(size ~ K / (1 + exp(-r * (time - t0))),
                              data = fit_data,
                              fixed = K + r + t0 ~ 1,
@@ -272,7 +291,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              
             } else if (growth_model == "bertalanffy") {
                 # von Bertalanffy: V(t) = (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k*t))^3
-                Vinf_init <- max(fit_data$size, na.rm = TRUE) * 1.5
+                Vinf_init <- self$options$maxSize %||% (max(fit_data$size, na.rm = TRUE) * 1.5)
                 model <- nlme(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
                              data = fit_data,
                              fixed = V0 + Vinf + k ~ 1,
@@ -315,30 +334,31 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fitNlsModel = function(fit_data, growth_model) {
             
             # Simple nonlinear least squares for single patients or pooled data
+            V0_start <- self$options$initialSize %||% mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE)
             if (growth_model == "exponential") {
                 model <- nls(size ~ V0 * exp(k * time),
                             data = fit_data,
-                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
+                            start = list(V0 = V0_start,
                                         k = 0.1))
                                         
             } else if (growth_model == "gompertz") {
                 model <- nls(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
                             data = fit_data,
-                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
+                            start = list(V0 = V0_start,
                                         alpha = 1, beta = 0.1))
                                         
             } else if (growth_model == "logistic") {
-                K_init <- max(fit_data$size, na.rm = TRUE) * 1.2
+                K_init <- self$options$maxSize %||% (max(fit_data$size, na.rm = TRUE) * 1.2)
                 model <- nls(size ~ K / (1 + exp(-r * (time - t0))),
                             data = fit_data,
                             start = list(K = K_init, r = 0.1, 
                                         t0 = median(fit_data$time, na.rm = TRUE)))
                                         
             } else if (growth_model == "bertalanffy") {
-                Vinf_init <- max(fit_data$size, na.rm = TRUE) * 1.5
+                Vinf_init <- self$options$maxSize %||% (max(fit_data$size, na.rm = TRUE) * 1.5)
                 model <- nls(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
                             data = fit_data,
-                            start = list(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
+                            start = list(V0 = V0_start,
                                         Vinf = Vinf_init, k = 0.1))
                                         
             } else if (growth_model == "power") {
@@ -363,6 +383,8 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .formatGrowthResults = function(model, growth_model) {
             
+            conf_level <- (self$options$confidenceLevel %||% 95) / 100
+            
             # Extract coefficient summary
             if (inherits(model, "nlme")) {
                 coef_summary <- summary(model)$tTable
@@ -384,19 +406,24 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- private$.interpretParameter(param_name, growth_model)
                 
                 if (inherits(model, "brmsfit")) {
+                    lower_name <- paste0(round((1 - conf_level) / 2 * 100), "% CI")
+                    upper_name <- paste0(round((1 + conf_level) / 2 * 100), "% CI")
+                    ci_lower <- if (lower_name %in% colnames(coef_summary)) coef_summary[i, lower_name] else coef_summary[i, "l-95% CI"]
+                    ci_upper <- if (upper_name %in% colnames(coef_summary)) coef_summary[i, upper_name] else coef_summary[i, "u-95% CI"]
+                    
                     model_table$addRow(rowKey = i, values = list(
                         parameter = param_name,
                         estimate = round(coef_summary[i, "Estimate"], 4),
                         std_error = round(coef_summary[i, "Est.Error"], 4),
                         t_value = NA,
                         p_value = NA,
-                        ci_lower = round(coef_summary[i, "l-95% CI"], 4),
-                        ci_upper = round(coef_summary[i, "u-95% CI"], 4),
+                        ci_lower = round(ci_lower, 4),
+                        ci_upper = round(ci_upper, 4),
                         interpretation = interpretation
                     ))
                 } else {
                     # Get better confidence intervals
-                    ci_result <- private$.calculateBetterConfidenceIntervals(model, param_name)
+                    ci_result <- private$.calculateBetterConfidenceIntervals(model, param_name, conf_level)
                     
                     # Extract values safely
                     est <- if ("Value" %in% colnames(coef_summary)) coef_summary[i, "Value"] else coef_summary[i, "Estimate"]
@@ -465,42 +492,69 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 model <- private$growth_model
                 growth_model <- self$options$growthModel %||% "gompertz"
+                conf_level <- (self$options$confidenceLevel %||% 95) / 100
+                alpha <- 1 - conf_level
+                z <- stats::qnorm(1 - alpha / 2)
                 
                 dt_type <- "Doubling Time"
                 doubling_time <- NA
+                ci <- c(NA, NA)
                 
                 # Calculate doubling time based on model type
                 if (growth_model == "exponential") {
                     if (inherits(model, "nlme")) {
                         k <- fixef(model)["k"]
+                        se_k <- sqrt(vcov(model)["k", "k"])
                     } else {
                         k <- coef(model)["k"]
+                        se_k <- summary(model)$coefficients["k", "Std. Error"] %||% NA
                     }
                     doubling_time <- log(2) / k
                     dt_type <- "Constant Doubling Time"
+                    if (!is.na(se_k)) {
+                        se_dt <- (log(2) / (k^2)) * se_k
+                        ci <- doubling_time + c(-z, z) * se_dt
+                    }
                     
                 } else if (growth_model == "gompertz") {
                     # Doubling time varies for Gompertz - calculate at initial time
                     if (inherits(model, "nlme")) {
-                        alpha <- fixef(model)["alpha"]
+                        alpha_g <- fixef(model)["alpha"]
+                        se_alpha <- sqrt(vcov(model)["alpha", "alpha"])
                     } else {
-                        alpha <- coef(model)["alpha"]
+                        alpha_g <- coef(model)["alpha"]
+                        se_alpha <- summary(model)$coefficients["alpha", "Std. Error"] %||% NA
                     }
                     # SGR(0) = alpha. Initial DT = ln(2)/alpha
-                    doubling_time <- log(2) / alpha 
+                    doubling_time <- log(2) / alpha_g 
                     dt_type <- "Initial Doubling Time"
+                    if (!is.na(se_alpha)) {
+                        se_dt <- (log(2) / (alpha_g^2)) * se_alpha
+                        ci <- doubling_time + c(-z, z) * se_dt
+                    }
                     
                 } else if (growth_model == "linear") {
                     # For linear growth, calculate time to double from initial size
                     if (inherits(model, "lm")) {
                         k <- coef(model)["time"]
                         V0 <- coef(model)["(Intercept)"]
+                        se_k <- summary(model)$coefficients["time", "Std. Error"]
+                        se_v0 <- summary(model)$coefficients["(Intercept)", "Std. Error"]
                     } else {
                         k <- coef(model)["k"]
                         V0 <- coef(model)["V0"]
+                        se_k <- summary(model)$coefficients["k", "Std. Error"] %||% NA
+                        se_v0 <- summary(model)$coefficients["V0", "Std. Error"] %||% NA
                     }
                     doubling_time <- V0 / k  # Time to add V0 to initial size
                     dt_type <- "Time to Double Initial Size"
+                    if (!is.na(se_k) && !is.na(se_v0)) {
+                        # Delta method: g = V0/k, grad = (1/k, -V0/k^2)
+                        grad <- c(1 / k, -V0 / (k^2))
+                        cov_mat <- matrix(c(se_v0^2, 0, 0, se_k^2), nrow = 2)
+                        se_dt <- sqrt(t(grad) %*% cov_mat %*% grad)
+                        ci <- doubling_time + c(-z, z) * se_dt
+                    }
                     
                 } else {
                     doubling_time <- NA
@@ -513,8 +567,8 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         group = dt_type,
                         doubling_time = round(doubling_time, 2),
                         unit = "time units",
-                        ci_lower = round(doubling_time * 0.8, 2),  # Approximate CI
-                        ci_upper = round(doubling_time * 1.2, 2)
+                        ci_lower = ifelse(is.na(ci[1]), NA, round(ci[1], 2)),
+                        ci_upper = ifelse(is.na(ci[2]), NA, round(ci[2], 2))
                     ))
                 }
                 
@@ -666,40 +720,54 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                  max(plot_data$time, na.rm = TRUE), 
                                  length.out = 100)
                 
-                # Get fitted values
-                if (inherits(private$growth_model, c("nlme", "nls", "lm"))) {
-                    pred_data <- data.frame(time = time_range)
+                pred_data <- data.frame(time = time_range)
+                ribbon <- NULL
+                
+                # Get fitted values and simple uncertainty if available
+                if (inherits(private$growth_model, "lm")) {
+                    pred <- predict(private$growth_model, newdata = pred_data, se.fit = TRUE)
+                    pred_data$fitted <- as.numeric(pred$fit)
+                    ribbon <- data.frame(
+                        time = time_range,
+                        ymin = pred$fit - 1.96 * pred$se.fit,
+                        ymax = pred$fit + 1.96 * pred$se.fit
+                    )
+                } else if (inherits(private$growth_model, c("nlme", "nls"))) {
                     pred_data$fitted <- predict(private$growth_model, newdata = pred_data)
                 } else if (inherits(private$growth_model, "brmsfit")) {
-                    pred_data <- data.frame(time = time_range)
-                    pred_data$fitted <- predict(private$growth_model, newdata = pred_data)[, "Estimate"]
+                    pred_draws <- posterior_predict(private$growth_model, newdata = pred_data, draws = 400)
+                    pred_data$fitted <- apply(pred_draws, 2, median)
+                    qs <- apply(pred_draws, 2, quantile, probs = c(0.025, 0.975))
+                    ribbon <- data.frame(time = time_range, ymin = qs[1, ], ymax = qs[2, ])
                 }
 
-                    
-                    # Create plot
-                    p <- ggplot() +
-                        geom_point(data = plot_data, aes(x = time, y = size), alpha = 0.6) +
-                        geom_line(data = pred_data, aes(x = time, y = fitted), color = "red", size = 1) +
-                        labs(
-                            title = paste("Tumor Growth Curves -", stringr::str_to_title(self$options$growthModel %||% "Gompertz"), "Model"),
-                            x = "Time",
-                            y = "Tumor Size",
-                            caption = "Red line: Fitted growth model, Points: Observed data"
-                        ) +
-                        theme_classic() +
-                        theme(
-                            plot.title = element_text(hjust = 0.5),
-                            text = element_text(size = 11)
-                        )
-                    
-                    # Add individual curves if patient data available
-                    if (!is.null(patient_var) && length(unique(plot_data$patient)) > 1) {
-                        p <- p + geom_line(data = plot_data, aes(x = time, y = size, group = patient), 
-                                          alpha = 0.3, color = "blue")
-                    }
-                    
-                    print(p)
+                caption_txt <- "Red line: Fitted growth model, Points: Observed data"
+                if (!is.null(ribbon)) caption_txt <- paste(caption_txt, "Shaded: 95% interval.")
+                if (length(self$options$covariates) > 0) caption_txt <- paste(caption_txt, "Covariate effects not visualised.")
+
+                p <- ggplot() +
+                    geom_point(data = plot_data, aes(x = time, y = size), alpha = 0.6) +
+                    {if (!is.null(ribbon)) geom_ribbon(data = ribbon, aes(x = time, ymin = ymin, ymax = ymax), alpha = 0.2, fill = "red") else NULL} +
+                    geom_line(data = pred_data, aes(x = time, y = fitted), color = "red", size = 1) +
+                    labs(
+                        title = paste("Tumor Growth Curves -", stringr::str_to_title(self$options$growthModel %||% "Gompertz"), "Model"),
+                        x = "Time",
+                        y = "Tumor Size",
+                        caption = caption_txt
+                    ) +
+                    theme_classic() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5),
+                        text = element_text(size = 11)
+                    )
                 
+                # Add individual curves if patient data available
+                if (!is.null(patient_var) && length(unique(plot_data$patient)) > 1) {
+                    p <- p + geom_line(data = plot_data, aes(x = time, y = size, group = patient), 
+                                      alpha = 0.3, color = "blue")
+                }
+                
+                print(p)
                 
                 TRUE
                 
@@ -721,18 +789,23 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 model <- private$growth_model
                 
-                # Calculate residuals
-                if (inherits(model, c("nlme", "nls", "lm", "brmsfit"))) {
-                    fitted_vals <- fitted(model)[, "Estimate"]
-                    residuals <- residuals(model)[, "Estimate"]
-                    
-                    # Create residual plot data
+                fitted_vals <- NULL
+                residual_vals <- NULL
+                
+                if (inherits(model, "brmsfit")) {
+                    fitted_vals <- as.numeric(fitted(model)[, 1])
+                    residual_vals <- as.numeric(residuals(model)[, 1])
+                } else if (inherits(model, c("nlme", "nls", "lm"))) {
+                    fitted_vals <- as.numeric(fitted(model))
+                    residual_vals <- as.numeric(residuals(model))
+                }
+                
+                if (!is.null(fitted_vals) && !is.null(residual_vals)) {
                     resid_data <- data.frame(
                         fitted = fitted_vals,
-                        residuals = residuals
+                        residuals = residual_vals
                     )
                     
-                    # Residuals vs fitted plot
                     p <- ggplot(resid_data, aes(x = fitted, y = residuals)) +
                         geom_point(alpha = 0.6) +
                         geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
@@ -783,11 +856,23 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Create prediction data
                 pred_data <- data.frame(time = extended_time)
+                ribbon <- NULL
                 
-                if (inherits(private$growth_model, c("nlme", "nls", "lm"))) {
+                if (inherits(private$growth_model, "lm")) {
+                    pred <- predict(private$growth_model, newdata = pred_data, se.fit = TRUE)
+                    pred_data$fitted <- as.numeric(pred$fit)
+                    ribbon <- data.frame(
+                        time = extended_time,
+                        ymin = pred$fit - 1.96 * pred$se.fit,
+                        ymax = pred$fit + 1.96 * pred$se.fit
+                    )
+                } else if (inherits(private$growth_model, c("nlme", "nls"))) {
                     pred_data$fitted <- predict(private$growth_model, newdata = pred_data)
                 } else if (inherits(private$growth_model, "brmsfit")) {
-                    pred_data$fitted <- predict(private$growth_model, newdata = pred_data)[, "Estimate"]
+                    pred_draws <- posterior_predict(private$growth_model, newdata = pred_data, draws = 400)
+                    pred_data$fitted <- apply(pred_draws, 2, median)
+                    qs <- apply(pred_draws, 2, quantile, probs = c(0.025, 0.975))
+                    ribbon <- data.frame(time = extended_time, ymin = qs[1, ], ymax = qs[2, ])
                 }
 
                     
@@ -797,9 +882,14 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         size = data[[size_var]]
                     )
                     
+                    caption_txt <- "Blue: Fitted to observed data; Red: Future predictions; Gray line: End of observed data"
+                    if (!is.null(ribbon)) caption_txt <- paste(caption_txt, "Shaded: 95% interval.")
+                    if (length(self$options$covariates) > 0) caption_txt <- paste(caption_txt, "Covariate effects not visualised.")
+
                     # Create plot
                     p <- ggplot() +
                         geom_point(data = orig_data, aes(x = time, y = size), alpha = 0.6) +
+                        {if (!is.null(ribbon)) geom_ribbon(data = ribbon, aes(x = time, ymin = ymin, ymax = ymax), alpha = 0.15, fill = "red") else NULL} +
                         geom_line(data = pred_data[pred_data$time <= max_time, ], 
                                  aes(x = time, y = fitted), color = "blue", size = 1) +
                         geom_line(data = pred_data[pred_data$time > max_time, ], 
@@ -809,7 +899,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             title = "Tumor Growth Predictions",
                             x = "Time",
                             y = "Tumor Size",
-                            caption = "Blue: Fitted to observed data; Red: Future predictions; Gray line: End of observed data"
+                            caption = caption_txt
                         ) +
                         theme_classic()
                     
@@ -841,6 +931,18 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 treatment_var <- self$options$treatmentEffect
                 if (is.null(treatment_var)) return()
+                
+                if (!"patient" %in% names(data)) {
+                    treatment_table <- self$results$treatmentEffectTable
+                    treatment_table$addRow(rowKey = "warning", values = list(
+                        parameter = "Treatment analysis skipped",
+                        treatment_effect = NA,
+                        percent_change = NA,
+                        p_value = NA,
+                        clinical_significance = "Provide patient IDs for mixed-effects treatment comparisons."
+                    ))
+                    return()
+                }
                 
                 # Add treatment variable to data
                 data$treatment <- data[[treatment_var]]
@@ -1219,25 +1321,32 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(obs_per_patient < 3)) {
                     warning("Some patients have fewer than 3 measurements. Consider using NLS instead of NLME approach.")
                 }
+                
+                # Monotonic time check per patient
+                bad_patients <- names(Filter(function(v) any(diff(v) < 0, na.rm = TRUE),
+                                             split(data[[time_var]], data$patient)))
+                if (length(bad_patients) > 0) {
+                    warning(glue::glue("Time is not monotonically increasing for patient(s): {paste(head(bad_patients, 5), collapse = ', ')}"))
+                }
             }
         },
         
-        .calculateBetterConfidenceIntervals = function(model, param_name) {
+        .calculateBetterConfidenceIntervals = function(model, param_name, conf_level = 0.95) {
             
             tryCatch({
                 
                 # Get parameter-specific confidence intervals
                 if (inherits(model, "nlme")) {
                     # For NLME models, use intervals() function
-                    ci_result <- intervals(model)$fixed[param_name, c("lower", "upper")]
+                    ci_result <- intervals(model, level = conf_level)$fixed[param_name, c("lower", "upper")]
                     
                 } else if (inherits(model, "nls")) {
                     # For NLS models, use confint()
-                    ci_result <- confint(model)[param_name, ]
+                    ci_result <- confint(model, level = conf_level)[param_name, ]
                     
                 } else if (inherits(model, "lm")) {
                     # For linear models, use confint()
-                    ci_result <- confint(model)[param_name, ]
+                    ci_result <- confint(model, level = conf_level)[param_name, ]
                 }
                 
                 return(list(lower = ci_result[1], upper = ci_result[2]))
@@ -1247,10 +1356,13 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 coef_val <- coef(model)[param_name] %||% fixef(model)[param_name]
                 se_val <- summary(model)$tTable[param_name, "Std.Error"] %||% 
                          summary(model)$coefficients[param_name, "Std. Error"]
+                
+                alpha <- 1 - conf_level
+                z <- stats::qnorm(1 - alpha / 2)
                          
                 return(list(
-                    lower = coef_val - 1.96 * se_val,
-                    upper = coef_val + 1.96 * se_val
+                    lower = coef_val - z * se_val,
+                    upper = coef_val + z * se_val
                 ))
             })
         }

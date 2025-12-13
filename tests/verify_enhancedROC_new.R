@@ -177,10 +177,7 @@ mock_jmvcore$. <- function(text) text
 if ("package:jmvcore" %in% search()) detach("package:jmvcore", unload = TRUE)
 attach(mock_jmvcore, name = "jmvcore_mock", warn.conflicts = FALSE)
 
-# Source the enhancedROC implementation
-source("R/enhancedROC.b.R")
-
-# Define enhancedROCBase for inheritance
+# Define enhancedROCBase for inheritance (minimal stub)
 enhancedROCBase <- R6::R6Class(
     "enhancedROCBase",
     inherit = Analysis,
@@ -191,6 +188,10 @@ enhancedROCBase <- R6::R6Class(
         }
     )
 )
+assign("enhancedROCBase", enhancedROCBase, envir = .GlobalEnv)
+
+# Source the enhancedROC implementation
+source("../R/enhancedroc.b.R")
 
 # 2. Test Data Generation -------------------------------------------------
 

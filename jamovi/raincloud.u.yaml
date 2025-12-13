@@ -165,3 +165,12 @@ children:
           - type: ComboBox
             name: comparison_method
             label: "Comparison Method"
+          - type: ComboBox
+            name: adjust_method
+            label: "P-value Adjustment"
+          - type: CheckBox
+            name: effect_size
+            label: "Show Effect Size (2 groups)"
+          - type: CheckBox
+            name: log_transform
+            label: "Log-transform Y-axis"

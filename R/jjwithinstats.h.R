@@ -27,7 +27,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = FALSE,
+            resultssubtitle = TRUE,
             bfmessage = FALSE,
             conflevel = 0.95,
             k = 2,
@@ -181,7 +181,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
-                default=FALSE)
+                default=TRUE)
             private$..bfmessage <- jmvcore::OptionBool$new(
                 "bfmessage",
                 bfmessage,
@@ -363,6 +363,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        warnings = function() private$.items[["warnings"]],
         interpretation = function() private$.items[["interpretation"]],
         explanations = function() private$.items[["explanations"]],
         plot = function() private$.items[["plot"]],
@@ -411,6 +412,18 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="todo",
                 title="Analysis Guide"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Messages",
+                visible=TRUE,
+                clearWith=list(
+                    "dep1",
+                    "dep2",
+                    "dep3",
+                    "dep4",
+                    "typestatistics",
+                    "clinicalpreset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -604,6 +617,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -635,7 +649,7 @@ jjwithinstats <- function(
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = FALSE,
+    resultssubtitle = TRUE,
     bfmessage = FALSE,
     conflevel = 0.95,
     k = 2,

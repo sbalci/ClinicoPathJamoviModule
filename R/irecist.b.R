@@ -2,7 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag select left_join
+#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag select left_join group_modify transmute bind_rows
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats binom.test
 #' @export
@@ -185,12 +185,21 @@ irecistClass <- R6::R6Class(
             targetLesionSum <- getVarName(self$options$targetLesionSum)
             newLesions <- getVarName(self$options$newLesions)
 
+            # Helper to coerce new lesion indicator to binary (accepts 0/1, TRUE/FALSE, yes/no)
+            parseNewLesions <- function(x) {
+                if (is.null(x)) return(rep(NA_real_, nrow(mydata)))
+                if (is.numeric(x)) return(x)
+                x <- tolower(as.character(x))
+                ifelse(x %in% c("1", "yes", "y", "true"), 1,
+                       ifelse(x %in% c("0", "no", "n", "false"), 0, NA_real_))
+            }
+
             # Create working dataframe
             data <- data.frame(
                 patientId = as.character(mydata[[patientId]]),
                 assessmentTime = as.numeric(mydata[[assessmentTime]]),
                 targetSum = as.numeric(mydata[[targetLesionSum]]),
-                newLesions = as.numeric(mydata[[newLesions]]),
+                newLesions = parseNewLesions(mydata[[newLesions]]),
                 stringsAsFactors = FALSE
             )
 
@@ -208,8 +217,8 @@ irecistClass <- R6::R6Class(
                 data$group <- as.character(mydata[[groupVar]])
             }
 
-            # Remove missing values
-            data <- na.omit(data[, c("patientId", "assessmentTime", "targetSum", "newLesions")])
+            # Remove rows missing required values (logically missing assessments)
+            data <- data[complete.cases(data[, c("patientId", "assessmentTime", "targetSum", "newLesions")]), ]
 
             # Sort by patient and time
             data <- data[order(data$patientId, data$assessmentTime), ]
@@ -229,7 +238,7 @@ irecistClass <- R6::R6Class(
                 mutate(isBaseline = row_number() == 1) %>%
                 filter(isBaseline) %>%
                 ungroup() %>%
-                select(patientId, baselineSum = targetSum, baselineTime = assessmentTime)
+                dplyr::select(patientId, baselineSum = targetSum, baselineTime = assessmentTime)
 
             private$.baselineValues <- baseline
 
@@ -248,10 +257,10 @@ irecistClass <- R6::R6Class(
                         nadirSum = cummin(targetSum),
                         nadirSum = ifelse(assessmentTime == baselineTime, baselineSum, nadirSum)
                     ) %>%
-                    ungroup()
+                ungroup()
 
-                private$.nadirValues <- data %>%
-                    select(patientId, assessmentTime, nadirSum)
+            private$.nadirValues <- data %>%
+                dplyr::select(patientId, assessmentTime, nadirSum)
             }
 
             private$.processedData <- data
@@ -289,34 +298,52 @@ irecistClass <- R6::R6Class(
                     # Determine reference for PD (nadir or baseline)
                     refChange = if (self$options$nadirReference) changeFromNadir else changeFromBaseline,
 
-                    # iRECIST classification
+                    # iRECIST base classification (before confirmation)
                     irecistCategory = case_when(
-                        # New lesions = PD (iUPD)
+                        # New lesions = iUPD (await confirmation)
                         newLesions == 1 ~ "iUPD",
 
-                        # Complete response (all target lesions disappear)
-                        targetSum == 0 ~ "iCR",
+                        # Non-target progression counts as iUPD
+                        !is.na(nonTargetStatus) &
+                            tolower(nonTargetStatus) == "pd" ~ "iUPD",
 
-                        # Partial response (≥30% decrease from baseline)
-                        changeFromBaseline <= -30 ~ "iPR",
+                        # Complete response (all target lesions disappear; allow non-target CR)
+                        targetSum == 0 & (is.na(nonTargetStatus) | tolower(nonTargetStatus) %in% c("cr", "complete")) ~ "iCR",
 
-                        # Progressive disease (≥20% increase from nadir + 5mm absolute)
-                        refChange >= 20 & absoluteChange >= pdAbsolute ~ "iUPD",
+                        # Partial response (user-configured threshold from baseline)
+                        changeFromBaseline <= -100 * prThreshold ~ "iPR",
+
+                        # Progressive disease (user-configured % increase + absolute)
+                        refChange >= 100 * pdThreshold & absoluteChange >= pdAbsolute ~ "iUPD",
 
                         # Stable disease (everything else)
                         TRUE ~ "iSD"
                     ),
 
+                    irecistCategoryOrig = irecistCategory,
+
                     # Initially all responses are unconfirmed
                     confirmed = "No"
-                )
+                ) %>%
+                group_by(patientId) %>%
+                arrange(assessmentTime) %>%
+                mutate(
+                    nextTime = lead(assessmentTime),
+                    nextCategoryRaw = lead(irecistCategory),
+                    timeDiff = nextTime - assessmentTime
+                ) %>%
+                ungroup()
 
             # Apply confirmation logic
             if (self$options$requireConfirmation) {
                 data <- private$.applyConfirmation(data)
+            } else {
+                # Keep timing info for pseudoprogression even when confirmation not required
+                data$confirmed <- "Not required"
             }
 
             private$.responseData <- data
+            private$.processedData <- data
         },
 
         # ---- Confirmation Logic ----
@@ -330,29 +357,31 @@ irecistClass <- R6::R6Class(
                 group_by(patientId) %>%
                 arrange(assessmentTime) %>%
                 mutate(
-                    # Check next assessment
-                    nextTime = lead(assessmentTime),
-                    nextCategory = lead(irecistCategory),
-                    timeDiff = nextTime - assessmentTime,
-
-                    # iUPD confirmed if:
-                    # 1. Current assessment is iUPD
-                    # 2. Next assessment is 4-12 weeks later
-                    # 3. Next assessment shows progression
+                    # Use pre-computed next assessment info
                     confirmed = case_when(
+                        # Confirm progression within window
                         irecistCategory == "iUPD" &
                             !is.na(timeDiff) &
                             timeDiff >= confirmWindow &
                             timeDiff <= confirmWindowMax &
-                            nextCategory == "iUPD" ~ "Yes (iCPD)",
+                            nextCategoryRaw == "iUPD" ~ "Yes (iCPD)",
 
+                        # Pseudoprogression: iUPD followed by response/stable
                         irecistCategory == "iUPD" &
                             !is.na(timeDiff) &
                             timeDiff >= confirmWindow &
                             timeDiff <= confirmWindowMax &
-                            nextCategory %in% c("iPR", "iSD", "iCR") ~ "No (Pseudoprogression)",
+                            nextCategoryRaw %in% c("iPR", "iSD", "iCR") ~ "No (Pseudoprogression)",
 
+                        # Awaiting confirmation
                         irecistCategory == "iUPD" ~ "Pending",
+
+                        # Response confirmation: need a follow-up scan in window
+                        irecistCategory %in% c("iPR", "iCR") &
+                            !is.na(timeDiff) &
+                            timeDiff >= confirmWindow &
+                            timeDiff <= confirmWindowMax &
+                            nextCategoryRaw %in% c("iPR", "iCR", "iSD") ~ "Yes (Confirmed)",
 
                         irecistCategory %in% c("iPR", "iCR") ~ "Requires 2nd scan",
 
@@ -362,7 +391,7 @@ irecistClass <- R6::R6Class(
                     # Update category based on confirmation
                     irecistCategory = case_when(
                         confirmed == "Yes (iCPD)" ~ "iCPD",
-                        confirmed == "No (Pseudoprogression)" ~ paste0(nextCategory, " (pseudo)"),
+                        confirmed == "No (Pseudoprogression)" ~ paste0(nextCategoryRaw, " (pseudo)"),
                         TRUE ~ irecistCategory
                     )
                 ) %>%
@@ -376,68 +405,67 @@ irecistClass <- R6::R6Class(
 
             data <- private$.responseData
 
-            # Define response hierarchy (best to worst)
-            response_order <- c("iCR", "iPR", "iSD", "iUPD", "iCPD")
+            # Calculate best response per patient (stop at first iCPD)
+            bestResponse <- lapply(split(data, data$patientId), function(df) {
+                df <- df[order(df$assessmentTime), ]
+                df <- df[!df$isBaseline, ]
 
-            # Calculate best response per patient
-            bestResponse <- data %>%
-                filter(!isBaseline) %>%
-                group_by(patientId) %>%
-                arrange(assessmentTime) %>%
-                summarise(
-                    bestResponse = {
-                        # Get confirmed responses only if required
-                        if (self$options$requireConfirmation) {
-                            responses <- irecistCategory[confirmed != "Pending"]
-                        } else {
-                            responses <- irecistCategory
-                        }
+                idx_cpd <- which(df$irecistCategory == "iCPD")
+                if (length(idx_cpd) > 0) {
+                    df <- df[seq_len(idx_cpd[1]), ]
+                }
 
-                        # Remove pseudo labels for comparison
-                        responses <- gsub(" \\(pseudo\\)", "", responses)
+                responses <- if (self$options$requireConfirmation) {
+                    df$irecistCategory[df$confirmed != "Pending"]
+                } else {
+                    df$irecistCategory
+                }
 
-                        # Find best response
-                        if (length(responses) == 0) {
-                            "Unknown"
-                        } else if ("iCR" %in% responses) {
-                            "iCR"
-                        } else if ("iPR" %in% responses) {
-                            "iPR"
-                        } else if ("iSD" %in% responses) {
-                            "iSD"
-                        } else if ("iCPD" %in% responses) {
-                            "iCPD"
-                        } else {
-                            "iUPD"
-                        }
-                    },
+                responses <- gsub(" \\(pseudo\\)", "", responses)
 
-                    timeToResponse = {
-                        # Time to first CR or PR
-                        idx <- which(irecistCategory %in% c("iCR", "iPR"))
-                        if (length(idx) > 0) assessmentTime[idx[1]] else NA
-                    },
+                best <- if (length(responses) == 0) {
+                    "Unknown"
+                } else if ("iCR" %in% responses) {
+                    "iCR"
+                } else if ("iPR" %in% responses) {
+                    "iPR"
+                } else if ("iSD" %in% responses) {
+                    "iSD"
+                } else if ("iCPD" %in% responses) {
+                    "iCPD"
+                } else {
+                    "iUPD"
+                }
 
-                    confirmed = {
-                        # Check if best response is confirmed
-                        if (bestResponse %in% c("iCR", "iPR")) {
-                            sum_confirmed <- sum(confirmed == "Requires 2nd scan" | confirmed == "Yes")
-                            if (sum_confirmed >= self$options$confirmationScans) "Yes" else "No"
-                        } else {
-                            "-"
-                        }
-                    },
+                timeToResponse <- {
+                    idx <- which(df$irecistCategory %in% c("iCR", "iPR"))
+                    if (length(idx) > 0) df$assessmentTime[idx[1]] else NA
+                }
 
-                    hadPseudoprogression = any(grepl("pseudo", confirmed)),
+                confirmedBest <- if (best %in% c("iCR", "iPR")) {
+                    sum_confirmed <- sum(df$confirmed %in% c("Yes", "Yes (Confirmed)"))
+                    if (sum_confirmed >= self$options$confirmationScans) "Yes" else "No"
+                } else {
+                    "-"
+                }
 
-                    timeToCPD = {
-                        # Time to first confirmed PD
-                        idx <- which(irecistCategory == "iCPD")
-                        if (length(idx) > 0) assessmentTime[idx[1]] else NA
-                    },
+                hadPseudo <- any(grepl("Pseudo", df$confirmed) | grepl("\\(pseudo\\)", df$irecistCategory))
 
-                    .groups = "drop"
+                timeToCPD <- {
+                    idx <- which(df$irecistCategory == "iCPD")
+                    if (length(idx) > 0) df$assessmentTime[idx[1]] else NA
+                }
+
+                tibble(
+                    patientId = unique(df$patientId),
+                    bestResponse = best,
+                    timeToResponse = timeToResponse,
+                    confirmed = confirmedBest,
+                    hadPseudoprogression = hadPseudo,
+                    timeToCPD = timeToCPD
                 )
+            }) %>%
+                bind_rows()
 
             private$.bestResponseData <- bestResponse
         },
@@ -447,18 +475,15 @@ irecistClass <- R6::R6Class(
 
             data <- private$.responseData
 
-            # Filter for iUPD events (including confirmed and pseudo)
-            # nextTime and nextCategory were added in .applyConfirmation
+            # Filter for original iUPD events and track outcomes
             pseudo <- data %>%
-                filter(irecistCategory == "iUPD" | 
-                       irecistCategory == "iCPD" | 
-                       grepl("\\(pseudo\\)", irecistCategory)) %>%
-                select(
-                    patientId,
+                filter(irecistCategoryOrig == "iUPD") %>%
+                transmute(
+                    patientId = patientId,
                     iupdTime = assessmentTime,
-                    confirmationTime = nextTime,
+                    confirmationTime = ifelse(confirmed %in% c("Yes (iCPD)", "No (Pseudoprogression)"), nextTime, NA_real_),
                     outcome = confirmed,
-                    subsequentResponse = nextCategory
+                    subsequentResponse = ifelse(!is.na(nextCategoryRaw), nextCategoryRaw, "Pending")
                 )
 
             private$.pseudoprogressionData <- pseudo
@@ -644,8 +669,50 @@ irecistClass <- R6::R6Class(
         # ---- Populate Stratified Analysis ----
         .populateStratifiedAnalysis = function() {
 
-            # This would require group variable - placeholder for now
-            return()
+            if (is.null(self$options$groupVar) || !self$options$stratifiedAnalysis) {
+                return()
+            }
+
+            table <- self$results$stratifiedTable
+
+            groupLookup <- private$.processedData %>%
+                group_by(patientId) %>%
+                summarise(group = dplyr::first(group), .groups = "drop")
+
+            data <- private$.bestResponseData %>%
+                left_join(groupLookup, by = "patientId")
+
+            if (is.null(data) || nrow(data) == 0) {
+                return()
+            }
+
+            summary <- data %>%
+                group_by(group) %>%
+                summarise(
+                    n = n(),
+                    iCR = mean(bestResponse == "iCR") * 100,
+                    iPR = mean(bestResponse == "iPR") * 100,
+                    iSD = mean(bestResponse == "iSD") * 100,
+                    iCPD = mean(bestResponse == "iCPD") * 100,
+                    orr = mean(bestResponse %in% c("iCR", "iPR")) * 100,
+                    dcr = mean(bestResponse %in% c("iCR", "iPR", "iSD")) * 100,
+                    pseudoprogression_rate = mean(hadPseudoprogression) * 100,
+                    .groups = "drop"
+                )
+
+            for (i in 1:nrow(summary)) {
+                table$addRow(rowKey = i, values = list(
+                    group = as.character(summary$group[i]),
+                    n = as.integer(summary$n[i]),
+                    iCR = summary$iCR[i],
+                    iPR = summary$iPR[i],
+                    iSD = summary$iSD[i],
+                    iCPD = summary$iCPD[i],
+                    orr = summary$orr[i],
+                    dcr = summary$dcr[i],
+                    pseudoprogression_rate = summary$pseudoprogression_rate[i]
+                ))
+            }
         },
 
         # ---- Populate Clinical Interpretation ----
@@ -758,7 +825,7 @@ irecistClass <- R6::R6Class(
 
             # Add best response category
             bestResp <- private$.bestResponseData %>%
-                select(patientId, bestResponse)
+                dplyr::select(patientId, bestResponse)
 
             waterfallData <- waterfallData %>%
                 left_join(bestResp, by = "patientId")
@@ -880,17 +947,51 @@ irecistClass <- R6::R6Class(
 
         .timeToCPDPlot = function(image, ggtheme, theme, ...) {
 
-            # Placeholder for Kaplan-Meier style plot for time to iCPD
-            # Would require survival analysis integration
+            if (is.null(private$.bestResponseData)) {
+                return()
+            }
 
-            return()
+            data <- private$.bestResponseData
+            data <- data %>% filter(!is.na(timeToCPD))
+            if (nrow(data) == 0) {
+                return()
+            }
+
+            p <- ggplot(data, aes(x = timeToCPD)) +
+                geom_histogram(binwidth = 2, fill = "firebrick", color = "white", alpha = 0.8) +
+                labs(
+                    title = "Time to Confirmed PD (iCPD)",
+                    x = "Time",
+                    y = "Patients"
+                ) +
+                theme_minimal()
+
+            print(p)
+
+            TRUE
         },
 
         .timelinePlot = function(image, ggtheme, theme, ...) {
 
-            # Placeholder for detailed timeline visualization
+            if (is.null(private$.responseData)) {
+                return()
+            }
 
-            return()
+            data <- private$.responseData
+
+            p <- ggplot(data, aes(x = assessmentTime, y = patientId, color = irecistCategory)) +
+                geom_line(aes(group = patientId), alpha = 0.3) +
+                geom_point(size = 2) +
+                labs(
+                    title = "Response Timeline",
+                    x = "Time from Baseline",
+                    y = "Patient"
+                ) +
+                theme_minimal()
+
+            print(p)
+
+            TRUE
         }
     )
 )

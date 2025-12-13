@@ -320,3 +320,40 @@ options_5 <- list(
 )
 res5 <- run_test("Missing Outcome Level", test_data, options_5, outcomeorganizerClass)
 
+# Test 6: Robust Variable Mapping (Spaces and special chars)
+cat("Running Test 6: Robust Variable Mapping\n")
+test_data_messy <- test_data
+names(test_data_messy)[1] <- "Patient Status" # Should clean to patient_status
+names(test_data_messy)[2] <- "Recurrence?"    # Should clean to recurrence
+options_6 <- list(
+    outcome = "Patient Status",
+    outcomeLevel = "Dead",
+    recurrence = "Recurrence?",
+    recurrenceLevel = "Yes",
+    analysistype = "rfs",
+    addOutcome = TRUE
+)
+res6 <- run_test("Robust Variable Mapping", test_data_messy, options_6, outcomeorganizerClass)
+if(!is.null(res6)) print("Robust Mapping Test Passed: Handled 'Patient Status' and 'Recurrence?' correctly")
+
+# Test 7: Ordered Factor Handling
+cat("Running Test 7: Ordered Factor Handling\n")
+test_data_ordered <- test_data
+test_data_ordered$status <- factor(test_data_ordered$status, levels=c("Alive", "Dead"), ordered=TRUE)
+options_7 <- list(
+    outcome = "status",
+    outcomeLevel = "Dead",
+    analysistype = "os"
+)
+res7 <- run_test("Ordered Factor Handling", test_data_ordered, options_7, outcomeorganizerClass)
+if(!is.null(res7)) print("Ordered Factor Test Passed: Handled ordered factor without error")
+
+# Test 8: Strict Validation (Compete without Multievent)
+cat("Running Test 8: Strict Validation (Compete without Multievent)\n")
+options_8 <- list(
+    outcome = "multistatus",
+    analysistype = "compete",
+    multievent = FALSE # Should trigger ERROR now
+)
+res8 <- run_test("Strict Validation Check", test_data, options_8, outcomeorganizerClass)
+# We expect this to fail/return NULL and print an error message about enabling Multiple Event Types

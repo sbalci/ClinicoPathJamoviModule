@@ -7,6 +7,7 @@
 jjsyndromicplot(
   data,
   vars,
+  missing = "listwise",
   component = 1,
   cutoff = 0.5,
   center = TRUE,
@@ -33,6 +34,10 @@ jjsyndromicplot(
 Analysis. Select at least 3 numeric variables (e.g., biomarker levels,
 clinical measurements, gene expression values). PCA will identify patterns
 of correlation among these variables.}
+
+\item{missing}{How to handle missing values. 'listwise' excludes cases with
+any missing values. 'mean_imputation' replaces missing values with the
+variable mean.}
 
 \item{component}{Which principal component to visualize (1 = PC1, 2 = PC2,
 etc.). PC1 typically explains the most variance in the data.}
@@ -87,6 +92,8 @@ plot.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$loadings} \tab \tab \tab \tab \tab Standardized loadings for the selected principal component \cr
 \code{results$plot} \tab \tab \tab \tab \tab Syndromic visualization of PCA loadings \cr
 }

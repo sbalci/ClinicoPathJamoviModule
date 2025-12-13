@@ -360,10 +360,10 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Dot Chart
 #'
-#' Wrapper Function for ggstatsplot::ggdotplotstats and
-#' ggstatsplot::grouped_ggdotplotstats to generate dot plots
-#' comparing continuous variables between groups with statistical
-#' annotations and significance testing.
+#' Wrapper Function for ggstatsplot::ggbetweenstats and
+#' ggstatsplot::grouped_ggbetweenstats to generate dot-style
+#' comparisons of continuous variables between groups with
+#' statistical annotations and significance testing.
 #' 
 #'
 #' @examples

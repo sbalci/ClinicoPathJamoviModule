@@ -38,8 +38,12 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .options_hash = NULL,
         .cached_plot = NULL,
         .cached_palette = NULL,
+        .messages = NULL,
         
         .init = function() {
+            # Reset messages for new analysis
+            private$.resetMessages()
+            
             base_width <- 600
             base_height <- 500
             
@@ -54,6 +58,28 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             } else {
                 self$results$plot$setSize(base_width, base_height)
+            }
+        },
+
+        # Helper method for message accumulation
+        .accumulateMessage = function(message) {
+            if (is.null(private$.messages)) {
+                private$.messages <- character()
+            }
+            private$.messages <- append(private$.messages, message)
+            
+            # Write to WARNINGS panel
+            if (!is.null(self$results$warnings)) {
+                self$results$warnings$setContent(paste(private$.messages, collapse = ""))
+                self$results$warnings$setVisible(TRUE)
+            }
+        },
+        
+        # Reset messages for new analysis run
+        .resetMessages = function() {
+            private$.messages <- character()
+            if (!is.null(self$results$warnings)) {
+                self$results$warnings$setContent("")
             }
         },
 
@@ -257,6 +283,13 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     units_per_square, unit_label, squares_per_unit, total_cases
                 )
             }
+            
+            if (!is.null(facet_var)) {
+                caption_text <- paste0(
+                    caption_text, 
+                    "\nNote: Squares represent proportions within the specified group."
+                )
+            }
 
             return(caption_text)
         },
@@ -314,18 +347,19 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
             
+            
             if (n_categories > 10) {
-                warning(sprintf(
-                    "Many categories (%d) detected in '%s'. Consider grouping rare categories as 'Other' for clarity in clinical presentation.",
-                    n_categories, self$options$groups
+                private$.accumulateMessage(glue::glue(
+                    "<br>⚠️ <strong>Many Categories:</strong> {n_categories} categories detected in '{self$options$groups}'. ",
+                    "Consider grouping rare categories as 'Other' for clarity detailed clinical presentation.<br>"
                 ))
             }
             
             # Check sample size adequacy for clinical interpretation
             if (n_total < 30) {
-                warning(sprintf(
-                    "Small sample size (n=%d). Proportions may be unstable for clinical interpretation. Consider combining categories or collecting more data.",
-                    n_total
+                private$.accumulateMessage(glue::glue(
+                    "<br>⚠️ <strong>Small Sample:</strong> Total n={n_total}. Proportions may be unstable. ",
+                    "Consider combining categories or collecting more data.<br>"
                 ))
             }
             
@@ -334,9 +368,9 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             min_count <- min(category_counts)
             if (min_count < 5 && n_total >= 30) {
                 small_cats <- names(category_counts)[category_counts < 5]
-                warning(sprintf(
-                    "Some categories have very few cases (n<%d): %s. Consider combining rare categories for more reliable clinical interpretation.",
-                    5, paste(small_cats, collapse = ", ")
+                private$.accumulateMessage(glue::glue(
+                    "<br>⚠️ <strong>Rare Categories:</strong> Some categories have <5 cases: {paste(small_cats, collapse = ', ')}. ",
+                    "Consider combining rare categories for more reliable clinical interpretation.<br>"
                 ))
             }
             
@@ -531,6 +565,8 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br>2. Optionally, a numeric variable for specific counts (if not provided, will use number of cases)
                     <br><br>
                     The waffle chart will show proportions using squares arranged in a grid.
+                    Rows with missing values in the specific analysis variables will be removed.
+                    If provided, the Counts variable will be used as frequency weights.
                     <br><hr>"
                 )
                 self$results$todo$setContent(todo)
@@ -539,6 +575,8 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
+
+            private$.resetMessages()
 
             # Validate inputs before processing
             tryCatch({

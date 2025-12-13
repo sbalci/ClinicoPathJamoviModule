@@ -43,6 +43,7 @@ enhancedROC(
   showImbalanceWarning = TRUE,
   recommendPRC = TRUE,
   prevalence = 0.1,
+  useObservedPrevalence = TRUE,
   clinicalContext = "general",
   clinicalPresets = "custom",
   comprehensive_output = FALSE,
@@ -191,6 +192,9 @@ detected}
 is detected}
 
 \item{prevalence}{Disease prevalence for calculating predictive values}
+
+\item{useObservedPrevalence}{Use the prevalence observed in the data for
+PPV/NPV and clinical impact calculations (recommended)}
 
 \item{clinicalContext}{Clinical application context for interpretation}
 

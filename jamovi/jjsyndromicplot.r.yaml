@@ -8,6 +8,36 @@ items:
       title: 'Instructions'
       type: Html
       visible: true
+      clearWith:
+        - vars
+        - component
+        - cutoff
+        - center
+        - scale
+
+    - name: warnings
+      title: Messages
+      type: Html
+      visible: true
+      clearWith:
+        - vars
+        - component
+        - cutoff
+        - center
+        - scale
+        - clinicalPreset
+
+    - name: explanations
+      title: Explanations
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - vars
+        - component
+        - cutoff
+        - center
+        - scale
+        - showExplanations
 
     - name: loadings
       title: Component Loadings

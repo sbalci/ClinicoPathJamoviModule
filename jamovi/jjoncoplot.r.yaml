@@ -38,6 +38,10 @@ items:
         - showTMB
         - log10TransformTMB
         - showGeneFreq
+        - showMutationLoad
+        - showClinicalAnnotation
+        - showLegend
+        - clinicalPreset
 
     - name: mutationSummary
       title: Mutation Summary
@@ -96,6 +100,35 @@ items:
           type: number
           format: pc
 
+    - name: tmbTable
+      title: Per-sample Mutation Burden
+      type: Table
+      rows: 0
+      visible: (showTMB && showMutationLoad && showTMBTable)
+      clearWith:
+        - geneVars
+        - sampleVar
+        - topn
+        - genesToInclude
+        - genesToIgnore
+        - maxSamples
+        - sortBy
+        - showMutationLoad
+        - showTMB
+        - log10TransformTMB
+        - showTMBTable
+      columns:
+        - name: sample
+          title: Sample ID
+          type: text
+        - name: total_mutations
+          title: Total Mutations
+          type: integer
+        - name: tmb_log10
+          title: Log10(TMB + 1)
+          type: number
+          format: zto
+
     - name: clinicalSummary
       title: Clinical Annotation Summary
       type: Table
@@ -145,8 +178,16 @@ items:
         - name: association_type
           title: Association
           type: text
+        - name: odds_ratio
+          title: Odds Ratio
+          type: number
+          format: zto
         - name: p_value
           title: p-value
+          type: number
+          format: zto,pvalue
+        - name: fdr
+          title: FDR
           type: number
           format: zto,pvalue
 

@@ -1,7 +1,7 @@
 ---
 name: raincloud
 title: Raincloud Plot
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT1
 menuSubgroup: Categorical vs Continuous
 version: '0.0.32'
 jas: '1.2'
@@ -382,5 +382,38 @@ options:
       description:
         R: >
           Statistical test method for comparing groups.
+
+    - name: adjust_method
+      title: P-value Adjustment
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Holm"
+          name: holm
+        - title: "Bonferroni"
+          name: bonferroni
+        - title: "Benjamini-Hochberg (FDR)"
+          name: BH
+      default: none
+      description:
+        R: >
+          Adjustment method applied to the reported p-value (useful for multiple comparisons).
+
+    - name: effect_size
+      title: Show Effect Size (2 groups)
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE and two groups are present, reports Cohen's d effect size.
+
+    - name: log_transform
+      title: Log-transform Y-axis
+      type: Bool
+      default: false
+      description:
+        R: >
+          Apply log10 transformation to the Y-axis (requires all positive values).
 
 ...

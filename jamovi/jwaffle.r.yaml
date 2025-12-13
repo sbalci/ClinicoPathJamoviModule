@@ -20,6 +20,22 @@ items:
     - name: todo
       title: To Do
       type: Html
+    - name: warnings
+      title: Messages
+      type: Html
+      visible: true
+      clearWith:
+        - counts
+        - groups
+        - facet
+        - rows
+        - flip
+        - color_palette
+        - show_legend
+        - mytitle
+        - legendtitle
+        - showSummaries
+        - showExplanations
 
     - name: analysisSummary
       title: Analysis Summary

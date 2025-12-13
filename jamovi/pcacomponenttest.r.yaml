@@ -9,6 +9,11 @@ items:
       type: Html
       visible: true
 
+    - name: warnings
+      title: Analysis Messages
+      type: Html
+      visible: true
+
     - name: results
       title: Component Significance Results
       type: Table

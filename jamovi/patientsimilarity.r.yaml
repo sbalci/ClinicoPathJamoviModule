@@ -16,6 +16,11 @@ items:
       type: Preformatted
       visible: true
 
+    - name: warnings
+      title: Analysis Messages
+      type: Html
+      visible: true
+
     - name: projectionPlot
       title: ''
       type: Image

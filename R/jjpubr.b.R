@@ -9,6 +9,8 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjpubrBase,
     private = list(
         ..stats_df = NULL,
+        ..inferredMethod = NULL,
+        ..assumptionReason = NULL,
 
         # === Initialization ===
         .init = function() {
@@ -41,10 +43,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.populateDescriptives()
             private$.populateCorrelation()
 
-            # Check assumptions before calculating statistics
-            private$.checkAssumptions()
-
-            # Calculate statistics once for both plot and table
+            # Calculate statistics once for both plot and table (includes assumption checks/inference)
             private$.calculateStatistics()
             private$.populateStatistics()
         },
@@ -59,6 +58,10 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent(paste0(
                     "<div style='padding: 20px;'><h3>Y Variable Required</h3>",
                     "<p>The ", self$options$plotType, " plot requires a Y variable.</p></div>"))
+                return(FALSE)
+            }
+            # For x-only plot types, yvar can be NULL; ensure validation doesn't block them
+            if (is.null(self$options$yvar) && !(self$options$plotType %in% c("histogram", "density", "barplot"))) {
                 return(FALSE)
             }
 
@@ -103,9 +106,22 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$yvar)) {
                     y_data <- self$data[[self$options$yvar]]
                     if (!is.numeric(y_data)) {
+                        if (self$options$plotType == "scatter") {
+                            stop(paste0(
+                                "Scatter plots require both X and Y to be numeric.
+",
+                                "Y variable '", self$options$yvar, "' is ", class(y_data)[1],
+                                " (must be numeric).
+
+",
+                                "💡 Solution: Select continuous numeric variables for both axes."
+                            ))
+                        }
                         stop(paste0(
                             "Y variable '", self$options$yvar, "' must be numeric for ",
-                            self$options$plotType, " plots. Current type: ", class(y_data)[1], "\n\n",
+                            self$options$plotType, " plots. Current type: ", class(y_data)[1], "
+
+",
                             "💡 Solution: Select a continuous numeric variable (e.g., biomarker level, ",
                             "measurement value, score)."
                         ))
@@ -116,16 +132,11 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (self$options$plotType == "scatter") {
                     if (!is.numeric(x_data)) {
                         stop(paste0(
-                            "Scatter plots require both X and Y to be numeric.\n",
-                            "X variable '", self$options$xvar, "' is ", class(x_data)[1], " (must be numeric).\n\n",
-                            "💡 Solution: Select continuous numeric variables for both axes."
-                        ))
-                    }
-                    if (!is.numeric(self$data[[self$options$yvar]])) {
-                        stop(paste0(
-                            "Scatter plots require both X and Y to be numeric.\n",
-                            "Y variable '", self$options$yvar, "' is ", class(self$data[[self$options$yvar]])[1],
-                            " (must be numeric).\n\n",
+                            "Scatter plots require both X and Y to be numeric.
+",
+                            "X variable '", self$options$xvar, "' is ", class(x_data)[1], " (must be numeric).
+
+",
                             "💡 Solution: Select continuous numeric variables for both axes."
                         ))
                     }
@@ -157,7 +168,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<h3>❌ Data Validation Error</h3>",
                     "<p><strong>", e$message, "</strong></p>",
                     "</div>"))
-                return(FALSE)
+                stop(e)
             })
         },
 
@@ -447,7 +458,11 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .addStatisticalComparisons = function(p) {
-            method <- if (self$options$statMethod == "auto") NULL else self$options$statMethod
+            # Use inferred method if available
+            inferred <- private$..inferredMethod %||% list(pairwise = NULL, omnibus = NULL)
+            method <- inferred$pairwise
+            groups <- unique(self$data[[self$options$xvar]])
+            groups <- groups[!is.na(groups)]
 
             # Global test (ANOVA/Kruskal) if requested or default
             # We can keep the global test using stat_compare_means if desired, 
@@ -464,7 +479,8 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             } else {
                 # Default behavior for global test or simple 2-group comparison without explicit pairwise
-                p <- p + ggpubr::stat_compare_means(method = method)
+                method_geom <- if (length(groups) > 2) inferred$omnibus else inferred$pairwise
+                p <- p + ggpubr::stat_compare_means(method = method_geom)
             }
             return(p)
         },
@@ -500,12 +516,76 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         sd = stats$sd, median = stats$median, min = stats$min, max = stats$max))
                 }
             }
+            table$setNote("na", "N counts are calculated after removing missing values in X/Y (and grouping when applicable).")
         },
 
         .calculateDescriptives = function(x) {
             x <- x[!is.na(x)]
             list(n = length(x), mean = mean(x), sd = sd(x),
                  median = median(x), min = min(x), max = max(x))
+        },
+
+        .inferStatMethod = function(data, x_col, y_col, n_groups) {
+            base_method <- self$options$statMethod
+            # Default choices
+            pairwise_method <- if (n_groups == 2) "t.test" else "t.test"
+            omnibus_method <- if (n_groups > 2) "anova" else NULL
+            reason <- NULL
+
+            if (base_method == "wilcox.test") {
+                pairwise_method <- "wilcox.test"
+                omnibus_method <- if (n_groups > 2) "kruskal.test" else NULL
+                return(list(pairwise = pairwise_method, omnibus = omnibus_method, omnibus_label = ifelse(is.null(omnibus_method), "None", omnibus_method), reason = NULL))
+            }
+
+            # auto or t.test/parametric choice
+            use_nonparam <- FALSE
+
+            # Normality/variance checks for auto
+            if (base_method == "auto") {
+                groups <- unique(data[[x_col]])
+                groups <- groups[!is.na(groups)]
+                normality_failed <- FALSE
+                for (g in groups) {
+                    subset_data <- data[[y_col]][data[[x_col]] == g]
+                    subset_data <- subset_data[!is.na(subset_data)]
+                    if (length(subset_data) >= 3 && length(subset_data) <= 200) {
+                        sw <- tryCatch(shapiro.test(subset_data), error = function(e) NULL)
+                        if (!is.null(sw) && sw$p.value < 0.05) normality_failed <- TRUE
+                    }
+                }
+
+                var_failed <- FALSE
+                if (n_groups >= 2 && requireNamespace("car", quietly = TRUE)) {
+                    formula_str <- paste(y_col, "~", x_col)
+                    lv <- tryCatch(car::leveneTest(as.formula(formula_str), data = data, center = median), error = function(e) NULL)
+                    if (!is.null(lv) && !is.na(lv$`Pr(>F)`[1]) && lv$`Pr(>F)`[1] < 0.05) var_failed <- TRUE
+                }
+
+                if (normality_failed || var_failed) {
+                    use_nonparam <- TRUE
+                    reason <- paste(
+                        "Auto switched to nonparametric tests due to",
+                        paste(c(if (normality_failed) "non-normality" else NULL, if (var_failed) "variance heterogeneity" else NULL), collapse = " and "),
+                        "."
+                    )
+                }
+            }
+
+            if (use_nonparam) {
+                pairwise_method <- "wilcox.test"
+                omnibus_method <- if (n_groups > 2) "kruskal.test" else NULL
+            } else {
+                pairwise_method <- "t.test"
+                omnibus_method <- if (n_groups > 2) "anova" else NULL
+            }
+
+            list(
+                pairwise = pairwise_method,
+                omnibus = omnibus_method,
+                omnibus_label = ifelse(is.null(omnibus_method), "None", omnibus_method),
+                reason = reason
+            )
         },
 
         .checkAssumptions = function() {
@@ -574,7 +654,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     car::leveneTest(formula_obj, data = complete_data, center = median)
                 }, error = function(e) NULL)
 
-                if (!is.null(levene_result) && levene_result$`Pr(>F)`[1] < 0.05) {
+                if (!is.null(levene_result) && !is.na(levene_result$`Pr(>F)`[1]) && levene_result$`Pr(>F)`[1] < 0.05) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
                         name = 'varianceHeterogeneity',
@@ -615,63 +695,93 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 }
 
-                # Get complete cases for correlation analysis
-                complete_idx <- complete.cases(x_data, y_data)
-                n_total <- length(x_data)
-                n_complete <- sum(complete_idx)
-
-                if (n_total > n_complete) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'correlationMissingData',
-                        type = jmvcore::NoticeType$WARNING
+                # Helper to compute correlation for a subset
+                compute_cor <- function(idx, label) {
+                    complete_idx <- complete.cases(x_data[idx], y_data[idx])
+                    n_total <- length(idx)
+                    n_complete <- sum(complete_idx)
+                    if (n_complete < 3) {
+                        return(list(values = NULL, msg = paste0(label, ": insufficient data for correlation (n<3 complete).")))
+                    }
+                    x_complete <- x_data[idx][complete_idx]
+                    y_complete <- y_data[idx][complete_idx]
+                    cor_result <- cor.test(
+                        x_complete,
+                        y_complete,
+                        method = self$options$corrMethod
                     )
-                    notice$setContent(paste0(
-                        "Correlation: ", n_total - n_complete, " observations (",
+                    values <- list(
+                        method = paste0(label, " - ", tools::toTitleCase(self$options$corrMethod), " (n=", n_complete, ")"),
+                        coefficient = cor_result$estimate,
+                        pvalue = cor_result$p.value,
+                        ci_lower = if (!is.null(cor_result$conf.int)) cor_result$conf.int[1] else NA,
+                        ci_upper = if (!is.null(cor_result$conf.int)) cor_result$conf.int[2] else NA
+                    )
+                    msg <- if (n_total > n_complete) paste0(
+                        label, ": ", n_total - n_complete, " observations (",
                         round(100 * (n_total - n_complete) / n_total, 1),
-                        "%) excluded due to missing values. Correlation is based on n=", n_complete, " complete pairs."
-                    ))
-                    self$results$insert(100, notice)
+                        "%) excluded due to missing values. Correlation based on n=", n_complete, " complete pairs."
+                    ) else NULL
+                    list(values = values, msg = msg)
                 }
 
-                if (n_complete < 3) {
-                    stop("Insufficient data for correlation analysis (n < 3 after removing missing values)")
-                }
+                # Clear previous rows
+                # (tables recreate per run; nothing to clear explicitly)
 
-                # Compute correlation on complete cases only
-                x_complete <- x_data[complete_idx]
-                y_complete <- y_data[complete_idx]
-
-                # IMPORTANT: Use complete data, not self$data with use="complete.obs"
-                # This ensures the correlation matches the displayed scatter plot
-                cor_result <- cor.test(
-                    x_complete,
-                    y_complete,
-                    method = self$options$corrMethod
-                )
-
-                # Check if faceting is used (correlation may not match plot)
-                if (!is.null(self$options$facetvar)) {
+                if (!is.null(self$options$groupvar)) {
+                    groups <- unique(self$data[[self$options$groupvar]])
+                    groups <- groups[!is.na(groups)]
+                    if (length(groups) > 0) {
+                        for (g in groups) {
+                            idx <- which(self$data[[self$options$groupvar]] == g)
+                            res <- compute_cor(idx, paste0("Group: ", g))
+                            if (!is.null(res$values)) {
+                                self$results$correlation$addRow(rowKey = paste0("group_", g), values = res$values)
+                            }
+                            if (!is.null(res$msg)) {
+                                notice <- jmvcore::Notice$new(
+                                    options = self$options,
+                                    name = paste0('correlationMissingData_', make.names(g)),
+                                    type = jmvcore::NoticeType$WARNING
+                                )
+                                notice$setContent(res$msg)
+                                self$results$insert(100, notice)
+                            }
+                        }
+                    }
+                    # Also provide pooled result for reference
+                    pooled_res <- compute_cor(seq_along(x_data), "Pooled")
+                    if (!is.null(pooled_res$values)) {
+                        self$results$correlation$addRow(rowKey = "pooled", values = pooled_res$values)
+                    }
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'correlationWithFaceting',
+                        name = 'correlationGrouping',
                         type = jmvcore::NoticeType$INFO
                     )
-                    notice$setContent(paste0(
-                        "Note: Correlation is computed on the entire dataset (n=", n_complete, "). ",
-                        "When using faceting, correlations may differ within each facet. ",
-                        "Consider running separate analyses for each facet level."
-                    ))
+                    notice$setContent("Correlations are computed per group and pooled. Within-group effects may differ from the pooled estimate.")
                     self$results$insert(200, notice)
+                    if (!is.null(self$options$facetvar)) {
+                        warning("Correlation with faceting: pooled and per-group correlations may differ across facets.")
+                    }
+                } else {
+                    pooled_res <- compute_cor(seq_along(x_data), "Overall")
+                    if (!is.null(pooled_res$values)) {
+                        self$results$correlation$addRow(rowKey = 1, values = pooled_res$values)
+                    }
+                    if (!is.null(pooled_res$msg)) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'correlationMissingData',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(pooled_res$msg)
+                        self$results$insert(100, notice)
+                    }
+                    if (!is.null(self$options$facetvar)) {
+                        warning("Correlation with faceting: pooled correlation may differ across facets.")
+                    }
                 }
-
-                self$results$correlation$addRow(rowKey = 1, values = list(
-                    method = paste0(tools::toTitleCase(self$options$corrMethod), " (n=", n_complete, ")"),
-                    coefficient = cor_result$estimate,
-                    pvalue = cor_result$p.value,
-                    ci_lower = if (!is.null(cor_result$conf.int)) cor_result$conf.int[1] else NA,
-                    ci_upper = if (!is.null(cor_result$conf.int)) cor_result$conf.int[2] else NA
-                ))
 
             }, error = function(e) {
                 notice <- jmvcore::Notice$new(
@@ -699,14 +809,31 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 groups <- groups[!is.na(groups)]
                 if (length(groups) < 2) return()
 
-                method <- self$options$statMethod
-                if (method == "auto") method <- if (length(groups) == 2) "t.test" else "anova"
+                # Small-sample warning
+                group_sizes <- table(complete_data[[x_col]])
+                if (any(group_sizes < 5)) {
+                    warning("Small sample size: at least one group has fewer than 5 observations.")
+                }
+
+                # Infer parametric vs nonparametric based on assumptions when auto
+                infer <- private$.inferStatMethod(complete_data, x_col, y_col, length(groups))
+                private$..inferredMethod <- infer
+                private$..assumptionReason <- infer$reason
+                if (!is.null(infer$reason)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'autoMethodSwitch',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(infer$reason)
+                    self$results$insert(2, notice)
+                }
 
                 # HIERARCHICAL TESTING: For >2 groups, perform omnibus test first
                 # Only proceed to pairwise comparisons if omnibus test is significant
                 if (length(groups) > 2) {
                     # Perform omnibus test (ANOVA or Kruskal-Wallis)
-                    omnibus_result <- if (method %in% c("t.test", "auto", "anova")) {
+                    omnibus_result <- if (infer$omnibus == "anova") {
                         # One-way ANOVA
                         formula_str <- paste(y_col, "~", x_col)
                         anova_result <- aov(as.formula(formula_str), data = complete_data)
@@ -718,7 +845,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             df1 = summary_result[[1]]$Df[1],
                             df2 = summary_result[[1]]$Df[2]
                         )
-                    } else {
+                    } else { # kruskal.test
                         # Kruskal-Wallis test
                         kw_result <- kruskal.test(as.formula(paste(y_col, "~", x_col)), data = complete_data)
                         list(
@@ -730,7 +857,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     # Add omnibus test result to statistics table
-                    omnibus_comparison <- if (method %in% c("t.test", "auto", "anova")) {
+                    omnibus_comparison <- if (infer$omnibus == "anova") {
                         paste0("Overall F(", omnibus_result$df1, ",", omnibus_result$df2, ")")
                     } else {
                         paste0("Overall H(", omnibus_result$df, ")")
@@ -791,7 +918,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_comparisons <- length(comps)
 
                 # Determine actual test method used for pairwise comparisons
-                actual_method_name <- if (method %in% c("t.test", "auto", "anova")) {
+                actual_method_name <- if (infer$pairwise == "t.test") {
                     if (length(groups) > 2) {
                         "Pairwise t-tests (post-hoc)"
                     } else {
@@ -841,13 +968,13 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ))
                         self$results$insert(1, notice)
 
-                        stats_df$p[i] <- NA
-                        next
+                        warning("Insufficient data for statistical comparison.")
+                        stop("Insufficient data for statistical comparison.")
                     }
 
                     # Perform pairwise test (NOT omnibus ANOVA/Kruskal-Wallis)
                     # Even if method is "anova", we perform t-test for each pair
-                    test_result <- if (method %in% c("t.test", "auto", "anova")) {
+                    test_result <- if (infer$pairwise == "t.test") {
                         t.test(data1, data2, na.action = na.omit)
                     } else {
                         wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
@@ -882,6 +1009,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 notice$setContent(paste("Statistics calculation failed:", e$message))
                 self$results$insert(1, notice)
+                stop(e)
             })
         },
 
@@ -891,6 +1019,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             table <- self$results$statistics
             df <- private$..stats_df
+            infer <- private$..inferredMethod %||% list(omnibus_label = "None")
             
             for (i in 1:nrow(df)) {
                 if (is.na(df$p[i])) next
@@ -910,15 +1039,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 table$addRow(rowKey = i, values = row_vals)
             }
             
-            # Add notes about adjustment and pairwise-only nature
-            if (nrow(df) > 1) {
-                table$setNote("adj", "P-values adjusted for multiple comparisons (Bonferroni).")
-                table$setNote("pairwise", paste0(
-                    "IMPORTANT: Only pairwise tests are shown. ",
-                    "No omnibus ANOVA or Kruskal-Wallis test is performed. ",
-                    "For formal multi-group inference, use appropriate omnibus tests in dedicated statistical software."
-                ))
-            }
+                # Add notes about adjustment and pairwise-only nature
+                if (nrow(df) > 1) {
+                    table$setNote("adj", "P-values adjusted for multiple comparisons (Bonferroni).")
+                    table$setNote("pairwise", paste0(
+                        "Pairwise tests shown; omnibus method used: ", infer$omnibus_label, "."
+                    ))
+                }
+                if (!is.null(private$..assumptionReason)) {
+                    table$setNote("assumption", private$..assumptionReason)
+                }
         },
 
         .generatePlotInfo = function() {
@@ -971,72 +1101,46 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             preset <- self$options$clinicalPreset
             if (preset == "custom") return()
 
-            # Track which settings will be overridden
             overrides <- list()
 
             switch(preset,
                 "prognostic_biomarker" = {
-                    if (self$options$plotType != "boxplot") {
-                        overrides <- c(overrides, paste0("Plot type changed from '", self$options$plotType, "' to 'boxplot'"))
-                    }
-                    if (!self$options$addStats) {
-                        overrides <- c(overrides, "Statistical comparisons enabled")
-                    }
-                    if (self$options$statMethod != "auto") {
-                        overrides <- c(overrides, paste0("Statistical method changed from '", self$options$statMethod, "' to 'auto'"))
-                    }
-
-                    self$options$plotType <- "boxplot"
-                    self$options$addStats <- TRUE
-                    self$options$statMethod <- "auto"
+                    if (self$options$plotType != "boxplot") overrides <- c(overrides, "Plot type set to boxplot")
+                    if (!self$options$addStats) overrides <- c(overrides, "Statistical comparisons enabled")
+                    plot_opt <- self$options$option("plotType")
+                    stats_opt <- self$options$option("addStats")
+                    method_opt <- self$options$option("statMethod")
+                    plot_opt$value <- "boxplot"
+                    stats_opt$value <- TRUE
+                    method_opt$value <- "auto"
                 },
                 "diagnostic_test" = {
-                    if (self$options$plotType != "boxplot") {
-                        overrides <- c(overrides, paste0("Plot type changed from '", self$options$plotType, "' to 'boxplot'"))
-                    }
-                    if (!self$options$addStats) {
-                        overrides <- c(overrides, "Statistical comparisons enabled")
-                    }
-                    if (self$options$statMethod != "t.test") {
-                        overrides <- c(overrides, paste0("Statistical method changed from '", self$options$statMethod, "' to 't.test'"))
-                    }
-
-                    self$options$plotType <- "boxplot"
-                    self$options$addStats <- TRUE
-                    self$options$statMethod <- "t.test"
+                    if (self$options$plotType != "boxplot") overrides <- c(overrides, "Plot type set to boxplot")
+                    if (!self$options$addStats) overrides <- c(overrides, "Statistical comparisons enabled")
+                    plot_opt <- self$options$option("plotType")
+                    stats_opt <- self$options$option("addStats")
+                    method_opt <- self$options$option("statMethod")
+                    plot_opt$value <- "boxplot"
+                    stats_opt$value <- TRUE
+                    method_opt$value <- "wilcox.test"
                 },
                 "correlation_analysis" = {
-                    if (self$options$plotType != "scatter") {
-                        overrides <- c(overrides, paste0("Plot type changed from '", self$options$plotType, "' to 'scatter'"))
-                    }
-                    if (!self$options$addCorr) {
-                        overrides <- c(overrides, "Correlation statistics enabled")
-                    }
-                    if (self$options$corrMethod != "pearson") {
-                        overrides <- c(overrides, paste0("Correlation method changed from '", self$options$corrMethod, "' to 'pearson'"))
-                    }
-
-                    self$options$plotType <- "scatter"
-                    self$options$addCorr <- TRUE
-                    self$options$corrMethod <- "pearson"
+                    if (self$options$plotType != "scatter") overrides <- c(overrides, "Plot type set to scatter")
+                    if (!self$options$addCorr) overrides <- c(overrides, "Correlation statistics enabled")
+                    plot_opt <- self$options$option("plotType")
+                    corr_opt <- self$options$option("addCorr")
+                    corr_method_opt <- self$options$option("corrMethod")
+                    plot_opt$value <- "scatter"
+                    corr_opt$value <- TRUE
+                    corr_method_opt$value <- "pearson"
                 }
             )
 
-            # Display notice if settings were overridden
             if (length(overrides) > 0) {
                 preset_name <- tools::toTitleCase(gsub("_", " ", preset))
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'clinicalPresetOverride',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(paste0(
-                    "Clinical preset '", preset_name, "' applied: ",
-                    paste(overrides, collapse = "; "), ". ",
-                    "In regulated clinical settings, ensure these preset configurations are appropriate for your analysis and documented in your protocol. ",
-                    "To use custom settings, select 'Custom' from the Clinical Preset dropdown."
+                warning(paste0(
+                    "CLINICAL PRESET OVERRIDE: ", preset_name, " (", paste(overrides, collapse = "; "), ")."
                 ))
-                self$results$insert(200, notice)
             }
         },
 

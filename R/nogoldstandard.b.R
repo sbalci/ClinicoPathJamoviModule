@@ -15,10 +15,26 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = nogoldstandardBase,
     private = list(
         .preset_info = NULL,
+        .messages = NULL,
+
+        .accumulateMessage = function(message) {
+            if (is.null(private$.messages)) {
+                private$.messages <- message
+            } else {
+                private$.messages <- c(private$.messages, message)
+            }
+        },
+
+        .resetMessages = function() {
+            private$.messages <- NULL
+            # clearWith handles strict clearing, but we can set empty string
+            self$results$warnings$setContent("")
+        },
 
         .init = function() {
-            print("DEBUG: Inside .init")
-            print(ls(private))
+            # Reset messages
+            private$.resetMessages()
+
             # Apply clinical preset if selected
             private$.applyPreset()
             
@@ -333,6 +349,11 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop(.("At least two tests with positive levels must be specified"))
             }
 
+            # Enforce LCA constraint
+            if (self$options$method == "latent_class" && length(tests) < 3) {
+                 stop(.("Latent Class Analysis requires at least 3 tests to be statistically identifiable. Please add more tests or select a different method (e.g., Composite Reference)."))
+            }
+
             # Data preparation
             data <- self$data
             test_data <- data[unlist(tests)]
@@ -364,15 +385,6 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Run analysis based on selected method
             results <- NULL
             if (self$options$method == "latent_class") {
-                if (length(tests) < 3) {
-                     self$results$instructions$setContent(
-                        paste0("<div style='color: #856404; background-color: #fff3cd; border-color: #ffeeba; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;'>",
-                               "<strong>Warning:</strong> Latent Class Analysis requires at least 3 tests to be statistically identifiable when analyzing a single population. ",
-                               "With only 2 tests, the model is under-identified and results may be unreliable or fail to converge. ",
-                               "Please consider adding a third test or using a different method (e.g., Composite Reference).</div>")
-                     )
-                     self$results$instructions$setVisible(TRUE)
-                }
                 results <- private$.runLCA(binary_data, tests, test_levels)
             } else if (self$options$method == "composite") {
                 results <- private$.runComposite(binary_data)
@@ -429,6 +441,21 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 agreement_matrix = agreement_matrix,
                 tests = unlist(tests)
             ))
+            
+            # Populate Agreement Statistics Table
+            private$.populateAgreementStats(test_data, tests, test_levels)
+
+            # Update warnings panel
+            if (!is.null(private$.messages) && length(private$.messages) > 0) {
+                self$results$warnings$setContent(paste(
+                    "<div class='alert alert-warning'>",
+                    "<h6>Analysis Messages</h6>",
+                    "<ul>",
+                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
+                    "</ul></div>",
+                    sep = ""
+                ))
+            }
 
 
 
@@ -1035,6 +1062,10 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 message(sprintf(.("Failed iterations: %d (%.1f%%)"),
                                 error_count, error_count/nboot*100))
             }
+            
+            if (error_count > 0) {
+                 private$.accumulateMessage(sprintf(.("Bootstrap: %d sample(s) failed to converge or produced errors (%d%%). CIs may be affected."), error_count, round(error_count/nboot*100)))
+            }
 
             # Calculate percentile CI
             boot_results <- boot_results[!is.na(boot_results)]
@@ -1291,11 +1322,11 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Sample size warnings based on method
             if (method == "latent_class" && n_obs < 100) {
-                warning(sprintf(.("LCA typically requires 100+ observations for stable results. Current N = %d. Consider using composite reference method for smaller samples."), n_obs))
+                private$.accumulateMessage(sprintf(.("LCA typically requires 100+ observations for stable results. Current N = %d. Consider using composite reference method for smaller samples."), n_obs))
             }
             
             if (method == "bayesian" && n_obs < 50) {
-                warning(sprintf(.("Bayesian analysis may be unstable with N < 50. Current N = %d. Consider collecting more data."), n_obs))
+                private$.accumulateMessage(sprintf(.("Bayesian analysis may be unstable with N < 50. Current N = %d. Consider collecting more data."), n_obs))
             }
             
             # Check test result distributions
@@ -1304,28 +1335,29 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 test_values <- table(data[[test_name]])
                 
                 if (any(test_values < 5)) {
-                    warning(sprintf(.("Test '%s' has categories with <5 observations. Results may be unstable. Consider combining categories if clinically appropriate."), test_name))
+                    private$.accumulateMessage(sprintf(.("Test '%s' has categories with <5 observations. Results may be unstable. Consider combining categories if clinically appropriate."), test_name))
                 }
                 
                 # Check for extreme imbalances
                 min_prop <- min(test_values) / sum(test_values)
                 if (min_prop < 0.05) {
-                    warning(sprintf(.("Test '%s' shows extreme imbalance (minority category %.1f%%). This may affect parameter estimation."), test_name, min_prop * 100))
+                    private$.accumulateMessage(sprintf(.("Test '%s' shows extreme imbalance (minority category %.1f%%). This may affect parameter estimation."), test_name, min_prop * 100))
                 }
             }
             
             # Method-specific warnings
             if (method == "latent_class" && n_tests < 3) {
-                warning(.("LCA with only 2 tests may have identifiability issues. Results should be interpreted cautiously. Consider adding a third test if possible."))
+                 # checking this earlier in .run now, but good to keep as message if we relax allow
+                 private$.accumulateMessage(.("LCA with only 2 tests is under-identified."))
             }
             
             if (method == "composite" && n_tests %% 2 == 0) {
-                warning(.("Composite reference with even number of tests may result in ties. Consider using an odd number of tests or a different method."))
+                private$.accumulateMessage(.("Composite reference with even number of tests may result in ties. Consider using an odd number of tests or a different method."))
             }
             
             # Clinical context message
             if (self$options$verbose) {
-                message(sprintf(.("Clinical validation: %d tests analyzed with N=%d using %s method"), n_tests, n_obs, method))
+                private$.accumulateMessage(sprintf(.("Clinical validation: %d tests analyzed with N=%d using %s method"), n_tests, n_obs, method))
             }
         },
 
@@ -1480,6 +1512,59 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             return(summary_html)
+        },
+
+        .populateAgreementStats = function(test_data, tests, test_levels) {
+            # Calculate pairwise Cohen's Kappa
+            table <- self$results$agreement_stats
+            n_tests <- length(tests)
+            
+            if (n_tests < 2) return()
+            
+            # Helper function for Cohen's Kappa
+            calculate_kappa <- function(var1, var2) {
+                # Create confusion matrix
+                tbl <- table(var1, var2)
+                
+                # Check if tbl is valid (needs to be square if possible, but for Kappa we need matched levels)
+                # Ensure we have 2x2 table even if some levels are missing
+                levels_union <- union(levels(var1), levels(var2))
+                tbl_full <- table(factor(var1, levels=levels_union), factor(var2, levels=levels_union))
+                
+                n <- sum(tbl_full)
+                p_o <- sum(diag(tbl_full)) / n
+                
+                row_sums <- rowSums(tbl_full)
+                col_sums <- colSums(tbl_full)
+                p_e <- sum(row_sums * col_sums) / (n^2)
+                
+                kappa <- (p_o - p_e) / (1 - p_e)
+                
+                # Standard error and p-value
+                se_kappa <- sqrt((p_o * (1 - p_o)) / (n * (1 - p_e)^2)) # Approximation
+                z_score <- kappa / se_kappa
+                p_value <- 2 * (1 - pnorm(abs(z_score)))
+                
+                return(list(kappa = kappa, p_value = p_value, agreement = p_o))
+            }
+            
+            for (i in 1:(n_tests-1)) {
+                for (j in (i+1):n_tests) {
+                    test1 <- tests[[i]]
+                    test2 <- tests[[j]]
+                    
+                    # Ensure binary/factor conversion matches what we used
+                    # Original data is factors
+                    res <- calculate_kappa(test_data[[test1]], test_data[[test2]])
+                    
+                    table$addRow(rowKey=paste0(test1, "_", test2), values=list(
+                        test_pair = paste0(test1, " vs ", test2),
+                        kappa = res$kappa,
+                        p_value = res$p_value,
+                        agreement = res$agreement
+                    ))
+                }
+            }
         }
 
 

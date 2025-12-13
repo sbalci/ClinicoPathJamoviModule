@@ -649,6 +649,9 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param fnote .
 #' @param ci .
 #' @param plot Generate comparison plot showing test performance metrics.
+#' @param excludeIndeterminate If TRUE, drop rows where test/gold values are
+#'   neither the specified positive level nor a clear negative level to avoid
+#'   inflating specificity/NPV from equivocal results.
 #' @param radarplot Generate radar plot for comprehensive test comparison
 #'   visualization.
 #' @param statComp Perform statistical comparison between tests (McNemar's
@@ -703,6 +706,7 @@ decisioncompare <- function(
     fnote = FALSE,
     ci = FALSE,
     plot = FALSE,
+    excludeIndeterminate = FALSE,
     radarplot = FALSE,
     statComp = FALSE,
     showSummary = FALSE,
@@ -744,6 +748,7 @@ decisioncompare <- function(
         fnote = fnote,
         ci = ci,
         plot = plot,
+        excludeIndeterminate = excludeIndeterminate,
         radarplot = radarplot,
         statComp = statComp,
         showSummary = showSummary,
@@ -758,3 +763,4 @@ decisioncompare <- function(
 
     analysis$results
 }
+

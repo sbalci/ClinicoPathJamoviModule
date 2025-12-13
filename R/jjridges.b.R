@@ -30,7 +30,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (option %in% names(private$overrides)) {
                 return(private$overrides[[option]])
             }
-            return(self$options[[option]])
+            opt_obj <- self$options$option(option)
+            if (!is.null(opt_obj))
+                return(opt_obj$value)
+            return(NULL)
         },
 
         .init = function() {
@@ -137,10 +140,20 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$y_var)) {
                 stop(.("Please select a grouping variable for Y (Groups)"))
             }
-            
+
             # Check data availability
             if (is.null(self$data) || nrow(self$data) == 0) {
                 stop(.("No data available for analysis"))
+            }
+
+            # Type checks
+            x_col <- self$data[[self$options$x_var]]
+            y_col <- self$data[[self$options$y_var]]
+            if (!is.numeric(x_col)) {
+                stop(paste0(.("X variable must be numeric for ridge plotting. Selected"), ": ", self$options$x_var))
+            }
+            if (!is.factor(y_col) && !is.character(y_col)) {
+                stop(paste0(.("Y variable should be categorical (factor/character). Selected"), ": ", self$options$y_var))
             }
             
             # Check minimum sample size
@@ -148,6 +161,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 warnings <- c(warnings, paste0(.("Sample size (n="), nrow(self$data), 
                                                .(") is below recommended minimum of "), private$.MIN_SAMPLE_SIZE, 
                                                .(" for reliable ridge plot analysis")))
+            }
+
+            # Check basic variability of X
+            n_unique_x <- length(unique(x_col[!is.na(x_col)]))
+            if (n_unique_x < 3) {
+                warnings <- c(warnings, .("X variable has very few unique values; density shapes may be misleading."))
             }
             
             return(warnings)
@@ -230,7 +249,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 # Sort quantiles
-                sort(vals)
+                vals <- sort(vals)
+                return(vals)
                 
             }, error = function(e) {
                 # Log warning and use defaults
@@ -269,82 +289,120 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalPreset
+            private$overrides <- list()
             if (preset == "custom") {
                 return()
+            }
+
+            apply_override <- function(name, value, label = NULL) {
+                opt <- self$options$option(name)
+                if (!is.null(opt) && !is.null(value)) {
+                    if (!identical(opt$value, value)) {
+                        private$overrides[[name]] <<- value
+                        attr(private$overrides[[name]], "label") <<- if (!is.null(label)) label else paste0(name, " set to ", value)
+                    }
+                    opt$value <- value
+                }
             }
 
             # Clinical presets optimized for medical research
             if (preset == "biomarker_distribution") {
                 # For comparing biomarker levels across patient groups
-                private$overrides$plot_type <- "density_ridges"
-                private$overrides$add_boxplot <- TRUE
-                private$overrides$add_quantiles <- TRUE
-                private$overrides$quantiles <- "0.25, 0.5, 0.75"
-                private$overrides$theme_style <- "theme_pubr"
-                private$overrides$color_palette <- "clinical_colorblind"
-                private$overrides$show_stats <- TRUE
-                private$overrides$test_type <- "nonparametric"
-                private$overrides$effsize_type <- "cliff_delta"
-                private$overrides$p_adjust_method <- "fdr"
+                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
+                apply_override("add_boxplot", TRUE, "Boxplots enabled")
+                apply_override("add_quantiles", TRUE, "Quantile lines enabled")
+                apply_override("quantiles", "0.25, 0.5, 0.75")
+                apply_override("theme_style", "theme_pubr", "Publication theme")
+                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
+                apply_override("show_stats", TRUE, "Statistics enabled")
+                apply_override("test_type", "nonparametric", "Nonparametric tests")
+                apply_override("effsize_type", "cliff_delta", "Cliff's delta effect size")
+                apply_override("p_adjust_method", "fdr", "FDR correction")
 
             } else if (preset == "treatment_response") {
                 # For comparing treatment outcomes across groups
-                private$overrides$plot_type <- "violin_ridges"
-                private$overrides$show_stats <- TRUE
-                private$overrides$test_type <- "nonparametric"
-                private$overrides$effsize_type <- "cliff_delta"
-                private$overrides$theme_style <- "theme_pubr"
-                private$overrides$color_palette <- "clinical_colorblind"
-                private$overrides$add_boxplot <- TRUE
-                private$overrides$p_adjust_method <- "bonferroni"
+                apply_override("plot_type", "violin_ridges", "Plot type set to violin_ridges")
+                apply_override("show_stats", TRUE, "Statistics enabled")
+                apply_override("test_type", "nonparametric", "Nonparametric tests")
+                apply_override("effsize_type", "cliff_delta", "Cliff's delta effect size")
+                apply_override("theme_style", "theme_pubr", "Publication theme")
+                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
+                apply_override("add_boxplot", TRUE, "Boxplots enabled")
+                apply_override("p_adjust_method", "bonferroni", "Bonferroni correction")
 
             } else if (preset == "age_by_stage") {
                 # For age distribution across disease stages
-                private$overrides$plot_type <- "density_ridges"
-                private$overrides$add_mean <- TRUE
-                private$overrides$add_median <- TRUE
-                private$overrides$theme_style <- "theme_pubr"
-                private$overrides$color_palette <- "viridis"
-                private$overrides$show_stats <- TRUE
-                private$overrides$test_type <- "parametric"
-                private$overrides$effsize_type <- "d"
+                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
+                apply_override("add_mean", TRUE, "Mean lines enabled")
+                apply_override("add_median", TRUE, "Median lines enabled")
+                apply_override("theme_style", "theme_pubr", "Publication theme")
+                apply_override("color_palette", "viridis", "Viridis palette")
+                apply_override("show_stats", TRUE, "Statistics enabled")
+                apply_override("test_type", "parametric", "Parametric tests")
+                apply_override("effsize_type", "d", "Cohen's d effect size")
 
             } else if (preset == "tumor_size_comparison") {
                 # For tumor size/dimension comparisons
-                private$overrides$plot_type <- "density_ridges"
-                private$overrides$add_boxplot <- TRUE
-                private$overrides$add_quantiles <- TRUE
-                private$overrides$quantiles <- "0.25, 0.5, 0.75"
-                private$overrides$theme_style <- "theme_pubr"
-                private$overrides$color_palette <- "clinical_colorblind"
-                private$overrides$show_stats <- TRUE
-                private$overrides$test_type <- "nonparametric"
-                private$overrides$effsize_type <- "hodges_lehmann"
-                private$overrides$p_adjust_method <- "holm"
+                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
+                apply_override("add_boxplot", TRUE, "Boxplots enabled")
+                apply_override("add_quantiles", TRUE, "Quantile lines enabled")
+                apply_override("quantiles", "0.25, 0.5, 0.75")
+                apply_override("theme_style", "theme_pubr", "Publication theme")
+                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
+                apply_override("show_stats", TRUE, "Statistics enabled")
+                apply_override("test_type", "nonparametric", "Nonparametric tests")
+                apply_override("effsize_type", "hodges_lehmann", "Hodges-Lehmann shift")
+                apply_override("p_adjust_method", "holm", "Holm correction")
 
             } else if (preset == "lab_values_by_group") {
                 # For laboratory values across patient groups
-                private$overrides$plot_type <- "density_ridges"
-                private$overrides$add_boxplot <- TRUE
-                private$overrides$theme_style <- "theme_pubr"
-                private$overrides$color_palette <- "clinical_colorblind"
-                private$overrides$show_stats <- TRUE
-                private$overrides$test_type <- "robust"
-                private$overrides$effsize_type <- "g"
-                private$overrides$p_adjust_method <- "fdr"
+                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
+                apply_override("add_boxplot", TRUE, "Boxplots enabled")
+                apply_override("theme_style", "theme_pubr", "Publication theme")
+                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
+                apply_override("show_stats", TRUE, "Statistics enabled")
+                apply_override("test_type", "robust", "Robust tests")
+                apply_override("effsize_type", "g", "Hedges' g effect size")
+                apply_override("p_adjust_method", "fdr", "FDR correction")
 
             } else if (preset == "survival_time_distribution") {
                 # For survival time or time-to-event distributions
-                private$overrides$plot_type <- "density_ridges"
-                private$overrides$add_median <- TRUE
-                private$overrides$add_quantiles <- TRUE
-                private$overrides$quantiles <- "0.25, 0.5, 0.75"
-                private$overrides$theme_style <- "theme_pubr"
-                private$overrides$color_palette <- "Set2"
-                private$overrides$show_stats <- TRUE
-                private$overrides$test_type <- "nonparametric"
-                private$overrides$effsize_type <- "hodges_lehmann"
-                private$overrides$p_adjust_method <- "holm"
+                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
+                apply_override("add_median", TRUE, "Median lines enabled")
+                apply_override("add_quantiles", TRUE, "Quantile lines enabled")
+                apply_override("quantiles", "0.25, 0.5, 0.75")
+                apply_override("theme_style", "theme_pubr", "Publication theme")
+                apply_override("color_palette", "Set2", "Set2 palette")
+                apply_override("show_stats", TRUE, "Statistics enabled")
+                apply_override("test_type", "nonparametric", "Nonparametric tests")
+                apply_override("effsize_type", "hodges_lehmann", "Hodges-Lehmann shift")
+                apply_override("p_adjust_method", "holm", "Holm correction")
+            }
+
+            if (length(private$overrides) > 0) {
+                labels <- vapply(private$overrides, function(x) {
+                    lbl <- attr(x, "label")
+                    if (!is.null(lbl)) return(lbl)
+                    return(as.character(x))
+                }, character(1))
+                preset_label <- gsub("_", " ", preset)
+                preset_label <- tools::toTitleCase(preset_label)
+                msg <- paste0(
+                    "CLINICAL PRESET OVERRIDE: ", preset_label, " (",
+                    paste(labels, collapse = "; "),
+                    ")."
+                )
+                warning(msg)
+
+                # Surface in UI warnings without clobbering other content
+                current <- self$results$warnings$content
+                html_msg <- paste0("<p style='color:#856404;'>", msg, "</p>")
+                if (is.null(current) || current == "") {
+                    self$results$warnings$setContent(html_msg)
+                } else {
+                    self$results$warnings$setContent(paste0(html_msg, current))
+                }
+                self$results$warnings$setVisible(TRUE)
             }
         },
 
@@ -1002,13 +1060,77 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             test_method <- ""
             warning_msg <- NULL
 
+            # Guard for insufficient observations
+            if (length(data1) < 2 || length(data2) < 2) {
+                warning_msg <- paste0(
+                    "Insufficient observations for comparison ",
+                    group1, " vs ", group2,
+                    if (stratum_label != "") paste0(" (", stratum_label, ")") else "",
+                    ". Need at least 2 observations per group."
+                )
+                return(list(
+                    comparison = paste(group1, "vs", group2),
+                    statistic = NA,
+                    p_value = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    effect_size = NA,
+                    effect_ci_lower = NA,
+                    effect_ci_upper = NA,
+                    test_method = test_type,
+                    warning = warning_msg
+                ))
+            }
+
             if (test_type == "parametric") {
-                test_result <- t.test(data1, data2)
-                statistic <- test_result$statistic
-                p_value <- test_result$p.value
-                ci_lower <- test_result$conf.int[1]
-                ci_upper <- test_result$conf.int[2]
-                test_method <- "t-test"
+                assumption_violations <- c()
+
+                # Normality checks
+                if (length(data1) >= 3 && length(data1) <= 500) {
+                    sw1 <- tryCatch(shapiro.test(data1), error = function(e) NULL)
+                    if (!is.null(sw1) && !is.na(sw1$p.value) && sw1$p.value < 0.05) {
+                        assumption_violations <- c(assumption_violations, paste0(group1, " non-normal (Shapiro p=", round(sw1$p.value, 3), ")"))
+                    }
+                }
+                if (length(data2) >= 3 && length(data2) <= 500) {
+                    sw2 <- tryCatch(shapiro.test(data2), error = function(e) NULL)
+                    if (!is.null(sw2) && !is.na(sw2$p.value) && sw2$p.value < 0.05) {
+                        assumption_violations <- c(assumption_violations, paste0(group2, " non-normal (Shapiro p=", round(sw2$p.value, 3), ")"))
+                    }
+                }
+
+                # Variance check
+                if (requireNamespace("car", quietly = TRUE)) {
+                    df_lv <- data.frame(
+                        val = c(data1, data2),
+                        grp = factor(rep(c("g1", "g2"), c(length(data1), length(data2))))
+                    )
+                    lv <- tryCatch(car::leveneTest(val ~ grp, data = df_lv, center = median), error = function(e) NULL)
+                    if (!is.null(lv) && !is.na(lv$`Pr(>F)`[1]) && lv$`Pr(>F)`[1] < 0.05) {
+                        assumption_violations <- c(assumption_violations, paste0("Variance heterogeneity (Levene p=", round(lv$`Pr(>F)`[1], 3), ")"))
+                    }
+                }
+
+                if (length(assumption_violations) > 0) {
+                    # Auto-suggest and switch to nonparametric for robustness
+                    warning_msg <- paste0(
+                        "Assumption check failed: ", paste(assumption_violations, collapse = "; "),
+                        ". Using Wilcoxon test instead of t-test (auto-suggested)."
+                    )
+                    test_result <- wilcox.test(data1, data2, conf.int = TRUE)
+                    statistic <- test_result$statistic
+                    p_value <- test_result$p.value
+                    ci_lower <- if(!is.null(test_result$conf.int)) test_result$conf.int[1] else NA
+                    ci_upper <- if(!is.null(test_result$conf.int)) test_result$conf.int[2] else NA
+                    test_method <- "Wilcoxon (auto due to assumptions)"
+                } else {
+                    test_result <- t.test(data1, data2)
+                    statistic <- test_result$statistic
+                    p_value <- test_result$p.value
+                    ci_lower <- test_result$conf.int[1]
+                    ci_upper <- test_result$conf.int[2]
+                    test_method <- "t-test"
+                }
 
             } else if (test_type == "nonparametric") {
                 test_result <- wilcox.test(data1, data2, conf.int = TRUE)
@@ -1515,21 +1637,34 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .calculateCliffsDelta = function(x, y) {
-            # Cliff's Delta: proportion of pairs where x > y minus proportion where x < y
-            # Perfect for lymph node count comparisons (e.g., orange-peeling vs conventional)
+            # Prefer effectsize::cliff_delta when available for efficiency and validation
+            if (requireNamespace("effectsize", quietly = TRUE)) {
+                res <- effectsize::cliff_delta(x, y, ci = NULL, alternative = "two.sided", distribution = "continuous")
+                if (!is.null(res$CLES)) {
+                    return(as.numeric(res$CLES * 2 - 1))  # convert common language effect size to delta scale
+                }
+                if (!is.null(res$delta)) {
+                    return(as.numeric(res$delta))
+                }
+            }
+
+            # Fallback manual computation: proportion of pairs where x > y minus proportion where x < y
+            x <- x[!is.na(x)]
+            y <- y[!is.na(y)]
             n1 <- length(x)
             n2 <- length(y)
-            
+            if (n1 == 0 || n2 == 0) return(NA_real_)
+
             greater <- 0
             less <- 0
-            
+
             for (xi in x) {
                 for (yj in y) {
                     if (xi > yj) greater <- greater + 1
                     else if (xi < yj) less <- less + 1
                 }
             }
-            
+
             delta <- (greater - less) / (n1 * n2)
             return(delta)
         },
@@ -1537,15 +1672,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .calculateHodgesLehmann = function(x, y) {
             # Hodges-Lehmann shift: median of all pairwise differences (x - y)
             # Shows typical difference in lymph node counts between techniques
-            differences <- c()
-            
-            for (xi in x) {
-                for (yj in y) {
-                    differences <- c(differences, xi - yj)
-                }
-            }
-            
-            # Return median of all pairwise differences
+            x <- x[!is.na(x)]
+            y <- y[!is.na(y)]
+            if (length(x) == 0 || length(y) == 0) return(NA_real_)
+
+            # Use vectorised outer for efficiency
+            differences <- as.vector(outer(x, y, "-"))
             return(median(differences))
         }
     )

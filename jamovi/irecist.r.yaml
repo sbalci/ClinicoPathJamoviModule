@@ -137,7 +137,7 @@ items:
   - name: efficacyMetrics
     title: Efficacy Metrics
     type: Table
-    visible: (calculateORR)
+    visible: (calculateORR || calculateDCR || showPseudoprogressionRate)
     rows: 0
     clearWith:
       - patientId

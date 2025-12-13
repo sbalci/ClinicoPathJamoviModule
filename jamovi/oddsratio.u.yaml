@@ -32,6 +32,14 @@ children:
       - type: CheckBox
         name: showNomogram
         label: Show diagnostic nomogram
+      - type: TargetLayoutBox
+        label: Diagnostic predictor (binary)
+        children:
+          - type: VariablesListBox
+            name: diagnosticPredictor
+            maxItemCount: 1
+            isTarget: true
+            enable: (showNomogram)
       - type: CheckBox
         name: showExplanations
       - type: CheckBox

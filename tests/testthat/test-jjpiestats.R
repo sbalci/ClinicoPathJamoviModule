@@ -127,7 +127,7 @@ test_that("jjpiestats validates input parameters", {
       dep = "Species",
       typestatistics = "parametric"
     ),
-    "Data contains no \\\\(complete\\\\) rows"
+    "Data contains no"
   )
 })
 

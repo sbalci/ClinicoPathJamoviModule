@@ -218,6 +218,16 @@ vennClass <- if (requireNamespace('jmvcore'))
                     self$results$todo$setContent(validation_error)
                     return()
                 }
+
+                # If no plot type selected, default to ggvenn for user feedback
+                if (!self$options$show_ggvenn && !self$options$show_ggVennDiagram &&
+                    !self$options$show_upsetR && !self$options$show_complexUpset) {
+                    self$options$show_ggvenn <- TRUE
+                    self$results$todo$setContent(
+                        paste0("<div class='alert alert-info'>",
+                               .("No plot type was selected; defaulting to ggvenn output."), "</div>")
+                    )
+                }
                 
                 # Control welcome panel visibility based on variable selection
                 if (is.null(self$options$var1) || is.null(self$options$var2)) {
@@ -818,6 +828,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                             sprintf(.("Variable '%s' contains only missing values. This variable will be skipped."), self$options$var3),
                             "</div>"))
                     }
+                    if (!self$options$var3true %in% levels(as.factor(var3_data))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 3 True Level Not Found"), "</strong><br>",
+                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var3true, self$options$var3),
+                            "</div>"))
+                    }
                 }
 
                 if (!is.null(self$options$var4)) {
@@ -836,6 +852,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                             sprintf(.("Variable '%s' contains only missing values. This variable will be skipped."), self$options$var4),
                             "</div>"))
                     }
+                    if (!self$options$var4true %in% levels(as.factor(var4_data))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 4 True Level Not Found"), "</strong><br>",
+                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var4true, self$options$var4),
+                            "</div>"))
+                    }
                 }
 
                 # Check variables 5-7 (automatically uses advanced engine)
@@ -844,6 +866,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                         return(paste0("<div class='alert alert-warning'>",
                             "<strong>", .("Variable 5 Selected but True Level Missing"), "</strong><br>",
                             .("Please select which level in Variable 5 represents the 'true' condition."),
+                            "</div>"))
+                    }
+                    if (!self$options$var5true %in% levels(as.factor(self$data[[self$options$var5]]))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 5 True Level Not Found"), "</strong><br>",
+                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var5true, self$options$var5),
                             "</div>"))
                     }
                 }
@@ -855,6 +883,12 @@ vennClass <- if (requireNamespace('jmvcore'))
                             .("Please select which level in Variable 6 represents the 'true' condition."),
                             "</div>"))
                     }
+                    if (!self$options$var6true %in% levels(as.factor(self$data[[self$options$var6]]))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 6 True Level Not Found"), "</strong><br>",
+                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var6true, self$options$var6),
+                            "</div>"))
+                    }
                 }
 
                 if (!is.null(self$options$var7)) {
@@ -864,6 +898,21 @@ vennClass <- if (requireNamespace('jmvcore'))
                             .("Please select which level in Variable 7 represents the 'true' condition."),
                             "</div>"))
                     }
+                    if (!self$options$var7true %in% levels(as.factor(self$data[[self$options$var7]]))) {
+                        return(paste0("<div class='alert alert-danger'>",
+                            "<strong>", .("Variable 7 True Level Not Found"), "</strong><br>",
+                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var7true, self$options$var7),
+                            "</div>"))
+                    }
+                }
+                
+                # Require at least two variables for overlap visuals
+                selected_vars <- c(self$options$var1, self$options$var2, self$options$var3, self$options$var4, self$options$var5, self$options$var6, self$options$var7)
+                if (sum(!sapply(selected_vars, is.null)) < 2) {
+                    return(paste0("<div class='alert alert-warning'>",
+                        "<strong>", .("Select at least two variables"), "</strong><br>",
+                        .("Venn/UpSet analysis requires two or more variables with true levels."),
+                        "</div>"))
                 }
                 
                 return(NULL)  # No validation errors

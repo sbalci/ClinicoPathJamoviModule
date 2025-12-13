@@ -10,6 +10,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             fu_date = NULL,
             time_format = "auto",
             output_unit = "months",
+            time_basis = "standardized",
             use_landmark = FALSE,
             landmark_time = 6,
             remove_negative = FALSE,
@@ -68,6 +69,13 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "months",
                     "years"),
                 default="months")
+            private$..time_basis <- jmvcore::OptionList$new(
+                "time_basis",
+                time_basis,
+                options=list(
+                    "standardized",
+                    "calendar"),
+                default="standardized")
             private$..use_landmark <- jmvcore::OptionBool$new(
                 "use_landmark",
                 use_landmark,
@@ -125,6 +133,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..fu_date)
             self$.addOption(private$..time_format)
             self$.addOption(private$..output_unit)
+            self$.addOption(private$..time_basis)
             self$.addOption(private$..use_landmark)
             self$.addOption(private$..landmark_time)
             self$.addOption(private$..remove_negative)
@@ -142,6 +151,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         fu_date = function() private$..fu_date$value,
         time_format = function() private$..time_format$value,
         output_unit = function() private$..output_unit$value,
+        time_basis = function() private$..time_basis$value,
         use_landmark = function() private$..use_landmark$value,
         landmark_time = function() private$..landmark_time$value,
         remove_negative = function() private$..remove_negative$value,
@@ -158,6 +168,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..fu_date = NA,
         ..time_format = NA,
         ..output_unit = NA,
+        ..time_basis = NA,
         ..use_landmark = NA,
         ..landmark_time = NA,
         ..remove_negative = NA,
@@ -359,6 +370,7 @@ timeinterval <- function(
     fu_date,
     time_format = "auto",
     output_unit = "months",
+    time_basis = "standardized",
     use_landmark = FALSE,
     landmark_time = 6,
     remove_negative = FALSE,
@@ -374,6 +386,10 @@ timeinterval <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timeinterval requires jmvcore to be installed (restart may be required)")
 
+    if (missing(dx_date) || missing(fu_date) || is.null(dx_date) || is.null(fu_date)) {
+        stop("Please provide both start (dx_date) and end (fu_date) date variables.")
+    }
+
     if ( ! missing(dx_date)) dx_date <- jmvcore::resolveQuo(jmvcore::enquo(dx_date))
     if ( ! missing(fu_date)) fu_date <- jmvcore::resolveQuo(jmvcore::enquo(fu_date))
     if (missing(data))
@@ -388,6 +404,7 @@ timeinterval <- function(
         fu_date = fu_date,
         time_format = time_format,
         output_unit = output_unit,
+        time_basis = time_basis,
         use_landmark = use_landmark,
         landmark_time = landmark_time,
         remove_negative = remove_negative,
@@ -408,4 +425,3 @@ timeinterval <- function(
 
     analysis$results
 }
-

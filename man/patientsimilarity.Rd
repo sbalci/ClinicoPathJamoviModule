@@ -7,6 +7,7 @@
 patientsimilarity(
   data,
   vars = NULL,
+  seed = 123,
   method = "tsne",
   dimensions = "2",
   colorBy = NULL,
@@ -17,6 +18,8 @@ patientsimilarity(
   performClustering = FALSE,
   clusterMethod = "kmeans",
   nClusters = 3,
+  dbscan_eps = 0.5,
+  dbscan_minpts = 5,
   showClusterStats = TRUE,
   survivalAnalysis = FALSE,
   survivalTime = NULL,
@@ -34,6 +37,9 @@ patientsimilarity(
 \item{vars}{Continuous variables to use for calculating patient similarity.
 These will be used to compute distances between patients. Categorical
 variables should be converted to numeric or one-hot encoded.}
+
+\item{seed}{Random seed for reproducibility of t-SNE, UMAP, and clustering
+results.}
 
 \item{method}{Method for dimensionality reduction: - PCA: Linear method,
 preserves global structure - t-SNE: Non-linear, excellent for
@@ -70,6 +76,12 @@ k-means or hierarchical clustering on the reduced-dimension space.}
 \item{nClusters}{Number of clusters for k-means or hierarchical clustering.
 For DBSCAN, this is ignored.}
 
+\item{dbscan_eps}{The radius of the neighborhood around a point (eps) for
+DBSCAN.}
+
+\item{dbscan_minpts}{The minimum number of points required to form a dense
+region (MinPts) for DBSCAN.}
+
 \item{showClusterStats}{Display summary statistics for each cluster
 including size, characteristics, and outcome distribution.}
 
@@ -100,6 +112,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$projectionPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$projection3D} \tab \tab \tab \tab \tab an image \cr
 \code{results$varianceTable} \tab \tab \tab \tab \tab a table \cr

@@ -9,6 +9,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             explanatory = NULL,
             outcome = NULL,
             outcomeLevel = NULL,
+            diagnosticPredictor = NULL,
             showNomogram = FALSE,
             showSummaries = FALSE,
             showExplanations = FALSE, ...) {
@@ -40,6 +41,14 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "outcomeLevel",
                 outcomeLevel,
                 variable="(outcome)")
+            private$..diagnosticPredictor <- jmvcore::OptionVariable$new(
+                "diagnosticPredictor",
+                diagnosticPredictor,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
             private$..showNomogram <- jmvcore::OptionBool$new(
                 "showNomogram",
                 showNomogram,
@@ -56,6 +65,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..diagnosticPredictor)
             self$.addOption(private$..showNomogram)
             self$.addOption(private$..showSummaries)
             self$.addOption(private$..showExplanations)
@@ -64,6 +74,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         explanatory = function() private$..explanatory$value,
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
+        diagnosticPredictor = function() private$..diagnosticPredictor$value,
         showNomogram = function() private$..showNomogram$value,
         showSummaries = function() private$..showSummaries$value,
         showExplanations = function() private$..showExplanations$value),
@@ -71,6 +82,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..explanatory = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
+        ..diagnosticPredictor = NA,
         ..showNomogram = NA,
         ..showSummaries = NA,
         ..showExplanations = NA)
@@ -304,6 +316,8 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param outcomeLevel Specify which outcome level represents the positive
 #'   case for likelihood ratio calculations. If not specified, the function will
 #'   use the second level alphabetically.
+#' @param diagnosticPredictor Specify the predictor to drive likelihood
+#'   ratios; must be binary. Defaults to the first explanatory variable.
 #' @param showNomogram Display an interactive nomogram for converting pre-test
 #'   to post-test  probabilities using likelihood ratios calculated from the
 #'   data.
@@ -342,6 +356,7 @@ oddsratio <- function(
     explanatory,
     outcome,
     outcomeLevel,
+    diagnosticPredictor = NULL,
     showNomogram = FALSE,
     showSummaries = FALSE,
     showExplanations = FALSE) {
@@ -351,18 +366,22 @@ oddsratio <- function(
 
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
+    if ( ! missing(diagnosticPredictor)) diagnosticPredictor <- jmvcore::resolveQuo(jmvcore::enquo(diagnosticPredictor))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(explanatory), explanatory, NULL),
-            `if`( ! missing(outcome), outcome, NULL))
+            `if`( ! missing(outcome), outcome, NULL),
+            `if`( ! missing(diagnosticPredictor), diagnosticPredictor, NULL))
 
     for (v in outcome) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in diagnosticPredictor) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- oddsratioOptions$new(
         explanatory = explanatory,
         outcome = outcome,
         outcomeLevel = outcomeLevel,
+        diagnosticPredictor = diagnosticPredictor,
         showNomogram = showNomogram,
         showSummaries = showSummaries,
         showExplanations = showExplanations)

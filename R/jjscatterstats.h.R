@@ -391,6 +391,9 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        presetInfo = function() private$.items[["presetInfo"]],
+        warnings = function() private$.items[["warnings"]],
+        explanations = function() private$.items[["explanations"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
@@ -442,6 +445,21 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="presetInfo",
+                title="Clinical Preset Info",
+                visible="(clinicalPreset != \"custom\")"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="Explanations",
+                visible="(showExplanations)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -634,6 +652,9 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr

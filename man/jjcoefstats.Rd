@@ -13,7 +13,7 @@ jjcoefstats(
   confLow = NULL,
   confHigh = NULL,
   pValue = NULL,
-  degreesOfFreedom = 999,
+  degreesOfFreedom,
   outcome = NULL,
   predictors = NULL,
   modelType = "lm",
@@ -23,9 +23,10 @@ jjcoefstats(
   sortCoefs = FALSE,
   excludeIntercept = FALSE,
   showPValues = FALSE,
-  pSymbols = FALSE,
+  pValueDisplay = "numeric",
   ciLevel = 0.95,
   exponentiate = FALSE,
+  expScaleLabel = "exp",
   referenceValue = 0,
   colorScheme = "default",
   plotTheme = "default",
@@ -77,15 +78,18 @@ effects term like (1|subject).}
 
 \item{showPValues}{Display p-values alongside coefficients.}
 
-\item{pSymbols}{Use symbols (*, **, ***) instead of numeric p-values.}
+\item{pValueDisplay}{How to display p-values in the table and plot.}
 
 \item{ciLevel}{Confidence level for intervals.}
 
 \item{exponentiate}{Exponentiate coefficients (for odds ratios or hazard
 ratios).}
 
+\item{expScaleLabel}{Label to apply to exponentiated coefficients in
+pre-computed mode.}
+
 \item{referenceValue}{Reference value for plotting (0 for differences, 1
-for ratios).}
+for ratios; will auto-switch to 1 when exponentiating).}
 
 \item{colorScheme}{Color palette for the plot.}
 

@@ -39,6 +39,19 @@ items:
       title: Analysis Guide
       type:  Html
 
+
+    - name: warnings
+      title: Messages
+      type: Html
+      visible: true
+      clearWith:
+        - dep1
+        - dep2
+        - dep3
+        - dep4
+        - typestatistics
+        - clinicalpreset
+
     - name: interpretation
       title: Clinical Interpretation
       type: Html

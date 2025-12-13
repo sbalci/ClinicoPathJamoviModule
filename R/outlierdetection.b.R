@@ -164,6 +164,17 @@
 outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierdetectionClass",
     inherit = outlierdetectionBase,
     private = list(
+        
+        .messages = NULL,
+        
+        .accumulateMessage = function(msg) {
+            private$.messages <- c(private$.messages, msg)
+        },
+        
+        .resetMessages = function() {
+            private$.messages <- NULL
+            self$results$warnings$setContent("")
+        },
 
         .createHTMLSection = function(title, content, style = "info", icon = NULL) {
             # Helper function to create consistent HTML sections
@@ -186,6 +197,9 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         },
 
         .run = function() {
+            
+            # Reset messages
+            private$.resetMessages()
 
             # Check if required variables have been selected
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
@@ -361,6 +375,31 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # CRITICAL FIX: Preserve original dataset size before sampling
             original_n <- nrow(analysis_data)
+            
+            # Clinical Assumption Checklist
+            # 1. Sample Size Check
+            if (original_n < 30) {
+                private$.accumulateMessage(sprintf("Sample size is small (N=%d). Outlier detection methods, especially multivariate ones, may be unreliable. Recommended N >= 30.", original_n))
+            }
+            
+            # 2. Skewness Check for Classical Methods
+            # Only relevant if using standard Z-score or Mahalanobis (but good to warn generally)
+            if (self$options$method_category %in% c("univariate", "multivariate", "composite")) {
+                 for (col in names(analysis_data)) {
+                     if (is.numeric(analysis_data[[col]])) {
+                         # Simple skewness check
+                         x <- analysis_data[[col]]
+                         n <- length(x)
+                         m3 <- sum((x - mean(x))^3) / n
+                         s3 <- sd(x)^3
+                         skew <- m3 / s3
+                         
+                         if (!is.na(skew) && abs(skew) > 2) {
+                             private$.accumulateMessage(sprintf("Variable '%s' is highly skewed (skewness=%.2f). Standard methods (Z-score, Mahalanobis) may flag valid extreme values as outliers. Consider using Robust Z-score or MCD.", col, skew))
+                         }
+                     }
+                 }
+            }
 
             # Performance optimization for large datasets
             if (nrow(analysis_data) > 5000) {
@@ -509,6 +548,18 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     analysis_data = analysis_data
                 )
                 self$results$plot$setState(plotData)
+            }
+            
+            # Populate warnings panel
+            if (!is.null(private$.messages) && length(private$.messages) > 0) {
+                self$results$warnings$setContent(paste(
+                    "<div class='alert alert-warning'>",
+                    "<h6>Analysis Messages</h6>",
+                    "<ul>",
+                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
+                    "</ul></div>",
+                    sep = ""
+                ))
             }
 
         },
@@ -1039,12 +1090,89 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
         .generate_method_comparison = function(outlier_results) {
             
+            # Extract detailed method data
+            detailed_data <- outlier_results$outlier_data
+            
             comparison_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>📊 Method Comparison</h3>",
-                "<p>Composite outlier detection combines multiple algorithms for robust identification.</p>",
-                "<p>The composite score represents the probability of being classified as an outlier by at least one method.</p>",
-                "<p><strong>Threshold:</strong> ", self$options$composite_threshold, " (observations with scores ≥ this value are classified as outliers)</p>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'>📊 Method Comparison & Composite Breakdown</h3>"
+            )
+
+            if (!is.null(detailed_data) && is.data.frame(detailed_data)) {
+                # Look for columns starting with "Z_Score", "Mahalanobis", "IQR", etc. 
+                # or typically they are just the method names in performance package depending on version.
+                # Actually performance::check_outliers data usually has columns like 'Z_Score_Robust', 'IQR', 'Mahalanobis', etc.
+                
+                # Filter for numeric/logical columns that strictly look like method flags or scores
+                # Note: They are often probabilities or standardized scores. 
+                # Let's try to summarize how many outliers each method found.
+                
+                method_cols <- setdiff(names(detailed_data), c("Row", "Outlier", "n_Outliers"))
+                
+                # Clean up column names filter
+                # We want columns that are numeric or logical
+                valid_cols <- c()
+                for (col in method_cols) {
+                    if (is.numeric(detailed_data[[col]]) || is.logical(detailed_data[[col]])) {
+                        valid_cols <- c(valid_cols, col)
+                    }
+                }
+                
+                if (length(valid_cols) > 0) {
+                     # Create a summary table of agreement
+                     comparison_html <- paste0(comparison_html,
+                        "<p>The table below shows how many observations were flagged by each individual method included in the composite score.</p>",
+                        "<table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>",
+                        "<tr style='background-color: #4caf50; color: white;'>",
+                        "<th style='padding: 10px; border: 1px solid #ddd;'>Method</th>",
+                        "<th style='padding: 10px; border: 1px solid #ddd;'>Outliers Detected</th>",
+                        "<th style='padding: 10px; border: 1px solid #ddd;'>Agreement Rate (%)</th>",
+                        "</tr>"
+                     )
+                     
+                     n_total <- nrow(detailed_data)
+                     
+                     for (col in valid_cols) {
+                         # Assuming these are probabilities or 0/1 scores. 
+                         # Usually standard in performance is probability or distance converted.
+                         # Roughly, > threshold or some cut-off. 
+                         # For logical columns acts as 0/1. For numeric, it's often a probability.
+                         
+                         vals <- detailed_data[[col]]
+                         if (is.logical(vals)) {
+                             n_flagged <- sum(vals, na.rm=TRUE)
+                         } else {
+                             # Assume numeric score > threshold is flag, but threshold varies.
+                             # Actually check_outliers standardizes to roughly [0,1] or flags.
+                             # If we can't be sure, we count non-zero? 
+                             # Let's check if it's binary-like.
+                             if (all(vals %in% c(0, 1, NA))) {
+                                  n_flagged <- sum(vals == 1, na.rm=TRUE)
+                             } else {
+                                  # Continuous score - harder to count "flags" without specific threshold
+                                  # Just report "Score Range" maybe?
+                                  # Or use the global composite threshold as proxy?
+                                  n_flagged <- sum(vals >= self$options$composite_threshold, na.rm=TRUE) 
+                             }
+                         }
+                         
+                         pct <- round(n_flagged / n_total * 100, 1)
+                         
+                         comparison_html <- paste0(comparison_html,
+                             "<tr>",
+                             "<td style='padding: 8px; border: 1px solid #ddd;'><strong>", col, "</strong></td>",
+                             "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", n_flagged, "</td>",
+                             "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", pct, "%</td>",
+                             "</tr>"
+                         )
+                     }
+                     comparison_html <- paste0(comparison_html, "</table>")
+                }
+            }
+            
+            comparison_html <- paste0(comparison_html,
+                "<p style='margin-top: 15px;'><strong>Composite Logic:</strong> An observation is classified as a composite outlier if it is flagged by at least ", 
+                round(self$options$composite_threshold * 100), "% of the methods used.</p>",
                 "</div>"
             )
             

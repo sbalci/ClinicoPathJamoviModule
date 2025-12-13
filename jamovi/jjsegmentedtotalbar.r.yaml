@@ -133,6 +133,22 @@ items:
       clearWith:
         - analysis_preset
 
+    - name: presetInfo
+      title: 'Preset Information'
+      type: Html
+      visible: false
+      clearWith:
+        - analysis_preset
+
+    - name: warnings
+      title: 'Warnings'
+      type: Html
+      visible: true
+      clearWith:
+        - x_var
+        - y_var
+        - fill_var
+
     - name: explanations
       title: 'Explanations'
       type: Html

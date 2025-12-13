@@ -13,7 +13,7 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             confLow = NULL,
             confHigh = NULL,
             pValue = NULL,
-            degreesOfFreedom = 999,
+            degreesOfFreedom = NULL,
             outcome = NULL,
             predictors = NULL,
             modelType = "lm",
@@ -23,9 +23,10 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             sortCoefs = FALSE,
             excludeIntercept = FALSE,
             showPValues = FALSE,
-            pSymbols = FALSE,
+            pValueDisplay = "numeric",
             ciLevel = 0.95,
             exponentiate = FALSE,
+            expScaleLabel = "exp",
             referenceValue = 0,
             colorScheme = "default",
             plotTheme = "default",
@@ -97,8 +98,7 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 default=NULL)
             private$..degreesOfFreedom <- jmvcore::OptionInteger$new(
                 "degreesOfFreedom",
-                degreesOfFreedom,
-                default=999)
+                degreesOfFreedom)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -160,10 +160,14 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "showPValues",
                 showPValues,
                 default=FALSE)
-            private$..pSymbols <- jmvcore::OptionBool$new(
-                "pSymbols",
-                pSymbols,
-                default=FALSE)
+            private$..pValueDisplay <- jmvcore::OptionList$new(
+                "pValueDisplay",
+                pValueDisplay,
+                options=list(
+                    "none",
+                    "numeric",
+                    "symbols"),
+                default="numeric")
             private$..ciLevel <- jmvcore::OptionNumber$new(
                 "ciLevel",
                 ciLevel,
@@ -174,6 +178,14 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "exponentiate",
                 exponentiate,
                 default=FALSE)
+            private$..expScaleLabel <- jmvcore::OptionList$new(
+                "expScaleLabel",
+                expScaleLabel,
+                options=list(
+                    "or",
+                    "hr",
+                    "exp"),
+                default="exp")
             private$..referenceValue <- jmvcore::OptionNumber$new(
                 "referenceValue",
                 referenceValue,
@@ -230,9 +242,10 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..sortCoefs)
             self$.addOption(private$..excludeIntercept)
             self$.addOption(private$..showPValues)
-            self$.addOption(private$..pSymbols)
+            self$.addOption(private$..pValueDisplay)
             self$.addOption(private$..ciLevel)
             self$.addOption(private$..exponentiate)
+            self$.addOption(private$..expScaleLabel)
             self$.addOption(private$..referenceValue)
             self$.addOption(private$..colorScheme)
             self$.addOption(private$..plotTheme)
@@ -258,9 +271,10 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         sortCoefs = function() private$..sortCoefs$value,
         excludeIntercept = function() private$..excludeIntercept$value,
         showPValues = function() private$..showPValues$value,
-        pSymbols = function() private$..pSymbols$value,
+        pValueDisplay = function() private$..pValueDisplay$value,
         ciLevel = function() private$..ciLevel$value,
         exponentiate = function() private$..exponentiate$value,
+        expScaleLabel = function() private$..expScaleLabel$value,
         referenceValue = function() private$..referenceValue$value,
         colorScheme = function() private$..colorScheme$value,
         plotTheme = function() private$..plotTheme$value,
@@ -285,9 +299,10 @@ jjcoefstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..sortCoefs = NA,
         ..excludeIntercept = NA,
         ..showPValues = NA,
-        ..pSymbols = NA,
+        ..pValueDisplay = NA,
         ..ciLevel = NA,
         ..exponentiate = NA,
+        ..expScaleLabel = NA,
         ..referenceValue = NA,
         ..colorScheme = NA,
         ..plotTheme = NA,
@@ -397,8 +412,8 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="modelMetrics",
                 title="Model Fit Metrics",
-                visible=TRUE,
-                rows=1,
+                visible="(inputMode == 'fitmodel')",
+                rows=0,
                 columns=list(
                     list(
                         `name`="metric", 
@@ -480,12 +495,14 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sortCoefs Sort coefficients by estimate magnitude.
 #' @param excludeIntercept Exclude intercept from the plot.
 #' @param showPValues Display p-values alongside coefficients.
-#' @param pSymbols Use symbols (*, **, ***) instead of numeric p-values.
+#' @param pValueDisplay How to display p-values in the table and plot.
 #' @param ciLevel Confidence level for intervals.
 #' @param exponentiate Exponentiate coefficients (for odds ratios or hazard
 #'   ratios).
+#' @param expScaleLabel Label to apply to exponentiated coefficients in
+#'   pre-computed mode.
 #' @param referenceValue Reference value for plotting (0 for differences, 1
-#'   for ratios).
+#'   for ratios; will auto-switch to 1 when exponentiating).
 #' @param colorScheme Color palette for the plot.
 #' @param plotTheme ggplot2 theme for the plot.
 #' @param plotWidth Plot width in pixels.
@@ -517,7 +534,7 @@ jjcoefstats <- function(
     confLow = NULL,
     confHigh = NULL,
     pValue = NULL,
-    degreesOfFreedom = 999,
+    degreesOfFreedom,
     outcome = NULL,
     predictors = NULL,
     modelType = "lm",
@@ -527,9 +544,10 @@ jjcoefstats <- function(
     sortCoefs = FALSE,
     excludeIntercept = FALSE,
     showPValues = FALSE,
-    pSymbols = FALSE,
+    pValueDisplay = "numeric",
     ciLevel = 0.95,
     exponentiate = FALSE,
+    expScaleLabel = "exp",
     referenceValue = 0,
     colorScheme = "default",
     plotTheme = "default",
@@ -587,9 +605,10 @@ jjcoefstats <- function(
         sortCoefs = sortCoefs,
         excludeIntercept = excludeIntercept,
         showPValues = showPValues,
-        pSymbols = pSymbols,
+        pValueDisplay = pValueDisplay,
         ciLevel = ciLevel,
         exponentiate = exponentiate,
+        expScaleLabel = expScaleLabel,
         referenceValue = referenceValue,
         colorScheme = colorScheme,
         plotTheme = plotTheme,

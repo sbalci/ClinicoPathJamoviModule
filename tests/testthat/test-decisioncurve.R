@@ -190,6 +190,73 @@ test_that("decisioncurve function works with weighted AUC", {
   expect_true("weightedAUCTable" %in% names(result))
 })
 
+test_that("clinical decision rule uses patient-level data and matches manual net benefit", {
+  testthat::skip_on_cran()
+
+  # Construct small deterministic data
+  df <- data.frame(
+    outcome = factor(c("1", "1", "0", "0", "0"), levels = c("0", "1")),
+    model_prob = c(0.9, 0.7, 0.4, 0.2, 0.1),
+    rule_var = factor(c("yes", "yes", "no", "no", "no"), levels = c("no", "yes"))
+  )
+
+  res <- decisioncurve(
+    data = df,
+    outcome = "outcome",
+    outcomePositive = "1",
+    models = "model_prob",
+    clinicalDecisionRule = TRUE,
+    decisionRuleVar = "rule_var",
+    decisionRulePositive = "yes",
+    decisionRuleLabel = "Rule",
+    thresholdRange = "custom",
+    thresholdMin = 0.2,
+    thresholdMax = 0.2,
+    thresholdStep = 0.2,
+    selectedThresholds = "0.2",
+    showTable = TRUE
+  )
+
+  tbl <- res$resultsTable$asDF()
+  # Manual NB at pt=0.2: model = 0.3, rule = 0.4, treat_all = 0.25
+  expect_equal(tbl$treat_all[1], 0.25, tolerance = 1e-6)
+  expect_equal(tbl$model_prob[1], 0.3, tolerance = 1e-6)
+  expect_equal(tbl$model_Rule[1], 0.4, tolerance = 1e-6)
+})
+
+test_that("clinical decision rule participates in complete-case filtering", {
+  testthat::skip_on_cran()
+
+  df <- data.frame(
+    outcome = factor(c("1", "1", "0", "0", "0"), levels = c("0", "1")),
+    model_prob = c(0.9, 0.7, 0.4, 0.2, 0.1),
+    rule_var = factor(c("yes", "yes", NA, "no", "no"), levels = c("no", "yes"))
+  )
+
+  res <- decisioncurve(
+    data = df,
+    outcome = "outcome",
+    outcomePositive = "1",
+    models = "model_prob",
+    clinicalDecisionRule = TRUE,
+    decisionRuleVar = "rule_var",
+    decisionRulePositive = "yes",
+    decisionRuleLabel = "Rule",
+    thresholdRange = "custom",
+    thresholdMin = 0.2,
+    thresholdMax = 0.2,
+    thresholdStep = 0.2,
+    selectedThresholds = "0.2",
+    showTable = TRUE
+  )
+
+  tbl <- res$resultsTable$asDF()
+
+  # Because rule_var has an NA, complete cases drop to n=4 with prevalence 0.5
+  # Treat-all NB at pt=0.2 with prevalence 0.5: 0.5 - 0.5*(0.2/0.8) = 0.375
+  expect_equal(tbl$treat_all[1], 0.375, tolerance = 1e-6)
+})
+
 test_that("decisioncurve function works with custom threshold ranges", {
   testthat::skip_on_cran()
   

@@ -21,6 +21,15 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .ciHigh = NULL,
         .pvalues = NULL,
         .adjPvalues = NULL,
+        .messages = NULL,
+
+        # Message accumulation ----
+        .accumulateMessage = function(message) {
+            if (is.null(private$.messages)) {
+                private$.messages <- list()
+            }
+            private$.messages[[length(private$.messages) + 1]] <- message
+        },
 
         # init ----
 
@@ -83,8 +92,30 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     stop('Data contains no (complete) rows')
             }
 
+            # Checkpoint
+            private$.checkpoint()
+
+            # Set Seed for Reproducibility
+            if (!is.null(self$options$seed)) {
+                set.seed(self$options$seed)
+            }
+
             # Run permutation test ----
-            private$.runPermutationTest()
+            if (nrow(self$data) > 0) {
+                 private$.runPermutationTest()
+            }
+
+            # Populate warnings
+            if (!is.null(private$.messages) && length(private$.messages) > 0) {
+                # Format messages
+                msg_html <- paste0(
+                    "<div style='border: 1px solid #e6e6e6; background-color: #fafafa; padding: 10px; margin-bottom: 10px; border-radius: 5px;'>",
+                    "<b>Note:</b><br>",
+                    paste(unlist(private$.messages), collapse = "<br>"),
+                    "</div>"
+                )
+                self$results$warnings$setContent(msg_html)
+            }
 
         },
 
@@ -132,15 +163,14 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_means <- apply(pca_matrix, 2, mean, na.rm = TRUE)
 
                 if (max(var_ranges) / min(var_ranges) > 10 || max(abs(var_means)) > 1e-6) {
-                    jmvcore::reject(paste0(
-                        'WARNING: Centering and/or scaling are disabled, but variables have different scales.\n\n',
-                        '⚠️ CRITICAL: Without centering/scaling, the permutation test compares RAW VARIANCE, ',
-                        'not correlation structure. Variables with larger variance will dominate the analysis.\n\n',
-                        'RECOMMENDATION: Enable "Center Variables" and "Scale Variables" options for valid results.\n\n',
-                        'If you proceed without centering/scaling, interpret results as testing raw variance contributions, ',
-                        'NOT correlation-based structure (which is the standard interpretation of parallel analysis).'
-                    ))
+                    private$.accumulateMessage("WARNING: Centering/Scaling should be enabled when variables have disparate ranges.")
                 }
+            }
+
+            # Check for constant variables or singular matrix
+            if (any(apply(pca_matrix, 2, var) == 0)) {
+                 jmvcore::reject("One or more variables have zero variance (constant). Please remove them.")
+                 return()
             }
 
             # Run original PCA
@@ -187,7 +217,10 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Permute each variable independently in residual space
                     perm_data <- as.data.frame(residual_data)
-                    perm_data <- perm_data %>% mutate_all(.funs = sample)
+                    # Use base R to shuffle columns to avoid dplyr dependency issues
+                    for(j in seq_len(ncol(perm_data))) {
+                        perm_data[[j]] <- sample(perm_data[[j]])
+                    }
 
                     # Run PCA on permuted residual data
                     tryCatch({
@@ -218,8 +251,8 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     projection <- residual_data %*% loading %*% t(loading)
                     residual_data <- residual_data - projection
                     components_removed <- components_removed + 1
-                } else if (comp_idx < ndim) {
-                    # If component not significant, STOP sequential testing
+                } else if (comp_idx < ndim && self$options$stop_rule) {
+                    # If component not significant AND stop rule is active, STOP sequential testing
                     # Set remaining components to NA (conservative approach)
                     for (remaining in (comp_idx + 1):ndim) {
                         mean_VAF[remaining] <- NA
@@ -227,6 +260,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ci_high[remaining] <- NA
                         pvalue[remaining] <- NA
                     }
+                    private$.accumulateMessage("Note: Sequential testing stopped after first non-significant component.")
                     break
                 }
             }

@@ -112,21 +112,27 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(TRUE)
         },
         
-        .detectDateFormat = function(date_vector, specified_format = NULL) {
+        .detectDateFormat = function(start_vector,
+                                     end_vector,
+                                     specified_format = NULL,
+                                     start_name = "start",
+                                     end_name = "end") {
             # Automatic date format detection if not specified
             if (!is.null(specified_format) && specified_format != "auto") {
                 return(specified_format)
             }
             
             # Remove missing values for format detection
-            sample_dates <- date_vector[!is.na(date_vector)]
-            if (length(sample_dates) == 0) {
-                stop("No valid dates found for format detection")
+            sample_start <- start_vector[!is.na(start_vector)]
+            sample_end <- end_vector[!is.na(end_vector)]
+            
+            if (length(sample_start) == 0 && length(sample_end) == 0) {
+                stop("No valid dates found for format detection in either column")
             }
             
-            # Take a larger sample for format detection to handle ambiguity better
-            sample_size <- min(50, length(sample_dates))
-            sample_dates <- head(sample_dates, sample_size)
+            sample_size <-  min(50, max(length(sample_start), length(sample_end)))
+            sample_start <- head(sample_start, sample_size)
+            sample_end <- head(sample_end, sample_size)
             
             # Test common formats
             formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
@@ -146,10 +152,15 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 
                 tryCatch({
-                    parsed_dates <- parser(sample_dates, quiet = TRUE)
-                    success_rate <- sum(!is.na(parsed_dates)) / length(sample_dates)
+                    parsed_start <- if (length(sample_start) > 0) parser(sample_start, quiet = TRUE) else NULL
+                    parsed_end <- if (length(sample_end) > 0) parser(sample_end, quiet = TRUE) else NULL
                     
-                    # Keep track of the best format
+                    success_start <- if (length(parsed_start)) sum(!is.na(parsed_start)) / length(parsed_start) else 0
+                    success_end <- if (length(parsed_end)) sum(!is.na(parsed_end)) / length(parsed_end) else 0
+                    
+                    # Require a format that works for both columns; take the weaker score
+                    success_rate <- min(success_start, success_end)
+                    
                     if (success_rate > best_score) {
                         best_score <- success_rate
                         best_format <- fmt
@@ -160,8 +171,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (best_score < 0.5) {
-                warning("Could not reliably detect date format. Using YMD format. Please specify format manually if incorrect.")
-                return("ymd")
+                stop(glue::glue(
+                    "Could not detect a common date format for columns '{start_name}' and '{end_name}'. ",
+                    "Please select the correct format manually."
+                ))
             }
             
             return(best_format)
@@ -197,6 +210,31 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
         
+        .validateParsedDates = function(parsed_dates, original_vector, column_name, format_label) {
+            total_non_missing <- sum(!is.na(original_vector))
+            successful <- sum(!is.na(parsed_dates))
+            
+            if (total_non_missing == 0) {
+                stop(glue::glue("Column '{column_name}' contains only missing values; cannot calculate time intervals."))
+            }
+            
+            if (successful == 0) {
+                sample_values <- paste(utils::head(unique(original_vector), 3), collapse = ", ")
+                stop(glue::glue(
+                    "Date parsing failed for column '{column_name}' using format '{format_label}'. ",
+                    "Example values: {sample_values}"
+                ))
+            }
+            
+            success_rate <- successful / total_non_missing
+            if (success_rate < 0.8) {
+                stop(glue::glue(
+                    "Only {round(100 * success_rate, 1)}% of non-missing values in '{column_name}' were parsed with format '{format_label}'. ",
+                    "Please verify that the selected format matches all values or standardise the column."
+                ))
+            }
+        },
+        
         .calculateTimeIntervals = function(start_dates, end_dates, output_unit) {
             # Enhanced interval calculation with validation
             
@@ -227,6 +265,40 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             return(calculated_time)
+        },
+
+        .calculateCalendarIntervals = function(start_dates, end_dates, output_unit) {
+            # Calendar-aware interval calculation that respects varying month lengths
+            if (!inherits(start_dates, "Date") && !inherits(start_dates, "POSIXct")) {
+                stop("Start dates are not valid date objects")
+            }
+            if (!inherits(end_dates, "Date") && !inherits(end_dates, "POSIXct")) {
+                stop("End dates are not valid date objects")
+            }
+
+            intervals <- lubridate::interval(start_dates, end_dates)
+            days <- lubridate::time_length(intervals, "days")
+
+            # Handle simple units directly
+            if (output_unit == "days") return(days)
+            if (output_unit == "weeks") return(days / 7)
+
+            # Calendar months/years: count whole months, then proportion of remaining month
+            whole_months <- intervals %/% months(1)
+            # Remaining interval after removing whole months
+            remainder_start <- start_dates + months(whole_months)
+            remainder_int <- lubridate::interval(remainder_start, end_dates)
+            remainder_days <- lubridate::time_length(remainder_int, "days")
+
+            # Avoid division by zero when remainder_start is NA
+            days_in_month_start <- ifelse(is.na(remainder_start), NA_real_, lubridate::days_in_month(remainder_start))
+            fraction_months <- remainder_days / days_in_month_start
+            total_months <- whole_months + fraction_months
+
+            if (output_unit == "months") return(total_months)
+            if (output_unit == "years") return(total_months / 12)
+
+            stop("Unsupported output unit for calendar-based calculation")
         },
         
         .applyLandmarkAnalysis = function(calculated_time, data, landmark_time, output_unit) {
@@ -278,12 +350,19 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .assessDataQuality = function(calculated_time, start_dates, end_dates) {
             # Comprehensive data quality assessment
 
+            total_obs <- length(calculated_time)
+            non_missing <- sum(!is.na(calculated_time))
+            suppressWarnings({
+                q99 <- quantile(calculated_time, 0.99, na.rm = TRUE, names = FALSE)
+            })
+            extreme_threshold <- if (is.na(q99)) Inf else q99 * 2
+
             quality_metrics <- list(
-                total_observations = length(calculated_time),
+                total_observations = total_obs,
                 missing_values = sum(is.na(calculated_time)),
-                negative_intervals = sum(calculated_time < 0, na.rm = TRUE),
-                zero_intervals = sum(calculated_time == 0, na.rm = TRUE),
-                extreme_values = sum(calculated_time > quantile(calculated_time, 0.99, na.rm = TRUE) * 2, na.rm = TRUE),
+                negative_intervals = if (non_missing > 0) sum(calculated_time < 0, na.rm = TRUE) else 0,
+                zero_intervals = if (non_missing > 0) sum(calculated_time == 0, na.rm = TRUE) else 0,
+                extreme_values = if (is.finite(extreme_threshold)) sum(calculated_time > extreme_threshold, na.rm = TRUE) else 0,
                 missing_start_dates = sum(is.na(start_dates)),
                 missing_end_dates = sum(is.na(end_dates)),
                 future_dates = sum(start_dates > Sys.Date(), na.rm = TRUE) + sum(end_dates > Sys.Date(), na.rm = TRUE)
@@ -291,6 +370,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Generate quality warnings
             warnings <- character()
+            
+            if (non_missing == 0) {
+                warnings <- c(warnings, "No valid time intervals after parsing start/end dates.")
+            }
             
             if (quality_metrics$negative_intervals > 0) {
                 warnings <- c(warnings, paste(quality_metrics$negative_intervals, "negative time intervals detected (end date before start date)"))
@@ -321,6 +404,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                             fu_date = NULL,
                                             time_format = "ymd",
                                             output_unit = "months",
+                                            time_basis = "standardized",
                                             landmark_time = NULL,
                                             timezone_setting = "system") {
 
@@ -328,7 +412,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.validateInputData(data, dx_date, fu_date)
 
             # Detect date format if needed
-            detected_format <- private$.detectDateFormat(data[[dx_date]], time_format)
+            detected_format <- private$.detectDateFormat(
+                data[[dx_date]],
+                data[[fu_date]],
+                specified_format = time_format,
+                start_name = dx_date,
+                end_name = fu_date
+            )
 
             # Convert timezone setting to lubridate format
             tz <- if (timezone_setting == "utc") "UTC" else ""
@@ -336,6 +426,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Parse dates with enhanced error handling
             start_dates <- private$.parseDate(data[[dx_date]], detected_format, tz = tz)
             end_dates <- private$.parseDate(data[[fu_date]], detected_format, tz = tz)
+
+            # Validate parse success for both columns
+            private$.validateParsedDates(start_dates, data[[dx_date]], dx_date, detected_format)
+            private$.validateParsedDates(end_dates, data[[fu_date]], fu_date, detected_format)
 
             # CRITICAL FIX: Validate parsing success
             if (all(is.na(start_dates)) || all(is.na(end_dates))) {
@@ -349,35 +443,74 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Calculate time intervals
-            calculated_time <- private$.calculateTimeIntervals(start_dates, end_dates, output_unit)
+            calculated_time_raw <- if (identical(time_basis, "calendar")) {
+                private$.calculateCalendarIntervals(start_dates, end_dates, output_unit)
+            } else {
+                private$.calculateTimeIntervals(start_dates, end_dates, output_unit)
+            }
+
+            if (all(is.na(calculated_time_raw))) {
+                stop("No valid time intervals could be calculated; please verify start/end dates and selected format.")
+            }
+
+            # Preserve original parsed vectors for quality assessment
+            start_dates_raw <- start_dates
+            end_dates_raw <- end_dates
 
             # Apply data quality filters if requested (combined for performance)
             original_data <- data
-            valid_idx <- rep(TRUE, length(calculated_time))
+            valid_idx <- rep(TRUE, length(calculated_time_raw))
             filter_applied <- FALSE
+            calculated_time <- calculated_time_raw
+            removed_negative <- 0
+            removed_extreme <- 0
+            extreme_threshold <- NA
+
+            # Explicitly handle negative intervals before any filtering
+            negative_idx <- which(!is.na(calculated_time_raw) & calculated_time_raw < 0)
+            if (length(negative_idx) > 0 && !self$options$remove_negative) {
+                example_rows <- head(negative_idx, 3)
+                examples <- paste0(
+                    "Row ", example_rows, ": Start=", format(start_dates_raw[example_rows]),
+                    ", End=", format(end_dates_raw[example_rows])
+                )
+                stop(glue::glue(
+                    "Negative time intervals detected (end date before start date) in {length(negative_idx)} rows.\n",
+                    "Please correct the dates or enable 'Remove Negative Intervals'.\n",
+                    "Examples:\n{paste(examples, collapse = '\\n')}"
+                ))
+            }
 
             if (self$options$remove_negative) {
-                valid_idx <- valid_idx & (calculated_time >= 0 | is.na(calculated_time))
+                removed_negative <- length(negative_idx)
+                valid_idx <- valid_idx & (calculated_time_raw >= 0 | is.na(calculated_time_raw))
                 filter_applied <- TRUE
             }
 
             if (self$options$remove_extreme) {
-                q99 <- quantile(calculated_time, 0.99, na.rm = TRUE)
-                threshold <- q99 * self$options$extreme_multiplier
-                valid_idx <- valid_idx & (calculated_time <= threshold | is.na(calculated_time))
-                filter_applied <- TRUE
+                suppressWarnings({
+                    q99 <- quantile(calculated_time_raw, 0.99, na.rm = TRUE, names = FALSE)
+                })
+                if (!is.na(q99) && is.finite(q99)) {
+                    extreme_threshold <- q99 * self$options$extreme_multiplier
+                    removed_extreme <- sum(calculated_time_raw > extreme_threshold, na.rm = TRUE)
+                    valid_idx <- valid_idx & (calculated_time_raw <= extreme_threshold | is.na(calculated_time_raw))
+                    filter_applied <- TRUE
+                }
             }
 
             # Apply combined filter in single operation
             if (filter_applied && !all(valid_idx)) {
-                calculated_time <- calculated_time[valid_idx]
+                calculated_time <- calculated_time_raw[valid_idx]
                 data <- data[valid_idx, ]
                 start_dates <- start_dates[valid_idx]
                 end_dates <- end_dates[valid_idx]
+            } else {
+                calculated_time <- calculated_time_raw
             }
 
             # Assess data quality
-            quality_assessment <- private$.assessDataQuality(calculated_time, start_dates, end_dates)
+            quality_assessment <- private$.assessDataQuality(calculated_time_raw, start_dates_raw, end_dates_raw)
             
             # Apply landmark analysis if specified
             landmark_result <- private$.applyLandmarkAnalysis(calculated_time, data, landmark_time, output_unit)
@@ -388,7 +521,12 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 quality = quality_assessment,
                 landmark = landmark_result,
                 original_data = data,
-                detected_format = detected_format
+                detected_format = detected_format,
+                filter = list(
+                    removed_negative = removed_negative,
+                    removed_extreme = removed_extreme,
+                    extreme_threshold = extreme_threshold
+                )
             ))
         },
 
@@ -418,6 +556,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 fu_date = self$options$fu_date,
                 time_format = self$options$time_format,
                 output_unit = self$options$output_unit,
+                time_basis = self$options$time_basis,
                 landmark_time = if(self$options$use_landmark) self$options$landmark_time else NULL,
                 timezone_setting = self$options$timezone
             )
@@ -531,18 +670,44 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 time_values <- calculated_times  # fallback if it's already a vector
             }
             
+            filter_info <- if (is.list(calculated_times) && "filter" %in% names(calculated_times)) {
+                calculated_times$filter
+            } else {
+                list(removed_negative = 0, removed_extreme = 0, extreme_threshold = NA)
+            }
+            landmark_info <- if (is.list(calculated_times) && "landmark" %in% names(calculated_times)) {
+                calculated_times$landmark
+            } else {
+                list(excluded_count = 0, landmark_time = NA)
+            }
+            
+            filter_lines <- c()
+            if (self$options$remove_negative && filter_info$removed_negative > 0) {
+                filter_lines <- c(filter_lines, glue::glue("{filter_info$removed_negative} negative interval(s) removed"))
+            }
+            if (self$options$remove_extreme && filter_info$removed_extreme > 0) {
+                threshold_txt <- if (!is.na(filter_info$extreme_threshold)) round(filter_info$extreme_threshold, 2) else "threshold"
+                filter_lines <- c(filter_lines, glue::glue("{filter_info$removed_extreme} extreme interval(s) removed (> {threshold_txt} {self$options$output_unit})"))
+            }
+            if (self$options$use_landmark && !is.null(landmark_info$excluded_count) && landmark_info$excluded_count > 0) {
+                filter_lines <- c(filter_lines, glue::glue("{landmark_info$excluded_count} participant(s) excluded by landmark ({self$options$landmark_time} {self$options$output_unit})"))
+            }
+            filter_text <- if (length(filter_lines) > 0) paste(filter_lines, collapse = "; ") else "None"
+            
             # Generate summary statistics
-            if (!is.null(time_values) && length(time_values) > 0) {
+            valid_time_values <- if (!is.null(time_values)) time_values[!is.na(time_values)] else numeric(0)
+
+            if (!is.null(time_values) && length(valid_time_values) > 0) {
                 summary_stats <- list(
-                    n = length(time_values),
-                    mean = mean(time_values, na.rm = TRUE),
-                    median = median(time_values, na.rm = TRUE),
-                    sd = sd(time_values, na.rm = TRUE),
-                    min = min(time_values, na.rm = TRUE),
-                    max = max(time_values, na.rm = TRUE),
+                    n = length(valid_time_values),
+                    mean = mean(valid_time_values, na.rm = TRUE),
+                    median = median(valid_time_values, na.rm = TRUE),
+                    sd = sd(valid_time_values, na.rm = TRUE),
+                    min = min(valid_time_values, na.rm = TRUE),
+                    max = max(valid_time_values, na.rm = TRUE),
                     missing = sum(is.na(time_values)),
-                    negative = sum(time_values < 0, na.rm = TRUE),
-                    total_person_time = sum(time_values, na.rm = TRUE)
+                    negative = sum(valid_time_values < 0, na.rm = TRUE),
+                    total_person_time = sum(valid_time_values, na.rm = TRUE)
                 )
 
                 # Calculate confidence intervals if quality metrics requested
@@ -569,13 +734,15 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ""
                 }
 
-                                summary_text <- glue::glue("
+                summary_text <- glue::glue("
 
-                                    <br><b>Time Interval Summary ({self$options$output_unit})</b><br>
+                    <br><b>Time Interval Summary ({self$options$output_unit})</b><br>
 
-                                    Number of observations: {summary_stats$n}<br>
+                    Number of observations: {summary_stats$n}<br>
 
-                                    Total person-time: {round(summary_stats$total_person_time, 2)} person-{self$options$output_unit}<br>
+                    Time basis: {if (self$options$time_basis == 'calendar') 'Calendar-aware (actual month lengths)' else 'Standardized (30.44-day months, 365.25-day years)'}<br>
+
+                    Total person-time: {round(summary_stats$total_person_time, 2)} person-{self$options$output_unit}<br>
 
                                     Mean time: {round(summary_stats$mean, 2)}{ci_text}<br>
 
@@ -583,11 +750,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                                     Standard deviation: {round(summary_stats$sd, 2)}<br>
 
-                                    Range: {round(summary_stats$min, 2)} to {round(summary_stats$max, 2)}<br>
+                    Range: {round(summary_stats$min, 2)} to {round(summary_stats$max, 2)}<br>
 
-                                    Missing values: {summary_stats$missing}<br>
+                    Missing values: {summary_stats$missing}<br>
 
-                                    {if(summary_stats$negative > 0) paste('Warning:', summary_stats$negative, 'negative time intervals detected') else ''}
+                    Filters applied: {filter_text}<br>
+
+                    {if(summary_stats$negative > 0) paste('Warning:', summary_stats$negative, 'negative time intervals detected') else ''}
 
                 
 
@@ -631,7 +800,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Generate natural-language summary if requested
-            if (self$options$show_summary && !is.null(time_values) && length(time_values) > 0) {
+            if (self$options$show_summary && length(valid_time_values) > 0) {
                 n_obs <- summary_stats$n
                 mean_time <- round(summary_stats$mean, 1)
                 median_time <- round(summary_stats$median, 1)
@@ -817,6 +986,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>",
                             "</tr>",
                         "</table>",
+
+                        "{if (length(filter_lines) > 0) paste0('<p><strong>Filters applied:</strong> ', filter_text, '</p>') else ''}",
 
                         "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong>⚠️ Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
                     "</div>"

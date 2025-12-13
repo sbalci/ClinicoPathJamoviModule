@@ -9,6 +9,27 @@ items:
       type: Html
       visible: true
 
+    - name: variance
+      title: Variance Explained
+      type: Table
+      clearWith:
+        - vars
+        - ncomp
+        - center
+        - scale
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+          type: number
+          format: zto
+        - name: cumulative
+          title: Cumulative
+          type: number
+          format: zto
+
     - name: heatmap
       title: Loading Heatmap
       type: Image
@@ -29,6 +50,22 @@ items:
         - colorlow
         - colormid
         - colorhigh
+        - plotwidth
+        - plotheight
+
+    - name: scree
+      title: Variance Explained Plot
+      type: Image
+      description: Scree/variance explained plot
+      width: 600
+      height: 450
+      renderFun: .scree
+      requiresData: true
+      clearWith:
+        - vars
+        - ncomp
+        - center
+        - scale
         - plotwidth
         - plotheight
 

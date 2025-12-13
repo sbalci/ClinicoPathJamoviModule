@@ -330,6 +330,36 @@ children:
         name: exportClusters
         label: Export cluster assignments to dataset
   - type: CollapseBox
+    label: Marker-Level Clustering
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: performMarkerClustering
+        label: Perform marker-level clustering
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Marker Clustering Distance
+          - type: ComboBox
+            name: markerClusteringMethod
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Marker Linkage Method
+          - type: ComboBox
+            name: markerLinkage
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: markerSignificanceTest
+            label: Test Marker Associations
+          - type: CheckBox
+            name: markerCutHeight
+            label: Auto-detect Marker Groups
+  - type: CollapseBox
     label: Clinical Correlations (optional)
     collapsed: true
     children:
@@ -357,11 +387,6 @@ children:
                 name: survivalEvent
                 maxItemCount: 1
                 isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: performMarkerClustering
   - type: CollapseBox
     label: Accessibility & Display
     collapsed: true
@@ -389,20 +414,3 @@ children:
       - type: CheckBox
         name: showTechnicalNotes
         label: Show technical notes
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: markerClusteringMethod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: markerLinkage
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: markerSignificanceTest
-      - type: CheckBox
-        name: markerCutHeight

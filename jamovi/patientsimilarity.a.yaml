@@ -1,7 +1,7 @@
 ---
 name:  patientsimilarity
 title: Patient Similarity Clustering
-menuGroup: OncoPathT2
+menuGroup: OncoPathT1
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: 't-SNE, UMAP, PCA - Discover Patient Subgroups'
 version: '0.0.31'
@@ -72,6 +72,14 @@ options:
             Continuous variables to use for calculating patient similarity.
             These will be used to compute distances between patients.
             Categorical variables should be converted to numeric or one-hot encoded.
+
+    - name: seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: >
+            Random seed for reproducibility of t-SNE, UMAP, and clustering results.
 
 # Method ----
 
@@ -211,6 +219,26 @@ options:
           R: >
             Number of clusters for k-means or hierarchical clustering.
             For DBSCAN, this is ignored.
+
+    - name: dbscan_eps
+      title: DBSCAN Epsilon (eps)
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 10.0
+      description:
+          R: >
+            The radius of the neighborhood around a point (eps) for DBSCAN.
+
+    - name: dbscan_minpts
+      title: DBSCAN MinPts
+      type: Integer
+      default: 5
+      min: 2
+      max: 100
+      description:
+          R: >
+            The minimum number of points required to form a dense region (MinPts) for DBSCAN.
 
     - name: showClusterStats
       title: Show Cluster Statistics

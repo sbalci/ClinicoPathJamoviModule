@@ -41,6 +41,16 @@ children:
                 isTarget: true
                 label: Last Follow-up Date/Time
               - type: VariablesListBox
+                name: progressionDate
+                maxItemCount: 1
+                isTarget: true
+                label: Progression Date/Time (Optional)
+              - type: VariablesListBox
+                name: deathDate
+                maxItemCount: 1
+                isTarget: true
+                label: Death Date/Time (Optional)
+              - type: VariablesListBox
                 name: treatmentEnd
                 maxItemCount: 1
                 isTarget: true

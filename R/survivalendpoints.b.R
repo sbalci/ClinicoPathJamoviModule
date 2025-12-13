@@ -327,29 +327,39 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             # 2. Check for Imputed Events (Event = 1 but Date is Missing)
             # PFS / TTP Imputation
             if ((self$options$calculatePFS || self$options$calculateTTP) && 
-                !is.null(progressionEvent) && !is.null(progressionDate)) {
+                !is.null(progressionEvent)) {
                 
-                imputed_prog <- sum(progressionEvent == 1 & is.na(progressionDate), na.rm = TRUE)
-                if (imputed_prog > 0) {
-                    warnings <- c(warnings, paste0(
-                        "<strong>Progression Date Missing:</strong> ", imputed_prog, 
-                        " patient(s) have a progression event but no date. ",
-                        "Time was imputed using the Last Follow-up Date. This may overestimate time-to-event."
-                    ))
+                if (is.null(progressionDate)) {
+                    warnings <- c(warnings,
+                        "<strong>Progression Date Not Provided:</strong> Progression events without dates were timed to Last Follow-up. Provide progression dates for accurate PFS/TTP.")
+                } else {
+                    imputed_prog <- sum(progressionEvent == 1 & is.na(progressionDate), na.rm = TRUE)
+                    if (imputed_prog > 0) {
+                        warnings <- c(warnings, paste0(
+                            "<strong>Progression Date Missing:</strong> ", imputed_prog, 
+                            " patient(s) have a progression event but no date. ",
+                            "Time was imputed using the Last Follow-up Date. This may overestimate time-to-event."
+                        ))
+                    }
                 }
             }
             
             # OS Imputation
             if ((self$options$calculateOS || self$options$calculatePFS) && 
-                !is.null(deathEvent) && !is.null(deathDate)) {
+                !is.null(deathEvent)) {
                 
-                imputed_death <- sum(deathEvent == 1 & is.na(deathDate), na.rm = TRUE)
-                if (imputed_death > 0) {
-                    warnings <- c(warnings, paste0(
-                        "<strong>Death Date Missing:</strong> ", imputed_death, 
-                        " patient(s) have a death event but no date. ",
-                        "Time was imputed using the Last Follow-up Date."
-                    ))
+                if (is.null(deathDate)) {
+                    warnings <- c(warnings,
+                        "<strong>Death Date Not Provided:</strong> Death events without dates were timed to Last Follow-up. Provide death dates for accurate OS/PFS.")
+                } else {
+                    imputed_death <- sum(deathEvent == 1 & is.na(deathDate), na.rm = TRUE)
+                    if (imputed_death > 0) {
+                        warnings <- c(warnings, paste0(
+                            "<strong>Death Date Missing:</strong> ", imputed_death, 
+                            " patient(s) have a death event but no date. ",
+                            "Time was imputed using the Last Follow-up Date."
+                        ))
+                    }
                 }
             }
             

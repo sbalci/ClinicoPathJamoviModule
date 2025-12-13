@@ -6,6 +6,7 @@
 #' @import dplyr
 #' @import tidyr
 #' @import pracma
+#' @import scales
 #'
 
 pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -19,6 +20,8 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .permResults = NULL,
         .originalLoadings = NULL,
         .resultsDF = NULL,
+        .rowInfo = NULL,
+        .varianceInfo = NULL,
 
         # init ----
 
@@ -29,6 +32,7 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
 
             self$results$loadingplot$setSize(plotwidth, plotheight)
+            self$results$scree$setSize(plotwidth, plotheight)
 
         },
 
@@ -85,6 +89,40 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Run permutation test ----
             private$.runPermutationTest()
 
+            # Informational summary for users ----
+            row_info <- private$.rowInfo
+            pca <- private$.pcaResults
+            ncomp_available <- ncol(pca$rotation)
+            ncomp_used <- min(self$options$ncomp, ncomp_available)
+            trunc_note <- if (self$options$ncomp > ncomp_available) {
+                glue::glue("<br><b>Requested {self$options$ncomp} components but only {ncomp_available} are available; testing PC1–PC{ncomp_available}.</b>")
+            } else {
+                ""
+            }
+            center_note <- if (!isTRUE(self$options$center) || !isTRUE(self$options$scale)) {
+                "<br><b>Note:</b> Center/scale disabled; loadings reflect raw variance, not correlations."
+            } else {
+                ""
+            }
+            var_note <- if (!is.null(private$.varianceInfo)) {
+                shown <- head(private$.varianceInfo, min(3, nrow(private$.varianceInfo)))
+                paste0("<br>Variance explained: ",
+                       paste0("PC", shown$component, "=", sprintf('%.1f%%', shown$variance * 100), collapse = "; "),
+                       ". Cumulative PC1–PC", max(shown$component), ": ",
+                       sprintf('%.1f%%', shown$cumulative[length(shown$cumulative)] * 100), ".")
+            } else {
+                ""
+            }
+            todo <- glue::glue(
+                "<br>PCA loading test run with {length(self$options$vars)} variables; {row_info$rows_used} observations used (removed {row_info$rows_removed} rows with missing values).",
+                "<br>Permutations: {self$options$nperm} per variable; Components tested: PC1–PC{ncomp_used}.",
+                "{trunc_note}",
+                "{center_note}",
+                "{var_note}",
+                "<br><hr>"
+            )
+            self$results$todo$setContent(todo)
+
         },
 
         # Run Permutation Test ----
@@ -101,7 +139,13 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             pca_data <- mydata[, vars, drop = FALSE]
 
             # Remove missing values
+            n_rows_before <- nrow(pca_data)
             pca_data <- na.omit(pca_data)
+            private$.rowInfo <- list(
+                rows_total = n_rows_before,
+                rows_used = nrow(pca_data),
+                rows_removed = n_rows_before - nrow(pca_data)
+            )
 
             # CRITICAL FIX: Validate numeric inputs (prevent silent factor coercion)
             non_numeric <- sapply(pca_data, function(x) !is.numeric(x))
@@ -122,6 +166,11 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
                 stop('Insufficient data for PCA. Need at least 3 complete observations.')
+            }
+
+            # Optional seed for reproducibility
+            if (!is.null(self$options$seed)) {
+                set.seed(self$options$seed)
             }
 
             # CRITICAL FIX: Warn if centering/scaling disabled
@@ -148,9 +197,13 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Extract standardized loadings
             original_loadings <- private$.stand_loadings(pca, pca_matrix)
+            private$.varianceInfo <- pcaloadingtest_variance_info(pca, self$options$ncomp)
 
             # Number of components to test
             ndim <- min(self$options$ncomp, ncol(original_loadings))
+            if (ndim < 1) {
+                stop('No principal components available to test.')
+            }
 
             # Checkpoint
             private$.checkpoint()
@@ -265,9 +318,11 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.permResults <- all_perm
             private$.originalLoadings <- original_loadings
             private$.resultsDF <- results_df
+            private$.varianceInfo <- pcaloadingtest_variance_info(pca, self$options$ncomp)
 
             # Populate results table
             private$.populateTable()
+            private$.variance()
 
         },
 
@@ -297,8 +352,12 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Filter by selected component if specified
             if (self$options$componentfilter > 0) {
+                comp_requested <- paste0('PC', self$options$componentfilter)
+                if (!comp_requested %in% results_df$component) {
+                    comp_requested <- unique(results_df$component)[1]
+                }
                 results_df <- results_df %>%
-                    filter(.data$component == paste0('PC', self$options$componentfilter))
+                    filter(.data$component == comp_requested)
             }
 
             for (i in 1:nrow(results_df)) {
@@ -332,7 +391,8 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Filter by component if needed
             comp_to_plot <- if (self$options$componentfilter > 0) {
-                paste0('PC', self$options$componentfilter)
+                comp_req <- paste0('PC', self$options$componentfilter)
+                if (comp_req %in% results_df$component) comp_req else unique(results_df$component)[1]
             } else {
                 unique(results_df$component)[1]
             }
@@ -374,6 +434,61 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(p)
             TRUE
 
+        },
+
+        # variance table ----
+        .variance = function(...) {
+
+            if (is.null(private$.varianceInfo))
+                return()
+
+            var_df <- private$.varianceInfo
+            table <- self$results$variance
+            for (i in seq_len(nrow(var_df))) {
+                table$addRow(rowKey = i, values = list(
+                    component = paste0('PC', var_df$component[i]),
+                    variance = var_df$variance[i],
+                    cumulative = var_df$cumulative[i]
+                ))
+            }
+        },
+
+        # scree plot ----
+        .scree = function(image, ggtheme, theme, ...) {
+
+            if (is.null(private$.varianceInfo))
+                return()
+
+            var_df <- private$.varianceInfo
+
+            s_plot <- ggplot(var_df, aes(x = factor(component, levels = component),
+                                         y = variance)) +
+                geom_col(fill = self$options$colorhigh, alpha = 0.8) +
+                geom_line(aes(y = cumulative), group = 1, color = self$options$colorlow) +
+                geom_point(aes(y = cumulative), color = self$options$colorlow) +
+                scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+                labs(x = 'Component', y = 'Variance explained (proportion)',
+                     title = 'Variance Explained') +
+                theme_minimal()
+
+            print(s_plot)
+            TRUE
         }
     )
 )
+
+#' Variance explained helper for pcaloadingtest
+#'
+#' @keywords internal
+pcaloadingtest_variance_info <- function(pca, ncomp) {
+    var <- pca$sdev ^ 2
+    prop <- var / sum(var)
+    cum <- cumsum(prop)
+    n_use <- min(length(prop), ncomp)
+    data.frame(
+        component = seq_len(n_use),
+        variance = prop[seq_len(n_use)],
+        cumulative = cum[seq_len(n_use)],
+        stringsAsFactors = FALSE
+    )
+}

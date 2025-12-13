@@ -40,7 +40,8 @@ MockOptions <- R6::R6Class("MockOptions",
         compareModels = NULL,
         weightedAUC = NULL,
         clinicalDecisionRule = NULL,
-        decisionRuleThreshold = NULL,
+        decisionRuleVar = NULL,
+        decisionRulePositive = NULL,
         decisionRuleLabel = NULL,
         showClinicalImpactPlot = NULL,
         showNetBenefitCI = NULL,
@@ -83,7 +84,8 @@ MockOptions <- R6::R6Class("MockOptions",
             compareModels = FALSE,
             weightedAUC = FALSE,
             clinicalDecisionRule = FALSE,
-            decisionRuleThreshold = 0.15,
+            decisionRuleVar = NULL,
+            decisionRulePositive = NULL,
             decisionRuleLabel = "Clinical Rule",
             showClinicalImpactPlot = FALSE,
             showNetBenefitCI = FALSE,
@@ -125,7 +127,8 @@ MockOptions <- R6::R6Class("MockOptions",
             self$compareModels <- compareModels
             self$weightedAUC <- weightedAUC
             self$clinicalDecisionRule <- clinicalDecisionRule
-            self$decisionRuleThreshold <- decisionRuleThreshold
+            self$decisionRuleVar <- decisionRuleVar
+            self$decisionRulePositive <- decisionRulePositive
             self$decisionRuleLabel <- decisionRuleLabel
             self$showClinicalImpactPlot <- showClinicalImpactPlot
             self$showNetBenefitCI <- showNetBenefitCI

@@ -8,6 +8,44 @@ items:
       title: Instructions
       type: Html
       visible: true
+      
+    - name: warnings
+      title: Analysis Messages
+      type: Html
+      visible: true
+      clearWith:
+        - data
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+
+    - name: agreement_stats
+      title: Agreement Statistics (Cohen's Kappa)
+      type: Table
+      visible: true
+      columns:
+        - name: test_pair
+          title: Test Pair
+          type: text
+        - name: kappa
+          title: Kappa
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: agreement
+          title: Agreement
+          type: number
+          format: pc
 
     - name: clinical_summary
       title: Clinical Summary

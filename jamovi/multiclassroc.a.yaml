@@ -1,7 +1,7 @@
 ---
 name: multiclassroc
 title: Multi-class ROC Analysis
-menuGroup: meddecideT4
+menuGroup: meddecideD
 menuSubgroup: Medical Decision Analysis
 menuTitle: Multi-class ROC Analysis
 menuSubtitle: ROC curves for >2 diagnostic classes

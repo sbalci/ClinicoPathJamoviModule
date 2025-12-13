@@ -19,6 +19,11 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjsyndromicplotClass",
     inherit = jjsyndromicplotBase,
     private = list(
+        .pcaResults = NULL,
+        .pcaData = NULL,
+        .presetSettings = NULL,
+        .componentToUse = NULL,
+        .presetMessage = "",
 
         # init ----
 
@@ -35,6 +40,17 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # run ----
 
         .run = function() {
+
+            # Reset messages each run
+            self$results$warnings$setContent("")
+            self$results$warnings$setVisible(FALSE)
+            self$results$explanations$setVisible(self$options$showExplanations)
+            self$results$explanations$setContent("")
+            private$.pcaResults <- NULL
+            private$.pcaData <- NULL
+            private$.presetSettings <- NULL
+            private$.componentToUse <- NULL
+            private$.presetMessage <- ""
 
             # Initial Message ----
             if (length(self$options$vars) < 3) {
@@ -88,11 +104,15 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Apply clinical preset ----
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalPreset
-
-            # CRITICAL FIX: Make preset mutations transparent
-            if (preset == "custom") {
-                return()  # No changes for custom
-            }
+            settings <- list(
+                cutoff = self$options$cutoff,
+                arrowsize = self$options$arrowsize,
+                textsize = self$options$textsize,
+                varorder = self$options$varorder,
+                colorlow = self$options$colorlow,
+                colormid = self$options$colormid,
+                colorhigh = self$options$colorhigh
+            )
 
             preset_message <- NULL
 
@@ -108,16 +128,16 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li>Variable order: <strong>By absolute loading (decreasing)</strong></li>",
                     "<li>Color scheme: <strong>Blue-White-Red gradient</strong></li>",
                     "</ul>",
-                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                    "<p style='margin-bottom:0;'><em>Note: These settings override the UI controls. To use custom values, select 'None' or 'Custom'.</em></p>",
                     "</div>"
                 )
-                self$options$set("cutoff", 0.4)
-                self$options$set("arrowsize", 12)
-                self$options$set("textsize", 10)
-                self$options$set("varorder", "absdecreasing")
-                self$options$set("colorlow", "blue")
-                self$options$set("colormid", "white")
-                self$options$set("colorhigh", "red")
+                settings$cutoff <- 0.4
+                settings$arrowsize <- 12
+                settings$textsize <- 10
+                settings$varorder <- "absdecreasing"
+                settings$colorlow <- "blue"
+                settings$colormid <- "white"
+                settings$colorhigh <- "red"
 
             } else if (preset == "disease_subtyping") {
                 preset_message <- paste0(
@@ -131,28 +151,23 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li>Variable order: <strong>By loading value (decreasing)</strong></li>",
                     "<li>Color scheme: <strong>Green-White-Purple gradient</strong></li>",
                     "</ul>",
-                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                    "<p style='margin-bottom:0;'><em>Note: These settings override the UI controls. To use custom values, select 'None' or 'Custom'.</em></p>",
                     "</div>"
                 )
-                self$options$set("cutoff", 0.3)
-                self$options$set("arrowsize", 15)
-                self$options$set("textsize", 8)
-                self$options$set("varorder", "decreasing")
-                self$options$set("colorlow", "green")
-                self$options$set("colormid", "white")
-                self$options$set("colorhigh", "purple")
+                settings$cutoff <- 0.3
+                settings$arrowsize <- 15
+                settings$textsize <- 8
+                settings$varorder <- "decreasing"
+                settings$colorlow <- "green"
+                settings$colormid <- "white"
+                settings$colorhigh <- "purple"
             }
+
+            private$.presetSettings <- settings
 
             # Display preset notification
             if (!is.null(preset_message)) {
-                # Append to existing warnings if any
-                current_warnings <- self$results$warnings$state
-                if (is.null(current_warnings) || current_warnings == "") {
-                    self$results$warnings$setContent(preset_message)
-                } else {
-                    self$results$warnings$setContent(paste0(current_warnings, preset_message))
-                }
-                self$results$warnings$setVisible(TRUE)
+                private$.presetMessage <- preset_message
             }
         },
 
@@ -171,9 +186,13 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     Variables with high absolute loadings are the most important for that component.
                 </p>
                 <p>
-                    In the syndromic plot, the arrows represent the variables.
-                    The width and color of the arrows represent the magnitude and direction of the loadings.
-                    Positive loadings are shown in one color, and negative loadings are shown in another.
+                    In the syndromic plot, the <strong>arrows</strong> represent the variables.
+                    The <strong>width</strong> of the arrow represents the magnitude (absolute strength) of the loading.
+                    The <strong>color</strong> represents the direction:
+                    <ul>
+                        <li><strong>High Color (e.g. Red)</strong>: Positive loading (variable increases with PC).</li>
+                        <li><strong>Low Color (e.g. Blue)</strong>: Negative loading (variable decreases with PC).</li>
+                    </ul>
                 </p>"
             )
         },
@@ -188,8 +207,49 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
             pca_data <- mydata[, vars, drop = FALSE]
 
-            # Remove missing values
-            pca_data <- na.omit(pca_data)
+            # CRITICAL FIX: Handle missing data and report N
+            initial_n <- nrow(pca_data)
+            n_vars_initial <- ncol(pca_data)
+            warning_msgs <- character()
+
+            # Prepend Preset Message if exists
+            if (nchar(private$.presetMessage) > 0) {
+                warning_msgs <- c(warning_msgs, private$.presetMessage)
+            }
+
+            # Handle Missing Data
+            missing_method <- if (!is.null(self$options$missing)) self$options$missing else "listwise"
+
+            if (missing_method == "mean_imputation") {
+                # Mean Imputation
+                for (col in names(pca_data)) {
+                    if (any(is.na(pca_data[[col]]))) {
+                        pca_data[[col]][is.na(pca_data[[col]])] <- mean(pca_data[[col]], na.rm = TRUE)
+                    }
+                }
+                # No rows dropped
+            } else {
+                # Listwise Deletion (default)
+                pca_data <- na.omit(pca_data)
+            }
+
+            final_n <- nrow(pca_data)
+            n_vars_final <- ncol(pca_data) # Will update if zero-var removed
+
+            # Data Summary Message
+            dropped_n <- initial_n - final_n
+            summary_msg <- paste0(
+                "<div style='background:#f5f5f5; padding:10px; margin:10px 0; border:1px solid #ddd;'>",
+                "<strong>Data Summary:</strong>",
+                "<ul>",
+                "<li>Initial N: ", initial_n, "</li>",
+                "<li>Analyzed N: ", final_n, " (", dropped_n, " cases removed)</li>",
+                "<li>Missing Data Method: ", ifelse(missing_method=="mean_imputation", "Mean Imputation", "Listwise Deletion"), "</li>",
+                "</ul>",
+                "</div>"
+            )
+            warning_msgs <- c(warning_msgs, summary_msg)
+
 
             # CRITICAL FIX: Validate input types BEFORE coercion
             # Check for categorical/factor variables
@@ -204,15 +264,14 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 else if (is.numeric(col_data)) {
                     unique_vals <- length(unique(col_data[!is.na(col_data)]))
                     if (unique_vals <= 5 && unique_vals < nrow(pca_data) * 0.1) {
-                        warning_msg <- paste0(
-                            "⚠️ Variable '", var_name, "' has only ", unique_vals,
-                            " unique values. It may be categorical rather than continuous. ",
-                            "PCA assumes continuous variables."
+                        warning_msgs <- c(
+                            warning_msgs,
+                            paste0(
+                                "<p>⚠️ Variable '<code>", var_name, "</code>' has only ",
+                                unique_vals, " unique values. It may be categorical rather than ",
+                                "continuous. PCA assumes continuous variables.</p>"
+                            )
                         )
-                        self$results$warnings$setContent(
-                            paste0(self$results$warnings$state, "<p>", warning_msg, "</p>")
-                        )
-                        self$results$warnings$setVisible(TRUE)
                     }
                 }
             }
@@ -238,6 +297,28 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Convert to numeric matrix (now safe after validation)
             pca_matrix <- as.matrix(sapply(pca_data, as.numeric))
 
+            # Flag and drop zero-variance variables
+            sd_vals <- apply(pca_matrix, 2, sd)
+            zero_var_names <- names(sd_vals[sd_vals == 0 | is.na(sd_vals)])
+            if (length(zero_var_names) > 0) {
+                warning_msgs <- c(
+                    warning_msgs,
+                    paste0(
+                        "<p>⚠️ The following variables have zero variance and were removed before PCA: ",
+                        paste0("<code>", zero_var_names, "</code>", collapse = ", "),
+                        ".</p>"
+                    )
+                )
+                keep_vars <- sd_vals > 0 & !is.na(sd_vals)
+                pca_matrix <- pca_matrix[, keep_vars, drop = FALSE]
+                vars <- vars[keep_vars]
+                if (length(vars) < 3) {
+                    self$results$warnings$setContent(paste0(warning_msgs, collapse = ""))
+                    self$results$warnings$setVisible(TRUE)
+                    return()
+                }
+            }
+
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
                 stop('Insufficient data for PCA. Need at least 3 complete observations.')
@@ -249,24 +330,32 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CRITICAL FIX: Check component bounds
             n_components <- ncol(pca$rotation)
             requested_component <- self$options$component
+            component_to_use <- requested_component
 
             if (requested_component > n_components) {
-                warning_msg <- paste0(
-                    "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Component Number Out of Bounds</h4>",
-                    "<p><strong>Requested component ", requested_component,
-                    " exceeds available components.</strong></p>",
-                    "<p>PCA with ", length(vars), " variables produced ", n_components,
-                    " components (PC1 through PC", n_components, ").</p>",
-                    "<p><strong>Action:</strong> Component has been reset to PC1. ",
-                    "Please select a component between 1 and ", n_components, ".</p>",
-                    "</div>"
+                warning_msgs <- c(
+                    warning_msgs,
+                    paste0(
+                        "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
+                        "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Component Number Out of Bounds</h4>",
+                        "<p><strong>Requested component ", requested_component,
+                        " exceeds available components.</strong></p>",
+                        "<p>PCA with ", length(vars), " variables produced ", n_components,
+                        " components (PC1 through PC", n_components, ").</p>",
+                        "<p><strong>Action:</strong> Component has been reset to PC1. ",
+                        "Please select a component between 1 and ", n_components, ".</p>",
+                        "</div>"
+                    )
                 )
-                self$results$warnings$setContent(warning_msg)
-                self$results$warnings$setVisible(TRUE)
 
-                # Reset to safe value
-                self$options$set("component", 1)
+                component_to_use <- 1
+            }
+
+            private$.componentToUse <- component_to_use
+
+            if (length(warning_msgs) > 0) {
+                self$results$warnings$setContent(paste0(warning_msgs, collapse = ""))
+                self$results$warnings$setVisible(TRUE)
             }
 
             # Store PCA results for plotting
@@ -291,7 +380,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             loadings <- private$.stand_loadings(pca, pca_data)
 
             # Get component to display
-            component <- self$options$component
+            component <- if (!is.null(private$.componentToUse)) private$.componentToUse else self$options$component
 
             # Create results table
             table <- self$results$loadings
@@ -351,19 +440,39 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             pca_data <- private$.pcaData
 
             # Get parameters
-            component <- self$options$component
-            cutoff <- self$options$cutoff
-            arrow_size_multi <- self$options$arrowsize
-            text_size <- self$options$textsize
+            component <- if (!is.null(private$.componentToUse)) private$.componentToUse else self$options$component
+            settings <- private$.presetSettings
+            if (is.null(settings)) {
+                settings <- list(
+                    cutoff = self$options$cutoff,
+                    arrowsize = self$options$arrowsize,
+                    textsize = self$options$textsize,
+                    varorder = self$options$varorder,
+                    colorlow = self$options$colorlow,
+                    colormid = self$options$colormid,
+                    colorhigh = self$options$colorhigh
+                )
+            }
+
+            cutoff <- settings$cutoff
+            arrow_size_multi <- settings$arrowsize
+            text_size <- settings$textsize
             repel <- self$options$repel
             plot_legend <- self$options$plotlegend
             plot_cutoff <- self$options$plotcutoff
-            var_order <- self$options$varorder
+            var_order <- switch(
+                settings$varorder,
+                absdecreasing = "absdecreasing",
+                absincreasing = "absincreasing",
+                decreasing = "decreasing",
+                increasing = "increasing",
+                settings$varorder
+            )
 
             # Get colors
-            color_low <- self$options$colorlow
-            color_mid <- self$options$colormid
-            color_high <- self$options$colorhigh
+            color_low <- settings$colorlow
+            color_mid <- settings$colormid
+            color_high <- settings$colorhigh
             colors <- c(color_low, color_mid, color_high)
 
             # Calculate VAF
@@ -402,7 +511,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                           arrow_size_multi = 10,
                                           repel = TRUE, plot_legend = TRUE,
                                           plot_cutoff = TRUE, text_size = 6,
-                                          var_order = 'abs decreasing',
+                                          var_order = 'absdecreasing',
                                           colors = c("steelblue1", "white", "firebrick1")) {
 
             old_scipen <- getOption('scipen')
@@ -416,9 +525,9 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Order variables
-            if (var_order == 'abs decreasing') {
+            if (var_order %in% c('absdecreasing', 'abs decreasing')) {
                 p <- p %>% dplyr::arrange(desc(abs(.data$loading)))
-            } else if (var_order == 'abs increasing') {
+            } else if (var_order %in% c('absincreasing', 'abs increasing')) {
                 p <- p %>% dplyr::arrange(abs(.data$loading))
             } else if (var_order == 'decreasing') {
                 p <- p %>% dplyr::arrange(desc(.data$loading))

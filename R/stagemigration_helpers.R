@@ -1,6 +1,6 @@
 #' Advanced Metrics Calculation for Stage Migration
-#' @importFrom survival coxph Surv concordance AIC BIC survfit
-#' @importFrom stats cor sd quantile complete.cases pnorm pchisq var approx
+#' @importFrom survival coxph Surv concordance survfit
+#' @importFrom stats cor sd quantile complete.cases pnorm pchisq var approx AIC BIC
 #' @importFrom Hmisc rcorrp.cens
 #' @keywords internal
 

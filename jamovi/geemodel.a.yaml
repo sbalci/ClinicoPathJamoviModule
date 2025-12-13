@@ -1,7 +1,7 @@
 ---
 name: geemodel
 title: Generalized Estimating Equations
-menuGroup: OncoPathT4
+menuGroup: OncoPathD
 menuSubgroup: Correlated Data Analysis
 menuTitle: GEE Model
 menuSubtitle: Analyze repeated measures and clustered data

@@ -343,6 +343,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (is.null(preset) || preset == "custom") {
                 return(NULL)  # Use manual settings
             }
+
+            # Advisory note: presets currently provide guidance; verify outputs align with your intent
+            try(jmvcore::note(self$results$migrationOverview,
+                              glue::glue("Clinical preset '{preset}' selected. Presets are advisory; please confirm displayed tables/plots and advanced options match your scenario.")),
+                silent = TRUE)
             
             # Define preset configurations
             preset_configs <- list(
@@ -958,6 +963,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 stop("Event variable contains values that could not be converted to binary (0/1)")
             }
 
+            # Stage-level event counts (for instability warning)
+            stage_event_counts <- tapply(data[["event_binary"]], data[[self$options$oldStage]], sum, na.rm = TRUE)
+            if (any(stage_event_counts < 5)) {
+                warning("Some original stages have fewer than 5 events; migration and survival comparisons may be unstable for those stages.")
+            }
+
             # Ensure binary event coding
             unique_events <- unique(data[["event_binary"]])
             if (length(unique_events) == 0) {
@@ -1029,26 +1040,30 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 )
             }
 
-            # Calculate upstaging and downstaging (for ordinal stages)
+            # Calculate upstaging and downstaging (respect factor order if present)
             upstaging <- 0
             downstaging <- 0
 
-            # Try to extract numeric stage levels for up/down staging calculation
-            old_levels <- suppressWarnings(as.numeric(gsub("[^0-9]", "", rownames(migration_table))))
-            new_levels <- suppressWarnings(as.numeric(gsub("[^0-9]", "", colnames(migration_table))))
+            # Determine ordering maps from factor levels
+            old_level_order <- seq_along(levels(data[[old_stage]]))
+            names(old_level_order) <- levels(data[[old_stage]])
+            new_level_order <- seq_along(levels(data[[new_stage]]))
+            names(new_level_order) <- levels(data[[new_stage]])
 
-            # Check if we have valid numeric levels for both old and new stages
-            old_levels_valid <- !is.na(old_levels) & is.finite(old_levels)
-            new_levels_valid <- !is.na(new_levels) & is.finite(new_levels)
-
-            if (all(old_levels_valid) && all(new_levels_valid) && length(old_levels) > 0 && length(new_levels) > 0) {
+            if (length(old_level_order) > 0 && length(new_level_order) > 0) {
                 for (i in 1:nrow(migration_table)) {
                     for (j in 1:ncol(migration_table)) {
                         if (i != j && migration_table[i, j] > 0) {
-                            if (new_levels[j] > old_levels[i]) {
-                                upstaging <- upstaging + migration_table[i, j]
-                            } else if (new_levels[j] < old_levels[i]) {
-                                downstaging <- downstaging + migration_table[i, j]
+                            old_name <- rownames(migration_table)[i]
+                            new_name <- colnames(migration_table)[j]
+                            old_idx <- old_level_order[[old_name]]
+                            new_idx <- new_level_order[[new_name]]
+                            if (!is.null(old_idx) && !is.null(new_idx)) {
+                                if (new_idx > old_idx) {
+                                    upstaging <- upstaging + migration_table[i, j]
+                                } else if (new_idx < old_idx) {
+                                    downstaging <- downstaging + migration_table[i, j]
+                                }
                             }
                         }
                     }
@@ -2959,6 +2974,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Validate and prepare data
             private$.showProgressIndicator("Validating and preparing data", 2, 5)
             data <- private$.validateData()
+
+            if (isTRUE(self$options$performCompetingRisks)) {
+                jmvcore::note(self$results$migrationOverview,
+                              "Competing risks option is currently not supported in stage migration workflow; proceeding with standard survival analysis.")
+            }
             
             # Apply memory optimization for large datasets
             data <- private$.optimizeMemoryUsage(data)
@@ -11709,10 +11729,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 )
 
                 # Determine x-axis limits
-                max_time <- if (!is.null(time_range) && time_range != "auto") {
-                    as.numeric(time_range)
-                } else {
-                    max(old_surv_data$time, na.rm = TRUE)
+                max_time <- suppressWarnings(as.numeric(time_range))
+                if (is.null(time_range) || time_range == "auto" || is.na(max_time)) {
+                    max_time <- max(old_surv_data$time, na.rm = TRUE)
                 }
 
                 p1 <- ggplot(old_surv_data, aes(x = time, y = surv, color = strata)) +

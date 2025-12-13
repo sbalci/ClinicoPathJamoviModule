@@ -1,7 +1,7 @@
 ---
 name:  jjdotplotstats
 title: Dot Chart
-menuGroup: JJStatsPlotT2
+menuGroup: JJStatsPlotT1
 menuSubgroup: Categorical vs Continuous
 # menuSubtitle: Dot Chart
 version: '0.0.32'
@@ -11,10 +11,10 @@ jas: '1.2'
 
 description:
     main: |
-        Wrapper Function for ggstatsplot::ggdotplotstats and
-        ggstatsplot::grouped_ggdotplotstats to generate dot plots
-        comparing continuous variables between groups with statistical
-        annotations and significance testing.
+        Wrapper Function for ggstatsplot::ggbetweenstats and
+        ggstatsplot::grouped_ggbetweenstats to generate dot-style
+        comparisons of continuous variables between groups with
+        statistical annotations and significance testing.
     R:
         dontrun: false
         usage: |
@@ -350,4 +350,3 @@ options:
             formatting; Clinical: Medical report optimization; Custom: Full control.
 
 ...
-

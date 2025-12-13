@@ -41,6 +41,12 @@ children:
                 enable: (vars)
 
               - type: TextBox
+                name: seed
+                label: Random Seed
+                format: number
+                enable: (vars)
+
+              - type: TextBox
                 name: componentfilter
                 label: Display Component (0 = All)
                 format: number
@@ -70,10 +76,12 @@ children:
             children:
               - type: CheckBox
                 name: center
+                label: Center variables
                 enable: (vars)
 
               - type: CheckBox
                 name: scale
+                label: Scale variables
                 enable: (vars)
 
   - type: CollapseBox

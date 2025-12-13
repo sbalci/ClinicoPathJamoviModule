@@ -65,9 +65,29 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "lollipopClass",
     inherit = lollipopBase,
     private = list(
+        .messages = NULL,
+        
+        # Helper method for message accumulation
+        .accumulateMessage = function(message) {
+            if (is.null(private$.messages)) {
+                private$.messages <- c()
+            }
+            if (!is.null(message) && message != "") {
+                private$.messages <- c(private$.messages, message)
+            }
+        },
+        
+        .resetMessages = function() {
+            private$.messages <- NULL
+            # clearWith handles strict clearing, but we can set empty string
+            self$results$warnings$setContent("")
+        },
         
         # Initialize results and validate dependencies
         .init = function() {
+            # Reset messages for new analysis
+            private$.resetMessages()
+
             # Check for required packages
             missing_packages <- c()
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -116,6 +136,12 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Statistical Integration</strong>: Summary statistics and reference lines</li>
                 </ul>
                 
+                <h5>", .("Data Handling Notes:"), "</h5>
+                <ul>
+                <li>Rows with missing values (NA) in the selected variables will be automatically removed.</li>
+                <li>If your data has multiple rows per group, use the <strong>Data Aggregation</strong> option (Mean/Median/Sum) to avoid over-plotting.</li>
+                </ul>
+
                 <h5>Clinical applications:</h5>
                 <ul>
                 <li>Patient timeline visualization (days to event, treatment progression)</li>
@@ -141,6 +167,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Hide results until data is provided
                 self$results$summary$setVisible(FALSE)
                 self$results$plot$setVisible(FALSE)
+                self$results$warnings$setVisible(FALSE)
             }
         },
         
@@ -158,7 +185,11 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$todo$setVisible(FALSE)
             self$results$summary$setVisible(TRUE)
             self$results$plot$setVisible(TRUE)
+            self$results$warnings$setVisible(TRUE)
             
+            # Reset messages
+            private$.resetMessages()
+
             # Main analysis pipeline with comprehensive error handling
             tryCatch({
                 # Checkpoint before expensive data cleaning
@@ -177,25 +208,50 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Check for potential issues and warnings
                 warnings <- private$.checkForMisuseAndWarnings(data, summary_stats)
-                
-                # Generate and display clinical summary with warnings
-                clinical_summary <- private$.generateClinicalSummary(summary_stats, self$options$dep, self$options$group)
-                
-                # Add warnings if any
                 if (length(warnings) > 0) {
-                    warning_html <- paste0(
-                        "<div class='alert alert-warning' style='margin-top: 10px;'>",
-                        "<h6>", .("Analysis Considerations"), "</h6>",
-                        "<ul>",
-                        paste0("<li>", warnings, "</li>", collapse = ""),
-                        "</ul>",
-                        "</div>"
-                    )
-                    clinical_summary <- paste0(clinical_summary, warning_html)
+                    for (w in warnings) {
+                        private$.accumulateMessage(w)
+                    }
                 }
                 
+                # Generate and display clinical summary
+                clinical_summary <- private$.generateClinicalSummary(summary_stats, self$options$dep, self$options$group)
                 self$results$todo$setContent(clinical_summary)
                 self$results$todo$setVisible(TRUE)
+                
+                # Update warnings panel
+                if (!is.null(private$.messages) && length(private$.messages) > 0) {
+                    self$results$warnings$setContent(paste(
+                        "<div class='alert alert-warning'>",
+                        "<h6>Analysis Messages</h6>",
+                        "<ul>",
+                        paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
+                        "</ul></div>",
+                        sep = ""
+                    ))
+                }
+                
+                # Checkpoint before plot data preparation
+                private$.checkpoint()
+                
+                # Add note about conditional coloring if enabled
+                if (self$options$conditionalColor) {
+                    private$.accumulateMessage(sprintf(
+                        "Note: Conditional coloring applied. Values > %.2f colored orange (above threshold), others blue (below).",
+                        self$options$colorThreshold
+                    ))
+                     # Re-update warnings panel to include this note
+                    if (!is.null(private$.messages) && length(private$.messages) > 0) {
+                         self$results$warnings$setContent(paste(
+                            "<div class='alert alert-warning'>",
+                            "<h6>Analysis Messages</h6>",
+                            "<ul>",
+                            paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
+                            "</ul></div>",
+                            sep = ""
+                        ))
+                    }
+                }
                 
                 # Checkpoint before plot data preparation
                 private$.checkpoint()
@@ -256,7 +312,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if (n_groups > 50) {
-                warning(.("Grouping variable has more than 50 levels. Consider reducing categories for better visualization."))
+                private$.accumulateMessage(.("Grouping variable has more than 50 levels. Consider reducing categories for better visualization."))
             }
             
             # Checkpoint before potentially expensive missing data removal
@@ -273,7 +329,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             if (complete_after < complete_before) {
                 n_removed <- complete_before - complete_after
-                warning(paste(n_removed, .("rows with missing values were removed from analysis.")))
+                private$.accumulateMessage(paste(n_removed, .("rows with missing values were removed from analysis.")))
             }
             
             # Check minimum data requirements
@@ -289,7 +345,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if (self$options$useHighlight && !is.null(highlight_level) && !highlight_level %in% data[[group_var]]) {
-                warning(paste(.("Highlight level"), "'", highlight_level, "'", .("not found in grouping variable. Highlight will be ignored.")))
+                private$.accumulateMessage(paste(.("Highlight level"), "'", highlight_level, "'", .("not found in grouping variable. Highlight will be ignored.")))
                 highlight_level <- NULL  # Disable highlighting for this case
             }
 
@@ -301,7 +357,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (has_duplicates && self$options$aggregation == "none") {
                 max_count <- max(group_counts)
                 groups_with_dups <- names(group_counts[group_counts > 1])
-                warning(sprintf(
+                private$.accumulateMessage(sprintf(
                     "Multiple observations per group detected (max=%d per group). Groups with duplicates: %s. Consider using aggregation (mean/median/sum) to avoid over-plotting and misleading visualization.",
                     max_count,
                     paste(head(groups_with_dups, 5), collapse = ", ")
@@ -371,6 +427,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Ensure group column is factor with same levels
             agg_data[[group_var]] <- factor(agg_data[[group_var]], levels = levels(data[[group_var]]))
+            
+            # Reorder to [dep, group] to match .cleanData expectation
+            agg_data <- agg_data[, c(dep_var, group_var)]
 
             return(agg_data)
         },

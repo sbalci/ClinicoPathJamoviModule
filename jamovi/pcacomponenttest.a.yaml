@@ -1,7 +1,7 @@
 ---
 name:  pcacomponenttest
 title: PCA Component Significance Test
-menuGroup: ExplorationT2
+menuGroup: ExplorationT1
 menuSubgroup: Multivariate Analysis
 version: '1.0.0'
 jas: '1.2'
@@ -82,6 +82,24 @@ options:
             Number of permutations to generate null distribution (100-10000).
             Higher values provide more accurate p-values but take longer.
             Minimum p-value = 1/(nperm+1). For p<0.001, use nperm>=1000.
+
+    - name: stop_rule
+      title: Stop Rule (Sequential)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Stop testing after the first non-significant component (Sequential Testing).
+            Recommended: TRUE to prevent Type I error inflation.
+            If FALSE, all components up to ncomp are tested (Batch Testing).
+
+    - name: seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: >
+            Random seed for reproducibility of permutation results.
 
     - name: center
       title: Center Variables

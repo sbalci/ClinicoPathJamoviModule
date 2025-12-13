@@ -506,3 +506,25 @@ test_that("Variables with spaces are handled correctly", {
     # Should handle special characters without errors
     expect_s3_class(result, "vartreeResults")
 })
+
+
+test_that("percvar level must exist in data", {
+    skip_if_not_installed("ClinicoPath")
+    skip_if_not_installed("vtree")
+
+    testData <- data.frame(
+        group = factor(c("A", "B")),
+        outcome = factor(c("Yes", "No"))
+    )
+
+    expect_error(
+        vartree(
+            data = testData,
+            vars = c("group"),
+            percvar = "outcome",
+            percvarLevel = "Maybe", # not present
+            pct = TRUE
+        ),
+        "level is not present"
+    )
+})

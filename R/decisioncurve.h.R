@@ -33,7 +33,8 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             compareModels = FALSE,
             weightedAUC = FALSE,
             clinicalDecisionRule = FALSE,
-            decisionRuleThreshold = 0.15,
+            decisionRuleVar = NULL,
+            decisionRulePositive = NULL,
             decisionRuleLabel = "Clinical Rule",
             showClinicalImpactPlot = FALSE,
             showNetBenefitCI = FALSE,
@@ -194,12 +195,17 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "clinicalDecisionRule",
                 clinicalDecisionRule,
                 default=FALSE)
-            private$..decisionRuleThreshold <- jmvcore::OptionNumber$new(
-                "decisionRuleThreshold",
-                decisionRuleThreshold,
-                default=0.15,
-                min=0.001,
-                max=0.999)
+            private$..decisionRuleVar <- jmvcore::OptionVariable$new(
+                "decisionRuleVar",
+                decisionRuleVar,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..decisionRulePositive <- jmvcore::OptionLevel$new(
+                "decisionRulePositive",
+                decisionRulePositive,
+                variable="(decisionRuleVar)")
             private$..decisionRuleLabel <- jmvcore::OptionString$new(
                 "decisionRuleLabel",
                 decisionRuleLabel,
@@ -296,7 +302,8 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..compareModels)
             self$.addOption(private$..weightedAUC)
             self$.addOption(private$..clinicalDecisionRule)
-            self$.addOption(private$..decisionRuleThreshold)
+            self$.addOption(private$..decisionRuleVar)
+            self$.addOption(private$..decisionRulePositive)
             self$.addOption(private$..decisionRuleLabel)
             self$.addOption(private$..showClinicalImpactPlot)
             self$.addOption(private$..showNetBenefitCI)
@@ -340,7 +347,8 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         compareModels = function() private$..compareModels$value,
         weightedAUC = function() private$..weightedAUC$value,
         clinicalDecisionRule = function() private$..clinicalDecisionRule$value,
-        decisionRuleThreshold = function() private$..decisionRuleThreshold$value,
+        decisionRuleVar = function() private$..decisionRuleVar$value,
+        decisionRulePositive = function() private$..decisionRulePositive$value,
         decisionRuleLabel = function() private$..decisionRuleLabel$value,
         showClinicalImpactPlot = function() private$..showClinicalImpactPlot$value,
         showNetBenefitCI = function() private$..showNetBenefitCI$value,
@@ -383,7 +391,8 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..compareModels = NA,
         ..weightedAUC = NA,
         ..clinicalDecisionRule = NA,
-        ..decisionRuleThreshold = NA,
+        ..decisionRuleVar = NA,
+        ..decisionRulePositive = NA,
         ..decisionRuleLabel = NA,
         ..showClinicalImpactPlot = NA,
         ..showNetBenefitCI = NA,
@@ -948,8 +957,10 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param weightedAUC Calculate weighted area under the decision curve.
 #' @param clinicalDecisionRule Add clinical decision rule analysis and
 #'   comparison with models.
-#' @param decisionRuleThreshold Threshold probability for clinical decision
-#'   rule (e.g., "screen if risk > 15\%").
+#' @param decisionRuleVar Binary variable indicating whether the clinical rule
+#'   recommends intervention (1/0 or yes/no).
+#' @param decisionRulePositive Which level of the rule variable indicates a
+#'   positive recommendation (treat/intervene).
 #' @param decisionRuleLabel Label for the clinical decision rule in plots and
 #'   tables.
 #' @param showClinicalImpactPlot Display clinical impact plot showing number
@@ -1034,7 +1045,8 @@ decisioncurve <- function(
     compareModels = FALSE,
     weightedAUC = FALSE,
     clinicalDecisionRule = FALSE,
-    decisionRuleThreshold = 0.15,
+    decisionRuleVar,
+    decisionRulePositive,
     decisionRuleLabel = "Clinical Rule",
     showClinicalImpactPlot = FALSE,
     showNetBenefitCI = FALSE,
@@ -1055,13 +1067,16 @@ decisioncurve <- function(
 
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(models)) models <- jmvcore::resolveQuo(jmvcore::enquo(models))
+    if ( ! missing(decisionRuleVar)) decisionRuleVar <- jmvcore::resolveQuo(jmvcore::enquo(decisionRuleVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(outcome), outcome, NULL),
-            `if`( ! missing(models), models, NULL))
+            `if`( ! missing(models), models, NULL),
+            `if`( ! missing(decisionRuleVar), decisionRuleVar, NULL))
 
     for (v in outcome) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in decisionRuleVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- decisioncurveOptions$new(
         outcome = outcome,
@@ -1091,7 +1106,8 @@ decisioncurve <- function(
         compareModels = compareModels,
         weightedAUC = weightedAUC,
         clinicalDecisionRule = clinicalDecisionRule,
-        decisionRuleThreshold = decisionRuleThreshold,
+        decisionRuleVar = decisionRuleVar,
+        decisionRulePositive = decisionRulePositive,
         decisionRuleLabel = decisionRuleLabel,
         showClinicalImpactPlot = showClinicalImpactPlot,
         showNetBenefitCI = showNetBenefitCI,

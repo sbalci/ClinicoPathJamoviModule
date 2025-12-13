@@ -22,6 +22,7 @@ jjoncoplot(
   showGeneFreq = FALSE,
   drawMarginalPlots = FALSE,
   showTMB = FALSE,
+  showTMBTable = TRUE,
   log10TransformTMB = TRUE,
   showClinicalAnnotation = FALSE,
   plotWidth = 800,
@@ -72,6 +73,9 @@ of the main oncoplot.}
 
 \item{showTMB}{Display tumor mutation burden (TMB) bar plot.}
 
+\item{showTMBTable}{Show per-sample mutation burden table alongside the
+plot.}
+
 \item{log10TransformTMB}{Apply log10 transformation to TMB values for
 better visualization.}
 
@@ -93,6 +97,7 @@ A results object containing:
 \code{results$main} \tab \tab \tab \tab \tab an image \cr
 \code{results$mutationSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$sampleSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$tmbTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$cooccurrence} \tab \tab \tab \tab \tab a table \cr
 \code{results$plotInfo} \tab \tab \tab \tab \tab a table \cr

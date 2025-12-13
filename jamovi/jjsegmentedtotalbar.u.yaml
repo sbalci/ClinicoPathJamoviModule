@@ -134,6 +134,10 @@ children:
             format: number
             suffix: '%'
             label: Min Segment Size for Labels
+          - type: Label
+            label: '⚠️ Requirements: Value Variable must be integer counts for valid Chi-square tests.'
+            margin: small
+            style: list-inline
           - type: CheckBox
             name: show_statistical_tests
             label: Statistical Tests (Chi-square)

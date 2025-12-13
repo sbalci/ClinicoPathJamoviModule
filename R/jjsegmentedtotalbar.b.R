@@ -41,77 +41,71 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .processed_data = NULL,
         .composition_data = NULL,
         .preset_config = NULL,
+        .preset_style_override = NULL,
+        .preset_palette_override = NULL,
 
         .init = function() {
+            print("Debug: Init start")
             # Initialize comprehensive instructions with clinical context
-            instructions_html <- paste(
-                "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>Segmented Total Bar Charts</h3>",
-                "<div style='margin: 10px 0;'>",
-                "<p><strong>Create 100% stacked bar charts showing proportional composition within categories.</strong><br>",
-                "Perfect for clinical data: response rates by treatment, demographic distributions,<br>",
-                "biomarker patterns across patient groups, or outcome proportions over time.</p>",
-                "<div style='margin: 15px 0;'>",
-                "<h4 style='color: #2e7d32; margin-bottom: 10px;'>Variable Setup:</h4>",
-                "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
-                "<li><strong>Category Variable (X-axis):</strong> Main grouping variable</li>",
-                "<li><strong>Value Variable (Y-axis):</strong> Numeric values for segments</li>",
-                "<li><strong>Segment Variable (Fill):</strong> Variable defining bar segments</li>",
-                "<li><strong>Panel Variable:</strong> Optional faceting variable</li>",
+
+            html_content <- paste(
+                "<div style='font-family: sans-serif; padding: 15px; background-color: #f5f5f5; border-radius: 5px;'>",
+                "<h3>Segmented Total Bar Chart Instructions</h3>",
+                "<p>This tool creates publication-quality segmented bar charts (also known as stacked bar charts), ideal for visualizing the relationship between two categorical variables.</p>",
+                "<ul>",
+                "<li><b>X-Axis Variable:</b> The main category (e.g., Treatment Group, Time Point)</li>",
+                "<li><b>Fill Variable:</b> The segments within each bar (e.g., Response Type, Outcome)</li>",
+                "<li><b>Value Variable:</b> The counts or values determining segment sizes (must be numeric)</li>",
                 "</ul>",
-                "</div>",
-                "<div style='background-color: #e3f2fd; padding: 12px; border-radius: 4px; margin: 15px 0; border-left: 4px solid #2196f3;'>",
-                "<h4 style='color: #1565c0; margin-top: 0;'>Quick Start Templates:</h4>",
-                "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.5;'>",
-                "<li><strong>Treatment Response:</strong> Response rates by treatment group</li>",
-                "<li><strong>Demographics:</strong> Age/gender distribution by disease stage</li>",
-                "<li><strong>Biomarker:</strong> Expression levels by mutation status</li>",
-                "<li><strong>Quality:</strong> Satisfaction scores by department</li>",
-                "<li><strong>Temporal:</strong> Patient status over time points</li>",
-                "</ul>",
-                "</div>",
-                "<p style='margin: 10px 0; padding: 10px; background-color: #f3e5f5; border-left: 4px solid #9c27b0;'>",
-                "<strong>Perfect for:</strong> Survey responses, patient demographics, market composition, treatment outcomes</p>",
-                "</div>",
+                "<p><b>Clinical Presets:</b> Use the 'Analysis Template' dropdown to quickly apply settings for common clinical research scenarios.</p>",
                 "</div>"
             )
-
-            self$results$instructions$setContent(instructions_html)
-
+            print("Debug: Checking instructions")
+            self$results$instructions$setContent(html_content)
+            
+            print("Debug: Setting dimensions")
             # Set plot size based on user options
-            # Convert inches to pixels (assuming 72 DPI)
             width_px <- self$options$plot_width * 72
             height_px <- self$options$plot_height * 72
-
-            # Set visibility and size for plot
-            if (self$options$show_plot) {
-                self$results$plot$setVisible(TRUE)
-                self$results$plot$setSize(width_px, height_px)
-            } else {
-                self$results$plot$setVisible(FALSE)
+            
+            # Helper to safely set size/visibility
+            image_set <- function(img, w, h, v) {
+                if(!is.null(img)) {
+                    if(is.function(img$setSize)) img$setSize(width=w, height=h)
+                    if(is.function(img$setVisible)) img$setVisible(v)
+                }
             }
             
-            # Set visibility for statistical tests
-            if (self$options$show_statistical_tests) {
-                self$results$statistical_tests$setVisible(TRUE)
-            } else {
-                self$results$statistical_tests$setVisible(FALSE)
+            image_set(self$results$plot, width_px, height_px, self$options$show_plot)
+            
+            if (!is.null(self$results$statistical_tests) && is.function(self$results$statistical_tests$setVisible)) {
+                self$results$statistical_tests$setVisible(self$options$show_statistical_tests)
             }
+            
+            print("Debug: Applying presets")
             
             # Apply clinical presets if selected
             private$.applyPresetConfiguration()
             
             # Show preset guidance if not custom
             if (self$options$analysis_preset != "custom") {
-                self$results$preset_guidance$setVisible(TRUE)
+                if (!is.null(self$results$preset_guidance)) self$results$preset_guidance$setVisible(TRUE)
+                if (!is.null(self$results$presetInfo)) self$results$presetInfo$setVisible(TRUE)
                 private$.updatePresetGuidance()
             } else {
-                self$results$preset_guidance$setVisible(FALSE)
+                if (!is.null(self$results$preset_guidance)) self$results$preset_guidance$setVisible(FALSE)
+                if (!is.null(self$results$presetInfo)) self$results$presetInfo$setVisible(FALSE)
+            }
+            
+            # Clear warnings initially
+            if (!is.null(self$results$warnings)) {
+                 self$results$warnings$setContent("")
+                 self$results$warnings$setVisible(FALSE)
             }
         },
 
         .run = function() {
-
+            print("Debug: Run start")
             # Check if required variables are specified
             if (is.null(self$options$x_var) ||
                 is.null(self$options$y_var) ||
@@ -119,8 +113,27 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 return()
             }
 
+            # Clear existing tables to prevent accumulation
+            print("Debug: Clearing composition_table")
+            self$results$composition_table$setRow(rowNo=1, values=list(category="", segment="", count=0, percentage=0, overall_percentage=0, total_in_category=0))
+            self$results$composition_table$deleteRows()
+            
+            print("Debug: Clearing detailed_stats")
+            self$results$detailed_stats$setRow(rowNo=1, values=list(measure="", value=""))
+            self$results$detailed_stats$deleteRows()
+            
+            print("Debug: Clearing stats tests check")
+            
+            if (self$options$show_statistical_tests) {
+                 print("Debug: Clearing statistical_tests")
+                 self$results$statistical_tests$setRow(rowNo=1, values=list(test_name="", statistic=0, df=0, p_value=0, interpretation=""))
+                 self$results$statistical_tests$deleteRows()
+            }
+
+            print("Debug: Accessing data")
             # Get data
             data <- self$data
+            print("Debug: Got data")
 
             # Extract variable names
             x_var <- self$options$x_var
@@ -134,8 +147,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 return()
             }
 
-            # Checkpoint before expensive data processing
-            private$.checkpoint()
+
 
             # Prepare data
             private$.processData(data, x_var, y_var, fill_var, facet_var)
@@ -147,13 +159,13 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             private$.updateSummary()
 
             # Checkpoint before composition table processing
-            private$.checkpoint()
+
 
             # Update composition table
             private$.updateComposition()
 
             # Checkpoint before detailed statistics calculation
-            private$.checkpoint()
+
 
             # Update detailed statistics
             private$.updateDetailedStats()
@@ -165,8 +177,27 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             private$.createClinicalSummary()
             
             # Perform statistical tests if requested
+            print("Debug: Starting validation")
+            # Perform statistical tests if requested
             if (self$options$show_statistical_tests) {
-                private$.performStatisticalTests()
+                print("Debug: Checking count data")
+                # Validate that data implies counts (integers)
+                if (is.null(private$.processed_data)) print("Debug: processed_data is NULL")
+                else print(glue::glue("Debug: processed_data rows: {nrow(private$.processed_data)}"))
+                
+                is_count_data <- all(private$.processed_data$count %% 1 == 0) && all(private$.processed_data$count >= 0)
+                print(glue::glue("Debug: is_count_data: {is_count_data}"))
+                
+                if (!is_count_data) {
+                    warning_msg <- "<div style='color: #856404; background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffeeba;'>
+                        <strong>Warning:</strong> Statistical tests skipped. The 'Value Variable' contains non-integer or negative values, which suggests continuous data rather than counts. 
+                        Chi-square tests are only valid for count/frequency data.</div>"
+                    self$results$warnings$setContent(warning_msg)
+                    self$results$warnings$setVisible(TRUE)
+                } else {
+                    print("Debug: Calling performStatisticalTests")
+                    private$.performStatisticalTests()
+                }
             }
 
             # Generate explanations if requested
@@ -239,7 +270,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 data[[facet_var]] <- as.factor(data[[facet_var]])
             }
 
-            # CRITICAL FIX: Group and summarize data
+            # CRITICAL FIX: Group and summarise data
             # For aggregated data (one row per category), n() returns 1, which is wrong
             # The y_var already contains the counts/values we need to sum
             if (!is.null(facet_var)) {
@@ -1081,25 +1112,39 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 x_var <- self$options$x_var
                 fill_var <- self$options$fill_var
                 
+                print(glue::glue("Debug: Stats vars {x_var}, {fill_var}"))
+                
                 # Convert processed data back to contingency table format
                 contingency_data <- data %>%
                     dplyr::select(!!rlang::sym(x_var), !!rlang::sym(fill_var), count)
                 
+                print("Debug: XTABS start")
                 # Create matrix for chi-square test
                 contingency_matrix <- xtabs(count ~ ., data = contingency_data)
                 
                 # Perform chi-square test
                 chi_test <- chisq.test(contingency_matrix)
                 
+                print("Debug: Chi-test done")
+                print(glue::glue("Debug: p-value {chi_test$p.value}"))
+                
                 # Determine significance
                 alpha <- 1 - self$options$confidence_level
-                is_significant <- chi_test$p.value < alpha
+                print(glue::glue("Debug: alpha {alpha}"))
+                
+                print(glue::glue("Debug: is_sig {is_significant}"))
                 
                 interpretation <- if (is_significant) {
+                    print("Debug: Sig TRUE")
                     paste0("Significant association between ", x_var, " and ", fill_var, " (p < ", alpha, ")")
                 } else {
-                    paste0("No significant association between ", x_var, " and ", fill_var, " (p ≥ ", alpha, ")")
+                    print("Debug: Sig FALSE")
+                    paste0("No significant association between ", x_var, " and ", fill_var, " (p >= ", alpha, ")")
                 }
+                
+                print("Debug: Interpretation done")
+                print(glue::glue("Debug: stat {chi_test$statistic[[1]]}"))
+                print(glue::glue("Debug: df {chi_test$parameter[[1]]}"))
                 
                 # Add test results to table
                 test_row <- list(
@@ -1110,6 +1155,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     interpretation = interpretation
                 )
                 
+                print("Debug: Adding row")
                 self$results$statistical_tests$addRow(rowKey = 1, values = test_row)
                 
                 # If significant, add post-hoc analysis

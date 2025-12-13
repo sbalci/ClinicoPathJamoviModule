@@ -15,6 +15,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             show_plots = TRUE,
             icc_type = "consistency",
             correlation_method = "both",
+            missing_data = "listwise",
             show_interpretation = TRUE, ...) {
 
             super$initialize(
@@ -84,6 +85,13 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "pearson",
                     "spearman"),
                 default="both")
+            private$..missing_data <- jmvcore::OptionList$new(
+                "missing_data",
+                missing_data,
+                options=list(
+                    "listwise",
+                    "pairwise"),
+                default="listwise")
             private$..show_interpretation <- jmvcore::OptionBool$new(
                 "show_interpretation",
                 show_interpretation,
@@ -98,6 +106,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..show_plots)
             self$.addOption(private$..icc_type)
             self$.addOption(private$..correlation_method)
+            self$.addOption(private$..missing_data)
             self$.addOption(private$..show_interpretation)
         }),
     active = list(
@@ -110,6 +119,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         show_plots = function() private$..show_plots$value,
         icc_type = function() private$..icc_type$value,
         correlation_method = function() private$..correlation_method$value,
+        missing_data = function() private$..missing_data$value,
         show_interpretation = function() private$..show_interpretation$value),
     private = list(
         ..dep1 = NA,
@@ -121,6 +131,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..show_plots = NA,
         ..icc_type = NA,
         ..correlation_method = NA,
+        ..missing_data = NA,
         ..show_interpretation = NA)
 )
 
@@ -128,6 +139,7 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     "pathologyagreementResults",
     inherit = jmvcore::Group,
     active = list(
+        warnings = function() private$.items[["warnings"]],
         interpretation = function() private$.items[["interpretation"]],
         agreementtable = function() private$.items[["agreementtable"]],
         correlationtable = function() private$.items[["correlationtable"]],
@@ -150,6 +162,18 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "ClinicoPathJamoviModule",
                     "psych",
                     "epiR"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Analysis Messages",
+                visible=TRUE,
+                clearWith=list(
+                    "dep1",
+                    "dep2",
+                    "additional_methods",
+                    "bootstrap_n",
+                    "conf_level",
+                    "missing_data")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -343,10 +367,12 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param show_plots show scatter plot and Bland-Altman plot
 #' @param icc_type type of intraclass correlation coefficient to calculate
 #' @param correlation_method correlation method(s) to calculate
+#' @param missing_data method for handling missing values
 #' @param show_interpretation provide clinical interpretation of agreement
 #'   statistics
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$agreementtable} \tab \tab \tab \tab \tab ICC, CCC, and Bland-Altman metrics \cr
 #'   \code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr
@@ -378,6 +404,7 @@ pathologyagreement <- function(
     show_plots = TRUE,
     icc_type = "consistency",
     correlation_method = "both",
+    missing_data = "listwise",
     show_interpretation = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -404,6 +431,7 @@ pathologyagreement <- function(
         show_plots = show_plots,
         icc_type = icc_type,
         correlation_method = correlation_method,
+        missing_data = missing_data,
         show_interpretation = show_interpretation)
 
     analysis <- pathologyagreementClass$new(

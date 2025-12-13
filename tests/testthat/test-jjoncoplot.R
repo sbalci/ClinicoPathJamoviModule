@@ -112,3 +112,73 @@ test_that("jjoncoplot handles missing data gracefully", {
     # Should not crash, just return empty results or guidance
     expect_true(results$results$setupGuidance$visible)
 })
+
+test_that("jjoncoplot presets are applied (tumor profiling)", {
+    set.seed(123)
+    data <- data.frame(
+        SampleID = paste0("S", 1:30),
+        TP53 = sample(c(0, 1), 30, replace = TRUE),
+        KRAS = sample(c(0, 1), 30, replace = TRUE),
+        stringsAsFactors = FALSE
+    )
+    
+    results <- jjoncoplotClass$new(
+        options = jjoncoplotOptions$new(
+            sampleVar = "SampleID",
+            geneVars = c("TP53", "KRAS"),
+            clinicalPreset = "tumor_profiling"
+        ),
+        data = data
+    )
+    results$run()
+    
+    info <- results$results$plotInfo$asDF
+    expect_true(any(info$parameter == "Plot Type" & info$value == "oncoplot"))
+    # Preset should turn on mutation load
+    expect_true(results$results$sampleSummary$visible)
+})
+
+test_that("jjoncoplot co-occurrence outputs include odds ratio and FDR", {
+    set.seed(123)
+    data <- data.frame(
+        SampleID = paste0("S", 1:40),
+        TP53 = sample(c(0, 1), 40, replace = TRUE),
+        KRAS = sample(c(0, 1), 40, replace = TRUE),
+        PIK3CA = sample(c(0, 1), 40, replace = TRUE),
+        stringsAsFactors = FALSE
+    )
+    
+    results <- jjoncoplotClass$new(
+        options = jjoncoplotOptions$new(
+            sampleVar = "SampleID",
+            geneVars = c("TP53", "KRAS", "PIK3CA"),
+            plotType = "cooccurrence"
+        ),
+        data = data
+    )
+    results$run()
+    
+    cooc <- results$results$cooccurrence$asDF
+    expect_true(all(c("odds_ratio", "fdr") %in% names(cooc)))
+})
+
+test_that("jjoncoplot clips non-binary mutation inputs safely", {
+    data <- data.frame(
+        SampleID = paste0("S", 1:10),
+        TP53 = c(0, 1, 2, -1, NA, 1, 0, 3, 0, 1),
+        stringsAsFactors = FALSE
+    )
+    
+    results <- jjoncoplotClass$new(
+        options = jjoncoplotOptions$new(
+            sampleVar = "SampleID",
+            geneVars = c("TP53"),
+            plotType = "frequency"
+        ),
+        data = data
+    )
+    results$run()
+    
+    mut <- results$results$mutationSummary$asDF
+    expect_true(mut$mutated_samples <= 10)
+})

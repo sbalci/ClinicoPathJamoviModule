@@ -45,6 +45,11 @@ children:
                 name: adjustmethod
                 label: P-value Adjustment
                 enable: (vars)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: stop_rule
   - type: LayoutBox
     margin: large
     style: inline
@@ -62,6 +67,12 @@ children:
               - type: CheckBox
                 name: scale
                 enable: (vars)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: seed
+        format: number
   - type: CollapseBox
     label: Plot Customization
     collapsed: true

@@ -9,6 +9,7 @@ pcaloadingtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             vars = NULL,
             ncomp = 3,
             nperm = 1000,
+            seed = 123,
             componentfilter = 0,
             center = TRUE,
             scale = TRUE,
@@ -51,6 +52,10 @@ pcaloadingtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 min=0,
                 max=10,
                 default=0)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=123)
             private$..center <- jmvcore::OptionBool$new(
                 "center",
                 center,
@@ -102,6 +107,7 @@ pcaloadingtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..vars)
             self$.addOption(private$..ncomp)
             self$.addOption(private$..nperm)
+            self$.addOption(private$..seed)
             self$.addOption(private$..componentfilter)
             self$.addOption(private$..center)
             self$.addOption(private$..scale)
@@ -117,6 +123,7 @@ pcaloadingtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         vars = function() private$..vars$value,
         ncomp = function() private$..ncomp$value,
         nperm = function() private$..nperm$value,
+        seed = function() private$..seed$value,
         componentfilter = function() private$..componentfilter$value,
         center = function() private$..center$value,
         scale = function() private$..scale$value,
@@ -131,6 +138,7 @@ pcaloadingtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..vars = NA,
         ..ncomp = NA,
         ..nperm = NA,
+        ..seed = NA,
         ..componentfilter = NA,
         ..center = NA,
         ..scale = NA,
@@ -149,6 +157,8 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     active = list(
         todo = function() private$.items[["todo"]],
         results = function() private$.items[["results"]],
+        variance = function() private$.items[["variance"]],
+        scree = function() private$.items[["scree"]],
         loadingplot = function() private$.items[["loadingplot"]]),
     private = list(),
     public=list(
@@ -173,6 +183,7 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "vars",
                     "ncomp",
                     "nperm",
+                    "seed",
                     "componentfilter",
                     "center",
                     "scale",
@@ -222,6 +233,31 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="Sig.", 
                         `type`="text", 
                         `content`="($key)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="variance",
+                title="Variance Explained",
+                clearWith=list(
+                    "vars",
+                    "ncomp",
+                    "seed",
+                    "center",
+                    "scale"),
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Component", 
+                        `type`="text"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="cumulative", 
+                        `title`="Cumulative", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="loadingplot",
@@ -234,6 +270,7 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "vars",
                     "ncomp",
                     "nperm",
+                    "seed",
                     "componentfilter",
                     "center",
                     "scale",
@@ -241,6 +278,22 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "colorlow",
                     "colormid",
                     "colorhigh",
+                    "plotwidth",
+                    "plotheight")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="scree",
+                title="Variance Explained Plot",
+                width=700,
+                height=450,
+                renderFun=".scree",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "ncomp",
+                    "seed",
+                    "center",
+                    "scale",
                     "plotwidth",
                     "plotheight")))}))
 
@@ -339,6 +392,7 @@ pcaloadingtest <- function(
     vars,
     ncomp = 3,
     nperm = 1000,
+    seed = 123,
     componentfilter = 0,
     center = TRUE,
     scale = TRUE,
@@ -364,6 +418,7 @@ pcaloadingtest <- function(
         vars = vars,
         ncomp = ncomp,
         nperm = nperm,
+        seed = seed,
         componentfilter = componentfilter,
         center = center,
         scale = scale,
@@ -383,4 +438,3 @@ pcaloadingtest <- function(
 
     analysis$results
 }
-

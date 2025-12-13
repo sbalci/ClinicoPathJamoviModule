@@ -10,7 +10,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
         inherit = sequentialtestsBase,
         private = list(
             NUMERICAL_TOLERANCE = 1e-10,
-            POPULATION_SIZE = 1000,
+            POPULATION_SIZE = NULL,
             .init = function() {
                 # Add rows to tables during initialization
                 individualTable <- self$results$individual_tests_table
@@ -28,6 +28,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                                  values = list(stage = "After First Test"))
                 flowTable$addRow(rowKey = "after_test2",
                                  values = list(stage = "After Second Test"))
+                if (is.null(private$POPULATION_SIZE))
+                    private$POPULATION_SIZE <- self$options$population_size
             },
 
             .run = function() {
@@ -257,6 +259,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 })
 
                 # Calculate combined metrics based on strategy
+                strategy_note <- "Assumes conditional independence between tests. Correlated tests will overstate combined performance."
                 if (strategy == "serial_positive") {
                     # Serial testing of positives (confirmation strategy)
                     combined_sens <- test1_sens * test2_sens
@@ -772,7 +775,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         final_explanation <- paste0(warningHtml, explanation)
                     }
                     
-                    self$results$explanation_text$setContent(final_explanation)
+                    independence_note <- paste0(
+                        "<div style='background-color:#f8f9fa;padding:10px;border-radius:6px;margin-top:8px;'>",
+                        "<strong>Assumption:</strong> Combined metrics assume conditional independence between tests. ",
+                        "If tests are correlated (similar biology/technology), combined PPV/NPV may be overstated.",
+                        "</div>"
+                    )
+                    self$results$explanation_text$setContent(paste0(independence_note, final_explanation))
                 }
 
                 # Generate formulas HTML if requested

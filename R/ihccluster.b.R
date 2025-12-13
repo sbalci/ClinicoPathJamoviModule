@@ -78,14 +78,22 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 warnings = character()
             )
 
+            # Extended list of positive indicators for IHC
+            pos_indicators <- c(
+                "Positive", "Pos", "pos", "POS", "+", "1", 
+                "1+", "2", "2+", "3", "3+", "High", "Strong", 
+                "Moderate", "Weak", "Present", "Yes", "True", "TRUE"
+            )
+
             # Convert categorical to 0/1
             if (length(catVars) > 0) {
                 for (var in catVars) {
                     if (!var %in% colnames(df)) next
                     if (is.factor(df[[var]])) {
                         levels_orig <- levels(df[[var]])
-                        # Positive values -> 1, all others -> 0
-                        binary_df[[var]] <- as.numeric(df[[var]] %in% c("Positive", "pos", "+", "1"))
+                        
+                        # Check for positive values
+                        binary_df[[var]] <- as.numeric(df[[var]] %in% pos_indicators)
 
                         # Track conversion
                         n_positive <- sum(binary_df[[var]] == 1, na.rm = TRUE)
@@ -143,6 +151,13 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             html <- paste0(html, "<p><b>Jaccard distance requires binary (0/1) data.</b> Your data has been automatically converted as follows:</p>")
 
+            # Extended list of positive indicators for checking
+            pos_indicators <- c(
+                "Positive", "Pos", "pos", "POS", "+", "1", 
+                "1+", "2", "2+", "3", "3+", "High", "Strong", 
+                "Moderate", "Weak", "Present", "Yes", "True", "TRUE"
+            )
+
             # Categorical markers section
             if (length(catVars) > 0) {
                 html <- paste0(html, "<h5 style='color:#856404;'>Categorical Markers (n=", length(catVars), "):</h5>")
@@ -158,8 +173,8 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 for (var in catVars) {
                     if (!var %in% colnames(df)) next
                     levels_str <- paste(levels(df[[var]]), collapse=", ")
-                    n_pos <- sum(df[[var]] %in% c("Positive", "pos", "+", "1"), na.rm = TRUE)
-                    n_neg <- sum(!df[[var]] %in% c("Positive", "pos", "+", "1"), na.rm = TRUE)
+                    n_pos <- sum(df[[var]] %in% pos_indicators, na.rm = TRUE)
+                    n_neg <- sum(!df[[var]] %in% pos_indicators, na.rm = TRUE)
 
                     # Status check
                     status <- "OK"
@@ -168,11 +183,8 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         status <- "WARNING: All same"
                         status_color <- "#dc3545"
                     }
-                    if (!any(df[[var]] %in% c("Positive", "Negative", "pos", "neg", "+", "-", "1", "0"))) {
-                        status <- "WARNING: Non-standard coding"
-                        status_color <- "#dc3545"
-                    }
-
+                    # Relaxed check for standard coding
+                    
                     html <- paste0(html, "<tr>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'><b>", var, "</b></td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>", levels_str, "</td>")
@@ -183,7 +195,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 html <- paste0(html, "</table>")
-                html <- paste0(html, "<p style='margin:5px 0; font-size:0.9em;'><b>Conversion rule:</b> 'Positive', 'pos', '+', '1' coded as 1; all other values coded as 0</p>")
+                html <- paste0(html, "<p style='margin:5px 0; font-size:0.9em;'><b>Conversion rule:</b> Standard IHC positive terms (Positive, +, 1/2/3, High, Strong, etc.) coded as 1; others as 0</p>")
             }
 
             # Continuous markers section
@@ -576,31 +588,55 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             allVars <- unique(c(catVars, contVars))
+            
+            # Add auxiliary variables to keep them aligned with markers
+            auxVars <- character()
+            if (!is.null(opts$caseId)) auxVars <- c(auxVars, opts$caseId)
+            if (!is.null(opts$spatialCompartment)) auxVars <- c(auxVars, opts$spatialCompartment)
+            if (!is.null(opts$supervisedVariable)) auxVars <- c(auxVars, opts$supervisedVariable)
+            if (!is.null(opts$knownDiagnosis)) auxVars <- c(auxVars, opts$knownDiagnosis)
+            if (!is.null(opts$survivalTime)) auxVars <- c(auxVars, opts$survivalTime)
+            if (!is.null(opts$survivalEvent)) auxVars <- c(auxVars, opts$survivalEvent)
+            if (!is.null(opts$clinicalVars)) auxVars <- c(auxVars, opts$clinicalVars)
+            
+            auxVars <- unique(auxVars)
+            auxVars <- auxVars[auxVars %in% colnames(data)]
+
             if (length(allVars) == 0)
                 stop("No markers supplied for clustering")
 
-            df <- data[, allVars, drop = FALSE]
+            # Include markers and auxiliary variables
+            df <- data[, c(allVars, auxVars), drop = FALSE]
 
             if (identical(info$handleMissing, "complete")) {
+                # Only check markers for completeness, not auxiliary vars
+                # But jamovi's naOmit removes row if ANY column is NA
+                # We want to remove cases where MARKERS are missing
+                
+                # Check complete cases based on markers only
+                complete_cases <- complete.cases(df[, allVars, drop = FALSE])
                 initial_n <- nrow(df)
-                df <- jmvcore::naOmit(df)
+                df <- df[complete_cases, , drop = FALSE]
                 removed <- initial_n - nrow(df)
+                
                 if (removed > 0)
-                    notes <- c(notes, sprintf("Removed %d cases with incomplete data (complete-case analysis)", removed))
+                    notes <- c(notes, sprintf("Removed %d cases with incomplete marker data (complete-case analysis)", removed))
             }
 
             # Drop markers with no observed data
-            all_na <- names(df)[vapply(df, function(col) all(is.na(col)), logical(1))]
+            all_na <- names(df)[vapply(df[, allVars, drop=FALSE], function(col) all(is.na(col)), logical(1))]
             if (length(all_na) > 0) {
-                df <- df[, setdiff(names(df), all_na), drop = FALSE]
+                # Do not remove from df, just remove from catVars/contVars list
+                # df <- df[, setdiff(names(df), all_na), drop = FALSE] 
                 catVars <- setdiff(catVars, all_na)
                 contVars <- setdiff(contVars, all_na)
                 info$droppedMarkers <- all_na
                 notes <- c(notes, sprintf("Removed markers with no observed values: %s", paste(all_na, collapse = ", ")))
             }
-
-            if (ncol(df) < 2)
-                stop("At least two markers with data are required for clustering")
+            
+            # Re-verify we have enough markers
+            if (length(c(catVars, contVars)) < 2)
+                 stop("At least two markers with data are required for clustering")
 
             # Harmonise categorical markers
             if (length(catVars) > 0) {
@@ -839,6 +875,11 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else if (method == "hierarchical") {
                 # Get linkage method
                 linkage <- opts$linkageMethod %||% "ward"
+                
+                distance_method <- opts$distanceMethod %||% "gower"
+                if (distance_method == "gower" && linkage == "ward") {
+                     result$notes <- c(result$notes, "Note: Ward linkage with Gower distance is heuristic. Consider 'Complete' or 'Average' linkage for rigorous interpretation.")
+                }
 
                 # Perform hierarchical clustering with selected linkage
                 if (linkage == "ward") {
@@ -1128,6 +1169,35 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             catVars <- prepared$catVars
             contVars <- prepared$contVars
 
+            # Phase 3: Calculate marker ratios (Sterlacci 2019)
+            # Moved up so ratios participate in clustering
+            ratioResult <- NULL
+            if (isTRUE(opts$calculateRatios)) {
+                ratioResult <- private$.calculateRatio(
+                    data = data,
+                    numerator_var = opts$ratioNumerator,
+                    denominator_var = opts$ratioDenominator,
+                    ratio_name = opts$ratioName %||% "Marker_Ratio",
+                    opts = opts
+                )
+
+                # If successful, add ratio to continuous markers for clustering
+                if (is.null(ratioResult$error)) {
+                    # Add ratio values to data frame
+                    ratio_name <- ratioResult$ratio_name
+                    df[[ratio_name]] <- ratioResult$ratio_values
+
+                    # Add to continuous markers list
+                    contVars <- c(contVars, ratio_name)
+
+                    # If classification requested, also add classified variable
+                    if (isTRUE(opts$ratioClassification) && !is.null(ratioResult$classification)) {
+                        df[[paste0(ratio_name, "_Class")]] <- ratioResult$classification$classes
+                        catVars <- c(catVars, paste0(ratio_name, "_Class"))
+                    }
+                }
+            }
+
             # Display binary conversion notice if using Jaccard distance
             distance_method <- opts$distanceMethod %||% "gower"
             if (distance_method == "jaccard") {
@@ -1275,7 +1345,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (isTRUE(opts$performSpatialAnalysis) && !is.null(opts$spatialCompartment)) {
                 tryCatch({
                     spatialResults <- private$.analyzeSpatialCompartments(
-                        data,
+                        df,
                         opts$spatialCompartment,
                         catVars,
                         contVars,
@@ -1289,7 +1359,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # Test marker differences between compartments
                     spatialMarkerDifferences <- private$.testMarkerDifferencesByCompartment(
-                        data,
+                        df,
                         opts$spatialCompartment,
                         catVars,
                         contVars
@@ -1305,11 +1375,14 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             optimalPanels <- NULL
             outlierCases <- NULL
 
+            # Define markerVars for diagnostic features (ratio already included if computed)
+            markerVars <- c(catVars, contVars)
+
             if (!is.null(opts$knownDiagnosis)) {
                 # Marker performance metrics
                 if (isTRUE(opts$calculateDiagnosticMetrics)) {
                     markerPerformance <- private$.calculateMarkerPerformance(
-                        data,
+                        df,
                         markerVars,
                         opts$knownDiagnosis
                     )
@@ -1319,39 +1392,11 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (isTRUE(opts$identifyOptimalPanel)) {
                     panelSize <- opts$panelSize %||% "pairs"
                     optimalPanels <- private$.identifyOptimalPanels(
-                        data,
+                        df,
                         markerVars,
                         opts$knownDiagnosis,
                         panelSize
                     )
-                }
-            }
-
-            # Phase 3: Calculate marker ratios (Sterlacci 2019)
-            ratioResult <- NULL
-            if (isTRUE(opts$calculateRatios)) {
-                ratioResult <- private$.calculateRatio(
-                    data = data,
-                    numerator_var = opts$ratioNumerator,
-                    denominator_var = opts$ratioDenominator,
-                    ratio_name = opts$ratioName %||% "Marker_Ratio",
-                    opts = opts
-                )
-
-                # If successful, add ratio to continuous markers for clustering
-                if (is.null(ratioResult$error)) {
-                    # Add ratio values to data frame
-                    ratio_name <- ratioResult$ratio_name
-                    df[[ratio_name]] <- ratioResult$ratio_values
-
-                    # Add to continuous markers list
-                    contVars <- c(contVars, ratio_name)
-
-                    # If classification requested, also add classified variable
-                    if (isTRUE(opts$ratioClassification) && !is.null(ratioResult$classification)) {
-                        df[[paste0(ratio_name, "_Class")]] <- ratioResult$classification$classes
-                        catVars <- c(catVars, paste0(ratio_name, "_Class"))
-                    }
                 }
             }
 
@@ -1396,7 +1441,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 sil <- cluster::silhouette(as.integer(clusters), clusterResult$dist)
                 threshold <- opts$outlierThreshold %||% 0.25
                 outlierCases <- private$.flagOutlierCases(
-                    data,
+                    df,
                     clusters,
                     sil,
                     threshold,
@@ -1471,7 +1516,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     for (i in seq_along(fit$medoids)) {
                         medoidId <- if (!is.null(caseIdVar)) {
-                            as.character(data[[caseIdVar]][fit$medoids[i]])
+                            as.character(df[[caseIdVar]][fit$medoids[i]])
                         } else if (!is.null(rownames(df))) {
                             rownames(df)[fit$medoids[i]]
                         } else {
@@ -4483,8 +4528,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             comp_data,
                             catVars,
                             contVars,
-                            opts$method,
-                            opts$nClusters
+                            opts
                         )
 
                         # Compute silhouette
@@ -4536,8 +4580,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     all_data,
                     catVars,
                     contVars,
-                    opts$method,
-                    opts$nClusters
+                    opts
                 )
 
                 results$overall_clusters <- overall_result$clusters
