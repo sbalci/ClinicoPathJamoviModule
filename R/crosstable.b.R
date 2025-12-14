@@ -393,6 +393,15 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {
+                    # Add ERROR notice for missing required variables
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'missingRequiredVars',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Please select dependent variables (rows) and a grouping variable (columns) to generate the cross table.')
+                    self$results$insert(1, notice)
+
                     todo <- paste0(
                         "<div style='background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #007bff;'>",
                         "<h3 style='margin-top: 0; color: #007bff;'>Welcome to Cross Table Analysis</h3>",
@@ -454,9 +463,17 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 self$results$todo2$setContent(todo2)
 
                 # Check if data has complete rows.
-                if (nrow(self$data) == 0)
-                    stop(.("The dataset contains no complete rows. Please check your data."))
-                
+                if (nrow(self$data) == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'emptyDataset',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Dataset contains no complete rows. Please check your data and filters.')
+                    self$results$insert(1, notice)
+                    return()
+                }
+
                 # Performance safeguards for large datasets
                 n_rows <- nrow(self$data)
                 n_vars <- length(self$options$vars)
@@ -491,18 +508,34 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Validate analysis assumptions and data quality
                 validation_results <- .validateAnalysisAssumptions(mydata, myvars, mygroup)
                 if (length(validation_results$warnings) > 0) {
-                    warning_text <- paste0(
-                        "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<strong>⚠️ Data Quality Warnings:</strong><br>",
-                        paste(validation_results$warnings, collapse = "<br>"),
-                        "</div>"
-                    )
-                    # Append to existing todo2 content
-                    current_content <- self$results$todo2$content
-                    if (!is.null(current_content) && nchar(current_content) > 0) {
-                        self$results$todo2$setContent(paste0(current_content, "<br>", warning_text))
-                    } else {
-                        self$results$todo2$setContent(warning_text)
+                    pos <- 2  # Start after any ERROR notices
+                    for (warn in validation_results$warnings) {
+                        # Determine severity based on content
+                        type <- if (grepl("Very small|n = [0-9]+\\)", warn)) {
+                            # Extract sample size if present
+                            n_match <- regmatches(warn, regexec("n = ([0-9]+)", warn))
+                            if (length(n_match[[1]]) > 1) {
+                                n_val <- as.numeric(n_match[[1]][2])
+                                if (n_val < 10) {
+                                    jmvcore::NoticeType$STRONG_WARNING
+                                } else {
+                                    jmvcore::NoticeType$WARNING
+                                }
+                            } else {
+                                jmvcore::NoticeType$WARNING
+                            }
+                        } else {
+                            jmvcore::NoticeType$WARNING
+                        }
+
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('dataQualityWarn', pos),
+                            type = type
+                        )
+                        notice$setContent(warn)
+                        self$results$insert(pos, notice)
+                        pos <- pos + 1
                     }
                 }
 
@@ -850,6 +883,31 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         self$results$mantelHaenszelResults$setContent(error_html)
                     }
                 }
+
+                # Add INFO notice for successful analysis completion
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+
+                n_vars <- length(self$options$vars)
+                group_display <- self$options$group
+                style_display <- switch(self$options$sty,
+                    "arsenal" = "arsenal",
+                    "finalfit" = "finalfit",
+                    "gtsummary" = "gtsummary",
+                    "nejm" = "NEJM",
+                    "lancet" = "Lancet",
+                    "hmisc" = "Hmisc",
+                    self$options$sty
+                )
+
+                notice$setContent(sprintf(
+                    'Cross table analysis completed successfully. Analyzed %d variable(s) across %s groups using %s style.',
+                    n_vars, group_display, style_display
+                ))
+                self$results$insert(999, notice)
 
                 # ========================================================================
                 # STUBBED FEATURES - NOT IMPLEMENTED

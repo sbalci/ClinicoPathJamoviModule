@@ -13,7 +13,10 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             plot_data_overview = FALSE,
             plot_missing_patterns = FALSE,
             plot_data_types = FALSE,
-            missing_threshold_visual = 10, ...) {
+            missing_threshold_visual = 10,
+            showSummary = TRUE,
+            showRecommendations = TRUE,
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -54,6 +57,18 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 min=0,
                 max=100,
                 default=10)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=TRUE)
+            private$..showRecommendations <- jmvcore::OptionBool$new(
+                "showRecommendations",
+                showRecommendations,
+                default=TRUE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..check_duplicates)
@@ -63,6 +78,9 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..plot_missing_patterns)
             self$.addOption(private$..plot_data_types)
             self$.addOption(private$..missing_threshold_visual)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showRecommendations)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -72,7 +90,10 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         plot_data_overview = function() private$..plot_data_overview$value,
         plot_missing_patterns = function() private$..plot_missing_patterns$value,
         plot_data_types = function() private$..plot_data_types$value,
-        missing_threshold_visual = function() private$..missing_threshold_visual$value),
+        missing_threshold_visual = function() private$..missing_threshold_visual$value,
+        showSummary = function() private$..showSummary$value,
+        showRecommendations = function() private$..showRecommendations$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..vars = NA,
         ..check_duplicates = NA,
@@ -81,7 +102,10 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..plot_data_overview = NA,
         ..plot_missing_patterns = NA,
         ..plot_data_types = NA,
-        ..missing_threshold_visual = NA)
+        ..missing_threshold_visual = NA,
+        ..showSummary = NA,
+        ..showRecommendations = NA,
+        ..showExplanations = NA)
 )
 
 dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -90,6 +114,9 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
+        summary = function() private$.items[["summary"]],
+        recommendations = function() private$.items[["recommendations"]],
+        explanations = function() private$.items[["explanations"]],
         plotDataOverview = function() private$.items[["plotDataOverview"]],
         plotMissingPatterns = function() private$.items[["plotMissingPatterns"]],
         plotDataTypes = function() private$.items[["plotDataTypes"]]),
@@ -102,7 +129,10 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Data Quality Assessment",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "visdat"))
+                    "visdat",
+                    "BaylorEdPsych",
+                    "dplyr",
+                    "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -111,6 +141,21 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="text",
                 title="Data Quality Summary"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Plain-Language Summary",
+                visible="(showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="recommendations",
+                title="Recommended Actions",
+                visible="(showRecommendations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="Understanding Quality Metrics",
+                visible="(showExplanations)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotDataOverview",
@@ -200,10 +245,19 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   visualization.
 #' @param missing_threshold_visual Threshold percentage for highlighting
 #'   variables with missing values in visual analysis.
+#' @param showSummary If TRUE, displays a concise plain-language summary of
+#'   quality issues and overall assessment.
+#' @param showRecommendations If TRUE, provides specific recommendations for
+#'   addressing identified quality issues.
+#' @param showExplanations If TRUE, includes explanations of quality metrics
+#'   and statistical tests used in the analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$recommendations} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plotDataOverview} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotMissingPatterns} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotDataTypes} \tab \tab \tab \tab \tab an image \cr
@@ -219,7 +273,10 @@ dataquality <- function(
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
-    missing_threshold_visual = 10) {
+    missing_threshold_visual = 10,
+    showSummary = TRUE,
+    showRecommendations = TRUE,
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataquality requires jmvcore to be installed (restart may be required)")
@@ -239,7 +296,10 @@ dataquality <- function(
         plot_data_overview = plot_data_overview,
         plot_missing_patterns = plot_missing_patterns,
         plot_data_types = plot_data_types,
-        missing_threshold_visual = missing_threshold_visual)
+        missing_threshold_visual = missing_threshold_visual,
+        showSummary = showSummary,
+        showRecommendations = showRecommendations,
+        showExplanations = showExplanations)
 
     analysis <- dataqualityClass$new(
         options = options,

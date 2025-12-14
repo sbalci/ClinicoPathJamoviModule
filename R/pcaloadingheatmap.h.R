@@ -165,10 +165,10 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        heatmap = function() private$.items[["heatmap"]],
-        barmap = function() private$.items[["barmap"]],
         variance = function() private$.items[["variance"]],
-        scree = function() private$.items[["scree"]]),
+        heatmap = function() private$.items[["heatmap"]],
+        scree = function() private$.items[["scree"]],
+        barmap = function() private$.items[["barmap"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -231,6 +231,21 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "plotheight")))
             self$add(jmvcore::Image$new(
                 options=options,
+                name="scree",
+                title="Variance Explained Plot",
+                width=600,
+                height=450,
+                renderFun=".scree",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "ncomp",
+                    "center",
+                    "scale",
+                    "plotwidth",
+                    "plotheight")))
+            self$add(jmvcore::Image$new(
+                options=options,
                 name="barmap",
                 title="Loading Barmap",
                 width=600,
@@ -252,21 +267,6 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "colorlow",
                     "colormid",
                     "colorhigh",
-                    "plotwidth",
-                    "plotheight")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="scree",
-                title="Variance Explained Plot",
-                width=600,
-                height=450,
-                renderFun=".scree",
-                requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "center",
-                    "scale",
-                    "ncomp",
                     "plotwidth",
                     "plotheight")))}))
 
@@ -350,9 +350,17 @@ pcaloadingheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$variance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$heatmap} \tab \tab \tab \tab \tab Heatmap visualization of PCA loadings across components \cr
+#'   \code{results$scree} \tab \tab \tab \tab \tab Scree/variance explained plot \cr
 #'   \code{results$barmap} \tab \tab \tab \tab \tab Barmap visualization of PCA loadings showing magnitude and direction \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$variance$asDF}
+#'
+#' \code{as.data.frame(results$variance)}
 #'
 #' @export
 pcaloadingheatmap <- function(
@@ -410,3 +418,4 @@ pcaloadingheatmap <- function(
 
     analysis$results
 }
+

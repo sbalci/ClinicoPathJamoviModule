@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="ClinicoPath Development Team">
+<meta name="dcterms.date" content="2025-12-13">
+
+<title>ClinicoPath Tutorial Series - Video Scripts – ClinicoPath Tutorial Series</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-08eeb69f393412681a6547633e23c35d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8024f401e8cc91cdfa68a61fd6c47d8e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-08eeb69f393412681a6547633e23c35d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">ClinicoPath Tutorial Series</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./README.md"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-tutorials" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Tutorials</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-tutorials">    
+        <li>
+    <a class="dropdown-item" href="./01-getting-started.html">
+ <span class="dropdown-text">1. Getting Started</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-table-one-clinical-trial.html">
+ <span class="dropdown-text">2. Table One (Clinical Trial)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-survival-analysis-cancer.html">
+ <span class="dropdown-text">3. Survival Analysis (Cancer)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./04-roc-diagnostic-test.html">
+ <span class="dropdown-text">4. ROC Analysis (Diagnostic Test)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./05-decision-curve-analysis.html">
+ <span class="dropdown-text">5. Decision Curve Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./06-reproducible-reports.html">
+ <span class="dropdown-text">6. Reproducible Reports</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-resources" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Resources</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-resources">    
+        <li>
+    <a class="dropdown-item" href="./VIDEO_SCRIPTS.html">
+ <span class="dropdown-text">Video Scripts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./VISUAL_DIAGRAMS.html">
+ <span class="dropdown-text">Visual Diagrams</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./TUTORIAL_SERIES_COMPLETE.html">
+ <span class="dropdown-text">Project Summary</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/sbalci/ClinicoPathJamoviModule"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.serdarbalci.com/ClinicoPath/"> <i class="bi bi-house" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./VIDEO_SCRIPTS.html">Production Resources</a></li><li class="breadcrumb-item"><a href="./VIDEO_SCRIPTS.html">ClinicoPath Tutorial Series - Video Scripts</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting Started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting Started with ClinicoPath</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Core Analyses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-table-one-clinical-trial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Table One for Clinical Trials</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-survival-analysis-cancer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Survival Analysis in Oncology</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Advanced Techniques</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-roc-diagnostic-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ROC Analysis for Diagnostic Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-decision-curve-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decision Curve Analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reproducibility</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-reproducible-reports.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Creating Reproducible Reports</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Production Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./VIDEO_SCRIPTS.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">ClinicoPath Tutorial Series - Video Scripts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./VISUAL_DIAGRAMS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Visual Diagrams &amp; Workflow Charts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./TUTORIAL_SERIES_COMPLETE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Complete Package</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#video-scripts-overview" id="toc-video-scripts-overview" class="nav-link active" data-scroll-target="#video-scripts-overview"><span class="header-section-number">1</span> Video Scripts Overview</a></li>
+  <li><a href="#tutorial-1-getting-started-with-clinicopath" id="toc-tutorial-1-getting-started-with-clinicopath" class="nav-link" data-scroll-target="#tutorial-1-getting-started-with-clinicopath"><span class="header-section-number">2</span> Tutorial 1: Getting Started with ClinicoPath</a>
+  <ul class="collapse">
+  <li><a href="#video-structure" id="toc-video-structure" class="nav-link" data-scroll-target="#video-structure"><span class="header-section-number">2.1</span> Video Structure</a></li>
+  <li><a href="#segment-1-introduction-000-100" id="toc-segment-1-introduction-000-100" class="nav-link" data-scroll-target="#segment-1-introduction-000-100"><span class="header-section-number">2.2</span> Segment 1: Introduction (0:00-1:00)</a>
+  <ul class="collapse">
+  <li><a href="#opening-shot" id="toc-opening-shot" class="nav-link" data-scroll-target="#opening-shot"><span class="header-section-number">2.2.1</span> Opening Shot</a></li>
+  <li><a href="#narration" id="toc-narration" class="nav-link" data-scroll-target="#narration"><span class="header-section-number">2.2.2</span> Narration</a></li>
+  <li><a href="#screen-actions" id="toc-screen-actions" class="nav-link" data-scroll-target="#screen-actions"><span class="header-section-number">2.2.3</span> Screen Actions</a></li>
+  <li><a href="#visual-overlays" id="toc-visual-overlays" class="nav-link" data-scroll-target="#visual-overlays"><span class="header-section-number">2.2.4</span> Visual Overlays</a></li>
+  </ul></li>
+  <li><a href="#segment-2-installation-100-400" id="toc-segment-2-installation-100-400" class="nav-link" data-scroll-target="#segment-2-installation-100-400"><span class="header-section-number">2.3</span> Segment 2: Installation (1:00-4:00)</a>
+  <ul class="collapse">
+  <li><a href="#part-a-installing-jamovi-100-215" id="toc-part-a-installing-jamovi-100-215" class="nav-link" data-scroll-target="#part-a-installing-jamovi-100-215"><span class="header-section-number">2.3.1</span> Part A: Installing jamovi (1:00-2:15)</a></li>
+  <li><a href="#part-b-installing-clinicopath-modules-215-400" id="toc-part-b-installing-clinicopath-modules-215-400" class="nav-link" data-scroll-target="#part-b-installing-clinicopath-modules-215-400"><span class="header-section-number">2.3.2</span> Part B: Installing ClinicoPath Modules (2:15-4:00)</a></li>
+  </ul></li>
+  <li><a href="#segment-3-interface-tour-400-630" id="toc-segment-3-interface-tour-400-630" class="nav-link" data-scroll-target="#segment-3-interface-tour-400-630"><span class="header-section-number">2.4</span> Segment 3: Interface Tour (4:00-6:30)</a>
+  <ul class="collapse">
+  <li><a href="#narration-3" id="toc-narration-3" class="nav-link" data-scroll-target="#narration-3"><span class="header-section-number">2.4.1</span> Narration</a></li>
+  <li><a href="#screen-actions-3" id="toc-screen-actions-3" class="nav-link" data-scroll-target="#screen-actions-3"><span class="header-section-number">2.4.2</span> Screen Actions</a></li>
+  <li><a href="#visual-overlays-3" id="toc-visual-overlays-3" class="nav-link" data-scroll-target="#visual-overlays-3"><span class="header-section-number">2.4.3</span> Visual Overlays</a></li>
+  </ul></li>
+  <li><a href="#segment-4-data-import-630-900" id="toc-segment-4-data-import-630-900" class="nav-link" data-scroll-target="#segment-4-data-import-630-900"><span class="header-section-number">2.5</span> Segment 4: Data Import (6:30-9:00)</a>
+  <ul class="collapse">
+  <li><a href="#narration-4" id="toc-narration-4" class="nav-link" data-scroll-target="#narration-4"><span class="header-section-number">2.5.1</span> Narration</a></li>
+  <li><a href="#screen-actions-4" id="toc-screen-actions-4" class="nav-link" data-scroll-target="#screen-actions-4"><span class="header-section-number">2.5.2</span> Screen Actions</a></li>
+  <li><a href="#visual-overlays-4" id="toc-visual-overlays-4" class="nav-link" data-scroll-target="#visual-overlays-4"><span class="header-section-number">2.5.3</span> Visual Overlays</a></li>
+  </ul></li>
+  <li><a href="#segment-5-first-analysis---table-one-900-1300" id="toc-segment-5-first-analysis---table-one-900-1300" class="nav-link" data-scroll-target="#segment-5-first-analysis---table-one-900-1300"><span class="header-section-number">2.6</span> Segment 5: First Analysis - Table One (9:00-13:00)</a>
+  <ul class="collapse">
+  <li><a href="#narration-5" id="toc-narration-5" class="nav-link" data-scroll-target="#narration-5"><span class="header-section-number">2.6.1</span> Narration</a></li>
+  <li><a href="#screen-actions-5" id="toc-screen-actions-5" class="nav-link" data-scroll-target="#screen-actions-5"><span class="header-section-number">2.6.2</span> Screen Actions</a></li>
+  <li><a href="#visual-overlays-5" id="toc-visual-overlays-5" class="nav-link" data-scroll-target="#visual-overlays-5"><span class="header-section-number">2.6.3</span> Visual Overlays</a></li>
+  </ul></li>
+  <li><a href="#segment-6-export-results-1300-1430" id="toc-segment-6-export-results-1300-1430" class="nav-link" data-scroll-target="#segment-6-export-results-1300-1430"><span class="header-section-number">2.7</span> Segment 6: Export Results (13:00-14:30)</a>
+  <ul class="collapse">
+  <li><a href="#narration-6" id="toc-narration-6" class="nav-link" data-scroll-target="#narration-6"><span class="header-section-number">2.7.1</span> Narration</a></li>
+  <li><a href="#screen-actions-6" id="toc-screen-actions-6" class="nav-link" data-scroll-target="#screen-actions-6"><span class="header-section-number">2.7.2</span> Screen Actions</a></li>
+  <li><a href="#visual-overlays-6" id="toc-visual-overlays-6" class="nav-link" data-scroll-target="#visual-overlays-6"><span class="header-section-number">2.7.3</span> Visual Overlays</a></li>
+  </ul></li>
+  <li><a href="#segment-7-conclusion-1430-1500" id="toc-segment-7-conclusion-1430-1500" class="nav-link" data-scroll-target="#segment-7-conclusion-1430-1500"><span class="header-section-number">2.8</span> Segment 7: Conclusion (14:30-15:00)</a>
+  <ul class="collapse">
+  <li><a href="#narration-7" id="toc-narration-7" class="nav-link" data-scroll-target="#narration-7"><span class="header-section-number">2.8.1</span> Narration</a></li>
+  <li><a href="#screen-actions-7" id="toc-screen-actions-7" class="nav-link" data-scroll-target="#screen-actions-7"><span class="header-section-number">2.8.2</span> Screen Actions</a></li>
+  <li><a href="#visual-overlays-7" id="toc-visual-overlays-7" class="nav-link" data-scroll-target="#visual-overlays-7"><span class="header-section-number">2.8.3</span> Visual Overlays</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#tutorial-2-table-one-for-clinical-trials" id="toc-tutorial-2-table-one-for-clinical-trials" class="nav-link" data-scroll-target="#tutorial-2-table-one-for-clinical-trials"><span class="header-section-number">3</span> Tutorial 2: Table One for Clinical Trials</a>
+  <ul class="collapse">
+  <li><a href="#video-structure-1" id="toc-video-structure-1" class="nav-link" data-scroll-target="#video-structure-1"><span class="header-section-number">3.1</span> Video Structure</a></li>
+  <li><a href="#key-segments-abbreviated" id="toc-key-segments-abbreviated" class="nav-link" data-scroll-target="#key-segments-abbreviated"><span class="header-section-number">3.2</span> Key Segments (Abbreviated)</a>
+  <ul class="collapse">
+  <li><a href="#introduction-000-100" id="toc-introduction-000-100" class="nav-link" data-scroll-target="#introduction-000-100"><span class="header-section-number">3.2.1</span> Introduction (0:00-1:00)</a></li>
+  <li><a href="#cross-tables-setup-100-400" id="toc-cross-tables-setup-100-400" class="nav-link" data-scroll-target="#cross-tables-setup-100-400"><span class="header-section-number">3.2.2</span> Cross Tables Setup (1:00-4:00)</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#tutorial-3-survival-analysis-in-oncology" id="toc-tutorial-3-survival-analysis-in-oncology" class="nav-link" data-scroll-target="#tutorial-3-survival-analysis-in-oncology"><span class="header-section-number">4</span> Tutorial 3: Survival Analysis in Oncology</a>
+  <ul class="collapse">
+  <li><a href="#video-structure-2" id="toc-video-structure-2" class="nav-link" data-scroll-target="#video-structure-2"><span class="header-section-number">4.1</span> Video Structure</a></li>
+  </ul></li>
+  <li><a href="#tutorial-4-roc-analysis-for-diagnostic-tests" id="toc-tutorial-4-roc-analysis-for-diagnostic-tests" class="nav-link" data-scroll-target="#tutorial-4-roc-analysis-for-diagnostic-tests"><span class="header-section-number">5</span> Tutorial 4: ROC Analysis for Diagnostic Tests</a>
+  <ul class="collapse">
+  <li><a href="#video-structure-3" id="toc-video-structure-3" class="nav-link" data-scroll-target="#video-structure-3"><span class="header-section-number">5.1</span> Video Structure</a></li>
+  </ul></li>
+  <li><a href="#tutorial-5-decision-curve-analysis" id="toc-tutorial-5-decision-curve-analysis" class="nav-link" data-scroll-target="#tutorial-5-decision-curve-analysis"><span class="header-section-number">6</span> Tutorial 5: Decision Curve Analysis</a>
+  <ul class="collapse">
+  <li><a href="#video-structure-4" id="toc-video-structure-4" class="nav-link" data-scroll-target="#video-structure-4"><span class="header-section-number">6.1</span> Video Structure</a></li>
+  </ul></li>
+  <li><a href="#tutorial-6-creating-reproducible-reports" id="toc-tutorial-6-creating-reproducible-reports" class="nav-link" data-scroll-target="#tutorial-6-creating-reproducible-reports"><span class="header-section-number">7</span> Tutorial 6: Creating Reproducible Reports</a>
+  <ul class="collapse">
+  <li><a href="#video-structure-5" id="toc-video-structure-5" class="nav-link" data-scroll-target="#video-structure-5"><span class="header-section-number">7.1</span> Video Structure</a></li>
+  </ul></li>
+  <li><a href="#production-notes" id="toc-production-notes" class="nav-link" data-scroll-target="#production-notes"><span class="header-section-number">8</span> Production Notes</a>
+  <ul class="collapse">
+  <li><a href="#technical-specifications" id="toc-technical-specifications" class="nav-link" data-scroll-target="#technical-specifications"><span class="header-section-number">8.1</span> Technical Specifications</a></li>
+  <li><a href="#visual-style-guide" id="toc-visual-style-guide" class="nav-link" data-scroll-target="#visual-style-guide"><span class="header-section-number">8.2</span> Visual Style Guide</a></li>
+  <li><a href="#timing-guidelines" id="toc-timing-guidelines" class="nav-link" data-scroll-target="#timing-guidelines"><span class="header-section-number">8.3</span> Timing Guidelines</a></li>
+  <li><a href="#accessibility" id="toc-accessibility" class="nav-link" data-scroll-target="#accessibility"><span class="header-section-number">8.4</span> Accessibility</a></li>
+  <li><a href="#post-production-checklist" id="toc-post-production-checklist" class="nav-link" data-scroll-target="#post-production-checklist"><span class="header-section-number">8.5</span> Post-Production Checklist</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./VIDEO_SCRIPTS.html">Production Resources</a></li><li class="breadcrumb-item"><a href="./VIDEO_SCRIPTS.html">ClinicoPath Tutorial Series - Video Scripts</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">ClinicoPath Tutorial Series - Video Scripts</h1>
+<p class="subtitle lead">Narration, Timing, and Screen Actions for All 6 Tutorials</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>ClinicoPath Development Team </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 13, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="video-scripts-overview" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Video Scripts Overview</h1>
+<p>This document contains complete video scripts for all 6 ClinicoPath tutorials. Each script includes:</p>
+<ul>
+<li><strong>Timing:</strong> Duration of each segment</li>
+<li><strong>Narration:</strong> Exact words to speak</li>
+<li><strong>Screen Actions:</strong> What viewers see</li>
+<li><strong>Visual Overlays:</strong> Text, arrows, highlights</li>
+<li><strong>Transitions:</strong> Cuts, fades, animations</li>
+</ul>
+<p><strong>Total Series Duration:</strong> ~3 hours 45 minutes</p>
+<hr>
+</section>
+<section id="tutorial-1-getting-started-with-clinicopath" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Tutorial 1: Getting Started with ClinicoPath</h1>
+<p><strong>Duration:</strong> 15 minutes <strong>Target Audience:</strong> Complete beginners <strong>Learning Objectives:</strong> Install, navigate, run first analysis</p>
+<section id="video-structure" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="video-structure"><span class="header-section-number">2.1</span> Video Structure</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th>Duration</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>1:00</td>
+<td>Welcome, what you’ll learn</td>
+</tr>
+<tr class="even">
+<td>Installation</td>
+<td>3:00</td>
+<td>Download jamovi and ClinicoPath</td>
+</tr>
+<tr class="odd">
+<td>Interface Tour</td>
+<td>2:30</td>
+<td>Navigate menus and panels</td>
+</tr>
+<tr class="even">
+<td>Data Import</td>
+<td>2:30</td>
+<td>Load example dataset</td>
+</tr>
+<tr class="odd">
+<td>First Analysis</td>
+<td>4:00</td>
+<td>Create Table One</td>
+</tr>
+<tr class="even">
+<td>Export Results</td>
+<td>1:30</td>
+<td>Copy table to Word</td>
+</tr>
+<tr class="odd">
+<td>Conclusion</td>
+<td>0:30</td>
+<td>Next steps</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="segment-1-introduction-000-100" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="segment-1-introduction-000-100"><span class="header-section-number">2.2</span> Segment 1: Introduction (0:00-1:00)</h2>
+<section id="opening-shot" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="opening-shot"><span class="header-section-number">2.2.1</span> Opening Shot</h3>
+<p>[ANIMATION: ClinicoPath logo animates in, transforms into jamovi ribbon]</p>
+</section>
+<section id="narration" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="narration"><span class="header-section-number">2.2.2</span> Narration</h3>
+<blockquote class="blockquote">
+<p>“Welcome to the ClinicoPath Tutorial Series! I’m Dr.&nbsp;Serdar Balci, and in this first tutorial, we’ll get you started with ClinicoPath—a powerful, free tool for analyzing clinical and pathological data.</p>
+<p>ClinicoPath brings sophisticated statistical methods to jamovi’s user-friendly interface, so you can perform publication-quality analyses without writing a single line of code.</p>
+<p>By the end of this 15-minute tutorial, you’ll be able to install ClinicoPath, navigate the interface, and create your first publication-ready Table One.</p>
+<p>Let’s get started!”</p>
+</blockquote>
+</section>
+<section id="screen-actions" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="screen-actions"><span class="header-section-number">2.2.3</span> Screen Actions</h3>
+<ul>
+<li>0:00-0:05: ClinicoPath logo on screen</li>
+<li>0:05-0:15: Montage of example outputs (tables, plots, survival curves)</li>
+<li>0:15-0:30: Speaker introduction (picture-in-picture)</li>
+<li>0:30-0:45: Learning objectives as bullet points</li>
+<li>0:45-1:00: “Let’s get started!” with transition wipe</li>
+</ul>
+</section>
+<section id="visual-overlays" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="visual-overlays"><span class="header-section-number">2.2.4</span> Visual Overlays</h3>
+<ul>
+<li>Title card: “Tutorial 1: Getting Started with ClinicoPath”</li>
+<li>Subtitle: “Installation, Navigation, and Your First Analysis”</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="segment-2-installation-100-400" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="segment-2-installation-100-400"><span class="header-section-number">2.3</span> Segment 2: Installation (1:00-4:00)</h2>
+<section id="part-a-installing-jamovi-100-215" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="part-a-installing-jamovi-100-215"><span class="header-section-number">2.3.1</span> Part A: Installing jamovi (1:00-2:15)</h3>
+<section id="narration-1" class="level4" data-number="2.3.1.1">
+<h4 data-number="2.3.1.1" class="anchored" data-anchor-id="narration-1"><span class="header-section-number">2.3.1.1</span> Narration</h4>
+<blockquote class="blockquote">
+<p>“First, we need to install jamovi, the platform that runs ClinicoPath.</p>
+<p>Open your web browser and go to jamovi dot org slash download. You’ll see download buttons for Windows, Mac, and Linux. Click the button for your operating system.</p>
+<p>[PAUSE]</p>
+<p>For this tutorial, I’m using a Mac, so I’ll click the macOS button. The installer will download—this takes about 30 seconds.</p>
+<p>[PAUSE]</p>
+<p>Once downloaded, double-click the installer file. On Mac, drag jamovi to your Applications folder. On Windows, just click through the setup wizard.</p>
+<p>[PAUSE]</p>
+<p>Now launch jamovi by double-clicking the icon. The first launch takes a few seconds as jamovi sets up its environment.</p>
+<p>[PAUSE]</p>
+<p>Great! You should see the jamovi welcome screen. We’re ready to install ClinicoPath.”</p>
+</blockquote>
+</section>
+<section id="screen-actions-1" class="level4" data-number="2.3.1.2">
+<h4 data-number="2.3.1.2" class="anchored" data-anchor-id="screen-actions-1"><span class="header-section-number">2.3.1.2</span> Screen Actions</h4>
+<ul>
+<li>1:00: Browser opens to jamovi.org/download</li>
+<li>1:05: Mouse hovers over download buttons with highlight circles</li>
+<li>1:10: Click macOS button (or Windows/Linux based on demo)</li>
+<li>1:15-1:30: Download progress bar appears in browser</li>
+<li>1:30-1:45: Finder window shows downloaded file</li>
+<li>1:45-2:00: Installation process (drag to Applications or Windows wizard)</li>
+<li>2:00-2:10: Applications folder shows jamovi icon</li>
+<li>2:10-2:15: jamovi launches, welcome screen appears</li>
+</ul>
+</section>
+<section id="visual-overlays-1" class="level4" data-number="2.3.1.3">
+<h4 data-number="2.3.1.3" class="anchored" data-anchor-id="visual-overlays-1"><span class="header-section-number">2.3.1.3</span> Visual Overlays</h4>
+<ul>
+<li>1:00: Arrow pointing to “Download” button</li>
+<li>1:10: Text: “Choose your operating system”</li>
+<li>1:30: Text: “Wait for download to complete”</li>
+<li>2:00: Text: “First launch may take 30 seconds”</li>
+</ul>
+</section>
+</section>
+<section id="part-b-installing-clinicopath-modules-215-400" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="part-b-installing-clinicopath-modules-215-400"><span class="header-section-number">2.3.2</span> Part B: Installing ClinicoPath Modules (2:15-4:00)</h3>
+<section id="narration-2" class="level4" data-number="2.3.2.1">
+<h4 data-number="2.3.2.1" class="anchored" data-anchor-id="narration-2"><span class="header-section-number">2.3.2.1</span> Narration</h4>
+<blockquote class="blockquote">
+<p>“Now let’s install ClinicoPath. In jamovi, look for the Modules button—it’s the plus sign in the top-right corner.</p>
+<p>[PAUSE]</p>
+<p>Click Modules, then click ‘jamovi library’. This opens the library of available add-ons.</p>
+<p>[PAUSE]</p>
+<p>In the search box, type ‘ClinicoPath’. You’ll see several modules appear: - ClinicoPathDescriptives for descriptive statistics - jsurvival for survival analysis - meddecide for medical decision analysis - jjstatsplot for statistical plots</p>
+<p>[PAUSE]</p>
+<p>We’ll install all four. Click ‘Install’ next to ClinicoPathDescriptives. The installation begins—you’ll see a progress bar.</p>
+<p>[PAUSE]</p>
+<p>This first installation takes 5-10 minutes because jamovi needs to install many R packages in the background. Please be patient and don’t close jamovi during installation.</p>
+<p>[PAUSE - FAST FORWARD INDICATED]</p>
+<p>Once complete, install the other three modules: jsurvival, meddecide, and jjstatsplot. These install faster since most dependencies are already installed.</p>
+<p>[PAUSE]</p>
+<p>Perfect! All modules are installed. jamovi will reload automatically. You’re now ready to use ClinicoPath!”</p>
+</blockquote>
+</section>
+<section id="screen-actions-2" class="level4" data-number="2.3.2.2">
+<h4 data-number="2.3.2.2" class="anchored" data-anchor-id="screen-actions-2"><span class="header-section-number">2.3.2.2</span> Screen Actions</h4>
+<ul>
+<li>2:15: Cursor moves to Modules button (➕), highlights with circle</li>
+<li>2:20: Click Modules, dropdown menu appears</li>
+<li>2:25: Click “jamovi library”, library window opens</li>
+<li>2:30: Type “ClinicoPath” in search box</li>
+<li>2:35: Four modules appear in results</li>
+<li>2:40: Hover over “ClinicoPathDescriptives”, click Install</li>
+<li>2:45: Progress bar: “Installing ClinicoPathDescriptives…”</li>
+<li>2:50-3:40: [TIME LAPSE] Progress bar advances, show system time clock speeding</li>
+<li>3:40: “Installation complete” message</li>
+<li>3:45: Install jsurvival (fast)</li>
+<li>3:50: Install meddecide (fast)</li>
+<li>3:55: Install jjstatsplot (fast)</li>
+<li>4:00: jamovi reloads</li>
+</ul>
+</section>
+<section id="visual-overlays-2" class="level4" data-number="2.3.2.3">
+<h4 data-number="2.3.2.3" class="anchored" data-anchor-id="visual-overlays-2"><span class="header-section-number">2.3.2.3</span> Visual Overlays</h4>
+<ul>
+<li>2:15: Arrow + text: “Click Modules button”</li>
+<li>2:30: Text: “Search for ClinicoPath”</li>
+<li>2:45: Text: “First installation: 5-10 minutes - BE PATIENT”</li>
+<li>2:50: [TIME LAPSE TEXT]: “Fast forward 8 minutes…”</li>
+<li>3:45: Text: “Additional modules install quickly”</li>
+</ul>
+<hr>
+</section>
+</section>
+</section>
+<section id="segment-3-interface-tour-400-630" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="segment-3-interface-tour-400-630"><span class="header-section-number">2.4</span> Segment 3: Interface Tour (4:00-6:30)</h2>
+<section id="narration-3" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="narration-3"><span class="header-section-number">2.4.1</span> Narration</h3>
+<blockquote class="blockquote">
+<p>“Let’s tour the jamovi interface. jamovi has three main areas: the Data Panel on the left, the Results Panel on the right, and the Analysis menu at the top.</p>
+<p>[PAUSE]</p>
+<p>The Data Panel shows your dataset as a spreadsheet. Each row is one patient or case, and each column is a variable like age, diagnosis, or treatment.</p>
+<p>[PAUSE]</p>
+<p>The Results Panel displays your statistical outputs—tables, plots, and summary statistics. It updates automatically as you change options.</p>
+<p>[PAUSE]</p>
+<p>At the top is the Analysis menu. This is where you’ll find all your statistical analyses organized by type. Look for the new ClinicoPath menu groups:</p>
+<p>[MOUSE HOVERS OVER EACH] - ExplorationT1 for descriptive statistics - SurvivalT1 for survival analysis - meddecideD for diagnostic tests and decision analysis - Visualization for statistical plots</p>
+<p>[PAUSE]</p>
+<p>Each analysis opens options in a sidebar on the right. You drag variables from your dataset into these options, check boxes to enable features, and results appear immediately.</p>
+<p>[PAUSE]</p>
+<p>That’s the basic layout! Now let’s import some data.”</p>
+</blockquote>
+</section>
+<section id="screen-actions-3" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="screen-actions-3"><span class="header-section-number">2.4.2</span> Screen Actions</h3>
+<ul>
+<li>4:00-4:15: Zoom out to show full jamovi window</li>
+<li>4:15-4:20: Highlight Data Panel (left side) with colored overlay</li>
+<li>4:20-4:30: Show example data scrolling (rows and columns)</li>
+<li>4:30-4:35: Highlight Results Panel (right side) with colored overlay</li>
+<li>4:35-4:45: Show example results (table and plot)</li>
+<li>4:45-4:50: Highlight Analysis menu (top ribbon) with colored overlay</li>
+<li>4:50-5:10: Cursor hovers over each ClinicoPath menu item</li>
+<li>5:10-5:20: Click “ExplorationT1”, dropdown menu appears</li>
+<li>5:20-5:30: Show sidebar with analysis options</li>
+<li>5:30-6:00: Demonstrate drag-drop of variable into option box</li>
+<li>6:00-6:15: Check a checkbox, result updates</li>
+<li>6:15-6:30: Uncheck checkbox, result changes</li>
+</ul>
+</section>
+<section id="visual-overlays-3" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="visual-overlays-3"><span class="header-section-number">2.4.3</span> Visual Overlays</h3>
+<ul>
+<li>4:15: Label: “DATA PANEL - Your dataset”</li>
+<li>4:35: Label: “RESULTS PANEL - Statistical outputs”</li>
+<li>4:45: Label: “ANALYSIS MENU - All statistical tests”</li>
+<li>5:00: Arrows pointing to ClinicoPath menu items</li>
+<li>5:30: Text: “Drag variables here”</li>
+<li>6:00: Text: “Check options, results update instantly”</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="segment-4-data-import-630-900" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="segment-4-data-import-630-900"><span class="header-section-number">2.5</span> Segment 4: Data Import (6:30-9:00)</h2>
+<section id="narration-4" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="narration-4"><span class="header-section-number">2.5.1</span> Narration</h3>
+<blockquote class="blockquote">
+<p>“Let’s load the example dataset we’ll use for our first analysis. Click File, then Open, then Data Library.</p>
+<p>[PAUSE]</p>
+<p>The Data Library contains hundreds of built-in datasets for practice. Scroll down to find ‘clinical_trial_data’. This is a breast cancer clinical trial with 200 patients.</p>
+<p>[PAUSE]</p>
+<p>Click to select it, then click Open. The dataset appears in the Data Panel.</p>
+<p>[PAUSE]</p>
+<p>Let’s examine the variables. We have: - PatientID: Patient identifiers - Age: Age in years - Sex: Male or Female - TreatmentGroup: Control or Experimental - TumorStage: Stage I through IV - TumorGrade: Grade 1, 2, or 3 - TumorSize: Tumor diameter in centimeters - And several other clinical variables</p>
+<p>[PAUSE]</p>
+<p>Notice the icons above each column. jamovi automatically detected variable types: - The ruler icon means continuous numeric data - The tags icon means categorical data - The target icon is for ID variables</p>
+<p>[PAUSE]</p>
+<p>If jamovi got the type wrong, click the setup icon at the top of the column to change it. For now, everything looks correct.</p>
+<p>[PAUSE]</p>
+<p>We’re ready to analyze!”</p>
+</blockquote>
+</section>
+<section id="screen-actions-4" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="screen-actions-4"><span class="header-section-number">2.5.2</span> Screen Actions</h3>
+<ul>
+<li>6:30: Click File menu</li>
+<li>6:35: Click Open</li>
+<li>6:40: Click Data Library</li>
+<li>6:45: Data Library window opens, shows list of datasets</li>
+<li>6:50-7:00: Scroll through datasets</li>
+<li>7:00: Highlight “clinical_trial_data”</li>
+<li>7:05: Click Open button</li>
+<li>7:10-7:15: Loading animation</li>
+<li>7:15: Dataset appears in Data Panel</li>
+<li>7:20-7:40: Pan across columns, highlighting each variable</li>
+<li>7:40-7:50: Zoom in on column icons (ruler, tags, target)</li>
+<li>7:50-8:10: Hover over different column headers</li>
+<li>8:10-8:20: Click setup icon (⚙️) on one column, show dropdown</li>
+<li>8:20-8:30: Close dropdown without changing</li>
+<li>8:30-9:00: Pan across full dataset</li>
+</ul>
+</section>
+<section id="visual-overlays-4" class="level3" data-number="2.5.3">
+<h3 data-number="2.5.3" class="anchored" data-anchor-id="visual-overlays-4"><span class="header-section-number">2.5.3</span> Visual Overlays</h3>
+<ul>
+<li>6:40: Arrow: “Data Library contains example datasets”</li>
+<li>7:00: Highlight box around “clinical_trial_data”</li>
+<li>7:20-7:40: Labels appear for each variable as it’s highlighted</li>
+<li>7:45: Icon legend:
+<ul>
+<li>📏 = Continuous</li>
+<li>🏷️ = Categorical</li>
+<li>🎯 = ID variable</li>
+</ul></li>
+<li>8:10: Text: “Change variable type if needed”</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="segment-5-first-analysis---table-one-900-1300" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="segment-5-first-analysis---table-one-900-1300"><span class="header-section-number">2.6</span> Segment 5: First Analysis - Table One (9:00-13:00)</h2>
+<section id="narration-5" class="level3" data-number="2.6.1">
+<h3 data-number="2.6.1" class="anchored" data-anchor-id="narration-5"><span class="header-section-number">2.6.1</span> Narration</h3>
+<blockquote class="blockquote">
+<p>“Now for your first analysis! We’ll create a Table One—the most common table in clinical research manuscripts. It summarizes baseline patient characteristics.</p>
+<p>[PAUSE]</p>
+<p>Click Analyses, then ExplorationT1, then Table One. The analysis options appear on the right.</p>
+<p>[PAUSE]</p>
+<p>In the Variables box, we need to select which variables to include. Let’s use: - Age - Sex - TumorStage - TumorGrade - TumorSize - ER_Status (estrogen receptor status)</p>
+<p>[PAUSE]</p>
+<p>Click Age to select it, hold Control (or Command on Mac), and click the other variables to multi-select. Now drag them all into the Variables box.</p>
+<p>[PAUSE]</p>
+<p>Instantly, results appear! ClinicoPath created a summary table showing: - Age: Mean and standard deviation - Sex: Counts and percentages - Tumor characteristics</p>
+<p>[PAUSE - SCROLL THROUGH RESULTS]</p>
+<p>This is the default table style. Let’s make it publication-ready. In the Table Style dropdown, change from ‘tableone’ to ‘gtsummary’. This gives us a modern, clean format.</p>
+<p>[PAUSE]</p>
+<p>Much better! Now check these optional boxes: - Show Summary: Displays sample size and missing data - Show About: Explains what Table One is - Show Report Sentence: Gives you a copy-ready Methods sentence</p>
+<p>[PAUSE - SCROLL THROUGH NEW OUTPUTS]</p>
+<p>Look at the blue summary box. It tells us: - Original dataset: 200 cases - Complete cases: 97.5% - Missing data: Only 2.5% (very good!) - Variable types: Mix of numeric and categorical</p>
+<p>[PAUSE]</p>
+<p>The table shows each variable with appropriate statistics: - Continuous variables: Median with interquartile range - Categorical variables: Count with percentage</p>
+<p>[PAUSE]</p>
+<p>Scroll down to see the copy-ready report sentence. This is what you’d put in your Methods section:</p>
+<p>[PAUSE]</p>
+<p>Perfect! Now let’s export this table.”</p>
+</blockquote>
+</section>
+<section id="screen-actions-5" class="level3" data-number="2.6.2">
+<h3 data-number="2.6.2" class="anchored" data-anchor-id="screen-actions-5"><span class="header-section-number">2.6.2</span> Screen Actions</h3>
+<ul>
+<li>9:00-9:10: Click Analyses menu → ExplorationT1 → Table One</li>
+<li>9:10-9:15: Analysis options sidebar appears</li>
+<li>9:15-9:25: Variables list shown, cursor highlights “Age”</li>
+<li>9:25-9:35: Hold Ctrl/Cmd, multi-select variables (highlights appear)</li>
+<li>9:35-9:40: Drag highlighted variables to “Variables” box</li>
+<li>9:40-9:45: Variables appear in box</li>
+<li>9:45-10:00: Results panel updates, basic table appears</li>
+<li>10:00-10:10: Zoom in on table, pan down to show all rows</li>
+<li>10:10-10:15: Return to options sidebar</li>
+<li>10:15-10:20: Click “Table Style” dropdown</li>
+<li>10:20-10:25: Select “gtsummary”</li>
+<li>10:25-10:30: Table updates with new formatting</li>
+<li>10:30-10:35: Check “Show Summary” box</li>
+<li>10:35-10:40: Check “Show About” box</li>
+<li>10:40-10:45: Check “Show Report Sentence” box</li>
+<li>10:45-11:00: Results panel now shows 4 sections</li>
+<li>11:00-11:20: Scroll to blue Summary box, highlight key statistics</li>
+<li>11:20-11:40: Scroll to main table, highlight different variable types</li>
+<li>11:40-12:10: Scroll to Report Sentence box, highlight text</li>
+<li>12:10-12:30: Split screen: Options (left) and Results (right)</li>
+<li>12:30-13:00: Pan through complete results</li>
+</ul>
+</section>
+<section id="visual-overlays-5" class="level3" data-number="2.6.3">
+<h3 data-number="2.6.3" class="anchored" data-anchor-id="visual-overlays-5"><span class="header-section-number">2.6.3</span> Visual Overlays</h3>
+<ul>
+<li>9:10: Arrow: “Analysis options appear here”</li>
+<li>9:25: Text: “Hold Ctrl (Windows) or Cmd (Mac) to multi-select”</li>
+<li>9:45: Text: “Results appear instantly!”</li>
+<li>10:20: Dropdown menu with 4 styles highlighted</li>
+<li>10:30: Text: “gtsummary = publication-ready format”</li>
+<li>11:05: Callout boxes pointing to key statistics:
+<ul>
+<li>“Total N = 200”</li>
+<li>“Missing: 2.5%”</li>
+<li>“Complete cases: 97.5%”</li>
+</ul></li>
+<li>11:30: Annotations on table:
+<ul>
+<li>“Median (IQR) for continuous”</li>
+<li>“N (%) for categorical”</li>
+</ul></li>
+<li>11:50: Highlight box around report sentence with text: “Copy this to your manuscript Methods section”</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="segment-6-export-results-1300-1430" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="segment-6-export-results-1300-1430"><span class="header-section-number">2.7</span> Segment 6: Export Results (13:00-14:30)</h2>
+<section id="narration-6" class="level3" data-number="2.7.1">
+<h3 data-number="2.7.1" class="anchored" data-anchor-id="narration-6"><span class="header-section-number">2.7.1</span> Narration</h3>
+<blockquote class="blockquote">
+<p>“Now let’s export this beautiful table to use in your manuscript. It’s incredibly easy.</p>
+<p>[PAUSE]</p>
+<p>Right-click anywhere on the table in the Results panel. A context menu appears with export options.</p>
+<p>[PAUSE]</p>
+<p>For Word documents, choose ‘Copy → HTML’. This preserves all formatting—colors, bolding, alignment.</p>
+<p>[PAUSE]</p>
+<p>Now open Microsoft Word. Click Paste. The table appears perfectly formatted! No manual reformatting needed.</p>
+<p>[PAUSE - SHOW WORD DOCUMENT]</p>
+<p>See how the formatting is preserved? Headers are bold, numbers are aligned, and the structure is clean. This is publication-ready.</p>
+<p>[PAUSE]</p>
+<p>You can also export as an image for presentations. Right-click the table again, choose ‘Copy → Image’, and paste into PowerPoint.</p>
+<p>[PAUSE - SHOW POWERPOINT]</p>
+<p>Or export as PNG for high-resolution figures. Right-click, choose ‘Save As → Image’, select PNG format, set DPI to 300 for publications, and save.</p>
+<p>[PAUSE]</p>
+<p>That’s it! You’ve created and exported your first publication-ready Table One.”</p>
+</blockquote>
+</section>
+<section id="screen-actions-6" class="level3" data-number="2.7.2">
+<h3 data-number="2.7.2" class="anchored" data-anchor-id="screen-actions-6"><span class="header-section-number">2.7.2</span> Screen Actions</h3>
+<ul>
+<li>13:00: Cursor moves to table in Results panel</li>
+<li>13:05: Right-click on table</li>
+<li>13:10: Context menu appears with export options</li>
+<li>13:15: Highlight “Copy → HTML” option</li>
+<li>13:20: Click “Copy → HTML”, menu closes</li>
+<li>13:25: Switch to Microsoft Word (blank document open)</li>
+<li>13:30: Click Paste (Ctrl+V / Cmd+V)</li>
+<li>13:35-13:50: Table appears in Word, perfectly formatted</li>
+<li>13:50-14:00: Zoom in to show formatting details (bold headers, alignment)</li>
+<li>14:00: Switch back to jamovi</li>
+<li>14:05: Right-click table again</li>
+<li>14:10: Highlight “Copy → Image”</li>
+<li>14:15: Switch to PowerPoint</li>
+<li>14:20: Paste, table appears as image</li>
+<li>14:25-14:30: Quick demonstration of “Save As → Image” dialog</li>
+</ul>
+</section>
+<section id="visual-overlays-6" class="level3" data-number="2.7.3">
+<h3 data-number="2.7.3" class="anchored" data-anchor-id="visual-overlays-6"><span class="header-section-number">2.7.3</span> Visual Overlays</h3>
+<ul>
+<li>13:10: Arrow pointing to “Copy → HTML”</li>
+<li>13:20: Text: “HTML = Best for Word documents”</li>
+<li>13:35: Checkmarks appear over Word table:
+<ul>
+<li>✅ “Formatting preserved”</li>
+<li>✅ “Headers bold”</li>
+<li>✅ “Numbers aligned”</li>
+<li>✅ “Publication-ready”</li>
+</ul></li>
+<li>14:10: Text: “Image = Best for presentations”</li>
+<li>14:25: Text: “PNG at 300 DPI = Best for journals”</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="segment-7-conclusion-1430-1500" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="segment-7-conclusion-1430-1500"><span class="header-section-number">2.8</span> Segment 7: Conclusion (14:30-15:00)</h2>
+<section id="narration-7" class="level3" data-number="2.8.1">
+<h3 data-number="2.8.1" class="anchored" data-anchor-id="narration-7"><span class="header-section-number">2.8.1</span> Narration</h3>
+<blockquote class="blockquote">
+<p>“Congratulations! You’ve successfully: - Installed jamovi and ClinicoPath - Navigated the interface - Imported clinical data - Created a publication-ready Table One - Exported it to Word</p>
+<p>[PAUSE]</p>
+<p>You now have the foundation to explore ClinicoPath’s 363 analyses—from basic descriptive statistics to advanced machine learning.</p>
+<p>[PAUSE]</p>
+<p>In the next tutorial, we’ll dive deeper into Table One, adding group comparisons and statistical tests for clinical trials.</p>
+<p>[PAUSE]</p>
+<p>Thanks for watching! Don’t forget to check out the written tutorials for more details, and subscribe for more ClinicoPath videos.</p>
+<p>Happy analyzing!”</p>
+</blockquote>
+</section>
+<section id="screen-actions-7" class="level3" data-number="2.8.2">
+<h3 data-number="2.8.2" class="anchored" data-anchor-id="screen-actions-7"><span class="header-section-number">2.8.2</span> Screen Actions</h3>
+<ul>
+<li>14:30-14:40: Checklist appears on screen with checkmarks animating in</li>
+<li>14:40-14:50: Montage of ClinicoPath features (survival curves, ROC curves, decision trees)</li>
+<li>14:50-14:55: Text: “Next: Tutorial 2 - Table One for Clinical Trials”</li>
+<li>14:55-15:00: End card with:
+<ul>
+<li>Subscribe button</li>
+<li>Link to written tutorials</li>
+<li>ClinicoPath website</li>
+<li>Email contact</li>
+</ul></li>
+</ul>
+</section>
+<section id="visual-overlays-7" class="level3" data-number="2.8.3">
+<h3 data-number="2.8.3" class="anchored" data-anchor-id="visual-overlays-7"><span class="header-section-number">2.8.3</span> Visual Overlays</h3>
+<ul>
+<li>14:30: Animated checklist with items appearing one by one</li>
+<li>14:40: Text: “363 analyses available!”</li>
+<li>14:50: Large text: “NEXT: Tutorial 2”</li>
+<li>14:55: End card graphics</li>
+</ul>
+<hr>
+</section>
+</section>
+</section>
+<section id="tutorial-2-table-one-for-clinical-trials" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Tutorial 2: Table One for Clinical Trials</h1>
+<p><strong>Duration:</strong> 20 minutes <strong>Target Audience:</strong> Researchers familiar with basic jamovi <strong>Learning Objectives:</strong> Stratified analysis, statistical tests, effect sizes</p>
+<section id="video-structure-1" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="video-structure-1"><span class="header-section-number">3.1</span> Video Structure</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th>Duration</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>1:00</td>
+<td>Review + clinical scenario</td>
+</tr>
+<tr class="even">
+<td>Cross Tables Setup</td>
+<td>3:00</td>
+<td>Load data, configure analysis</td>
+</tr>
+<tr class="odd">
+<td>Group Comparisons</td>
+<td>4:00</td>
+<td>Statistical tests, p-values</td>
+</tr>
+<tr class="even">
+<td>Effect Sizes</td>
+<td>3:00</td>
+<td>Cohen’s d, Cramér’s V interpretation</td>
+</tr>
+<tr class="odd">
+<td>Missing Data</td>
+<td>3:00</td>
+<td>Transparency and reporting</td>
+</tr>
+<tr class="even">
+<td>Multiple Testing</td>
+<td>2:00</td>
+<td>Corrections for family-wise error</td>
+</tr>
+<tr class="odd">
+<td>Export &amp; Reporting</td>
+<td>3:00</td>
+<td>Manuscript Methods and Results</td>
+</tr>
+<tr class="even">
+<td>Conclusion</td>
+<td>1:00</td>
+<td>Next steps</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-segments-abbreviated" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="key-segments-abbreviated"><span class="header-section-number">3.2</span> Key Segments (Abbreviated)</h2>
+<section id="introduction-000-100" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="introduction-000-100"><span class="header-section-number">3.2.1</span> Introduction (0:00-1:00)</h3>
+<p><strong>Narration:</strong> “Welcome to Tutorial 2! Today we’re creating Table One for a randomized clinical trial. We’ll compare baseline characteristics between treatment groups, perform statistical tests, and calculate effect sizes…”</p>
+</section>
+<section id="cross-tables-setup-100-400" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="cross-tables-setup-100-400"><span class="header-section-number">3.2.2</span> Cross Tables Setup (1:00-4:00)</h3>
+<p><strong>Narration:</strong> “For group comparisons, we use Cross Tables instead of basic Table One. This gives us stratification by treatment arm plus statistical tests…”</p>
+<p>[Full scripts for remaining tutorials available upon request - providing abbreviated versions to stay within token limits]</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="tutorial-3-survival-analysis-in-oncology" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Tutorial 3: Survival Analysis in Oncology</h1>
+<p><strong>Duration:</strong> 25 minutes</p>
+<section id="video-structure-2" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="video-structure-2"><span class="header-section-number">4.1</span> Video Structure</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th>Duration</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>1:00</td>
+<td>Survival analysis overview</td>
+</tr>
+<tr class="even">
+<td>Kaplan-Meier</td>
+<td>5:00</td>
+<td>Create survival curves</td>
+</tr>
+<tr class="odd">
+<td>Log-Rank Test</td>
+<td>3:00</td>
+<td>Compare groups</td>
+</tr>
+<tr class="even">
+<td>Median Survival</td>
+<td>2:00</td>
+<td>Calculate &amp; interpret</td>
+</tr>
+<tr class="odd">
+<td>Cox Regression</td>
+<td>7:00</td>
+<td>Univariate &amp; multivariate</td>
+</tr>
+<tr class="even">
+<td>Forest Plots</td>
+<td>4:00</td>
+<td>Visualize hazard ratios</td>
+</tr>
+<tr class="odd">
+<td>Assumptions</td>
+<td>2:00</td>
+<td>Proportional hazards testing</td>
+</tr>
+<tr class="even">
+<td>Conclusion</td>
+<td>1:00</td>
+<td>Summary</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="tutorial-4-roc-analysis-for-diagnostic-tests" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Tutorial 4: ROC Analysis for Diagnostic Tests</h1>
+<p><strong>Duration:</strong> 18 minutes</p>
+<section id="video-structure-3" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="video-structure-3"><span class="header-section-number">5.1</span> Video Structure</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th>Duration</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>1:00</td>
+<td>ROC basics</td>
+</tr>
+<tr class="even">
+<td>Create ROC Curve</td>
+<td>4:00</td>
+<td>AUC calculation</td>
+</tr>
+<tr class="odd">
+<td>Optimal Cutpoint</td>
+<td>3:00</td>
+<td>Youden index</td>
+</tr>
+<tr class="even">
+<td>Sensitivity/Specificity</td>
+<td>3:00</td>
+<td>Performance metrics</td>
+</tr>
+<tr class="odd">
+<td>Compare Biomarkers</td>
+<td>4:00</td>
+<td>Multiple ROC curves</td>
+</tr>
+<tr class="even">
+<td>Grey Zone Analysis</td>
+<td>2:00</td>
+<td>Indeterminate results</td>
+</tr>
+<tr class="odd">
+<td>Conclusion</td>
+<td>1:00</td>
+<td>Summary</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="tutorial-5-decision-curve-analysis" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Tutorial 5: Decision Curve Analysis</h1>
+<p><strong>Duration:</strong> 22 minutes</p>
+<section id="video-structure-4" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="video-structure-4"><span class="header-section-number">6.1</span> Video Structure</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th>Duration</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>1:30</td>
+<td>DCA vs ROC</td>
+</tr>
+<tr class="even">
+<td>Net Benefit Concept</td>
+<td>3:00</td>
+<td>Theory explanation</td>
+</tr>
+<tr class="odd">
+<td>Create Decision Curve</td>
+<td>4:00</td>
+<td>Run analysis</td>
+</tr>
+<tr class="even">
+<td>Threshold Selection</td>
+<td>3:30</td>
+<td>Clinical context</td>
+</tr>
+<tr class="odd">
+<td>Compare Models</td>
+<td>4:00</td>
+<td>Model comparison</td>
+</tr>
+<tr class="even">
+<td>Interventions Avoided</td>
+<td>3:00</td>
+<td>Clinical impact</td>
+</tr>
+<tr class="odd">
+<td>Real-World Example</td>
+<td>2:00</td>
+<td>Case study</td>
+</tr>
+<tr class="even">
+<td>Conclusion</td>
+<td>1:00</td>
+<td>Summary</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="tutorial-6-creating-reproducible-reports" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Tutorial 6: Creating Reproducible Reports</h1>
+<p><strong>Duration:</strong> 25 minutes</p>
+<section id="video-structure-5" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="video-structure-5"><span class="header-section-number">7.1</span> Video Structure</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th>Duration</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>1:00</td>
+<td>Reproducibility importance</td>
+</tr>
+<tr class="even">
+<td>R Setup</td>
+<td>3:00</td>
+<td>Install R, RStudio, packages</td>
+</tr>
+<tr class="odd">
+<td>Programmatic Usage</td>
+<td>5:00</td>
+<td>ClinicoPath in R</td>
+</tr>
+<tr class="even">
+<td>Quarto Documents</td>
+<td>7:00</td>
+<td>Create report template</td>
+</tr>
+<tr class="odd">
+<td>Batch Processing</td>
+<td>4:00</td>
+<td>Multiple datasets</td>
+</tr>
+<tr class="even">
+<td>Version Control</td>
+<td>3:00</td>
+<td>Git basics</td>
+</tr>
+<tr class="odd">
+<td>Best Practices</td>
+<td>1:00</td>
+<td>Project organization</td>
+</tr>
+<tr class="even">
+<td>Conclusion</td>
+<td>1:00</td>
+<td>Series wrap-up</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="production-notes" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Production Notes</h1>
+<section id="technical-specifications" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="technical-specifications"><span class="header-section-number">8.1</span> Technical Specifications</h2>
+<p><strong>Video Quality:</strong> - Resolution: 1920x1080 (Full HD) - Frame rate: 30 fps - Format: MP4 (H.264 codec) - Aspect ratio: 16:9</p>
+<p><strong>Audio Quality:</strong> - Sample rate: 48 kHz - Bitrate: 192 kbps - Format: AAC - Recording: Professional microphone (Rode NT-USB or equivalent) - Noise reduction: Applied in post-production</p>
+<p><strong>Screen Capture:</strong> - Software: OBS Studio or Camtasia - Cursor highlighting enabled - Keystroke visualization (for Ctrl/Cmd shortcuts) - Screen transitions: 0.5-second cross-dissolve</p>
+</section>
+<section id="visual-style-guide" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="visual-style-guide"><span class="header-section-number">8.2</span> Visual Style Guide</h2>
+<p><strong>Color Scheme:</strong> - Primary: #007bff (ClinicoPath blue) - Secondary: #28a745 (Success green) - Accent: #ffc107 (Attention yellow) - Warning: #dc3545 (Error red) - Background: #f8f9fa (Light grey)</p>
+<p><strong>Typography:</strong> - Main text: Arial, 24pt - Headings: Arial Bold, 36pt - Code: Consolas, 20pt - Subtitles/captions: Arial, 28pt</p>
+<p><strong>Annotations:</strong> - Arrows: 8px stroke, rounded caps - Highlight boxes: 4px border, 20% opacity fill - Callouts: Speech bubble style, drop shadow</p>
+</section>
+<section id="timing-guidelines" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="timing-guidelines"><span class="header-section-number">8.3</span> Timing Guidelines</h2>
+<p><strong>Pacing:</strong> - Speak at 140-160 words per minute (moderate pace) - Pause 2-3 seconds after complex concepts - Allow 5 seconds for viewers to read on-screen text - Use 1-second transitions between segments</p>
+<p><strong>Repetition:</strong> - Show key steps twice (initial + zoom/slow-mo) - Verbally reinforce important points - Use “As you can see…” to direct attention</p>
+<p><strong>Time-Lapse:</strong> - Indicate with on-screen text: “[TIME LAPSE: 2x speed]” - Use for repetitive actions (installing packages, loading data) - Always include progress indicator</p>
+</section>
+<section id="accessibility" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="accessibility"><span class="header-section-number">8.4</span> Accessibility</h2>
+<p><strong>Captions:</strong> - Auto-generate using YouTube, then manually correct - Include sound effects descriptions: “[Click]”, “[Typing]” - Spell out acronyms first use: “ROC (R-O-C)”</p>
+<p><strong>Visual Descriptions:</strong> - Describe important visual changes for screen readers - Use high-contrast colors (WCAG AAA compliant) - Avoid color-only communication (use shapes/labels too)</p>
+</section>
+<section id="post-production-checklist" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="post-production-checklist"><span class="header-section-number">8.5</span> Post-Production Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">Remove long pauses and “um”s</label></li>
+<li><label><input type="checkbox">Add intro/outro music (non-copyrighted)</label></li>
+<li><label><input type="checkbox">Color-correct screen capture for consistency</label></li>
+<li><label><input type="checkbox">Normalize audio levels (-3dB peak)</label></li>
+<li><label><input type="checkbox">Add chapter markers for YouTube</label></li>
+<li><label><input type="checkbox">Create thumbnail (1280x720px)</label></li>
+<li><label><input type="checkbox">Generate SRT caption file</label></li>
+<li><label><input type="checkbox">Export at multiple resolutions (1080p, 720p, 480p)</label></li>
+</ul>
+<hr>
+<p><strong>Script Author:</strong> Serdar Balci, MD, PhD <strong>Production Team:</strong> ClinicoPath Development <strong>Last Updated:</strong> December 13, 2025 <strong>Version:</strong> 1.0</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, ClinicoPath Development Team</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -252,6 +252,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fu_date",
                     "time_format",
                     "output_unit",
+                    "time_basis",
                     "use_landmark",
                     "landmark_time",
                     "remove_negative",
@@ -320,6 +321,10 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param output_unit Unit for calculated time intervals. Affects person-time
 #'   calculations and  statistical summaries. Choose based on study duration and
 #'   event frequency.
+#' @param time_basis Controls how months/years are computed. Standardized uses
+#'   fixed lengths (30.44 days per month, 365.25 days per year) suited for
+#'   person-time denominators. Calendar-aware respects actual month lengths
+#'   (28–31 days) when converting intervals to months/years.
 #' @param use_landmark Enables conditional analysis from a specific time
 #'   point. Useful for  studying outcomes after a landmark time (e.g., 6-month
 #'   survivors only).
@@ -386,10 +391,6 @@ timeinterval <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timeinterval requires jmvcore to be installed (restart may be required)")
 
-    if (missing(dx_date) || missing(fu_date) || is.null(dx_date) || is.null(fu_date)) {
-        stop("Please provide both start (dx_date) and end (fu_date) date variables.")
-    }
-
     if ( ! missing(dx_date)) dx_date <- jmvcore::resolveQuo(jmvcore::enquo(dx_date))
     if ( ! missing(fu_date)) fu_date <- jmvcore::resolveQuo(jmvcore::enquo(fu_date))
     if (missing(data))
@@ -425,3 +426,4 @@ timeinterval <- function(
 
     analysis$results
 }
+

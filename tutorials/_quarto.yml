@@ -1,0 +1,95 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "ClinicoPath Tutorial Series"
+  navbar:
+    background: primary
+    search: true
+    left:
+      - text: "Home"
+        file: README.md
+      - text: "Tutorials"
+        menu:
+          - text: "1. Getting Started"
+            file: 01-getting-started.qmd
+          - text: "2. Table One (Clinical Trial)"
+            file: 02-table-one-clinical-trial.qmd
+          - text: "3. Survival Analysis (Cancer)"
+            file: 03-survival-analysis-cancer.qmd
+          - text: "4. ROC Analysis (Diagnostic Test)"
+            file: 04-roc-diagnostic-test.qmd
+          - text: "5. Decision Curve Analysis"
+            file: 05-decision-curve-analysis.qmd
+          - text: "6. Reproducible Reports"
+            file: 06-reproducible-reports.qmd
+      - text: "Resources"
+        menu:
+          - text: "Video Scripts"
+            file: VIDEO_SCRIPTS.md
+          - text: "Visual Diagrams"
+            file: VISUAL_DIAGRAMS.md
+          - text: "Project Summary"
+            file: TUTORIAL_SERIES_COMPLETE.md
+    right:
+      - icon: github
+        href: https://github.com/sbalci/ClinicoPathJamoviModule
+      - icon: house
+        href: https://www.serdarbalci.com/ClinicoPath/
+
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - section: "Getting Started"
+        contents:
+          - README.md
+          - 01-getting-started.qmd
+
+      - section: "Core Analyses"
+        contents:
+          - 02-table-one-clinical-trial.qmd
+          - 03-survival-analysis-cancer.qmd
+
+      - section: "Advanced Techniques"
+        contents:
+          - 04-roc-diagnostic-test.qmd
+          - 05-decision-curve-analysis.qmd
+
+      - section: "Reproducibility"
+        contents:
+          - 06-reproducible-reports.qmd
+
+      - section: "Production Resources"
+        contents:
+          - VIDEO_SCRIPTS.md
+          - VISUAL_DIAGRAMS.md
+          - TUTORIAL_SERIES_COMPLETE.md
+
+  page-footer:
+    left: |
+      Copyright 2025, ClinicoPath Development Team
+    right: |
+      Built with [Quarto](https://quarto.org/)
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    number-sections: true
+    link-external-newwindow: true
+    anchor-sections: true
+    smooth-scroll: true
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false

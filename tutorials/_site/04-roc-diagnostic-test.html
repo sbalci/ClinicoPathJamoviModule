@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="ClinicoPath Tutorial Series">
+
+<title>ROC Analysis for Diagnostic Tests – ClinicoPath Tutorial Series</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-08eeb69f393412681a6547633e23c35d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">ClinicoPath Tutorial Series</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./README.md"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-tutorials" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Tutorials</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-tutorials">    
+        <li>
+    <a class="dropdown-item" href="./01-getting-started.html">
+ <span class="dropdown-text">1. Getting Started</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-table-one-clinical-trial.html">
+ <span class="dropdown-text">2. Table One (Clinical Trial)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-survival-analysis-cancer.html">
+ <span class="dropdown-text">3. Survival Analysis (Cancer)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./04-roc-diagnostic-test.html">
+ <span class="dropdown-text">4. ROC Analysis (Diagnostic Test)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./05-decision-curve-analysis.html">
+ <span class="dropdown-text">5. Decision Curve Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./06-reproducible-reports.html">
+ <span class="dropdown-text">6. Reproducible Reports</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-resources" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Resources</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-resources">    
+        <li>
+    <a class="dropdown-item" href="./VIDEO_SCRIPTS.html">
+ <span class="dropdown-text">Video Scripts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./VISUAL_DIAGRAMS.html">
+ <span class="dropdown-text">Visual Diagrams</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./TUTORIAL_SERIES_COMPLETE.html">
+ <span class="dropdown-text">Project Summary</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/sbalci/ClinicoPathJamoviModule"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.serdarbalci.com/ClinicoPath/"> <i class="bi bi-house" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-roc-diagnostic-test.html">Advanced Techniques</a></li><li class="breadcrumb-item"><a href="./04-roc-diagnostic-test.html">ROC Analysis for Diagnostic Tests</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting Started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting Started with ClinicoPath</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Core Analyses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-table-one-clinical-trial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Table One for Clinical Trials</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-survival-analysis-cancer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Survival Analysis in Oncology</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Advanced Techniques</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-roc-diagnostic-test.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">ROC Analysis for Diagnostic Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-decision-curve-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decision Curve Analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reproducibility</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-reproducible-reports.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Creating Reproducible Reports</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Production Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./VIDEO_SCRIPTS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Video Scripts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./VISUAL_DIAGRAMS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Visual Diagrams &amp; Workflow Charts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./TUTORIAL_SERIES_COMPLETE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Complete Package</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sec-overview" id="toc-sec-overview" class="nav-link active" data-scroll-target="#sec-overview"><span class="header-section-number">1</span> Overview</a></li>
+  <li><a href="#sec-scenario" id="toc-sec-scenario" class="nav-link" data-scroll-target="#sec-scenario"><span class="header-section-number">2</span> Clinical Scenario</a>
+  <ul class="collapse">
+  <li><a href="#study-design" id="toc-study-design" class="nav-link" data-scroll-target="#study-design"><span class="header-section-number">2.1</span> Study Design</a></li>
+  <li><a href="#research-questions" id="toc-research-questions" class="nav-link" data-scroll-target="#research-questions"><span class="header-section-number">2.2</span> Research Questions</a></li>
+  </ul></li>
+  <li><a href="#sec-understanding" id="toc-sec-understanding" class="nav-link" data-scroll-target="#sec-understanding"><span class="header-section-number">3</span> Understanding ROC Curves</a>
+  <ul class="collapse">
+  <li><a href="#key-concepts" id="toc-key-concepts" class="nav-link" data-scroll-target="#key-concepts"><span class="header-section-number">3.1</span> Key Concepts</a>
+  <ul class="collapse">
+  <li><a href="#what-is-a-roc-curve" id="toc-what-is-a-roc-curve" class="nav-link" data-scroll-target="#what-is-a-roc-curve"><span class="header-section-number">3.1.1</span> What is a ROC Curve?</a></li>
+  <li><a href="#interpreting-auc" id="toc-interpreting-auc" class="nav-link" data-scroll-target="#interpreting-auc"><span class="header-section-number">3.1.2</span> Interpreting AUC</a></li>
+  <li><a href="#sensitivity-vs.-specificity-trade-off" id="toc-sensitivity-vs.-specificity-trade-off" class="nav-link" data-scroll-target="#sensitivity-vs.-specificity-trade-off"><span class="header-section-number">3.1.3</span> Sensitivity vs.&nbsp;Specificity Trade-off</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-basic-roc" id="toc-sec-basic-roc" class="nav-link" data-scroll-target="#sec-basic-roc"><span class="header-section-number">4</span> Step 1: Basic ROC Analysis</a>
+  <ul class="collapse">
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data"><span class="header-section-number">4.1</span> Load Data</a></li>
+  <li><a href="#run-roc-analysis" id="toc-run-roc-analysis" class="nav-link" data-scroll-target="#run-roc-analysis"><span class="header-section-number">4.2</span> Run ROC Analysis</a>
+  <ul class="collapse">
+  <li><a href="#essential-options" id="toc-essential-options" class="nav-link" data-scroll-target="#essential-options"><span class="header-section-number">4.2.1</span> Essential Options</a></li>
+  </ul></li>
+  <li><a href="#interpret-results" id="toc-interpret-results" class="nav-link" data-scroll-target="#interpret-results"><span class="header-section-number">4.3</span> Interpret Results</a>
+  <ul class="collapse">
+  <li><a href="#roc-curve-output" id="toc-roc-curve-output" class="nav-link" data-scroll-target="#roc-curve-output"><span class="header-section-number">4.3.1</span> ROC Curve Output</a></li>
+  <li><a href="#optimal-cutpoint" id="toc-optimal-cutpoint" class="nav-link" data-scroll-target="#optimal-cutpoint"><span class="header-section-number">4.3.2</span> Optimal Cutpoint</a></li>
+  <li><a href="#coordinates-table" id="toc-coordinates-table" class="nav-link" data-scroll-target="#coordinates-table"><span class="header-section-number">4.3.3</span> Coordinates Table</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-comparing" id="toc-sec-comparing" class="nav-link" data-scroll-target="#sec-comparing"><span class="header-section-number">5</span> Step 2: Comparing Multiple Tests</a>
+  <ul class="collapse">
+  <li><a href="#add-visual-score-comparison" id="toc-add-visual-score-comparison" class="nav-link" data-scroll-target="#add-visual-score-comparison"><span class="header-section-number">5.1</span> Add Visual Score Comparison</a>
+  <ul class="collapse">
+  <li><a href="#comparison-results" id="toc-comparison-results" class="nav-link" data-scroll-target="#comparison-results"><span class="header-section-number">5.1.1</span> Comparison Results</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-thresholds" id="toc-sec-thresholds" class="nav-link" data-scroll-target="#sec-thresholds"><span class="header-section-number">6</span> Step 3: Clinical Decision Thresholds</a>
+  <ul class="collapse">
+  <li><a href="#scenario-1-screening-high-sensitivity" id="toc-scenario-1-screening-high-sensitivity" class="nav-link" data-scroll-target="#scenario-1-screening-high-sensitivity"><span class="header-section-number">6.1</span> Scenario 1: Screening (High Sensitivity)</a></li>
+  <li><a href="#scenario-2-confirmation-high-specificity" id="toc-scenario-2-confirmation-high-specificity" class="nav-link" data-scroll-target="#scenario-2-confirmation-high-specificity"><span class="header-section-number">6.2</span> Scenario 2: Confirmation (High Specificity)</a></li>
+  <li><a href="#scenario-3-balanced-youden-index" id="toc-scenario-3-balanced-youden-index" class="nav-link" data-scroll-target="#scenario-3-balanced-youden-index"><span class="header-section-number">6.3</span> Scenario 3: Balanced (Youden Index)</a></li>
+  </ul></li>
+  <li><a href="#sec-greyzone" id="toc-sec-greyzone" class="nav-link" data-scroll-target="#sec-greyzone"><span class="header-section-number">7</span> Step 4: Grey Zone Analysis</a>
+  <ul class="collapse">
+  <li><a href="#define-grey-zone" id="toc-define-grey-zone" class="nav-link" data-scroll-target="#define-grey-zone"><span class="header-section-number">7.1</span> Define Grey Zone</a>
+  <ul class="collapse">
+  <li><a href="#grey-zone-results" id="toc-grey-zone-results" class="nav-link" data-scroll-target="#grey-zone-results"><span class="header-section-number">7.1.1</span> Grey Zone Results</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-likelihood" id="toc-sec-likelihood" class="nav-link" data-scroll-target="#sec-likelihood"><span class="header-section-number">8</span> Step 5: Likelihood Ratios</a>
+  <ul class="collapse">
+  <li><a href="#understanding-lr-and-lr-" id="toc-understanding-lr-and-lr-" class="nav-link" data-scroll-target="#understanding-lr-and-lr-"><span class="header-section-number">8.1</span> Understanding LR+ and LR-</a>
+  <ul class="collapse">
+  <li><a href="#interpretation-guide" id="toc-interpretation-guide" class="nav-link" data-scroll-target="#interpretation-guide"><span class="header-section-number">8.1.1</span> Interpretation Guide</a></li>
+  <li><a href="#example-calculation" id="toc-example-calculation" class="nav-link" data-scroll-target="#example-calculation"><span class="header-section-number">8.1.2</span> Example Calculation</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-reporting" id="toc-sec-reporting" class="nav-link" data-scroll-target="#sec-reporting"><span class="header-section-number">9</span> Manuscript Reporting</a>
+  <ul class="collapse">
+  <li><a href="#methods-section" id="toc-methods-section" class="nav-link" data-scroll-target="#methods-section"><span class="header-section-number">9.1</span> Methods Section</a></li>
+  <li><a href="#results-section" id="toc-results-section" class="nav-link" data-scroll-target="#results-section"><span class="header-section-number">9.2</span> Results Section</a></li>
+  <li><a href="#figure-legend" id="toc-figure-legend" class="nav-link" data-scroll-target="#figure-legend"><span class="header-section-number">9.3</span> Figure Legend</a></li>
+  </ul></li>
+  <li><a href="#sec-mistakes" id="toc-sec-mistakes" class="nav-link" data-scroll-target="#sec-mistakes"><span class="header-section-number">10</span> Common Mistakes to Avoid</a>
+  <ul class="collapse">
+  <li><a href="#mistake-1-using-auc-alone" id="toc-mistake-1-using-auc-alone" class="nav-link" data-scroll-target="#mistake-1-using-auc-alone"><span class="header-section-number">10.1</span> ❌ Mistake 1: Using AUC Alone</a></li>
+  <li><a href="#mistake-2-ignoring-prevalence" id="toc-mistake-2-ignoring-prevalence" class="nav-link" data-scroll-target="#mistake-2-ignoring-prevalence"><span class="header-section-number">10.2</span> ❌ Mistake 2: Ignoring Prevalence</a></li>
+  <li><a href="#mistake-3-optimal-best-for-all" id="toc-mistake-3-optimal-best-for-all" class="nav-link" data-scroll-target="#mistake-3-optimal-best-for-all"><span class="header-section-number">10.3</span> ❌ Mistake 3: Optimal = Best for All</a></li>
+  <li><a href="#mistake-4-comparing-independent-rocs-incorrectly" id="toc-mistake-4-comparing-independent-rocs-incorrectly" class="nav-link" data-scroll-target="#mistake-4-comparing-independent-rocs-incorrectly"><span class="header-section-number">10.4</span> ❌ Mistake 4: Comparing Independent ROCs Incorrectly</a></li>
+  </ul></li>
+  <li><a href="#sec-exercises" id="toc-sec-exercises" class="nav-link" data-scroll-target="#sec-exercises"><span class="header-section-number">11</span> Practice Exercises</a>
+  <ul class="collapse">
+  <li><a href="#exercise-1-prostate-cancer-screening" id="toc-exercise-1-prostate-cancer-screening" class="nav-link" data-scroll-target="#exercise-1-prostate-cancer-screening"><span class="header-section-number">11.1</span> Exercise 1: Prostate Cancer Screening</a></li>
+  <li><a href="#exercise-2-multi-marker-comparison" id="toc-exercise-2-multi-marker-comparison" class="nav-link" data-scroll-target="#exercise-2-multi-marker-comparison"><span class="header-section-number">11.2</span> Exercise 2: Multi-Marker Comparison</a></li>
+  <li><a href="#exercise-3-grey-zone-implementation" id="toc-exercise-3-grey-zone-implementation" class="nav-link" data-scroll-target="#exercise-3-grey-zone-implementation"><span class="header-section-number">11.3</span> Exercise 3: Grey Zone Implementation</a></li>
+  </ul></li>
+  <li><a href="#sec-summary" id="toc-sec-summary" class="nav-link" data-scroll-target="#sec-summary"><span class="header-section-number">12</span> Summary</a>
+  <ul class="collapse">
+  <li><a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways"><span class="header-section-number">12.1</span> Key Takeaways</a></li>
+  <li><a href="#decision-framework" id="toc-decision-framework" class="nav-link" data-scroll-target="#decision-framework"><span class="header-section-number">12.2</span> Decision Framework</a></li>
+  <li><a href="#next-tutorial" id="toc-next-tutorial" class="nav-link" data-scroll-target="#next-tutorial"><span class="header-section-number">12.3</span> Next Tutorial</a></li>
+  </ul></li>
+  <li><a href="#sec-references" id="toc-sec-references" class="nav-link" data-scroll-target="#sec-references"><span class="header-section-number">13</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-roc-diagnostic-test.html">Advanced Techniques</a></li><li class="breadcrumb-item"><a href="./04-roc-diagnostic-test.html">ROC Analysis for Diagnostic Tests</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">ROC Analysis for Diagnostic Tests</h1>
+<p class="subtitle lead">Evaluating Biomarker Performance and Optimal Cutpoints</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>ClinicoPath Tutorial Series </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">Invalid Date</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="sec-overview" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Overview</h1>
+<p>Learn how to evaluate <strong>diagnostic test performance</strong> using ROC analysis:</p>
+<ul>
+<li>✅ Create ROC curves with confidence intervals</li>
+<li>✅ Calculate Area Under the Curve (AUC)</li>
+<li>✅ Determine optimal cutpoints (Youden index, cost-benefit)</li>
+<li>✅ Calculate sensitivity, specificity, PPV, NPV</li>
+<li>✅ Compare multiple biomarkers</li>
+<li>✅ Interpret clinical implications</li>
+</ul>
+<p><strong>Prerequisites:</strong> <a href="./01-getting-started.html">Tutorial 1: Getting Started</a> <strong>Time Required:</strong> 45 minutes <strong>Dataset:</strong> <code>her2_breast_cancer_data</code> (HER2 testing validation, n=150)</p>
+<hr>
+</section>
+<section id="sec-scenario" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Clinical Scenario</h1>
+<section id="study-design" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="study-design"><span class="header-section-number">2.1</span> Study Design</h2>
+<p>You’re validating a <strong>new quantitative HER2 assay</strong> for breast cancer diagnosis:</p>
+<ul>
+<li><strong>Gold Standard:</strong> IHC + FISH (HER2-positive vs.&nbsp;HER2-negative)</li>
+<li><strong>New Test:</strong> Automated digital pathology score (0-100)</li>
+<li><strong>Goal:</strong> Determine optimal cutpoint for HER2-positive classification</li>
+<li><strong>Sample:</strong> 150 breast cancer cases
+<ul>
+<li>75 HER2-positive (by gold standard)</li>
+<li>75 HER2-negative (by gold standard)</li>
+</ul></li>
+</ul>
+</section>
+<section id="research-questions" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="research-questions"><span class="header-section-number">2.2</span> Research Questions</h2>
+<ol type="1">
+<li>How well does the digital score discriminate HER2-positive from negative?</li>
+<li>What is the optimal cutpoint for clinical use?</li>
+<li>At that cutpoint, what are sensitivity and specificity?</li>
+<li>How does this compare to standard visual scoring?</li>
+<li>Should we use different cutpoints for different clinical scenarios?</li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Why ROC Analysis?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>ROC analysis evaluates <strong>discrimination ability</strong> across all possible cutpoints, helping you choose the threshold that best balances sensitivity and specificity for your clinical context.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="sec-understanding" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Understanding ROC Curves</h1>
+<section id="key-concepts" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="key-concepts"><span class="header-section-number">3.1</span> Key Concepts</h2>
+<section id="what-is-a-roc-curve" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="what-is-a-roc-curve"><span class="header-section-number">3.1.1</span> What is a ROC Curve?</h3>
+<p><strong>ROC = Receiver Operating Characteristic</strong></p>
+<p>A ROC curve plots: - <strong>Y-axis:</strong> Sensitivity (True Positive Rate) - <strong>X-axis:</strong> 1 - Specificity (False Positive Rate) - <strong>Diagonal line:</strong> Random chance (AUC = 0.5) - <strong>Perfect test:</strong> Passes through top-left corner (AUC = 1.0)</p>
+<pre><code>1.0 ┤           ●  ← Perfect test
+    │         ●/
+    │       ●/
+    │     ●/
+S   │   ●/  ← Good test (AUC = 0.85)
+e 0.5┤ ●/
+n   │●/  ← Random chance (AUC = 0.5)
+s   │/
+    │/
+0.0 └──────────────
+   0.0    0.5    1.0
+      1 - Specificity</code></pre>
+</section>
+<section id="interpreting-auc" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="interpreting-auc"><span class="header-section-number">3.1.2</span> Interpreting AUC</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>AUC Range</th>
+<th>Discrimination</th>
+<th>Clinical Utility</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.90-1.00</td>
+<td>Excellent</td>
+<td>Outstanding test</td>
+</tr>
+<tr class="even">
+<td>0.80-0.90</td>
+<td>Good</td>
+<td>Useful in most cases</td>
+</tr>
+<tr class="odd">
+<td>0.70-0.80</td>
+<td>Fair</td>
+<td>May be useful with other tests</td>
+</tr>
+<tr class="even">
+<td>0.60-0.70</td>
+<td>Poor</td>
+<td>Limited utility</td>
+</tr>
+<tr class="odd">
+<td>0.50-0.60</td>
+<td>Fail</td>
+<td>No better than chance</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sensitivity-vs.-specificity-trade-off" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="sensitivity-vs.-specificity-trade-off"><span class="header-section-number">3.1.3</span> Sensitivity vs.&nbsp;Specificity Trade-off</h3>
+<p><strong>Sensitivity (True Positive Rate):</strong></p>
+<pre><code>Sensitivity = TP / (TP + FN)
+            = Diseased patients correctly identified
+            = "How good at detecting disease?"</code></pre>
+<p><strong>Specificity (True Negative Rate):</strong></p>
+<pre><code>Specificity = TN / (TN + FP)
+            = Healthy patients correctly identified
+            = "How good at ruling out disease?"</code></pre>
+<p><strong>The Trade-off:</strong> - ↑ Cutpoint → ↑ Specificity, ↓ Sensitivity (fewer false positives) - ↓ Cutpoint → ↑ Sensitivity, ↓ Specificity (fewer false negatives)</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Clinical Context Matters
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Screening test:</strong> Prioritize sensitivity (don’t miss disease)</li>
+<li><strong>Confirmatory test:</strong> Prioritize specificity (avoid false positives)</li>
+<li><strong>Treatment decision:</strong> Balance based on harm of errors</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+</section>
+</section>
+<section id="sec-basic-roc" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Step 1: Basic ROC Analysis</h1>
+<section id="load-data" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="load-data"><span class="header-section-number">4.1</span> Load Data</h2>
+<ol type="1">
+<li>Open jamovi</li>
+<li><strong>File</strong> → <strong>Open</strong> → <strong>Data Library</strong></li>
+<li>Select <code>her2_breast_cancer_data</code></li>
+</ol>
+<p><strong>Dataset Structure:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 16%">
+<col style="width: 21%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Type</th>
+<th>Values</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>PatientID</code></td>
+<td>ID</td>
+<td>BC001-BC150</td>
+<td>Patient identifier</td>
+</tr>
+<tr class="even">
+<td><code>HER2_Status</code></td>
+<td>Nominal</td>
+<td>Positive / Negative</td>
+<td>Gold standard (IHC+FISH)</td>
+</tr>
+<tr class="odd">
+<td><code>Digital_Score</code></td>
+<td>Continuous</td>
+<td>0-100</td>
+<td>New automated score</td>
+</tr>
+<tr class="even">
+<td><code>Visual_Score</code></td>
+<td>Ordinal</td>
+<td>0 / 1+ / 2+ / 3+</td>
+<td>Standard IHC scoring</td>
+</tr>
+<tr class="odd">
+<td><code>Age</code></td>
+<td>Continuous</td>
+<td>28-82 years</td>
+<td>Patient age</td>
+</tr>
+<tr class="even">
+<td><code>TumorSize</code></td>
+<td>Continuous</td>
+<td>0.8-8.5 cm</td>
+<td>Tumor diameter</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="run-roc-analysis" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="run-roc-analysis"><span class="header-section-number">4.2</span> Run ROC Analysis</h2>
+<ol type="1">
+<li><strong>Analyses</strong> → <strong>meddecideD</strong> → <strong>ROC Analysis</strong></li>
+<li>Configure:
+<ul>
+<li><strong>Test variable:</strong> <code>Digital_Score</code> (continuous biomarker)</li>
+<li><strong>State variable:</strong> <code>HER2_Status</code> (gold standard)</li>
+<li><strong>Positive class:</strong> <code>Positive</code> (what you’re trying to detect)</li>
+</ul></li>
+</ol>
+<section id="essential-options" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="essential-options"><span class="header-section-number">4.2.1</span> Essential Options</h3>
+<p><strong>Confidence Intervals:</strong> - ☑ AUC with 95% CI - Method: DeLong (most common) - Alternative: Bootstrap (2000 iterations) for small samples</p>
+<p><strong>Coordinates:</strong> - ☑ Sensitivity and specificity at all cutpoints - ☑ Optimal cutpoint by Youden index - ☑ Show PPV and NPV (requires prevalence)</p>
+<p><strong>Plot Options:</strong> - ☑ ROC curve - ☑ 95% confidence band - ☑ Diagonal reference line - ☑ Mark optimal cutpoint - ☑ Display AUC on plot</p>
+</section>
+</section>
+<section id="interpret-results" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="interpret-results"><span class="header-section-number">4.3</span> Interpret Results</h2>
+<section id="roc-curve-output" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="roc-curve-output"><span class="header-section-number">4.3.1</span> ROC Curve Output</h3>
+<pre><code>════════════════════════════════════════════════════════
+ROC Analysis: Digital Score for HER2 Status
+════════════════════════════════════════════════════════
+
+Area Under Curve (AUC)
+────────────────────────────────────────────────────────
+AUC:              0.872
+95% CI:          (0.813 - 0.931)
+Standard Error:   0.030
+p-value:         &lt;0.001
+
+Interpretation: Good discrimination (AUC &gt; 0.80)
+────────────────────────────────────────────────────────</code></pre>
+<p><strong>What This Means:</strong></p>
+<p>✅ <strong>AUC = 0.872</strong> (Good discrimination) - 87.2% chance that randomly selected HER2-positive patient scores higher than randomly selected HER2-negative patient - Significantly better than chance (p &lt; 0.001)</p>
+<p>✅ <strong>95% CI: 0.813-0.931</strong> (Narrow confidence interval) - Lower bound &gt; 0.80 → Confident it’s “good” - Sample size adequate for stable estimate</p>
+</section>
+<section id="optimal-cutpoint" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="optimal-cutpoint"><span class="header-section-number">4.3.2</span> Optimal Cutpoint</h3>
+<pre><code>Optimal Cutpoint by Youden Index
+────────────────────────────────────────────────────────
+Cutpoint:             52.3
+Youden Index:         0.653 (J = Sensitivity + Specificity - 1)
+
+Performance at Cutpoint 52.3:
+────────────────────────────────────────────────────────
+Sensitivity:          84.0% (95% CI: 74.0-91.2%)
+Specificity:          81.3% (95% CI: 70.7-89.4%)
+PPV:                  81.8% (95% CI: 71.6-89.3%)
+NPV:                  83.6% (95% CI: 73.3-90.9%)
+Accuracy:             82.7%
+Likelihood Ratio +:   4.49
+Likelihood Ratio -:   0.20
+────────────────────────────────────────────────────────</code></pre>
+<p><strong>Interpretation:</strong></p>
+<p>✅ <strong>Cutpoint = 52.3</strong> - Scores ≥52.3 → Classify as HER2-positive - Scores &lt;52.3 → Classify as HER2-negative</p>
+<p>✅ <strong>Balanced Performance:</strong> - Sensitivity 84% → Detects 84% of true HER2-positive cases - Specificity 81% → Correctly identifies 81% of HER2-negative cases - Youden Index 0.653 → Excellent balance</p>
+<p>✅ <strong>Positive Predictive Value (PPV) = 81.8%</strong> - If test is positive (≥52.3), 82% chance truly HER2-positive - Depends on prevalence (50% in this study)</p>
+<p>✅ <strong>Negative Predictive Value (NPV) = 83.6%</strong> - If test is negative (&lt;52.3), 84% chance truly HER2-negative</p>
+</section>
+<section id="coordinates-table" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="coordinates-table"><span class="header-section-number">4.3.3</span> Coordinates Table</h3>
+<pre><code>Digital Score Cutpoint  |  Sensitivity  |  Specificity  |  Youden J
+───────────────────────────────────────────────────────────────────
+0                       |  100.0%       |    0.0%       |  0.000
+10                      |  100.0%       |   10.7%       |  0.107
+20                      |   98.7%       |   29.3%       |  0.280
+30                      |   96.0%       |   48.0%       |  0.440
+40                      |   92.0%       |   65.3%       |  0.573
+50                      |   86.7%       |   78.7%       |  0.653
+52.3 ← OPTIMAL          |   84.0%       |   81.3%       |  0.653
+60                      |   77.3%       |   89.3%       |  0.667
+70                      |   62.7%       |   94.7%       |  0.573
+80                      |   41.3%       |   98.7%       |  0.400
+90                      |   17.3%       |  100.0%       |  0.173
+100                     |    0.0%       |  100.0%       |  0.000</code></pre>
+<p><strong>Key Insights:</strong></p>
+<ol type="1">
+<li><strong>At cutpoint 60:</strong> Sensitivity 77%, Specificity 89%
+<ul>
+<li>Use if false positives are costly (confirmatory test)</li>
+</ul></li>
+<li><strong>At cutpoint 40:</strong> Sensitivity 92%, Specificity 65%
+<ul>
+<li>Use if false negatives are costly (screening test)</li>
+</ul></li>
+<li><strong>Youden maximum at 52-60 range</strong>
+<ul>
+<li>Any cutpoint in this range provides excellent performance</li>
+</ul></li>
+</ol>
+<hr>
+</section>
+</section>
+</section>
+<section id="sec-comparing" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Step 2: Comparing Multiple Tests</h1>
+<section id="add-visual-score-comparison" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="add-visual-score-comparison"><span class="header-section-number">5.1</span> Add Visual Score Comparison</h2>
+<p>Now compare digital score to standard visual IHC scoring:</p>
+<ol type="1">
+<li>In <strong>ROC Analysis</strong>, click <strong>Add Test</strong></li>
+<li><strong>Test variable:</strong> <code>Visual_Score_Numeric</code> (convert ordinal to numeric)</li>
+<li>Keep same <strong>State variable</strong> and <strong>Positive class</strong></li>
+</ol>
+<section id="comparison-results" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="comparison-results"><span class="header-section-number">5.1.1</span> Comparison Results</h3>
+<pre><code>ROC Curve Comparison
+════════════════════════════════════════════════════════
+Test                    AUC      95% CI         p-value
+────────────────────────────────────────────────────────
+Digital Score          0.872   (0.813-0.931)    &lt;0.001
+Visual Score           0.798   (0.728-0.868)    &lt;0.001
+────────────────────────────────────────────────────────
+Difference:            0.074   (0.012-0.136)     0.019
+(Digital - Visual)
+
+Interpretation: Digital score significantly better (p=0.019)
+════════════════════════════════════════════════════════</code></pre>
+<p><strong>Statistical Test:</strong> DeLong test for correlated ROC curves - Accounts for paired data (same patients) - More powerful than comparing independent samples</p>
+<p><strong>Conclusion:</strong> ✅ Digital score superior to visual scoring (p = 0.019) ✅ Difference in AUC = 0.074 (7.4 percentage points) ✅ Both methods show “good” discrimination (&gt;0.70)</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="sec-thresholds" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Step 3: Clinical Decision Thresholds</h1>
+<p>Different clinical scenarios require different cutpoints.</p>
+<section id="scenario-1-screening-high-sensitivity" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="scenario-1-screening-high-sensitivity"><span class="header-section-number">6.1</span> Scenario 1: Screening (High Sensitivity)</h2>
+<p><strong>Goal:</strong> Don’t miss any HER2-positive cases (avoid false negatives) <strong>Use case:</strong> Initial screening to determine who needs FISH confirmation</p>
+<p><strong>Recommended Cutpoint:</strong> 40</p>
+<pre><code>Performance at Cutpoint 40:
+────────────────────────────────────────────────────────
+Sensitivity:          92.0%  ← HIGH (few false negatives)
+Specificity:          65.3%  ← Lower (more false positives OK)
+PPV:                  72.6%  ← 27% false positive rate
+NPV:                  89.3%  ← 11% false negative rate
+────────────────────────────────────────────────────────</code></pre>
+<p><strong>Interpretation:</strong> - Catches 92% of HER2-positive cases - 35% of HER2-negative cases test positive (sent for FISH) - Acceptable: FISH is confirmatory, better to over-test than miss cases</p>
+</section>
+<section id="scenario-2-confirmation-high-specificity" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="scenario-2-confirmation-high-specificity"><span class="header-section-number">6.2</span> Scenario 2: Confirmation (High Specificity)</h2>
+<p><strong>Goal:</strong> Minimize false positives before expensive treatment <strong>Use case:</strong> Deciding on targeted anti-HER2 therapy</p>
+<p><strong>Recommended Cutpoint:</strong> 60</p>
+<pre><code>Performance at Cutpoint 60:
+────────────────────────────────────────────────────────
+Sensitivity:          77.3%  ← Lower (some false negatives)
+Specificity:          89.3%  ← HIGH (few false positives)
+PPV:                  87.9%  ← HIGH (confident when positive)
+NPV:                  79.7%  ← Moderate
+────────────────────────────────────────────────────────</code></pre>
+<p><strong>Interpretation:</strong> - Only 11% of HER2-negative cases test positive - 88% confidence that positive result is truly HER2-positive - Trade-off: Miss 23% of HER2-positive cases (may need reflex testing)</p>
+</section>
+<section id="scenario-3-balanced-youden-index" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="scenario-3-balanced-youden-index"><span class="header-section-number">6.3</span> Scenario 3: Balanced (Youden Index)</h2>
+<p><strong>Goal:</strong> Optimize overall accuracy <strong>Use case:</strong> General diagnostic use with equal costs for errors</p>
+<p><strong>Recommended Cutpoint:</strong> 52.3 (Youden optimum) - See results in Step 1</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Choosing Cutpoints
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Clinical context</strong> &gt; statistical optimum</li>
+<li>Consider <strong>costs of errors</strong> (missed cancer vs.&nbsp;unnecessary treatment)</li>
+<li><strong>Regulatory requirements</strong> (FDA approval may mandate specific sensitivity)</li>
+<li><strong>Prevalence</strong> affects PPV/NPV (revalidate in your population)</li>
+</ol>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="sec-greyzone" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Step 4: Grey Zone Analysis</h1>
+<p>Not all results are clear-cut. Some scores fall in an <strong>indeterminate zone</strong> requiring additional testing.</p>
+<section id="define-grey-zone" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="define-grey-zone"><span class="header-section-number">7.1</span> Define Grey Zone</h2>
+<ol type="1">
+<li>In <strong>ROC Analysis</strong> → <strong>Advanced Options</strong></li>
+<li>☑ <strong>Grey zone analysis</strong></li>
+<li><strong>Method:</strong> Confidence interval overlap</li>
+<li><strong>Sensitivity threshold:</strong> 85%</li>
+<li><strong>Specificity threshold:</strong> 85%</li>
+</ol>
+<section id="grey-zone-results" class="level3" data-number="7.1.1">
+<h3 data-number="7.1.1" class="anchored" data-anchor-id="grey-zone-results"><span class="header-section-number">7.1.1</span> Grey Zone Results</h3>
+<pre><code>Grey Zone Analysis
+════════════════════════════════════════════════════════
+HER2-Negative Zone:  Digital Score &lt; 45
+  - Specificity: 90% (confidently negative)
+  - Classify as: HER2-Negative
+
+Grey Zone:           Digital Score 45-60
+  - Uncertain classification
+  - Recommend: FISH confirmation
+
+HER2-Positive Zone:  Digital Score &gt; 60
+  - Sensitivity: 87% (confidently positive)
+  - Classify as: HER2-Positive
+════════════════════════════════════════════════════════
+
+Classification Distribution:
+────────────────────────────────────────────────────────
+HER2-Negative zone:   52 cases (34.7%)
+Grey zone:            43 cases (28.7%)
+HER2-Positive zone:   55 cases (36.7%)
+────────────────────────────────────────────────────────</code></pre>
+<p><strong>Clinical Workflow:</strong></p>
+<ol type="1">
+<li><strong>Score &lt; 45:</strong> Report as HER2-negative (no FISH needed)</li>
+<li><strong>Score 45-60:</strong> Grey zone → Reflex to FISH</li>
+<li><strong>Score &gt; 60:</strong> Report as HER2-positive (no FISH needed)</li>
+</ol>
+<p><strong>Cost Savings:</strong> - 71.3% of cases have definitive classification - Only 28.7% require expensive FISH testing - Maintains high accuracy for clear-cut cases</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="sec-likelihood" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Step 5: Likelihood Ratios</h1>
+<p>Likelihood ratios show how much a test result changes disease probability.</p>
+<section id="understanding-lr-and-lr-" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="understanding-lr-and-lr-"><span class="header-section-number">8.1</span> Understanding LR+ and LR-</h2>
+<p><strong>Positive Likelihood Ratio (LR+):</strong></p>
+<pre><code>LR+ = Sensitivity / (1 - Specificity)
+    = P(Positive test | Disease) / P(Positive test | No disease)</code></pre>
+<p><strong>Negative Likelihood Ratio (LR-):</strong></p>
+<pre><code>LR- = (1 - Sensitivity) / Specificity
+    = P(Negative test | Disease) / P(Negative test | No disease)</code></pre>
+<section id="interpretation-guide" class="level3" data-number="8.1.1">
+<h3 data-number="8.1.1" class="anchored" data-anchor-id="interpretation-guide"><span class="header-section-number">8.1.1</span> Interpretation Guide</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Likelihood Ratio</th>
+<th>Interpretation</th>
+<th>Effect on Probability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LR+ &gt; 10</td>
+<td>Strong evidence for disease</td>
+<td>Large increase</td>
+</tr>
+<tr class="even">
+<td>LR+ 5-10</td>
+<td>Moderate evidence</td>
+<td>Moderate increase</td>
+</tr>
+<tr class="odd">
+<td>LR+ 2-5</td>
+<td>Weak evidence</td>
+<td>Small increase</td>
+</tr>
+<tr class="even">
+<td>LR+ 1-2</td>
+<td>Minimal evidence</td>
+<td>Minimal increase</td>
+</tr>
+<tr class="odd">
+<td>LR- &lt; 0.1</td>
+<td>Strong evidence against disease</td>
+<td>Large decrease</td>
+</tr>
+<tr class="even">
+<td>LR- 0.1-0.2</td>
+<td>Moderate evidence against</td>
+<td>Moderate decrease</td>
+</tr>
+<tr class="odd">
+<td>LR- 0.2-0.5</td>
+<td>Weak evidence against</td>
+<td>Small decrease</td>
+</tr>
+<tr class="even">
+<td>LR- 0.5-1.0</td>
+<td>Minimal evidence against</td>
+<td>Minimal decrease</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-calculation" class="level3" data-number="8.1.2">
+<h3 data-number="8.1.2" class="anchored" data-anchor-id="example-calculation"><span class="header-section-number">8.1.2</span> Example Calculation</h3>
+<p>At optimal cutpoint (52.3):</p>
+<pre><code>LR+ = 84.0% / (1 - 81.3%)
+    = 0.84 / 0.187
+    = 4.49
+
+LR- = (1 - 84.0%) / 81.3%
+    = 0.16 / 0.813
+    = 0.20</code></pre>
+<p><strong>Clinical Application:</strong></p>
+<p>If pre-test probability (prevalence) = 30%:</p>
+<p><strong>Positive test result:</strong> - Pre-test odds = 0.30 / 0.70 = 0.43 - Post-test odds = 0.43 × 4.49 = 1.93 - Post-test probability = 1.93 / (1 + 1.93) = 66% - <strong>Probability increased from 30% → 66%</strong></p>
+<p><strong>Negative test result:</strong> - Post-test odds = 0.43 × 0.20 = 0.086 - Post-test probability = 0.086 / (1.086) = 8% - <strong>Probability decreased from 30% → 8%</strong></p>
+<hr>
+</section>
+</section>
+</section>
+<section id="sec-reporting" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Manuscript Reporting</h1>
+<section id="methods-section" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="methods-section"><span class="header-section-number">9.1</span> Methods Section</h2>
+<blockquote class="blockquote">
+<p><strong>ROC Analysis.</strong> Receiver operating characteristic (ROC) curve analysis evaluated the diagnostic performance of the digital HER2 score using the gold standard IHC+FISH result as reference. Area under the ROC curve (AUC) with 95% confidence intervals (CI) was calculated using the DeLong method. Optimal cutpoint was determined by maximizing Youden index (J = sensitivity + specificity - 1). Sensitivity, specificity, positive predictive value (PPV), and negative predictive value (NPV) were calculated at the optimal cutpoint, assuming prevalence equal to the study sample (50%). Comparison between digital and visual scoring used DeLong test for correlated ROC curves. Likelihood ratios quantified diagnostic value. Grey zone analysis identified score ranges with uncertain classification. All tests were two-sided with α = 0.05. Analyses used ClinicoPath v0.0.32 for jamovi.</p>
+</blockquote>
+</section>
+<section id="results-section" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="results-section"><span class="header-section-number">9.2</span> Results Section</h2>
+<blockquote class="blockquote">
+<p><strong>Diagnostic Performance.</strong> The digital HER2 score showed good discrimination (AUC 0.872, 95% CI: 0.813-0.931, p &lt; 0.001) (Figure 1). The optimal cutpoint by Youden index was 52.3, yielding sensitivity 84.0% (95% CI: 74.0-91.2%), specificity 81.3% (95% CI: 70.7-89.4%), PPV 81.8%, and NPV 83.6% at 50% prevalence. Positive likelihood ratio was 4.49 and negative likelihood ratio was 0.20, indicating substantial diagnostic value. Grey zone analysis (scores 45-60, 28.7% of cases) identified indeterminate results requiring FISH confirmation. Digital scoring outperformed visual IHC scoring (AUC 0.798, 95% CI: 0.728-0.868), with AUC difference 0.074 (95% CI: 0.012-0.136, p = 0.019).</p>
+</blockquote>
+</section>
+<section id="figure-legend" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="figure-legend"><span class="header-section-number">9.3</span> Figure Legend</h2>
+<blockquote class="blockquote">
+<p><strong>Figure 1. ROC Curve for Digital HER2 Score.</strong> Receiver operating characteristic curve shows diagnostic performance of automated digital pathology scoring for HER2 status (n=150). AUC = 0.872 (95% CI: 0.813-0.931). Red dot indicates optimal cutpoint (52.3) by Youden index, yielding sensitivity 84% and specificity 81%. Diagonal line represents random chance (AUC = 0.5). Shaded band shows 95% confidence interval.</p>
+</blockquote>
+<hr>
+</section>
+</section>
+<section id="sec-mistakes" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Common Mistakes to Avoid</h1>
+<section id="mistake-1-using-auc-alone" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="mistake-1-using-auc-alone"><span class="header-section-number">10.1</span> ❌ Mistake 1: Using AUC Alone</h2>
+<p><strong>Wrong:</strong> &gt; “AUC was 0.85, so the test is good.”</p>
+<p><strong>Why Wrong:</strong> - AUC summarizes across all cutpoints - Doesn’t tell you performance at YOUR chosen cutpoint - Ignores clinical context</p>
+<p><strong>Correct:</strong> &gt; “AUC was 0.85 (good discrimination). At optimal cutpoint 52, sensitivity was 84% and specificity 81%, suitable for our screening scenario.”</p>
+</section>
+<section id="mistake-2-ignoring-prevalence" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="mistake-2-ignoring-prevalence"><span class="header-section-number">10.2</span> ❌ Mistake 2: Ignoring Prevalence</h2>
+<p><strong>Wrong:</strong> &gt; “PPV is 82%, so a positive result means 82% chance of disease.”</p>
+<p><strong>Why Wrong:</strong> - PPV depends on prevalence (study sample may not match your population) - PPV changes, AUC doesn’t</p>
+<p><strong>Correct:</strong> &gt; “In our study (50% prevalence), PPV was 82%. In clinical practice (10% prevalence), PPV would be approximately 35%.”</p>
+</section>
+<section id="mistake-3-optimal-best-for-all" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="mistake-3-optimal-best-for-all"><span class="header-section-number">10.3</span> ❌ Mistake 3: Optimal = Best for All</h2>
+<p><strong>Wrong:</strong> &gt; “Youden index is 0.65 at cutpoint 52, so we always use 52.”</p>
+<p><strong>Why Wrong:</strong> - Youden assumes equal weight for sensitivity and specificity - Clinical context may prioritize one over the other</p>
+<p><strong>Correct:</strong> &gt; “Youden-optimal cutpoint is 52 (balanced performance). For screening, we use 40 (high sensitivity). For treatment decisions, we use 60 (high specificity).”</p>
+</section>
+<section id="mistake-4-comparing-independent-rocs-incorrectly" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="mistake-4-comparing-independent-rocs-incorrectly"><span class="header-section-number">10.4</span> ❌ Mistake 4: Comparing Independent ROCs Incorrectly</h2>
+<p><strong>Wrong:</strong> &gt; “AUC for Test A = 0.85 (CI: 0.75-0.95), Test B = 0.80 (CI: 0.70-0.90). CIs overlap, so no difference.”</p>
+<p><strong>Why Wrong:</strong> - Overlapping CIs doesn’t mean no significant difference - Should use formal comparison test (DeLong)</p>
+<p><strong>Correct:</strong> &gt; “AUC for Test A = 0.85, Test B = 0.80. DeLong test showed significant difference (p = 0.03), favoring Test A.”</p>
+<hr>
+</section>
+</section>
+<section id="sec-exercises" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Practice Exercises</h1>
+<section id="exercise-1-prostate-cancer-screening" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="exercise-1-prostate-cancer-screening"><span class="header-section-number">11.1</span> Exercise 1: Prostate Cancer Screening</h2>
+<p><strong>Dataset:</strong> <code>psa_screening_data</code> (PSA levels for prostate cancer detection)</p>
+<p><strong>Tasks:</strong> 1. Create ROC curve for PSA predicting cancer 2. Calculate AUC with 95% CI 3. Determine optimal cutpoint 4. Calculate sensitivity/specificity at cutpoint 4.0 ng/mL (standard threshold) 5. Should the threshold be changed? Why or why not?</p>
+</section>
+<section id="exercise-2-multi-marker-comparison" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="exercise-2-multi-marker-comparison"><span class="header-section-number">11.2</span> Exercise 2: Multi-Marker Comparison</h2>
+<p><strong>Dataset:</strong> <code>biomarker_panel_data</code> (3 biomarkers for lung cancer)</p>
+<p><strong>Tasks:</strong> 1. Create ROC curves for all 3 biomarkers 2. Compare AUCs statistically 3. Which biomarker is best? 4. Is combination of markers better than single markers?</p>
+</section>
+<section id="exercise-3-grey-zone-implementation" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="exercise-3-grey-zone-implementation"><span class="header-section-number">11.3</span> Exercise 3: Grey Zone Implementation</h2>
+<p><strong>Dataset:</strong> <code>thyroid_nodule_data</code> (ultrasound score for malignancy)</p>
+<p><strong>Tasks:</strong> 1. Define grey zone for your ultrasound scoring system 2. What percentage of cases fall in grey zone? 3. Develop clinical workflow for grey zone cases 4. Calculate cost savings vs.&nbsp;universal biopsy</p>
+<hr>
+</section>
+</section>
+<section id="sec-summary" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Summary</h1>
+<section id="key-takeaways" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="key-takeaways"><span class="header-section-number">12.1</span> Key Takeaways</h2>
+<p>✅ <strong>ROC curves</strong> evaluate discrimination across all cutpoints ✅ <strong>AUC</strong> quantifies overall performance (0.5-1.0 scale) ✅ <strong>Optimal cutpoint</strong> depends on clinical context ✅ <strong>Youden index</strong> balances sensitivity and specificity ✅ <strong>Grey zones</strong> identify indeterminate results ✅ <strong>Likelihood ratios</strong> show diagnostic value ✅ <strong>Prevalence</strong> affects PPV and NPV</p>
+</section>
+<section id="decision-framework" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="decision-framework"><span class="header-section-number">12.2</span> Decision Framework</h2>
+<pre><code>1. Calculate AUC
+   ↓
+   AUC &gt; 0.70?
+   ↓ YES
+2. Determine clinical context
+   - Screening → High sensitivity
+   - Confirmation → High specificity
+   - Balanced → Youden index
+   ↓
+3. Choose cutpoint
+   ↓
+4. Calculate performance metrics
+   ↓
+5. Define grey zone (optional)
+   ↓
+6. Validate in independent sample</code></pre>
+</section>
+<section id="next-tutorial" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="next-tutorial"><span class="header-section-number">12.3</span> Next Tutorial</h2>
+<p><a href="./05-decision-curve-analysis.html"><strong>Tutorial 5: Decision Curve Analysis</strong></a> - Net benefit calculation - Clinical utility assessment - Comparing prediction models - Threshold probability selection</p>
+<hr>
+</section>
+</section>
+<section id="sec-references" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> References</h1>
+<p><strong>ROC Analysis Methods:</strong></p>
+<ol type="1">
+<li><p>DeLong ER, DeLong DM, Clarke-Pearson DL. Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. <em>Biometrics</em>. 1988;44(3):837-845.</p></li>
+<li><p>Youden WJ. Index for rating diagnostic tests. <em>Cancer</em>. 1950;3(1):32-35.</p></li>
+<li><p>Hanley JA, McNeil BJ. The meaning and use of the area under a receiver operating characteristic (ROC) curve. <em>Radiology</em>. 1982;143(1):29-36.</p></li>
+</ol>
+<p><strong>Clinical Applications:</strong></p>
+<ol start="4" type="1">
+<li><p>Metz CE. Basic principles of ROC analysis. <em>Semin Nucl Med</em>. 1978;8(4):283-298.</p></li>
+<li><p>Zweig MH, Campbell G. Receiver-operating characteristic (ROC) plots: a fundamental evaluation tool in clinical medicine. <em>Clin Chem</em>. 1993;39(4):561-577.</p></li>
+</ol>
+<p><strong>Grey Zone Analysis:</strong></p>
+<ol start="6" type="1">
+<li>Coste J, Pouchot J. A grey zone for quantitative diagnostic and screening tests. <em>Int J Epidemiol</em>. 2003;32(2):304-313.</li>
+</ol>
+<hr>
+<p><strong>Tutorial Author:</strong> Serdar Balci, MD, PhD <strong>Last Updated:</strong> December 13, 2025 <strong>License:</strong> CC-BY-4.0 <strong>Tutorial Version:</strong> 1.0</p>
+<p><strong>Continue learning:</strong> <a href="./05-decision-curve-analysis.html">Tutorial 5: Decision Curve Analysis →</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, ClinicoPath Development Team</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

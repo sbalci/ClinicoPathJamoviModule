@@ -67,6 +67,24 @@ For a comprehensive guide to all the documentation available for this package, p
 
 ---
 
+## 🎓 Tutorials
+
+**NEW!** Comprehensive tutorial series for ClinicoPath users:
+
+- **[Tutorial Series Home](tutorials/README.md)** - Complete learning paths for clinical trials, diagnostic pathology, and advanced analyses
+- **Quick Start:** [Getting Started with ClinicoPath](tutorials/01-getting-started.qmd) (30 min)
+- **Clinical Trials:** [Table One for Baseline Characteristics](tutorials/02-table-one-clinical-trial.qmd) (45 min)
+- **Survival Analysis:** [Kaplan-Meier & Cox Regression](tutorials/03-survival-analysis-cancer.qmd) (45 min)
+- **Diagnostic Testing:** [ROC Analysis & Optimal Cutpoints](tutorials/04-roc-diagnostic-test.qmd) (45 min)
+- **Advanced Modeling:** [Decision Curve Analysis](tutorials/05-decision-curve-analysis.qmd) (50 min)
+- **Reproducibility:** [Automated Reports & Version Control](tutorials/06-reproducible-reports.qmd) (40 min)
+
+**Total Learning Time:** 4.5 hours | **No Programming Required**
+
+The tutorial series includes 60+ working code examples, 25+ visual diagrams, and 18 hands-on practice exercises. Perfect for clinicians, pathologists, and researchers new to ClinicoPath.
+
+---
+
 
 ## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 

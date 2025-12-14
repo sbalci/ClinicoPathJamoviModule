@@ -1,0 +1,993 @@
+---
+title: "Creating Reproducible Reports"
+subtitle: "Automating Analyses and Manuscript Generation"
+author: "ClinicoPath Tutorial Series"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: show
+    theme: cosmo
+    number-sections: true
+execute:
+  eval: false
+  echo: true
+---
+
+# Overview {#sec-overview}
+
+Learn how to create **fully reproducible research workflows** using ClinicoPath:
+
+- ✅ Use ClinicoPath programmatically in R
+- ✅ Automate analyses with scripts
+- ✅ Generate reports with Quarto/R Markdown
+- ✅ Version control with Git
+- ✅ Create manuscript templates
+- ✅ Batch process multiple datasets
+
+**Prerequisites:** All previous tutorials, basic R knowledge helpful but not required
+**Time Required:** 40 minutes
+**Tools:** R, RStudio (optional but recommended), Quarto
+
+---
+
+# Why Reproducibility Matters {#sec-why}
+
+## The Reproducibility Crisis
+
+**Problem:** Many published research findings cannot be reproduced:
+- 70% of researchers have failed to reproduce another scientist's experiments
+- 50% have failed to reproduce their own experiments
+- Manual point-and-click analyses are error-prone and hard to verify
+
+## Benefits of Reproducible Workflows
+
+✅ **Transparency:** Others can see exactly what you did
+✅ **Replicability:** Easy to re-run with new data
+✅ **Error detection:** Code review catches mistakes
+✅ **Efficiency:** Automate repetitive tasks
+✅ **Collaboration:** Team members can build on your work
+✅ **Publication:** Journals increasingly require code/data sharing
+
+::: {.callout-important}
+## Modern Research Standard
+Leading journals (Nature, Science, PLOS) now require:
+- Public data repositories (when ethical)
+- Analysis code availability
+- Computational reproducibility
+:::
+
+---
+
+# Setting Up Your Environment {#sec-setup}
+
+## Install Required Software
+
+### 1. Install R
+
+**Download:** [https://cran.r-project.org/](https://cran.r-project.org/)
+
+- **Windows:** `R-4.3.x-win.exe`
+- **macOS:** `R-4.3.x.pkg`
+- **Linux:** Follow distribution-specific instructions
+
+### 2. Install RStudio (Recommended)
+
+**Download:** [https://posit.co/download/rstudio-desktop/](https://posit.co/download/rstudio-desktop/)
+
+RStudio provides:
+- Integrated editor
+- Console for R commands
+- Package manager
+- Git integration
+- Quarto support
+
+### 3. Install Quarto
+
+**Download:** [https://quarto.org/docs/get-started/](https://quarto.org/docs/get-started/)
+
+Quarto creates:
+- HTML reports
+- PDF documents
+- Word manuscripts
+- Presentations
+
+### 4. Install ClinicoPath
+
+```{r}
+# Option 1: From CRAN (when available)
+install.packages("ClinicoPath")
+
+# Option 2: From GitHub (development version)
+if (!requireNamespace("remotes")) install.packages("remotes")
+remotes::install_github("sbalci/ClinicoPathJamoviModule")
+
+# Load package
+library(ClinicoPath)
+```
+
+---
+
+# Using ClinicoPath Programmatically {#sec-programmatic}
+
+## Basic Syntax
+
+ClinicoPath functions in R mirror jamovi analyses:
+
+```{r}
+# Load package
+library(ClinicoPath)
+
+# Load example data
+data(clinical_trial_data)
+
+# Run Table One
+result <- tableone(
+    data = clinical_trial_data,
+    vars = c("Age", "Sex", "TumorStage", "TumorGrade"),
+    sty = "gtsummary",
+    excl = FALSE
+)
+
+# View results
+print(result)
+```
+
+## Function Structure
+
+Every ClinicoPath analysis follows this pattern:
+
+```{r}
+result <- analysis_function(
+    data = your_dataset,
+    # Specify variables
+    outcome = "outcome_variable",
+    predictors = c("var1", "var2", "var3"),
+    # Set options
+    option1 = TRUE,
+    option2 = "value",
+    # Control output
+    plots = TRUE,
+    tables = TRUE
+)
+```
+
+---
+
+# Example 1: Automated Table One {#sec-example1}
+
+## Clinical Trial Baseline Characteristics
+
+### Step 1: Create R Script
+
+Create file: `01-create-table-one.R`
+
+```{r}
+#| filename: 01-create-table-one.R
+#| eval: false
+
+# ═══════════════════════════════════════════════════════
+# Automated Table One Generation
+# Project: Breast Cancer Clinical Trial
+# Author: Your Name
+# Date: 2025-12-13
+# ═══════════════════════════════════════════════════════
+
+# Load packages
+library(ClinicoPath)
+library(dplyr)
+
+# Load data
+data(clinical_trial_data)
+
+# Define variables for Table One
+baseline_vars <- c(
+    "Age",
+    "Sex",
+    "Race",
+    "BMI",
+    "ECOG_Status",
+    "TumorStage",
+    "TumorGrade",
+    "TumorSize",
+    "ER_Status",
+    "PR_Status"
+)
+
+# Create Table One stratified by treatment
+table1 <- crosstable(
+    data = clinical_trial_data,
+    rows = baseline_vars,
+    cols = "TreatmentGroup",
+    sty = "NEJM",  # New England Journal of Medicine style
+    showTests = TRUE,
+    showEffectSize = TRUE
+)
+
+# Save results
+saveRDS(table1, "results/table-one.rds")
+
+# Export to Word
+# (requires officer package)
+library(officer)
+library(flextable)
+
+# Convert to flextable
+ft <- as_flextable(table1)
+
+# Save to Word document
+doc <- read_docx()
+doc <- body_add_flextable(doc, ft)
+print(doc, target = "results/Table1_Baseline.docx")
+
+message("✓ Table One created: results/Table1_Baseline.docx")
+```
+
+### Step 2: Run the Script
+
+```{r}
+# In R console or RStudio:
+source("01-create-table-one.R")
+```
+
+**Output:** Creates `Table1_Baseline.docx` ready for manuscript!
+
+---
+
+# Example 2: Survival Analysis Pipeline {#sec-example2}
+
+## Kaplan-Meier and Cox Regression
+
+### Complete Analysis Script
+
+Create file: `02-survival-analysis.R`
+
+```{r}
+#| filename: 02-survival-analysis.R
+#| eval: false
+
+# ═══════════════════════════════════════════════════════
+# Survival Analysis Pipeline
+# ═══════════════════════════════════════════════════════
+
+library(ClinicoPath)
+library(ggplot2)
+
+# Load data
+data(basic_survival_data)
+
+# ───────────────────────────────────────────────────────
+# 1. Kaplan-Meier Analysis
+# ───────────────────────────────────────────────────────
+
+km_results <- survival(
+    data = basic_survival_data,
+    time = "SurvivalTime",
+    event = "Status",
+    group = "Treatment",
+    plot = TRUE,
+    riskTable = TRUE,
+    confInt = TRUE
+)
+
+# Extract median survival
+median_survival <- km_results$median
+print(median_survival)
+
+# Save Kaplan-Meier plot
+ggsave(
+    "results/Figure1_KM_Curve.pdf",
+    plot = km_results$plot,
+    width = 8,
+    height = 6,
+    dpi = 300
+)
+
+# ───────────────────────────────────────────────────────
+# 2. Cox Proportional Hazards Regression
+# ───────────────────────────────────────────────────────
+
+# Univariate analyses
+univariate_vars <- c("Treatment", "Age", "Stage", "Grade")
+
+univariate_results <- lapply(univariate_vars, function(var) {
+    cox_result <- coxregression(
+        data = basic_survival_data,
+        time = "SurvivalTime",
+        event = "Status",
+        covariates = var
+    )
+    return(cox_result)
+})
+
+names(univariate_results) <- univariate_vars
+
+# Multivariate analysis
+multivariate_result <- coxregression(
+    data = basic_survival_data,
+    time = "SurvivalTime",
+    event = "Status",
+    covariates = c("Treatment", "Age", "Stage", "Grade"),
+    plot_forest = TRUE
+)
+
+# Save forest plot
+ggsave(
+    "results/Figure2_Forest_Plot.pdf",
+    plot = multivariate_result$forest_plot,
+    width = 10,
+    height = 8,
+    dpi = 300
+)
+
+# Extract hazard ratios
+hr_table <- multivariate_result$coefficients
+write.csv(hr_table, "results/Table2_Hazard_Ratios.csv", row.names = FALSE)
+
+message("✓ Survival analysis complete")
+message("  - Kaplan-Meier plot: results/Figure1_KM_Curve.pdf")
+message("  - Forest plot: results/Figure2_Forest_Plot.pdf")
+message("  - Hazard ratios: results/Table2_Hazard_Ratios.csv")
+```
+
+---
+
+# Example 3: ROC Analysis for Biomarkers {#sec-example3}
+
+## Compare Multiple Diagnostic Tests
+
+```{r}
+#| filename: 03-roc-analysis.R
+#| eval: false
+
+# ═══════════════════════════════════════════════════════
+# ROC Analysis: HER2 Biomarker Validation
+# ═══════════════════════════════════════════════════════
+
+library(ClinicoPath)
+library(pROC)
+
+# Load data
+data(her2_breast_cancer_data)
+
+# ───────────────────────────────────────────────────────
+# 1. Single Biomarker ROC
+# ───────────────────────────────────────────────────────
+
+roc_digital <- roc_analysis(
+    data = her2_breast_cancer_data,
+    test_var = "Digital_Score",
+    state_var = "HER2_Status",
+    positive_class = "Positive",
+    plot = TRUE,
+    ci = TRUE,
+    optimal_cutpoint = TRUE
+)
+
+# Extract AUC
+auc_value <- roc_digital$auc
+auc_ci <- roc_digital$ci
+
+cat(sprintf("AUC: %.3f (95%% CI: %.3f-%.3f)\n",
+            auc_value, auc_ci[1], auc_ci[2]))
+
+# Extract optimal cutpoint
+optimal <- roc_digital$optimal_cutpoint
+
+cat(sprintf("Optimal cutpoint: %.1f\n", optimal$cutpoint))
+cat(sprintf("Sensitivity: %.1f%%\n", optimal$sensitivity * 100))
+cat(sprintf("Specificity: %.1f%%\n", optimal$specificity * 100))
+
+# ───────────────────────────────────────────────────────
+# 2. Compare Multiple Biomarkers
+# ───────────────────────────────────────────────────────
+
+biomarkers <- c("Digital_Score", "Visual_Score", "IHC_Score")
+
+roc_comparison <- compare_roc(
+    data = her2_breast_cancer_data,
+    test_vars = biomarkers,
+    state_var = "HER2_Status",
+    positive_class = "Positive",
+    method = "delong",  # Statistical test
+    plot_combined = TRUE
+)
+
+# Save comparison plot
+ggsave(
+    "results/Figure3_ROC_Comparison.pdf",
+    plot = roc_comparison$plot,
+    width = 8,
+    height = 8,
+    dpi = 300
+)
+
+# Create comparison table
+comparison_table <- data.frame(
+    Biomarker = biomarkers,
+    AUC = sapply(roc_comparison$roc_list, function(x) x$auc),
+    CI_lower = sapply(roc_comparison$roc_list, function(x) x$ci[1]),
+    CI_upper = sapply(roc_comparison$roc_list, function(x) x$ci[2])
+)
+
+write.csv(comparison_table, "results/Table3_ROC_Comparison.csv", row.names = FALSE)
+
+message("✓ ROC analysis complete")
+```
+
+---
+
+# Creating Quarto Reports {#sec-quarto}
+
+## Quarto Document Structure
+
+Quarto combines:
+- **Narrative text** (Markdown)
+- **R code** (executable chunks)
+- **Results** (automatically embedded)
+
+### Example: Automated Clinical Trial Report
+
+Create file: `clinical-trial-report.qmd`
+
+````{verbatim}
+---
+title: "Breast Cancer Clinical Trial: Statistical Analysis Report"
+author: "Your Name, MD, PhD"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    code-fold: true
+    theme: cosmo
+  docx:
+    reference-doc: template.docx
+  pdf:
+    documentclass: article
+---
+
+# Executive Summary
+
+This report presents the statistical analysis of a randomized controlled
+trial comparing two treatments for HER2-positive breast cancer.
+
+```{r}
+#| label: setup
+#| include: false
+
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+# Set global options
+knitr::opts_chunk$set(
+    echo = FALSE,
+    warning = FALSE,
+    message = FALSE,
+    fig.width = 8,
+    fig.height = 6,
+    dpi = 300
+)
+
+# Load data
+data(clinical_trial_data)
+```
+
+# Methods
+
+## Study Design
+
+A randomized controlled trial enrolled `r nrow(clinical_trial_data)` patients
+with HER2-positive breast cancer between 2020-2023. Patients were randomized
+1:1 to standard chemotherapy (n=`r sum(clinical_trial_data$TreatmentGroup == "Standard")`)
+or targeted therapy (n=`r sum(clinical_trial_data$TreatmentGroup == "Targeted")`).
+
+## Statistical Analysis
+
+Baseline characteristics were compared using independent t-tests (continuous)
+and chi-square tests (categorical). Survival was analyzed using Kaplan-Meier
+method and Cox proportional hazards regression. All tests were two-sided with
+α = 0.05.
+
+# Results
+
+## Baseline Characteristics
+
+```{r}
+#| label: tbl-baseline
+#| tbl-cap: "Baseline patient and tumor characteristics by treatment group"
+
+# Create Table One
+table1 <- crosstable(
+    data = clinical_trial_data,
+    rows = c("Age", "Sex", "TumorStage", "TumorGrade", "TumorSize"),
+    cols = "TreatmentGroup",
+    sty = "gtsummary",
+    showTests = TRUE
+)
+
+# Display table
+table1
+```
+
+As shown in @tbl-baseline, baseline characteristics were well-balanced between
+treatment groups (all p > 0.20).
+
+## Survival Analysis
+
+```{r}
+#| label: fig-km
+#| fig-cap: "Kaplan-Meier survival curves by treatment group"
+
+# Run survival analysis
+km_results <- survival(
+    data = clinical_trial_data,
+    time = "SurvivalTime",
+    event = "Status",
+    group = "TreatmentGroup",
+    plot = TRUE,
+    confInt = TRUE
+)
+
+# Display plot
+km_results$plot
+```
+
+Median survival was significantly longer with targeted therapy
+(`r km_results$median["Targeted", "Median"]` months) compared to standard
+chemotherapy (`r km_results$median["Standard", "Median"]` months; log-rank
+p = `r format(km_results$logrank_p, digits = 3)`).
+
+## Cox Regression
+
+```{r}
+#| label: tbl-cox
+#| tbl-cap: "Multivariate Cox regression results"
+
+# Run Cox regression
+cox_result <- coxregression(
+    data = clinical_trial_data,
+    time = "SurvivalTime",
+    event = "Status",
+    covariates = c("TreatmentGroup", "Age", "Stage")
+)
+
+# Display results table
+cox_result$summary_table
+```
+
+# Conclusions
+
+Targeted therapy significantly improved overall survival compared to standard
+chemotherapy (adjusted HR `r format(cox_result$hr["TreatmentGroup"], digits = 2)`,
+95% CI: `r format(cox_result$ci_lower["TreatmentGroup"], digits = 2)`-`r format(cox_result$ci_upper["TreatmentGroup"], digits = 2)`,
+p = `r format(cox_result$p_value["TreatmentGroup"], digits = 3)`).
+
+# References
+
+1. Balci S. (2025). ClinicoPath: Comprehensive Analysis for Clinicopathological
+   Research. R package version 0.0.32.43.
+
+# Appendix: Session Information
+
+```{r}
+#| label: session-info
+
+sessionInfo()
+```
+````
+
+### Render the Report
+
+```{r}
+# Render to HTML
+quarto::quarto_render("clinical-trial-report.qmd", output_format = "html")
+
+# Render to Word
+quarto::quarto_render("clinical-trial-report.qmd", output_format = "docx")
+
+# Render to PDF
+quarto::quarto_render("clinical-trial-report.qmd", output_format = "pdf")
+```
+
+**Output:**
+- `clinical-trial-report.html` (interactive, shareable)
+- `clinical-trial-report.docx` (editable manuscript)
+- `clinical-trial-report.pdf` (publication-ready)
+
+---
+
+# Batch Processing Multiple Datasets {#sec-batch}
+
+## Analyze Multiple Studies
+
+```{r}
+#| filename: batch-analysis.R
+#| eval: false
+
+# ═══════════════════════════════════════════════════════
+# Batch Analysis: Process Multiple Clinical Trials
+# ═══════════════════════════════════════════════════════
+
+library(ClinicoPath)
+library(purrr)
+library(dplyr)
+
+# List of datasets
+datasets <- list(
+    study1 = clinical_trial_data_study1,
+    study2 = clinical_trial_data_study2,
+    study3 = clinical_trial_data_study3
+)
+
+# Function to analyze one dataset
+analyze_trial <- function(data, study_name) {
+
+    message(sprintf("Analyzing %s...", study_name))
+
+    # Create Table One
+    table1 <- tableone(
+        data = data,
+        vars = c("Age", "Sex", "Stage"),
+        sty = "gtsummary"
+    )
+
+    # Run survival analysis
+    surv <- survival(
+        data = data,
+        time = "SurvivalTime",
+        event = "Status",
+        group = "TreatmentGroup"
+    )
+
+    # Extract key results
+    results <- list(
+        study = study_name,
+        n = nrow(data),
+        median_surv_control = surv$median["Control", "Median"],
+        median_surv_treatment = surv$median["Treatment", "Median"],
+        logrank_p = surv$logrank_p,
+        hr = surv$hr,
+        hr_ci_lower = surv$hr_ci[1],
+        hr_ci_upper = surv$hr_ci[2]
+    )
+
+    return(results)
+}
+
+# Apply to all datasets
+all_results <- map2_dfr(
+    datasets,
+    names(datasets),
+    analyze_trial
+)
+
+# Save combined results
+write.csv(all_results, "results/Meta_Analysis_Results.csv", row.names = FALSE)
+
+# Create summary table
+summary_table <- all_results %>%
+    mutate(
+        `Median Survival (Control)` = sprintf("%.1f months", median_surv_control),
+        `Median Survival (Treatment)` = sprintf("%.1f months", median_surv_treatment),
+        `Hazard Ratio` = sprintf("%.2f (%.2f-%.2f)", hr, hr_ci_lower, hr_ci_upper),
+        `P-value` = format.pval(logrank_p, digits = 3)
+    ) %>%
+    select(Study = study, N = n, `Median Survival (Control)`,
+           `Median Survival (Treatment)`, `Hazard Ratio`, `P-value`)
+
+knitr::kable(summary_table, caption = "Summary of all clinical trials")
+```
+
+---
+
+# Version Control with Git {#sec-git}
+
+## Why Git?
+
+✅ **Track changes:** See what changed, when, and why
+✅ **Collaboration:** Work with team members without conflicts
+✅ **Backup:** Cloud storage on GitHub/GitLab
+✅ **Reproducibility:** Anyone can access exact analysis version
+
+## Basic Git Workflow
+
+### Step 1: Initialize Git Repository
+
+```{bash}
+# In your project directory
+cd /path/to/your/project
+git init
+```
+
+### Step 2: Create `.gitignore`
+
+```{verbatim}
+# .gitignore file
+
+# R files
+.Rhistory
+.RData
+.Rproj.user/
+
+# Output files (large, can be regenerated)
+results/*.pdf
+results/*.docx
+results/*.rds
+
+# Sensitive data (DO NOT commit)
+data/raw/*.csv
+data/patient_identifiers.xlsx
+
+# Keep these (small, essential)
+!results/summary_stats.csv
+```
+
+### Step 3: Make Your First Commit
+
+```{bash}
+# Add all files
+git add .
+
+# Commit with descriptive message
+git commit -m "Initial commit: Add analysis scripts and Quarto reports"
+
+# View history
+git log
+```
+
+### Step 4: Push to GitHub
+
+```{bash}
+# Create repository on GitHub first, then:
+git remote add origin https://github.com/yourusername/your-repo.git
+git branch -M main
+git push -u origin main
+```
+
+## Reproducible Commits
+
+```{bash}
+# After making changes to analysis:
+git add 02-survival-analysis.R
+git commit -m "Add forest plot for Cox regression results
+
+- Created multivariate Cox model
+- Generated forest plot with 95% CI
+- Adjusted for age, stage, and grade
+- Closes #15"
+
+git push
+```
+
+---
+
+# Best Practices for Reproducibility {#sec-bestpractices}
+
+## Project Organization
+
+```
+my-clinical-trial/
+├── data/
+│   ├── raw/                    # Original data (read-only)
+│   │   └── clinical_trial.csv
+│   └── processed/              # Cleaned data
+│       └── analysis_ready.rds
+├── scripts/
+│   ├── 01-import-data.R
+│   ├── 02-clean-data.R
+│   ├── 03-table-one.R
+│   ├── 04-survival-analysis.R
+│   └── 05-figures.R
+├── reports/
+│   ├── manuscript.qmd
+│   └── supplementary.qmd
+├── results/
+│   ├── tables/
+│   ├── figures/
+│   └── models/
+├── README.md                   # Project description
+├── _quarto.yml                 # Quarto configuration
+└── renv.lock                   # Package versions
+```
+
+## Session Management with `renv`
+
+Lock package versions for exact reproducibility:
+
+```{r}
+# Initialize renv
+renv::init()
+
+# After installing packages
+renv::snapshot()
+
+# Others can restore exact environment
+renv::restore()
+```
+
+## Document Everything
+
+### README.md Template
+
+```markdown
+# Breast Cancer Clinical Trial Analysis
+
+## Study Overview
+Randomized controlled trial comparing targeted therapy vs. chemotherapy
+for HER2-positive breast cancer (n=200).
+
+## Repository Structure
+- `data/`: Clinical trial data (de-identified)
+- `scripts/`: R analysis scripts
+- `reports/`: Quarto manuscripts
+- `results/`: Generated tables and figures
+
+## Reproducing the Analysis
+
+### Step 1: Install Dependencies
+```r
+install.packages("renv")
+renv::restore()  # Installs exact package versions
+```
+
+### Step 2: Run Analysis Pipeline
+```r
+source("scripts/01-import-data.R")
+source("scripts/02-clean-data.R")
+source("scripts/03-table-one.R")
+source("scripts/04-survival-analysis.R")
+```
+
+### Step 3: Generate Manuscript
+```r
+quarto::quarto_render("reports/manuscript.qmd")
+```
+
+## Citation
+If you use this code, please cite:
+[Include citation]
+
+## Contact
+Questions? Email: your.email@institution.edu
+```
+
+---
+
+# Manuscript Template {#sec-template}
+
+## Complete Quarto Manuscript
+
+Save as `manuscript-template.qmd`:
+
+````{verbatim}
+---
+title: "Your Manuscript Title Here"
+subtitle: "A Randomized Controlled Trial"
+author:
+  - name: First Author
+    affiliation: Institution 1
+    email: first.author@email.com
+  - name: Second Author
+    affiliation: Institution 2
+abstract: |
+  **Background:** State the problem and research gap.
+
+  **Methods:** Describe study design and analysis approach.
+
+  **Results:** Summarize key findings with numbers.
+
+  **Conclusions:** State main conclusion and implications.
+keywords: [breast cancer, targeted therapy, survival analysis]
+bibliography: references.bib
+format:
+  docx:
+    reference-doc: journal-template.docx
+    number-sections: true
+  pdf:
+    keep-tex: true
+    documentclass: article
+    geometry: margin=1in
+---
+
+# Introduction
+
+## Background
+
+[Your introduction text with citations @citation2025]
+
+## Study Objectives
+
+1. Compare survival between treatment groups
+2. Identify prognostic factors
+3. Evaluate cost-effectiveness
+
+# Methods
+
+## Study Design
+
+## Statistical Analysis
+
+```{r setup}
+library(ClinicoPath)
+# Analysis code here
+```
+
+# Results
+
+## Baseline Characteristics
+
+See @tbl-baseline.
+
+```{r}
+#| label: tbl-baseline
+# Table code
+```
+
+## Survival Outcomes
+
+See @fig-km.
+
+```{r}
+#| label: fig-km
+# Figure code
+```
+
+# Discussion
+
+# Conclusions
+
+# References
+````
+
+---
+
+# Summary {#sec-summary}
+
+## Key Takeaways
+
+✅ **ClinicoPath works both GUI and programmatically**
+✅ **Quarto combines code + narrative + results**
+✅ **Git tracks changes and enables collaboration**
+✅ **renv locks package versions**
+✅ **Good organization = Easy reproducibility**
+
+## Reproducibility Checklist
+
+Before publishing, ensure:
+
+- [ ] Code runs from start to finish without errors
+- [ ] Package versions documented (`renv.lock`)
+- [ ] Data availability stated (repository or "available on request")
+- [ ] README explains how to reproduce
+- [ ] Git history shows transparent development
+- [ ] No hardcoded paths (use `here` package or relative paths)
+- [ ] Random seeds set for any simulations
+- [ ] Session info included in reports
+
+---
+
+# Resources {#sec-resources}
+
+**Reproducible Research:**
+- [The Turing Way](https://the-turing-way.netlify.app/)
+- [rOpenSci Packages Guide](https://devguide.ropensci.org/)
+
+**Quarto:**
+- [Quarto Official Guide](https://quarto.org/docs/guide/)
+- [R Markdown Cookbook](https://bookdown.org/yihui/rmarkdown-cookbook/)
+
+**Version Control:**
+- [Happy Git with R](https://happygitwithr.com/)
+- [GitHub Learning Lab](https://lab.github.com/)
+
+---
+
+**Tutorial Author:** Serdar Balci, MD, PhD
+**Last Updated:** December 13, 2025
+**License:** CC-BY-4.0
+**Tutorial Version:** 1.0
+
+**Congratulations!** You've completed the ClinicoPath Tutorial Series. 🎉

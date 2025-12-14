@@ -166,7 +166,6 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         breakpointsTable = function() private$.items[["breakpointsTable"]],
         plot = function() private$.items[["plot"]],
         rcode = function() private$.items[["rcode"]],
-        warnings = function() private$.items[["warnings"]],
         addtodata = function() private$.items[["addtodata"]]),
     private = list(),
     public=list(
@@ -285,17 +284,6 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rightclosed",
                     "ordered",
                     "excl")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="warnings",
-                title="Messages",
-                visible=TRUE,
-                clearWith=list(
-                    "var",
-                    "method",
-                    "nbins",
-                    "breaks",
-                    "customlabels")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addtodata",
@@ -376,7 +364,6 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$breakpointsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$rcode} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$addtodata} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'

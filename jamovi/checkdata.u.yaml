@@ -54,3 +54,13 @@ children:
                 enable: (clinicalValidation)
               - type: CheckBox
                 name: mcarTest
+      - type: Label
+        label: Educational Panels
+        margin: large
+        children:
+          - type: CheckBox
+            name: showSummary
+          - type: CheckBox
+            name: showAbout
+          - type: CheckBox
+            name: showCaveats

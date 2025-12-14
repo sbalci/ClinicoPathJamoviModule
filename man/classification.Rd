@@ -32,13 +32,18 @@ classification(
   printRandForest = FALSE,
   predictedFreqRF = FALSE,
   balancingMethod = "none",
-  clinicalCutoff = 0.5,
   validateMethod = "holdout",
   bootstrapSamples = 1000,
   reportClinicalMetrics = FALSE,
   reportConfidenceIntervals = FALSE,
   reportMCC = FALSE,
-  positiveClass = ""
+  positiveClass = "",
+  seed = 42,
+  thresholdMethod = "youden",
+  thresholdValue = 0.5,
+  showSummary = FALSE,
+  showAbout = FALSE,
+  showGlossary = FALSE
 )
 }
 \arguments{
@@ -98,8 +103,6 @@ sigmoid kernels).}
 \item{balancingMethod}{Method for handling class imbalance in medical
 datasets.}
 
-\item{clinicalCutoff}{Probability threshold for clinical decision making.}
-
 \item{validateMethod}{Validation method for clinical model assessment.}
 
 \item{bootstrapSamples}{Number of bootstrap samples for confidence
@@ -121,6 +124,27 @@ for clinical metrics (sensitivity, specificity, PPV, NPV, likelihood
 ratios). If left empty, the second factor level will be used as positive.
 This is critical for ensuring correct interpretation of diagnostic
 performance metrics.}
+
+\item{seed}{Set random seed for reproducibility. Using the same seed will
+produce identical results across runs, which is critical for validating
+analyses.}
+
+\item{thresholdMethod}{Method for determining classification threshold for
+binary outcomes. Youden J maximizes sensitivity + specificity. Manual
+allows custom cutoff.}
+
+\item{thresholdValue}{Custom probability threshold when using manual
+threshold method. Only used when Decision Threshold Method is set to Manual
+Cutoff.}
+
+\item{showSummary}{Display a plain-language summary of classification
+results suitable for copying to clinical reports.}
+
+\item{showAbout}{Display information about classification methodology and
+interpretation guidance.}
+
+\item{showGlossary}{Display glossary of machine learning and clinical
+metrics terms.}
 }
 \value{
 A results object containing:
@@ -136,6 +160,9 @@ A results object containing:
 \code{results$predictedFreqPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$printRandForest$randomForestModel} \tab \tab \tab \tab \tab a table \cr
 \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

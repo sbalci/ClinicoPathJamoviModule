@@ -33,6 +33,26 @@ children:
                 name: complete_cases_only
 
   - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clinical Summaries
+            children:
+              - type: CheckBox
+                name: showSummary
+                label: "Plain-Language Summary"
+              - type: CheckBox
+                name: showRecommendations
+                label: "Action Recommendations"
+              - type: CheckBox
+                name: showExplanations
+                label: "Educational Explanations"
+
+  - type: CollapseBox
     label: Visual Data Exploration (visdat)
     collapsed: true
     children:

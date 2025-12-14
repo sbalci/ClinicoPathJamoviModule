@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="ClinicoPath Tutorial Series">
+
+<title>Getting Started with ClinicoPath – ClinicoPath Tutorial Series</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-08eeb69f393412681a6547633e23c35d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">ClinicoPath Tutorial Series</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./README.md"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-tutorials" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Tutorials</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-tutorials">    
+        <li>
+    <a class="dropdown-item" href="./01-getting-started.html">
+ <span class="dropdown-text">1. Getting Started</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-table-one-clinical-trial.html">
+ <span class="dropdown-text">2. Table One (Clinical Trial)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-survival-analysis-cancer.html">
+ <span class="dropdown-text">3. Survival Analysis (Cancer)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./04-roc-diagnostic-test.html">
+ <span class="dropdown-text">4. ROC Analysis (Diagnostic Test)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./05-decision-curve-analysis.html">
+ <span class="dropdown-text">5. Decision Curve Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./06-reproducible-reports.html">
+ <span class="dropdown-text">6. Reproducible Reports</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-resources" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Resources</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-resources">    
+        <li>
+    <a class="dropdown-item" href="./VIDEO_SCRIPTS.html">
+ <span class="dropdown-text">Video Scripts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./VISUAL_DIAGRAMS.html">
+ <span class="dropdown-text">Visual Diagrams</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./TUTORIAL_SERIES_COMPLETE.html">
+ <span class="dropdown-text">Project Summary</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/sbalci/ClinicoPathJamoviModule"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.serdarbalci.com/ClinicoPath/"> <i class="bi bi-house" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./README.md">Getting Started</a></li><li class="breadcrumb-item"><a href="./01-getting-started.html">Getting Started with ClinicoPath</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting Started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-getting-started.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Getting Started with ClinicoPath</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Core Analyses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-table-one-clinical-trial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Table One for Clinical Trials</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-survival-analysis-cancer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Survival Analysis in Oncology</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Advanced Techniques</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-roc-diagnostic-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ROC Analysis for Diagnostic Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-decision-curve-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decision Curve Analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reproducibility</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-reproducible-reports.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Creating Reproducible Reports</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Production Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./VIDEO_SCRIPTS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Video Scripts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./VISUAL_DIAGRAMS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Visual Diagrams &amp; Workflow Charts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./TUTORIAL_SERIES_COMPLETE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ClinicoPath Tutorial Series - Complete Package</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#welcome-to-clinicopath" id="toc-welcome-to-clinicopath" class="nav-link active" data-scroll-target="#welcome-to-clinicopath"><span class="header-section-number">1</span> Welcome to ClinicoPath! 👋</a>
+  <ul class="collapse">
+  <li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link" data-scroll-target="#what-youll-learn"><span class="header-section-number">1.1</span> What You’ll Learn</a></li>
+  </ul></li>
+  <li><a href="#sec-installation" id="toc-sec-installation" class="nav-link" data-scroll-target="#sec-installation"><span class="header-section-number">2</span> Installation</a>
+  <ul class="collapse">
+  <li><a href="#step-1-install-jamovi" id="toc-step-1-install-jamovi" class="nav-link" data-scroll-target="#step-1-install-jamovi"><span class="header-section-number">2.1</span> Step 1: Install jamovi</a>
+  <ul class="collapse">
+  <li><a href="#download-jamovi" id="toc-download-jamovi" class="nav-link" data-scroll-target="#download-jamovi"><span class="header-section-number">2.1.1</span> Download jamovi</a></li>
+  </ul></li>
+  <li><a href="#step-2-install-clinicopath-module" id="toc-step-2-install-clinicopath-module" class="nav-link" data-scroll-target="#step-2-install-clinicopath-module"><span class="header-section-number">2.2</span> Step 2: Install ClinicoPath Module</a>
+  <ul class="collapse">
+  <li><a href="#option-a-install-from-jamovi-library-recommended" id="toc-option-a-install-from-jamovi-library-recommended" class="nav-link" data-scroll-target="#option-a-install-from-jamovi-library-recommended"><span class="header-section-number">2.2.1</span> Option A: Install from jamovi Library (Recommended)</a></li>
+  <li><a href="#option-b-install-from-.jmo-file-development-version" id="toc-option-b-install-from-.jmo-file-development-version" class="nav-link" data-scroll-target="#option-b-install-from-.jmo-file-development-version"><span class="header-section-number">2.2.2</span> Option B: Install from .jmo File (Development Version)</a></li>
+  </ul></li>
+  <li><a href="#step-3-verify-installation" id="toc-step-3-verify-installation" class="nav-link" data-scroll-target="#step-3-verify-installation"><span class="header-section-number">2.3</span> Step 3: Verify Installation</a></li>
+  </ul></li>
+  <li><a href="#sec-interface" id="toc-sec-interface" class="nav-link" data-scroll-target="#sec-interface"><span class="header-section-number">3</span> Understanding the ClinicoPath Interface</a>
+  <ul class="collapse">
+  <li><a href="#jamovi-layout" id="toc-jamovi-layout" class="nav-link" data-scroll-target="#jamovi-layout"><span class="header-section-number">3.1</span> jamovi Layout</a>
+  <ul class="collapse">
+  <li><a href="#data-panel-left-side" id="toc-data-panel-left-side" class="nav-link" data-scroll-target="#data-panel-left-side"><span class="header-section-number">3.1.1</span> 1. Data Panel (Left Side)</a></li>
+  <li><a href="#results-panel-right-side" id="toc-results-panel-right-side" class="nav-link" data-scroll-target="#results-panel-right-side"><span class="header-section-number">3.1.2</span> 2. Results Panel (Right Side)</a></li>
+  <li><a href="#analysis-menu-top-ribbon" id="toc-analysis-menu-top-ribbon" class="nav-link" data-scroll-target="#analysis-menu-top-ribbon"><span class="header-section-number">3.1.3</span> 3. Analysis Menu (Top Ribbon)</a></li>
+  </ul></li>
+  <li><a href="#clinicopath-menu-structure" id="toc-clinicopath-menu-structure" class="nav-link" data-scroll-target="#clinicopath-menu-structure"><span class="header-section-number">3.2</span> ClinicoPath Menu Structure</a></li>
+  </ul></li>
+  <li><a href="#sec-data" id="toc-sec-data" class="nav-link" data-scroll-target="#sec-data"><span class="header-section-number">4</span> Importing Your Data</a>
+  <ul class="collapse">
+  <li><a href="#supported-file-formats" id="toc-supported-file-formats" class="nav-link" data-scroll-target="#supported-file-formats"><span class="header-section-number">4.1</span> Supported File Formats</a></li>
+  <li><a href="#example-loading-a-csv-file" id="toc-example-loading-a-csv-file" class="nav-link" data-scroll-target="#example-loading-a-csv-file"><span class="header-section-number">4.2</span> Example: Loading a CSV File</a>
+  <ul class="collapse">
+  <li><a href="#preparing-your-data-in-excel" id="toc-preparing-your-data-in-excel" class="nav-link" data-scroll-target="#preparing-your-data-in-excel"><span class="header-section-number">4.2.1</span> Preparing Your Data in Excel</a></li>
+  <li><a href="#importing-into-jamovi" id="toc-importing-into-jamovi" class="nav-link" data-scroll-target="#importing-into-jamovi"><span class="header-section-number">4.2.2</span> Importing into jamovi</a></li>
+  </ul></li>
+  <li><a href="#using-clinicopath-example-data" id="toc-using-clinicopath-example-data" class="nav-link" data-scroll-target="#using-clinicopath-example-data"><span class="header-section-number">4.3</span> Using ClinicoPath Example Data</a>
+  <ul class="collapse">
+  <li><a href="#option-1-load-from-jamovi-data-library" id="toc-option-1-load-from-jamovi-data-library" class="nav-link" data-scroll-target="#option-1-load-from-jamovi-data-library"><span class="header-section-number">4.3.1</span> Option 1: Load from jamovi Data Library</a></li>
+  <li><a href="#option-2-load-in-r-advanced" id="toc-option-2-load-in-r-advanced" class="nav-link" data-scroll-target="#option-2-load-in-r-advanced"><span class="header-section-number">4.3.2</span> Option 2: Load in R (Advanced)</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-first-analysis" id="toc-sec-first-analysis" class="nav-link" data-scroll-target="#sec-first-analysis"><span class="header-section-number">5</span> Your First Analysis: Table One</a>
+  <ul class="collapse">
+  <li><a href="#clinical-scenario" id="toc-clinical-scenario" class="nav-link" data-scroll-target="#clinical-scenario"><span class="header-section-number">5.1</span> Clinical Scenario</a></li>
+  <li><a href="#step-by-step-walkthrough" id="toc-step-by-step-walkthrough" class="nav-link" data-scroll-target="#step-by-step-walkthrough"><span class="header-section-number">5.2</span> Step-by-Step Walkthrough</a>
+  <ul class="collapse">
+  <li><a href="#step-1-load-example-data" id="toc-step-1-load-example-data" class="nav-link" data-scroll-target="#step-1-load-example-data"><span class="header-section-number">5.2.1</span> Step 1: Load Example Data</a></li>
+  <li><a href="#step-2-open-table-one-analysis" id="toc-step-2-open-table-one-analysis" class="nav-link" data-scroll-target="#step-2-open-table-one-analysis"><span class="header-section-number">5.2.2</span> Step 2: Open Table One Analysis</a></li>
+  <li><a href="#step-3-select-variables" id="toc-step-3-select-variables" class="nav-link" data-scroll-target="#step-3-select-variables"><span class="header-section-number">5.2.3</span> Step 3: Select Variables</a></li>
+  <li><a href="#step-4-choose-table-style" id="toc-step-4-choose-table-style" class="nav-link" data-scroll-target="#step-4-choose-table-style"><span class="header-section-number">5.2.4</span> Step 4: Choose Table Style</a></li>
+  <li><a href="#step-5-optional-settings" id="toc-step-5-optional-settings" class="nav-link" data-scroll-target="#step-5-optional-settings"><span class="header-section-number">5.2.5</span> Step 5: Optional Settings</a></li>
+  <li><a href="#step-6-interpret-results" id="toc-step-6-interpret-results" class="nav-link" data-scroll-target="#step-6-interpret-results"><span class="header-section-number">5.2.6</span> Step 6: Interpret Results</a></li>
+  <li><a href="#step-7-export-the-table" id="toc-step-7-export-the-table" class="nav-link" data-scroll-target="#step-7-export-the-table"><span class="header-section-number">5.2.7</span> Step 7: Export the Table</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-interpretation" id="toc-sec-interpretation" class="nav-link" data-scroll-target="#sec-interpretation"><span class="header-section-number">6</span> Understanding Results Interpretation</a>
+  <ul class="collapse">
+  <li><a href="#what-table-one-tells-you" id="toc-what-table-one-tells-you" class="nav-link" data-scroll-target="#what-table-one-tells-you"><span class="header-section-number">6.1</span> What Table One Tells You</a></li>
+  <li><a href="#what-table-one-does-not-tell-you" id="toc-what-table-one-does-not-tell-you" class="nav-link" data-scroll-target="#what-table-one-does-not-tell-you"><span class="header-section-number">6.2</span> What Table One Does NOT Tell You</a></li>
+  <li><a href="#red-flags-to-watch-for" id="toc-red-flags-to-watch-for" class="nav-link" data-scroll-target="#red-flags-to-watch-for"><span class="header-section-number">6.3</span> Red Flags to Watch For</a></li>
+  </ul></li>
+  <li><a href="#sec-next" id="toc-sec-next" class="nav-link" data-scroll-target="#sec-next"><span class="header-section-number">7</span> Next Steps</a>
+  <ul class="collapse">
+  <li><a href="#what-you-learned" id="toc-what-you-learned" class="nav-link" data-scroll-target="#what-you-learned"><span class="header-section-number">7.1</span> What You Learned</a></li>
+  <li><a href="#continue-learning" id="toc-continue-learning" class="nav-link" data-scroll-target="#continue-learning"><span class="header-section-number">7.2</span> Continue Learning</a></li>
+  <li><a href="#practice-exercise" id="toc-practice-exercise" class="nav-link" data-scroll-target="#practice-exercise"><span class="header-section-number">7.3</span> Practice Exercise</a></li>
+  </ul></li>
+  <li><a href="#sec-help" id="toc-sec-help" class="nav-link" data-scroll-target="#sec-help"><span class="header-section-number">8</span> Getting Help</a>
+  <ul class="collapse">
+  <li><a href="#documentation" id="toc-documentation" class="nav-link" data-scroll-target="#documentation"><span class="header-section-number">8.1</span> Documentation</a></li>
+  <li><a href="#community-support" id="toc-community-support" class="nav-link" data-scroll-target="#community-support"><span class="header-section-number">8.2</span> Community Support</a></li>
+  <li><a href="#common-questions" id="toc-common-questions" class="nav-link" data-scroll-target="#common-questions"><span class="header-section-number">8.3</span> Common Questions</a></li>
+  </ul></li>
+  <li><a href="#sec-citation" id="toc-sec-citation" class="nav-link" data-scroll-target="#sec-citation"><span class="header-section-number">9</span> Citation</a></li>
+  <li><a href="#sec-troubleshooting" id="toc-sec-troubleshooting" class="nav-link" data-scroll-target="#sec-troubleshooting"><span class="header-section-number">10</span> Appendix: Troubleshooting</a>
+  <ul class="collapse">
+  <li><a href="#installation-issues" id="toc-installation-issues" class="nav-link" data-scroll-target="#installation-issues"><span class="header-section-number">10.1</span> Installation Issues</a></li>
+  <li><a href="#analysis-issues" id="toc-analysis-issues" class="nav-link" data-scroll-target="#analysis-issues"><span class="header-section-number">10.2</span> Analysis Issues</a></li>
+  <li><a href="#performance-issues" id="toc-performance-issues" class="nav-link" data-scroll-target="#performance-issues"><span class="header-section-number">10.3</span> Performance Issues</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./README.md">Getting Started</a></li><li class="breadcrumb-item"><a href="./01-getting-started.html">Getting Started with ClinicoPath</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Getting Started with ClinicoPath</h1>
+<p class="subtitle lead">Installation, Navigation, and Your First Analysis</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>ClinicoPath Tutorial Series </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">Invalid Date</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="welcome-to-clinicopath" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Welcome to ClinicoPath! 👋</h1>
+<p>ClinicoPath is a comprehensive jamovi module designed specifically for <strong>clinicopathological research and medical data analysis</strong>. This tutorial will help you get started with ClinicoPath, whether you’re a clinician, pathologist, or researcher with no programming experience.</p>
+<section id="what-youll-learn" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="what-youll-learn"><span class="header-section-number">1.1</span> What You’ll Learn</h2>
+<p>By the end of this tutorial, you will be able to:</p>
+<ul>
+<li>✅ Install jamovi and ClinicoPath</li>
+<li>✅ Navigate the ClinicoPath menu system</li>
+<li>✅ Import your clinical data</li>
+<li>✅ Run your first analysis (Table One)</li>
+<li>✅ Interpret the results</li>
+<li>✅ Export publication-ready tables</li>
+</ul>
+<p><strong>Time Required:</strong> 30 minutes <strong>Prerequisites:</strong> None! This tutorial assumes no prior experience.</p>
+<hr>
+</section>
+</section>
+<section id="sec-installation" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Installation</h1>
+<section id="step-1-install-jamovi" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="step-1-install-jamovi"><span class="header-section-number">2.1</span> Step 1: Install jamovi</h2>
+<p>ClinicoPath runs inside <strong>jamovi</strong>, a free and user-friendly statistical software.</p>
+<section id="download-jamovi" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="download-jamovi"><span class="header-section-number">2.1.1</span> Download jamovi</h3>
+<ol type="1">
+<li>Go to <a href="https://www.jamovi.org/download.html">https://www.jamovi.org/download.html</a></li>
+<li>Download the version for your operating system:
+<ul>
+<li><strong>Windows</strong>: <code>jamovi-2.5.x-win64.exe</code></li>
+<li><strong>macOS</strong>: <code>jamovi-2.5.x-macos.dmg</code></li>
+<li><strong>Linux</strong>: <code>jamovi-2.5.x-linux.tar.gz</code></li>
+</ul></li>
+<li>Run the installer and follow the prompts</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>System Requirements
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>RAM:</strong> 4 GB minimum (8 GB recommended)</li>
+<li><strong>Disk Space:</strong> 500 MB for jamovi + 200 MB for ClinicoPath</li>
+<li><strong>Operating System:</strong> Windows 10+, macOS 10.14+, or Ubuntu 18.04+</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="step-2-install-clinicopath-module" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="step-2-install-clinicopath-module"><span class="header-section-number">2.2</span> Step 2: Install ClinicoPath Module</h2>
+<p>There are <strong>two ways</strong> to install ClinicoPath:</p>
+<section id="option-a-install-from-jamovi-library-recommended" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="option-a-install-from-jamovi-library-recommended"><span class="header-section-number">2.2.1</span> Option A: Install from jamovi Library (Recommended)</h3>
+<ol type="1">
+<li>Open jamovi</li>
+<li>Click the <strong>Modules</strong> button (➕) in the top-right corner</li>
+<li>Click <strong>jamovi library</strong></li>
+<li>Search for <strong>“ClinicoPath”</strong> submodules:
+<ul>
+<li><code>ClinicoPathDescriptives</code></li>
+<li><code>jsurvival</code></li>
+<li><code>meddecide</code></li>
+<li><code>jjstatsplot</code></li>
+</ul></li>
+<li>Click <strong>Install</strong> for each module</li>
+<li>Wait for installation to complete (may take 5-10 minutes)</li>
+</ol>
+</section>
+<section id="option-b-install-from-.jmo-file-development-version" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="option-b-install-from-.jmo-file-development-version"><span class="header-section-number">2.2.2</span> Option B: Install from .jmo File (Development Version)</h3>
+<ol type="1">
+<li>Download the latest <code>.jmo</code> file from:
+<ul>
+<li><a href="https://github.com/sbalci/ClinicoPathJamoviModule/releases/">GitHub Releases</a></li>
+</ul></li>
+<li>In jamovi, click <strong>Modules</strong> (➕)</li>
+<li>Click <strong>Sideload</strong> (folder icon)</li>
+<li>Select the downloaded <code>.jmo</code> file</li>
+<li>Click <strong>Install</strong></li>
+</ol>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>First-Time Installation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The first installation may take <strong>10-15 minutes</strong> because jamovi needs to install 100+ R packages. Be patient and don’t close jamovi during installation.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="step-3-verify-installation" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="step-3-verify-installation"><span class="header-section-number">2.3</span> Step 3: Verify Installation</h2>
+<ol type="1">
+<li>After installation, jamovi will reload</li>
+<li>Check the <strong>Analysis</strong> menu (ribbon at the top)</li>
+<li>You should see new menu groups:
+<ul>
+<li><strong>ExplorationT1</strong> (Descriptive statistics, Table One, Cross Tables)</li>
+<li><strong>SurvivalT1</strong> (Kaplan-Meier, Cox regression, Competing risks)</li>
+<li><strong>meddecideD</strong> (ROC curves, Decision curves, Diagnostic tests)</li>
+<li><strong>Visualization</strong> (Statistical plots)</li>
+</ul></li>
+</ol>
+<p>If you see these menus, <strong>congratulations!</strong> 🎉 ClinicoPath is installed.</p>
+<hr>
+</section>
+</section>
+<section id="sec-interface" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Understanding the ClinicoPath Interface</h1>
+<section id="jamovi-layout" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="jamovi-layout"><span class="header-section-number">3.1</span> jamovi Layout</h2>
+<p>jamovi has a simple 3-panel layout:</p>
+<pre><code>┌─────────────────┬──────────────────────────────┐
+│                 │                              │
+│   DATA PANEL    │      RESULTS PANEL           │
+│   (Spreadsheet) │   (Tables, Plots, Stats)     │
+│                 │                              │
+├─────────────────┴──────────────────────────────┤
+│         ANALYSIS MENU (Ribbon at Top)          │
+└────────────────────────────────────────────────┘</code></pre>
+<section id="data-panel-left-side" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="data-panel-left-side"><span class="header-section-number">3.1.1</span> 1. Data Panel (Left Side)</h3>
+<ul>
+<li>Your dataset appears here as a spreadsheet</li>
+<li>Each <strong>row</strong> = one patient/case</li>
+<li>Each <strong>column</strong> = one variable (age, diagnosis, treatment, etc.)</li>
+<li>You can edit data directly, but <strong>we don’t recommend it</strong> (use Excel/CSV instead)</li>
+</ul>
+</section>
+<section id="results-panel-right-side" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="results-panel-right-side"><span class="header-section-number">3.1.2</span> 2. Results Panel (Right Side)</h3>
+<ul>
+<li>All statistical outputs appear here</li>
+<li>Tables, plots, and text summaries</li>
+<li>Automatically updates when you change options</li>
+<li><strong>Right-click</strong> on any table/plot to copy or export</li>
+</ul>
+</section>
+<section id="analysis-menu-top-ribbon" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="analysis-menu-top-ribbon"><span class="header-section-number">3.1.3</span> 3. Analysis Menu (Top Ribbon)</h3>
+<ul>
+<li>Organized by analysis type</li>
+<li>Click to open analysis options</li>
+<li>Options appear in a sidebar on the right</li>
+</ul>
+</section>
+</section>
+<section id="clinicopath-menu-structure" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="clinicopath-menu-structure"><span class="header-section-number">3.2</span> ClinicoPath Menu Structure</h2>
+<p>ClinicoPath organizes <strong>363 analyses</strong> into logical groups:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 25%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Menu Group</th>
+<th>Purpose</th>
+<th>Key Analyses</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>ExplorationT1</strong></td>
+<td>Descriptive statistics &amp; data quality</td>
+<td>Table One, Cross Tables, Data checking</td>
+</tr>
+<tr class="even">
+<td><strong>SurvivalT1</strong></td>
+<td>Survival analysis</td>
+<td>Kaplan-Meier, Cox regression, Competing risks</td>
+</tr>
+<tr class="odd">
+<td><strong>meddecideD</strong></td>
+<td>Medical decision analysis</td>
+<td>ROC curves, Decision curves, Diagnostic tests</td>
+</tr>
+<tr class="even">
+<td><strong>Visualization</strong></td>
+<td>Statistical plots</td>
+<td>Waterfall plots, Swimmer plots, Forest plots</td>
+</tr>
+<tr class="odd">
+<td><strong>AIandML</strong></td>
+<td>Machine learning</td>
+<td>Classification, Clustering, Feature selection</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Navigation Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use the <strong>search function</strong> in the Analysis menu to find specific analyses quickly. For example, search “survival” to see all survival-related methods.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="sec-data" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Importing Your Data</h1>
+<section id="supported-file-formats" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="supported-file-formats"><span class="header-section-number">4.1</span> Supported File Formats</h2>
+<p>jamovi supports multiple data formats:</p>
+<ul>
+<li>✅ <strong>CSV</strong> (<code>.csv</code>) - Most common, recommended</li>
+<li>✅ <strong>Excel</strong> (<code>.xlsx</code>, <code>.xls</code>)</li>
+<li>✅ <strong>SPSS</strong> (<code>.sav</code>)</li>
+<li>✅ <strong>Stata</strong> (<code>.dta</code>)</li>
+<li>✅ <strong>SAS</strong> (<code>.sas7bdat</code>)</li>
+<li>✅ <strong>jamovi</strong> (<code>.omv</code>)</li>
+<li>✅ <strong>R</strong> (<code>.rds</code>, <code>.RData</code>)</li>
+</ul>
+</section>
+<section id="example-loading-a-csv-file" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="example-loading-a-csv-file"><span class="header-section-number">4.2</span> Example: Loading a CSV File</h2>
+<section id="preparing-your-data-in-excel" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="preparing-your-data-in-excel"><span class="header-section-number">4.2.1</span> Preparing Your Data in Excel</h3>
+<p>Before importing, structure your data correctly:</p>
+<p><strong>Good Format:</strong></p>
+<pre><code>| PatientID | Age | Sex    | Diagnosis | TumorSize | Survival_months | Status |
+|-----------|-----|--------|-----------|-----------|-----------------|--------|
+| PT001     | 45  | Female | Breast    | 2.3       | 24              | Alive  |
+| PT002     | 62  | Male   | Lung      | 4.1       | 12              | Dead   |
+| PT003     | 58  | Female | Breast    | 1.8       | 36              | Alive  |</code></pre>
+<p><strong>Rules:</strong> 1. <strong>First row</strong> = Variable names (no spaces, use underscores) 2. <strong>One row per patient</strong> (wide format, not long format) 3. <strong>Missing values</strong> = leave blank (don’t use “NA”, “N/A”, or “-”) 4. <strong>Consistent coding</strong> (e.g., don’t mix “Male”/“M” or “Dead”/“Deceased”) 5. <strong>No merged cells</strong> or formatting</p>
+</section>
+<section id="importing-into-jamovi" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="importing-into-jamovi"><span class="header-section-number">4.2.2</span> Importing into jamovi</h3>
+<ol type="1">
+<li>Click <strong>File</strong> → <strong>Open</strong></li>
+<li>Navigate to your CSV file</li>
+<li>Click <strong>Open</strong></li>
+<li>jamovi will automatically detect variable types:
+<ul>
+<li><strong>Continuous</strong>: Numbers (age, tumor size, lab values)</li>
+<li><strong>Nominal</strong>: Categories (sex, diagnosis, treatment)</li>
+<li><strong>Ordinal</strong>: Ordered categories (stage I/II/III/IV, grade)</li>
+<li><strong>ID</strong>: Patient identifiers</li>
+</ul></li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Check Variable Types
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After importing, verify that jamovi correctly detected variable types by clicking the <strong>setup icon</strong> (⚙️) at the top of each column. Incorrect types lead to wrong analyses!</p>
+</div>
+</div>
+</section>
+</section>
+<section id="using-clinicopath-example-data" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="using-clinicopath-example-data"><span class="header-section-number">4.3</span> Using ClinicoPath Example Data</h2>
+<p>ClinicoPath includes <strong>462 example datasets</strong> for learning. To access them:</p>
+<section id="option-1-load-from-jamovi-data-library" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="option-1-load-from-jamovi-data-library"><span class="header-section-number">4.3.1</span> Option 1: Load from jamovi Data Library</h3>
+<ol type="1">
+<li>Click <strong>File</strong> → <strong>Open</strong></li>
+<li>Click <strong>Data Library</strong> (folder icon)</li>
+<li>Navigate to <strong>ClinicoPath</strong> section</li>
+<li>Select a dataset (e.g., <code>clinical_trial_data</code>)</li>
+</ol>
+</section>
+<section id="option-2-load-in-r-advanced" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="option-2-load-in-r-advanced"><span class="header-section-number">4.3.2</span> Option 2: Load in R (Advanced)</h3>
+<p>If using ClinicoPath programmatically:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load ClinicoPath</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ClinicoPath)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load example data</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(clinical_trial_data)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># View structure</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(clinical_trial_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Available Example Datasets:</strong></p>
+<ul>
+<li><code>clinical_trial_data</code> - Randomized clinical trial (n=200)</li>
+<li><code>breast_cancer_data</code> - Breast cancer cases (n=569)</li>
+<li><code>basic_survival_data</code> - Survival analysis example (n=200)</li>
+<li><code>lung_agreement_data</code> - Pathologist agreement study (n=100)</li>
+<li><code>her2_breast_cancer_data</code> - HER2 testing data (n=150)</li>
+</ul>
+<hr>
+</section>
+</section>
+</section>
+<section id="sec-first-analysis" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Your First Analysis: Table One</h1>
+<p><strong>Table One</strong> is the most common table in clinical research manuscripts. It summarizes baseline characteristics of study participants.</p>
+<section id="clinical-scenario" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="clinical-scenario"><span class="header-section-number">5.1</span> Clinical Scenario</h2>
+<p>You conducted a clinical trial comparing two breast cancer treatments:</p>
+<ul>
+<li><strong>Group A:</strong> Standard chemotherapy (n=100)</li>
+<li><strong>Group B:</strong> New targeted therapy (n=100)</li>
+</ul>
+<p>You need to create a baseline characteristics table showing: - Patient demographics (age, sex) - Tumor characteristics (stage, grade, size) - Comparison between treatment groups</p>
+</section>
+<section id="step-by-step-walkthrough" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="step-by-step-walkthrough"><span class="header-section-number">5.2</span> Step-by-Step Walkthrough</h2>
+<section id="step-1-load-example-data" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="step-1-load-example-data"><span class="header-section-number">5.2.1</span> Step 1: Load Example Data</h3>
+<ol type="1">
+<li>Click <strong>File</strong> → <strong>Open</strong></li>
+<li>Select <strong>Data Library</strong></li>
+<li>Choose <code>clinical_trial_data</code></li>
+<li>Click <strong>Open</strong></li>
+</ol>
+<p>You should see a dataset with these variables: - <code>PatientID</code> - Patient identifier - <code>Age</code> - Age in years - <code>Sex</code> - Male/Female - <code>TreatmentGroup</code> - Group A / Group B - <code>TumorStage</code> - I / II / III / IV - <code>TumorGrade</code> - 1 / 2 / 3 - <code>TumorSize</code> - Size in cm - <code>ER_Status</code> - Positive / Negative</p>
+</section>
+<section id="step-2-open-table-one-analysis" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="step-2-open-table-one-analysis"><span class="header-section-number">5.2.2</span> Step 2: Open Table One Analysis</h3>
+<ol type="1">
+<li>Click <strong>Analyses</strong> menu (top ribbon)</li>
+<li>Click <strong>ExplorationT1</strong></li>
+<li>Click <strong>Table One</strong></li>
+</ol>
+<p>The analysis options appear in the right sidebar.</p>
+</section>
+<section id="step-3-select-variables" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="step-3-select-variables"><span class="header-section-number">5.2.3</span> Step 3: Select Variables</h3>
+<p>In the <strong>Variables</strong> box, drag and drop: - ✅ Age - ✅ Sex - ✅ TumorStage - ✅ TumorGrade - ✅ TumorSize - ✅ ER_Status</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Quick Selection
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hold <strong>Ctrl</strong> (Windows/Linux) or <strong>Cmd</strong> (Mac) to select multiple variables at once, then drag them all together.</p>
+</div>
+</div>
+</section>
+<section id="step-4-choose-table-style" class="level3" data-number="5.2.4">
+<h3 data-number="5.2.4" class="anchored" data-anchor-id="step-4-choose-table-style"><span class="header-section-number">5.2.4</span> Step 4: Choose Table Style</h3>
+<p>ClinicoPath offers <strong>4 table styles</strong>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Style</th>
+<th>Package</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>tableone</strong></td>
+<td>Standard medical format</td>
+<td>Most clinical papers</td>
+</tr>
+<tr class="even">
+<td><strong>gtsummary</strong></td>
+<td>Modern, publication-ready</td>
+<td>High-impact journals</td>
+</tr>
+<tr class="odd">
+<td><strong>arsenal</strong></td>
+<td>Comprehensive details</td>
+<td>Detailed reports</td>
+</tr>
+<tr class="even">
+<td><strong>janitor</strong></td>
+<td>Simple frequencies</td>
+<td>Data exploration</td>
+</tr>
+</tbody>
+</table>
+<p><strong>For this tutorial</strong>, select: <strong><code>gtsummary</code></strong> (recommended for publication)</p>
+</section>
+<section id="step-5-optional-settings" class="level3" data-number="5.2.5">
+<h3 data-number="5.2.5" class="anchored" data-anchor-id="step-5-optional-settings"><span class="header-section-number">5.2.5</span> Step 5: Optional Settings</h3>
+<p>Explore these options:</p>
+<ul>
+<li><p><strong>Exclude Missing Values (NA)</strong>:</p>
+<ul>
+<li><label><input type="checkbox">Unchecked = Keep all cases, report missing %</label></li>
+<li>☑ Checked = Exclude cases with any missing value</li>
+<li><strong>Recommendation:</strong> Leave unchecked for transparency</li>
+</ul></li>
+<li><p><strong>Show Summary</strong>: ☑ Check to see sample size, missing data, etc.</p></li>
+<li><p><strong>Show About</strong>: ☑ Check to see explanation of Table One</p></li>
+<li><p><strong>Show Report Sentence</strong>: ☑ Check to get a copy-ready methods sentence</p></li>
+</ul>
+</section>
+<section id="step-6-interpret-results" class="level3" data-number="5.2.6">
+<h3 data-number="5.2.6" class="anchored" data-anchor-id="step-6-interpret-results"><span class="header-section-number">5.2.6</span> Step 6: Interpret Results</h3>
+<p>The results panel shows:</p>
+<section id="analysis-summary-blue-box" class="level4" data-number="5.2.6.1">
+<h4 data-number="5.2.6.1" class="anchored" data-anchor-id="analysis-summary-blue-box"><span class="header-section-number">5.2.6.1</span> Analysis Summary (Blue Box)</h4>
+<pre><code>Original dataset: 200 cases with 6 selected variables
+Complete cases (original): 195 (97.5%)
+Missing data (original): 2.5% of cases have at least one missing value
+Analysis sample: 200 cases (no exclusions applied)
+Variable types: Numeric: 2; Categorical: 4</code></pre>
+<p><strong>Interpretation:</strong> - Total N = 200 patients - 97.5% have complete data - Only 2.5% missing (very good!) - No cases excluded</p>
+</section>
+<section id="table-one-output" class="level4" data-number="5.2.6.2">
+<h4 data-number="5.2.6.2" class="anchored" data-anchor-id="table-one-output"><span class="header-section-number">5.2.6.2</span> Table One Output</h4>
+<pre><code>Characteristic         N = 200
+Age, years            55 (48-62)
+Sex
+  Female              120 (60%)
+  Male                 80 (40%)
+Tumor Stage
+  I                    45 (23%)
+  II                   78 (39%)
+  III                  52 (26%)
+  IV                   25 (13%)
+Tumor Grade
+  1                    38 (19%)
+  2                    97 (49%)
+  3                    65 (33%)
+Tumor Size, cm        3.2 (2.1-4.8)
+ER Status
+  Positive            145 (73%)
+  Negative             55 (28%)</code></pre>
+<p><strong>Interpretation:</strong> - <strong>Age</strong>: Median 55 years (IQR: 48-62) - typical for breast cancer - <strong>Sex</strong>: 60% female (expected for breast cancer) - <strong>Stage</strong>: Most patients are Stage II (39%) - <strong>Grade</strong>: Most tumors are Grade 2 (49%) - <strong>Size</strong>: Median 3.2 cm - <strong>ER Status</strong>: 73% ER-positive</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Understanding the Numbers
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Continuous variables</strong> (age, tumor size): Median (IQR) or Mean (SD)</li>
+<li><strong>Categorical variables</strong> (sex, stage): N (percentage)</li>
+<li><strong>Missing values</strong>: Automatically reported in footnotes</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="data-quality-check-yellow-box" class="level4" data-number="5.2.6.3">
+<h4 data-number="5.2.6.3" class="anchored" data-anchor-id="data-quality-check-yellow-box"><span class="header-section-number">5.2.6.3</span> Data Quality Check (Yellow Box)</h4>
+<p>If ClinicoPath detects issues, you’ll see warnings:</p>
+<pre><code>⚠️ Moderate missing data in original dataset (15.2%).
+Consider reporting missing data patterns or using multiple imputation.</code></pre>
+<p><strong>What to Do:</strong> - &lt; 5% missing: No action needed - 5-20% missing: Report missing data patterns - &gt; 20% missing: Consider multiple imputation or sensitivity analysis</p>
+</section>
+<section id="copy-ready-report-sentence-blue-box" class="level4" data-number="5.2.6.4">
+<h4 data-number="5.2.6.4" class="anchored" data-anchor-id="copy-ready-report-sentence-blue-box"><span class="header-section-number">5.2.6.4</span> Copy-Ready Report Sentence (Blue Box)</h4>
+<pre><code>Table One summarizes baseline characteristics of 200 patients.
+Variables included Age, Sex, TumorStage, TumorGrade, TumorSize, ER_Status.
+Minimal missing data were detected (2.5% of cases with at least one missing value).</code></pre>
+<p><strong>Use this in your Methods section!</strong> Just copy and paste, then edit as needed.</p>
+</section>
+</section>
+<section id="step-7-export-the-table" class="level3" data-number="5.2.7">
+<h3 data-number="5.2.7" class="anchored" data-anchor-id="step-7-export-the-table"><span class="header-section-number">5.2.7</span> Step 7: Export the Table</h3>
+<p>To use the table in your manuscript:</p>
+<ol type="1">
+<li><strong>Right-click</strong> on the table</li>
+<li>Choose <strong>Copy</strong> → <strong>HTML</strong> (for Word)</li>
+<li>Paste into Microsoft Word</li>
+<li>The table formatting is preserved!</li>
+</ol>
+<p><strong>Alternative:</strong> Export as <strong>Image</strong> (PNG) for presentations.</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="sec-interpretation" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Understanding Results Interpretation</h1>
+<section id="what-table-one-tells-you" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="what-table-one-tells-you"><span class="header-section-number">6.1</span> What Table One Tells You</h2>
+<p>✅ <strong>Sample Characteristics</strong>: Who are your patients? ✅ <strong>Balance Check</strong>: Are groups similar at baseline? (important for RCTs) ✅ <strong>Missing Data</strong>: How much data is incomplete? ✅ <strong>Data Quality</strong>: Are there unusual patterns?</p>
+</section>
+<section id="what-table-one-does-not-tell-you" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="what-table-one-does-not-tell-you"><span class="header-section-number">6.2</span> What Table One Does NOT Tell You</h2>
+<p>❌ <strong>Statistical Significance</strong>: Table One typically doesn’t test differences ❌ <strong>Causality</strong>: Associations ≠ causation ❌ <strong>Outcomes</strong>: This is baseline data only</p>
+</section>
+<section id="red-flags-to-watch-for" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="red-flags-to-watch-for"><span class="header-section-number">6.3</span> Red Flags to Watch For</h2>
+<p>🚩 <strong>Very small sample size</strong> (N &lt; 30): Results may be unreliable 🚩 <strong>High missing data</strong> (&gt; 20%): May bias results 🚩 <strong>Imbalanced groups</strong>: In RCTs, groups should be similar at baseline 🚩 <strong>Unusual distributions</strong>: Check for data entry errors</p>
+<hr>
+</section>
+</section>
+<section id="sec-next" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Next Steps</h1>
+<p>Congratulations! You’ve completed your first ClinicoPath analysis. 🎉</p>
+<section id="what-you-learned" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="what-you-learned"><span class="header-section-number">7.1</span> What You Learned</h2>
+<p>✅ Install jamovi and ClinicoPath ✅ Navigate the interface ✅ Import clinical data ✅ Run Table One analysis ✅ Interpret results ✅ Export publication-ready tables</p>
+</section>
+<section id="continue-learning" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="continue-learning"><span class="header-section-number">7.2</span> Continue Learning</h2>
+<p><strong>Next Tutorials:</strong></p>
+<ol type="1">
+<li>✅ <strong>Getting Started</strong> ← You are here</li>
+<li>📖 <a href="./02-table-one-clinical-trial.html"><strong>Table One for Clinical Trials</strong></a> - Stratified analysis, statistical tests</li>
+<li>📖 <a href="./03-survival-analysis-cancer.html"><strong>Survival Analysis in Oncology</strong></a> - Kaplan-Meier curves, Cox regression</li>
+<li>📖 <a href="./04-roc-diagnostic-test.html"><strong>ROC Analysis for Diagnostic Tests</strong></a> - Sensitivity, specificity, optimal cutpoints</li>
+<li>📖 <a href="./05-decision-curve-analysis.html"><strong>Decision Curve Analysis</strong></a> - Clinical utility, net benefit</li>
+<li>📖 <a href="./06-reproducible-reports.html"><strong>Creating Reproducible Reports</strong></a> - Automating analyses with Quarto</li>
+</ol>
+</section>
+<section id="practice-exercise" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="practice-exercise"><span class="header-section-number">7.3</span> Practice Exercise</h2>
+<p><strong>Challenge:</strong> Create a Table One for your own data!</p>
+<ol type="1">
+<li>Prepare your dataset in Excel (follow the format guidelines)</li>
+<li>Import into jamovi</li>
+<li>Run Table One with:
+<ul>
+<li>At least 3 continuous variables</li>
+<li>At least 3 categorical variables</li>
+<li>Try all 4 table styles to see differences</li>
+</ul></li>
+<li>Export the best-looking table</li>
+</ol>
+<hr>
+</section>
+</section>
+<section id="sec-help" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Getting Help</h1>
+<section id="documentation" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="documentation"><span class="header-section-number">8.1</span> Documentation</h2>
+<ul>
+<li><strong>ClinicoPath Website</strong>: <a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/">www.serdarbalci.com/ClinicoPathJamoviModule</a></li>
+<li><strong>jamovi User Guide</strong>: <a href="https://www.jamovi.org/user-manual.html">https://www.jamovi.org/user-manual.html</a></li>
+<li><strong>Tutorial Series</strong>: All 6 tutorials in <code>tutorials/</code> directory</li>
+</ul>
+</section>
+<section id="community-support" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="community-support"><span class="header-section-number">8.2</span> Community Support</h2>
+<ul>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/">Report bugs</a></li>
+<li><strong>jamovi Forum</strong>: <a href="https://forum.jamovi.org/">Ask questions</a></li>
+<li><strong>Email</strong>: serdarbalci@serdarbalci.com</li>
+</ul>
+</section>
+<section id="common-questions" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="common-questions"><span class="header-section-number">8.3</span> Common Questions</h2>
+<p><strong>Q: Can I use ClinicoPath for free?</strong> A: Yes! Both jamovi and ClinicoPath are completely free and open-source (GPL-2 license).</p>
+<p><strong>Q: Do I need programming skills?</strong> A: No! ClinicoPath is designed for clinicians with no programming experience. Everything is point-and-click.</p>
+<p><strong>Q: Can I use ClinicoPath for my publication?</strong> A: Absolutely! Please cite ClinicoPath and jamovi in your manuscript.</p>
+<p><strong>Q: What if my analysis isn’t in ClinicoPath?</strong> A: ClinicoPath has 363 analyses covering most clinical research needs. If something is missing, request it on GitHub!</p>
+<p><strong>Q: Can I see the R code behind the analysis?</strong> A: Yes! Click the <strong>Syntax mode</strong> button (&lt;/&gt;) in jamovi to see the R code. You can copy and modify it.</p>
+<hr>
+</section>
+</section>
+<section id="sec-citation" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Citation</h1>
+<p>If you use ClinicoPath in your research, please cite:</p>
+<p><strong>ClinicoPath Module:</strong></p>
+<pre><code>Balci, S. (2025). ClinicoPath: Comprehensive Analysis for
+Clinicopathological Research. R package version 0.0.32.43.
+https://www.serdarbalci.com/ClinicoPathJamoviModule/</code></pre>
+<p><strong>jamovi Software:</strong></p>
+<pre><code>The jamovi project (2025). jamovi (Version 2.5) [Computer Software].
+Retrieved from https://www.jamovi.org</code></pre>
+<p><strong>For LaTeX/BibTeX:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bibtex code-with-copy"><code class="sourceCode bibtex"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">clinicopath2025</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span> = {ClinicoPath: Comprehensive Analysis for Clinicopathological Research},</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span> = {Serdar Balci},</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span> = {2025},</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">note</span> = {R package version 0.0.32.43},</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span> = {https://www.serdarbalci.com/ClinicoPathJamoviModule/},</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="sec-troubleshooting" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Appendix: Troubleshooting</h1>
+<section id="installation-issues" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="installation-issues"><span class="header-section-number">10.1</span> Installation Issues</h2>
+<p><strong>Problem:</strong> “Module failed to install” <strong>Solution:</strong> - Check internet connection - Try installing submodules individually (ClinicoPathDescriptives first) - Restart jamovi and try again - Check jamovi log: <strong>Help</strong> → <strong>Log</strong></p>
+<p><strong>Problem:</strong> “Package ‘X’ is not available” <strong>Solution:</strong> - Wait 5-10 minutes for dependencies to install - jamovi installs R packages in the background - Don’t close jamovi during first installation</p>
+</section>
+<section id="analysis-issues" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="analysis-issues"><span class="header-section-number">10.2</span> Analysis Issues</h2>
+<p><strong>Problem:</strong> “Error: Insufficient data for Table One” <strong>Solution:</strong> - Check that you selected at least one variable - Ensure dataset has at least 2 complete cases - Try unchecking “Exclude Missing Values”</p>
+<p><strong>Problem:</strong> “Variable ‘X’ not found” <strong>Solution:</strong> - Check variable name spelling (case-sensitive) - Refresh the analysis: close and reopen - Reload the dataset</p>
+</section>
+<section id="performance-issues" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="performance-issues"><span class="header-section-number">10.3</span> Performance Issues</h2>
+<p><strong>Problem:</strong> “jamovi is slow with large datasets” <strong>Solution:</strong> - ClinicoPath handles up to 100,000 rows efficiently - For N &gt; 100,000, consider subsetting - Close unused analyses to free memory - Increase RAM if possible (8 GB recommended)</p>
+<hr>
+<p><strong>Tutorial Author:</strong> Serdar Balci, MD, PhD <strong>Last Updated:</strong> December 13, 2025 <strong>License:</strong> CC-BY-4.0 <strong>Tutorial Version:</strong> 1.0</p>
+<p><strong>Ready for more?</strong> Continue with <a href="./02-table-one-clinical-trial.html">Tutorial 2: Table One for Clinical Trials →</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Copyright 2025, ClinicoPath Development Team</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

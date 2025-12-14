@@ -1,7 +1,7 @@
 ---
 name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
-menuGroup: ExplorationT1
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.31'
 jas: '1.2'
@@ -159,7 +159,7 @@ options:
     - name: showClinicalSummary
       title: Show Clinical Summary
       type: Bool
-      default: true
+      default: false
       description: >
                   Display natural-language summary of results for clinical interpretation
 
@@ -180,7 +180,7 @@ options:
     - name: showAssumptionsCheck
       title: Show Assumptions Check
       type: Bool
-      default: true
+      default: false
       description: >
                   Display validation of chi-square test assumptions
 

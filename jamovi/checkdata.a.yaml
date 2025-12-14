@@ -1,7 +1,7 @@
 ---
 name:  checkdata
 title: Single Variable Quality Check
-menuGroup: ExplorationT1
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'
@@ -25,7 +25,7 @@ options:
     - name: showDistribution
       title: Show Distribution Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display descriptive statistics and distribution characteristics.
@@ -33,7 +33,7 @@ options:
     - name: showDuplicates
       title: Show Duplicate Analysis
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Identify and count duplicate values in the dataset.
@@ -111,4 +111,28 @@ options:
       description:
           R: >
             Suppress coefficient of variation when absolute mean is below this threshold (avoids instability).
+
+    - name: showSummary
+      title: Show Natural-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a plain-language summary of data quality suitable for copying to reports.
+
+    - name: showAbout
+      title: Show About This Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display information about data quality assessment methodology.
+
+    - name: showCaveats
+      title: Show Caveats & Assumptions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display important limitations and assumptions of the quality assessment.
 ...

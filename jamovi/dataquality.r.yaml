@@ -12,6 +12,21 @@ items:
       title: Data Quality Summary
       type: Html
 
+    - name: summary
+      title: "Plain-Language Summary"
+      type: Html
+      visible: (showSummary)
+
+    - name: recommendations
+      title: "Recommended Actions"
+      type: Html
+      visible: (showRecommendations)
+
+    - name: explanations
+      title: "Understanding Quality Metrics"
+      type: Html
+      visible: (showExplanations)
+
     - name: plotDataOverview
       title: Data Overview
       type: Image
@@ -63,4 +78,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - visdat
+    - BaylorEdPsych
+    - dplyr
+    - ggplot2
 ...

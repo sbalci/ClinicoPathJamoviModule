@@ -33,13 +33,18 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             printRandForest = FALSE,
             predictedFreqRF = FALSE,
             balancingMethod = "none",
-            clinicalCutoff = 0.5,
             validateMethod = "holdout",
             bootstrapSamples = 1000,
             reportClinicalMetrics = FALSE,
             reportConfidenceIntervals = FALSE,
             reportMCC = FALSE,
-            positiveClass = "", ...) {
+            positiveClass = "",
+            seed = 42,
+            thresholdMethod = "youden",
+            thresholdValue = 0.5,
+            showSummary = FALSE,
+            showAbout = FALSE,
+            showGlossary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -196,12 +201,6 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "downsample",
                     "smote"),
                 default="none")
-            private$..clinicalCutoff <- jmvcore::OptionNumber$new(
-                "clinicalCutoff",
-                clinicalCutoff,
-                min=0,
-                max=1,
-                default=0.5)
             private$..validateMethod <- jmvcore::OptionList$new(
                 "validateMethod",
                 validateMethod,
@@ -232,6 +231,37 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "positiveClass",
                 positiveClass,
                 default="")
+            private$..seed <- jmvcore::OptionNumber$new(
+                "seed",
+                seed,
+                default=42,
+                min=1,
+                max=999999)
+            private$..thresholdMethod <- jmvcore::OptionList$new(
+                "thresholdMethod",
+                thresholdMethod,
+                options=list(
+                    "youden",
+                    "manual"),
+                default="youden")
+            private$..thresholdValue <- jmvcore::OptionNumber$new(
+                "thresholdValue",
+                thresholdValue,
+                min=0,
+                max=1,
+                default=0.5)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showAbout <- jmvcore::OptionBool$new(
+                "showAbout",
+                showAbout,
+                default=FALSE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..indep)
@@ -259,13 +289,18 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..printRandForest)
             self$.addOption(private$..predictedFreqRF)
             self$.addOption(private$..balancingMethod)
-            self$.addOption(private$..clinicalCutoff)
             self$.addOption(private$..validateMethod)
             self$.addOption(private$..bootstrapSamples)
             self$.addOption(private$..reportClinicalMetrics)
             self$.addOption(private$..reportConfidenceIntervals)
             self$.addOption(private$..reportMCC)
             self$.addOption(private$..positiveClass)
+            self$.addOption(private$..seed)
+            self$.addOption(private$..thresholdMethod)
+            self$.addOption(private$..thresholdValue)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showAbout)
+            self$.addOption(private$..showGlossary)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -294,13 +329,18 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         printRandForest = function() private$..printRandForest$value,
         predictedFreqRF = function() private$..predictedFreqRF$value,
         balancingMethod = function() private$..balancingMethod$value,
-        clinicalCutoff = function() private$..clinicalCutoff$value,
         validateMethod = function() private$..validateMethod$value,
         bootstrapSamples = function() private$..bootstrapSamples$value,
         reportClinicalMetrics = function() private$..reportClinicalMetrics$value,
         reportConfidenceIntervals = function() private$..reportConfidenceIntervals$value,
         reportMCC = function() private$..reportMCC$value,
-        positiveClass = function() private$..positiveClass$value),
+        positiveClass = function() private$..positiveClass$value,
+        seed = function() private$..seed$value,
+        thresholdMethod = function() private$..thresholdMethod$value,
+        thresholdValue = function() private$..thresholdValue$value,
+        showSummary = function() private$..showSummary$value,
+        showAbout = function() private$..showAbout$value,
+        showGlossary = function() private$..showGlossary$value),
     private = list(
         ..dep = NA,
         ..indep = NA,
@@ -328,13 +368,18 @@ classificationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..printRandForest = NA,
         ..predictedFreqRF = NA,
         ..balancingMethod = NA,
-        ..clinicalCutoff = NA,
         ..validateMethod = NA,
         ..bootstrapSamples = NA,
         ..reportClinicalMetrics = NA,
         ..reportConfidenceIntervals = NA,
         ..reportMCC = NA,
-        ..positiveClass = NA)
+        ..positiveClass = NA,
+        ..seed = NA,
+        ..thresholdMethod = NA,
+        ..thresholdValue = NA,
+        ..showSummary = NA,
+        ..showAbout = NA,
+        ..showGlossary = NA)
 )
 
 classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -348,7 +393,10 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         decisionTreeModel = function() private$.items[["decisionTreeModel"]],
         predictedFreqPlot = function() private$.items[["predictedFreqPlot"]],
         printRandForest = function() private$.items[["printRandForest"]],
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        naturalSummary = function() private$.items[["naturalSummary"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        glossaryPanel = function() private$.items[["glossaryPanel"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -388,7 +436,9 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                 list(
                                     `name`="class", 
                                     `title`="response", 
-                                    `type`="number"))))}))$new(options=options))
+                                    `type`="number")),
+                            refs=list(
+                                "ClinicoPathJamoviModule")))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -417,7 +467,9 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                 list(
                                     `name`="value", 
                                     `title`="Value", 
-                                    `type`="number"))))
+                                    `type`="number")),
+                            refs=list(
+                                "ClinicoPathJamoviModule")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="clinicalMetrics",
@@ -445,7 +497,9 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                     `title`="95% CI Upper", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(reportConfidenceIntervals)"))))
+                                    `visible`="(reportConfidenceIntervals)")),
+                            refs=list(
+                                "ClinicoPathJamoviModule")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="mccTable",
@@ -507,7 +561,9 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                     `name`="classif.auc", 
                                     `title`="AUC", 
                                     `type`="number", 
-                                    `visible`="(reporting:AUC)"))))}))$new(options=options))
+                                    `visible`="(reporting:AUC)")),
+                            refs=list(
+                                "ClinicoPathJamoviModule")))}))$new(options=options))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="rocCurvePlot",
@@ -561,7 +617,28 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title=""))}))
+                title=""))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalSummary",
+                title="Natural-Language Summary",
+                visible="(showSummary)",
+                refs=list(
+                    "ClinicoPathJamoviModule")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(showAbout)",
+                refs=list(
+                    "ClinicoPathJamoviModule")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossaryPanel",
+                title="Statistical Glossary",
+                visible="(showGlossary)",
+                refs=list(
+                    "ClinicoPathJamoviModule")))}))
 
 classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "classificationBase",
@@ -616,7 +693,6 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param predictedFreqRF .
 #' @param balancingMethod Method for handling class imbalance in medical
 #'   datasets.
-#' @param clinicalCutoff Probability threshold for clinical decision making.
 #' @param validateMethod Validation method for clinical model assessment.
 #' @param bootstrapSamples Number of bootstrap samples for confidence
 #'   intervals.
@@ -633,6 +709,21 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   ratios). If left empty, the second factor level will be used as positive.
 #'   This is critical for ensuring correct interpretation of diagnostic
 #'   performance metrics.
+#' @param seed Set random seed for reproducibility. Using the same seed will
+#'   produce identical results across runs, which is critical for validating
+#'   analyses.
+#' @param thresholdMethod Method for determining classification threshold for
+#'   binary outcomes. Youden J maximizes sensitivity + specificity. Manual
+#'   allows custom cutoff.
+#' @param thresholdValue Custom probability threshold when using manual
+#'   threshold method. Only used when Decision Threshold Method is set to Manual
+#'   Cutoff.
+#' @param showSummary Display a plain-language summary of classification
+#'   results suitable for copying to clinical reports.
+#' @param showAbout Display information about classification methodology and
+#'   interpretation guidance.
+#' @param showGlossary Display glossary of machine learning and clinical
+#'   metrics terms.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$modelSettings} \tab \tab \tab \tab \tab a html \cr
@@ -646,6 +737,9 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$predictedFreqPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$printRandForest$randomForestModel} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -678,13 +772,18 @@ classification <- function(
     printRandForest = FALSE,
     predictedFreqRF = FALSE,
     balancingMethod = "none",
-    clinicalCutoff = 0.5,
     validateMethod = "holdout",
     bootstrapSamples = 1000,
     reportClinicalMetrics = FALSE,
     reportConfidenceIntervals = FALSE,
     reportMCC = FALSE,
-    positiveClass = "") {
+    positiveClass = "",
+    seed = 42,
+    thresholdMethod = "youden",
+    thresholdValue = 0.5,
+    showSummary = FALSE,
+    showAbout = FALSE,
+    showGlossary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("classification requires jmvcore to be installed (restart may be required)")
@@ -726,13 +825,18 @@ classification <- function(
         printRandForest = printRandForest,
         predictedFreqRF = predictedFreqRF,
         balancingMethod = balancingMethod,
-        clinicalCutoff = clinicalCutoff,
         validateMethod = validateMethod,
         bootstrapSamples = bootstrapSamples,
         reportClinicalMetrics = reportClinicalMetrics,
         reportConfidenceIntervals = reportConfidenceIntervals,
         reportMCC = reportMCC,
-        positiveClass = positiveClass)
+        positiveClass = positiveClass,
+        seed = seed,
+        thresholdMethod = thresholdMethod,
+        thresholdValue = thresholdValue,
+        showSummary = showSummary,
+        showAbout = showAbout,
+        showGlossary = showGlossary)
 
     analysis <- classificationClass$new(
         options = options,

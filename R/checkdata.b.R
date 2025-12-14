@@ -1158,7 +1158,14 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Enhanced error checking and validation
             if (nrow(self$data) == 0) {
-                stop('Error: Dataset contains no rows. Please provide data for quality assessment.')
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'emptyDataset',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Dataset contains no rows. Please provide data for quality assessment.')
+                self$results$insert(1, notice)
+                return()
             }
 
             # Get variable data with enhanced validation
@@ -1170,7 +1177,14 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Handle validation errors
             if (!validation_results$is_valid) {
-                stop(paste("Data Validation Error:", paste(validation_results$error_messages, collapse = "; ")))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'validationError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(paste("Data Validation Error:", paste(validation_results$error_messages, collapse = "; ")))
+                self$results$insert(1, notice)
+                return()
             }
             
             # Basic data characteristics with enhanced calculations
@@ -1576,7 +1590,120 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 quality_grade <- "D"
             }
-            
+
+            # Collect quality threshold Notices for user-facing alerts
+            quality_notices <- list()
+
+            # STRONG_WARNING: Severe missing data (>30%)
+            if (missing_pct > 30) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'severeMissingData',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf("Severe missing data: %.1f%% missing values. Results may be unreliable; investigate missing data mechanisms (MCAR/MAR/MNAR) before analysis.", missing_pct))
+                quality_notices$severeMissing <- notice
+            } else if (missing_pct > 15) {
+                # WARNING: Substantial missing data (15-30%)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'substantialMissingData',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf("Substantial missing data: %.1f%% missing values. Consider sensitivity analysis with multiple imputation methods.", missing_pct))
+                quality_notices$substantialMissing <- notice
+            }
+
+            # STRONG_WARNING: Very high outlier rate (>15%)
+            outlier_rate <- ifelse(n_complete > 0, outliers_found / n_complete, 0)
+            if (outlier_rate > 0.15) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'veryHighOutlierRate',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf("Very high outlier rate: %.1f%% of data flagged as outliers. Verify measurement procedures and consider robust analysis methods.", outlier_rate * 100))
+                quality_notices$veryHighOutliers <- notice
+            } else if (outlier_rate > 0.10) {
+                # WARNING: High outlier rate (10-15%)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'highOutlierRate',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf("High outlier rate: %.1f%% of data flagged as outliers. Review each outlier for data entry errors and clinical plausibility.", outlier_rate * 100))
+                quality_notices$highOutliers <- notice
+            }
+
+            # STRONG_WARNING: Very small sample (n<10)
+            if (n_total < 10) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'verySmallSample',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf("Very small sample size (n=%d). Statistical analyses unreliable; outlier detection is informative-only. Consider collecting additional data.", n_total))
+                quality_notices$verySmallSample <- notice
+            } else if (n_total < 30) {
+                # WARNING: Small sample (n<30)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSample',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf("Small sample size (n=%d). Use appropriate methods for small samples and consider collecting additional data for robust analysis.", n_total))
+                quality_notices$smallSample <- notice
+            }
+
+            # STRONG_WARNING: Extremely low variability (<1% unique)
+            uniqueness_ratio <- ifelse(n_complete > 0, n_unique / n_complete, 0)
+            if (uniqueness_ratio < 0.01) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'extremelyLowVariability',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf("Extremely low variability: <1%% unique values (%d unique out of %d). Investigate constant value cause or data collection procedures.", n_unique, n_complete))
+                quality_notices$extremeLowVar <- notice
+            }
+
+            # WARNING: Clinical plausibility issues (if enabled and issues found)
+            if (self$options$clinicalValidation && !is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
+                penalizable <- clinical_issues_found[!grepl("auto-detect|could not auto", clinical_issues_found, ignore.case = TRUE)]
+                if (length(penalizable) > 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'clinicalPlausibility',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf("Clinical plausibility issues: %d validation checks failed. Verify measurement units and clinical plausibility before analysis.", length(penalizable)))
+                    quality_notices$clinicalIssues <- notice
+                }
+            }
+
+            # INFO: Analysis complete with quality summary
+            grade_desc <- ifelse(quality_score >= 90, "Excellent",
+                         ifelse(quality_score >= 80, "Good",
+                         ifelse(quality_score >= 70, "Fair", "Poor")))
+            notice_info <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            notice_info$setContent(sprintf("Quality assessment completed: %d observations analyzed. Overall quality: %s (Grade %s). Note: Scoring is heuristic-based; review component breakdown for details.", n_total, grade_desc, quality_grade))
+            quality_notices$analysisComplete <- notice_info
+
+            # Insert notices in priority order: STRONG_WARNING → WARNING → INFO
+            position <- 1
+            priority_order <- c('severeMissing', 'substantialMissing', 'veryHighOutliers', 'highOutliers',
+                               'verySmallSample', 'smallSample', 'extremeLowVar', 'clinicalIssues', 'analysisComplete')
+            for (name in priority_order) {
+                if (!is.null(quality_notices[[name]])) {
+                    self$results$insert(position, quality_notices[[name]])
+                    position <- position + 1
+                }
+            }
+
             # IMPROVED: Transparent heuristic quality summary with softened presentation
             quality_text <- sprintf("═══════════════════════════════════════════════════════\n")
             quality_text <- paste0(quality_text, sprintf("   DATA QUALITY ASSESSMENT FOR '%s'\n", toupper(var_name)))
@@ -1876,6 +2003,166 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             quality_text <- paste0(quality_text, "═══════════════════════════════════════════════════════")
 
             self$results$qualityText$setContent(quality_text)
+
+            # ========== EDUCATIONAL PANELS ==========
+
+            # Natural-Language Summary (for copying to reports)
+            if (self$options$showSummary) {
+                summary_html <- "<div style='font-family: Georgia, serif; line-height: 1.8; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2c5aa0;'>"
+                summary_html <- paste0(summary_html, "<h3 style='color: #2c5aa0; margin-top: 0;'>Data Quality Summary</h3>")
+                summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", varname, "</p>")
+                summary_html <- paste0(summary_html, "<p><strong>Overall Quality Grade:</strong> ", quality_grade, " (", quality_score, "/100 by heuristic scoring)</p>")
+
+                # Sample characteristics
+                if (is_numeric) {
+                    summary_html <- paste0(summary_html, sprintf("<p>This numeric variable contains <strong>%d observations</strong> with <strong>%.1f%% missing data</strong> (%d/%d cases). ", n_total, missing_pct, n_missing, n_total))
+                } else {
+                    summary_html <- paste0(summary_html, sprintf("<p>This categorical variable contains <strong>%d observations</strong> across <strong>%d unique categories</strong> with <strong>%.1f%% missing data</strong> (%d/%d cases). ", n_total, length(unique(var_data[!is.na(var_data)])), missing_pct, n_missing, n_total))
+                }
+
+                # Key findings
+                if (outliers_found > 0) {
+                    summary_html <- paste0(summary_html, sprintf("Consensus outlier detection identified <strong>%d potential outliers</strong> (%.1f%% of non-missing cases). ", outliers_found, (outliers_found/n_complete)*100))
+                }
+
+                if (!is.null(clinical_issues) && length(clinical_issues) > 0) {
+                    summary_html <- paste0(summary_html, sprintf("Clinical plausibility checks flagged <strong>%d observations</strong> with values outside typical ranges. ", length(clinical_issues)))
+                }
+
+                summary_html <- paste0(summary_html, "</p>")
+
+                # Quality interpretation
+                summary_html <- paste0(summary_html, "<p><strong>Interpretation:</strong> ")
+                if (quality_grade == "A") {
+                    summary_html <- paste0(summary_html, "The data show <strong>excellent quality</strong> with minimal issues detected. The variable appears suitable for standard statistical analysis without major concerns.")
+                } else if (quality_grade == "B") {
+                    summary_html <- paste0(summary_html, "The data show <strong>good quality</strong> with minor issues that should be documented but do not prevent analysis. Review specific flagged observations and note any limitations in study methods.")
+                } else if (quality_grade == "C") {
+                    summary_html <- paste0(summary_html, "The data show <strong>quality concerns</strong> that may affect analysis validity. Careful review of specific issues is recommended, and sensitivity analyses should be performed to assess impact on study conclusions.")
+                } else {
+                    summary_html <- paste0(summary_html, "The data show <strong>significant quality issues</strong> that may threaten analysis validity. Major concerns include high missing data rates or numerous outliers/implausible values. Consider whether data cleaning or re-collection is necessary before proceeding with analysis.")
+                }
+                summary_html <- paste0(summary_html, "</p>")
+
+                # Recommendations
+                summary_html <- paste0(summary_html, "<p><strong>Recommendations:</strong> ")
+                recommendations <- c()
+                if (missing_pct > 15) recommendations <- c(recommendations, "investigate missing data mechanisms")
+                if (outliers_found > 0) recommendations <- c(recommendations, "manually verify flagged outliers")
+                if (!is.null(clinical_issues) && length(clinical_issues) > 0) recommendations <- c(recommendations, "verify clinical plausibility of flagged values")
+                if (n_total < 30) recommendations <- c(recommendations, "consider collecting additional data")
+
+                if (length(recommendations) > 0) {
+                    summary_html <- paste0(summary_html, paste(recommendations, collapse = ", "), ".")
+                } else {
+                    summary_html <- paste0(summary_html, "No immediate actions required. Proceed with standard analysis protocols.")
+                }
+                summary_html <- paste0(summary_html, "</p>")
+
+                summary_html <- paste0(summary_html, "<p style='font-size: 0.9em; color: #666; margin-top: 15px;'><em>Note: This assessment uses heuristic quality rules and should be combined with clinical/domain expertise for final data quality decisions.</em></p>")
+                summary_html <- paste0(summary_html, "</div>")
+
+                self$results$naturalSummary$setContent(summary_html)
+            }
+
+            # About This Analysis panel
+            if (self$options$showAbout) {
+                about_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4682b4;'>"
+                about_html <- paste0(about_html, "<h3 style='color: #4682b4; margin-top: 0;'>About Data Quality Assessment</h3>")
+
+                about_html <- paste0(about_html, "<h4>Purpose</h4>")
+                about_html <- paste0(about_html, "<p>This analysis performs comprehensive quality assessment for single variables to identify potential data issues before statistical analysis. It helps researchers detect missing data patterns, outliers, clinical implausibility, and other quality concerns that may affect study validity.</p>")
+
+                about_html <- paste0(about_html, "<h4>Assessment Components</h4>")
+                about_html <- paste0(about_html, "<ul>")
+                about_html <- paste0(about_html, "<li><strong>Missing Data Analysis:</strong> Examines completeness, missing data patterns, and heuristic assessment of potential mechanisms (MCAR/MAR/MNAR) using runs test when sample size permits</li>")
+                about_html <- paste0(about_html, "<li><strong>Outlier Detection:</strong> Uses consensus approach requiring agreement from ≥2 methods (Z-score |z|>3, IQR 1.5×rule, Modified Z-score MAD-based |z|>3.5) to minimize false positives</li>")
+                about_html <- paste0(about_html, "<li><strong>Distribution Analysis:</strong> Provides descriptive statistics, normality assessment, and coefficient of variation for numeric variables</li>")
+                about_html <- paste0(about_html, "<li><strong>Clinical Validation:</strong> Applies hard-coded plausibility ranges for common clinical variables (age, vital signs, lab values) with configurable unit systems</li>")
+                about_html <- paste0(about_html, "<li><strong>Quality Scoring:</strong> Generates heuristic composite score (0-100) based on completeness, outlier prevalence, sample size, and variability</li>")
+                about_html <- paste0(about_html, "</ul>")
+
+                about_html <- paste0(about_html, "<h4>Quality Grade Interpretation</h4>")
+                about_html <- paste0(about_html, "<ul>")
+                about_html <- paste0(about_html, "<li><strong>Grade A (85-100):</strong> Excellent quality - minimal issues, suitable for standard analysis</li>")
+                about_html <- paste0(about_html, "<li><strong>Grade B (70-84):</strong> Good quality - minor issues requiring documentation but analysis can proceed</li>")
+                about_html <- paste0(about_html, "<li><strong>Grade C (50-69):</strong> Quality concerns - significant issues requiring review and sensitivity analyses</li>")
+                about_html <- paste0(about_html, "<li><strong>Grade D (<50):</strong> Poor quality - major validity threats, consider data cleaning or re-collection</li>")
+                about_html <- paste0(about_html, "</ul>")
+
+                about_html <- paste0(about_html, "<h4>Advanced Options</h4>")
+                about_html <- paste0(about_html, "<ul>")
+                about_html <- paste0(about_html, "<li><strong>Outlier Transformation:</strong> Apply log or square root transformations before outlier detection for right-skewed distributions (common in lab values)</li>")
+                about_html <- paste0(about_html, "<li><strong>MCAR Test:</strong> Perform Little's MCAR test if naniar package available for formal statistical test of missing completely at random assumption</li>")
+                about_html <- paste0(about_html, "<li><strong>Rare Category Threshold:</strong> Flag categories occurring in <X% of observations (important for chi-squared test assumptions and modeling stability)</li>")
+                about_html <- paste0(about_html, "</ul>")
+
+                about_html <- paste0(about_html, "<p style='font-size: 0.9em; color: #666; margin-top: 15px;'><em>For detailed methodology and validation studies, see ClinicoPath module documentation at <a href='https://www.serdarbalci.com/ClinicoPathDescriptives/' target='_blank'>https://www.serdarbalci.com/ClinicoPathDescriptives/</a></em></p>")
+                about_html <- paste0(about_html, "</div>")
+
+                self$results$aboutAnalysis$setContent(about_html)
+            }
+
+            # Caveats & Assumptions panel
+            if (self$options$showCaveats) {
+                caveats_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: #fff8dc; border-left: 4px solid #ffa500;'>"
+                caveats_html <- paste0(caveats_html, "<h3 style='color: #d2691e; margin-top: 0;'>⚠️ Important Caveats & Assumptions</h3>")
+
+                caveats_html <- paste0(caveats_html, "<h4>Heuristic-Based Assessment</h4>")
+                caveats_html <- paste0(caveats_html, "<ul>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Quality scores and grades are NOT externally validated:</strong> Thresholds and penalty weights are based on statistical rules of thumb, not empirical validation studies</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Not suitable for regulatory submissions:</strong> This is a screening tool for research workflows, not a validated quality metric for FDA/EMA submissions</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Context matters:</strong> Quality thresholds appropriate for clinical trials may differ from observational studies, pilot studies, or exploratory analyses</li>")
+                caveats_html <- paste0(caveats_html, "</ul>")
+
+                caveats_html <- paste0(caveats_html, "<h4>Outlier Detection Limitations</h4>")
+                caveats_html <- paste0(caveats_html, "<ul>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Assumes approximate normality:</strong> Z-score and MAD methods work best for symmetric distributions; severely skewed data may produce false positives</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Transformation trade-offs:</strong> Log/sqrt transforms reduce false positives in skewed data but complicate interpretation of flagged values on original scale</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Small sample sensitivity:</strong> With n<30, outlier flags are informative only; consensus requirement is relaxed to single-method for very small samples (n<10)</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>True outliers vs errors:</strong> Statistical outliers may represent valid extreme values (e.g., elite athletes, rare diseases); clinical judgment required</li>")
+                caveats_html <- paste0(caveats_html, "</ul>")
+
+                caveats_html <- paste0(caveats_html, "<h4>Missing Data Assessment Limitations</h4>")
+                caveats_html <- paste0(caveats_html, "<ul>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Cannot definitively prove MCAR/MAR/MNAR:</strong> Runs test provides heuristic pattern assessment but formal distinction requires specialized methods (e.g., sensitivity analyses, pattern-mixture models)</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Single-variable limitation:</strong> Missing data mechanisms often involve relationships between variables; multivariate approaches (Little's MCAR test with multiple variables) provide stronger evidence</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Informative missingness:</strong> Even low missing percentages can bias results if missingness is related to outcome (MNAR)</li>")
+                caveats_html <- paste0(caveats_html, "</ul>")
+
+                caveats_html <- paste0(caveats_html, "<h4>Clinical Validation Limitations</h4>")
+                caveats_html <- paste0(caveats_html, "<ul>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Hard-coded reference ranges:</strong> Plausibility bounds are based on general population norms and may not suit all contexts (pediatric, ICU, elite athletes, diverse ethnic populations)</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Unit auto-detection is heuristic:</strong> May misclassify units in edge cases (e.g., height in inches vs cm); manually verify unit system selection</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Variable name matching:</strong> Clinical checks use pattern matching on variable names (e.g., 'age', 'glucose', 'systolic'); may miss or misclassify non-standard naming</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Context-specific ranges:</strong> Normal ranges vary by measurement method, population demographics, and clinical context; verify against study-specific protocols</li>")
+                caveats_html <- paste0(caveats_html, "</ul>")
+
+                caveats_html <- paste0(caveats_html, "<h4>Statistical Assumptions</h4>")
+                caveats_html <- paste0(caveats_html, "<ul>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Independence assumption:</strong> Outlier and normality tests assume independent observations; may be violated in clustered/longitudinal data</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>CV calculation:</strong> Coefficient of variation only appropriate for ratio-scale data with meaningful zero; suppressed when |mean| < threshold to avoid instability</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Normality tests:</strong> Shapiro-Wilk test is sensitive to sample size (low power for n<30, overpowered for large n); use Q-Q plots and domain knowledge</li>")
+                caveats_html <- paste0(caveats_html, "</ul>")
+
+                caveats_html <- paste0(caveats_html, "<h4>Recommended Workflow</h4>")
+                caveats_html <- paste0(caveats_html, "<p style='background-color: #fff; padding: 10px; border-left: 3px solid #ffa500;'>")
+                caveats_html <- paste0(caveats_html, "<strong>Step 1:</strong> Use this tool for initial automated screening<br>")
+                caveats_html <- paste0(caveats_html, "<strong>Step 2:</strong> Manually verify all flagged observations with clinical/domain expertise<br>")
+                caveats_html <- paste0(caveats_html, "<strong>Step 3:</strong> Investigate root causes (data entry errors, measurement issues, true biological variation)<br>")
+                caveats_html <- paste0(caveats_html, "<strong>Step 4:</strong> Document all quality decisions and cleaning actions with justification<br>")
+                caveats_html <- paste0(caveats_html, "<strong>Step 5:</strong> Perform sensitivity analyses comparing results with/without flagged observations<br>")
+                caveats_html <- paste0(caveats_html, "<strong>Step 6:</strong> Report quality assessment and handling in study methods section")
+                caveats_html <- paste0(caveats_html, "</p>")
+
+                caveats_html <- paste0(caveats_html, "<p style='font-size: 0.9em; color: #d2691e; margin-top: 15px; font-weight: bold;'>")
+                caveats_html <- paste0(caveats_html, "⚡ CRITICAL: Automated quality assessment is a starting point, not a substitute for statistical and clinical judgment. Always combine algorithmic screening with expert review before making data cleaning decisions.")
+                caveats_html <- paste0(caveats_html, "</p>")
+
+                caveats_html <- paste0(caveats_html, "</div>")
+
+                self$results$caveatsAssumptions$setContent(caveats_html)
+            }
         }
     )
 )

@@ -20,6 +20,7 @@ psychopdaROC(
   break_ties = "mean",
   allObserved = FALSE,
   boot_runs = 0,
+  seed = 123,
   usePriorPrev = FALSE,
   priorPrev = 0.5,
   costratioFP = 1,
@@ -134,6 +135,9 @@ as potential cutpoints, not just the optimal cutpoint.}
 
 \item{boot_runs}{Number of bootstrap iterations for methods using
 bootstrapping. Set to 0 to disable bootstrapping.}
+
+\item{seed}{Random seed for reproducibility of bootstrap and permutation
+tests.}
 
 \item{usePriorPrev}{Use a specified prior prevalence instead of the sample
 prevalence for calculating predictive values.}
@@ -333,6 +337,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr

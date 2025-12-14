@@ -65,8 +65,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom tidyheatmaps tidyheatmap
-# tidyHeatmap support commented out due to Bioconductor dependencies
-# #' @importFrom tidyHeatmap heatmap layer_point layer_text layer_diamond layer_square layer_star
 #' @importFrom dplyr select mutate group_by summarise across arrange filter pull n inner_join
 #' @importFrom tidyr pivot_wider complete
 #' @importFrom tibble column_to_rownames
@@ -133,7 +131,13 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
     private = list(
 
         .escapeVar = function(x) {
-            # Escape variable names with spaces/special characters
+            # Escape variable names for rlang::sym() - original names work best
+            if (is.null(x) || length(x) == 0) return(x)
+            x
+        },
+
+        .escapeVarBare = function(x) {
+            # Create safe R identifiers for column names
             if (is.null(x) || length(x) == 0) return(x)
             make.names(x)
         },
@@ -207,6 +211,16 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 </div>"
 
                 self$results$todo$setContent(intro_msg)
+
+                # Add ERROR notice for missing variables
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingRequiredVars',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Row, column, and value variables are required. Select all three variables from the left panel to generate the clinical heatmap.')
+                self$results$insert(1, notice)
+
                 return()
             } else {
                 self$results$todo$setContent("")
@@ -214,6 +228,16 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
             # Validate dataset
             if (nrow(self$data) == 0) {
+                # Add ERROR notice
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'emptyDataset',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Dataset contains no rows. Ensure data was imported correctly and check if filters excluded all observations.')
+                self$results$insert(1, notice)
+
+                # Keep detailed HTML explanation
                 error_msg <- "
                 <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
                 <h4>📊 Dataset Error</h4>
@@ -233,6 +257,16 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
             # Check for tidyheatmaps package
             if (!requireNamespace("tidyheatmaps", quietly = TRUE)) {
+                # Add ERROR notice
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingTidyheatmaps',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Required package tidyheatmaps is not installed. Install it using: install.packages("tidyheatmaps") then restart R.')
+                self$results$insert(1, notice)
+
+                # Keep detailed HTML explanation
                 error_msg <- "
                 <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
                 <h4>📦 Required Package Missing</h4>
@@ -264,16 +298,62 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             # Generate explanatory content
             private$.generateAboutAnalysis()
 
-            # Get data and variables - escape names for safety
+            # Get data and variables
             dataset <- self$data
-            row_var <- private$.escapeVar(self$options$rowVar)
-            col_var <- private$.escapeVar(self$options$colVar)
-            value_var <- private$.escapeVar(self$options$valueVar)
+            row_var <- self$options$rowVar
+            col_var <- self$options$colVar
+            value_var <- self$options$valueVar
 
             # Perform comprehensive input validation
             validation_results <- private$.validateInputs(dataset, row_var, col_var, value_var)
 
-            # Show validation summary if there are issues
+            # Convert validation results to Notices
+            if (validation_results$should_stop) {
+                # Add ERROR notices for critical validation failures
+                for (i in seq_along(validation_results$errors)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('validationError', i),
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(validation_results$errors[i])
+                    self$results$insert(i, notice)
+                }
+            }
+
+            # Add WARNING and STRONG_WARNING notices
+            pos <- if (validation_results$should_stop) length(validation_results$errors) + 1 else 1
+            for (warn in validation_results$warnings) {
+                # Determine warning severity based on content
+                type <- if (grepl("50%|50 %", warn)) {
+                    jmvcore::NoticeType$STRONG_WARNING
+                } else {
+                    jmvcore::NoticeType$WARNING
+                }
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = paste0('validationWarn', pos),
+                    type = type
+                )
+                notice$setContent(warn)
+                self$results$insert(pos, notice)
+                pos <- pos + 1
+            }
+
+            # Add INFO notice if validation passed
+            if (length(validation_results$info) > 0 &&
+                length(validation_results$errors) == 0 &&
+                length(validation_results$warnings) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'validationPassed',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent('Data validation passed. Heatmap generation proceeding.')
+                self$results$insert(999, notice)
+            }
+
+            # Show validation summary HTML if there are issues
             if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
                 validation_html <- private$.generateValidationSummary(validation_results)
                 self$results$clinicalSummary$setContent(validation_html)
@@ -288,6 +368,16 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             heatmap_data <- private$.prepareHeatmapData(dataset, row_var, col_var, value_var)
 
             if (is.null(heatmap_data)) {
+                # Add ERROR notice
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'dataPreparationFailed',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Data preparation failed. Ensure data is in tidy format with one row per row-variable/column-variable combination and check for excessive missing values.')
+                self$results$insert(1, notice)
+
+                # Keep detailed HTML explanation
                 error_msg <- "
                 <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
                 <h4>📋 Data Preparation Failed</h4>
@@ -314,8 +404,16 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             private$.generateClinicalSummary(heatmap_data, row_var, col_var, value_var)
             private$.generateReportSentences(heatmap_data, row_var, col_var, value_var)
 
+            if (self$options$showSummary) {
+                private$.generatePlainSummary(heatmap_data, row_var, col_var, value_var)
+            }
+
             if (self$options$showInterpretation) {
                 private$.generateInterpretationGuide()
+            }
+
+            if (self$options$showWorkflow) {
+                private$.generateWorkflowGuide()
             }
 
             private$.generateAssumptions()
@@ -369,9 +467,6 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     annotation_cols = self$options$annotationCols,
                     annotation_rows = self$options$annotationRows,
                     annotation_type = self$options$annotationType,
-                    add_layer = self$options$addLayer,
-                    layer_type = self$options$layerType,
-                    layer_filter = self$options$layerFilter,
                     split_rows = self$options$splitRows,
                     split_cols = self$options$splitCols
                 )
@@ -425,6 +520,29 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     )
                 }
             }
+
+            # Add success INFO notice at end
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            n_rows <- length(unique(heatmap_data[[row_var]]))
+            n_cols <- length(unique(heatmap_data[[col_var]]))
+            clustering_text <- if (self$options$clusterRows && self$options$clusterCols) {
+                "row and column clustering"
+            } else if (self$options$clusterRows) {
+                "row clustering"
+            } else if (self$options$clusterCols) {
+                "column clustering"
+            } else {
+                "no clustering"
+            }
+            notice$setContent(sprintf('Clinical heatmap analysis completed successfully. Generated %dx%d heatmap with %s scaling and %s.',
+                                      n_rows, n_cols,
+                                      self$options$scaleMethod,
+                                      clustering_text))
+            self$results$insert(999, notice)
         },
 
         .plotHeatmap = function(image, ggtheme, theme, ...) {
@@ -504,16 +622,6 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 # Create the base heatmap using tidyheatmaps
                 p <- do.call(tidyheatmaps::tidyheatmap, heatmap_args)
 
-                # === LAYER FUNCTIONALITY NOT SUPPORTED ===
-                # The tidyheatmaps package does not support add_tile() or add_point()
-                # layer functions. These are available in tidyHeatmap (different package)
-                # but not in tidyheatmaps (jbengler). Layer options are disabled in UI.
-                #
-                # To implement layers, would need to either:
-                # 1. Switch to tidyHeatmap package (stemangiola) which has layer_*() functions
-                # 2. Or create custom overlay logic using ggplot2 after heatmap generation
-                # 3. Or remove layer options entirely from the interface
-
                 # Apply color palette if specified
                 if (!is.null(options$color_palette) && options$color_palette != "viridis") {
                     # Build color palette function
@@ -557,135 +665,6 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 return(TRUE)
             })
         },
-
-        # tidyHeatmap support commented out due to Bioconductor dependencies
-        # .plotHeatmapAdvanced = function(image, ggtheme, theme, ...) {
-        #     # Heatmap plotting function using tidyHeatmap (advanced, ComplexHeatmap-based)
-        #     plot_data <- image$state
-        #
-        #     if (is.null(plot_data) || is.null(plot_data$data)) {
-        #         return(FALSE)
-        #     }
-        #
-        #     # Extract plotting parameters
-        #     data <- plot_data$data
-        #     row_var <- plot_data$row_var
-        #     col_var <- plot_data$col_var
-        #     value_var <- plot_data$value_var
-        #     options <- plot_data$options
-        #
-        #     # Safely create heatmap with error handling
-        #     tryCatch({
-        #         # Load required packages
-        #         if (!requireNamespace("tidyHeatmap", quietly = TRUE)) {
-        #             stop("tidyHeatmap package is required")
-        #         }
-        #
-        #         # Build base heatmap using tidyHeatmap
-        #         p <- data %>%
-        #             tidyHeatmap::heatmap(
-        #                 .row = !!rlang::sym(row_var),
-        #                 .column = !!rlang::sym(col_var),
-        #                 .value = !!rlang::sym(value_var),
-        #                 scale = if(options$scale_method == "none") "none" else options$scale_method,
-        #                 cluster_rows = options$cluster_rows,
-        #                 cluster_columns = options$cluster_cols,
-        #                 show_row_names = options$show_rownames,
-        #                 show_column_names = options$show_colnames
-        #             )
-        #
-        #         # Add row/column clustering options if enabled
-        #         if (options$cluster_rows) {
-        #             # tidyHeatmap uses ComplexHeatmap internally with different parameter names
-        #             # Note: Advanced distance/method options may need custom ComplexHeatmap config
-        #         }
-        #
-        #         # Add annotations using tidyHeatmap's annotation functions
-        #         if (!is.null(options$annotation_cols) && length(options$annotation_cols) > 0) {
-        #             for (ann_col in options$annotation_cols) {
-        #                 annotation_func <- switch(
-        #                     options$annotation_type,
-        #                     "bar" = tidyHeatmap::annotation_bar,
-        #                     "point" = tidyHeatmap::annotation_point,
-        #                     "line" = tidyHeatmap::annotation_line,
-        #                     tidyHeatmap::annotation_tile  # default tile
-        #                 )
-        #
-        #                 p <- p %>% annotation_func(!!rlang::sym(ann_col))
-        #             }
-        #         }
-        #
-        #         # Add layer/symbol overlays if requested
-        #         if (options$add_layer) {
-        #             layer_type <- options$layer_type
-        #             layer_filter <- options$layer_filter
-        #
-        #             # Build filter expression if provided
-        #             if (!is.null(layer_filter) && nchar(layer_filter) > 0) {
-        #                 # Parse user's filter expression (e.g., "> 0.5" becomes value > 0.5)
-        #                 filter_expr <- paste(value_var, layer_filter)
-        #
-        #                 # Add appropriate layer based on type
-        #                 p <- p %>%
-        #                     switch(
-        #                         layer_type,
-        #                         "point" = tidyHeatmap::layer_point(!!rlang::parse_expr(filter_expr)),
-        #                         "text" = tidyHeatmap::layer_text(!!rlang::parse_expr(filter_expr)),
-        #                         "star" = tidyHeatmap::layer_star(!!rlang::parse_expr(filter_expr)),
-        #                         "square" = tidyHeatmap::layer_square(!!rlang::parse_expr(filter_expr)),
-        #                         "diamond" = tidyHeatmap::layer_diamond(!!rlang::parse_expr(filter_expr)),
-        #                         "arrow_up" = tidyHeatmap::layer_arrow_up(!!rlang::parse_expr(filter_expr)),
-        #                         "arrow_down" = tidyHeatmap::layer_down(!!rlang::parse_expr(filter_expr)),
-        #                         tidyHeatmap::layer_point(!!rlang::parse_expr(filter_expr))  # default
-        #                     )
-        #             } else {
-        #                 # No filter - add layer to all cells
-        #                 p <- p %>%
-        #                     switch(
-        #                         layer_type,
-        #                         "point" = tidyHeatmap::layer_point(),
-        #                         "text" = tidyHeatmap::layer_text(),
-        #                         "star" = tidyHeatmap::layer_star(),
-        #                         "square" = tidyHeatmap::layer_square(),
-        #                         "diamond" = tidyHeatmap::layer_diamond(),
-        #                         tidyHeatmap::layer_point()  # default
-        #                     )
-        #             }
-        #         }
-        #
-        #         # Apply color palette if specified
-        #         if (!is.null(options$color_palette) && options$color_palette != "viridis") {
-        #             # Build color palette
-        #             palette_colors <- switch(
-        #                 options$color_palette,
-        #                 "plasma" = grDevices::hcl.colors(100, "Plasma"),
-        #                 "inferno" = grDevices::hcl.colors(100, "Inferno"),
-        #                 "RdYlBu" = grDevices::hcl.colors(100, "RdYlBu"),
-        #                 "RdBu" = grDevices::hcl.colors(100, "RdBu"),
-        #                 "Blues" = grDevices::hcl.colors(100, "Blues"),
-        #                 "Reds" = grDevices::hcl.colors(100, "Reds"),
-        #                 grDevices::hcl.colors(100, "Viridis")  # default
-        #             )
-        #
-        #             # tidyHeatmap handles palettes differently than tidyheatmaps
-        #             # May need to pass as a named vector or use add_palette if available
-        #         }
-        #
-        #         # Add title
-        #         # Note: tidyHeatmap returns a different object type (ComplexHeatmap)
-        #         # Title handling may differ from ggplot2
-        #
-        #         print(p)
-        #         return(TRUE)
-        #
-        #     }, error = function(e) {
-        #         # If tidyHeatmap fails, create a simple fallback message
-        #         plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
-        #         text(1, 1, paste("Error creating heatmap:\n", e$message), cex = 1.2, col = "red")
-        #         title("Clinical Heatmap (tidyHeatmap) - Error")
-        #         return(TRUE)
-        #     })
-        # },
 
         .buildScaledMatrix = function(heatmap_data, row_var, col_var, value_var, scale_method) {
             wide_data <- heatmap_data %>%
@@ -1061,6 +1040,136 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             self$results$reportSentences$setContent(report_content)
         },
 
+        .generatePlainSummary = function(data, row_var, col_var, value_var) {
+            n_rows <- length(unique(data[[row_var]]))
+            n_cols <- length(unique(data[[col_var]]))
+
+            # Describe the analysis in plain language
+            summary_text <- paste0(
+                "This analysis examined patterns in ", value_var, " across ",
+                n_rows, " different ", row_var, " and ", n_cols, " ", col_var, "."
+            )
+
+            # Add scaling interpretation
+            scale_desc <- switch(self$options$scaleMethod,
+                "none" = " The heatmap displays the original measurement values without any transformation.",
+                "row" = " Values were standardized within each row to enable comparison of patterns across different rows.",
+                "column" = " Values were standardized within each column to compare how each measurement varies across different observations.",
+                "both" = " All values were standardized together to show relative differences across the entire dataset."
+            )
+            summary_text <- paste0(summary_text, scale_desc)
+
+            # Add clustering interpretation if used
+            if (self$options$clusterRows || self$options$clusterCols) {
+                cluster_desc <- paste0(
+                    " Hierarchical clustering was applied to",
+                    if (self$options$clusterRows && self$options$clusterCols) {
+                        " both rows and columns"
+                    } else if (self$options$clusterRows) {
+                        " rows"
+                    } else {
+                        " columns"
+                    },
+                    " to automatically group similar patterns together."
+                )
+                summary_text <- paste0(summary_text, cluster_desc)
+            }
+
+            # Add practical interpretation
+            practical_text <- paste0(
+                " This visualization helps identify which ", row_var,
+                " have similar ", col_var, " profiles, and which ", col_var,
+                " tend to vary together. Such patterns can reveal underlying biological relationships,",
+                " quality control issues, or clinically relevant subgroups."
+            )
+            summary_text <- paste0(summary_text, practical_text)
+
+            plain_summary_html <- paste0(
+                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #6c757d;'>",
+                "<h4 style='color: #495057; margin-top: 0;'>📄 Plain-Language Summary</h4>",
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; font-family: Georgia, serif; line-height: 1.8;'>",
+                "<p style='text-align: justify;'>", summary_text, "</p>",
+                "</div>",
+                "<p style='margin-top: 15px; font-size: 0.9em; color: #6c757d;'>",
+                "<em>💡 This summary is written in plain language for inclusion in clinical documentation,",
+                " patient communications, or interdisciplinary discussions.</em>",
+                "</p>",
+                "</div>"
+            )
+
+            self$results$plainSummary$setContent(plain_summary_html)
+        },
+
+        .generateWorkflowGuide = function() {
+            workflow_content <- paste0(
+                "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'>🏥 Clinical Workflow Guidance</h3>",
+
+                "<h4 style='color: #2e7d32;'>Step 1: Data Preparation</h4>",
+                "<ul>",
+                "<li><strong>Quality Control:</strong> Review data for outliers, missing values, and batch effects</li>",
+                "<li><strong>Data Format:</strong> Ensure data is in tidy long format (one observation per row)</li>",
+                "<li><strong>Variable Selection:</strong> Choose biologically or clinically meaningful rows and columns</li>",
+                "<li><strong>Normalization:</strong> Consider whether raw values or normalized data are more appropriate</li>",
+                "</ul>",
+
+                "<h4 style='color: #2e7d32;'>Step 2: Initial Visualization</h4>",
+                "<ul>",
+                "<li><strong>Explore Scaling:</strong> Try different scaling methods (none, row, column, both)</li>",
+                "<li><strong>Enable Clustering:</strong> Use hierarchical clustering to reveal patterns</li>",
+                "<li><strong>Select Palette:</strong> Choose colorblind-friendly palettes for presentations</li>",
+                "<li><strong>Add Annotations:</strong> Include clinical/demographic variables for context</li>",
+                "</ul>",
+
+                "<h4 style='color: #2e7d32;'>Step 3: Pattern Identification</h4>",
+                "<ul>",
+                "<li><strong>Identify Clusters:</strong> Look for groups of similar patients or biomarkers</li>",
+                "<li><strong>Spot Outliers:</strong> Note unusual patterns that may need investigation</li>",
+                "<li><strong>Find Correlations:</strong> Identify biomarkers that vary together</li>",
+                "<li><strong>Check Quality:</strong> Look for systematic biases or batch effects</li>",
+                "</ul>",
+
+                "<h4 style='color: #2e7d32;'>Step 4: Statistical Validation</h4>",
+                "<ul>",
+                "<li><strong>Cluster Analysis:</strong> Use optimal K determination and cluster comparison</li>",
+                "<li><strong>Survival Analysis:</strong> If applicable, test cluster association with outcomes</li>",
+                "<li><strong>Compare Groups:</strong> Statistically compare clinical characteristics across clusters</li>",
+                "<li><strong>Export Assignments:</strong> Save cluster memberships for further analysis</li>",
+                "</ul>",
+
+                "<h4 style='color: #2e7d32;'>Step 5: Clinical Interpretation</h4>",
+                "<ul>",
+                "<li><strong>Biological Plausibility:</strong> Do patterns make clinical/biological sense?</li>",
+                "<li><strong>Clinical Significance:</strong> Are differences clinically meaningful?</li>",
+                "<li><strong>Literature Context:</strong> Do findings align with existing knowledge?</li>",
+                "<li><strong>Hypothesis Generation:</strong> What new questions do patterns suggest?</li>",
+                "</ul>",
+
+                "<h4 style='color: #2e7d32;'>Step 6: Documentation & Reporting</h4>",
+                "<ul>",
+                "<li><strong>Plain Summary:</strong> Use the plain-language summary for documentation</li>",
+                "<li><strong>Save Visualizations:</strong> Export high-resolution images for publications</li>",
+                "<li><strong>Report Methods:</strong> Include scaling, clustering, and annotation details</li>",
+                "<li><strong>Share Results:</strong> Present findings to clinical team for validation</li>",
+                "</ul>",
+
+                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 20px;'>",
+                "<h5 style='color: #856404; margin-top: 0;'>⚠️ Important Considerations</h5>",
+                "<ul style='color: #856404; margin-left: 20px;'>",
+                "<li>Heatmaps show associations, not causation</li>",
+                "<li>Validate patterns in independent datasets when possible</li>",
+                "<li>Consider multiple testing correction for cluster comparisons</li>",
+                "<li>Consult with statisticians for complex analyses</li>",
+                "<li>Always maintain patient confidentiality in presentations</li>",
+                "</ul>",
+                "</div>",
+
+                "</div>"
+            )
+
+            self$results$workflow$setContent(workflow_content)
+        },
+
         .generateInterpretationGuide = function() {
             interpretation_content <- paste0(
                 "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
@@ -1322,12 +1431,26 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 # Log-rank test
                 # Guard against too few events per cluster
                 if (length(unique(surv_data$cluster)) < 2) {
-                    warning("Survival analysis skipped: fewer than 2 clusters available.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'survivalInsufficientClusters',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('Survival analysis skipped: clustering produced only %d group(s). Requires at least 2 clusters. Try adjusting splitRows or clustering parameters.',
+                                              length(unique(surv_data$cluster))))
+                    self$results$insert(2, notice)
                     return(invisible(NULL))
                 }
                 events_per_cluster <- tapply(surv_data$event, surv_data$cluster, sum)
                 if (length(events_per_cluster) < 2 || any(events_per_cluster == 0)) {
-                    warning("Survival analysis skipped: insufficient events per cluster for log-rank test.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'survivalInsufficientEvents',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('Survival analysis skipped: %d cluster(s) have zero events. All clusters need at least one event for log-rank test.',
+                                              sum(events_per_cluster == 0)))
+                    self$results$insert(2, notice)
                     return(invisible(NULL))
                 }
                 log_rank <- survival::survdiff(surv_obj ~ cluster, data = surv_data)
@@ -1409,11 +1532,35 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                         }, error = function(e) NULL)
 
                     } else {
-                        # Use chi-square for categorical variables
+                        # Use chi-square or Fisher's exact for categorical variables
                         test_result <- tryCatch({
                             tbl <- table(comp_data$cluster, comp_data[[var]])
-                            chi_result <- stats::chisq.test(tbl)
-                            p_value <- chi_result$p.value
+
+                            # Check chi-square assumptions (expected counts ≥ 5)
+                            chi_test <- stats::chisq.test(tbl)
+                            expected_counts <- chi_test$expected
+
+                            if (any(expected_counts < 5)) {
+                                # Use Fisher's exact test when assumptions violated
+                                fisher_result <- tryCatch({
+                                    if (prod(dim(tbl)) > 2) {
+                                        stats::fisher.test(tbl, simulate.p.value = TRUE, B = 10000)
+                                    } else {
+                                        stats::fisher.test(tbl)
+                                    }
+                                }, error = function(e) NULL)
+
+                                if (!is.null(fisher_result)) {
+                                    p_value <- fisher_result$p.value
+                                    test_used <- if (prod(dim(tbl)) > 2) " (Fisher's exact, simulated)" else " (Fisher's exact)"
+                                } else {
+                                    p_value <- chi_test$p.value
+                                    test_used <- " (χ², low expected counts)"
+                                }
+                            } else {
+                                p_value <- chi_test$p.value
+                                test_used <- " (χ²)"
+                            }
 
                             # Get frequencies by cluster
                             freqs <- comp_data %>%
@@ -1422,14 +1569,20 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                                 dplyr::group_by(cluster) %>%
                                 dplyr::mutate(pct = n / sum(n) * 100)
 
+                            # Add test method to first row summary
                             for (i in seq_len(nrow(freqs))) {
+                                summary_text <- sprintf("%s: %d (%.1f%%)",
+                                                        freqs[[var]][i], freqs$n[i], freqs$pct[i])
+                                if (i == 1) {
+                                    summary_text <- paste0(summary_text, test_used)
+                                }
+
                                 self$results$clusterCharacteristics$characteristicTable$addRow(
                                     rowKey = paste(var, freqs$cluster[i], freqs[[var]][i], sep = "_"),
                                     values = list(
                                         variable = var,
                                         cluster = paste("Cluster", freqs$cluster[i]),
-                                        summary = sprintf("%s: %d (%.1f%%)",
-                                                          freqs[[var]][i], freqs$n[i], freqs$pct[i]),
+                                        summary = summary_text,
                                         p_value = if (i == 1) p_value else NA
                                     )
                                 )

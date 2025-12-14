@@ -8,15 +8,18 @@ checkdata(
   data,
   var,
   showOutliers = TRUE,
-  showDistribution = TRUE,
-  showDuplicates = TRUE,
+  showDistribution = FALSE,
+  showDuplicates = FALSE,
   showPatterns = FALSE,
   rareCategoryThreshold = 5,
   clinicalValidation = TRUE,
   unitSystem = "auto",
   outlierTransform = "none",
   mcarTest = FALSE,
-  cvMinMean = 0.01
+  cvMinMean = 0.01,
+  showSummary = FALSE,
+  showAbout = FALSE,
+  showCaveats = FALSE
 )
 }
 \arguments{
@@ -52,6 +55,15 @@ package). Provides formal test vs. heuristic assessment.}
 
 \item{cvMinMean}{Suppress coefficient of variation when absolute mean is
 below this threshold (avoids instability).}
+
+\item{showSummary}{Display a plain-language summary of data quality
+suitable for copying to reports.}
+
+\item{showAbout}{Display information about data quality assessment
+methodology.}
+
+\item{showCaveats}{Display important limitations and assumptions of the
+quality assessment.}
 }
 \value{
 A results object containing:
@@ -65,6 +77,9 @@ A results object containing:
 \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
 \code{results$patterns} \tab \tab \tab \tab \tab a table \cr
+\code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$caveatsAssumptions} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

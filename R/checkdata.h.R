@@ -8,15 +8,18 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             var = NULL,
             showOutliers = TRUE,
-            showDistribution = TRUE,
-            showDuplicates = TRUE,
+            showDistribution = FALSE,
+            showDuplicates = FALSE,
             showPatterns = FALSE,
             rareCategoryThreshold = 5,
             clinicalValidation = TRUE,
             unitSystem = "auto",
             outlierTransform = "none",
             mcarTest = FALSE,
-            cvMinMean = 0.01, ...) {
+            cvMinMean = 0.01,
+            showSummary = FALSE,
+            showAbout = FALSE,
+            showCaveats = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -34,11 +37,11 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showDistribution <- jmvcore::OptionBool$new(
                 "showDistribution",
                 showDistribution,
-                default=TRUE)
+                default=FALSE)
             private$..showDuplicates <- jmvcore::OptionBool$new(
                 "showDuplicates",
                 showDuplicates,
-                default=TRUE)
+                default=FALSE)
             private$..showPatterns <- jmvcore::OptionBool$new(
                 "showPatterns",
                 showPatterns,
@@ -79,6 +82,18 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=0,
                 max=10,
                 default=0.01)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showAbout <- jmvcore::OptionBool$new(
+                "showAbout",
+                showAbout,
+                default=FALSE)
+            private$..showCaveats <- jmvcore::OptionBool$new(
+                "showCaveats",
+                showCaveats,
+                default=FALSE)
 
             self$.addOption(private$..var)
             self$.addOption(private$..showOutliers)
@@ -91,6 +106,9 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..outlierTransform)
             self$.addOption(private$..mcarTest)
             self$.addOption(private$..cvMinMean)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showAbout)
+            self$.addOption(private$..showCaveats)
         }),
     active = list(
         var = function() private$..var$value,
@@ -103,7 +121,10 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         unitSystem = function() private$..unitSystem$value,
         outlierTransform = function() private$..outlierTransform$value,
         mcarTest = function() private$..mcarTest$value,
-        cvMinMean = function() private$..cvMinMean$value),
+        cvMinMean = function() private$..cvMinMean$value,
+        showSummary = function() private$..showSummary$value,
+        showAbout = function() private$..showAbout$value,
+        showCaveats = function() private$..showCaveats$value),
     private = list(
         ..var = NA,
         ..showOutliers = NA,
@@ -115,7 +136,10 @@ checkdataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..unitSystem = NA,
         ..outlierTransform = NA,
         ..mcarTest = NA,
-        ..cvMinMean = NA)
+        ..cvMinMean = NA,
+        ..showSummary = NA,
+        ..showAbout = NA,
+        ..showCaveats = NA)
 )
 
 checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -130,7 +154,10 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         outlierMethodSummary = function() private$.items[["outlierMethodSummary"]],
         distribution = function() private$.items[["distribution"]],
         duplicates = function() private$.items[["duplicates"]],
-        patterns = function() private$.items[["patterns"]]),
+        patterns = function() private$.items[["patterns"]],
+        naturalSummary = function() private$.items[["naturalSummary"]],
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        caveatsAssumptions = function() private$.items[["caveatsAssumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -285,7 +312,22 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="recommendation", 
                         `title`="Recommendation", 
-                        `type`="text"))))}))
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalSummary",
+                title="Natural-Language Summary",
+                visible="(showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutAnalysis",
+                title="About This Analysis",
+                visible="(showAbout)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="caveatsAssumptions",
+                title="Caveats & Assumptions",
+                visible="(showCaveats)"))}))
 
 checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "checkdataBase",
@@ -332,6 +374,12 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   package). Provides formal test vs. heuristic assessment.
 #' @param cvMinMean Suppress coefficient of variation when absolute mean is
 #'   below this threshold (avoids instability).
+#' @param showSummary Display a plain-language summary of data quality
+#'   suitable for copying to reports.
+#' @param showAbout Display information about data quality assessment
+#'   methodology.
+#' @param showCaveats Display important limitations and assumptions of the
+#'   quality assessment.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -343,6 +391,9 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$patterns} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$caveatsAssumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -356,15 +407,18 @@ checkdata <- function(
     data,
     var,
     showOutliers = TRUE,
-    showDistribution = TRUE,
-    showDuplicates = TRUE,
+    showDistribution = FALSE,
+    showDuplicates = FALSE,
     showPatterns = FALSE,
     rareCategoryThreshold = 5,
     clinicalValidation = TRUE,
     unitSystem = "auto",
     outlierTransform = "none",
     mcarTest = FALSE,
-    cvMinMean = 0.01) {
+    cvMinMean = 0.01,
+    showSummary = FALSE,
+    showAbout = FALSE,
+    showCaveats = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("checkdata requires jmvcore to be installed (restart may be required)")
@@ -387,7 +441,10 @@ checkdata <- function(
         unitSystem = unitSystem,
         outlierTransform = outlierTransform,
         mcarTest = mcarTest,
-        cvMinMean = cvMinMean)
+        cvMinMean = cvMinMean,
+        showSummary = showSummary,
+        showAbout = showAbout,
+        showCaveats = showCaveats)
 
     analysis <- checkdataClass$new(
         options = options,

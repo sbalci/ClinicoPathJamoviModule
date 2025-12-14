@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.43
+version: 0.0.32.45
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-12-11'
+date: '2025-12-13'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT1
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT1
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -102,7 +102,7 @@ analyses:
   - title: Categorize Continuous Variables
     name: categorize
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: Data Preparation
     menuTitle: Categorize Continuous Variables
     menuSubtitle: Bin numeric variables into categories
@@ -119,7 +119,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables with multiple table styles.
@@ -155,7 +155,7 @@ analyses:
   - title: Clinical Heatmap
     name: clinicalheatmap
     ns: ClinicoPath
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: Visualization
     menuTitle: Clinical Heatmap
     menuSubtitle: Tidy Heatmaps for Clinical Data
@@ -370,7 +370,7 @@ analyses:
   - title: Multi-Variable Visual Quality
     name: dataquality
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Multi-Variable Visual Quality
     description: >
@@ -734,7 +734,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -766,7 +766,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT1
     menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -806,7 +806,7 @@ analyses:
   - title: Single Variable Quality Check
     name: checkdata
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuTitle: Single Variable Quality Check
     menuSubgroup: ClinicoPath Data Quality
     ribbon: analyses
@@ -918,7 +918,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: >
@@ -1018,7 +1018,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT1
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1035,7 +1035,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT1
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -1106,7 +1106,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT1
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -1356,7 +1356,7 @@ analyses:
   - title: Advanced TNM Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT1
     menuSubgroup: Stage Migration Analysis
     menuTitle: Advanced TNM Stage Migration Analysis
     menuSubtitle: State-of-the-Art Staging System Validation
@@ -1476,7 +1476,7 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT1
     menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -1537,7 +1537,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideT2
+    menuGroup: meddecideT1
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
@@ -1694,7 +1694,7 @@ analyses:
   - title: PCA Loading Heatmap & Barmap
     name: pcaloadingheatmap
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT1
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Heatmap & Barmap
     menuSubtitle: Heatmap and Barmap Visualizations
@@ -1803,7 +1803,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT2
+    menuGroup: JJStatsPlotT1
     menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-
@@ -4289,7 +4289,7 @@ analyses:
     name: tumorgrowth
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT1
     menuSubgroup: Survival Analysis
     menuTitle: Tumor Growth Models
   - title: Progression-Free Survival Analysis
@@ -4366,7 +4366,7 @@ analyses:
     name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT1
     menuSubgroup: Design and Power Analysis
     menuTitle: Power Analysis
     menuSubtitle: Power analysis
@@ -4762,7 +4762,7 @@ analyses:
     name: pcaloadingtest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT2
+    menuGroup: ExplorationT1
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Significance Test
     menuSubtitle: Permutation-based loading thresholds
@@ -4992,7 +4992,7 @@ analyses:
     name: studydiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT1
     menuSubgroup: Study Design
     menuTitle: Study Diagram
     description: >-
@@ -5585,7 +5585,7 @@ analyses:
     name: timedependentdca
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT2
+    menuGroup: meddecideT1
     menuSubgroup: Medical Decision Analysis
     menuTitle: Time-Dependent DCA
     menuSubtitle: Net benefit for survival and longitudinal data
@@ -5714,7 +5714,7 @@ analyses:
     name: recist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT2
+    menuGroup: OncoPathT1
     menuSubgroup: Response Evaluation
     menuTitle: RECIST 1.1 Multi-Lesion Aggregation
     menuSubtitle: Automated Best Overall Response
@@ -5727,7 +5727,7 @@ analyses:
     name: survivalendpoints
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT2
+    menuGroup: SurvivalT1
     menuSubgroup: Data Preparation
     menuTitle: Survival Endpoint Derivation
     menuSubtitle: Derive PFS, OS, TTP, DOR from Timeline Data

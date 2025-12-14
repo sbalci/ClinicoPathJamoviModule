@@ -100,11 +100,6 @@ children:
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_prevalence
-          - type: TextBox
-            name: population_size
-            format: integer
-            label: Illustrative Population Size
-            enable: (preset == 'custom')
   - type: Label
     label: Display Options
     children:
@@ -119,3 +114,9 @@ children:
             name: show_nomogram
           - type: CheckBox
             name: show_cost_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: population_size
+        format: number

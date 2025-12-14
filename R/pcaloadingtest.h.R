@@ -46,16 +46,16 @@ pcaloadingtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 min=100,
                 max=5000,
                 default=1000)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=123)
             private$..componentfilter <- jmvcore::OptionInteger$new(
                 "componentfilter",
                 componentfilter,
                 min=0,
                 max=10,
                 default=0)
-            private$..seed <- jmvcore::OptionInteger$new(
-                "seed",
-                seed,
-                default=123)
             private$..center <- jmvcore::OptionBool$new(
                 "center",
                 center,
@@ -158,8 +158,8 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         todo = function() private$.items[["todo"]],
         results = function() private$.items[["results"]],
         variance = function() private$.items[["variance"]],
-        scree = function() private$.items[["scree"]],
-        loadingplot = function() private$.items[["loadingplot"]]),
+        loadingplot = function() private$.items[["loadingplot"]],
+        scree = function() private$.items[["scree"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -361,6 +361,8 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param nperm Number of permutations per variable (100-5000). Total
 #'   permutations = nperm × number of variables. Higher values provide more
 #'   accurate p-values but take longer.
+#' @param seed Seed for permutation reproducibility. Use the same seed to
+#'   obtain identical results.
 #' @param componentfilter Filter results table by component. 0 shows all
 #'   components, 1 shows only PC1, 2 shows only PC2, etc.
 #' @param center Center variables to have mean = 0 before PCA.
@@ -377,7 +379,9 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results} \tab \tab \tab \tab \tab Permutation-based significance testing for each variable-component loading \cr
+#'   \code{results$variance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$loadingplot} \tab \tab \tab \tab \tab Barplot showing loadings with confidence intervals from permutation \cr
+#'   \code{results$scree} \tab \tab \tab \tab \tab Scree/variance explained plot \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -438,3 +442,4 @@ pcaloadingtest <- function(
 
     analysis$results
 }
+

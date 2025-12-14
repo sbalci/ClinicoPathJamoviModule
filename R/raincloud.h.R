@@ -501,6 +501,12 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param comparison_test If TRUE, performs statistical tests to compare
 #'   groups.
 #' @param comparison_method Statistical test method for comparing groups.
+#' @param adjust_method Adjustment method applied to the reported p-value
+#'   (useful for multiple comparisons).
+#' @param effect_size If TRUE and two groups are present, reports Cohen's d
+#'   effect size.
+#' @param log_transform Apply log10 transformation to the Y-axis (requires all
+#'   positive values).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -539,7 +545,10 @@ raincloud <- function(
     outlier_method = "iqr",
     normality_test = FALSE,
     comparison_test = FALSE,
-    comparison_method = "auto") {
+    comparison_method = "auto",
+    adjust_method = "none",
+    effect_size = FALSE,
+    log_transform = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("raincloud requires jmvcore to be installed (restart may be required)")
@@ -582,7 +591,10 @@ raincloud <- function(
         outlier_method = outlier_method,
         normality_test = normality_test,
         comparison_test = comparison_test,
-        comparison_method = comparison_method)
+        comparison_method = comparison_method,
+        adjust_method = adjust_method,
+        effect_size = effect_size,
+        log_transform = log_transform)
 
     analysis <- raincloudClass$new(
         options = options,
@@ -592,3 +604,4 @@ raincloud <- function(
 
     analysis$results
 }
+

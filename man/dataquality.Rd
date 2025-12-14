@@ -13,7 +13,10 @@ dataquality(
   plot_data_overview = FALSE,
   plot_missing_patterns = FALSE,
   plot_data_types = FALSE,
-  missing_threshold_visual = 10
+  missing_threshold_visual = 10,
+  showSummary = TRUE,
+  showRecommendations = TRUE,
+  showExplanations = FALSE
 )
 }
 \arguments{
@@ -42,12 +45,24 @@ visualization.}
 
 \item{missing_threshold_visual}{Threshold percentage for highlighting
 variables with missing values in visual analysis.}
+
+\item{showSummary}{If TRUE, displays a concise plain-language summary of
+quality issues and overall assessment.}
+
+\item{showRecommendations}{If TRUE, provides specific recommendations for
+addressing identified quality issues.}
+
+\item{showExplanations}{If TRUE, includes explanations of quality metrics
+and statistical tests used in the analysis.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$recommendations} \tab \tab \tab \tab \tab a html \cr
+\code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$plotDataOverview} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotMissingPatterns} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotDataTypes} \tab \tab \tab \tab \tab an image \cr

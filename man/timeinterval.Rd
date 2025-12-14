@@ -10,6 +10,7 @@ timeinterval(
   fu_date,
   time_format = "auto",
   output_unit = "months",
+  time_basis = "standardized",
   use_landmark = FALSE,
   landmark_time = 6,
   remove_negative = FALSE,
@@ -41,6 +42,11 @@ parsing for specific date formats.}
 \item{output_unit}{Unit for calculated time intervals. Affects person-time
 calculations and  statistical summaries. Choose based on study duration and
 event frequency.}
+
+\item{time_basis}{Controls how months/years are computed. Standardized uses
+fixed lengths (30.44 days per month, 365.25 days per year) suited for
+person-time denominators. Calendar-aware respects actual month lengths
+(28–31 days) when converting intervals to months/years.}
 
 \item{use_landmark}{Enables conditional analysis from a specific time
 point. Useful for  studying outcomes after a landmark time (e.g., 6-month

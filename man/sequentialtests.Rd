@@ -16,6 +16,7 @@ sequentialtests(
   test2_cost = 0,
   strategy = "serial_positive",
   prevalence = 0.1,
+  population_size = 1000,
   show_explanation = TRUE,
   show_formulas = FALSE,
   show_cost_analysis = FALSE,
@@ -46,6 +47,9 @@ literature.}
 \item{strategy}{.}
 
 \item{prevalence}{.}
+
+\item{population_size}{Population size used to illustrate population flow
+counts. Does not affect probabilities.}
 
 \item{show_explanation}{.}
 

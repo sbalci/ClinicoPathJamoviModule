@@ -20,16 +20,15 @@ clinicalheatmap(
   naHandling = "exclude",
   showDataSummary = FALSE,
   showInterpretation = FALSE,
-  exportWidth = 8,
-  exportHeight = 6,
+  showSummary = TRUE,
+  showWorkflow = FALSE,
+  plotWidth = 800,
+  plotHeight = 600,
   clusterDistanceRows = "euclidean",
   clusterMethodRows = "complete",
   clusterDistanceCols = "euclidean",
   clusterMethodCols = "complete",
   annotationType = "tile",
-  addLayer = FALSE,
-  layerType = "point",
-  layerFilter = "",
   splitRows = 1,
   splitCols = 1,
   findOptimalK = FALSE,
@@ -84,9 +83,15 @@ patient characteristics, gene families).}
 \item{showInterpretation}{Display interpretation guidelines and clinical
 context.}
 
-\item{exportWidth}{Width of exported heatmap in inches.}
+\item{showSummary}{Display a plain-language summary suitable for clinical
+documentation and reports.}
 
-\item{exportHeight}{Height of exported heatmap in inches.}
+\item{showWorkflow}{Display step-by-step clinical workflow guidance for
+using heatmaps in practice.}
+
+\item{plotWidth}{Width of heatmap plot in pixels.}
+
+\item{plotHeight}{Height of heatmap plot in pixels.}
 
 \item{clusterDistanceRows}{Distance metric for row clustering.}
 
@@ -97,13 +102,6 @@ context.}
 \item{clusterMethodCols}{Agglomeration method for column clustering.}
 
 \item{annotationType}{Type of annotation visualization for tidyHeatmap.}
-
-\item{addLayer}{Add a symbol layer on top of the heatmap.}
-
-\item{layerType}{Type of symbol to add as a layer.}
-
-\item{layerFilter}{Logical expression to filter which cells show symbols
-(e.g., "> 0.5").}
 
 \item{splitRows}{Number of row groups to split based on dendrogram
 branches.}
@@ -156,6 +154,8 @@ A results object containing:
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$plainSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$workflow} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$optimalKAnalysis$elbowPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$optimalKAnalysis$silhouettePlot} \tab \tab \tab \tab \tab an image \cr

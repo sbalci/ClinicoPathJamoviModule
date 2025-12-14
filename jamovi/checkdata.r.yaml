@@ -129,7 +129,22 @@ items:
           title: "Recommendation"
           type: text
 
-refs: 
+    - name: naturalSummary
+      title: Natural-Language Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: aboutAnalysis
+      title: About This Analysis
+      type: Html
+      visible: (showAbout)
+
+    - name: caveatsAssumptions
+      title: Caveats & Assumptions
+      type: Html
+      visible: (showCaveats)
+
+refs:
     - ClinicoPathJamoviModule
 
 ...

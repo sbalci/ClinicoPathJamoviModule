@@ -20,10 +20,10 @@ chisqposttest(
   residualsCutoff = 2,
   testSelection = "auto",
   exportResults = FALSE,
-  showClinicalSummary = TRUE,
+  showClinicalSummary = FALSE,
   showExampleInterpretations = FALSE,
   copyReadySentences = FALSE,
-  showAssumptionsCheck = TRUE,
+  showAssumptionsCheck = FALSE,
   showGlossary = FALSE,
   colorBlindSafe = FALSE
 )

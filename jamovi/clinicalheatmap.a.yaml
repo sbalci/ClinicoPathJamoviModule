@@ -1,7 +1,7 @@
 ---
 name: clinicalheatmap
 title: Clinical Heatmap
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: Visualization
 menuSubtitle: Tidy Heatmaps for Clinical Data
 version: '0.0.31'
@@ -195,29 +195,49 @@ options:
           jamovi: >
             Show guidance on interpreting the heatmap.
 
-    - name: exportWidth
-      title: 'Export Width (inches)'
-      type: Number
-      min: 3
-      max: 20
-      default: 8
+    - name: showSummary
+      title: 'Show Plain-Language Summary'
+      type: Bool
+      default: true
       description:
           R: >
-            Width of exported heatmap in inches.
+            Display a plain-language summary suitable for clinical documentation and reports.
           jamovi: >
-            Width for exported plots.
+            Show plain-language summary for clinical reports.
 
-    - name: exportHeight
-      title: 'Export Height (inches)'
-      type: Number
-      min: 3
-      max: 20
-      default: 6
+    - name: showWorkflow
+      title: 'Show Clinical Workflow Guidance'
+      type: Bool
+      default: false
       description:
           R: >
-            Height of exported heatmap in inches.
+            Display step-by-step clinical workflow guidance for using heatmaps in practice.
           jamovi: >
-            Height for exported plots.
+            Show guidance on incorporating heatmaps into clinical workflows.
+
+    - name: plotWidth
+      title: 'Plot Width (pixels)'
+      type: Integer
+      min: 400
+      max: 2000
+      default: 800
+      description:
+          R: >
+            Width of heatmap plot in pixels.
+          jamovi: >
+            Width for heatmap display.
+
+    - name: plotHeight
+      title: 'Plot Height (pixels)'
+      type: Integer
+      min: 300
+      max: 2000
+      default: 600
+      description:
+          R: >
+            Height of heatmap plot in pixels.
+          jamovi: >
+            Height for heatmap display.
 
     # === CLUSTERING OPTIONS ===
     - name: clusterDistanceRows
@@ -305,46 +325,6 @@ options:
       description:
           R: >
             Type of annotation visualization for tidyHeatmap.
-
-    # === LAYER/SYMBOL OPTIONS ===
-    - name: addLayer
-      title: 'Add Symbol Layer'
-      type: Bool
-      default: false
-      description:
-          R: >
-            Add a symbol layer on top of the heatmap.
-
-    - name: layerType
-      title: 'Layer Symbol Type'
-      type: List
-      options:
-        - name: point
-          title: 'Points'
-        - name: text
-          title: 'Text'
-        - name: star
-          title: 'Stars'
-        - name: square
-          title: 'Squares'
-        - name: diamond
-          title: 'Diamonds'
-        - name: arrow_up
-          title: 'Arrow Up'
-        - name: arrow_down
-          title: 'Arrow Down'
-      default: point
-      description:
-          R: >
-            Type of symbol to add as a layer.
-
-    - name: layerFilter
-      title: 'Layer Filter Expression'
-      type: String
-      default: ''
-      description:
-          R: >
-            Logical expression to filter which cells show symbols (e.g., "> 0.5").
 
     # === SPLIT OPTIONS ===
     - name: splitRows

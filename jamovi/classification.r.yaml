@@ -22,6 +22,8 @@ items:
           - name: class
             title: 'response'
             type: number
+        refs:
+          - ClinicoPathJamoviModule
 
   - name: classificationMetrics
     title: Classification metrics
@@ -39,6 +41,8 @@ items:
           - name: value
             title: 'Value'
             type: number
+        refs:
+          - ClinicoPathJamoviModule
       - name: clinicalMetrics
         title: Clinical Performance Metrics
         visible: (reportClinicalMetrics)
@@ -62,6 +66,8 @@ items:
             type: number
             format: zto
             visible: (reportConfidenceIntervals)
+        refs:
+          - ClinicoPathJamoviModule
       - name: mccTable
         title: Matthews Correlation Coefficient
         visible: (reportMCC)
@@ -113,6 +119,8 @@ items:
             title: 'AUC'
             type: number
             visible: (reporting:AUC)
+        refs:
+          - ClinicoPathJamoviModule
 
   - name: rocCurvePlot
     title: ROC curve
@@ -160,6 +168,27 @@ items:
   - name:  text
     title: ''
     type:  Preformatted
+
+  - name: naturalSummary
+    title: Natural-Language Summary
+    type: Html
+    visible: (showSummary)
+    refs:
+      - ClinicoPathJamoviModule
+
+  - name: aboutAnalysis
+    title: About This Analysis
+    type: Html
+    visible: (showAbout)
+    refs:
+      - ClinicoPathJamoviModule
+
+  - name: glossaryPanel
+    title: Statistical Glossary
+    type: Html
+    visible: (showGlossary)
+    refs:
+      - ClinicoPathJamoviModule
 
 refs:
     - ClinicoPathJamoviModule

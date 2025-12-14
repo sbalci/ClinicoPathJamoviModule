@@ -111,6 +111,7 @@ Progressive Disease (comma separated)}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$lesionTable} \tab \tab \tab \tab \tab a table \cr

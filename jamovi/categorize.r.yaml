@@ -106,17 +106,6 @@ items:
           - ordered
           - excl
 
-    - name: warnings
-      title: Messages
-      type: Html
-      visible: true
-      clearWith:
-          - var
-          - method
-          - nbins
-          - breaks
-          - customlabels
-
     - name: addtodata
       title: Categorized Variable
       type: Output

@@ -20,6 +20,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             break_ties = "mean",
             allObserved = FALSE,
             boot_runs = 0,
+            seed = 123,
             usePriorPrev = FALSE,
             priorPrev = 0.5,
             costratioFP = 1,
@@ -207,6 +208,10 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=0,
                 min=0,
                 max=10000)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=123)
             private$..usePriorPrev <- jmvcore::OptionBool$new(
                 "usePriorPrev",
                 usePriorPrev,
@@ -533,6 +538,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..break_ties)
             self$.addOption(private$..allObserved)
             self$.addOption(private$..boot_runs)
+            self$.addOption(private$..seed)
             self$.addOption(private$..usePriorPrev)
             self$.addOption(private$..priorPrev)
             self$.addOption(private$..costratioFP)
@@ -611,6 +617,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         break_ties = function() private$..break_ties$value,
         allObserved = function() private$..allObserved$value,
         boot_runs = function() private$..boot_runs$value,
+        seed = function() private$..seed$value,
         usePriorPrev = function() private$..usePriorPrev$value,
         priorPrev = function() private$..priorPrev$value,
         costratioFP = function() private$..costratioFP$value,
@@ -688,6 +695,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..break_ties = NA,
         ..allObserved = NA,
         ..boot_runs = NA,
+        ..seed = NA,
         ..usePriorPrev = NA,
         ..priorPrev = NA,
         ..costratioFP = NA,
@@ -758,6 +766,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         instructions = function() private$.items[["instructions"]],
         procedureNotes = function() private$.items[["procedureNotes"]],
+        runSummary = function() private$.items[["runSummary"]],
         simpleResultsTable = function() private$.items[["simpleResultsTable"]],
         clinicalInterpretationTable = function() private$.items[["clinicalInterpretationTable"]],
         resultsTable = function() private$.items[["resultsTable"]],
@@ -813,6 +822,11 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="procedureNotes",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="runSummary",
+                title="Analysis Status",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -1952,6 +1966,8 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   as potential cutpoints, not just the optimal cutpoint.
 #' @param boot_runs Number of bootstrap iterations for methods using
 #'   bootstrapping. Set to 0 to disable bootstrapping.
+#' @param seed Random seed for reproducibility of bootstrap and permutation
+#'   tests.
 #' @param usePriorPrev Use a specified prior prevalence instead of the sample
 #'   prevalence for calculating predictive values.
 #' @param priorPrev Population prevalence to use for predictive value
@@ -2087,6 +2103,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$simpleResultsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
@@ -2148,6 +2165,7 @@ psychopdaROC <- function(
     break_ties = "mean",
     allObserved = FALSE,
     boot_runs = 0,
+    seed = 123,
     usePriorPrev = FALSE,
     priorPrev = 0.5,
     costratioFP = 1,
@@ -2242,6 +2260,7 @@ psychopdaROC <- function(
         break_ties = break_ties,
         allObserved = allObserved,
         boot_runs = boot_runs,
+        seed = seed,
         usePriorPrev = usePriorPrev,
         priorPrev = priorPrev,
         costratioFP = costratioFP,

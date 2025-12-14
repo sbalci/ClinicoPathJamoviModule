@@ -20,16 +20,15 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             naHandling = "exclude",
             showDataSummary = FALSE,
             showInterpretation = FALSE,
-            exportWidth = 8,
-            exportHeight = 6,
+            showSummary = TRUE,
+            showWorkflow = FALSE,
+            plotWidth = 800,
+            plotHeight = 600,
             clusterDistanceRows = "euclidean",
             clusterMethodRows = "complete",
             clusterDistanceCols = "euclidean",
             clusterMethodCols = "complete",
             annotationType = "tile",
-            addLayer = FALSE,
-            layerType = "point",
-            layerFilter = "",
             splitRows = 1,
             splitCols = 1,
             findOptimalK = FALSE,
@@ -148,18 +147,26 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "showInterpretation",
                 showInterpretation,
                 default=FALSE)
-            private$..exportWidth <- jmvcore::OptionNumber$new(
-                "exportWidth",
-                exportWidth,
-                min=3,
-                max=20,
-                default=8)
-            private$..exportHeight <- jmvcore::OptionNumber$new(
-                "exportHeight",
-                exportHeight,
-                min=3,
-                max=20,
-                default=6)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=TRUE)
+            private$..showWorkflow <- jmvcore::OptionBool$new(
+                "showWorkflow",
+                showWorkflow,
+                default=FALSE)
+            private$..plotWidth <- jmvcore::OptionInteger$new(
+                "plotWidth",
+                plotWidth,
+                min=400,
+                max=2000,
+                default=800)
+            private$..plotHeight <- jmvcore::OptionInteger$new(
+                "plotHeight",
+                plotHeight,
+                min=300,
+                max=2000,
+                default=600)
             private$..clusterDistanceRows <- jmvcore::OptionList$new(
                 "clusterDistanceRows",
                 clusterDistanceRows,
@@ -205,26 +212,6 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "point",
                     "line"),
                 default="tile")
-            private$..addLayer <- jmvcore::OptionBool$new(
-                "addLayer",
-                addLayer,
-                default=FALSE)
-            private$..layerType <- jmvcore::OptionList$new(
-                "layerType",
-                layerType,
-                options=list(
-                    "point",
-                    "text",
-                    "star",
-                    "square",
-                    "diamond",
-                    "arrow_up",
-                    "arrow_down"),
-                default="point")
-            private$..layerFilter <- jmvcore::OptionString$new(
-                "layerFilter",
-                layerFilter,
-                default="")
             private$..splitRows <- jmvcore::OptionInteger$new(
                 "splitRows",
                 splitRows,
@@ -313,16 +300,15 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..naHandling)
             self$.addOption(private$..showDataSummary)
             self$.addOption(private$..showInterpretation)
-            self$.addOption(private$..exportWidth)
-            self$.addOption(private$..exportHeight)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showWorkflow)
+            self$.addOption(private$..plotWidth)
+            self$.addOption(private$..plotHeight)
             self$.addOption(private$..clusterDistanceRows)
             self$.addOption(private$..clusterMethodRows)
             self$.addOption(private$..clusterDistanceCols)
             self$.addOption(private$..clusterMethodCols)
             self$.addOption(private$..annotationType)
-            self$.addOption(private$..addLayer)
-            self$.addOption(private$..layerType)
-            self$.addOption(private$..layerFilter)
             self$.addOption(private$..splitRows)
             self$.addOption(private$..splitCols)
             self$.addOption(private$..findOptimalK)
@@ -353,16 +339,15 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         naHandling = function() private$..naHandling$value,
         showDataSummary = function() private$..showDataSummary$value,
         showInterpretation = function() private$..showInterpretation$value,
-        exportWidth = function() private$..exportWidth$value,
-        exportHeight = function() private$..exportHeight$value,
+        showSummary = function() private$..showSummary$value,
+        showWorkflow = function() private$..showWorkflow$value,
+        plotWidth = function() private$..plotWidth$value,
+        plotHeight = function() private$..plotHeight$value,
         clusterDistanceRows = function() private$..clusterDistanceRows$value,
         clusterMethodRows = function() private$..clusterMethodRows$value,
         clusterDistanceCols = function() private$..clusterDistanceCols$value,
         clusterMethodCols = function() private$..clusterMethodCols$value,
         annotationType = function() private$..annotationType$value,
-        addLayer = function() private$..addLayer$value,
-        layerType = function() private$..layerType$value,
-        layerFilter = function() private$..layerFilter$value,
         splitRows = function() private$..splitRows$value,
         splitCols = function() private$..splitCols$value,
         findOptimalK = function() private$..findOptimalK$value,
@@ -392,16 +377,15 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..naHandling = NA,
         ..showDataSummary = NA,
         ..showInterpretation = NA,
-        ..exportWidth = NA,
-        ..exportHeight = NA,
+        ..showSummary = NA,
+        ..showWorkflow = NA,
+        ..plotWidth = NA,
+        ..plotHeight = NA,
         ..clusterDistanceRows = NA,
         ..clusterMethodRows = NA,
         ..clusterDistanceCols = NA,
         ..clusterMethodCols = NA,
         ..annotationType = NA,
-        ..addLayer = NA,
-        ..layerType = NA,
-        ..layerFilter = NA,
         ..splitRows = NA,
         ..splitCols = NA,
         ..findOptimalK = NA,
@@ -430,6 +414,8 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         interpretation = function() private$.items[["interpretation"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
         reportSentences = function() private$.items[["reportSentences"]],
+        plainSummary = function() private$.items[["plainSummary"]],
+        workflow = function() private$.items[["workflow"]],
         assumptions = function() private$.items[["assumptions"]],
         optimalKAnalysis = function() private$.items[["optimalKAnalysis"]],
         clusterAssignments = function() private$.items[["clusterAssignments"]],
@@ -541,11 +527,10 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "showRownames",
                     "showColnames",
                     "annotationType",
-                    "addLayer",
-                    "layerType",
-                    "layerFilter",
                     "splitRows",
-                    "splitCols")))
+                    "splitCols",
+                    "plotWidth",
+                    "plotHeight")))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -587,6 +572,18 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="reportSentences",
                 title="Report Sentences",
                 visible=TRUE,
+                clearWith=list()))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="plainSummary",
+                title="Plain-Language Summary",
+                visible="(showSummary)",
+                clearWith=list()))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="workflow",
+                title="Clinical Workflow Guidance",
+                visible="(showWorkflow)",
                 clearWith=list()))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -841,17 +838,17 @@ clinicalheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param showDataSummary Display a summary of the data structure and values.
 #' @param showInterpretation Display interpretation guidelines and clinical
 #'   context.
-#' @param exportWidth Width of exported heatmap in inches.
-#' @param exportHeight Height of exported heatmap in inches.
+#' @param showSummary Display a plain-language summary suitable for clinical
+#'   documentation and reports.
+#' @param showWorkflow Display step-by-step clinical workflow guidance for
+#'   using heatmaps in practice.
+#' @param plotWidth Width of heatmap plot in pixels.
+#' @param plotHeight Height of heatmap plot in pixels.
 #' @param clusterDistanceRows Distance metric for row clustering.
 #' @param clusterMethodRows Agglomeration method for row clustering.
 #' @param clusterDistanceCols Distance metric for column clustering.
 #' @param clusterMethodCols Agglomeration method for column clustering.
 #' @param annotationType Type of annotation visualization for tidyHeatmap.
-#' @param addLayer Add a symbol layer on top of the heatmap.
-#' @param layerType Type of symbol to add as a layer.
-#' @param layerFilter Logical expression to filter which cells show symbols
-#'   (e.g., "> 0.5").
 #' @param splitRows Number of row groups to split based on dendrogram
 #'   branches.
 #' @param splitCols Number of column groups to split based on dendrogram
@@ -888,6 +885,8 @@ clinicalheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plainSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$workflow} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$optimalKAnalysis$elbowPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$optimalKAnalysis$silhouettePlot} \tab \tab \tab \tab \tab an image \cr
@@ -918,16 +917,15 @@ clinicalheatmap <- function(
     naHandling = "exclude",
     showDataSummary = FALSE,
     showInterpretation = FALSE,
-    exportWidth = 8,
-    exportHeight = 6,
+    showSummary = TRUE,
+    showWorkflow = FALSE,
+    plotWidth = 800,
+    plotHeight = 600,
     clusterDistanceRows = "euclidean",
     clusterMethodRows = "complete",
     clusterDistanceCols = "euclidean",
     clusterMethodCols = "complete",
     annotationType = "tile",
-    addLayer = FALSE,
-    layerType = "point",
-    layerFilter = "",
     splitRows = 1,
     splitCols = 1,
     findOptimalK = FALSE,
@@ -984,16 +982,15 @@ clinicalheatmap <- function(
         naHandling = naHandling,
         showDataSummary = showDataSummary,
         showInterpretation = showInterpretation,
-        exportWidth = exportWidth,
-        exportHeight = exportHeight,
+        showSummary = showSummary,
+        showWorkflow = showWorkflow,
+        plotWidth = plotWidth,
+        plotHeight = plotHeight,
         clusterDistanceRows = clusterDistanceRows,
         clusterMethodRows = clusterMethodRows,
         clusterDistanceCols = clusterDistanceCols,
         clusterMethodCols = clusterMethodCols,
         annotationType = annotationType,
-        addLayer = addLayer,
-        layerType = layerType,
-        layerFilter = layerFilter,
         splitRows = splitRows,
         splitCols = splitCols,
         findOptimalK = findOptimalK,

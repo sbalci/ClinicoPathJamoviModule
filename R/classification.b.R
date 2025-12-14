@@ -30,8 +30,8 @@ private = list(
     },
 
     .init = function() {
-        preformatted <- jmvcore::Preformatted$new(self$options, 'preformatted')
-        self$results$add(preformatted)
+        # Preformatted result 'text' is already defined in classification.r.yaml
+        # No manual initialization needed
     },
 
     .resolvePositiveClass = function(truth_factor) {
@@ -73,8 +73,16 @@ private = list(
             return()
         }
 
-        if (nrow(self$data) == 0)
-            stop('Data contains no (complete) rows')
+        if (nrow(self$data) == 0) {
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'emptyDataset',
+                type = jmvcore::NoticeType$ERROR
+            )
+            notice$setContent('Data contains no (complete) rows. Please check your dataset and variable selections.')
+            self$results$insert(1, notice)
+            return()
+        }
 
         # Apply user-defined seed for reproducibility
         if (!is.null(self$options$seed) && !is.na(self$options$seed)) {
@@ -92,13 +100,12 @@ private = list(
                                backend = data[complete.cases(data),],
                                target = self$options$dep)
 
+        # Add quality threshold warnings
+        private$.checkDataQuality(task)
+
         # Create learner with class balancing pipeline if requested
         # This ensures balancing happens WITHIN each training fold, not on entire dataset
         learner <- private$.createBalancedLearner()
-
-        # NOTE: Clinical cutoff is stored for potential future use
-        # Most mlr3 learners don't support cutoff parameter directly
-        # Threshold can be applied during prediction post-processing if needed
 
         # Add checkpoint before model training
         private$.checkpoint()
@@ -140,11 +147,14 @@ private = list(
         } else if (self$options$balancingMethod == "smote") {
             # SMOTE requires mlr3smote package (not smotefamily)
             if (!requireNamespace("smotefamily", quietly = TRUE)) {
-                warning(paste(
-                    "SMOTE option selected, but the 'smotefamily' package is not installed.",
-                    "Using classbalancing oversampling instead (no synthetic examples generated).",
-                    "To enable SMOTE, install the package with: install.packages('smotefamily')"
-                ))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smoteFallback',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent("SMOTE option selected, but the 'smotefamily' package is not installed. Using classbalancing oversampling instead (no synthetic examples generated). To enable SMOTE, install the package with: install.packages('smotefamily')")
+                self$results$insert(2, notice)
+
                 # Fall back to oversampling
                 po_balance <- po("classbalancing",
                                id = "oversample_fallback",
@@ -193,6 +203,94 @@ private = list(
     .checkpoint = function() {
         # Allow jamovi to check for user cancellation
         if (self$isFresh) return()
+    },
+
+    .checkDataQuality = function(task) {
+        # Check for quality issues and add appropriate warnings
+        n <- task$nrow
+        notice_position <- 2  # Start after ERROR notices (if any)
+
+        # 1. Small sample warning (n < 30)
+        if (n < 30) {
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'smallSample',
+                type = jmvcore::NoticeType$STRONG_WARNING
+            )
+            notice$setContent(sprintf(
+                'Very small sample size (n=%d). Classification models may be unstable and results may not generalize. Consider collecting more data or using simpler models. Recommended minimum: n=30 per class.',
+                n
+            ))
+            self$results$insert(notice_position, notice)
+            notice_position <- notice_position + 1
+        }
+
+        # 2. Check for severe class imbalance (minority < 5% of total)
+        class_counts <- table(task$truth())
+        minority_prop <- min(class_counts) / sum(class_counts)
+
+        if (minority_prop < 0.05) {
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'severeImbalance',
+                type = jmvcore::NoticeType$STRONG_WARNING
+            )
+            notice$setContent(sprintf(
+                'Severe class imbalance detected: minority class represents only %.1f%% of samples. Consider using class balancing methods (SMOTE, upsampling, or downsampling) and focusing on balanced metrics like MCC, F-score, or AUC rather than accuracy.',
+                minority_prop * 100
+            ))
+            self$results$insert(notice_position, notice)
+            notice_position <- notice_position + 1
+        } else if (minority_prop < 0.20) {
+            # Moderate imbalance warning
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'moderateImbalance',
+                type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent(sprintf(
+                'Moderate class imbalance: minority class represents %.1f%% of samples. Consider using balanced performance metrics (MCC, F-score, AUC) in addition to accuracy.',
+                minority_prop * 100
+            ))
+            self$results$insert(notice_position, notice)
+            notice_position <- notice_position + 1
+        }
+
+        # 3. Cross-validation fold size warning
+        if (self$options$testing == "crossValidation" || self$options$validateMethod == "cv") {
+            folds <- self$options$noOfFolds
+            samples_per_fold <- n / folds
+
+            if (samples_per_fold < 10) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallFolds',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf(
+                    'Very small cross-validation fold size (avg. %.1f samples per fold with %d folds). This may lead to unstable performance estimates. Consider reducing the number of folds or using holdout validation instead.',
+                    samples_per_fold, folds
+                ))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+        }
+
+        # 4. Feature-to-sample ratio warning
+        n_features <- length(self$options$indep)
+        if (n_features > 0 && n / n_features < 10) {
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'highDimensionality',
+                type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent(sprintf(
+                'High feature-to-sample ratio: %d features with %d samples (ratio: %.1f). Risk of overfitting. Consider feature selection, regularization, or collecting more data. Recommended: n ≥ 10 × features.',
+                n_features, n, n / n_features
+            ))
+            self$results$insert(notice_position, notice)
+            notice_position <- notice_position + 1
+        }
     },
 
     .calculateClinicalMetrics = function(predictions, truth) {
@@ -426,7 +524,7 @@ private = list(
                 num.trees = self$options$noOfTrees,
                 splitrule = self$options$splitRule,
                 sample.fraction = self$options$sampleFraction,
-                min.node.size = self$options$maxDepth
+                min.node.size = self$options$maxDepthRandFor
             )
         } else if(self$options$classifier == 'knn') {
             options <- list(
@@ -458,7 +556,14 @@ private = list(
             learner$param_set$values <- options
             return(learner)
         }, error = function(e) {
-            warning(paste("Learner", classifier_type, "not available, using decision tree. Error:", e$message))
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'learnerFallback',
+                type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent(sprintf("Learner %s not available, using decision tree instead. Error: %s", classifier_type, e$message))
+            self$results$insert(2, notice)
+
             learner <- lrn('classif.rpart', predict_type = 'prob')
             learner$param_set$values <- list(
                 minsplit = self$options$minSplit,
@@ -481,7 +586,7 @@ private = list(
         } else if(self$options$classifier == 'randomForest') {
             selectedClassifier <- list(
             "no. of trees" = self$options$noOfTrees,
-            "max depth" = self$options$maxDepth,
+            "max depth" = self$options$maxDepthRandFor,
             "sample fraction" = self$options$sampleFraction,
             "split rule" = self$options$splitRule
             )
@@ -688,6 +793,58 @@ private = list(
             confusionMatrix <- thresholded_prediction$confusion
             private$.populateConfusionMatrix(confusionMatrix)
         }
+
+        # Add INFO notice for analysis summary
+        classifier_name <- switch(classifier,
+            "singleDecisionTree" = "Decision Tree",
+            "randomForest" = "Random Forest",
+            "knn" = "K-Nearest Neighbors",
+            "naiveBayes" = "Naive Bayes",
+            "logisticRegression" = "Logistic Regression",
+            "svm" = "Support Vector Machine",
+            "Unknown"
+        )
+
+        validation_name <- if (self$options$testing == "crossValidation" || self$options$validateMethod == "cv") {
+            sprintf("%d-fold cross-validation", self$options$noOfFolds)
+        } else if (self$options$validateMethod == "bootstrap") {
+            sprintf("bootstrap validation (%d samples)", min(self$options$bootstrapSamples, 200))
+        } else {
+            sprintf("holdout validation (%.0f%% test)", self$options$testSize * 100)
+        }
+
+        n_classes <- length(unique(prediction$truth))
+        accuracy <- as.numeric(thresholded_prediction$score(msr("classif.acc"), task = NULL))
+
+        balancing_text <- if (self$options$balancingMethod != "none") {
+            sprintf(" with %s class balancing", self$options$balancingMethod)
+        } else {
+            ""
+        }
+
+        info <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'analysisComplete',
+            type = jmvcore::NoticeType$INFO
+        )
+        info$setContent(sprintf(
+            'Classification analysis complete: %s classifier%s using %s. Overall accuracy: %.1f%% across %d classes.',
+            classifier_name, balancing_text, validation_name, accuracy * 100, n_classes
+        ))
+        self$results$insert(999, info)
+
+        # Populate educational panels if requested
+        if (self$options$showSummary) {
+            private$.generateNaturalSummary(thresholded_prediction, task, classifier_name, validation_name)
+        }
+
+        if (self$options$showAbout) {
+            private$.generateAboutPanel()
+        }
+
+        if (self$options$showGlossary) {
+            private$.generateGlossary()
+        }
     },
 
     .populateRandomForestResults = function(model) {
@@ -806,6 +963,177 @@ private = list(
         print(p)
 
         return(TRUE)
+    },
+
+    .generateNaturalSummary = function(thresholded_prediction, task, classifier_name, validation_name) {
+        # Generate copy-ready natural language summary
+        n_total <- task$nrow
+        n_classes <- length(unique(thresholded_prediction$truth))
+        accuracy <- as.numeric(thresholded_prediction$score(msr("classif.acc"), task = NULL))
+
+        # Get confusion matrix for detailed metrics
+        conf_matrix <- thresholded_prediction$confusion
+        class_names <- rownames(conf_matrix)
+
+        html <- "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;'>"
+        html <- paste0(html, "<h4>Clinical Summary</h4>")
+        html <- paste0(html, sprintf("<p><strong>Analysis Type:</strong> %s classification using %s</p>", classifier_name, validation_name))
+        html <- paste0(html, sprintf("<p><strong>Sample Size:</strong> %d patients across %d outcome categories</p>", n_total, n_classes))
+        html <- paste0(html, sprintf("<p><strong>Overall Performance:</strong> The classifier achieved %.1f%% overall accuracy.</p>", accuracy * 100))
+
+        # Add per-class performance
+        html <- paste0(html, "<p><strong>Per-Class Performance:</strong></p><ul>")
+        for (class_name in class_names) {
+            tp <- conf_matrix[class_name, class_name]
+            fp <- sum(conf_matrix[class_name, , drop = TRUE]) - tp
+            fn <- sum(conf_matrix[, class_name, drop = TRUE]) - tp
+
+            sensitivity <- if ((tp + fn) > 0) tp / (tp + fn) else NA
+            precision <- if ((tp + fp) > 0) tp / (tp + fp) else NA
+
+            if (!is.na(sensitivity) && !is.na(precision)) {
+                html <- paste0(html, sprintf(
+                    "<li><strong>%s:</strong> Sensitivity %.1f%%, Precision %.1f%% (%d correctly identified out of %d actual cases)</li>",
+                    class_name, sensitivity * 100, precision * 100, tp, tp + fn
+                ))
+            }
+        }
+        html <- paste0(html, "</ul>")
+
+        # Add clinical interpretation
+        if (accuracy >= 0.90) {
+            interp <- "Excellent classification performance. The model demonstrates strong discriminative ability."
+        } else if (accuracy >= 0.80) {
+            interp <- "Good classification performance. The model shows acceptable discriminative ability for clinical use with appropriate validation."
+        } else if (accuracy >= 0.70) {
+            interp <- "Moderate classification performance. Consider additional predictors or model refinement before clinical application."
+        } else {
+            interp <- "Limited classification performance. The model may require substantial improvement before clinical consideration."
+        }
+        html <- paste0(html, sprintf("<p><strong>Interpretation:</strong> %s</p>", interp))
+        html <- paste0(html, "</div>")
+
+        self$results$naturalSummary$setContent(html)
+    },
+
+    .generateAboutPanel = function() {
+        html <- "<div style='padding: 15px;'>"
+        html <- paste0(html, "<h4>About Clinical Classification Analysis</h4>")
+
+        html <- paste0(html, "<p><strong>What This Analysis Does:</strong></p>")
+        html <- paste0(html, "<p>This module performs supervised machine learning classification for clinical and pathological data. ")
+        html <- paste0(html, "It builds predictive models to classify patients into outcome categories based on clinical and pathological features.</p>")
+
+        html <- paste0(html, "<p><strong>Available Classifiers:</strong></p>")
+        html <- paste0(html, "<ul>")
+        html <- paste0(html, "<li><strong>Decision Trees:</strong> Interpretable tree-based models showing decision paths</li>")
+        html <- paste0(html, "<li><strong>Random Forests:</strong> Ensemble of decision trees for improved accuracy</li>")
+        html <- paste0(html, "<li><strong>K-Nearest Neighbors (KNN):</strong> Instance-based learning using proximity</li>")
+        html <- paste0(html, "<li><strong>Naive Bayes:</strong> Probabilistic classifier based on Bayes' theorem</li>")
+        html <- paste0(html, "<li><strong>Logistic Regression:</strong> Linear model for binary/multiclass outcomes</li>")
+        html <- paste0(html, "<li><strong>Support Vector Machines (SVM):</strong> Margin-based classifier with kernel tricks</li>")
+        html <- paste0(html, "</ul>")
+
+        html <- paste0(html, "<p><strong>Validation Methods:</strong></p>")
+        html <- paste0(html, "<ul>")
+        html <- paste0(html, "<li><strong>Train Set:</strong> Evaluates on training data (optimistic, for exploration only)</li>")
+        html <- paste0(html, "<li><strong>Train/Test Split:</strong> Holdout validation with percentage split</li>")
+        html <- paste0(html, "<li><strong>Cross-Validation:</strong> K-fold CV for robust performance estimation</li>")
+        html <- paste0(html, "</ul>")
+
+        html <- paste0(html, "<p><strong>Class Imbalance Handling:</strong></p>")
+        html <- paste0(html, "<p>This module correctly implements class balancing WITHIN training folds to prevent data leakage, ")
+        html <- paste0(html, "unlike many implementations that balance before splitting (which inflates performance estimates).</p>")
+
+        html <- paste0(html, "<p><strong>Clinical Metrics:</strong></p>")
+        html <- paste0(html, "<p>For binary classification, you can request clinical performance metrics including sensitivity, ")
+        html <- paste0(html, "specificity, positive/negative predictive values, and likelihood ratios with bootstrap confidence intervals.</p>")
+
+        html <- paste0(html, "<p><strong>When to Use:</strong></p>")
+        html <- paste0(html, "<ul>")
+        html <- paste0(html, "<li>Predicting patient outcomes from clinical/pathological features</li>")
+        html <- paste0(html, "<li>Building diagnostic classifiers for disease categories</li>")
+        html <- paste0(html, "<li>Risk stratification models</li>")
+        html <- paste0(html, "<li>Treatment response prediction</li>")
+        html <- paste0(html, "</ul>")
+
+        html <- paste0(html, "<p><strong>Important Notes:</strong></p>")
+        html <- paste0(html, "<ul>")
+        html <- paste0(html, "<li>Always validate on independent test sets before clinical use</li>")
+        html <- paste0(html, "<li>Consider sample size requirements (recommended n≥30 per class)</li>")
+        html <- paste0(html, "<li>Use appropriate validation methods (cross-validation preferred)</li>")
+        html <- paste0(html, "<li>Set random seed for reproducibility</li>")
+        html <- paste0(html, "</ul>")
+
+        html <- paste0(html, "</div>")
+
+        self$results$aboutAnalysis$setContent(html)
+    },
+
+    .generateGlossary = function() {
+        html <- "<div style='padding: 15px;'>"
+        html <- paste0(html, "<h4>Statistical Glossary</h4>")
+
+        html <- paste0(html, "<p><strong>Machine Learning Terms:</strong></p>")
+        html <- paste0(html, "<dl>")
+        html <- paste0(html, "<dt><strong>Accuracy</strong></dt>")
+        html <- paste0(html, "<dd>Proportion of correct predictions across all classes. Note: Can be misleading with imbalanced datasets.</dd>")
+
+        html <- paste0(html, "<dt><strong>Precision (Positive Predictive Value)</strong></dt>")
+        html <- paste0(html, "<dd>Of all predicted positives, what proportion were actually positive? Answers: 'When the test says yes, how often is it right?'</dd>")
+
+        html <- paste0(html, "<dt><strong>Recall (Sensitivity)</strong></dt>")
+        html <- paste0(html, "<dd>Of all actual positives, what proportion were correctly identified? Answers: 'How many true cases did we catch?'</dd>")
+
+        html <- paste0(html, "<dt><strong>F-Score</strong></dt>")
+        html <- paste0(html, "<dd>Harmonic mean of precision and recall, balancing both metrics. Useful when you care equally about false positives and false negatives.</dd>")
+
+        html <- paste0(html, "<dt><strong>AUC (Area Under ROC Curve)</strong></dt>")
+        html <- paste0(html, "<dd>Overall discriminative ability across all thresholds. AUC=0.5 is random guessing, AUC=1.0 is perfect separation. Clinical interpretation: AUC ≥0.9 excellent, 0.8-0.9 good, 0.7-0.8 acceptable, <0.7 poor.</dd>")
+
+        html <- paste0(html, "<dt><strong>Cross-Validation</strong></dt>")
+        html <- paste0(html, "<dd>Divides data into k folds, training on k-1 folds and testing on the remaining fold, rotating through all folds. Provides robust performance estimates less sensitive to random splits.</dd>")
+        html <- paste0(html, "</dl>")
+
+        html <- paste0(html, "<p><strong>Clinical Metrics (Binary Classification):</strong></p>")
+        html <- paste0(html, "<dl>")
+        html <- paste0(html, "<dt><strong>Sensitivity</strong></dt>")
+        html <- paste0(html, "<dd>Probability that a test is positive given the disease is present. Critical for screening tests where missing cases has serious consequences.</dd>")
+
+        html <- paste0(html, "<dt><strong>Specificity</strong></dt>")
+        html <- paste0(html, "<dd>Probability that a test is negative given the disease is absent. Important when false positives lead to unnecessary interventions.</dd>")
+
+        html <- paste0(html, "<dt><strong>PPV (Positive Predictive Value)</strong></dt>")
+        html <- paste0(html, "<dd>Probability of disease given a positive test. Depends on disease prevalence. Answers the patient's question: 'I tested positive, what are the chances I have the disease?'</dd>")
+
+        html <- paste0(html, "<dt><strong>NPV (Negative Predictive Value)</strong></dt>")
+        html <- paste0(html, "<dd>Probability of no disease given a negative test. Also prevalence-dependent. Answers: 'I tested negative, what are the chances I'm truly disease-free?'</dd>")
+
+        html <- paste0(html, "<dt><strong>Likelihood Ratio Positive (LR+)</strong></dt>")
+        html <- paste0(html, "<dd>How much a positive test increases disease odds. LR+ >10 is strong evidence for disease, 5-10 moderate, 2-5 small, <2 minimal.</dd>")
+
+        html <- paste0(html, "<dt><strong>Likelihood Ratio Negative (LR-)</strong></dt>")
+        html <- paste0(html, "<dd>How much a negative test decreases disease odds. LR- <0.1 is strong evidence against disease, 0.1-0.2 moderate, 0.2-0.5 small, >0.5 minimal.</dd>")
+
+        html <- paste0(html, "<dt><strong>Matthews Correlation Coefficient (MCC)</strong></dt>")
+        html <- paste0(html, "<dd>Balanced metric for binary classification, especially with imbalanced classes. Ranges from -1 (perfect disagreement) to +1 (perfect agreement). MCC=0 indicates random prediction. Often preferred over accuracy for imbalanced datasets.</dd>")
+        html <- paste0(html, "</dl>")
+
+        html <- paste0(html, "<p><strong>Class Imbalance Methods:</strong></p>")
+        html <- paste0(html, "<dl>")
+        html <- paste0(html, "<dt><strong>Upsampling</strong></dt>")
+        html <- paste0(html, "<dd>Duplicate minority class samples to balance classes. Simple but may lead to overfitting.</dd>")
+
+        html <- paste0(html, "<dt><strong>Downsampling</strong></dt>")
+        html <- paste0(html, "<dd>Remove majority class samples to balance classes. Discards data but reduces overfitting risk.</dd>")
+
+        html <- paste0(html, "<dt><strong>SMOTE</strong></dt>")
+        html <- paste0(html, "<dd>Synthetic Minority Over-sampling Technique. Creates synthetic examples by interpolating between minority class neighbors. More sophisticated than simple duplication.</dd>")
+        html <- paste0(html, "</dl>")
+
+        html <- paste0(html, "</div>")
+
+        self$results$glossaryPanel$setContent(html)
     }
 )
 )

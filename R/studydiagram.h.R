@@ -268,8 +268,9 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
-        diagram = function() private$.items[["diagram"]],
         plot = function() private$.items[["plot"]],
+        diagram = function() private$.items[["diagram"]],
+        diagramPlot = function() private$.items[["diagramPlot"]],
         interpretation = function() private$.items[["interpretation"]],
         warnings = function() private$.items[["warnings"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
@@ -338,10 +339,19 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `name`="exclusion_reasons", 
                         `title`="Exclusion Reasons", 
                         `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Consistency Diagram",
+                width=800,
+                height=600,
+                renderFun=".plot",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="diagram",
-                title="Study Diagram",
+                title="Diagram Description",
+                visible=TRUE,
                 clearWith=list(
                     "data_format",
                     "diagram_type",
@@ -369,7 +379,7 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "color_scheme")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
+                name="diagramPlot",
                 title="Diagram Plot",
                 width=800,
                 height=600,
@@ -520,8 +530,9 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab Instructions and data format guidance \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab Summary of participant flow through study steps \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$diagram} \tab \tab \tab \tab \tab Interactive study flow diagram \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
+#'   \code{results$diagramPlot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab Explanatory text about the diagram and results \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab Alerts about potential data quality issues \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab Plain-language summary for clinical interpretation \cr

@@ -52,7 +52,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Validate that the dataset contains complete rows.
         if (nrow(self$data) == 0) {
-            stop("Error: The provided dataset contains no rows. Please check your data and try again.")
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'emptyDataset',
+                type = jmvcore::NoticeType$ERROR
+            )
+            notice$setContent('Dataset contains no rows. Please provide data with at least one observation.')
+            self$results$insert(1, notice)
+            return()
         }
 
         dataset <- self$data
@@ -67,26 +74,21 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # Validate that all requested variables exist in the dataset
             missing_vars <- var_list[!var_list %in% names(dataset)]
             if (length(missing_vars) > 0) {
-                stop(paste0(
-                    "Error: The following variables do not exist in the dataset: ",
-                    paste(missing_vars, collapse = ", "),
-                    ". Please check variable names and try again."
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingVariables',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf(
+                    'Variables not found in dataset: %s. Please check variable names and try again.',
+                    paste(missing_vars, collapse = ', ')
                 ))
+                self$results$insert(1, notice)
+                return()
             }
 
             # Safely extract columns
             analysis_data <- dataset[, var_list, drop = FALSE]
-        } else {
-            # This block is reached if self$options$vars is empty,
-            # which means the welcome message (and return) logic above was executed.
-            # So, this else-branch should ideally not be reached during normal execution path.
-            # Keeping it as a fallback, but the early return handles the empty vars case.
-            # To be clear: if vars is empty, it returns early. If not empty, it uses the if block.
-            # The 'else' here (original code's 'else') is for a theoretical 'else' to `length(self$options$vars) > 0`.
-            # Reverting the `var_list <- names(dataset)` behavior here, as per user's request to return early if no variables.
-            # If the code reaches here, it means vars > 0.
-            # We already defined var_list in the `if` branch, so this `else` is dead.
-            stop("Internal error: Should not reach this point with empty vars. Check logic.")
         }
 
         quality_results <- list()
@@ -144,12 +146,68 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             add_summary_row(nm, analysis_data[[nm]])
         }
 
+        # Check for high missingness (>50%) and issue STRONG_WARNING
+        high_missing_vars <- vapply(summary_rows, function(r) {
+            if (!is.na(r$missing_pct) && r$missing_pct > 50) r$variable else NA_character_
+        }, character(1))
+        high_missing_vars <- high_missing_vars[!is.na(high_missing_vars)]
+
+        if (length(high_missing_vars) > 0) {
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'highMissingness',
+                type = jmvcore::NoticeType$STRONG_WARNING
+            )
+            notice$setContent(sprintf(
+                'High missingness detected (>50%% missing): %s. Results may be unreliable. Consider imputation or exclude these variables.',
+                paste(high_missing_vars, collapse = ', ')
+            ))
+            self$results$insert(2, notice)
+        }
+
+        # Check for small sample size and issue STRONG_WARNING
+        n_total <- nrow(analysis_data)
+        if (n_total < 20) {
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'smallSample',
+                type = jmvcore::NoticeType$STRONG_WARNING
+            )
+            notice$setContent(sprintf(
+                'Very small sample size (n=%d). Statistical estimates may be unstable. Recommend n≥30 for reliable quality assessment.',
+                n_total
+            ))
+            self$results$insert(2, notice)
+        }
+
+        # Check for near-zero variance and issue WARNING
+        near_zero_vars <- vapply(summary_rows, function(r) {
+            if (isTRUE(r$near_zero_var)) r$variable else NA_character_
+        }, character(1))
+        near_zero_vars <- near_zero_vars[!is.na(near_zero_vars)]
+
+        if (length(near_zero_vars) > 0) {
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'nearZeroVariance',
+                type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent(sprintf(
+                'Near-zero variance detected: %s. These variables show minimal variation and may not be useful for analysis.',
+                paste(near_zero_vars, collapse = ', ')
+            ))
+            self$results$insert(3, notice)
+        }
+
         # Missing value analysis
         if (self$options$check_missing) {
-            missing_summary <- vapply(names(analysis_data), function(nm) {
-                row <- summary_rows[[which(vapply(summary_rows, function(r) r$variable, character(1)) == nm)]]
-                paste0("Missing: ", row$missing, "/", row$n, " (", row$missing_pct, "%)")
-            }, character(1))
+            # OPTIMIZED: Extract directly from summary_rows instead of re-iterating
+            missing_summary <- setNames(
+                vapply(summary_rows, function(row) {
+                    paste0("Missing: ", row$missing, "/", row$n, " (", row$missing_pct, "%)")
+                }, character(1)),
+                vapply(summary_rows, function(r) r$variable, character(1))
+            )
 
             # Case-level missingness distribution
             case_missing <- rowSums(is.na(analysis_data))
@@ -307,6 +365,42 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             self$results$plotDataTypes$setState(plotData)
         }
 
+        # Generate clinical summaries if requested
+        if (self$options$showSummary) {
+            private$.generateSummary(summary_rows, n_total, high_missing_vars, near_zero_vars, duplicate_rows)
+        }
+
+        if (self$options$showRecommendations) {
+            private$.generateRecommendations(summary_rows, n_total, high_missing_vars, near_zero_vars, duplicate_rows)
+        }
+
+        if (self$options$showExplanations) {
+            private$.generateExplanations()
+        }
+
+        # Add INFO notice for successful completion
+        notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'analysisComplete',
+            type = jmvcore::NoticeType$INFO
+        )
+
+        n_vars_analyzed <- length(names(analysis_data))
+        analyses_enabled <- c()
+        if (self$options$check_duplicates) analyses_enabled <- c(analyses_enabled, "duplicates")
+        if (self$options$check_missing) analyses_enabled <- c(analyses_enabled, "missing values")
+        if (self$options$plot_data_overview || self$options$plot_missing_patterns || self$options$plot_data_types) {
+            analyses_enabled <- c(analyses_enabled, "visual exploration")
+        }
+
+        notice$setContent(sprintf(
+            'Data quality assessment completed for %d variable%s. Analyses: %s.',
+            n_vars_analyzed,
+            if (n_vars_analyzed == 1) "" else "s",
+            paste(analyses_enabled, collapse = ", ")
+        ))
+        self$results$insert(999, notice)
+
     },
 
     .generate_visdat_analysis = function(data) {
@@ -314,13 +408,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Safely require visdat
         if (!requireNamespace("visdat", quietly = TRUE)) {
-            return(paste0(
-                "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                "<h4>visdat Package Required</h4>",
-                "<p>The visdat package is required for visual data exploration.</p>",
-                "<p>Please install it using: <code>install.packages('visdat')</code></p>",
-                "</div>"
-            ))
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'visdatMissing',
+                type = jmvcore::NoticeType$WARNING
+            )
+            notice$setContent('visdat package not installed. Visual exploration disabled. Install via: install.packages("visdat")')
+            self$results$insert(2, notice)
+            return("")
         }
 
         missing_threshold <- self$options$missing_threshold_visual
@@ -550,46 +645,516 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         })
     },
 
-    .plotValueExpectations = function(image, ggtheme, theme, ...) {
-        # Get plot state
-        plotData <- image$state
+    .generateSummary = function(summary_rows, n_total, high_missing_vars, near_zero_vars, duplicate_rows) {
+        # Generate plain-language summary of data quality assessment
 
-        if (is.null(plotData) || is.null(plotData$data) || nrow(plotData$data) == 0) {
-            return(FALSE)
+        n_vars_analyzed <- length(summary_rows)
+        threshold <- self$options$missing_threshold_visual
+
+        # Calculate maximum missing percentage
+        max_missing_pct <- if (length(summary_rows) > 0) {
+            max(vapply(summary_rows, function(r) if (!is.na(r$missing_pct)) r$missing_pct else 0, numeric(1)))
+        } else {
+            0
         }
 
-        # Check if visdat package is available
-        if (!requireNamespace("visdat", quietly = TRUE)) {
-            return(FALSE)
+        # Determine overall assessment
+        overall_assessment <- if (length(high_missing_vars) == 0 && n_total >= 30 && length(near_zero_vars) == 0) {
+            "Good - data quality is acceptable for analysis"
+        } else if (n_total < 20 || length(high_missing_vars) > 0) {
+            "Needs attention - significant quality issues detected"
+        } else {
+            "Acceptable - minor quality issues present"
         }
 
-        tryCatch({
-            # Create value expectations plot
-            # NOTE: vis_expect requires expectation formula specification
-            # Using vis_dat as visual overview until expectations are configurable
-            plot <- visdat::vis_dat(plotData$data) +
-                ggplot2::labs(
-                    title = "Value Expectations Analysis",
-                    subtitle = "Visual overview of data types and missingness"
-                ) +
-                ggtheme +
-                ggplot2::theme(
-                    axis.text.x = ggplot2::element_text(
-                        angle = 45,
-                        hjust = 0,
-                        vjust = 0.5,
-                        margin = ggplot2::margin(t = 5)
-                    ),
-                    plot.margin = ggplot2::margin(t = 5, r = 5, b = 40, l = 5)
+        # Get duplicate info
+        dup_count <- if (!is.null(duplicate_rows) && !is.na(duplicate_rows)) duplicate_rows else 0
+        dup_type <- if (self$options$complete_cases_only) "rows" else "values"
+
+        # Count variables exceeding threshold
+        vars_above_threshold <- sum(vapply(summary_rows, function(r) {
+            !is.na(r$missing_pct) && r$missing_pct > threshold
+        }, logical(1)))
+
+        summary_html <- paste0(
+            "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
+            "<h3 style='color: #2e7d32; margin-top: 0;'>📊 Plain-Language Summary</h3>",
+
+            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<p style='font-size: 1.1em; line-height: 1.6;'>",
+            sprintf("Analyzed <strong>%d variable%s</strong> from <strong>%d observation%s</strong>. ",
+                    n_vars_analyzed, if (n_vars_analyzed == 1) "" else "s",
+                    n_total, if (n_total == 1) "" else "s"),
+            "</p>",
+
+            "<h4 style='color: #2e7d32; margin-top: 15px;'>Key Findings:</h4>",
+            "<ul style='line-height: 1.8;'>",
+
+            # Missing data summary
+            if (self$options$check_missing) {
+                sprintf("<li><strong>Missing Data:</strong> %d variable%s exceed%s %d%% missing threshold",
+                        vars_above_threshold,
+                        if (vars_above_threshold == 1) "" else "s",
+                        if (vars_above_threshold == 1) "s" else "",
+                        threshold)
+            } else {
+                ""
+            },
+            if (length(high_missing_vars) > 0) {
+                sprintf(" (highest: <em>%s</em> at %.1f%% missing)</li>",
+                        high_missing_vars[1], max_missing_pct)
+            } else if (self$options$check_missing) {
+                "</li>"
+            } else {
+                ""
+            },
+
+            # Duplicate summary
+            if (self$options$check_duplicates) {
+                sprintf("<li><strong>Duplicates:</strong> %d duplicate %s detected%s</li>",
+                        dup_count, dup_type,
+                        if (dup_count > 0) " - review for data entry errors or valid repetitions" else "")
+            } else {
+                ""
+            },
+
+            # Data quality flags
+            if (length(near_zero_vars) > 0) {
+                sprintf("<li><strong>Near-Zero Variance:</strong> %d variable%s show%s minimal variation (<em>%s</em>)</li>",
+                        length(near_zero_vars),
+                        if (length(near_zero_vars) == 1) "" else "s",
+                        if (length(near_zero_vars) == 1) "s" else "",
+                        paste(near_zero_vars, collapse = ", "))
+            } else {
+                ""
+            },
+
+            # Sample size assessment
+            sprintf("<li><strong>Sample Size:</strong> n=%d ", n_total),
+            if (n_total < 20) {
+                "- very small, estimates may be unstable"
+            } else if (n_total < 30) {
+                "- small, use caution with complex analyses"
+            } else if (n_total < 100) {
+                "- adequate for basic analyses"
+            } else {
+                "- good for most statistical analyses"
+            },
+            "</li>",
+
+            "</ul>",
+            "</div>",
+
+            # Overall assessment box
+            sprintf(
+                "<div style='background-color: %s; padding: 15px; border-radius: 5px; border-left: 4px solid %s;'>",
+                if (length(high_missing_vars) == 0 && n_total >= 30) "#d1f2eb" else "#fff3cd",
+                if (length(high_missing_vars) == 0 && n_total >= 30) "#00695c" else "#ff8f00"
+            ),
+            "<p style='margin: 0; font-weight: bold;'>Overall Assessment: ", overall_assessment, "</p>",
+            "</div>",
+
+            "<p style='margin-top: 15px; font-size: 0.9em; color: #555;'>",
+            "<em>💡 This summary is written in plain language for clinical documentation. ",
+            "Copy this text for inclusion in study reports, quality control logs, or data management plans.</em>",
+            "</p>",
+
+            "</div>"
+        )
+
+        self$results$summary$setContent(summary_html)
+    },
+
+    .generateRecommendations = function(summary_rows, n_total, high_missing_vars, near_zero_vars, duplicate_rows) {
+        # Generate actionable recommendations for addressing quality issues
+
+        recs_html <- paste0(
+            "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; border-left: 5px solid #ff8f00;'>",
+            "<h3 style='color: #e65100; margin-top: 0;'>⚡ Recommended Actions</h3>",
+
+            "<p style='font-size: 1.05em; margin-bottom: 20px;'>",
+            "Based on the quality assessment, here are specific actions to improve your data before analysis:",
+            "</p>"
+        )
+
+        has_recommendations <- FALSE
+
+        # High missingness recommendations
+        if (length(high_missing_vars) > 0) {
+            has_recommendations <- TRUE
+            recs_html <- paste0(recs_html,
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='color: #e65100; margin-top: 0;'>🔴 High Missingness (>50%)</h4>",
+                "<p><strong>Variables affected:</strong> ", paste(high_missing_vars, collapse = ", "), "</p>",
+                "<p><strong>Actions:</strong></p>",
+                "<ol style='line-height: 1.8;'>",
+                "<li><strong>Investigate root cause:</strong> Why is data missing? (not collected, measurement failure, data entry error)</li>",
+                "<li><strong>Consider exclusion:</strong> Variables with >50% missing often provide limited information</li>",
+                "<li><strong>If retaining, use imputation:</strong>",
+                "<ul>",
+                "<li>Multiple imputation (mice package): <code>mice::mice(data, m=5, method='pmm')</code></li>",
+                "<li>Only if missing data is MAR (Missing At Random) - check Little's MCAR test above</li>",
+                "<li>Report imputation method and sensitivity analysis in your manuscript</li>",
+                "</ul></li>",
+                "<li><strong>Alternative:</strong> Restrict to complete cases but report potential selection bias</li>",
+                "</ol>",
+                "<p style='background-color: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
+                "<strong>⚠️ Warning:</strong> Listwise deletion (complete-case analysis) with >50% missing can severely bias results. ",
+                "Consult a statistician if you're uncertain about the best approach.",
+                "</p>",
+                "</div>"
+            )
+        }
+
+        # Moderate missingness (10-50%)
+        moderate_missing_vars <- vapply(summary_rows, function(r) {
+            if (!is.na(r$missing_pct) && r$missing_pct > 10 && r$missing_pct <= 50) r$variable else NA_character_
+        }, character(1))
+        moderate_missing_vars <- moderate_missing_vars[!is.na(moderate_missing_vars)]
+
+        if (length(moderate_missing_vars) > 0) {
+            has_recommendations <- TRUE
+            recs_html <- paste0(recs_html,
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='color: #ff8f00; margin-top: 0;'>🟡 Moderate Missingness (10-50%)</h4>",
+                "<p><strong>Variables affected:</strong> ", paste(moderate_missing_vars, collapse = ", "), "</p>",
+                "<p><strong>Recommended approach:</strong></p>",
+                "<ul style='line-height: 1.8;'>",
+                "<li><strong>Preferred:</strong> Multiple imputation with sensitivity analysis</li>",
+                "<li><strong>Acceptable:</strong> Complete-case analysis if MCAR confirmed (Little's test p>0.05)</li>",
+                "<li><strong>Report:</strong> Compare baseline characteristics between complete vs. incomplete cases</li>",
+                "<li><strong>Document:</strong> State missingness mechanism and handling method in Methods section</li>",
+                "</ul>",
+                "</div>"
+            )
+        }
+
+        # Duplicate recommendations
+        dup_count <- if (!is.null(duplicate_rows) && !is.na(duplicate_rows)) duplicate_rows else 0
+        if (dup_count > 0) {
+            has_recommendations <- TRUE
+            dup_type <- if (self$options$complete_cases_only) "duplicate rows" else "duplicate values"
+            recs_html <- paste0(recs_html,
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='color: #e65100; margin-top: 0;'>🔴 ", dup_count, " ", dup_type, " Detected</h4>",
+                "<p><strong>Actions:</strong></p>",
+                "<ol style='line-height: 1.8;'>",
+                if (self$options$complete_cases_only) {
+                    paste0(
+                        "<li><strong>Review patient identifiers:</strong> Check if duplicates represent same patient (data entry error) or different patients</li>",
+                        "<li><strong>If same patient:</strong> Merge records, keeping most complete/recent data</li>",
+                        "<li><strong>If different patients:</strong> Check for ID assignment errors</li>",
+                        "<li><strong>Remove true duplicates:</strong> Use <code>dplyr::distinct()</code> after verification</li>"
+                    )
+                } else {
+                    paste0(
+                        "<li><strong>For categorical variables:</strong> High duplicates are normal (e.g., many patients with 'Male' gender)</li>",
+                        "<li><strong>For continuous variables:</strong> Investigate if duplicates are biologically plausible</li>",
+                        "<li><strong>For ID variables:</strong> Duplicates likely indicate data errors - review source data</li>"
+                    )
+                },
+                "</ol>",
+                "</div>"
+            )
+        }
+
+        # Near-zero variance recommendations
+        if (length(near_zero_vars) > 0) {
+            has_recommendations <- TRUE
+            recs_html <- paste0(recs_html,
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='color: #ff8f00; margin-top: 0;'>🟡 Near-Zero Variance Variables</h4>",
+                "<p><strong>Variables affected:</strong> ", paste(near_zero_vars, collapse = ", "), "</p>",
+                "<p><strong>Actions:</strong></p>",
+                "<ul style='line-height: 1.8;'>",
+                "<li><strong>Exclude from models:</strong> Variables with no variation cannot predict outcomes</li>",
+                "<li><strong>Investigate:</strong> Is lack of variation a data quality issue or a true population characteristic?</li>",
+                "<li><strong>Consider:</strong> May still be useful for descriptive statistics or subgroup identification</li>",
+                "<li><strong>Remove before modeling:</strong> Use <code>caret::nearZeroVar()</code> for automated detection</li>",
+                "</ul>",
+                "</div>"
+            )
+        }
+
+        # Small sample recommendations
+        if (n_total < 20) {
+            has_recommendations <- TRUE
+            recs_html <- paste0(recs_html,
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='color: #e65100; margin-top: 0;'>🔴 Very Small Sample Size (n=", n_total, ")</h4>",
+                "<p><strong>Critical limitations:</strong></p>",
+                "<ul style='line-height: 1.8;'>",
+                "<li><strong>Statistical power:</strong> Severely underpowered for most analyses</li>",
+                "<li><strong>Model stability:</strong> Regression models may not converge or produce unreliable estimates</li>",
+                "<li><strong>Generalizability:</strong> Results may not generalize beyond this specific sample</li>",
+                "</ul>",
+                "<p><strong>Recommended actions:</strong></p>",
+                "<ol style='line-height: 1.8;'>",
+                "<li><strong>Primary recommendation:</strong> Increase sample size if possible (target n≥30 minimum)</li>",
+                "<li><strong>If sample size fixed:</strong>",
+                "<ul>",
+                "<li>Limit to descriptive statistics only</li>",
+                "<li>Use exact tests instead of asymptotic (e.g., Fisher's exact vs. chi-square)</li>",
+                "<li>Avoid multivariable regression (rule of thumb: need ≥10 events per predictor)</li>",
+                "<li>Consider case series or qualitative analysis instead</li>",
+                "</ul></li>",
+                "<li><strong>Reporting:</strong> Clearly state sample size limitation in Discussion section</li>",
+                "</ol>",
+                "</div>"
+            )
+        } else if (n_total < 30) {
+            has_recommendations <- TRUE
+            recs_html <- paste0(recs_html,
+                "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='color: #ff8f00; margin-top: 0;'>🟡 Small Sample Size (n=", n_total, ")</h4>",
+                "<p><strong>Recommendations:</strong></p>",
+                "<ul style='line-height: 1.8;'>",
+                "<li><strong>Prefer exact tests:</strong> Use exact methods when possible (Fisher's exact, permutation tests)</li>",
+                "<li><strong>Limit model complexity:</strong> Restrict to ≤", floor(n_total/10), " predictor variables in regression</li>",
+                "<li><strong>Use cross-validation:</strong> LOOCV (leave-one-out) for model validation instead of train/test split</li>",
+                "<li><strong>Report uncertainty:</strong> Always include confidence intervals, not just p-values</li>",
+                "<li><strong>Consider pilot study:</strong> Frame results as preliminary findings requiring validation</li>",
+                "</ul>",
+                "</div>"
+            )
+        }
+
+        # If no issues detected
+        if (!has_recommendations) {
+            recs_html <- paste0(recs_html,
+                "<div style='background-color: #d1f2eb; padding: 15px; border-radius: 5px;'>",
+                "<h4 style='color: #00695c; margin-top: 0;'>✅ No Critical Issues Detected</h4>",
+                "<p style='line-height: 1.8;'>",
+                "Your data quality appears acceptable for analysis. However, always:",
+                "</p>",
+                "<ul style='line-height: 1.8;'>",
+                "<li>Check assumptions specific to your planned analysis (normality, homoscedasticity, etc.)</li>",
+                "<li>Visualize distributions and relationships before modeling</li>",
+                "<li>Screen for outliers that may influence results</li>",
+                "<li>Document any data transformations or exclusions in your analysis plan</li>",
+                "</ul>",
+                "</div>"
+            )
+        }
+
+        recs_html <- paste0(recs_html,
+            "<p style='margin-top: 20px; font-size: 0.9em; color: #555;'>",
+            "<em>💡 These recommendations are based on general statistical best practices. ",
+            "Consult with a biostatistician for guidance specific to your research question and study design.</em>",
+            "</p>",
+            "</div>"
+        )
+
+        self$results$recommendations$setContent(recs_html)
+    },
+
+    .generateExplanations = function() {
+        # Generate educational explanations of quality metrics
+
+        expl_html <- paste0(
+            "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 5px solid #1976d2;'>",
+            "<h3 style='color: #0d47a1; margin-top: 0;'>📚 Understanding Quality Metrics</h3>",
+
+            "<p style='font-size: 1.05em; margin-bottom: 20px;'>",
+            "This guide explains the quality metrics used in this analysis and how to interpret them.",
+            "</p>",
+
+            # Missing Data section
+            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<h4 style='color: #1976d2; margin-top: 0;'>Missing Data Analysis</h4>",
+
+            "<p><strong>What it measures:</strong> Percentage of observations with missing values for each variable.</p>",
+
+            "<p><strong>Interpretation guidelines:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>&lt;5% missing:</strong> Excellent - minimal impact on analysis</li>",
+            "<li><strong>5-10% missing:</strong> Acceptable - document and address appropriately</li>",
+            "<li><strong>10-20% missing:</strong> Moderate concern - may require imputation</li>",
+            "<li><strong>&gt;20% missing:</strong> Serious concern - results may be biased</li>",
+            "<li><strong>&gt;50% missing:</strong> Critical - consider excluding variable</li>",
+            "</ul>",
+
+            "<p><strong>Little's MCAR Test:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>What it tests:</strong> Whether missing data is completely random (MCAR) vs. systematic (MAR/MNAR)</li>",
+            "<li><strong>Interpretation:</strong>",
+            "<ul>",
+            "<li>p > 0.05: Missing data is MCAR (safe to use complete-case analysis or imputation)</li>",
+            "<li>p ≤ 0.05: Missing data is NOT random (use caution with complete-case analysis; prefer imputation)</li>",
+            "</ul></li>",
+            "<li><strong>Clinical relevance:</strong> If data is MCAR, deleting cases doesn't bias results (but reduces power)</li>",
+            "</ul>",
+            "</div>",
+
+            # Duplicate Detection section
+            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<h4 style='color: #1976d2; margin-top: 0;'>Duplicate Detection</h4>",
+
+            "<p><strong>Two types checked:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>Duplicate rows:</strong> Identical combinations across all selected variables (may indicate data entry errors or repeated measurements)</li>",
+            "<li><strong>Duplicate values:</strong> Repeated values within each variable (normal for categorical data, unusual for IDs)</li>",
+            "</ul>",
+
+            "<p><strong>When duplicates are concerning:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li>Patient ID variables should have ~0% duplicates</li>",
+            "<li>Exact matches across many variables may indicate copy-paste errors</li>",
+            "<li>Unexpected patterns (e.g., same tumor size for multiple patients)</li>",
+            "</ul>",
+
+            "<p><strong>When duplicates are normal:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li>Categorical variables (Gender, Stage, etc.) expected to have many duplicates</li>",
+            "<li>Rounded measurements (e.g., age in years)</li>",
+            "<li>Binary outcomes (yes/no, positive/negative)</li>",
+            "</ul>",
+            "</div>",
+
+            # Near-Zero Variance section
+            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<h4 style='color: #1976d2; margin-top: 0;'>Near-Zero Variance</h4>",
+
+            "<p><strong>What it means:</strong> Variable shows almost no variation across observations (standard deviation near zero).</p>",
+
+            "<p><strong>Why it matters:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li>Cannot predict outcomes if predictor doesn't vary</li>",
+            "<li>May cause numerical instability in regression models</li>",
+            "<li>Often indicates all patients have same value (e.g., all 'Stage IV')</li>",
+            "</ul>",
+
+            "<p><strong>Actions:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>For analysis:</strong> Exclude from regression models</li>",
+            "<li><strong>For reporting:</strong> State as constant in descriptive statistics</li>",
+            "<li><strong>For study design:</strong> May indicate homogeneous sample (affects generalizability)</li>",
+            "</ul>",
+            "</div>",
+
+            # High Cardinality section
+            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<h4 style='color: #1976d2; margin-top: 0;'>High Cardinality</h4>",
+
+            "<p><strong>Definition:</strong> Variable has >50 unique values AND these represent >50% of observations.</p>",
+
+            "<p><strong>Examples:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li>Patient ID (each patient unique) - very high cardinality</li>",
+            "<li>Age in years (20-90) - moderate cardinality</li>",
+            "<li>Tumor size in mm (continuous) - high cardinality</li>",
+            "</ul>",
+
+            "<p><strong>Implications:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>For categorical variables:</strong> May need to collapse categories (e.g., group age into bands)</li>",
+            "<li><strong>For continuous variables:</strong> Normal and expected</li>",
+            "<li><strong>For factors in regression:</strong> High cardinality increases parameters and reduces power</li>",
+            "</ul>",
+            "</div>",
+
+            # Outliers section
+            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<h4 style='color: #1976d2; margin-top: 0;'>Outlier Detection (IQR Method)</h4>",
+
+            "<p><strong>Method used:</strong> Tukey's IQR (Interquartile Range) rule</p>",
+
+            "<p><strong>Formula:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li>Lower bound = Q1 - 1.5 × IQR</li>",
+            "<li>Upper bound = Q3 + 1.5 × IQR</li>",
+            "<li>Values outside these bounds flagged as outliers</li>",
+            "</ul>",
+
+            "<p><strong>Interpretation:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>0-2 outliers:</strong> Normal for most datasets</li>",
+            "<li><strong>3-5 outliers:</strong> Review for data entry errors</li>",
+            "<li><strong>>5 outliers:</strong> May indicate skewed distribution or systematic issues</li>",
+            "</ul>",
+
+            "<p><strong>Actions:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>Don't automatically delete outliers</strong> - may represent true biological variation</li>",
+            "<li>Verify against source data for transcription errors</li>",
+            "<li>Consider robust statistical methods (median-based, trimmed means)</li>",
+            "<li>Run sensitivity analysis with/without outliers</li>",
+            "</ul>",
+            "</div>",
+
+            # Sample Size section
+            "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+            "<h4 style='color: #1976d2; margin-top: 0;'>Sample Size Guidelines</h4>",
+
+            "<p><strong>General rules of thumb:</strong></p>",
+            "<table border='1' cellspacing='0' cellpadding='8' style='width:100%; border-collapse: collapse;'>",
+            "<tr style='background-color: #f5f5f5;'>",
+            "<th>Sample Size</th><th>Analysis Type</th><th>Recommendation</th>",
+            "</tr>",
+            "<tr><td>n &lt; 20</td><td>Any</td><td>Descriptive only; avoid inference</td></tr>",
+            "<tr><td>n = 20-30</td><td>Basic</td><td>Simple comparisons; exact tests</td></tr>",
+            "<tr><td>n = 30-100</td><td>Standard</td><td>Most analyses acceptable; limit predictors</td></tr>",
+            "<tr><td>n = 100-500</td><td>Multivariable</td><td>Regression with multiple predictors OK</td></tr>",
+            "<tr><td>n &gt; 500</td><td>Advanced</td><td>Machine learning, complex models feasible</td></tr>",
+            "</table>",
+
+            "<p style='margin-top: 15px;'><strong>Events per variable (EPV) rule:</strong></p>",
+            "<ul style='line-height: 1.8;'>",
+            "<li><strong>Minimum:</strong> 10 events per predictor variable in regression</li>",
+            "<li><strong>Example:</strong> For binary outcome with 50 events, limit to 5 predictors</li>",
+            "<li><strong>Survival analysis:</strong> Need 10 deaths/events per covariate in Cox model</li>",
+            "</ul>",
+            "</div>",
+
+            # Visual exploration section
+            if (self$options$plot_data_overview || self$options$plot_missing_patterns || self$options$plot_data_types) {
+                paste0(
+                    "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'>Visual Data Exploration (visdat)</h4>",
+
+                    "<p><strong>Package background:</strong> visdat provides visual exploratory data analysis based on research published in the R Journal (2019).</p>",
+
+                    "<p><strong>Plot interpretations:</strong></p>",
+                    "<ul style='line-height: 1.8;'>",
+                    if (self$options$plot_data_overview) {
+                        "<li><strong>Data Overview (vis_dat):</strong> Shows data types and missing patterns in matrix format. Each row = observation, each column = variable. Colors indicate data type. Gray = missing.</li>"
+                    } else {
+                        ""
+                    },
+                    if (self$options$plot_missing_patterns) {
+                        "<li><strong>Missing Patterns (vis_miss):</strong> Highlights missing data patterns. Variables sorted by missingness. Red bands indicate variables exceeding threshold. Look for systematic patterns (MAR) vs. random scatter (MCAR).</li>"
+                    } else {
+                        ""
+                    },
+                    if (self$options$plot_data_types) {
+                        "<li><strong>Data Types (vis_guess):</strong> Shows R's guess at appropriate data type. Useful for validating that character variables should be factors, numeric variables aren't accidentally stored as text, etc.</li>"
+                    } else {
+                        ""
+                    },
+                    "</ul>",
+
+                    "<p><strong>Clinical applications:</strong></p>",
+                    "<ul style='line-height: 1.8;'>",
+                    "<li>Quickly spot data collection issues (e.g., missing Stage for all patients after certain date)</li>",
+                    "<li>Identify variables that should be recoded (e.g., '999' used as missing indicator)</li>",
+                    "<li>Verify data types match intended analysis (factors for categorical, numeric for continuous)</li>",
+                    "</ul>",
+                    "</div>"
                 )
+            } else {
+                ""
+            },
 
-            print(plot)
-            return(TRUE)
+            # Footer
+            "<p style='margin-top: 20px; font-size: 0.9em; color: #555;'>",
+            "<em>📖 These explanations provide general guidance for clinical researchers. ",
+            "For detailed statistical consultation, work with a biostatistician familiar with your research domain.</em>",
+            "</p>",
 
-        }, error = function(e) {
-            warning(paste("Value expectations plot generation failed:", e$message))
-            return(FALSE)
-        })
+            "</div>"
+        )
+
+        self$results$explanations$setContent(expl_html)
     }
 
     )

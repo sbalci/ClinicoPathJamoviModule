@@ -1,0 +1,664 @@
+---
+title: "ROC Analysis for Diagnostic Tests"
+subtitle: "Evaluating Biomarker Performance and Optimal Cutpoints"
+author: "ClinicoPath Tutorial Series"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+    number-sections: true
+---
+
+# Overview {#sec-overview}
+
+Learn how to evaluate **diagnostic test performance** using ROC analysis:
+
+- ✅ Create ROC curves with confidence intervals
+- ✅ Calculate Area Under the Curve (AUC)
+- ✅ Determine optimal cutpoints (Youden index, cost-benefit)
+- ✅ Calculate sensitivity, specificity, PPV, NPV
+- ✅ Compare multiple biomarkers
+- ✅ Interpret clinical implications
+
+**Prerequisites:** [Tutorial 1: Getting Started](01-getting-started.qmd)
+**Time Required:** 45 minutes
+**Dataset:** `her2_breast_cancer_data` (HER2 testing validation, n=150)
+
+---
+
+# Clinical Scenario {#sec-scenario}
+
+## Study Design
+
+You're validating a **new quantitative HER2 assay** for breast cancer diagnosis:
+
+- **Gold Standard:** IHC + FISH (HER2-positive vs. HER2-negative)
+- **New Test:** Automated digital pathology score (0-100)
+- **Goal:** Determine optimal cutpoint for HER2-positive classification
+- **Sample:** 150 breast cancer cases
+  - 75 HER2-positive (by gold standard)
+  - 75 HER2-negative (by gold standard)
+
+## Research Questions
+
+1. How well does the digital score discriminate HER2-positive from negative?
+2. What is the optimal cutpoint for clinical use?
+3. At that cutpoint, what are sensitivity and specificity?
+4. How does this compare to standard visual scoring?
+5. Should we use different cutpoints for different clinical scenarios?
+
+::: {.callout-important}
+## Why ROC Analysis?
+ROC analysis evaluates **discrimination ability** across all possible cutpoints, helping you choose the threshold that best balances sensitivity and specificity for your clinical context.
+:::
+
+---
+
+# Understanding ROC Curves {#sec-understanding}
+
+## Key Concepts
+
+### What is a ROC Curve?
+
+**ROC = Receiver Operating Characteristic**
+
+A ROC curve plots:
+- **Y-axis:** Sensitivity (True Positive Rate)
+- **X-axis:** 1 - Specificity (False Positive Rate)
+- **Diagonal line:** Random chance (AUC = 0.5)
+- **Perfect test:** Passes through top-left corner (AUC = 1.0)
+
+```
+1.0 ┤           ●  ← Perfect test
+    │         ●/
+    │       ●/
+    │     ●/
+S   │   ●/  ← Good test (AUC = 0.85)
+e 0.5┤ ●/
+n   │●/  ← Random chance (AUC = 0.5)
+s   │/
+    │/
+0.0 └──────────────
+   0.0    0.5    1.0
+      1 - Specificity
+```
+
+### Interpreting AUC
+
+| AUC Range | Discrimination | Clinical Utility |
+|-----------|----------------|------------------|
+| 0.90-1.00 | Excellent | Outstanding test |
+| 0.80-0.90 | Good | Useful in most cases |
+| 0.70-0.80 | Fair | May be useful with other tests |
+| 0.60-0.70 | Poor | Limited utility |
+| 0.50-0.60 | Fail | No better than chance |
+
+### Sensitivity vs. Specificity Trade-off
+
+**Sensitivity (True Positive Rate):**
+```
+Sensitivity = TP / (TP + FN)
+            = Diseased patients correctly identified
+            = "How good at detecting disease?"
+```
+
+**Specificity (True Negative Rate):**
+```
+Specificity = TN / (TN + FP)
+            = Healthy patients correctly identified
+            = "How good at ruling out disease?"
+```
+
+**The Trade-off:**
+- ↑ Cutpoint → ↑ Specificity, ↓ Sensitivity (fewer false positives)
+- ↓ Cutpoint → ↑ Sensitivity, ↓ Specificity (fewer false negatives)
+
+::: {.callout-note}
+## Clinical Context Matters
+- **Screening test:** Prioritize sensitivity (don't miss disease)
+- **Confirmatory test:** Prioritize specificity (avoid false positives)
+- **Treatment decision:** Balance based on harm of errors
+:::
+
+---
+
+# Step 1: Basic ROC Analysis {#sec-basic-roc}
+
+## Load Data
+
+1. Open jamovi
+2. **File** → **Open** → **Data Library**
+3. Select `her2_breast_cancer_data`
+
+**Dataset Structure:**
+
+| Variable | Type | Values | Description |
+|----------|------|--------|-------------|
+| `PatientID` | ID | BC001-BC150 | Patient identifier |
+| `HER2_Status` | Nominal | Positive / Negative | Gold standard (IHC+FISH) |
+| `Digital_Score` | Continuous | 0-100 | New automated score |
+| `Visual_Score` | Ordinal | 0 / 1+ / 2+ / 3+ | Standard IHC scoring |
+| `Age` | Continuous | 28-82 years | Patient age |
+| `TumorSize` | Continuous | 0.8-8.5 cm | Tumor diameter |
+
+## Run ROC Analysis
+
+1. **Analyses** → **meddecideD** → **ROC Analysis**
+2. Configure:
+   - **Test variable:** `Digital_Score` (continuous biomarker)
+   - **State variable:** `HER2_Status` (gold standard)
+   - **Positive class:** `Positive` (what you're trying to detect)
+
+### Essential Options
+
+**Confidence Intervals:**
+- ☑ AUC with 95% CI
+- Method: DeLong (most common)
+- Alternative: Bootstrap (2000 iterations) for small samples
+
+**Coordinates:**
+- ☑ Sensitivity and specificity at all cutpoints
+- ☑ Optimal cutpoint by Youden index
+- ☑ Show PPV and NPV (requires prevalence)
+
+**Plot Options:**
+- ☑ ROC curve
+- ☑ 95% confidence band
+- ☑ Diagonal reference line
+- ☑ Mark optimal cutpoint
+- ☑ Display AUC on plot
+
+## Interpret Results
+
+### ROC Curve Output
+
+```
+════════════════════════════════════════════════════════
+ROC Analysis: Digital Score for HER2 Status
+════════════════════════════════════════════════════════
+
+Area Under Curve (AUC)
+────────────────────────────────────────────────────────
+AUC:              0.872
+95% CI:          (0.813 - 0.931)
+Standard Error:   0.030
+p-value:         <0.001
+
+Interpretation: Good discrimination (AUC > 0.80)
+────────────────────────────────────────────────────────
+```
+
+**What This Means:**
+
+✅ **AUC = 0.872** (Good discrimination)
+- 87.2% chance that randomly selected HER2-positive patient scores higher than randomly selected HER2-negative patient
+- Significantly better than chance (p < 0.001)
+
+✅ **95% CI: 0.813-0.931** (Narrow confidence interval)
+- Lower bound > 0.80 → Confident it's "good"
+- Sample size adequate for stable estimate
+
+### Optimal Cutpoint
+
+```
+Optimal Cutpoint by Youden Index
+────────────────────────────────────────────────────────
+Cutpoint:             52.3
+Youden Index:         0.653 (J = Sensitivity + Specificity - 1)
+
+Performance at Cutpoint 52.3:
+────────────────────────────────────────────────────────
+Sensitivity:          84.0% (95% CI: 74.0-91.2%)
+Specificity:          81.3% (95% CI: 70.7-89.4%)
+PPV:                  81.8% (95% CI: 71.6-89.3%)
+NPV:                  83.6% (95% CI: 73.3-90.9%)
+Accuracy:             82.7%
+Likelihood Ratio +:   4.49
+Likelihood Ratio -:   0.20
+────────────────────────────────────────────────────────
+```
+
+**Interpretation:**
+
+✅ **Cutpoint = 52.3**
+- Scores ≥52.3 → Classify as HER2-positive
+- Scores <52.3 → Classify as HER2-negative
+
+✅ **Balanced Performance:**
+- Sensitivity 84% → Detects 84% of true HER2-positive cases
+- Specificity 81% → Correctly identifies 81% of HER2-negative cases
+- Youden Index 0.653 → Excellent balance
+
+✅ **Positive Predictive Value (PPV) = 81.8%**
+- If test is positive (≥52.3), 82% chance truly HER2-positive
+- Depends on prevalence (50% in this study)
+
+✅ **Negative Predictive Value (NPV) = 83.6%**
+- If test is negative (<52.3), 84% chance truly HER2-negative
+
+### Coordinates Table
+
+```
+Digital Score Cutpoint  |  Sensitivity  |  Specificity  |  Youden J
+───────────────────────────────────────────────────────────────────
+0                       |  100.0%       |    0.0%       |  0.000
+10                      |  100.0%       |   10.7%       |  0.107
+20                      |   98.7%       |   29.3%       |  0.280
+30                      |   96.0%       |   48.0%       |  0.440
+40                      |   92.0%       |   65.3%       |  0.573
+50                      |   86.7%       |   78.7%       |  0.653
+52.3 ← OPTIMAL          |   84.0%       |   81.3%       |  0.653
+60                      |   77.3%       |   89.3%       |  0.667
+70                      |   62.7%       |   94.7%       |  0.573
+80                      |   41.3%       |   98.7%       |  0.400
+90                      |   17.3%       |  100.0%       |  0.173
+100                     |    0.0%       |  100.0%       |  0.000
+```
+
+**Key Insights:**
+
+1. **At cutpoint 60:** Sensitivity 77%, Specificity 89%
+   - Use if false positives are costly (confirmatory test)
+
+2. **At cutpoint 40:** Sensitivity 92%, Specificity 65%
+   - Use if false negatives are costly (screening test)
+
+3. **Youden maximum at 52-60 range**
+   - Any cutpoint in this range provides excellent performance
+
+---
+
+# Step 2: Comparing Multiple Tests {#sec-comparing}
+
+## Add Visual Score Comparison
+
+Now compare digital score to standard visual IHC scoring:
+
+1. In **ROC Analysis**, click **Add Test**
+2. **Test variable:** `Visual_Score_Numeric` (convert ordinal to numeric)
+3. Keep same **State variable** and **Positive class**
+
+### Comparison Results
+
+```
+ROC Curve Comparison
+════════════════════════════════════════════════════════
+Test                    AUC      95% CI         p-value
+────────────────────────────────────────────────────────
+Digital Score          0.872   (0.813-0.931)    <0.001
+Visual Score           0.798   (0.728-0.868)    <0.001
+────────────────────────────────────────────────────────
+Difference:            0.074   (0.012-0.136)     0.019
+(Digital - Visual)
+
+Interpretation: Digital score significantly better (p=0.019)
+════════════════════════════════════════════════════════
+```
+
+**Statistical Test:** DeLong test for correlated ROC curves
+- Accounts for paired data (same patients)
+- More powerful than comparing independent samples
+
+**Conclusion:**
+✅ Digital score superior to visual scoring (p = 0.019)
+✅ Difference in AUC = 0.074 (7.4 percentage points)
+✅ Both methods show "good" discrimination (>0.70)
+
+---
+
+# Step 3: Clinical Decision Thresholds {#sec-thresholds}
+
+Different clinical scenarios require different cutpoints.
+
+## Scenario 1: Screening (High Sensitivity)
+
+**Goal:** Don't miss any HER2-positive cases (avoid false negatives)
+**Use case:** Initial screening to determine who needs FISH confirmation
+
+**Recommended Cutpoint:** 40
+
+```
+Performance at Cutpoint 40:
+────────────────────────────────────────────────────────
+Sensitivity:          92.0%  ← HIGH (few false negatives)
+Specificity:          65.3%  ← Lower (more false positives OK)
+PPV:                  72.6%  ← 27% false positive rate
+NPV:                  89.3%  ← 11% false negative rate
+────────────────────────────────────────────────────────
+```
+
+**Interpretation:**
+- Catches 92% of HER2-positive cases
+- 35% of HER2-negative cases test positive (sent for FISH)
+- Acceptable: FISH is confirmatory, better to over-test than miss cases
+
+## Scenario 2: Confirmation (High Specificity)
+
+**Goal:** Minimize false positives before expensive treatment
+**Use case:** Deciding on targeted anti-HER2 therapy
+
+**Recommended Cutpoint:** 60
+
+```
+Performance at Cutpoint 60:
+────────────────────────────────────────────────────────
+Sensitivity:          77.3%  ← Lower (some false negatives)
+Specificity:          89.3%  ← HIGH (few false positives)
+PPV:                  87.9%  ← HIGH (confident when positive)
+NPV:                  79.7%  ← Moderate
+────────────────────────────────────────────────────────
+```
+
+**Interpretation:**
+- Only 11% of HER2-negative cases test positive
+- 88% confidence that positive result is truly HER2-positive
+- Trade-off: Miss 23% of HER2-positive cases (may need reflex testing)
+
+## Scenario 3: Balanced (Youden Index)
+
+**Goal:** Optimize overall accuracy
+**Use case:** General diagnostic use with equal costs for errors
+
+**Recommended Cutpoint:** 52.3 (Youden optimum)
+- See results in Step 1
+
+::: {.callout-tip}
+## Choosing Cutpoints
+1. **Clinical context** > statistical optimum
+2. Consider **costs of errors** (missed cancer vs. unnecessary treatment)
+3. **Regulatory requirements** (FDA approval may mandate specific sensitivity)
+4. **Prevalence** affects PPV/NPV (revalidate in your population)
+:::
+
+---
+
+# Step 4: Grey Zone Analysis {#sec-greyzone}
+
+Not all results are clear-cut. Some scores fall in an **indeterminate zone** requiring additional testing.
+
+## Define Grey Zone
+
+1. In **ROC Analysis** → **Advanced Options**
+2. ☑ **Grey zone analysis**
+3. **Method:** Confidence interval overlap
+4. **Sensitivity threshold:** 85%
+5. **Specificity threshold:** 85%
+
+### Grey Zone Results
+
+```
+Grey Zone Analysis
+════════════════════════════════════════════════════════
+HER2-Negative Zone:  Digital Score < 45
+  - Specificity: 90% (confidently negative)
+  - Classify as: HER2-Negative
+
+Grey Zone:           Digital Score 45-60
+  - Uncertain classification
+  - Recommend: FISH confirmation
+
+HER2-Positive Zone:  Digital Score > 60
+  - Sensitivity: 87% (confidently positive)
+  - Classify as: HER2-Positive
+════════════════════════════════════════════════════════
+
+Classification Distribution:
+────────────────────────────────────────────────────────
+HER2-Negative zone:   52 cases (34.7%)
+Grey zone:            43 cases (28.7%)
+HER2-Positive zone:   55 cases (36.7%)
+────────────────────────────────────────────────────────
+```
+
+**Clinical Workflow:**
+
+1. **Score < 45:** Report as HER2-negative (no FISH needed)
+2. **Score 45-60:** Grey zone → Reflex to FISH
+3. **Score > 60:** Report as HER2-positive (no FISH needed)
+
+**Cost Savings:**
+- 71.3% of cases have definitive classification
+- Only 28.7% require expensive FISH testing
+- Maintains high accuracy for clear-cut cases
+
+---
+
+# Step 5: Likelihood Ratios {#sec-likelihood}
+
+Likelihood ratios show how much a test result changes disease probability.
+
+## Understanding LR+ and LR-
+
+**Positive Likelihood Ratio (LR+):**
+```
+LR+ = Sensitivity / (1 - Specificity)
+    = P(Positive test | Disease) / P(Positive test | No disease)
+```
+
+**Negative Likelihood Ratio (LR-):**
+```
+LR- = (1 - Sensitivity) / Specificity
+    = P(Negative test | Disease) / P(Negative test | No disease)
+```
+
+### Interpretation Guide
+
+| Likelihood Ratio | Interpretation | Effect on Probability |
+|------------------|----------------|------------------------|
+| LR+ > 10 | Strong evidence for disease | Large increase |
+| LR+ 5-10 | Moderate evidence | Moderate increase |
+| LR+ 2-5 | Weak evidence | Small increase |
+| LR+ 1-2 | Minimal evidence | Minimal increase |
+| LR- < 0.1 | Strong evidence against disease | Large decrease |
+| LR- 0.1-0.2 | Moderate evidence against | Moderate decrease |
+| LR- 0.2-0.5 | Weak evidence against | Small decrease |
+| LR- 0.5-1.0 | Minimal evidence against | Minimal decrease |
+
+### Example Calculation
+
+At optimal cutpoint (52.3):
+```
+LR+ = 84.0% / (1 - 81.3%)
+    = 0.84 / 0.187
+    = 4.49
+
+LR- = (1 - 84.0%) / 81.3%
+    = 0.16 / 0.813
+    = 0.20
+```
+
+**Clinical Application:**
+
+If pre-test probability (prevalence) = 30%:
+
+**Positive test result:**
+- Pre-test odds = 0.30 / 0.70 = 0.43
+- Post-test odds = 0.43 × 4.49 = 1.93
+- Post-test probability = 1.93 / (1 + 1.93) = 66%
+- **Probability increased from 30% → 66%**
+
+**Negative test result:**
+- Post-test odds = 0.43 × 0.20 = 0.086
+- Post-test probability = 0.086 / (1.086) = 8%
+- **Probability decreased from 30% → 8%**
+
+---
+
+# Manuscript Reporting {#sec-reporting}
+
+## Methods Section
+
+> **ROC Analysis.** Receiver operating characteristic (ROC) curve analysis evaluated the diagnostic performance of the digital HER2 score using the gold standard IHC+FISH result as reference. Area under the ROC curve (AUC) with 95% confidence intervals (CI) was calculated using the DeLong method. Optimal cutpoint was determined by maximizing Youden index (J = sensitivity + specificity - 1). Sensitivity, specificity, positive predictive value (PPV), and negative predictive value (NPV) were calculated at the optimal cutpoint, assuming prevalence equal to the study sample (50%). Comparison between digital and visual scoring used DeLong test for correlated ROC curves. Likelihood ratios quantified diagnostic value. Grey zone analysis identified score ranges with uncertain classification. All tests were two-sided with α = 0.05. Analyses used ClinicoPath v0.0.32 for jamovi.
+
+## Results Section
+
+> **Diagnostic Performance.** The digital HER2 score showed good discrimination (AUC 0.872, 95% CI: 0.813-0.931, p < 0.001) (Figure 1). The optimal cutpoint by Youden index was 52.3, yielding sensitivity 84.0% (95% CI: 74.0-91.2%), specificity 81.3% (95% CI: 70.7-89.4%), PPV 81.8%, and NPV 83.6% at 50% prevalence. Positive likelihood ratio was 4.49 and negative likelihood ratio was 0.20, indicating substantial diagnostic value. Grey zone analysis (scores 45-60, 28.7% of cases) identified indeterminate results requiring FISH confirmation. Digital scoring outperformed visual IHC scoring (AUC 0.798, 95% CI: 0.728-0.868), with AUC difference 0.074 (95% CI: 0.012-0.136, p = 0.019).
+
+## Figure Legend
+
+> **Figure 1. ROC Curve for Digital HER2 Score.** Receiver operating characteristic curve shows diagnostic performance of automated digital pathology scoring for HER2 status (n=150). AUC = 0.872 (95% CI: 0.813-0.931). Red dot indicates optimal cutpoint (52.3) by Youden index, yielding sensitivity 84% and specificity 81%. Diagonal line represents random chance (AUC = 0.5). Shaded band shows 95% confidence interval.
+
+---
+
+# Common Mistakes to Avoid {#sec-mistakes}
+
+## ❌ Mistake 1: Using AUC Alone
+
+**Wrong:**
+> "AUC was 0.85, so the test is good."
+
+**Why Wrong:**
+- AUC summarizes across all cutpoints
+- Doesn't tell you performance at YOUR chosen cutpoint
+- Ignores clinical context
+
+**Correct:**
+> "AUC was 0.85 (good discrimination). At optimal cutpoint 52, sensitivity was 84% and specificity 81%, suitable for our screening scenario."
+
+## ❌ Mistake 2: Ignoring Prevalence
+
+**Wrong:**
+> "PPV is 82%, so a positive result means 82% chance of disease."
+
+**Why Wrong:**
+- PPV depends on prevalence (study sample may not match your population)
+- PPV changes, AUC doesn't
+
+**Correct:**
+> "In our study (50% prevalence), PPV was 82%. In clinical practice (10% prevalence), PPV would be approximately 35%."
+
+## ❌ Mistake 3: Optimal = Best for All
+
+**Wrong:**
+> "Youden index is 0.65 at cutpoint 52, so we always use 52."
+
+**Why Wrong:**
+- Youden assumes equal weight for sensitivity and specificity
+- Clinical context may prioritize one over the other
+
+**Correct:**
+> "Youden-optimal cutpoint is 52 (balanced performance). For screening, we use 40 (high sensitivity). For treatment decisions, we use 60 (high specificity)."
+
+## ❌ Mistake 4: Comparing Independent ROCs Incorrectly
+
+**Wrong:**
+> "AUC for Test A = 0.85 (CI: 0.75-0.95), Test B = 0.80 (CI: 0.70-0.90). CIs overlap, so no difference."
+
+**Why Wrong:**
+- Overlapping CIs doesn't mean no significant difference
+- Should use formal comparison test (DeLong)
+
+**Correct:**
+> "AUC for Test A = 0.85, Test B = 0.80. DeLong test showed significant difference (p = 0.03), favoring Test A."
+
+---
+
+# Practice Exercises {#sec-exercises}
+
+## Exercise 1: Prostate Cancer Screening
+
+**Dataset:** `psa_screening_data` (PSA levels for prostate cancer detection)
+
+**Tasks:**
+1. Create ROC curve for PSA predicting cancer
+2. Calculate AUC with 95% CI
+3. Determine optimal cutpoint
+4. Calculate sensitivity/specificity at cutpoint 4.0 ng/mL (standard threshold)
+5. Should the threshold be changed? Why or why not?
+
+## Exercise 2: Multi-Marker Comparison
+
+**Dataset:** `biomarker_panel_data` (3 biomarkers for lung cancer)
+
+**Tasks:**
+1. Create ROC curves for all 3 biomarkers
+2. Compare AUCs statistically
+3. Which biomarker is best?
+4. Is combination of markers better than single markers?
+
+## Exercise 3: Grey Zone Implementation
+
+**Dataset:** `thyroid_nodule_data` (ultrasound score for malignancy)
+
+**Tasks:**
+1. Define grey zone for your ultrasound scoring system
+2. What percentage of cases fall in grey zone?
+3. Develop clinical workflow for grey zone cases
+4. Calculate cost savings vs. universal biopsy
+
+---
+
+# Summary {#sec-summary}
+
+## Key Takeaways
+
+✅ **ROC curves** evaluate discrimination across all cutpoints
+✅ **AUC** quantifies overall performance (0.5-1.0 scale)
+✅ **Optimal cutpoint** depends on clinical context
+✅ **Youden index** balances sensitivity and specificity
+✅ **Grey zones** identify indeterminate results
+✅ **Likelihood ratios** show diagnostic value
+✅ **Prevalence** affects PPV and NPV
+
+## Decision Framework
+
+```
+1. Calculate AUC
+   ↓
+   AUC > 0.70?
+   ↓ YES
+2. Determine clinical context
+   - Screening → High sensitivity
+   - Confirmation → High specificity
+   - Balanced → Youden index
+   ↓
+3. Choose cutpoint
+   ↓
+4. Calculate performance metrics
+   ↓
+5. Define grey zone (optional)
+   ↓
+6. Validate in independent sample
+```
+
+## Next Tutorial
+
+[**Tutorial 5: Decision Curve Analysis**](05-decision-curve-analysis.qmd)
+- Net benefit calculation
+- Clinical utility assessment
+- Comparing prediction models
+- Threshold probability selection
+
+---
+
+# References {#sec-references}
+
+**ROC Analysis Methods:**
+
+1. DeLong ER, DeLong DM, Clarke-Pearson DL. Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. *Biometrics*. 1988;44(3):837-845.
+
+2. Youden WJ. Index for rating diagnostic tests. *Cancer*. 1950;3(1):32-35.
+
+3. Hanley JA, McNeil BJ. The meaning and use of the area under a receiver operating characteristic (ROC) curve. *Radiology*. 1982;143(1):29-36.
+
+**Clinical Applications:**
+
+4. Metz CE. Basic principles of ROC analysis. *Semin Nucl Med*. 1978;8(4):283-298.
+
+5. Zweig MH, Campbell G. Receiver-operating characteristic (ROC) plots: a fundamental evaluation tool in clinical medicine. *Clin Chem*. 1993;39(4):561-577.
+
+**Grey Zone Analysis:**
+
+6. Coste J, Pouchot J. A grey zone for quantitative diagnostic and screening tests. *Int J Epidemiol*. 2003;32(2):304-313.
+
+---
+
+**Tutorial Author:** Serdar Balci, MD, PhD
+**Last Updated:** December 13, 2025
+**License:** CC-BY-4.0
+**Tutorial Version:** 1.0
+
+**Continue learning:** [Tutorial 5: Decision Curve Analysis →](05-decision-curve-analysis.qmd)

@@ -73,7 +73,25 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: TextBox
+        name: step1_label
         format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step1_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: step2_label
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step2_exclusions
   - type: LayoutBox
     margin: large
     children:
@@ -83,12 +101,44 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: LevelSelector
+        name: step3_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: step4_label
         format: string
   - type: LayoutBox
     margin: large
     children:
+      - type: LevelSelector
+        name: step4_exclusions
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: step5_label
         format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: step5_exclusions
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_percentages
+          - type: CheckBox
+            name: show_exclusion_boxes
+          - type: CheckBox
+            name: show_interpretation
+          - type: ComboBox
+            name: direction
+          - type: ComboBox
+            name: color_scheme

@@ -1,7 +1,7 @@
 ---
 name:  classification
 title: Clinical Classification
-menuGroup: ExplorationT1
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Predictions
 menuSubtitle: Classification Analysis
 version: '0.0.3'
@@ -224,16 +224,6 @@ options:
           R: >
             Method for handling class imbalance in medical datasets.
 
-    - name: clinicalCutoff
-      title: Clinical Risk Cutoff
-      type: Number
-      min: 0
-      max: 1
-      default: 0.5
-      description:
-          R: >
-            Probability threshold for clinical decision making.
-
     - name: validateMethod
       title: Validation Method
       type: List
@@ -295,5 +285,65 @@ options:
             (sensitivity, specificity, PPV, NPV, likelihood ratios). If left empty,
             the second factor level will be used as positive. This is critical for
             ensuring correct interpretation of diagnostic performance metrics.
+
+    - name: seed
+      title: Random Seed
+      type: Number
+      default: 42
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Set random seed for reproducibility. Using the same seed will produce
+            identical results across runs, which is critical for validating analyses.
+
+    - name: thresholdMethod
+      title: Decision Threshold Method
+      type: List
+      options:
+        - name: youden
+          title: Youden J (Automatic)
+        - name: manual
+          title: Manual Cutoff
+      default: youden
+      description:
+          R: >
+            Method for determining classification threshold for binary outcomes.
+            Youden J maximizes sensitivity + specificity. Manual allows custom cutoff.
+
+    - name: thresholdValue
+      title: Manual Threshold Value
+      type: Number
+      min: 0
+      max: 1
+      default: 0.5
+      description:
+          R: >
+            Custom probability threshold when using manual threshold method.
+            Only used when Decision Threshold Method is set to Manual Cutoff.
+
+    - name: showSummary
+      title: Show Natural-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a plain-language summary of classification results suitable for copying to clinical reports.
+
+    - name: showAbout
+      title: Show About This Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display information about classification methodology and interpretation guidance.
+
+    - name: showGlossary
+      title: Show Statistical Glossary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display glossary of machine learning and clinical metrics terms.
 
 ...

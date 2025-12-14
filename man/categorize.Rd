@@ -74,7 +74,6 @@ A results object containing:
 \code{results$breakpointsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$rcode} \tab \tab \tab \tab \tab a html \cr
-\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$addtodata} \tab \tab \tab \tab \tab an output \cr
 }
 

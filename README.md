@@ -102,6 +102,33 @@ Hub](vignettes/documentation_hub.md).
 
 ------------------------------------------------------------------------
 
+## 🎓 Tutorials
+
+**NEW!** Comprehensive tutorial series for ClinicoPath users:
+
+- **[Tutorial Series Home](tutorials/README.md)** - Complete learning
+  paths for clinical trials, diagnostic pathology, and advanced analyses
+- **Quick Start:** [Getting Started with
+  ClinicoPath](tutorials/01-getting-started.qmd) (30 min)
+- **Clinical Trials:** [Table One for Baseline
+  Characteristics](tutorials/02-table-one-clinical-trial.qmd) (45 min)
+- **Survival Analysis:** [Kaplan-Meier & Cox
+  Regression](tutorials/03-survival-analysis-cancer.qmd) (45 min)
+- **Diagnostic Testing:** [ROC Analysis & Optimal
+  Cutpoints](tutorials/04-roc-diagnostic-test.qmd) (45 min)
+- **Advanced Modeling:** [Decision Curve
+  Analysis](tutorials/05-decision-curve-analysis.qmd) (50 min)
+- **Reproducibility:** [Automated Reports & Version
+  Control](tutorials/06-reproducible-reports.qmd) (40 min)
+
+**Total Learning Time:** 4.5 hours \| **No Programming Required**
+
+The tutorial series includes 60+ working code examples, 25+ visual
+diagrams, and 18 hands-on practice exercises. Perfect for clinicians,
+pathologists, and researchers new to ClinicoPath.
+
+------------------------------------------------------------------------
+
 ## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 
 A [jamovi](https://www.jamovi.org) Module that contains main analysis
@@ -764,7 +791,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--10--27-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2025--12--13-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -844,7 +871,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--10--27-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2025--12--13-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

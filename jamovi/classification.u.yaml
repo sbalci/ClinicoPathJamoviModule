@@ -208,15 +208,21 @@ children:
         children:
           - type: ComboBox
             name: balancingMethod
-          - type: TextBox
-            name: clinicalCutoff
-            format: number
           - type: ComboBox
             name: validateMethod
           - type: TextBox
             name: bootstrapSamples
             format: number
             enable: (validateMethod:bootstrap)
+          - type: TextBox
+            name: seed
+            format: number
+          - type: ComboBox
+            name: thresholdMethod
+          - type: TextBox
+            name: thresholdValue
+            format: number
+            enable: (thresholdMethod:manual)
           - type: CheckBox
             name: reportClinicalMetrics
           - type: CheckBox
@@ -228,6 +234,12 @@ children:
             name: positiveClass
             format: string
             enable: (reportClinicalMetrics)
+          - type: CheckBox
+            name: showSummary
+          - type: CheckBox
+            name: showAbout
+          - type: CheckBox
+            name: showGlossary
   - type: CollapseBox
     label: K-Nearest Neighbors (KNN)
     collapsed: true

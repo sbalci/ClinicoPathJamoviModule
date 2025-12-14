@@ -94,7 +94,7 @@ items:
         - direction
         - color_scheme
 
-    - name: plot
+    - name: diagramPlot
       title: Diagram Plot
       type: Image
       description: Publication-ready diagram plot

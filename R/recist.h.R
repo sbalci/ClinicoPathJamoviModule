@@ -277,6 +277,7 @@ recistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "recistResults",
     inherit = jmvcore::Group,
     active = list(
+        runSummary = function() private$.items[["runSummary"]],
         instructions = function() private$.items[["instructions"]],
         dataInfo = function() private$.items[["dataInfo"]],
         lesionTable = function() private$.items[["lesionTable"]],
@@ -298,6 +299,11 @@ recistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="RECIST 1.1 Multi-Lesion Aggregation")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="runSummary",
+                title="Analysis Status",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -736,6 +742,7 @@ recistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$lesionTable} \tab \tab \tab \tab \tab a table \cr

@@ -1,7 +1,7 @@
 ---
 name:  pcacomponenttest
 title: PCA Component Significance Test
-menuGroup: ExplorationT1
+menuGroup: ExplorationT
 menuSubgroup: Multivariate Analysis
 version: '1.0.0'
 jas: '1.2'
@@ -165,18 +165,18 @@ options:
     - name: colororiginal
       title: Color for Original VAF
       type: String
-      default: "steelblue"
+      default: "#0072B2"
       description:
           R: >
-            Color for original VAF line/points. Use color names or hex codes.
+            Color for original VAF line/points. Use color names or hex codes. Default is color-blind safe blue.
 
     - name: colorpermuted
       title: Color for Permuted VAF
       type: String
-      default: "orange"
+      default: "#E69F00"
       description:
           R: >
-            Color for permuted VAF line/points. Use color names or hex codes.
+            Color for permuted VAF line/points. Use color names or hex codes. Default is color-blind safe orange.
 
     - name: showScreePlot
       title: Show Scree Plot
@@ -218,3 +218,21 @@ options:
       default: 450
       description:
           R: Height of the plot in pixels.
+
+    - name: showSummary
+      title: Show Plain-Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display natural-language summary of results with clinical interpretation.
+            Provides plain-language explanation of significant components and variance explained.
+
+    - name: showGuide
+      title: Show Interpretation Guide
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display guide explaining how to interpret VAF, p-values, and clinical implications.
+            Includes definitions of key terms and guidance for clinical use.

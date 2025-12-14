@@ -36,6 +36,11 @@ items:
           type: number
           format: zto,pvalue
 
+        - name: cumvar
+          title: Cumulative VAF
+          type: number
+          format: zto,pvalue
+
         - name: meanvaf
           title: Permuted Mean VAF
           type: number
@@ -103,5 +108,16 @@ items:
       renderFun: .loadingsPlot
       visible: (showLoadingsPlot)
 
+    - name: summary
+      title: Plain-Language Summary
+      type: Html
+      visible: false
+
+    - name: guide
+      title: Interpretation Guide
+      type: Html
+      visible: false
+
 refs:
+    - ClinicoPathJamoviModule
     - glue

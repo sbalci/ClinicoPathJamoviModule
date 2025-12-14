@@ -1,0 +1,570 @@
+---
+title: "Table One for Clinical Trials"
+subtitle: "Baseline Characteristics with Group Comparisons"
+author: "ClinicoPath Tutorial Series"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+    number-sections: true
+---
+
+# Overview {#sec-overview}
+
+This tutorial teaches you how to create **publication-ready Table One** for clinical trial manuscripts, including:
+
+- ✅ Baseline characteristics stratified by treatment group
+- ✅ Statistical tests comparing groups
+- ✅ Effect sizes and confidence intervals
+- ✅ Multiple testing corrections
+- ✅ Publication-quality formatting
+
+**Prerequisites:** [Tutorial 1: Getting Started](01-getting-started.qmd)
+**Time Required:** 45 minutes
+**Dataset:** `clinical_trial_data` (n=200, 2 treatment groups)
+
+---
+
+# Clinical Scenario {#sec-scenario}
+
+## Study Design
+
+You conducted a **randomized controlled trial** comparing two treatments for HER2-positive breast cancer:
+
+- **Control Group (n=100)**: Standard trastuzumab + chemotherapy
+- **Experimental Group (n=100)**: New dual HER2 blockade + chemotherapy
+
+**Primary Endpoint:** Progression-free survival (PFS)
+**Secondary Endpoints:** Overall survival, response rate, toxicity
+
+##
+
+ Manuscript Requirements
+
+Journal guidelines require Table One showing:
+
+1. ✅ Baseline patient demographics (age, sex, race, BMI)
+2. ✅ Tumor characteristics (stage, grade, size, ER/PR/HER2 status)
+3. ✅ Prior treatments (surgery, radiation)
+4. ✅ Comparison between groups with statistical tests
+5. ✅ P-values and effect sizes
+6. ✅ Missing data transparency
+
+::: {.callout-important}
+## Key Principle
+In RCTs, baseline characteristics should be **similar between groups**. Large imbalances suggest randomization failure or selection bias.
+:::
+
+---
+
+# Step-by-Step Analysis {#sec-analysis}
+
+## Step 1: Load Clinical Trial Data
+
+1. Open jamovi
+2. Click **File** → **Open**
+3. Select **Data Library**
+4. Choose `clinical_trial_data`
+
+**Dataset Structure:**
+
+| Variable | Type | Values | Description |
+|----------|------|--------|-------------|
+| `PatientID` | ID | PT001-PT200 | Patient identifier |
+| `TreatmentGroup` | Nominal | Control / Experimental | Randomization arm |
+| `Age` | Continuous | 25-75 years | Age at enrollment |
+| `Sex` | Nominal | Male / Female | Biological sex |
+| `Race` | Nominal | White / Black / Asian / Other | Self-reported race |
+| `BMI` | Continuous | 18-42 kg/m² | Body mass index |
+| `ECOG_Status` | Ordinal | 0 / 1 / 2 | Performance status |
+| `TumorStage` | Ordinal | I / II / III / IV | TNM stage |
+| `TumorGrade` | Ordinal | 1 / 2 / 3 | Histologic grade |
+| `TumorSize` | Continuous | 0.5-12.0 cm | Tumor diameter |
+| `ER_Status` | Nominal | Positive / Negative | Estrogen receptor |
+| `PR_Status` | Nominal | Positive / Negative | Progesterone receptor |
+| `HER2_Status` | Nominal | Positive / Negative | HER2 amplification |
+| `PriorSurgery` | Nominal | Yes / No | Prior surgical resection |
+| `PriorRadiation` | Nominal | Yes / No | Prior radiotherapy |
+
+## Step 2: Open Cross Tables Analysis
+
+For **group comparisons**, use **Cross Tables** instead of basic Table One:
+
+1. Click **Analyses** → **ExplorationT1**
+2. Choose **Cross Tables**
+
+::: {.callout-tip}
+## Why Cross Tables?
+Cross Tables provides:
+- ✅ Stratification by group
+- ✅ Automatic statistical tests
+- ✅ Effect sizes
+- ✅ Multiple table styles (including New England Journal of Medicine format)
+:::
+
+## Step 3: Configure the Analysis
+
+### Variables Section
+
+**Explanatory (Row) Variables:**
+Drag these to the **Rows** box:
+- Age
+- Sex
+- Race
+- BMI
+- ECOG_Status
+- TumorStage
+- TumorGrade
+- TumorSize
+- ER_Status
+- PR_Status
+- PriorSurgery
+- PriorRadiation
+
+**Outcome (Column) Variable:**
+Drag to the **Columns** box:
+- TreatmentGroup
+
+::: {.callout-note}
+## Variable Roles
+- **Rows** = Baseline characteristics you want to summarize
+- **Columns** = Groups you want to compare (treatment arms)
+:::
+
+### Table Style
+
+Choose your preferred style:
+
+| Style | Format | Best For |
+|-------|--------|----------|
+| **NEJM** | New England Journal of Medicine | High-impact medical journals |
+| **Lancet** | The Lancet format | European journals |
+| **arsenal** | R arsenal package | Comprehensive reports |
+| **finalfit** | finalfit package | Quick summaries |
+| **gtsummary** | Modern publication | General medical journals |
+
+**For this tutorial:** Select **`NEJM`** for maximum impact.
+
+### Statistics Options
+
+**Tests** section:
+
+- ☑ **Include p-values**: Shows statistical significance
+- ☑ **Include test names**: Transparency about which test was used
+- ☑ **Include effect sizes**: Cohen's d, Cramér's V, etc.
+
+**Automatic Test Selection:**
+
+ClinicoPath automatically chooses appropriate tests:
+
+| Variable Type | Test Used | When |
+|---------------|-----------|------|
+| Continuous, normal, 2 groups | Independent t-test | Default for age, BMI, tumor size |
+| Continuous, non-normal, 2 groups | Mann-Whitney U | If normality violated |
+| Categorical, 2 groups | Chi-square | For sex, stage, grade |
+| Categorical, small sample | Fisher's exact | If expected count < 5 |
+| Ordinal, 2 groups | Wilcoxon rank-sum | For ECOG, stage, grade |
+
+**Multiple Testing Correction:**
+
+- ☐ None - Raw p-values (standard for Table One)
+- ☑ Bonferroni - Conservative correction
+- ☑ Holm - Less conservative
+- ☑ Benjamini-Hochberg (FDR) - Control false discovery rate
+
+::: {.callout-warning}
+## Multiple Testing in Table One
+Most journals do NOT require correction for Table One baseline comparisons in RCTs, because you're checking balance, not testing hypotheses. However, showing corrected p-values demonstrates statistical rigor.
+:::
+
+### Missing Data
+
+**Handling Missing Values:**
+
+- ☑ **Show missing counts**: Display N missing for each variable
+- ☑ **Include missing %**: Show percentage missing
+- ☐ **Exclude missing cases**: Leave unchecked for transparency
+
+**Missing Data Reporting:**
+
+ClinicoPath will show:
+```
+Age: N = 198 (2 missing)
+Sex: N = 200 (0 missing)
+BMI: N = 185 (15 missing, 7.5%)
+```
+
+## Step 4: Interpret the Results
+
+### Sample Output
+
+```
+Baseline Characteristics Stratified by Treatment Group
+────────────────────────────────────────────────────────────────
+Characteristic          Control      Experimental   p-value   d/V
+                        (n=100)      (n=100)
+────────────────────────────────────────────────────────────────
+Age, years             56.2 (10.3)   55.8 (9.8)     0.76    0.04
+  Missing, n (%)        1 (1%)        1 (1%)
+
+Sex, n (%)                                           0.85    0.03
+  Female                61 (61%)      59 (59%)
+  Male                  39 (39%)      41 (41%)
+
+Race, n (%)                                          0.92    0.07
+  White                 72 (72%)      70 (70%)
+  Black                 15 (15%)      18 (18%)
+  Asian                  9 (9%)        8 (8%)
+  Other                  4 (4%)        4 (4%)
+
+BMI, kg/m²            27.3 (4.5)    26.8 (4.2)     0.42    0.12
+  Missing, n (%)        8 (8%)        7 (7%)
+
+ECOG Status, n (%)                                   0.68    0.05
+  0                     52 (52%)      48 (48%)
+  1                     41 (41%)      44 (44%)
+  2                      7 (7%)        8 (8%)
+
+Tumor Stage, n (%)                                   0.89    0.04
+  I                     12 (12%)      11 (11%)
+  II                    45 (45%)      48 (48%)
+  III                   34 (34%)      32 (32%)
+  IV                     9 (9%)        9 (9%)
+
+Tumor Grade, n (%)                                   0.95    0.03
+  1                     18 (18%)      19 (19%)
+  2                     51 (51%)      50 (50%)
+  3                     31 (31%)      31 (31%)
+
+Tumor Size, cm        3.4 (1.8)     3.2 (1.6)      0.38    0.12
+  Missing, n (%)        2 (2%)        3 (3%)
+
+ER Status, n (%)                                     0.82    0.04
+  Positive              74 (74%)      71 (71%)
+  Negative              26 (26%)      29 (29%)
+
+PR Status, n (%)                                     0.76    0.05
+  Positive              68 (68%)      65 (65%)
+  Negative              32 (32%)      35 (35%)
+
+HER2 Status, n (%)                                   1.00    0.00
+  Positive             100 (100%)    100 (100%)
+  (Inclusion criterion)
+
+Prior Surgery, n (%)                                 0.88    0.03
+  Yes                   45 (45%)      43 (43%)
+  No                    55 (55%)      57 (57%)
+
+Prior Radiation, n (%)                               0.71    0.06
+  Yes                   23 (23%)      26 (26%)
+  No                    77 (77%)      74 (74%)
+────────────────────────────────────────────────────────────────
+Continuous variables shown as mean (SD); categorical as n (%).
+p-values from independent t-test (continuous) and chi-square
+test (categorical). d = Cohen's d; V = Cramér's V.
+```
+
+### What the Results Tell You
+
+✅ **Excellent Balance:** All p-values > 0.05
+✅ **Small Effect Sizes:** All d and V < 0.15 (negligible)
+✅ **Successful Randomization:** Groups are comparable at baseline
+✅ **Low Missing Data:** < 10% for all variables
+
+::: {.callout-important}
+## Interpreting p-values in Table One
+**p > 0.05** is GOOD in baseline characteristics tables! It means groups are well-balanced. Large p-values (0.7-0.9) are ideal.
+
+**p < 0.05** would suggest imbalance, which could indicate:
+- Random chance (5% expected)
+- Stratification issues
+- Selection bias
+:::
+
+## Step 5: Add Effect Sizes
+
+Effect sizes show **magnitude** of differences:
+
+| Effect Size | Interpretation |
+|-------------|----------------|
+| **Cohen's d** (continuous) | |
+| 0.0 - 0.2 | Negligible |
+| 0.2 - 0.5 | Small |
+| 0.5 - 0.8 | Medium |
+| > 0.8 | Large |
+| **Cramér's V** (categorical) | |
+| 0.0 - 0.1 | Negligible |
+| 0.1 - 0.3 | Small |
+| 0.3 - 0.5 | Medium |
+| > 0.5 | Large |
+
+**In our example:**
+- Age: d = 0.04 (negligible difference)
+- Sex: V = 0.03 (negligible difference)
+- All effect sizes are negligible → **perfect balance**
+
+::: {.callout-tip}
+## Reporting Effect Sizes
+Modern journals increasingly require effect sizes. Including them in Table One demonstrates statistical sophistication and transparency.
+:::
+
+---
+
+# Advanced Features {#sec-advanced}
+
+## Stratified Analysis
+
+Sometimes you need to check balance within **subgroups** (e.g., by center in multicenter trials):
+
+### Example: Balance by Study Site
+
+1. In **Cross Tables**, add **Study_Site** to **Layers** box
+2. This creates separate tables for each site
+3. Check that randomization worked at each center
+
+**Why this matters:**
+- Detects center-specific randomization failures
+- Required for multicenter trials
+- Helps identify site effects
+
+## Handling Outliers
+
+**Problem:** Extreme values can skew means and distort comparisons.
+
+**Solution:** Report median (IQR) instead of mean (SD) for skewed data.
+
+### Detect Skewness
+
+Use **Summary of Continuous Variables**:
+
+1. **Analyses** → **ExplorationT1** → **Summary of Continuous Variables**
+2. Select your continuous variables
+3. Check **Skewness** and **Kurtosis**
+
+**Rules of Thumb:**
+- |Skewness| < 1.0: Normal-ish → Use mean (SD)
+- |Skewness| > 1.0: Skewed → Use median (IQR)
+
+**In Cross Tables:**
+
+- ☑ **Use median (IQR) for skewed variables**
+- ClinicoPath will automatically switch to Mann-Whitney U test
+
+## Missing Data Patterns
+
+**Problem:** Missing data is not random and could bias results.
+
+**Solution:** Compare missing data patterns between groups.
+
+### Missing Data Analysis
+
+1. Check **Show missing data patterns** in Cross Tables
+2. ClinicoPath will test if missingness differs by group
+
+**Example:**
+```
+Variable         Control Missing   Experimental Missing   p-value
+Age              1 (1%)            1 (1%)                 1.00
+BMI              8 (8%)            7 (7%)                 0.82
+Tumor Size       2 (2%)            3 (3%)                 0.68
+```
+
+**Interpretation:**
+- p > 0.05: Missing data is balanced (good!)
+- p < 0.05: Differential missingness (investigate why)
+
+---
+
+# Manuscript Reporting {#sec-reporting}
+
+## Methods Section
+
+**Template:**
+
+> Baseline characteristics were summarized as mean (standard deviation) for continuous variables and frequency (percentage) for categorical variables. Comparisons between treatment groups used independent t-tests for continuous variables and chi-square tests (or Fisher's exact test when expected cell counts were <5) for categorical variables. Effect sizes (Cohen's d for continuous, Cramér's V for categorical) were calculated to assess magnitude of differences. Missing data were handled using available case analysis, with missing counts reported for each variable. All tests were two-sided with α = 0.05. Analyses were conducted using ClinicoPath v0.0.32 for jamovi (jamovi project, 2025).
+
+## Results Section
+
+**Template:**
+
+> Baseline characteristics were well-balanced between treatment groups (Table 1). Mean age was 56.2 years (SD 10.3) in the control group and 55.8 years (SD 9.8) in the experimental group (p = 0.76, d = 0.04). Sex distribution was similar (61% female in control vs. 59% in experimental, p = 0.85). Tumor stage, grade, and size showed no significant differences between groups (all p > 0.38). Effect sizes for all comparisons were negligible (all d < 0.15, V < 0.07), indicating successful randomization. Missing data were minimal (<10% for all variables) and balanced between groups (all p > 0.68).
+
+::: {.callout-note}
+## What to Report
+- Sample sizes (total and by group)
+- Summary statistics for key variables
+- P-values for comparisons
+- Effect sizes
+- Missing data handling
+- Statistical test names (can be in Methods or Table footnote)
+:::
+
+## Table Footnote
+
+Add this footnote to Table 1:
+
+> Data presented as mean (SD) for continuous variables and n (%) for categorical variables. P-values from independent t-test (continuous normally distributed variables), Mann-Whitney U test (continuous non-normally distributed variables), chi-square test (categorical variables), or Fisher's exact test (categorical variables with expected count <5). Effect size: d = Cohen's d (continuous), V = Cramér's V (categorical). Missing values excluded pairwise; missing counts shown when >0.
+
+---
+
+# Common Mistakes to Avoid {#sec-mistakes}
+
+## ❌ Mistake 1: Testing for Significance in RCTs
+
+**Wrong Approach:**
+> "Age was significantly different between groups (p = 0.03), so we included it as a covariate in our models."
+
+**Why Wrong:**
+- Baseline differences in RCTs are due to chance
+- p < 0.05 expected in 5% of comparisons by random chance
+- Adding covariates based on p-values is data-dredging
+
+**Correct Approach:**
+> "Baseline characteristics were similar between groups (Table 1). All effect sizes were small (d < 0.3), indicating successful randomization."
+
+## ❌ Mistake 2: Ignoring Effect Sizes
+
+**Wrong Approach:**
+> "No significant differences in baseline characteristics (all p > 0.05)."
+
+**Why Incomplete:**
+- Large, clinically meaningful differences can have p > 0.05 with small samples
+- p-values depend on sample size, effect sizes don't
+
+**Correct Approach:**
+> "Baseline characteristics were balanced between groups, with small effect sizes (all d < 0.2, V < 0.1) and non-significant p-values (all p > 0.20)."
+
+## ❌ Mistake 3: Listwise Deletion
+
+**Wrong Approach:**
+- Check "Exclude missing values" → Lose 30% of sample
+
+**Why Wrong:**
+- Reduces statistical power
+- Can introduce bias if missingness is related to outcome
+
+**Correct Approach:**
+- Use available case analysis (default in Cross Tables)
+- Report missing counts
+- Check if missingness differs by group
+- Consider multiple imputation for primary analyses
+
+## ❌ Mistake 4: P-Hacking
+
+**Wrong Approach:**
+- Run 20 baseline comparisons
+- Only report the 2 with p < 0.05
+- Don't mention the other 18
+
+**Why Wrong:**
+- This is scientific misconduct
+- Inflates false positive rate
+- Undermines reproducibility
+
+**Correct Approach:**
+- Report ALL planned baseline comparisons
+- Use multiple testing correction if desired (though not required for Table One)
+- Pre-specify which variables go in Table One (in protocol)
+
+---
+
+# Practice Exercises {#sec-exercises}
+
+## Exercise 1: Create Your Own Table One
+
+**Dataset:** Load `multicenter_trial_data` from Data Library
+
+**Task:**
+1. Create Table One comparing 3 treatment arms
+2. Include at least 5 continuous and 5 categorical variables
+3. Report p-values and effect sizes
+4. Check missing data patterns
+5. Export as NEJM-style table
+
+**Bonus:** Stratify by study center to check balance within sites.
+
+## Exercise 2: Imbalanced Baseline
+
+**Dataset:** `imbalanced_rct_data` (intentionally has imbalances)
+
+**Task:**
+1. Identify which baseline variables are imbalanced
+2. Calculate effect sizes
+3. Write a Methods sentence explaining how you'll handle imbalances
+4. Consider: Should imbalanced variables be covariates in outcome analysis?
+
+## Exercise 3: Missing Data Investigation
+
+**Dataset:** `trial_high_missing_data`
+
+**Task:**
+1. Create Table One
+2. Identify variables with >10% missing
+3. Test if missingness differs by treatment group
+4. Write a Results sentence describing missing data patterns
+
+---
+
+# Summary {#sec-summary}
+
+## Key Takeaways
+
+✅ Use **Cross Tables** for group comparisons in Table One
+✅ **p > 0.05 is good** for baseline characteristics in RCTs
+✅ Report **effect sizes** along with p-values
+✅ **Effect sizes < 0.2** indicate good balance
+✅ Use **available case analysis** for missing data
+✅ **Report all** baseline comparisons (no selective reporting)
+✅ Choose table style matching your **target journal** (NEJM, Lancet, etc.)
+
+## Next Steps
+
+**You've mastered:**
+- Creating publication-ready Table One
+- Stratified analysis by group
+- Statistical tests for comparisons
+- Effect size interpretation
+- Missing data handling
+
+**Next Tutorial:**
+[**Tutorial 3: Survival Analysis in Oncology**](03-survival-analysis-cancer.qmd)
+- Kaplan-Meier curves
+- Log-rank tests
+- Cox proportional hazards regression
+- Competing risks analysis
+
+---
+
+# References {#sec-references}
+
+**Statistical Methods:**
+
+1. Altman DG, Gore SM, Gardner MJ, Pocock SJ. Statistical guidelines for contributors to medical journals. *BMJ*. 1983;286(6376):1489-1493.
+
+2. Schulz KF, Altman DG, Moher D. CONSORT 2010 Statement: updated guidelines for reporting parallel group randomised trials. *BMJ*. 2010;340:c332.
+
+3. Moher D, Hopewell S, Schulz KF, et al. CONSORT 2010 Explanation and Elaboration. *BMJ*. 2010;340:c869.
+
+4. Sedgwick P. Understanding baseline characteristics in clinical trials. *BMJ*. 2014;348:g2983.
+
+**Effect Sizes:**
+
+5. Sullivan GM, Feinn R. Using Effect Size—or Why the P Value Is Not Enough. *J Grad Med Educ*. 2012;4(3):279-282.
+
+6. Lakens D. Calculating and reporting effect sizes to facilitate cumulative science. *Front Psychol*. 2013;4:863.
+
+**Missing Data:**
+
+7. Sterne JAC, White IR, Carlin JB, et al. Multiple imputation for missing data in epidemiological and clinical research. *BMJ*. 2009;338:b2393.
+
+---
+
+**Tutorial Author:** Serdar Balci, MD, PhD
+**Last Updated:** December 13, 2025
+**License:** CC-BY-4.0
+**Tutorial Version:** 1.0
+
+**Continue learning:** [Tutorial 3: Survival Analysis →](03-survival-analysis-cancer.qmd)

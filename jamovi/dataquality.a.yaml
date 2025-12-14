@@ -1,7 +1,7 @@
 ---
 name: dataquality
 title: Multi-Variable Visual Quality
-menuGroup: ExplorationT1
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'
@@ -53,7 +53,7 @@ options:
           If TRUE, provides detailed missing value statistics and patterns.
 
     - name: complete_cases_only
-      title: "Check Duplicate Rows (not values)"
+      title: "Check for Duplicate Rows"
       type: Bool
       default: false
       description:
@@ -103,6 +103,30 @@ options:
       description:
         R: >
           Threshold percentage for highlighting variables with missing values in visual analysis.
+
+    - name: showSummary
+      title: "Show Plain-Language Summary"
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, displays a concise plain-language summary of quality issues and overall assessment.
+
+    - name: showRecommendations
+      title: "Show Action Recommendations"
+      type: Bool
+      default: true
+      description:
+        R: >
+          If TRUE, provides specific recommendations for addressing identified quality issues.
+
+    - name: showExplanations
+      title: "Show Educational Notes"
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, includes explanations of quality metrics and statistical tests used in the analysis.
 
 
 ...

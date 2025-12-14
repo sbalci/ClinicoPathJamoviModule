@@ -122,6 +122,18 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: Label
+        label: Clinical Output
+        children:
+          - type: CheckBox
+            name: showSummary
+            label: "Plain-Language Summary"
+          - type: CheckBox
+            name: showGuide
+            label: "Interpretation Guide"
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: nLoadings
         format: number

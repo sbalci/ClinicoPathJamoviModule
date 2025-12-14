@@ -106,8 +106,9 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab Instructions and data format guidance \cr
 \code{results$summary} \tab \tab \tab \tab \tab Summary of participant flow through study steps \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$diagram} \tab \tab \tab \tab \tab Interactive study flow diagram \cr
-\code{results$plot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
+\code{results$diagramPlot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab Explanatory text about the diagram and results \cr
 \code{results$warnings} \tab \tab \tab \tab \tab Alerts about potential data quality issues \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab Plain-language summary for clinical interpretation \cr

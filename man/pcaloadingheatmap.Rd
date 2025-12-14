@@ -68,9 +68,17 @@ FALSE, uses binary colors for positive/negative.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$variance} \tab \tab \tab \tab \tab a table \cr
 \code{results$heatmap} \tab \tab \tab \tab \tab Heatmap visualization of PCA loadings across components \cr
+\code{results$scree} \tab \tab \tab \tab \tab Scree/variance explained plot \cr
 \code{results$barmap} \tab \tab \tab \tab \tab Barmap visualization of PCA loadings showing magnitude and direction \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$variance$asDF}
+
+\code{as.data.frame(results$variance)}
 }
 \description{
 Creates heatmap and barmap visualizations of PCA loadings for easy

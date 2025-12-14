@@ -9,6 +9,7 @@ pcaloadingtest(
   vars,
   ncomp = 3,
   nperm = 1000,
+  seed = 123,
   componentfilter = 0,
   center = TRUE,
   scale = TRUE,
@@ -32,6 +33,9 @@ Analysis. Select at least 3 numeric variables.}
 \item{nperm}{Number of permutations per variable (100-5000). Total
 permutations = nperm × number of variables. Higher values provide more
 accurate p-values but take longer.}
+
+\item{seed}{Seed for permutation reproducibility. Use the same seed to
+obtain identical results.}
 
 \item{componentfilter}{Filter results table by component. 0 shows all
 components, 1 shows only PC1, 2 shows only PC2, etc.}
@@ -60,7 +64,9 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$results} \tab \tab \tab \tab \tab Permutation-based significance testing for each variable-component loading \cr
+\code{results$variance} \tab \tab \tab \tab \tab a table \cr
 \code{results$loadingplot} \tab \tab \tab \tab \tab Barplot showing loadings with confidence intervals from permutation \cr
+\code{results$scree} \tab \tab \tab \tab \tab Scree/variance explained plot \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

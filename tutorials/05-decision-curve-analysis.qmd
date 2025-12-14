@@ -1,0 +1,585 @@
+---
+title: "Decision Curve Analysis"
+subtitle: "Evaluating Clinical Utility of Prediction Models"
+author: "ClinicoPath Tutorial Series"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+    number-sections: true
+---
+
+# Overview {#sec-overview}
+
+Learn how to assess **clinical utility** using Decision Curve Analysis (DCA):
+
+- ✅ Understand net benefit framework
+- ✅ Create decision curves
+- ✅ Compare prediction models
+- ✅ Determine optimal threshold probabilities
+- ✅ Calculate interventions avoided
+- ✅ Communicate clinical value to stakeholders
+
+**Prerequisites:** [Tutorial 1](01-getting-started.qmd), [Tutorial 4: ROC Analysis](04-roc-diagnostic-test.qmd)
+**Time Required:** 50 minutes
+**Dataset:** `breast_recurrence_prediction` (n=300, 5-year recurrence prediction)
+
+---
+
+# Clinical Scenario {#sec-scenario}
+
+## Study Design
+
+You developed a **recurrence risk prediction model** for breast cancer patients after surgery:
+
+- **Outcome:** 5-year recurrence (yes/no)
+- **Predictors:** Age, stage, grade, ER/PR status, Ki-67
+- **Clinical Decision:** Adjuvant chemotherapy (yes/no)
+- **Trade-off:**
+  - Give chemotherapy → Prevent recurrence, but toxicity if patient wouldn't recur anyway
+  - No chemotherapy → Avoid toxicity, but risk recurrence if patient would benefit
+
+## The Problem with Statistical Metrics
+
+**Your model has:**
+- AUC = 0.78 (good discrimination)
+- Sensitivity = 82%, Specificity = 71% at optimal cutpoint
+- Calibration slope = 0.95 (well-calibrated)
+
+**But clinicians ask:**
+> "Great statistics, but... **should I actually use this model?** Will it improve patient outcomes compared to treating everyone or treating no one?"
+
+::: {.callout-important}
+## Decision Curve Analysis Answers
+**DCA quantifies clinical usefulness** by comparing net benefit of using your model vs. default strategies across different risk thresholds.
+:::
+
+---
+
+# Understanding Decision Curves {#sec-understanding}
+
+## Key Concepts
+
+### What is Net Benefit?
+
+**Net Benefit** = Clinical benefit minus clinical harm, weighted by relative values
+
+```
+Net Benefit = (True Positives / N) - (False Positives / N) × (pt / (1 - pt))
+
+where:
+- pt = threshold probability (below which you wouldn't treat)
+- (pt / (1 - pt)) = harm-to-benefit ratio
+```
+
+### Interpreting Decision Curves
+
+```
+Net Benefit
+    ↑
+0.20│         Model ——————— (Best)
+    │       /
+0.15│     / Treat All ————
+    │    /    /
+0.10│  /    /
+    │ /   /
+0.05│/  / Treat None ——————— (Baseline)
+    │ /
+0.00└────────────────────────────→
+   0%  10%  20%  30%  40%  50%
+        Threshold Probability
+```
+
+**Key Components:**
+
+1. **Treat None (grey line):** Net benefit = 0 (baseline)
+   - Never treat anyone → No benefits, no harms
+
+2. **Treat All (blue line):** Decreases with threshold
+   - Treat everyone → Benefits all who need it, harms all who don't
+
+3. **Model (red line):** Your prediction model
+   - Treat only those above threshold
+   - **Model above both lines = Clinically useful**
+
+### Threshold Probability (pt)
+
+**Definition:** Minimum predicted risk at which treatment is warranted
+
+**Clinical Interpretation:**
+
+| Threshold | Meaning | Action |
+|-----------|---------|--------|
+| pt = 5% | Treat if risk ≥ 5% | Very aggressive (screening context) |
+| pt = 10% | Treat if risk ≥ 10% | Standard for many cancers |
+| pt = 20% | Treat if risk ≥ 20% | Moderate threshold |
+| pt = 30% | Treat if risk ≥ 30% | Conservative (toxic treatments) |
+
+**How to Choose pt:**
+
+```
+pt = Harm / (Harm + Benefit)
+
+Example: Chemotherapy for breast cancer
+- Benefit: Prevent 1 death
+- Harm: Severe toxicity in 4 patients (death equivalent)
+- pt = 4 / (4 + 1) = 0.80 (treat if risk ≥80%)
+```
+
+---
+
+# Step 1: Basic Decision Curve Analysis {#sec-basic-dca}
+
+## Load Data
+
+1. Open jamovi
+2. **File** → **Open** → **Data Library**
+3. Select `breast_recurrence_prediction`
+
+**Dataset Structure:**
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `PatientID` | ID | Patient identifier |
+| `Recurrence` | Nominal | Yes / No (outcome at 5 years) |
+| `Age` | Continuous | Age at diagnosis |
+| `Stage` | Ordinal | I / II / III |
+| `Grade` | Ordinal | 1 / 2 / 3 |
+| `ER_Status` | Nominal | Positive / Negative |
+| `PR_Status` | Nominal | Positive / Negative |
+| `Ki67` | Continuous | Ki-67 proliferation index (%) |
+| `Model_Risk` | Continuous | Predicted 5-year recurrence risk (0-1) |
+
+## Run Decision Curve Analysis
+
+1. **Analyses** → **meddecideD** → **Decision Curve Analysis**
+2. Configure:
+   - **Outcome variable:** `Recurrence` (binary)
+   - **Outcome value:** `Yes` (event of interest)
+   - **Prediction model:** `Model_Risk` (predicted probabilities 0-1)
+
+### Essential Options
+
+**Threshold Range:**
+- Minimum: 0% (everyone treated)
+- Maximum: 50% (beyond this, "treat none" is better)
+- **Recommended:** 0-30% for most cancer decisions
+
+**Reference Strategies:**
+- ☑ Treat all (assume everyone has disease)
+- ☑ Treat none (assume no one has disease)
+- ☑ Show net benefit
+- ☑ Show net interventions avoided
+
+**Smoothing:**
+- ☑ LOESS smoothing (reduces noise)
+- Span: 0.3 (balance between smoothness and detail)
+
+**Confidence Intervals:**
+- ☑ Bootstrap 95% CI (1000 iterations)
+- Helps assess uncertainty in net benefit
+
+## Interpret Results
+
+### Decision Curve Output
+
+```
+════════════════════════════════════════════════════════
+Decision Curve Analysis: Recurrence Prediction Model
+════════════════════════════════════════════════════════
+
+Summary Across Threshold Probabilities 0-30%:
+────────────────────────────────────────────────────────
+Model Net Benefit Range:     0.000 to 0.165
+Treat All Net Benefit Range: 0.000 to 0.120
+Treat None Net Benefit:      0.000 (constant)
+
+Model Superior to Both Strategies: 3-28% threshold range
+────────────────────────────────────────────────────────
+
+Standardized Net Benefit (at key thresholds):
+────────────────────────────────────────────────────────
+Threshold    Model NB    Treat All NB    Difference
+   5%         0.145         0.118          +0.027
+  10%         0.165         0.105          +0.060
+  15%         0.158         0.082          +0.076
+  20%         0.138         0.053          +0.085
+  25%         0.108         0.023          +0.085
+  30%         0.072        -0.008          +0.080
+────────────────────────────────────────────────────────
+```
+
+**Interpretation:**
+
+✅ **Model is clinically useful** (curve above both reference lines)
+
+✅ **Optimal threshold range: 10-25%**
+- Maximum net benefit at 10% (NB = 0.165)
+- Largest improvement over "treat all" at 20-25% (NB difference = 0.085)
+
+✅ **At 15% threshold:**
+- Model: NB = 0.158
+- Treat All: NB = 0.082
+- **Improvement: +0.076**
+
+**What does NB = 0.158 mean?**
+> "Using the model is equivalent to a strategy that identifies 15.8 true positives per 100 patients with no false positives."
+
+### Net Interventions Avoided
+
+```
+Interventions Avoided per 100 Patients:
+────────────────────────────────────────────────────────
+Threshold    Model vs. Treat All
+   5%              8 fewer treatments
+  10%             18 fewer treatments
+  15%             25 fewer treatments
+  20%             31 fewer treatments
+  25%             34 fewer treatments
+  30%             36 fewer treatments
+────────────────────────────────────────────────────────
+```
+
+**Clinical Interpretation at 15% threshold:**
+
+✅ **25 unnecessary treatments avoided per 100 patients**
+- Without model: Treat 100% of patients
+- With model: Treat only 75% of patients
+- **25% reduction in chemotherapy use**
+- While maintaining or improving recurrence prevention
+
+::: {.callout-note}
+## Real-World Impact
+In a clinic seeing 200 breast cancer patients/year:
+- **50 patients** spared unnecessary chemotherapy
+- **Cost savings:** 50 × $50,000 = $2.5 million
+- **Toxicity avoided:** 50 patients avoid severe side effects
+:::
+
+---
+
+# Step 2: Comparing Multiple Models {#sec-comparing}
+
+Now compare your full model to simpler alternatives:
+
+1. **Model 1 (Full):** Age + Stage + Grade + ER + PR + Ki-67
+2. **Model 2 (Clinical):** Age + Stage + Grade only
+3. **Model 3 (Single marker):** Ki-67 only
+
+## Add Comparison Models
+
+1. In **Decision Curve Analysis**, click **Add Model**
+2. **Model 2 prediction:** `Model_Clinical_Risk`
+3. **Model 3 prediction:** `Model_Ki67_Risk`
+4. Keep same outcome and thresholds
+
+### Comparison Results
+
+```
+════════════════════════════════════════════════════════
+Model Comparison at Threshold 15%:
+════════════════════════════════════════════════════════
+Strategy              Net Benefit    Rank    Difference vs. Best
+────────────────────────────────────────────────────────────────
+Full Model              0.158         1st         --
+Clinical Model          0.142         2nd       -0.016
+Ki-67 Only              0.098         3rd       -0.060
+Treat All               0.082         4th       -0.076
+Treat None              0.000         5th       -0.158
+════════════════════════════════════════════════════════
+
+Interventions Avoided (vs. Treat All):
+────────────────────────────────────────────────────────
+Full Model:       25 per 100 patients
+Clinical Model:   21 per 100 patients
+Ki-67 Only:       12 per 100 patients
+════════════════════════════════════════════════════════
+```
+
+**Interpretation:**
+
+✅ **Full model is best** across 5-30% threshold range
+✅ **Clinical model is close** (NB difference = 0.016)
+  - Only 4 more interventions per 100 patients
+  - May prefer for simplicity (fewer biomarkers)
+✅ **Ki-67 alone insufficient** (only modest improvement over treat-all)
+
+### Cost-Benefit of Biomarkers
+
+**Question:** Is adding ER/PR/Ki-67 worth the cost?
+
+**Analysis:**
+```
+Incremental Net Benefit (Full vs. Clinical):
+  = 0.158 - 0.142 = 0.016
+  = 1.6 true positives per 100 patients
+  = 4 unnecessary treatments avoided per 100 patients
+
+Cost of biomarker panel: $500 × 100 = $50,000
+Savings from avoided treatments: 4 × $50,000 = $200,000
+Net savings: $150,000 per 100 patients
+```
+
+**Decision:** Full model is cost-effective (benefits exceed costs 4:1)
+
+---
+
+# Step 3: Time-Dependent DCA for Survival {#sec-timedependent}
+
+When outcome is time-to-event (survival), use **time-dependent DCA**.
+
+## Example: 5-Year Recurrence-Free Survival
+
+**Dataset:** `breast_survival_rfs` (recurrence-free survival with censoring)
+
+1. **Analyses** → **meddecideD** → **Time-Dependent Decision Curve Analysis**
+2. Configure:
+   - **Time variable:** `RFS_time` (months to recurrence or last follow-up)
+   - **Event variable:** `RFS_status` (0=censored, 1=recurrence)
+   - **Prediction model:** `Model_Risk_60months` (predicted risk at 60 months)
+   - **Time point:** 60 months (5 years)
+
+### Time-Dependent Results
+
+```
+════════════════════════════════════════════════════════
+Time-Dependent DCA at 60 Months (5 years):
+════════════════════════════════════════════════════════
+
+Kaplan-Meier Event Rate at 60 months: 28.5%
+Censoring Rate: 12.3%
+
+Net Benefit at Threshold 15%:
+────────────────────────────────────────────────────────
+Model:              0.152 (adjusted for censoring)
+Treat All:          0.078
+Treat None:         0.000
+────────────────────────────────────────────────────────
+
+Interventions Avoided: 24 per 100 patients
+════════════════════════════════════════════════════════
+```
+
+**Key Difference from Standard DCA:**
+- Accounts for censoring (patients lost to follow-up)
+- Uses time-specific risk estimates
+- More appropriate for survival outcomes
+
+---
+
+# Step 4: Sensitivity Analysis {#sec-sensitivity}
+
+Test robustness of conclusions to assumptions.
+
+## Vary Harm-to-Benefit Ratio
+
+**Base case:** pt = 15% (harm = 1, benefit = 5.67)
+
+**Sensitivity scenarios:**
+1. **Conservative:** pt = 25% (more weight on harm)
+2. **Aggressive:** pt = 5% (more weight on benefit)
+
+### Results Across Scenarios
+
+```
+═══════════════════════════════════════════════════════
+Sensitivity Analysis: Model Net Benefit
+═══════════════════════════════════════════════════════
+Scenario         Threshold    Net Benefit    Model Best?
+───────────────────────────────────────────────────────
+Aggressive          5%          0.145          YES
+Base case          15%          0.158          YES
+Conservative       25%          0.108          YES
+═══════════════════════════════════════════────────────
+
+Conclusion: Model remains superior across plausible range
+           of harm-to-benefit ratios
+═══════════════════════════════════════════════════════
+```
+
+**Robustness:** Model is useful even if clinicians disagree on exact threshold
+
+---
+
+# Manuscript Reporting {#sec-reporting}
+
+## Methods Section
+
+> **Decision Curve Analysis.** Clinical utility of the recurrence prediction model was evaluated using decision curve analysis (DCA), which quantifies net benefit across a range of threshold probabilities. Net benefit represents the difference between the proportion of true positives and false positives, weighted by the relative harm of false positives vs. false negatives. We compared the model to two default strategies: treat all patients (assume all will recur) and treat none (assume no recurrences). The model was considered clinically useful if its decision curve was above both reference strategies within a clinically reasonable threshold range (5-30%). Net interventions avoided quantified the reduction in unnecessary treatments compared to treating all patients. Threshold probabilities reflect the minimum predicted risk at which a patient and clinician would opt for adjuvant chemotherapy, accounting for treatment toxicity. Confidence intervals were estimated using 1000 bootstrap replicates. Analyses used ClinicoPath v0.0.32 for jamovi.
+
+## Results Section
+
+> **Clinical Utility.** Decision curve analysis demonstrated that the recurrence prediction model provides net benefit compared to default strategies of treating all or no patients across threshold probabilities of 3-28% (Figure 1). At a threshold of 15% (reflecting current treatment decision-making), the model achieved net benefit of 0.158, compared to 0.082 for treating all patients (difference: 0.076, 95% CI: 0.052-0.101). This translates to 25 unnecessary treatments avoided per 100 patients (95% CI: 18-32) while maintaining recurrence prevention. The full model (including biomarkers) outperformed the clinical-only model (net benefit 0.142, difference 0.016, p = 0.03), justifying biomarker costs through reduced overtreatment. Model performance was robust across sensitivity analyses varying the harm-to-benefit ratio (threshold 5-25%).
+
+## Figure Legend
+
+> **Figure 1. Decision Curve Analysis for Recurrence Prediction Model.** Net benefit of using the prediction model (red line) compared to treating all patients (blue line) or treating no patients (grey line) across threshold probabilities 0-50%. The model provides net benefit over both strategies between 3-28% thresholds. Shaded area shows 95% bootstrap confidence interval. At the 15% threshold (vertical dashed line), the model achieves net benefit of 0.158, avoiding 25 unnecessary treatments per 100 patients compared to treating all.
+
+---
+
+# Communicating to Stakeholders {#sec-communicating}
+
+## For Clinicians
+
+**Simple Message:**
+
+> "Using this model at our clinic (200 patients/year), we would:
+> - Avoid giving chemotherapy to **50 patients** who wouldn't benefit
+> - Still prevent recurrence in **90% of high-risk patients**
+> - Save patients from unnecessary toxicity
+> - Maintain excellent clinical outcomes"
+
+## For Hospital Administrators
+
+**Business Case:**
+
+```
+Annual Impact at 200 patients/year:
+
+Cost Savings:
+  - 50 avoided chemotherapy treatments × $50,000 = $2,500,000
+  - Biomarker testing cost: 200 × $500 = $100,000
+  - Net savings: $2,400,000/year
+
+Quality Metrics:
+  - Reduce chemotherapy-related toxicity by 25%
+  - Improve patient satisfaction (avoid unnecessary treatment)
+  - Reduce chemo suite utilization → capacity for more patients
+
+Return on Investment: 2400%
+Payback period: 2 weeks
+```
+
+## For Patients
+
+**Patient-Friendly Explanation:**
+
+> "This test helps us predict your risk of cancer coming back. If your risk is low (below 15%), you may not need chemotherapy – avoiding the side effects while staying safe. If your risk is high, chemotherapy will help prevent recurrence. The test is like a personalized recommendation based on your specific cancer."
+
+---
+
+# Common Mistakes to Avoid {#sec-mistakes}
+
+## ❌ Mistake 1: Confusing DCA with ROC
+
+**Wrong:**
+> "AUC is 0.78, so the model is useful."
+
+**Why Wrong:**
+- AUC measures discrimination, not clinical utility
+- High AUC doesn't guarantee net benefit
+- Example: Model with AUC 0.90 could have negative net benefit if poorly calibrated
+
+**Correct:**
+> "AUC is 0.78 (good discrimination). DCA shows the model provides net benefit over treat-all/treat-none strategies at clinically relevant thresholds (10-25%), confirming clinical usefulness."
+
+## ❌ Mistake 2: Ignoring Threshold Context
+
+**Wrong:**
+> "Maximum net benefit is at 10% threshold, so use 10%."
+
+**Why Wrong:**
+- Optimal threshold depends on patient/clinician preferences
+- Harm-to-benefit ratio varies by individual
+- No single "right" threshold
+
+**Correct:**
+> "The model shows positive net benefit across 5-30% thresholds. Clinicians should choose threshold based on shared decision-making, considering patient values regarding chemotherapy toxicity vs. recurrence risk."
+
+## ❌ Mistake 3: Treating Interventions Avoided as Gospel
+
+**Wrong:**
+> "The model avoids exactly 25 interventions per 100 patients."
+
+**Why Wrong:**
+- This assumes perfect adherence to model recommendations
+- Clinicians may override model in practice
+- Requires prospective validation
+
+**Correct:**
+> "If the model were used as intended, it would potentially avoid 25 interventions per 100 patients (95% CI: 18-32). Prospective implementation study needed to confirm real-world impact."
+
+---
+
+# Summary {#sec-summary}
+
+## Key Takeaways
+
+✅ **DCA quantifies clinical usefulness** (not just statistical performance)
+✅ **Net benefit** = Benefits - Harms (weighted appropriately)
+✅ **Model must beat both reference strategies** to be useful
+✅ **Threshold probability** reflects harm-to-benefit ratio
+✅ **Interventions avoided** shows real-world impact
+✅ **Compare multiple models** to justify complexity
+✅ **Sensitivity analysis** tests robustness
+
+## DCA vs. Other Metrics
+
+| Metric | What It Measures | Limitation |
+|--------|------------------|------------|
+| **AUC** | Discrimination | Doesn't consider clinical consequences |
+| **Calibration** | Prediction accuracy | Doesn't weigh harms vs. benefits |
+| **Sensitivity/Specificity** | Performance at one cutpoint | Doesn't compare to alternatives |
+| **Net Benefit (DCA)** | Clinical value across thresholds | ✅ Comprehensive assessment |
+
+## Decision Framework
+
+```
+1. Build prediction model
+   ↓
+2. Assess discrimination (ROC/AUC)
+   ↓
+3. Check calibration (calibration plot)
+   ↓
+4. Evaluate clinical utility (DCA)
+   ↓
+   Model above both reference lines?
+   ↓ YES
+5. Determine threshold range where model is useful
+   ↓
+6. Calculate interventions avoided
+   ↓
+7. Compare to simpler models (cost-benefit)
+   ↓
+8. Prospective validation
+```
+
+## Next Tutorial
+
+[**Tutorial 6: Creating Reproducible Reports**](06-reproducible-reports.qmd)
+- Automating analyses with R and Quarto
+- Batch processing multiple datasets
+- Version control with Git
+- Manuscript templates
+
+---
+
+# References {#sec-references}
+
+**Decision Curve Analysis:**
+
+1. Vickers AJ, Elkin EB. Decision curve analysis: a novel method for evaluating prediction models. *Med Decis Making*. 2006;26(6):565-574.
+
+2. Vickers AJ, Van Calster B, Steyerberg EW. Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. *BMJ*. 2016;352:i6.
+
+3. Van Calster B, Wynants L, Verbeek JFM, et al. Reporting and Interpreting Decision Curve Analysis: A Guide for Investigators. *Eur Urol*. 2018;74(6):796-804.
+
+**Time-Dependent DCA:**
+
+4. Vickers AJ, Cronin AM, Begg CB. One statistical test is sufficient for assessing new predictive markers. *BMC Med Res Methodol*. 2011;11:13.
+
+**Clinical Applications:**
+
+5. Localio AR, Goodman S. Beyond the usual prediction accuracy metrics: reporting results for clinical decision making. *Ann Intern Med*. 2012;157(4):294-295.
+
+---
+
+**Tutorial Author:** Serdar Balci, MD, PhD
+**Last Updated:** December 13, 2025
+**License:** CC-BY-4.0
+**Tutorial Version:** 1.0
+
+**Continue learning:** [Tutorial 6: Reproducible Reports →](06-reproducible-reports.qmd)

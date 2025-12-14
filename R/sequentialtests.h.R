@@ -17,11 +17,11 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             test2_cost = 0,
             strategy = "serial_positive",
             prevalence = 0.1,
+            population_size = 1000,
             show_explanation = TRUE,
             show_formulas = FALSE,
             show_cost_analysis = FALSE,
-            show_nomogram = FALSE,
-            population_size = 1000, ...) {
+            show_nomogram = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -98,6 +98,12 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=0.1,
                 min=0.001,
                 max=0.999)
+            private$..population_size <- jmvcore::OptionInteger$new(
+                "population_size",
+                population_size,
+                default=1000,
+                min=100,
+                max=100000)
             private$..show_explanation <- jmvcore::OptionBool$new(
                 "show_explanation",
                 show_explanation,
@@ -114,12 +120,6 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "show_nomogram",
                 show_nomogram,
                 default=FALSE)
-            private$..population_size <- jmvcore::OptionInteger$new(
-                "population_size",
-                population_size,
-                min=100,
-                max=100000,
-                default=1000)
 
             self$.addOption(private$..preset)
             self$.addOption(private$..test1_name)
@@ -132,11 +132,11 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test2_cost)
             self$.addOption(private$..strategy)
             self$.addOption(private$..prevalence)
+            self$.addOption(private$..population_size)
             self$.addOption(private$..show_explanation)
             self$.addOption(private$..show_formulas)
             self$.addOption(private$..show_cost_analysis)
             self$.addOption(private$..show_nomogram)
-            self$.addOption(private$..population_size)
         }),
     active = list(
         preset = function() private$..preset$value,
@@ -150,11 +150,11 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test2_cost = function() private$..test2_cost$value,
         strategy = function() private$..strategy$value,
         prevalence = function() private$..prevalence$value,
+        population_size = function() private$..population_size$value,
         show_explanation = function() private$..show_explanation$value,
         show_formulas = function() private$..show_formulas$value,
         show_cost_analysis = function() private$..show_cost_analysis$value,
-        show_nomogram = function() private$..show_nomogram$value,
-        population_size = function() private$..population_size$value),
+        show_nomogram = function() private$..show_nomogram$value),
     private = list(
         ..preset = NA,
         ..test1_name = NA,
@@ -167,11 +167,11 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..test2_cost = NA,
         ..strategy = NA,
         ..prevalence = NA,
+        ..population_size = NA,
         ..show_explanation = NA,
         ..show_formulas = NA,
         ..show_cost_analysis = NA,
-        ..show_nomogram = NA,
-        ..population_size = NA)
+        ..show_nomogram = NA)
 )
 
 sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -481,6 +481,8 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param test2_cost .
 #' @param strategy .
 #' @param prevalence .
+#' @param population_size Population size used to illustrate population flow
+#'   counts. Does not affect probabilities.
 #' @param show_explanation .
 #' @param show_formulas .
 #' @param show_cost_analysis .
@@ -519,6 +521,7 @@ sequentialtests <- function(
     test2_cost = 0,
     strategy = "serial_positive",
     prevalence = 0.1,
+    population_size = 1000,
     show_explanation = TRUE,
     show_formulas = FALSE,
     show_cost_analysis = FALSE,
@@ -540,6 +543,7 @@ sequentialtests <- function(
         test2_cost = test2_cost,
         strategy = strategy,
         prevalence = prevalence,
+        population_size = population_size,
         show_explanation = show_explanation,
         show_formulas = show_formulas,
         show_cost_analysis = show_cost_analysis,
@@ -553,3 +557,4 @@ sequentialtests <- function(
 
     analysis$results
 }
+

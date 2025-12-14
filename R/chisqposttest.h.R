@@ -20,10 +20,10 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             residualsCutoff = 2,
             testSelection = "auto",
             exportResults = FALSE,
-            showClinicalSummary = TRUE,
+            showClinicalSummary = FALSE,
             showExampleInterpretations = FALSE,
             copyReadySentences = FALSE,
-            showAssumptionsCheck = TRUE,
+            showAssumptionsCheck = FALSE,
             showGlossary = FALSE,
             colorBlindSafe = FALSE, ...) {
 
@@ -117,7 +117,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showClinicalSummary <- jmvcore::OptionBool$new(
                 "showClinicalSummary",
                 showClinicalSummary,
-                default=TRUE)
+                default=FALSE)
             private$..showExampleInterpretations <- jmvcore::OptionBool$new(
                 "showExampleInterpretations",
                 showExampleInterpretations,
@@ -129,7 +129,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showAssumptionsCheck <- jmvcore::OptionBool$new(
                 "showAssumptionsCheck",
                 showAssumptionsCheck,
-                default=TRUE)
+                default=FALSE)
             private$..showGlossary <- jmvcore::OptionBool$new(
                 "showGlossary",
                 showGlossary,
@@ -570,10 +570,10 @@ chisqposttest <- function(
     residualsCutoff = 2,
     testSelection = "auto",
     exportResults = FALSE,
-    showClinicalSummary = TRUE,
+    showClinicalSummary = FALSE,
     showExampleInterpretations = FALSE,
     copyReadySentences = FALSE,
-    showAssumptionsCheck = TRUE,
+    showAssumptionsCheck = FALSE,
     showGlossary = FALSE,
     colorBlindSafe = FALSE) {
 

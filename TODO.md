@@ -124,6 +124,56 @@ Rscript _updateModules.R
 
 
 
+
+Always use available 'skills' when possible. Keep the output organized. 
+Use these skills to update text and analysis in the project: 
+  pubmed-database
+  biopython
+  biorxiv-database
+  openalex-database
+  citation-management
+  scholar-evaluation
+  clinical-decision-support
+  clinical-reports
+  exploratory-data-analysis
+  hypogenic
+  hypothesis-generation
+  literature-review
+  peer-review
+  scientific-brainstorming
+  scientific-critical-thinking
+  scientific-visualization
+  scientific-schematics
+  generate-image
+  scientific-slides
+  scientific-writing
+  research-grants
+  statistical-analysis
+  statsmodels
+  paper-2-web
+  matplotlib
+  scikit-learn
+  scikit-survival
+  plotly
+  seaborn
+  aeon
+  docx
+  xlsx
+  pptx
+  latex-posters
+  pdf
+  markitdown
+  histolab
+  pathml
+  shap
+  omero-integration
+  pydicom
+  pytorch-lightning
+
+
+
+
+
 update DECSRIPTION, NEWS, README, and function Roxygen documentations.
 
 ! Rscript -e "pkgdown::build_site()"
@@ -2468,6 +2518,98 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 
 ## Drafts / Next steps (to implement later)
 - jjoncoplot: expose a dedicated result for per-sample mutation burden (currently only in plot logic), and add UI enable/disable logic (e.g., enable `log10TransformTMB` only when `showTMB` is TRUE).
+
+---
+
+## chisqposttest Enhancements (Optional - Production-Ready Function)
+
+**Status**: ✅ Function is production-ready and clinically safe (5/5 stars)
+**Notice Pattern**: ✅ Recently refactored to use jmvcore::Notice (10 notices implemented)
+**Priority**: Medium (enhancements, not fixes)
+
+### Enhancement 1: Bootstrap Confidence Intervals for Phi Coefficient [M]
+
+**Status**: ⏳ Planned for v0.0.32
+**Dependencies**: boot package (suggested, not required)
+
+**Implementation**:
+- Add `phi_ci` column to `posthocTable` in chisqposttest.r.yaml
+- Add `.calculatePhiCI()` private method in chisqposttest.b.R
+- Use BCa bootstrap (999 iterations) for accurate interval estimates
+- Handle small samples (n<20) gracefully with "n too small" message
+
+**Files to modify**:
+- `jamovi/chisqposttest.r.yaml` (line 127 - add phi_ci column)
+- `R/chisqposttest.b.R` (line 900 - add helper method, line 594 - compute CIs)
+
+**Clinical value**: Pathologists can report "Moderate association (φ=0.34, 95% CI [0.21, 0.48])" with precision estimates
+
+**Rationale**: Bootstrap BCa CIs provide accurate intervals without parametric assumptions; ~50ms per comparison for n=100
+
+---
+
+### Enhancement 2: Residuals Interpretation Guidance Panel [H]
+
+**Status**: ⏳ Planned for v0.0.32
+**Dependencies**: None (pure HTML)
+
+**Implementation**:
+- Add `residualsGuidance` Html output to chisqposttest.r.yaml
+- Insert blue-bordered guidance panel before residuals table
+- Include clinical example: "If 'Grade 3 × Positive' has residual = +3.2..."
+- Explain positive vs negative residuals with cutoff value
+
+**Files to modify**:
+- `jamovi/chisqposttest.r.yaml` (line 82 - add new Html output)
+- `R/chisqposttest.b.R` (line 1220 - add guidance HTML before residuals)
+
+**Clinical value**: Reduces user confusion about standardized residuals; clinicians understand which cells drive significant associations
+
+**Rationale**: Standardized residuals are powerful but often misinterpreted by non-statisticians; contextual help improves usability
+
+---
+
+### Enhancement 3: Power Analysis Warning for Small Samples [M]
+
+**Status**: ⏳ Planned for v0.0.32
+**Dependencies**: pwr package (suggested, not required)
+
+**Implementation**:
+- Detect underpowered studies (n<50) after assumptions check
+- Calculate required n for 80% power to detect medium effect (φ=0.3, Cohen 1988)
+- Add WARNING notice with required sample size
+- Fallback to heuristic (≥5 observations per cell) if pwr package unavailable
+
+**Files to modify**:
+- `R/chisqposttest.b.R` (line 1726 - add after low expected counts warning)
+- DESCRIPTION (add pwr to Suggests)
+
+**Clinical value**: Prevents misinterpretation of null results as "no association" when study is simply underpowered
+
+**Rationale**: Small samples common in pathology studies; users need guidance on Type II error risk
+
+---
+
+### Implementation Priority
+
+**High Priority (Next Release v0.0.32)**:
+- ✅ Enhancement 2: Residuals Guidance (no dependencies, high clinical value, low risk)
+
+**Medium Priority (Future Release)**:
+- ⏳ Enhancement 3: Power Analysis Warning (helps prevent Type II error misinterpretation)
+- ⏳ Enhancement 1: Bootstrap CIs (enhances reporting quality)
+
+**Timeline**: Can be implemented independently or together in ~2 hours total
+
+**Note**: These are OPTIONAL enhancements for an already production-ready function. Current version (with Notice pattern) is ready for clinical use.
+
+---
+
+### Related Documentation
+
+- Systematic check report: `/check-function chisqposttest` (2025-01-13)
+- Comprehensive review: `/review-function chisqposttest` (2025-01-13)
+- Notice pattern implementation: Completed 2025-01-13 (4 ERROR, 2 STRONG_WARNING, 2 WARNING, 2 INFO)
 
 ---
 

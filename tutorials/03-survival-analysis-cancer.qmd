@@ -1,0 +1,408 @@
+---
+title: "Survival Analysis in Oncology"
+subtitle: "Kaplan-Meier Curves, Log-Rank Tests, and Cox Regression"
+author: "ClinicoPath Tutorial Series"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+    number-sections: true
+---
+
+# Overview {#sec-overview}
+
+Learn how to perform **survival analysis** for oncology research:
+
+- ✅ Kaplan-Meier survival curves
+- ✅ Log-rank tests for group comparisons
+- ✅ Median survival time with confidence intervals
+- ✅ Cox proportional hazards regression
+- ✅ Hazard ratios and forest plots
+- ✅ Publication-ready survival plots
+
+**Prerequisites:** [Tutorial 1](01-getting-started.qmd), [Tutorial 2](02-table-one-clinical-trial.qmd)
+**Time Required:** 60 minutes
+**Dataset:** `basic_survival_data` (breast cancer, n=200)
+
+---
+
+# Clinical Scenario {#sec-scenario}
+
+## Study Design
+
+You analyzed a cohort of **200 breast cancer patients** treated at your institution:
+
+- **Outcome:** Overall survival (OS)
+- **Follow-up:** 0-60 months
+- **Primary Question:** Does treatment type affect survival?
+- **Groups:**
+  - Standard chemotherapy (n=100)
+  - Targeted therapy (n=100)
+
+## Research Questions
+
+1. What is the median survival time for each treatment group?
+2. Do survival curves differ significantly between groups?
+3. After adjusting for age, stage, and grade, does treatment affect survival?
+4. What is the hazard ratio for targeted therapy vs. standard chemotherapy?
+
+---
+
+# Step 1: Kaplan-Meier Analysis {#sec-km}
+
+## Load Data
+
+1. Open jamovi
+2. **File** → **Open** → **Data Library**
+3. Select `basic_survival_data`
+
+**Dataset Variables:**
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `PatientID` | ID | Patient identifier |
+| `Treatment` | Nominal | Standard / Targeted |
+| `SurvivalTime` | Continuous | Time to death or last follow-up (months) |
+| `Status` | Nominal | Alive (0) / Dead (1) |
+| `Age` | Continuous | Age at diagnosis |
+| `Stage` | Ordinal | I / II / III / IV |
+| `Grade` | Ordinal | 1 / 2 / 3 |
+
+## Run Kaplan-Meier
+
+1. **Analyses** → **SurvivalT1** → **Survival Analysis**
+2. Configure:
+   - **Time variable:** `SurvivalTime`
+   - **Event variable:** `Status`
+   - **Event value:** `1` (Dead)
+   - **Grouping variable:** `Treatment`
+
+### Key Options
+
+**Survival Estimates:**
+- ☑ Median survival with 95% CI
+- ☑ Survival at specific times (12, 24, 36, 48, 60 months)
+- ☑ Survival table
+
+**Plot Options:**
+- ☑ Kaplan-Meier curve
+- ☑ Confidence intervals (shaded bands)
+- ☑ Risk table (numbers at risk over time)
+- ☑ Cumulative events table
+
+**Statistical Tests:**
+- ☑ Log-rank test
+- ☑ Wilcoxon test (more weight to early events)
+- ☑ Tarone-Ware test (balanced)
+
+## Interpret Results
+
+### Survival Summary Table
+
+```
+Treatment        N    Events   Median (95% CI)    5-year Survival (95% CI)
+──────────────────────────────────────────────────────────────────────────
+Standard        100     58      28.3 (24.1-32.5)   35.2% (25.8-44.6%)
+Targeted        100     42      38.7 (33.9-43.5)   52.8% (42.9-62.7%)
+──────────────────────────────────────────────────────────────────────────
+Overall         200    100      32.1 (28.4-35.8)   44.0% (37.1-50.9%)
+```
+
+**Interpretation:**
+
+✅ **Median survival:**
+- Standard: 28.3 months (95% CI: 24.1-32.5)
+- Targeted: 38.7 months (95% CI: 33.9-43.5)
+- **Difference: 10.4 months longer with targeted therapy**
+
+✅ **5-year survival:**
+- Standard: 35.2% (only 1/3 survive 5 years)
+- Targeted: 52.8% (over half survive 5 years)
+- **Absolute difference: 17.6% improvement**
+
+::: {.callout-important}
+## Clinical Significance
+A 10-month increase in median survival and 18% improvement in 5-year survival is **clinically meaningful** in advanced breast cancer.
+:::
+
+### Log-Rank Test
+
+```
+Log-rank test: χ² = 8.42, df = 1, p = 0.004
+Wilcoxon test: χ² = 7.89, df = 1, p = 0.005
+```
+
+**Interpretation:**
+- **p = 0.004** (highly significant)
+- Survival curves are statistically different
+- Targeted therapy significantly improves survival
+
+### Kaplan-Meier Curve
+
+The survival plot shows:
+
+- **Y-axis:** Survival probability (0-1 or 0-100%)
+- **X-axis:** Time (months)
+- **Blue line:** Targeted therapy (higher curve = better survival)
+- **Red line:** Standard chemotherapy
+- **Shaded bands:** 95% confidence intervals
+- **Tick marks:** Censored patients (alive at last follow-up)
+
+**Key Features:**
+
+1. **Curves separate early** (within first 12 months) → Early benefit
+2. **Gap widens over time** → Sustained benefit
+3. **Confidence intervals don't overlap** → Robust difference
+4. **No plateau** → Some patients still at risk after 60 months
+
+---
+
+# Step 2: Cox Proportional Hazards Regression {#sec-cox}
+
+Kaplan-Meier shows **unadjusted** survival. Cox regression adjusts for **confounders**.
+
+## Univariate Cox Models
+
+Test each predictor individually:
+
+1. **Analyses** → **SurvivalT1** → **Cox Regression**
+2. **Time:** `SurvivalTime`
+3. **Event:** `Status` (value = 1)
+4. **Covariates:** Add one at a time:
+   - Treatment
+   - Age
+   - Stage
+   - Grade
+
+### Univariate Results
+
+```
+Variable            HR (95% CI)       p-value   C-index
+────────────────────────────────────────────────────────
+Treatment
+  Standard          1.00 (reference)    --        --
+  Targeted          0.58 (0.40-0.84)   0.004     0.61
+
+Age (per year)      1.03 (1.01-1.05)   0.002     0.63
+
+Stage
+  I                 1.00 (reference)    --        --
+  II                2.15 (0.98-4.72)   0.057     0.68
+  III               4.32 (2.01-9.28)  <0.001
+  IV                8.67 (3.95-19.0)  <0.001
+
+Grade
+  1                 1.00 (reference)    --        --
+  2                 1.82 (0.93-3.56)   0.082     0.59
+  3                 3.24 (1.68-6.25)  <0.001
+```
+
+**Interpretation:**
+
+✅ **Treatment (Targeted vs. Standard):**
+- HR = 0.58 → 42% reduction in death risk
+- p = 0.004 → Statistically significant
+- 95% CI: 0.40-0.84 (doesn't include 1.0)
+
+✅ **Age:**
+- HR = 1.03 per year → 3% increased risk per year older
+- For 10 years: HR = 1.03^10 = 1.34 (34% increased risk)
+
+✅ **Stage:**
+- Stage IV vs. I: HR = 8.67 (767% increased risk!)
+- Strong prognostic factor
+
+✅ **Grade:**
+- Grade 3 vs. 1: HR = 3.24 (224% increased risk)
+
+## Multivariate Cox Model
+
+Adjust for confounders simultaneously:
+
+1. **Cox Regression**
+2. **Covariates:** Add all significant predictors:
+   - Treatment
+   - Age
+   - Stage
+   - Grade
+
+### Multivariate Results
+
+```
+Variable            HR (95% CI)       p-value   Adjusted HR
+────────────────────────────────────────────────────────────
+Treatment
+  Targeted          0.62 (0.42-0.91)   0.014     0.62
+
+Age (per year)      1.02 (1.00-1.04)   0.032     1.02
+
+Stage
+  II vs. I          1.98 (0.89-4.41)   0.094     1.98
+  III vs. I         3.45 (1.56-7.63)   0.002     3.45
+  IV vs. I          6.24 (2.73-14.3)  <0.001     6.24
+
+Grade
+  2 vs. 1           1.52 (0.77-3.01)   0.228     1.52
+  3 vs. 1           2.18 (1.09-4.36)   0.027     2.18
+────────────────────────────────────────────────────────────
+Model: χ² = 64.3, df = 7, p < 0.001
+C-index: 0.74 (good discrimination)
+```
+
+**Interpretation:**
+
+✅ **Treatment effect persists after adjustment:**
+- Adjusted HR = 0.62 (38% risk reduction)
+- Still significant (p = 0.014)
+- Targeted therapy is **independently** protective
+
+✅ **Stage is strongest predictor:**
+- Stage IV vs. I: Adjusted HR = 6.24
+- Dominates prognosis
+
+✅ **Model performance:**
+- C-index = 0.74 (good discrimination)
+- 0.5 = no better than chance
+- 0.7-0.8 = acceptable
+- >0.8 = excellent
+
+::: {.callout-tip}
+## Hazard Ratio Interpretation
+- HR < 1: Protective (reduces death risk)
+- HR = 1: No effect
+- HR > 1: Harmful (increases death risk)
+- HR = 2: Doubles the risk
+- HR = 0.5: Halves the risk
+:::
+
+---
+
+# Step 3: Checking Cox Assumptions {#sec-assumptions}
+
+Cox regression assumes **proportional hazards**: hazard ratio is constant over time.
+
+## Test Proportional Hazards
+
+1. In **Cox Regression**
+2. **Diagnostics** section:
+   - ☑ Test proportional hazards (Schoenfeld residuals)
+   - ☑ Plot Schoenfeld residuals
+
+### Schoenfeld Test Results
+
+```
+Variable         χ²      p-value   Conclusion
+──────────────────────────────────────────────
+Treatment       0.82     0.37      Assumption OK
+Age             1.23     0.27      Assumption OK
+Stage           2.45     0.49      Assumption OK
+Grade           1.67     0.43      Assumption OK
+──────────────────────────────────────────────
+Global test     5.89     0.55      Assumption OK
+```
+
+**Interpretation:**
+- All p > 0.05 → Proportional hazards assumption is satisfied
+- Safe to use Cox regression
+
+**If assumption violated (p < 0.05):**
+- Use stratified Cox model
+- Add time-varying covariates
+- Use alternative models (AFT, additive hazards)
+
+---
+
+# Step 4: Forest Plot for Publication {#sec-forest}
+
+Forest plots visualize hazard ratios with confidence intervals.
+
+## Create Forest Plot
+
+1. **Analyses** → **SurvivalT1** → **Cox Regression**
+2. **Plots** section:
+   - ☑ Forest plot
+   - ☑ Show reference lines (HR = 1)
+   - ☑ Include C-index
+
+### Forest Plot Example
+
+```
+Variable                HR (95% CI)              p
+─────────────────────────────────────────────────────
+Treatment
+  Targeted vs. Standard  ●——●             0.62  0.014
+                      0.42       0.91
+
+Age (per 10 years)       ●—●               1.22  0.032
+                       1.00   1.44
+
+Stage
+  II vs. I               ●———————●         1.98  0.094
+                      0.89         4.41
+  III vs. I                ●————●          3.45  0.002
+                         1.56  7.63
+  IV vs. I                    ●————————●   6.24 <0.001
+                           2.73      14.3
+
+Grade
+  2 vs. 1                ●———————●         1.52  0.228
+                      0.77      3.01
+  3 vs. 1                  ●———●           2.18  0.027
+                         1.09 4.36
+─────────────────────────────────────────────────────
+      Favors Targeted  |  Favors Standard
+                      1.0
+```
+
+**Interpretation:**
+- **Dots** = hazard ratio point estimate
+- **Horizontal lines** = 95% confidence intervals
+- **Vertical line** = HR = 1 (no effect)
+- **Left of 1.0** = Protective (reduces death risk)
+- **Right of 1.0** = Harmful (increases death risk)
+
+---
+
+# Manuscript Reporting {#sec-reporting}
+
+## Methods Section
+
+> **Survival Analysis.** Overall survival was defined as time from diagnosis to death from any cause. Patients alive at last follow-up were censored. Kaplan-Meier method estimated survival probabilities; log-rank test compared survival curves between treatment groups. Cox proportional hazards regression modeled associations between covariates and survival, reporting hazard ratios (HRs) with 95% confidence intervals (CIs). Multivariable models included treatment, age, stage, and grade. Proportional hazards assumption was assessed using Schoenfeld residuals (all p > 0.27). Model discrimination was evaluated using Harrell's C-index. Analyses used ClinicoPath v0.0.32 for jamovi; two-sided p < 0.05 considered significant.
+
+## Results Section
+
+> **Survival Outcomes.** Median follow-up was 32.1 months (IQR: 18.4-45.8). During follow-up, 100 deaths occurred (50%). Median OS was significantly longer with targeted therapy (38.7 months, 95% CI: 33.9-43.5) than standard chemotherapy (28.3 months, 95% CI: 24.1-32.5; log-rank p = 0.004). Five-year survival was 52.8% (95% CI: 42.9-62.7%) vs. 35.2% (95% CI: 25.8-44.6%), respectively.
+>
+> In univariate Cox models, targeted therapy (HR 0.58, 95% CI: 0.40-0.84, p = 0.004), older age (HR 1.03 per year, 95% CI: 1.01-1.05, p = 0.002), advanced stage (Stage IV vs. I: HR 8.67, 95% CI: 3.95-19.0, p < 0.001), and higher grade (Grade 3 vs. 1: HR 3.24, 95% CI: 1.68-6.25, p < 0.001) were associated with survival.
+>
+> In multivariable analysis adjusting for age, stage, and grade, targeted therapy remained independently associated with reduced mortality (adjusted HR 0.62, 95% CI: 0.42-0.91, p = 0.014). Stage was the strongest predictor (Stage IV vs. I: adjusted HR 6.24, 95% CI: 2.73-14.3, p < 0.001). The final model showed good discrimination (C-index 0.74).
+
+---
+
+# Summary {#sec-summary}
+
+## Key Takeaways
+
+✅ **Kaplan-Meier** describes survival over time
+✅ **Log-rank test** compares survival curves
+✅ **Cox regression** adjusts for confounders
+✅ **Hazard ratios** quantify relative risk
+✅ **C-index** evaluates model discrimination
+✅ **Check assumptions** (proportional hazards)
+
+## Next Tutorial
+
+[**Tutorial 4: ROC Analysis for Diagnostic Tests**](04-roc-diagnostic-test.qmd)
+- Sensitivity and specificity
+- Optimal cutpoint determination
+- AUC interpretation
+- Comparing multiple biomarkers
+
+---
+
+**Tutorial Author:** Serdar Balci, MD, PhD
+**Last Updated:** December 13, 2025
+**License:** CC-BY-4.0

@@ -1101,7 +1101,16 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to prepare and validate data
         .prepareAndValidateData = function() {
             # Error Message ----
-            if (nrow(self$data) == 0) stop(.("Data contains no (complete) rows"))
+            if (nrow(self$data) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'emptyDataset',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Data contains no (complete) rows. Please check your dataset and variable selections.')
+                self$results$insert(1, notice)
+                return(NULL)
+            }
 
             # Prepare Data ----
             data <- self$data
@@ -1111,7 +1120,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if counts variable exists when specified
             if (!is.null(counts) && !(counts %in% names(data))) {
-                stop(.("The counts variable '{counts}' does not exist in the data. Please select a valid numeric variable for counts."))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'countsVariableNotFound',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf("The counts variable '%s' does not exist in the data. Please select a valid numeric variable for counts.", counts))
+                self$results$insert(1, notice)
+                return(NULL)
             }
 
             # Exclude NA ----
@@ -1119,7 +1135,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {
                 data <- jmvcore::naOmit(data)
             }
-            
+
             return(list(data = data, rows = rows, cols = cols, counts = counts))
         },
         
@@ -1148,12 +1164,26 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Handle errors
             if (inherits(contTable, "try-error")) {
-                stop(.("Error creating contingency table. Please check your data and variable selections."))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'contingencyTableError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Error creating contingency table. Please check your data format and variable selections. Ensure rows and columns variables are categorical.')
+                self$results$insert(1, notice)
+                return(NULL)
             }
-            
+
             # Validate table dimensions
             if (any(dim(contTable) < 2)) {
-                stop(.("Contingency table must have at least 2 rows and 2 columns. Please check your data."))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'invalidTableDimensions',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Contingency table must have at least 2 rows and 2 columns. Please check that your variables have at least 2 categories each.')
+                self$results$insert(1, notice)
+                return(NULL)
             }
             
             # Add warning message about weighted data (only in main analysis)
@@ -1389,9 +1419,20 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to handle post-hoc testing
         .handlePostHocTesting = function(chiSqTest, contTable, rows = NULL, cols = NULL) {
+            notice_position <- 1
+
             # CRITICAL FIX: Check if user wants to disable post-hoc tests entirely
             # When posthoc = "none", skip all pairwise testing
             if (self$options$posthoc == "none") {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'posthocDisabled',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent('Post-hoc testing disabled. Select Bonferroni, Holm, or FDR to enable pairwise comparisons with appropriate multiple testing correction.')
+                self$results$insert(notice_position, notice)
+
+                # Keep detailed HTML message for full explanation
                 message_text <- paste0(
                     "You selected 'None' for post-hoc method. No pairwise comparisons will be performed. ",
                     "If you want pairwise comparisons with no p-value adjustment, this feature is not currently available. ",
@@ -1410,7 +1451,15 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             overall_significant <- chiSqTest$p.value < self$options$sig
 
             if (!overall_significant) {
-                # Chi-square not significant - DO NOT run post-hoc tests
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'omnibusNotSignificant',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Overall chi-square test not significant (p = %.3f). Post-hoc pairwise comparisons not performed to avoid inflating Type I error.', chiSqTest$p.value))
+                self$results$insert(notice_position, notice)
+
+                # Keep detailed HTML message for full explanation
                 message_text <- paste0(
                     "Overall chi-square test is not significant (p = ",
                     format.pval(chiSqTest$p.value, digits = 3),
@@ -1434,6 +1483,20 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (length(pairwise_results) > 0) {
                 fisher_used <- any(sapply(pairwise_results, function(x) identical(x$test_used, "Fisher's exact")))
+
+                # Add INFO notice if Fisher's test was used
+                if (fisher_used) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'fisherTestUsed',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent('Fisher\'s exact test automatically used for pairwise comparisons with expected cell counts < 5. Exact p-values reported.')
+                    self$results$insert(notice_position, notice)
+                    notice_position <- notice_position + 1
+                }
+
+                # Keep detailed HTML notice for educational panel
                 fisher_notice <- NULL
                 if (fisher_used) {
                     fisher_notice <- htmltools::div(
@@ -1442,7 +1505,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         .("Pairwise comparisons with expected cell counts < 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method.")
                     )
                 }
-                
+
                 # Create multiple testing correction panel (conditional)
                 if (self$options$showEducational) {
                     correction_panel <- private$.createEducationalPanel("multiple_testing", 
@@ -1645,26 +1708,56 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             # Initial setup and validation
             if (!private$.handleInitialSetup()) return()
-            
+
             # Prepare and validate data
             data_info <- private$.prepareAndValidateData()
+            if (is.null(data_info)) return()  # Error notice already inserted
+
             data <- data_info$data
             rows <- data_info$rows
             cols <- data_info$cols
             counts <- data_info$counts
-            
+
             # Create contingency table
             contTable <- private$.createContingencyTable(data, rows, cols, counts)
+            if (is.null(contTable)) return()  # Error notice already inserted
             
             # Perform main chi-square test
             chiSqTest <- private$.performChiSquareTest(contTable, rows, cols)
             
             # Validate assumptions and show warnings
+            assumptions <- private$.validateAssumptions(contTable, chiSqTest)
             if (self$options$showAssumptionsCheck) {
-                assumptions <- private$.validateAssumptions(contTable, chiSqTest)
                 private$.displayAssumptionsCheck(assumptions, chiSqTest)
             }
-            
+
+            # Add STRONG_WARNING notices for critical assumption violations
+            notice_position <- 1
+
+            # Small sample size warning
+            if (assumptions$total_n < 20) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSample',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('Very small sample size (n=%d). Chi-square approximation may be unreliable. Consider using Fisher\'s exact test and interpreting results with caution.', assumptions$total_n))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+
+            # Low expected counts warning
+            if (assumptions$prop_low_5 > 0.2) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'lowExpectedCounts',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('%.0f%% of cells have expected counts < 5. Chi-square test assumptions violated. Use Fisher\'s exact test for more reliable results.', assumptions$prop_low_5 * 100))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+
             # Show educational overview if requested
             if (self$options$showEducational) {
                 overview_panel <- private$.createEducationalPanel("overview")
@@ -1719,6 +1812,27 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$exportResults) {
                 private$.generateExportTable(chiSqTest, contTable)
             }
+
+            # Add INFO notice at completion
+            info <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            pairwise_count <- if (chiSqTest$p.value < self$options$sig && self$options$posthoc != "none") {
+                pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
+                length(pairwise_results)
+            } else {
+                0
+            }
+            info$setContent(sprintf(
+                'Chi-square analysis completed: χ²(%d) = %.2f, p %s. %s',
+                chiSqTest$parameter,
+                chiSqTest$statistic,
+                if (chiSqTest$p.value < 0.001) '< 0.001' else sprintf('= %.3f', chiSqTest$p.value),
+                if (pairwise_count > 0) sprintf('%d pairwise comparisons with %s correction.', pairwise_count, self$options$posthoc) else 'No post-hoc tests performed.'
+            ))
+            self$results$insert(999, info)
         },
         
         # Display clinical summary

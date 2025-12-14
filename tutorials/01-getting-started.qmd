@@ -1,0 +1,599 @@
+---
+title: "Getting Started with ClinicoPath"
+subtitle: "Installation, Navigation, and Your First Analysis"
+author: "ClinicoPath Tutorial Series"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    theme: cosmo
+    number-sections: true
+---
+
+# Welcome to ClinicoPath! 👋
+
+ClinicoPath is a comprehensive jamovi module designed specifically for **clinicopathological research and medical data analysis**. This tutorial will help you get started with ClinicoPath, whether you're a clinician, pathologist, or researcher with no programming experience.
+
+## What You'll Learn
+
+By the end of this tutorial, you will be able to:
+
+- ✅ Install jamovi and ClinicoPath
+- ✅ Navigate the ClinicoPath menu system
+- ✅ Import your clinical data
+- ✅ Run your first analysis (Table One)
+- ✅ Interpret the results
+- ✅ Export publication-ready tables
+
+**Time Required:** 30 minutes
+**Prerequisites:** None! This tutorial assumes no prior experience.
+
+---
+
+# Installation {#sec-installation}
+
+## Step 1: Install jamovi
+
+ClinicoPath runs inside **jamovi**, a free and user-friendly statistical software.
+
+### Download jamovi
+
+1. Go to [https://www.jamovi.org/download.html](https://www.jamovi.org/download.html)
+2. Download the version for your operating system:
+   - **Windows**: `jamovi-2.5.x-win64.exe`
+   - **macOS**: `jamovi-2.5.x-macos.dmg`
+   - **Linux**: `jamovi-2.5.x-linux.tar.gz`
+3. Run the installer and follow the prompts
+
+::: {.callout-tip}
+## System Requirements
+- **RAM:** 4 GB minimum (8 GB recommended)
+- **Disk Space:** 500 MB for jamovi + 200 MB for ClinicoPath
+- **Operating System:** Windows 10+, macOS 10.14+, or Ubuntu 18.04+
+:::
+
+## Step 2: Install ClinicoPath Module
+
+There are **two ways** to install ClinicoPath:
+
+### Option A: Install from jamovi Library (Recommended)
+
+1. Open jamovi
+2. Click the **Modules** button (➕) in the top-right corner
+3. Click **jamovi library**
+4. Search for **"ClinicoPath"** submodules:
+   - `ClinicoPathDescriptives`
+   - `jsurvival`
+   - `meddecide`
+   - `jjstatsplot`
+5. Click **Install** for each module
+6. Wait for installation to complete (may take 5-10 minutes)
+
+### Option B: Install from .jmo File (Development Version)
+
+1. Download the latest `.jmo` file from:
+   - [GitHub Releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
+2. In jamovi, click **Modules** (➕)
+3. Click **Sideload** (folder icon)
+4. Select the downloaded `.jmo` file
+5. Click **Install**
+
+::: {.callout-warning}
+## First-Time Installation
+The first installation may take **10-15 minutes** because jamovi needs to install 100+ R packages. Be patient and don't close jamovi during installation.
+:::
+
+## Step 3: Verify Installation
+
+1. After installation, jamovi will reload
+2. Check the **Analysis** menu (ribbon at the top)
+3. You should see new menu groups:
+   - **ExplorationT1** (Descriptive statistics, Table One, Cross Tables)
+   - **SurvivalT1** (Kaplan-Meier, Cox regression, Competing risks)
+   - **meddecideD** (ROC curves, Decision curves, Diagnostic tests)
+   - **Visualization** (Statistical plots)
+
+If you see these menus, **congratulations!** 🎉 ClinicoPath is installed.
+
+---
+
+# Understanding the ClinicoPath Interface {#sec-interface}
+
+## jamovi Layout
+
+jamovi has a simple 3-panel layout:
+
+```
+┌─────────────────┬──────────────────────────────┐
+│                 │                              │
+│   DATA PANEL    │      RESULTS PANEL           │
+│   (Spreadsheet) │   (Tables, Plots, Stats)     │
+│                 │                              │
+├─────────────────┴──────────────────────────────┤
+│         ANALYSIS MENU (Ribbon at Top)          │
+└────────────────────────────────────────────────┘
+```
+
+### 1. Data Panel (Left Side)
+
+- Your dataset appears here as a spreadsheet
+- Each **row** = one patient/case
+- Each **column** = one variable (age, diagnosis, treatment, etc.)
+- You can edit data directly, but **we don't recommend it** (use Excel/CSV instead)
+
+### 2. Results Panel (Right Side)
+
+- All statistical outputs appear here
+- Tables, plots, and text summaries
+- Automatically updates when you change options
+- **Right-click** on any table/plot to copy or export
+
+### 3. Analysis Menu (Top Ribbon)
+
+- Organized by analysis type
+- Click to open analysis options
+- Options appear in a sidebar on the right
+
+## ClinicoPath Menu Structure
+
+ClinicoPath organizes **363 analyses** into logical groups:
+
+| Menu Group | Purpose | Key Analyses |
+|------------|---------|--------------|
+| **ExplorationT1** | Descriptive statistics & data quality | Table One, Cross Tables, Data checking |
+| **SurvivalT1** | Survival analysis | Kaplan-Meier, Cox regression, Competing risks |
+| **meddecideD** | Medical decision analysis | ROC curves, Decision curves, Diagnostic tests |
+| **Visualization** | Statistical plots | Waterfall plots, Swimmer plots, Forest plots |
+| **AIandML** | Machine learning | Classification, Clustering, Feature selection |
+
+::: {.callout-tip}
+## Navigation Tip
+Use the **search function** in the Analysis menu to find specific analyses quickly. For example, search "survival" to see all survival-related methods.
+:::
+
+---
+
+# Importing Your Data {#sec-data}
+
+## Supported File Formats
+
+jamovi supports multiple data formats:
+
+- ✅ **CSV** (`.csv`) - Most common, recommended
+- ✅ **Excel** (`.xlsx`, `.xls`)
+- ✅ **SPSS** (`.sav`)
+- ✅ **Stata** (`.dta`)
+- ✅ **SAS** (`.sas7bdat`)
+- ✅ **jamovi** (`.omv`)
+- ✅ **R** (`.rds`, `.RData`)
+
+## Example: Loading a CSV File
+
+### Preparing Your Data in Excel
+
+Before importing, structure your data correctly:
+
+**Good Format:**
+```
+| PatientID | Age | Sex    | Diagnosis | TumorSize | Survival_months | Status |
+|-----------|-----|--------|-----------|-----------|-----------------|--------|
+| PT001     | 45  | Female | Breast    | 2.3       | 24              | Alive  |
+| PT002     | 62  | Male   | Lung      | 4.1       | 12              | Dead   |
+| PT003     | 58  | Female | Breast    | 1.8       | 36              | Alive  |
+```
+
+**Rules:**
+1. **First row** = Variable names (no spaces, use underscores)
+2. **One row per patient** (wide format, not long format)
+3. **Missing values** = leave blank (don't use "NA", "N/A", or "-")
+4. **Consistent coding** (e.g., don't mix "Male"/"M" or "Dead"/"Deceased")
+5. **No merged cells** or formatting
+
+### Importing into jamovi
+
+1. Click **File** → **Open**
+2. Navigate to your CSV file
+3. Click **Open**
+4. jamovi will automatically detect variable types:
+   - **Continuous**: Numbers (age, tumor size, lab values)
+   - **Nominal**: Categories (sex, diagnosis, treatment)
+   - **Ordinal**: Ordered categories (stage I/II/III/IV, grade)
+   - **ID**: Patient identifiers
+
+::: {.callout-important}
+## Check Variable Types
+After importing, verify that jamovi correctly detected variable types by clicking the **setup icon** (⚙️) at the top of each column. Incorrect types lead to wrong analyses!
+:::
+
+## Using ClinicoPath Example Data
+
+ClinicoPath includes **462 example datasets** for learning. To access them:
+
+### Option 1: Load from jamovi Data Library
+
+1. Click **File** → **Open**
+2. Click **Data Library** (folder icon)
+3. Navigate to **ClinicoPath** section
+4. Select a dataset (e.g., `clinical_trial_data`)
+
+### Option 2: Load in R (Advanced)
+
+If using ClinicoPath programmatically:
+
+```r
+# Load ClinicoPath
+library(ClinicoPath)
+
+# Load example data
+data(clinical_trial_data)
+
+# View structure
+str(clinical_trial_data)
+```
+
+**Available Example Datasets:**
+
+- `clinical_trial_data` - Randomized clinical trial (n=200)
+- `breast_cancer_data` - Breast cancer cases (n=569)
+- `basic_survival_data` - Survival analysis example (n=200)
+- `lung_agreement_data` - Pathologist agreement study (n=100)
+- `her2_breast_cancer_data` - HER2 testing data (n=150)
+
+---
+
+# Your First Analysis: Table One {#sec-first-analysis}
+
+**Table One** is the most common table in clinical research manuscripts. It summarizes baseline characteristics of study participants.
+
+## Clinical Scenario
+
+You conducted a clinical trial comparing two breast cancer treatments:
+
+- **Group A:** Standard chemotherapy (n=100)
+- **Group B:** New targeted therapy (n=100)
+
+You need to create a baseline characteristics table showing:
+- Patient demographics (age, sex)
+- Tumor characteristics (stage, grade, size)
+- Comparison between treatment groups
+
+## Step-by-Step Walkthrough
+
+### Step 1: Load Example Data
+
+1. Click **File** → **Open**
+2. Select **Data Library**
+3. Choose `clinical_trial_data`
+4. Click **Open**
+
+You should see a dataset with these variables:
+- `PatientID` - Patient identifier
+- `Age` - Age in years
+- `Sex` - Male/Female
+- `TreatmentGroup` - Group A / Group B
+- `TumorStage` - I / II / III / IV
+- `TumorGrade` - 1 / 2 / 3
+- `TumorSize` - Size in cm
+- `ER_Status` - Positive / Negative
+
+### Step 2: Open Table One Analysis
+
+1. Click **Analyses** menu (top ribbon)
+2. Click **ExplorationT1**
+3. Click **Table One**
+
+The analysis options appear in the right sidebar.
+
+### Step 3: Select Variables
+
+In the **Variables** box, drag and drop:
+- ✅ Age
+- ✅ Sex
+- ✅ TumorStage
+- ✅ TumorGrade
+- ✅ TumorSize
+- ✅ ER_Status
+
+::: {.callout-tip}
+## Quick Selection
+Hold **Ctrl** (Windows/Linux) or **Cmd** (Mac) to select multiple variables at once, then drag them all together.
+:::
+
+### Step 4: Choose Table Style
+
+ClinicoPath offers **4 table styles**:
+
+| Style | Package | Best For |
+|-------|---------|----------|
+| **tableone** | Standard medical format | Most clinical papers |
+| **gtsummary** | Modern, publication-ready | High-impact journals |
+| **arsenal** | Comprehensive details | Detailed reports |
+| **janitor** | Simple frequencies | Data exploration |
+
+**For this tutorial**, select: **`gtsummary`** (recommended for publication)
+
+### Step 5: Optional Settings
+
+Explore these options:
+
+- **Exclude Missing Values (NA)**:
+  - ☐ Unchecked = Keep all cases, report missing %
+  - ☑ Checked = Exclude cases with any missing value
+  - **Recommendation:** Leave unchecked for transparency
+
+- **Show Summary**: ☑ Check to see sample size, missing data, etc.
+
+- **Show About**: ☑ Check to see explanation of Table One
+
+- **Show Report Sentence**: ☑ Check to get a copy-ready methods sentence
+
+### Step 6: Interpret Results
+
+The results panel shows:
+
+#### Analysis Summary (Blue Box)
+
+```
+Original dataset: 200 cases with 6 selected variables
+Complete cases (original): 195 (97.5%)
+Missing data (original): 2.5% of cases have at least one missing value
+Analysis sample: 200 cases (no exclusions applied)
+Variable types: Numeric: 2; Categorical: 4
+```
+
+**Interpretation:**
+- Total N = 200 patients
+- 97.5% have complete data
+- Only 2.5% missing (very good!)
+- No cases excluded
+
+#### Table One Output
+
+```
+Characteristic         N = 200
+Age, years            55 (48-62)
+Sex
+  Female              120 (60%)
+  Male                 80 (40%)
+Tumor Stage
+  I                    45 (23%)
+  II                   78 (39%)
+  III                  52 (26%)
+  IV                   25 (13%)
+Tumor Grade
+  1                    38 (19%)
+  2                    97 (49%)
+  3                    65 (33%)
+Tumor Size, cm        3.2 (2.1-4.8)
+ER Status
+  Positive            145 (73%)
+  Negative             55 (28%)
+```
+
+**Interpretation:**
+- **Age**: Median 55 years (IQR: 48-62) - typical for breast cancer
+- **Sex**: 60% female (expected for breast cancer)
+- **Stage**: Most patients are Stage II (39%)
+- **Grade**: Most tumors are Grade 2 (49%)
+- **Size**: Median 3.2 cm
+- **ER Status**: 73% ER-positive
+
+::: {.callout-note}
+## Understanding the Numbers
+- **Continuous variables** (age, tumor size): Median (IQR) or Mean (SD)
+- **Categorical variables** (sex, stage): N (percentage)
+- **Missing values**: Automatically reported in footnotes
+:::
+
+#### Data Quality Check (Yellow Box)
+
+If ClinicoPath detects issues, you'll see warnings:
+
+```
+⚠️ Moderate missing data in original dataset (15.2%).
+Consider reporting missing data patterns or using multiple imputation.
+```
+
+**What to Do:**
+- < 5% missing: No action needed
+- 5-20% missing: Report missing data patterns
+- > 20% missing: Consider multiple imputation or sensitivity analysis
+
+#### Copy-Ready Report Sentence (Blue Box)
+
+```
+Table One summarizes baseline characteristics of 200 patients.
+Variables included Age, Sex, TumorStage, TumorGrade, TumorSize, ER_Status.
+Minimal missing data were detected (2.5% of cases with at least one missing value).
+```
+
+**Use this in your Methods section!** Just copy and paste, then edit as needed.
+
+### Step 7: Export the Table
+
+To use the table in your manuscript:
+
+1. **Right-click** on the table
+2. Choose **Copy** → **HTML** (for Word)
+3. Paste into Microsoft Word
+4. The table formatting is preserved!
+
+**Alternative:** Export as **Image** (PNG) for presentations.
+
+---
+
+# Understanding Results Interpretation {#sec-interpretation}
+
+## What Table One Tells You
+
+✅ **Sample Characteristics**: Who are your patients?
+✅ **Balance Check**: Are groups similar at baseline? (important for RCTs)
+✅ **Missing Data**: How much data is incomplete?
+✅ **Data Quality**: Are there unusual patterns?
+
+## What Table One Does NOT Tell You
+
+❌ **Statistical Significance**: Table One typically doesn't test differences
+❌ **Causality**: Associations ≠ causation
+❌ **Outcomes**: This is baseline data only
+
+## Red Flags to Watch For
+
+🚩 **Very small sample size** (N < 30): Results may be unreliable
+🚩 **High missing data** (> 20%): May bias results
+🚩 **Imbalanced groups**: In RCTs, groups should be similar at baseline
+🚩 **Unusual distributions**: Check for data entry errors
+
+---
+
+# Next Steps {#sec-next}
+
+Congratulations! You've completed your first ClinicoPath analysis. 🎉
+
+## What You Learned
+
+✅ Install jamovi and ClinicoPath
+✅ Navigate the interface
+✅ Import clinical data
+✅ Run Table One analysis
+✅ Interpret results
+✅ Export publication-ready tables
+
+## Continue Learning
+
+**Next Tutorials:**
+
+1. ✅ **Getting Started** ← You are here
+2. 📖 [**Table One for Clinical Trials**](02-table-one-clinical-trial.qmd) - Stratified analysis, statistical tests
+3. 📖 [**Survival Analysis in Oncology**](03-survival-analysis-cancer.qmd) - Kaplan-Meier curves, Cox regression
+4. 📖 [**ROC Analysis for Diagnostic Tests**](04-roc-diagnostic-test.qmd) - Sensitivity, specificity, optimal cutpoints
+5. 📖 [**Decision Curve Analysis**](05-decision-curve-analysis.qmd) - Clinical utility, net benefit
+6. 📖 [**Creating Reproducible Reports**](06-reproducible-reports.qmd) - Automating analyses with Quarto
+
+## Practice Exercise
+
+**Challenge:** Create a Table One for your own data!
+
+1. Prepare your dataset in Excel (follow the format guidelines)
+2. Import into jamovi
+3. Run Table One with:
+   - At least 3 continuous variables
+   - At least 3 categorical variables
+   - Try all 4 table styles to see differences
+4. Export the best-looking table
+
+---
+
+# Getting Help {#sec-help}
+
+## Documentation
+
+- **ClinicoPath Website**: [www.serdarbalci.com/ClinicoPathJamoviModule](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
+- **jamovi User Guide**: [https://www.jamovi.org/user-manual.html](https://www.jamovi.org/user-manual.html)
+- **Tutorial Series**: All 6 tutorials in `tutorials/` directory
+
+## Community Support
+
+- **GitHub Issues**: [Report bugs](https://github.com/sbalci/ClinicoPathJamoviModule/issues/)
+- **jamovi Forum**: [Ask questions](https://forum.jamovi.org/)
+- **Email**: serdarbalci@serdarbalci.com
+
+## Common Questions
+
+**Q: Can I use ClinicoPath for free?**
+A: Yes! Both jamovi and ClinicoPath are completely free and open-source (GPL-2 license).
+
+**Q: Do I need programming skills?**
+A: No! ClinicoPath is designed for clinicians with no programming experience. Everything is point-and-click.
+
+**Q: Can I use ClinicoPath for my publication?**
+A: Absolutely! Please cite ClinicoPath and jamovi in your manuscript.
+
+**Q: What if my analysis isn't in ClinicoPath?**
+A: ClinicoPath has 363 analyses covering most clinical research needs. If something is missing, request it on GitHub!
+
+**Q: Can I see the R code behind the analysis?**
+A: Yes! Click the **Syntax mode** button (</>) in jamovi to see the R code. You can copy and modify it.
+
+---
+
+# Citation {#sec-citation}
+
+If you use ClinicoPath in your research, please cite:
+
+**ClinicoPath Module:**
+```
+Balci, S. (2025). ClinicoPath: Comprehensive Analysis for
+Clinicopathological Research. R package version 0.0.32.43.
+https://www.serdarbalci.com/ClinicoPathJamoviModule/
+```
+
+**jamovi Software:**
+```
+The jamovi project (2025). jamovi (Version 2.5) [Computer Software].
+Retrieved from https://www.jamovi.org
+```
+
+**For LaTeX/BibTeX:**
+```bibtex
+@Manual{clinicopath2025,
+  title = {ClinicoPath: Comprehensive Analysis for Clinicopathological Research},
+  author = {Serdar Balci},
+  year = {2025},
+  note = {R package version 0.0.32.43},
+  url = {https://www.serdarbalci.com/ClinicoPathJamoviModule/},
+}
+```
+
+---
+
+# Appendix: Troubleshooting {#sec-troubleshooting}
+
+## Installation Issues
+
+**Problem:** "Module failed to install"
+**Solution:**
+- Check internet connection
+- Try installing submodules individually (ClinicoPathDescriptives first)
+- Restart jamovi and try again
+- Check jamovi log: **Help** → **Log**
+
+**Problem:** "Package 'X' is not available"
+**Solution:**
+- Wait 5-10 minutes for dependencies to install
+- jamovi installs R packages in the background
+- Don't close jamovi during first installation
+
+## Analysis Issues
+
+**Problem:** "Error: Insufficient data for Table One"
+**Solution:**
+- Check that you selected at least one variable
+- Ensure dataset has at least 2 complete cases
+- Try unchecking "Exclude Missing Values"
+
+**Problem:** "Variable 'X' not found"
+**Solution:**
+- Check variable name spelling (case-sensitive)
+- Refresh the analysis: close and reopen
+- Reload the dataset
+
+## Performance Issues
+
+**Problem:** "jamovi is slow with large datasets"
+**Solution:**
+- ClinicoPath handles up to 100,000 rows efficiently
+- For N > 100,000, consider subsetting
+- Close unused analyses to free memory
+- Increase RAM if possible (8 GB recommended)
+
+---
+
+**Tutorial Author:** Serdar Balci, MD, PhD
+**Last Updated:** December 13, 2025
+**License:** CC-BY-4.0
+**Tutorial Version:** 1.0
+
+**Ready for more?** Continue with [Tutorial 2: Table One for Clinical Trials →](02-table-one-clinical-trial.qmd)
