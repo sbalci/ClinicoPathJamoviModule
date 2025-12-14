@@ -212,11 +212,9 @@ vennClass <- if (requireNamespace('jmvcore'))
             .run = function() {
                 private$.checkpoint()
 
-                # Validate required variables and their true levels
-                validation_error <- private$.validateVariables()
-                if (!is.null(validation_error)) {
-                    self$results$todo$setContent(validation_error)
-                    return()
+                # Validate required variables and their true levels (inserts Notices directly)
+                if (!private$.validateVariables()) {
+                    return()  # Validation failed, Notices already inserted
                 }
 
                 # If no plot type selected, default to ggvenn for user feedback
@@ -321,7 +319,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Check if required variables (var1 and var2) are provided.
                 if (is.null(self$options$var1) || is.null(self$options$var2)) {
-                    # Display a friendly welcome and instruction message.
+                    # Keep the friendly welcome message in todo (non-critical guidance)
                     todo <- paste0(
                         "<br><strong>", .("Welcome to ClinicoPath Venn Diagram Tool"), "</strong>",
                         "<br><br>",
@@ -340,18 +338,27 @@ vennClass <- if (requireNamespace('jmvcore'))
                         "<hr><br>"
                     )
                     self$results$todo$setContent(todo)
+                    return()
                 } else {
                     # Clear welcome message once variables are selected.
                     self$results$todo$setContent("")
-                    
+
                     # Generate explanatory content if requested
                     if (self$options$explanatory || self$options$aboutAnalysis) {
                         private$.generateAboutAnalysis()
                     }
 
-                    # Ensure data contains complete rows.
-                    if (nrow(self$data) == 0)
-                        stop(.("Data contains no (complete) rows"))
+                    # Empty dataset check with Notice
+                    if (nrow(self$data) == 0) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'emptyDataset',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Dataset contains no complete rows. Please check your data and ensure at least one complete observation exists.')
+                        self$results$insert(1, notice)
+                        return()
+                    }
 
                     # CRITICAL FIX: Capture original data BEFORE any filtering
                     # This ensures we report actual missingness, not post-exclusion stats
@@ -381,14 +388,14 @@ vennClass <- if (requireNamespace('jmvcore'))
                     validation_result <- .validateVennVariableNames(selected_vars)
 
                     if (!validation_result$valid) {
-                        # Display warning but continue with analysis
-                        warning_html <- paste0(
-                            "<div style='background-color: #fff3cd; padding: 12px; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px;'>",
-                            "<h6 style='margin: 0 0 8px 0; color: #856404;'>Variable Name Format Warning</h6>",
-                            "<p style='margin: 0;'>", validation_result$message, "</p>",
-                            "</div>"
+                        # Display warning with Notice but continue with analysis
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'variableNameWarning',
+                            type = jmvcore::NoticeType$WARNING
                         )
-                        self$results$todo$setContent(warning_html)
+                        notice$setContent(validation_result$message)
+                        self$results$insert(100, notice)  # Mid-section
                     }
 
                     # CRITICAL FIX: Select ONLY the variables needed for analysis
@@ -402,31 +409,19 @@ vennClass <- if (requireNamespace('jmvcore'))
                     full_data <- jmvcore::naOmit(selected_data)
                     excluded_n <- original_n - nrow(full_data)
 
-                    # CRITICAL WARNING: Report case loss if any exclusions occurred
-                    private$.excluded_warning <- NULL
+                    # CRITICAL WARNING: Report case loss if any exclusions occurred with Notice
                     if (excluded_n > 0) {
                         excluded_pct <- round(100 * excluded_n / original_n, 1)
-                        warning_msg <- paste0(
-                            "<div style='background-color: #fff3cd; padding: 12px; border-left: 4px solid #ff9800; margin: 10px 0; border-radius: 4px;'>",
-                            "<h6 style='margin: 0 0 8px 0; color: #856404;'>⚠️ Case Exclusion Warning</h6>",
-                            "<p style='margin: 0 0 8px 0;'><strong>", excluded_n, " cases (", excluded_pct, "%)</strong> ",
-                            "excluded due to missing values in selected variables.</p>",
-                            "<p style='margin: 0 0 8px 0;'><strong>Original N:</strong> ", original_n, " | ",
-                            "<strong>Final N:</strong> ", nrow(full_data), "</p>",
-                            "<p style='margin: 0; font-size: 0.9em;'><em>Note: Venn diagram counts and percentages ",
-                            "reflect the ", nrow(full_data), " complete cases only.</em></p>",
-                            "</div>"
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'caseExclusion',
+                            type = jmvcore::NoticeType$STRONG_WARNING
                         )
-                        private$.excluded_warning <- warning_msg
-
-                        # Display the exclusion warning
-                        # Append to existing warnings if any
-                        current_todo <- self$results$todo$state
-                        if (!is.null(current_todo) && nchar(current_todo) > 0) {
-                            self$results$todo$setContent(paste0(current_todo, warning_msg))
-                        } else {
-                            self$results$todo$setContent(warning_msg)
-                        }
+                        notice$setContent(sprintf(
+                            'CASE EXCLUSION: %d cases (%.1f%%) excluded due to missing values. Original N=%d, Final N=%d. Venn diagram counts and percentages reflect complete cases only. Consider implications for generalizability.',
+                            excluded_n, excluded_pct, original_n, nrow(full_data)
+                        ))
+                        self$results$insert(1, notice)  # Top priority
                     }
 
                     # Restore row numbers for tracking
@@ -612,6 +607,21 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (self$options$showSetCalculations && (self$options$showMembershipTable || self$options$membershipGroups)) {
                         private$.generateMembershipTable(mydata, names(mydata), private$.name_mapping, row_numbers)
                     }
+
+                    # Analysis completion notice (INFO)
+                    success_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'analysisComplete',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    num_sets <- sum(!sapply(list(self$options$var1, self$options$var2, self$options$var3,
+                                                 self$options$var4, self$options$var5, self$options$var6,
+                                                 self$options$var7), is.null))
+                    success_notice$setContent(sprintf(
+                        'Venn diagram analysis completed successfully for %d categorical variables across N=%d observations.',
+                        num_sets, nrow(full_data)
+                    ))
+                    self$results$insert(999, success_notice)  # Bottom
                 }
             },
 
@@ -751,171 +761,126 @@ vennClass <- if (requireNamespace('jmvcore'))
             
             # Validation helper method
             .validateVariables = function() {
+                # Returns TRUE if validation passes, FALSE if errors found (Notices already inserted)
+
                 # Check if dataset is empty
                 if (nrow(self$data) == 0) {
-                    return(paste0("<div class='alert alert-danger'>",
-                        "<strong>", .("Empty Dataset"), "</strong><br>",
-                        .("Dataset is empty. Please provide data with observations."),
-                        "</div>"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'emptyDatasetValidation',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Dataset is empty. Please provide data with observations.')
+                    self$results$insert(1, notice)
+                    return(FALSE)
                 }
 
-                # Check that required variables have true levels selected and are valid
+                # Validate var1 (required)
                 if (!is.null(self$options$var1)) {
                     if (is.null(self$options$var1true)) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 1 Selected but True Level Missing"), "</strong><br>",
-                            .("Please select which level in Variable 1 represents the 'true' condition."),
-                            "</div>"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'var1MissingLevel',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Variable 1 selected but "true" level not specified. Please select which level represents the positive/true condition for Variable 1.')
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
-
-                    # Check if variable exists and has data
                     var1_data <- self$data[[self$options$var1]]
                     if (all(is.na(var1_data))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 1 Contains Only Missing Values"), "</strong><br>",
-                            sprintf(.("Variable '%s' contains only missing values. Please select a different variable."), self$options$var1),
-                            "</div>"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'var1AllNA',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf("Variable '%s' contains only missing values. Please select a different variable with valid data.", self$options$var1))
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
-
-                    # Check if selected true level exists in the data
                     if (!self$options$var1true %in% levels(as.factor(var1_data))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 1 True Level Not Found"), "</strong><br>",
-                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var1true, self$options$var1),
-                            "</div>"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'var1LevelNotFound',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        available_levels <- paste(levels(as.factor(var1_data)), collapse=", ")
+                        notice$setContent(sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", self$options$var1true, self$options$var1, available_levels))
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
                 }
 
+                # Validate var2 (required)
                 if (!is.null(self$options$var2)) {
                     if (is.null(self$options$var2true)) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 2 Selected but True Level Missing"), "</strong><br>",
-                            .("Please select which level in Variable 2 represents the 'true' condition."),
-                            "</div>"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'var2MissingLevel',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Variable 2 selected but "true" level not specified. Please select which level represents the positive/true condition for Variable 2.')
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
-
-                    # Check if variable exists and has data
                     var2_data <- self$data[[self$options$var2]]
                     if (all(is.na(var2_data))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 2 Contains Only Missing Values"), "</strong><br>",
-                            sprintf(.("Variable '%s' contains only missing values. Please select a different variable."), self$options$var2),
-                            "</div>"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'var2AllNA',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf("Variable '%s' contains only missing values. Please select a different variable with valid data.", self$options$var2))
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
-
-                    # Check if selected true level exists in the data
                     if (!self$options$var2true %in% levels(as.factor(var2_data))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 2 True Level Not Found"), "</strong><br>",
-                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var2true, self$options$var2),
-                            "</div>"))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'var2LevelNotFound',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        available_levels <- paste(levels(as.factor(var2_data)), collapse=", ")
+                        notice$setContent(sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", self$options$var2true, self$options$var2, available_levels))
+                        self$results$insert(1, notice)
+                        return(FALSE)
                     }
                 }
 
-                if (!is.null(self$options$var3)) {
-                    if (is.null(self$options$var3true)) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 3 Selected but True Level Missing"), "</strong><br>",
-                            .("Please select which level in Variable 3 represents the 'true' condition."),
-                            "</div>"))
-                    }
+                # Validate optional variables (var3-7) - allow skipping if all NA
+                for (i in 3:7) {
+                    var_name <- paste0("var", i)
+                    var_true_name <- paste0("var", i, "true")
+                    var_value <- self$options[[var_name]]
+                    var_true_value <- self$options[[var_true_name]]
 
-                    # Check if variable exists and has data
-                    var3_data <- self$data[[self$options$var3]]
-                    if (all(is.na(var3_data))) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 3 Contains Only Missing Values"), "</strong><br>",
-                            sprintf(.("Variable '%s' contains only missing values. This variable will be skipped."), self$options$var3),
-                            "</div>"))
-                    }
-                    if (!self$options$var3true %in% levels(as.factor(var3_data))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 3 True Level Not Found"), "</strong><br>",
-                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var3true, self$options$var3),
-                            "</div>"))
+                    if (!is.null(var_value)) {
+                        if (is.null(var_true_value)) {
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = paste0('var', i, 'MissingLevel'),
+                                type = jmvcore::NoticeType$ERROR
+                            )
+                            notice$setContent(sprintf('Variable %d selected but "true" level not specified. Please select which level represents the positive/true condition.', i))
+                            self$results$insert(1, notice)
+                            return(FALSE)
+                        }
+                        var_data <- self$data[[var_value]]
+                        if (!var_true_value %in% levels(as.factor(var_data))) {
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = paste0('var', i, 'LevelNotFound'),
+                                type = jmvcore::NoticeType$ERROR
+                            )
+                            available_levels <- paste(levels(as.factor(var_data)), collapse=", ")
+                            notice$setContent(sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", var_true_value, var_value, available_levels))
+                            self$results$insert(1, notice)
+                            return(FALSE)
+                        }
                     }
                 }
 
-                if (!is.null(self$options$var4)) {
-                    if (is.null(self$options$var4true)) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 4 Selected but True Level Missing"), "</strong><br>",
-                            .("Please select which level in Variable 4 represents the 'true' condition."),
-                            "</div>"))
-                    }
-
-                    # Check if variable exists and has data
-                    var4_data <- self$data[[self$options$var4]]
-                    if (all(is.na(var4_data))) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 4 Contains Only Missing Values"), "</strong><br>",
-                            sprintf(.("Variable '%s' contains only missing values. This variable will be skipped."), self$options$var4),
-                            "</div>"))
-                    }
-                    if (!self$options$var4true %in% levels(as.factor(var4_data))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 4 True Level Not Found"), "</strong><br>",
-                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var4true, self$options$var4),
-                            "</div>"))
-                    }
-                }
-
-                # Check variables 5-7 (automatically uses advanced engine)
-                if (!is.null(self$options$var5)) {
-                    if (is.null(self$options$var5true)) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 5 Selected but True Level Missing"), "</strong><br>",
-                            .("Please select which level in Variable 5 represents the 'true' condition."),
-                            "</div>"))
-                    }
-                    if (!self$options$var5true %in% levels(as.factor(self$data[[self$options$var5]]))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 5 True Level Not Found"), "</strong><br>",
-                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var5true, self$options$var5),
-                            "</div>"))
-                    }
-                }
-
-                if (!is.null(self$options$var6)) {
-                    if (is.null(self$options$var6true)) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 6 Selected but True Level Missing"), "</strong><br>",
-                            .("Please select which level in Variable 6 represents the 'true' condition."),
-                            "</div>"))
-                    }
-                    if (!self$options$var6true %in% levels(as.factor(self$data[[self$options$var6]]))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 6 True Level Not Found"), "</strong><br>",
-                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var6true, self$options$var6),
-                            "</div>"))
-                    }
-                }
-
-                if (!is.null(self$options$var7)) {
-                    if (is.null(self$options$var7true)) {
-                        return(paste0("<div class='alert alert-warning'>",
-                            "<strong>", .("Variable 7 Selected but True Level Missing"), "</strong><br>",
-                            .("Please select which level in Variable 7 represents the 'true' condition."),
-                            "</div>"))
-                    }
-                    if (!self$options$var7true %in% levels(as.factor(self$data[[self$options$var7]]))) {
-                        return(paste0("<div class='alert alert-danger'>",
-                            "<strong>", .("Variable 7 True Level Not Found"), "</strong><br>",
-                            sprintf(.("Selected true level '%s' does not exist in variable '%s'."), self$options$var7true, self$options$var7),
-                            "</div>"))
-                    }
-                }
-                
-                # Require at least two variables for overlap visuals
-                selected_vars <- c(self$options$var1, self$options$var2, self$options$var3, self$options$var4, self$options$var5, self$options$var6, self$options$var7)
-                if (sum(!sapply(selected_vars, is.null)) < 2) {
-                    return(paste0("<div class='alert alert-warning'>",
-                        "<strong>", .("Select at least two variables"), "</strong><br>",
-                        .("Venn/UpSet analysis requires two or more variables with true levels."),
-                        "</div>"))
-                }
-                
-                return(NULL)  # No validation errors
+                return(TRUE)  # Validation passed
             },
             
             # Helper function for calculating summary statistics

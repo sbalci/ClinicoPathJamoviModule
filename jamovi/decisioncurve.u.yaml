@@ -137,12 +137,6 @@ children:
                 name: showReferenceLinesLabels
                 label: Show reference line labels
                 enable: (showPlot)
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: showCalibrationPlot
-                label: Show calibration plot
   - type: LayoutBox
     margin: large
     children:

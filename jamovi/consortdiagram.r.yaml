@@ -9,6 +9,16 @@ items:
       type: Html
       visible: (!participant_id)
 
+    - name: flowImbalanceNotice
+      title: ''
+      type: Html
+      visible: false
+
+    - name: duplicateIdNotice
+      title: ''
+      type: Html
+      visible: false
+
     - name: flowSummary
       title: Participant Flow Summary
       type: Table

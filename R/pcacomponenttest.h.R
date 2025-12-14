@@ -16,13 +16,15 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             conflevel = 0.95,
             adjustmethod = "BH",
             showpercent = TRUE,
-            colororiginal = "steelblue",
-            colorpermuted = "orange",
+            colororiginal = "#0072B2",
+            colorpermuted = "#E69F00",
             showScreePlot = FALSE,
             showLoadingsPlot = FALSE,
             nLoadings = 5,
             plotwidth = 600,
-            plotheight = 450, ...) {
+            plotheight = 450,
+            showSummary = FALSE,
+            showGuide = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -90,11 +92,11 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..colororiginal <- jmvcore::OptionString$new(
                 "colororiginal",
                 colororiginal,
-                default="steelblue")
+                default="#0072B2")
             private$..colorpermuted <- jmvcore::OptionString$new(
                 "colorpermuted",
                 colorpermuted,
-                default="orange")
+                default="#E69F00")
             private$..showScreePlot <- jmvcore::OptionBool$new(
                 "showScreePlot",
                 showScreePlot,
@@ -121,6 +123,14 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 min=300,
                 max=2000,
                 default=450)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showGuide <- jmvcore::OptionBool$new(
+                "showGuide",
+                showGuide,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..ncomp)
@@ -139,6 +149,8 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..nLoadings)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showGuide)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -157,7 +169,9 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         showLoadingsPlot = function() private$..showLoadingsPlot$value,
         nLoadings = function() private$..nLoadings$value,
         plotwidth = function() private$..plotwidth$value,
-        plotheight = function() private$..plotheight$value),
+        plotheight = function() private$..plotheight$value,
+        showSummary = function() private$..showSummary$value,
+        showGuide = function() private$..showGuide$value),
     private = list(
         ..vars = NA,
         ..ncomp = NA,
@@ -175,7 +189,9 @@ pcacomponenttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..showLoadingsPlot = NA,
         ..nLoadings = NA,
         ..plotwidth = NA,
-        ..plotheight = NA)
+        ..plotheight = NA,
+        ..showSummary = NA,
+        ..showGuide = NA)
 )
 
 pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -187,7 +203,9 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         results = function() private$.items[["results"]],
         vafplot = function() private$.items[["vafplot"]],
         screePlot = function() private$.items[["screePlot"]],
-        loadingsPlot = function() private$.items[["loadingsPlot"]]),
+        loadingsPlot = function() private$.items[["loadingsPlot"]],
+        summary = function() private$.items[["summary"]],
+        guide = function() private$.items[["guide"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -196,6 +214,7 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="PCA Component Significance Test",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "glue"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -227,6 +246,11 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     list(
                         `name`="originalvaf", 
                         `title`="Original VAF", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="cumvar", 
+                        `title`="Cumulative VAF", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
@@ -294,7 +318,17 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=600,
                 height=600,
                 renderFun=".loadingsPlot",
-                visible="(showLoadingsPlot)"))}))
+                visible="(showLoadingsPlot)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Plain-Language Summary",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="guide",
+                title="Interpretation Guide",
+                visible=FALSE))}))
 
 pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pcacomponenttestBase",
@@ -386,15 +420,21 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param showpercent Display variance accounted for (VAF) as percentage
 #'   (0-100) instead of proportion (0-1).
 #' @param colororiginal Color for original VAF line/points. Use color names or
-#'   hex codes.
+#'   hex codes. Default is color-blind safe blue.
 #' @param colorpermuted Color for permuted VAF line/points. Use color names or
-#'   hex codes.
+#'   hex codes. Default is color-blind safe orange.
 #' @param showScreePlot Display a scree plot of eigenvalues.
 #' @param showLoadingsPlot Display a plot of variable loadings for significant
 #'   components.
 #' @param nLoadings Number of top variables to display in loadings plot.
 #' @param plotwidth Width of the plot in pixels.
 #' @param plotheight Height of the plot in pixels.
+#' @param showSummary Display natural-language summary of results with
+#'   clinical interpretation. Provides plain-language explanation of significant
+#'   components and variance explained.
+#' @param showGuide Display guide explaining how to interpret VAF, p-values,
+#'   and clinical implications. Includes definitions of key terms and guidance
+#'   for clinical use.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -403,6 +443,8 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$vafplot} \tab \tab \tab \tab \tab Visualization comparing original VAF to permuted null distribution \cr
 #'   \code{results$screePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$loadingsPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$guide} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -424,13 +466,15 @@ pcacomponenttest <- function(
     conflevel = 0.95,
     adjustmethod = "BH",
     showpercent = TRUE,
-    colororiginal = "steelblue",
-    colorpermuted = "orange",
+    colororiginal = "#0072B2",
+    colorpermuted = "#E69F00",
     showScreePlot = FALSE,
     showLoadingsPlot = FALSE,
     nLoadings = 5,
     plotwidth = 600,
-    plotheight = 450) {
+    plotheight = 450,
+    showSummary = FALSE,
+    showGuide = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pcacomponenttest requires jmvcore to be installed (restart may be required)")
@@ -459,7 +503,9 @@ pcacomponenttest <- function(
         showLoadingsPlot = showLoadingsPlot,
         nLoadings = nLoadings,
         plotwidth = plotwidth,
-        plotheight = plotheight)
+        plotheight = plotheight,
+        showSummary = showSummary,
+        showGuide = showGuide)
 
     analysis <- pcacomponenttestClass$new(
         options = options,

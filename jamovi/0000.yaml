@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.45
+version: 0.0.32.46
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-12-13'
+date: '2025-12-14'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -102,7 +102,7 @@ analyses:
   - title: Categorize Continuous Variables
     name: categorize
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: Data Preparation
     menuTitle: Categorize Continuous Variables
     menuSubtitle: Bin numeric variables into categories
@@ -384,7 +384,7 @@ analyses:
   - title: Advanced Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Advanced Outlier Detection
     menuSubtitle: easystats Performance Package
@@ -1145,7 +1145,7 @@ analyses:
   - title: Date Field Correction
     name: datecorrection
     ns: ClinicoPath
-    menuGroup: SurvivalT1
+    menuGroup: SurvivalT
     menuSubgroup: Data Preparation
     menuTitle: Date Field Correction
     menuSubtitle: Multi-Package Date Standardization
@@ -1168,7 +1168,7 @@ analyses:
   - title: DateTime Converter
     name: datetimeconverter
     ns: ClinicoPath
-    menuGroup: SurvivalT1
+    menuGroup: SurvivalT
     menuSubgroup: Data Preparation
     menuTitle: DateTime Converter
     menuSubtitle: Convert datetime and extract components
@@ -1384,7 +1384,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1396,7 +1396,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1524,7 +1524,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Analyze combined test results
@@ -4746,7 +4746,7 @@ analyses:
     name: pcacomponenttest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Component Significance Test
     menuSubtitle: Permutation-based component selection
@@ -4762,7 +4762,7 @@ analyses:
     name: pcaloadingtest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT1
+    menuGroup: ExplorationT
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Significance Test
     menuSubtitle: Permutation-based loading thresholds
@@ -5232,7 +5232,7 @@ analyses:
     name: consortdiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: Study Design
     menuTitle: CONSORT Diagram
     menuSubtitle: Clinical Trial Flow

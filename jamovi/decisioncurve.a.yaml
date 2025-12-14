@@ -1,7 +1,7 @@
 ---
 name: decisioncurve
 title: Decision Curve Analysis
-menuGroup: meddecideT1
+menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
 version: '0.0.32'
@@ -152,16 +152,6 @@ options:
       description:
           R: >
             Show labels for "Treat All" and "Treat None" reference lines.
-
-    - name: showCalibrationPlot
-      title: Calibration Plot
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display calibration plot to assess model fit.
-          ui: >
-            Display a calibration plot to check if predicted probabilities match observed frequencies.
 
     - name: highlightRange
       title: Highlight Clinical Range

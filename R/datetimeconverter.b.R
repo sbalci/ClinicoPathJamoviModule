@@ -54,7 +54,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'noValidDates',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent('No valid datetime values found for format detection.\n• All values in the selected variable are missing (NA).\n• Select a different variable or check your data source.')
+                notice$setContent('No valid datetime values found for format detection. • All values in the selected variable are missing (NA). • Select a different variable or check your data source.')
                 self$results$insert(1, notice)
                 return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
             }
@@ -91,7 +91,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name = 'formatDetectionFailed',
                 type = jmvcore::NoticeType$WARNING
             )
-            notice$setContent('Could not reliably detect datetime format.\n• Format remains UNSURE; parsing will not proceed without manual selection.\n• Review preview and specify the correct format (e.g., DMY, MDY).')
+            notice$setContent('Could not reliably detect datetime format. • Format remains UNSURE; parsing will not proceed without manual selection. • Review preview and specify the correct format (e.g., DMY, MDY).')
             self$results$insert(2, notice)
 
             return(list(format = "unsure", warnings = c(format_warnings, 'Auto-detection failed; specify format manually.')))
@@ -479,7 +479,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf(
-                        'Error parsing datetimes with format "%s".\n• Parser error: %s\n• Try selecting a different format.\n• Check that your data matches the selected format.',
+                        'Error parsing datetimes with format "%s". • Parser error: %s • Try selecting a different format. • Check that your data matches the selected format.',
                         format, e$message
                     ))
                     self$results$insert(1, notice)
@@ -1243,7 +1243,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'noVariableSelected',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent('No datetime variable selected.\n• Please select a variable containing datetime information from the left panel.\n• Use the "DateTime Variable" dropdown to choose a column.')
+                notice$setContent('No datetime variable selected. • Please select a variable containing datetime information from the left panel. • Use the "DateTime Variable" dropdown to choose a column.')
                 self$results$insert(1, notice)
                 return()
             }
@@ -1263,7 +1263,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf(
-                    'Selected variable "%s" not found in dataset.\n• The column may have been renamed or removed.\n• Please select a different variable from the left panel.\n\nAvailable variables: %s',
+                    'Selected variable "%s" not found in dataset. • The column may have been renamed or removed. • Please select a different variable from the left panel. • Available variables: %s',
                     datetime_var,
                     available_preview
                 ))
@@ -1277,7 +1277,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'emptyDataset',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent('Dataset contains no rows.\n• Please ensure your dataset has at least one observation.\n• Check for data loading or filtering issues.')
+                notice$setContent('Dataset contains no rows. • Please ensure your dataset has at least one observation. • Check for data loading or filtering issues.')
                 self$results$insert(1, notice)
                 return()
             }
@@ -1295,7 +1295,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf(
-                    "All values in '%s' are missing (NA).\n• Please select a column with valid datetime entries before proceeding.",
+                    "All values in '%s' are missing (NA). • Please select a column with valid datetime entries before proceeding.",
                     datetime_var
                 ))
                 self$results$insert(1, notice)
@@ -1357,14 +1357,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (quality$success_rate < 70) {
                     notice$setContent(sprintf(
-                        'Low datetime parsing success rate: %.1f%%\n• Only %d of %d non-missing values were successfully parsed.\n• This may indicate incorrect format selection or data quality issues.\n\nRecommendations:\n• Try a different datetime format\n• Review failed samples in Quality Assessment\n• Check data source for systematic errors\n• Clinical analysis may be unreliable with <70%% success rate',
+                        'Low datetime parsing success rate: %.1f%% • Only %d of %d non-missing values were successfully parsed. • This may indicate incorrect format selection or data quality issues. • Recommendations: Try a different datetime format, Review failed samples in Quality Assessment, Check data source for systematic errors, Clinical analysis may be unreliable with <70%% success rate.',
                         quality$success_rate,
                         quality$successfully_parsed,
                         (quality$total_observations - quality$original_missing)
                     ))
                 } else {
                     notice$setContent(sprintf(
-                        'Moderate datetime parsing success rate: %.1f%%\n• %d of %d non-missing values were successfully parsed.\n• Review failed samples in Quality Assessment panel.\n• Consider manually specifying format if auto-detection is incorrect.',
+                        'Moderate datetime parsing success rate: %.1f%% • %d of %d non-missing values were successfully parsed. • Review failed samples in Quality Assessment panel. • Consider manually specifying format if auto-detection is incorrect.',
                         quality$success_rate,
                         quality$successfully_parsed,
                         (quality$total_observations - quality$original_missing)
@@ -1382,8 +1382,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent(paste0(
-                    'Potential data quality issues detected:\n• ',
-                    paste(misuse_warnings, collapse = '\n• ')
+                    'Potential data quality issues detected: • ',
+                    paste(misuse_warnings, collapse = ' • ')
                 ))
                 self$results$insert(3, notice)
             }
@@ -1611,7 +1611,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
 
                 notice$setContent(sprintf(
-                    'DateTime conversion completed.\n• Processed %d observations from variable "%s".\n• Successfully parsed %d datetimes (%.1f%%).\n• Added %d component column(s) to dataset.\n• Review preview tables before proceeding with analysis.',
+                    'DateTime conversion completed. • Processed %d observations from variable "%s". • Successfully parsed %d datetimes (%.1f%%). • Added %d component column(s) to dataset. • Review preview tables before proceeding with analysis.',
                     quality$total_observations, datetime_var,
                     quality$successfully_parsed, quality$success_rate,
                     components_added

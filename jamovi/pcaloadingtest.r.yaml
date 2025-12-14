@@ -9,6 +9,11 @@ items:
       type: Html
       visible: true
 
+    - name: clinicalGuide
+      title: 'Clinical Applications & Interpretation Guide'
+      type: Html
+      visible: true
+
     - name: results
       title: Loading Significance Results
       type: Table
@@ -132,3 +137,4 @@ items:
 refs:
     - glue
     - pracma
+    - dplyr

@@ -1,7 +1,7 @@
 ---
 name:  cotest
 title: Co-Testing Analysis
-menuGroup: meddecideT1
+menuGroup: meddecideT
 menuSubgroup: Decision Calculators
 menuSubtitle: Analyze combined test results
 version: '0.0.32'
@@ -98,10 +98,11 @@ options:
     - name: indep
       title: Independent Tests
       type: Bool
-      default: true
+      default: false
       description:
           R: >
-            Assume tests are conditionally independent (default is true).
+            Assume tests are conditionally independent (default is false for safety).
+            Use true only if tests measure completely different phenomena.
 
     # Conditional dependence parameters (visible only when indep = false)
     - name: cond_dep_pos

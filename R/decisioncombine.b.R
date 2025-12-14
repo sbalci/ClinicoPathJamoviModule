@@ -346,6 +346,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             .analyzeIndividualTest = function(data_prep, test_num) {
                 # Analyze individual test performance
 
+                # Check if epiR package is available
+                if (!requireNamespace("epiR", quietly = TRUE)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'epiRMissing',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('epiR package is required for diagnostic test analysis. • Install with install.packages("epiR"). • Or disable "Show Individual Test Statistics" option.')
+                    self$results$insert(1, notice)
+                    return()
+                }
+
                 test_var_name <- paste0("test", test_num, "Variable2")
 
                 if (!test_var_name %in% names(data_prep)) {
@@ -485,6 +497,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
             .analyzeCombinations = function(data_prep) {
                 # Generate and analyze all test combinations
+
+                # Check if epiR package is available for combination analysis
+                if (!requireNamespace("epiR", quietly = TRUE)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'epiRMissingCombinations',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('epiR package is required for combination analysis. • Install with install.packages("epiR").')
+                    self$results$insert(1, notice)
+                    return()
+                }
 
                 # Inform users that PPV/NPV are based on sample prevalence
                 prevalence_notice <- jmvcore::Notice$new(

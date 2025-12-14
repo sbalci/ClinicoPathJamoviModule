@@ -34,6 +34,43 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$loadingplot$setSize(plotwidth, plotheight)
             self$results$scree$setSize(plotwidth, plotheight)
 
+            # Populate clinical guide
+            clinical_guide <- glue::glue("
+<div style='background:#f8f9fa; padding:15px; border-left:4px solid #0066cc; margin:10px 0;'>
+<h4 style='color:#0066cc; margin-top:0;'>Clinical Applications in Pathology & Oncology:</h4>
+<ul style='margin:8px 0;'>
+<li><b>Biomarker Panel Validation:</b> Identify which biomarkers significantly contribute to patient stratification or disease subtypes</li>
+<li><b>IHC Profile Analysis:</b> Determine which immunohistochemical markers define distinct pathological subtypes</li>
+<li><b>Genomic Signature Discovery:</b> Find genes that significantly load on prognostic or predictive principal components</li>
+<li><b>Tissue Feature Clustering:</b> Identify morphological or molecular features that drive tissue classification</li>
+</ul>
+
+<h4 style='color:#0066cc;'>Interpretation Guide:</h4>
+<table style='width:100%; border-collapse:collapse; margin:8px 0;'>
+<tr style='background:#e9ecef;'><th style='padding:6px; text-align:left;'>Loading Magnitude</th><th style='padding:6px; text-align:left;'>Interpretation</th></tr>
+<tr><td style='padding:6px;'><b>|loading| &lt; 0.3</b></td><td style='padding:6px;'>Weak contribution (likely not clinically meaningful)</td></tr>
+<tr style='background:#f8f9fa;'><td style='padding:6px;'><b>|loading| 0.3–0.5</b></td><td style='padding:6px;'>Moderate contribution (consider in context)</td></tr>
+<tr><td style='padding:6px;'><b>|loading| &gt; 0.5</b></td><td style='padding:6px;'>Strong contribution (clinically important if p &lt; 0.05)</td></tr>
+<tr style='background:#f8f9fa;'><td style='padding:6px;'><b>FDR-adjusted p &lt; 0.05</b></td><td style='padding:6px;'>Significant after controlling for multiple testing (recommended threshold)</td></tr>
+</table>
+
+<h4 style='color:#0066cc;'>Sample Size Recommendations:</h4>
+<ul style='margin:8px 0;'>
+<li><b>Minimum N:</b> At least 30 complete observations for stable results</li>
+<li><b>Sample-to-Variable Ratio:</b> Recommend N/variables ≥ 10:1 (e.g., N ≥ 100 for 10 biomarkers)</li>
+<li><b>Permutations:</b> Default 1,000 permutations provides good precision; increase to 5,000 for final publication</li>
+</ul>
+
+<h4 style='color:#0066cc;'>Statistical Method:</h4>
+<p style='margin:8px 0; font-size:0.95em;'>
+This analysis uses the <b>permV method</b> (Linting et al., 2011) which permutes one variable at a time
+rather than all variables simultaneously. This provides higher statistical power and proper Type I error control
+through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PCA solutions.
+</p>
+</div>
+            ")
+            self$results$clinicalGuide$setContent(clinical_guide)
+
         },
 
         # run ----
@@ -82,8 +119,16 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 self$results$todo$setContent(todo)
 
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
+                if (nrow(self$data) == 0) {
+                    notice <- list(
+                        name = "emptyData",
+                        title = "Empty Dataset",
+                        content = "Data contains no complete rows. Please check for missing values or provide a valid dataset.",
+                        level = "ERROR"
+                    )
+                    self$results$appendNotice(notice)
+                    return()
+                }
             }
 
             # Run permutation test ----
@@ -147,25 +192,72 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows_removed = n_rows_before - nrow(pca_data)
             )
 
+            # Warn about small sample sizes
+            if (nrow(pca_data) < 10) {
+                notice <- list(
+                    name = "lowSampleSize",
+                    title = "Small Sample Size Warning",
+                    content = sprintf('Very small sample size (N=%d complete observations). PCA loadings and permutation tests require larger samples for reliable inference. Recommend N >= 30 for stable results.', nrow(pca_data)),
+                    level = "STRONG_WARNING"
+                )
+                self$results$appendNotice(notice)
+            }
+
+            # Check Events-Per-Variable (EPV) ratio
+            epv_ratio <- nrow(pca_data) / length(vars)
+            if (epv_ratio < 10) {
+                notice <- list(
+                    name = "lowEPV",
+                    title = "Low Sample-to-Variable Ratio",
+                    content = sprintf('Sample size to variable ratio is low (N=%d, variables=%d, ratio=%.1f:1). PCA loadings may be unstable with low sample-to-variable ratios. Recommend ratio >= 10:1 (N >= %d for %d variables).',
+                        nrow(pca_data), length(vars), epv_ratio, length(vars) * 10, length(vars)),
+                    level = "STRONG_WARNING"
+                )
+                self$results$appendNotice(notice)
+            }
+
             # CRITICAL FIX: Validate numeric inputs (prevent silent factor coercion)
             non_numeric <- sapply(pca_data, function(x) !is.numeric(x))
             if (any(non_numeric)) {
                 non_numeric_vars <- names(pca_data)[non_numeric]
-                stop(paste0(
-                    'ERROR: Non-numeric variables detected: ',
-                    paste(non_numeric_vars, collapse = ', '),
-                    '\\n\\nPCA Loading Test requires numeric variables only. ',
-                    'Factors and character variables cannot be used. ',
-                    'Please select only continuous numeric variables.'
-                ))
+                notice <- list(
+                    name = "nonNumericVars",
+                    title = "Non-Numeric Variables Detected",
+                    content = sprintf('Non-numeric variables detected: %s. PCA Loading Test requires numeric variables only. Factors and character variables cannot be used. Please select only continuous numeric variables.', paste(non_numeric_vars, collapse = ', ')),
+                    level = "ERROR"
+                )
+                self$results$appendNotice(notice)
+                return()
             }
 
             # Convert to numeric matrix
             pca_matrix <- as.matrix(sapply(pca_data, as.numeric))
 
+            # Check for multicollinearity
+            if (ncol(pca_matrix) >= 2 && nrow(pca_matrix) > ncol(pca_matrix)) {
+                cor_matrix <- cor(pca_matrix, use = "pairwise.complete.obs")
+                max_cor <- max(abs(cor_matrix[upper.tri(cor_matrix)]), na.rm = TRUE)
+                if (max_cor > 0.95) {
+                    notice <- list(
+                        name = "highMulticollinearity",
+                        title = "High Multicollinearity Detected",
+                        content = sprintf('Very high correlation detected between variables (max |r| = %.3f). This may indicate redundant variables or measurement error. Consider removing highly correlated variables before PCA to improve interpretability.', max_cor),
+                        level = "WARNING"
+                    )
+                    self$results$appendNotice(notice)
+                }
+            }
+
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
-                stop('Insufficient data for PCA. Need at least 3 complete observations.')
+                notice <- list(
+                    name = "insufficientData",
+                    title = "Insufficient Data",
+                    content = sprintf('Insufficient data for PCA (N=%d complete observations). Need at least 3 complete observations. Check for missing values.', nrow(pca_matrix)),
+                    level = "ERROR"
+                )
+                self$results$appendNotice(notice)
+                return()
             }
 
             # Optional seed for reproducibility
@@ -180,15 +272,14 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_means <- apply(pca_matrix, 2, mean, na.rm = TRUE)
 
                 if (max(var_ranges) / min(var_ranges) > 10 || max(abs(var_means)) > 1e-6) {
-                    jmvcore::reject(paste0(
-                        'WARNING: Centering and/or scaling are disabled, but variables have different scales.\\n\\n',
-                        '⚠️ CRITICAL: Without centering/scaling, the permutation test for loadings ',
-                        'compares RAW VARIANCE contributions, not standardized correlation-based loadings. ',
-                        'Variables with larger variance will dominate the loadings.\\n\\n',
-                        'RECOMMENDATION: Enable \"Center Variables\" and \"Scale Variables\" options for valid results.\\n\\n',
-                        'If you proceed without centering/scaling, interpret loadings as reflecting raw variance, ',
-                        'NOT standardized correlation structure (which is the standard interpretation of PCA loadings).'
-                    ))
+                    # Add non-blocking WARNING notice
+                    notice <- list(
+                        name = "centerscale_warning",
+                        title = "Centering/Scaling Disabled",
+                        content = "Center/scale disabled with mixed variable scales: loadings reflect raw variance (not correlations). Variables with larger variance will dominate. Enable 'Center Variables' and 'Scale Variables' for standard PCA interpretation.",
+                        level = "WARNING"
+                    )
+                    self$results$appendNotice(notice)
                 }
             }
 
@@ -199,10 +290,32 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             original_loadings <- private$.stand_loadings(pca, pca_matrix)
             private$.varianceInfo <- pcaloadingtest_variance_info(pca, self$options$ncomp)
 
+            # Warn if tested components explain low variance
+            var_info <- private$.varianceInfo
+            ncomp_tested <- min(self$options$ncomp, nrow(var_info))
+            total_var_explained <- sum(var_info$variance[1:ncomp_tested])
+            if (total_var_explained < 0.50) {
+                notice <- list(
+                    name = "lowVarianceExplained",
+                    title = "Low Variance Explained",
+                    content = sprintf('First %d components explain only %.1f%% of total variance. Consider whether PCA is appropriate for this data or increase the number of components tested. Low variance explained suggests weak underlying structure.',
+                        ncomp_tested, total_var_explained * 100),
+                    level = "WARNING"
+                )
+                self$results$appendNotice(notice)
+            }
+
             # Number of components to test
             ndim <- min(self$options$ncomp, ncol(original_loadings))
             if (ndim < 1) {
-                stop('No principal components available to test.')
+                notice <- list(
+                    name = "noComponents",
+                    title = "No Components Available",
+                    content = "No principal components available to test. This may occur with constant variables or perfect multicollinearity.",
+                    level = "ERROR"
+                )
+                self$results$appendNotice(notice)
+                return()
             }
 
             # Checkpoint
@@ -244,16 +357,14 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         } else {
                             # CRITICAL WARNING: pracma not available, sign correction disabled
                             # This degrades to sign-unstable comparison with inflated Type I errors
-                            jmvcore::reject(paste0(
-                                'ERROR: The pracma package is required for Procrustes rotation ',
-                                'in the permV method but is not installed.\n\n',
-                                '⚠️ CRITICAL: Without Procrustes rotation, PCA loading significance tests ',
-                                'suffer from sign indeterminacy. Different permutations can flip signs, ',
-                                'causing grossly inflated Type I error rates.\n\n',
-                                'SOLUTION: Install pracma with: install.packages("pracma")\n\n',
-                                'The permV method (Linting et al., 2011) requires Procrustes alignment ',
-                                'to handle rotation and reflection indeterminacy in PCA solutions.'
-                            ))
+                            notice <- list(
+                                name = "pracmaMissing",
+                                title = "Required Package Missing",
+                                content = "The pracma package is required for Procrustes rotation in the permV method but is not installed. Without Procrustes rotation, loading significance tests suffer from sign indeterminacy causing inflated Type I error rates. Install pracma with: install.packages('pracma')",
+                                level = "ERROR"
+                            )
+                            self$results$appendNotice(notice)
+                            return()
                         }
                     }, error = function(e) {
                         perm_loadings_list[[v]] <- rep(NA, ndim)
@@ -288,8 +399,11 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Calculate p-value
                     pval <- (sum(abs(perm_vals) > abs(original), na.rm = TRUE) + 1) / (P + 1)
 
+                    # Store both encoded (for jamovi tables) and original (for plots)
+                    var_name <- rownames(original_loadings)[v]
                     results_list[[length(results_list) + 1]] <- list(
-                        variable = rownames(original_loadings)[v],
+                        variable = jmvcore::toB64(var_name),
+                        variable_display = var_name,
                         component = paste0('PC', comp),
                         original = original,
                         mean = mean_perm,
@@ -324,14 +438,87 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.populateTable()
             private$.variance()
 
+            # Success completion notice
+            pca <- private$.pcaResults
+            infoNotice <- list(
+                name = "analysisComplete",
+                title = "Analysis Complete",
+                content = sprintf('Analysis completed: %d variables tested across %d components using %d permutations per variable (total %d permutation runs).', length(self$options$vars), min(self$options$ncomp, ncol(pca$rotation)), self$options$nperm, self$options$nperm * length(self$options$vars)),
+                level = "INFO"
+            )
+            self$results$appendNotice(infoNotice)
+
+            # Generate copy-ready report text
+            results_df <- private$.resultsDF
+            sig_vars <- results_df %>% filter(.data$adj_pvalue < 0.05)
+            n_sig <- nrow(sig_vars)
+
+            # Get most significant loadings for each component (top 3)
+            top_loadings <- results_df %>%
+                arrange(.data$adj_pvalue) %>%
+                group_by(.data$component) %>%
+                slice(1:3) %>%
+                ungroup()
+
+            # Dynamic preprocessing statement
+            preprocess_text <- if (self$options$center && self$options$scale) {
+                "Variables were centered and scaled prior to analysis."
+            } else if (self$options$center) {
+                "Variables were centered (but not scaled) prior to analysis."
+            } else if (self$options$scale) {
+                "Variables were scaled (but not centered) prior to analysis."
+            } else {
+                "Variables were analyzed without centering or scaling (raw data)."
+            }
+
+            report_text <- sprintf(
+                "Principal component analysis with permutation-based loading significance testing (permV method; %d permutations per variable; N=%d complete observations) identified %d significant variable-component associations (FDR-adjusted p < 0.05 after Benjamini-Hochberg correction). %s The first %d components explained %.1f%% of total variance.",
+                self$options$nperm,
+                private$.rowInfo$rows_used,
+                n_sig,
+                preprocess_text,
+                min(self$options$ncomp, ncol(pca$rotation)),
+                sum(private$.varianceInfo$variance[1:min(self$options$ncomp, nrow(private$.varianceInfo))]) * 100
+            )
+
+            copy_ready_html <- glue::glue("
+<div style='background:#f0f7ff; padding:15px; border:2px solid #0066cc; border-radius:5px; margin:15px 0;'>
+<h4 style='color:#0066cc; margin-top:0;'>📋 Copy-Ready Report Text</h4>
+<p style='background:white; padding:12px; border-radius:3px; font-family:serif; line-height:1.6;'>
+{report_text}
+</p>
+<button style='background:#0066cc; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:14px;'
+        onclick='navigator.clipboard.writeText(this.previousElementSibling.innerText).then(() => {{this.innerText=\"✓ Copied!\"; setTimeout(() => this.innerText=\"📋 Copy to Clipboard\", 2000);}})'>
+📋 Copy to Clipboard
+</button>
+
+<h5 style='color:#0066cc; margin-top:15px; margin-bottom:8px;'>Reference:</h5>
+<p style='font-size:0.9em; font-style:italic; margin:5px 0;'>
+Linting M, van Os BJ, Meulman JJ. (2011). Statistical Significance of the Contribution of Variables to the PCA solution:
+An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10.1007/s11336-011-9238-0
+</p>
+</div>
+            ")
+
+            # Append to todo output
+            current_todo <- self$results$todo$state
+            self$results$todo$setContent(paste0(current_todo, copy_ready_html))
+
         },
 
         # Extract standardized loadings ----
         .stand_loadings = function(pca, pca_data) {
 
             if (is.numeric(pca$scale)) {
+                # Case 1: scale=TRUE (prcomp applied scaling)
+                # rotation × sdev gives standardized loadings
+                # These are equivalent to correlations when data are scaled
                 loadings <- as.data.frame((pca$rotation %*% diag(pca$sdev)))
             } else {
+                # Case 2: scale=FALSE (no scaling applied by prcomp)
+                # Manually standardize by dividing by raw standard deviations
+                # This ensures loadings are on comparable scale even with raw data
+                # Without this, loadings would reflect raw variance contributions
                 loadings <- as.data.frame((pca$rotation %*% diag(pca$sdev)) / apply(pca_data, 2, sd))
             }
 
@@ -399,8 +586,8 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             plot_data <- results_df %>% filter(.data$component == comp_to_plot)
 
-            # Create barplot with error bars
-            p <- ggplot2::ggplot(plot_data, aes(x = .data$variable, y = .data$original)) +
+            # Create barplot with error bars (use variable_display for human-readable labels)
+            p <- ggplot2::ggplot(plot_data, aes(x = .data$variable_display, y = .data$original)) +
                 geom_col(aes(fill = .data$original), show.legend = TRUE) +
                 geom_errorbar(aes(ymin = .data$ci_low, ymax = .data$ci_high),
                              width = 0.3, color = "black") +
@@ -425,7 +612,7 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             sig_data <- plot_data %>% filter(.data$adj_pvalue < 0.05)
             if (nrow(sig_data) > 0) {
                 p <- p + geom_text(data = sig_data,
-                                  aes(x = .data$variable,
+                                  aes(x = .data$variable_display,
                                       y = .data$original * 1.1,
                                       label = "★"),
                                   size = 6, color = "gold3")

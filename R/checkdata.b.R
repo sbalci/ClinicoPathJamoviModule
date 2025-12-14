@@ -1891,8 +1891,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 quality_text <- paste0(quality_text, "• OUTLIERS: Review each outlier for data entry errors and clinical plausibility\n")
                 quality_text <- paste0(quality_text, "• OUTLIERS: Consider robust analysis methods (e.g., rank-based tests)\n")
             }
-            
-            if (!is.null(clinical_issues) && length(clinical_issues) > 0) {
+
+            if (!is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
                 quality_text <- paste0(quality_text, "• CLINICAL VALIDATION: Verify measurement units and clinical plausibility\n")
                 quality_text <- paste0(quality_text, "• CLINICAL VALIDATION: Review data collection procedures\n")
             }
@@ -2010,14 +2010,14 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$showSummary) {
                 summary_html <- "<div style='font-family: Georgia, serif; line-height: 1.8; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2c5aa0;'>"
                 summary_html <- paste0(summary_html, "<h3 style='color: #2c5aa0; margin-top: 0;'>Data Quality Summary</h3>")
-                summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", varname, "</p>")
+                summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", var_name, "</p>")
                 summary_html <- paste0(summary_html, "<p><strong>Overall Quality Grade:</strong> ", quality_grade, " (", quality_score, "/100 by heuristic scoring)</p>")
 
                 # Sample characteristics
                 if (is_numeric) {
                     summary_html <- paste0(summary_html, sprintf("<p>This numeric variable contains <strong>%d observations</strong> with <strong>%.1f%% missing data</strong> (%d/%d cases). ", n_total, missing_pct, n_missing, n_total))
                 } else {
-                    summary_html <- paste0(summary_html, sprintf("<p>This categorical variable contains <strong>%d observations</strong> across <strong>%d unique categories</strong> with <strong>%.1f%% missing data</strong> (%d/%d cases). ", n_total, length(unique(var_data[!is.na(var_data)])), missing_pct, n_missing, n_total))
+                    summary_html <- paste0(summary_html, sprintf("<p>This categorical variable contains <strong>%d observations</strong> across <strong>%d unique categories</strong> with <strong>%.1f%% missing data</strong> (%d/%d cases). ", n_total, length(unique(variable[!is.na(variable)])), missing_pct, n_missing, n_total))
                 }
 
                 # Key findings
@@ -2025,8 +2025,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     summary_html <- paste0(summary_html, sprintf("Consensus outlier detection identified <strong>%d potential outliers</strong> (%.1f%% of non-missing cases). ", outliers_found, (outliers_found/n_complete)*100))
                 }
 
-                if (!is.null(clinical_issues) && length(clinical_issues) > 0) {
-                    summary_html <- paste0(summary_html, sprintf("Clinical plausibility checks flagged <strong>%d observations</strong> with values outside typical ranges. ", length(clinical_issues)))
+                if (!is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
+                    summary_html <- paste0(summary_html, sprintf("Clinical plausibility checks flagged <strong>%d observations</strong> with values outside typical ranges. ", length(clinical_issues_found)))
                 }
 
                 summary_html <- paste0(summary_html, "</p>")
@@ -2049,7 +2049,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 recommendations <- c()
                 if (missing_pct > 15) recommendations <- c(recommendations, "investigate missing data mechanisms")
                 if (outliers_found > 0) recommendations <- c(recommendations, "manually verify flagged outliers")
-                if (!is.null(clinical_issues) && length(clinical_issues) > 0) recommendations <- c(recommendations, "verify clinical plausibility of flagged values")
+                if (!is.null(clinical_issues_found) && length(clinical_issues_found) > 0) recommendations <- c(recommendations, "verify clinical plausibility of flagged values")
                 if (n_total < 30) recommendations <- c(recommendations, "consider collecting additional data")
 
                 if (length(recommendations) > 0) {

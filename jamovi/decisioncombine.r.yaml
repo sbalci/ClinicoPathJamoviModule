@@ -138,6 +138,7 @@ items:
     - name: individualTest1
       title: 'Test 1 Performance'
       type: Group
+      visible: (showIndividual)
       items:
         - name: test1Contingency
           title: 'Contingency Table'
@@ -172,6 +173,7 @@ items:
     - name: individualTest2
       title: 'Test 2 Performance'
       type: Group
+      visible: (showIndividual)
       items:
         - name: test2Contingency
           title: 'Contingency Table'
@@ -206,6 +208,7 @@ items:
     - name: individualTest3
       title: 'Test 3 Performance'
       type: Group
+      visible: (showIndividual)
       items:
         - name: test3Contingency
           title: 'Contingency Table'

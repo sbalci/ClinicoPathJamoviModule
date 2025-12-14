@@ -1,8 +1,8 @@
 ---
 name:  dendrogram
 title: Dendrogram
-menuGroup: OncoPathT1
-menuSubgroup: Drafts
+menuGroup: OncoPathT
+menuSubgroup: Hierarchical Clustering
 version: '0.0.31'
 jas: '1.2'
 

@@ -156,6 +156,7 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        clinicalGuide = function() private$.items[["clinicalGuide"]],
         results = function() private$.items[["results"]],
         variance = function() private$.items[["variance"]],
         loadingplot = function() private$.items[["loadingplot"]],
@@ -169,11 +170,17 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="PCA Loading Significance Test",
                 refs=list(
                     "glue",
-                    "pracma"))
+                    "pracma",
+                    "dplyr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalGuide",
+                title="Clinical Applications & Interpretation Guide",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -334,13 +341,14 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' # Example with mtcars dataset
-#' data("mtcars")
+#' # Example with pcaloadingtest_data (simulated dataset with known structure)
+#' data("pcaloadingtest_data")
 #'
 #' # Test loading significance for first 3 components
+#' # Expected: var1-3 load on PC1, var4-5 on PC2, var6-7 on PC3
 #' pcaloadingtest(
-#'   data = mtcars,
-#'   vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
+#'   data = pcaloadingtest_data,
+#'   vars = c("var1", "var2", "var3", "var4", "var5", "var6", "var7", "noise"),
 #'   ncomp = 3,
 #'   nperm = 1000,
 #'   center = TRUE,
@@ -378,6 +386,7 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results} \tab \tab \tab \tab \tab Permutation-based significance testing for each variable-component loading \cr
 #'   \code{results$variance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$loadingplot} \tab \tab \tab \tab \tab Barplot showing loadings with confidence intervals from permutation \cr

@@ -10,7 +10,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             test1_spec = 0.9,
             test2_sens = 0.75,
             test2_spec = 0.95,
-            indep = TRUE,
+            indep = FALSE,
             cond_dep_pos = 0.05,
             cond_dep_neg = 0.05,
             prevalence = 0.1,
@@ -51,7 +51,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..indep <- jmvcore::OptionBool$new(
                 "indep",
                 indep,
-                default=TRUE)
+                default=FALSE)
             private$..cond_dep_pos <- jmvcore::OptionNumber$new(
                 "cond_dep_pos",
                 cond_dep_pos,
@@ -311,7 +311,8 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param test1_spec Specificity (true negative rate) of Test 1.
 #' @param test2_sens Sensitivity (true positive rate) of Test 2.
 #' @param test2_spec Specificity (true negative rate) of Test 2.
-#' @param indep Assume tests are conditionally independent (default is true).
+#' @param indep Assume tests are conditionally independent (default is false
+#'   for safety). Use true only if tests measure completely different phenomena.
 #' @param cond_dep_pos Conditional dependence between tests for subjects with
 #'   disease. Value between 0 (independence) and 1 (complete dependence).
 #' @param cond_dep_neg Conditional dependence between tests for subjects
@@ -348,7 +349,7 @@ cotest <- function(
     test1_spec = 0.9,
     test2_sens = 0.75,
     test2_spec = 0.95,
-    indep = TRUE,
+    indep = FALSE,
     cond_dep_pos = 0.05,
     cond_dep_neg = 0.05,
     prevalence = 0.1,

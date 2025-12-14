@@ -89,7 +89,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     name = 'emptyDataset',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent('Dataset contains no complete rows.\n• Please check your data for missing values.\n• Ensure at least one row has complete data before running date correction.')
+                notice$setContent('Dataset contains no complete rows. • Please check your data for missing values. • Ensure at least one row has complete data before running date correction.')
                 self$results$insert(1, notice)
                 return()
             }
@@ -104,7 +104,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf(
-                        'Required package "%s" is not installed.\n• Install it using: install.packages("%s")\n• Restart jamovi after installation.\n• This package is required for date correction functionality.',
+                        'Required package "%s" is not installed. • Install it using: install.packages("%s") • Restart jamovi after installation. • This package is required for date correction functionality.',
                         pkg, pkg
                     ))
                     self$results$insert(1, notice)
@@ -122,7 +122,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     name = 'missingDateVars',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent('Date variables are required.\n• Please select at least one variable containing date information.\n• Use the "Date Variables to Correct" box in the left panel to add variables.')
+                notice$setContent('Date variables are required. • Please select at least one variable containing date information. • Use the "Date Variables to Correct" box in the left panel to add variables.')
                 self$results$insert(1, notice)
                 return()
             }
@@ -143,8 +143,8 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     paste(available_vars, collapse = ", ")
                 }
                 notice$setContent(sprintf(
-                    'Selected variables not found in dataset:\n• %s\n\nAvailable variables: %s\n\n• Check variable names for typos.\n• Ensure variables are present in the active dataset.',
-                    paste(missing_vars, collapse = '\n• '),
+                    'Selected variables not found in dataset: %s • Available variables: %s • Check variable names for typos. • Ensure variables are present in the active dataset.',
+                    paste(missing_vars, collapse = ', '),
                     available_preview
                 ))
                 self$results$insert(1, notice)
@@ -187,12 +187,12 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
 
                 if (success_rate < 70) {
                     notice$setContent(sprintf(
-                        'Low date correction success rate: %.1f%%\n• Only %d of %d dates were successfully parsed.\n• Clinical analysis may be unreliable with <70%% success rate.\n\nConsider:\n• Using a different correction method (try "consensus")\n• Reviewing data source for systematic formatting issues\n• Manual review of failed corrections in the audit table\n• Consulting with data management team',
+                        'Low date correction success rate: %.1f%% • Only %d of %d dates were successfully parsed. • Clinical analysis may be unreliable with <70%% success rate. • Consider: Using a different correction method (try "consensus"), Reviewing data source for systematic formatting issues, Manual review of failed corrections in the audit table, Consulting with data management team.',
                         success_rate, successful_corrections, total_observations
                     ))
                 } else {
                     notice$setContent(sprintf(
-                        'Moderate date correction success rate: %.1f%%\n• %d of %d dates were successfully parsed.\n• Review failed corrections in the "Corrected Date Data" table.\n\nConsider:\n• Trying the "consensus" method for better results\n• Checking common error patterns in quality assessment\n• Manual verification of critical dates',
+                        'Moderate date correction success rate: %.1f%% • %d of %d dates were successfully parsed. • Review failed corrections in the "Corrected Date Data" table. • Consider: Trying the "consensus" method for better results, Checking common error patterns in quality assessment, Manual verification of critical dates.',
                         success_rate, successful_corrections, total_observations
                     ))
                 }
@@ -233,7 +233,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent(sprintf(
-                    'Date correction completed successfully.\n• Processed %d observations across %d variable(s).\n• Successfully corrected %d dates (%.1f%%).\n• Full audit trail available in "Corrected Date Data" table.\n• Export table to CSV for documentation or downstream use.',
+                    'Date correction completed successfully. • Processed %d observations across %d variable(s). • Successfully corrected %d dates (%.1f%%). • Full audit trail available in "Corrected Date Data" table. • Export table to CSV for documentation or downstream use.',
                     total_observations,
                     length(correction_results),
                     successful_corrections,
@@ -314,7 +314,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf(
-                        'Variable "%s" contains only missing values (NA).\n• No date corrections possible for this variable.\n• %d row(s) affected.\n• Consider removing this variable or checking your data source.',
+                        'Variable "%s" contains only missing values (NA). • No date corrections possible for this variable. • %d row(s) affected. • Consider removing this variable or checking your data source.',
                         var, length(var_data)
                     ))
                     self$results$insert(2, notice)
@@ -555,7 +555,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent(sprintf(
-                    'Consensus method detected %d conflict(s) where date parsers disagreed.\n• Using datefixR as primary resolver when conflicts occur.\n• Review "Method" column in audit table to see affected rows.\n• Consider specifying exact date format if conflicts are widespread.\n• Conflicts often indicate ambiguous date formats (e.g., 03/04/2020 could be March 4 or April 3).',
+                    'Consensus method detected %d conflict(s) where date parsers disagreed. • Using datefixR as primary resolver when conflicts occur. • Review "Method" column in audit table to see affected rows. • Consider specifying exact date format if conflicts are widespread. • Conflicts often indicate ambiguous date formats (e.g., 03/04/2020 could be March 4 or April 3).',
                     conflict_count
                 ))
                 self$results$insert(3, notice)

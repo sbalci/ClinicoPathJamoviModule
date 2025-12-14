@@ -287,7 +287,8 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]]),
+        text2 = function() private$.items[["text2"]],
+        reportSentence = function() private$.items[["reportSentence"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -310,7 +311,12 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="text2",
                 title="Pattern Table",
-                visible="(ptable)"))}))
+                visible="(ptable)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="reportSentence",
+                title="Copy-Ready Report Sentence",
+                visible="(showInterpretation)"))}))
 
 vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vartreeBase",
@@ -399,6 +405,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export

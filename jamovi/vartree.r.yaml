@@ -18,6 +18,11 @@ items:
       type:  Preformatted
       visible: (ptable)
 
+    - name:  reportSentence
+      title: Copy-Ready Report Sentence
+      type:  Preformatted
+      visible: (showInterpretation)
+
     # - name:  text3
     #   title: Venn Table
     #   type:  Preformatted

@@ -20,6 +20,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .clinicalImpactData = NULL,
         .analysisData = NULL,
         .analysisOutcomes = NULL,
+
+        # Helper method to escape variable names for notice IDs
+        .escapeVar = function(varName) {
+            gsub("[^A-Za-z0-9]", "_", varName)
+        },
         
         # Constants for default values and thresholds
         DECISIONCURVE_DEFAULTS = list(
@@ -145,35 +150,88 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .validateThresholdRange = function(min_thresh, max_thresh) {
             # Basic validation
             if (min_thresh >= max_thresh) {
-                stop(sprintf("Minimum threshold (%.3f) must be less than maximum threshold (%.3f)", 
-                           min_thresh, max_thresh))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'invalidThresholdRange',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(jmvcore::format(
+                    'Minimum threshold ({min}%) must be less than maximum threshold ({max}%). • Current settings: Min = {min}%, Max = {max}%. • Please adjust threshold range in Analysis Options.',
+                    min = round(min_thresh * 100, 1),
+                    max = round(max_thresh * 100, 1)
+                ))
+                self$results$insert(1, notice)
+                stop("Validation failed", call. = FALSE)
             }
-            
+
             if (min_thresh <= 0 || max_thresh >= 1) {
-                stop("Threshold probabilities must be between 0 and 1 (exclusive)")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'thresholdOutOfBounds',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(jmvcore::format(
+                    'Threshold probabilities must be between 0 and 1 (exclusive). • Current settings: Min = {min}%, Max = {max}%. • Valid range: 0.1% to 99.9%. • Please adjust threshold range.',
+                    min = round(min_thresh * 100, 1),
+                    max = round(max_thresh * 100, 1)
+                ))
+                self$results$insert(1, notice)
+                stop("Validation failed", call. = FALSE)
             }
             
             # Clinical guidance warnings for unusual ranges
             if (max_thresh > 0.8) {
-                warning(sprintf("Very high maximum threshold (%.1f%%). Decision thresholds above 80%% are rarely clinically meaningful for most medical decisions.", 
-                               max_thresh * 100))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'veryHighThreshold',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Very high maximum threshold ({max}%). • Decision thresholds above 80% are rarely clinically meaningful for most medical decisions. • Consider whether this reflects your actual clinical decision context.',
+                    max = round(max_thresh * 100, 1)
+                ))
+                self$results$insert(1, notice)
             }
-            
+
             if (min_thresh < 0.01) {
-                warning(sprintf("Very low minimum threshold (%.1f%%). Thresholds below 1%% may not be clinically interpretable.", 
-                               min_thresh * 100))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'veryLowThreshold',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Very low minimum threshold ({min}%). • Thresholds below 1% may not be clinically interpretable for most medical decisions. • Ensure this aligns with your clinical context.',
+                    min = round(min_thresh * 100, 1)
+                ))
+                self$results$insert(1, notice)
             }
-            
+
             # Range size warnings
             range_size <- max_thresh - min_thresh
             if (range_size > 0.7) {
-                warning(sprintf("Very wide threshold range (%.1f%% span). Consider focusing on clinically relevant range for your specific decision context.", 
-                               range_size * 100))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'veryWideRange',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Very wide threshold range ({span}% span). • Consider focusing on clinically relevant range for your specific decision context (e.g., 5-50% for most screening decisions).',
+                    span = round(range_size * 100, 1)
+                ))
+                self$results$insert(1, notice)
             }
-            
+
             if (range_size < 0.05) {
-                warning(sprintf("Narrow threshold range (%.1f%% span). Decision curve analysis is most informative across wider probability ranges.", 
-                               range_size * 100))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'narrowRange',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Narrow threshold range ({span}% span). • Decision curve analysis is most informative across wider probability ranges (typically 10-30% span or more).',
+                    span = round(range_size * 100, 1)
+                ))
+                self$results$insert(1, notice)
             }
             
             # Clinical context guidance
@@ -342,14 +400,34 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # Bootstrap confidence intervals with enhanced error handling and progress reporting
         .calculateBootstrapCI = function(predictions, outcomes, thresholds, positive_outcome, n_boot = 1000) {
-            
+
             # Validate inputs
             if (length(predictions) != length(outcomes)) {
-                stop("Bootstrap CI: Predictions and outcomes must have same length")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'bootstrapLengthMismatch',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(jmvcore::format(
+                    'Bootstrap CI calculation error: Predictions and outcomes have different lengths ({n_pred} vs {n_out}). • This indicates a data processing error. • Please report this issue.',
+                    n_pred = length(predictions),
+                    n_out = length(outcomes)
+                ))
+                self$results$insert(1, notice)
+                stop("Validation failed", call. = FALSE)
             }
-            
+
             if (n_boot < 100) {
-                warning("Bootstrap CI: Using fewer than 100 replications may give unreliable confidence intervals")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'lowBootstrapReps',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Low bootstrap replications ({n}). • Using fewer than 100 replications may give unreliable confidence intervals. • Consider increasing to at least 1000 replications for stable estimates.',
+                    n = n_boot
+                ))
+                self$results$insert(1, notice)
             }
             
             # Use chunked bootstrap for very large n_boot to manage memory
@@ -417,7 +495,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     
                     # Validate bootstrap sample has variation
                     if (length(unique(boot_out)) < 2) {
-                        warning(sprintf("Bootstrap sample %d has no outcome variation, skipping", i))
+                        # Skip silently - this can happen randomly with very small samples or extreme prevalence
                         next
                     }
 
@@ -449,11 +527,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 return(list(lower = ci_lower, upper = ci_upper))
                 
             }, error = function(e) {
-                enhanced_msg <- sprintf("Bootstrap CI calculation failed: %s. Continuing without confidence intervals.", 
-                                       conditionMessage(e))
-                warning(enhanced_msg)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'bootstrapCIFailed',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Bootstrap confidence interval calculation failed: {msg}. • Continuing analysis without confidence intervals. • Results are still valid, but CI uncertainty estimates are unavailable.',
+                    msg = conditionMessage(e)
+                ))
+                self$results$insert(1, notice)
                 return(list(
-                    lower = rep(NA, length(thresholds)), 
+                    lower = rep(NA, length(thresholds)),
                     upper = rep(NA, length(thresholds))
                 ))
             })
@@ -518,6 +603,31 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Main analysis function
         .run = function() {
 
+            # Check if required packages are available
+            required_packages <- c("ggplot2", "dplyr", "tidyr")
+            missing_packages <- character(0)
+
+            for (pkg in required_packages) {
+                if (!requireNamespace(pkg, quietly = TRUE)) {
+                    missing_packages <- c(missing_packages, pkg)
+                }
+            }
+
+            if (length(missing_packages) > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingPackages',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(jmvcore::format(
+                    'Required packages missing: {pkgs}. • Install with install.packages(c({quoted_pkgs})). • These packages are essential for Decision Curve Analysis visualizations and data processing.',
+                    pkgs = paste(missing_packages, collapse = ", "),
+                    quoted_pkgs = paste0('"', paste(missing_packages, collapse = '", "'), '"')
+                ))
+                self$results$insert(1, notice)
+                return()
+            }
+
             # Show instructions if needed
             if (is.null(self$options$outcome) || is.null(self$options$models) ||
                 length(self$options$models) == 0) {
@@ -574,7 +684,17 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             complete_cases <- complete.cases(data[complete_vars])
 
             if (sum(complete_cases) < 10) {
-                stop("Insufficient complete cases for analysis (minimum 10 required)")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficientCases',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(jmvcore::format(
+                    'Insufficient complete cases for analysis ({n} cases available, minimum 10 required). • Decision curve analysis requires adequate sample size for stable net benefit estimates. • Remove missing data or collect additional cases.',
+                    n = sum(complete_cases)
+                ))
+                self$results$insert(1, notice)
+                return()
             }
 
             # Filter data to complete cases
@@ -583,16 +703,77 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.analysisData <- analysis_data
             private$.analysisOutcomes <- outcomes
 
+            # Clinical Profile Notices: Sample Size Adequacy
+            n_total <- sum(complete_cases)
+            if (n_total < 100) {
+                notice_type <- if (n_total < 50) jmvcore::NoticeType$STRONG_WARNING else jmvcore::NoticeType$WARNING
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSampleSize',
+                    type = notice_type
+                )
+
+                severity <- if (n_total < 50) "very small" else "small"
+                notice$setContent(jmvcore::format(
+                    '{severity_cap} sample size (n={n}). • Confidence intervals may be wide and net benefit estimates unstable. • Minimum recommended: n=100-200 for adequate precision in decision curve analysis. • Bootstrap confidence intervals strongly recommended to assess uncertainty. • Consider collecting additional data for reliable assessment.',
+                    severity_cap = tools::toTitleCase(severity),
+                    n = n_total
+                ))
+                self$results$insert(1, notice)
+            }
+
             # Check outcome is binary
             unique_outcomes <- unique(outcomes)
             if (length(unique_outcomes) != 2) {
-                stop("Outcome variable must be binary (exactly 2 levels)")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'outcomeNotBinary',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(jmvcore::format(
+                    'Outcome variable must be binary (exactly 2 levels). • Current outcome "{outcome}" has {n} levels: {levels}. • Decision curve analysis requires a binary outcome (diseased vs healthy, event vs no event). • Please recode to binary or select different outcome variable.',
+                    outcome = outcome_var,
+                    n = length(unique_outcomes),
+                    levels = paste(unique_outcomes, collapse = ", ")
+                ))
+                self$results$insert(1, notice)
+                return()
             }
 
             # Validate positive outcome level
             if (!outcome_positive %in% unique_outcomes) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'outcomePositiveLevelNotFound',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Selected positive outcome level not found. • Using first level "{level}" instead. • Available levels: {levels}. • Please verify this is the correct positive outcome level.',
+                    level = unique_outcomes[1],
+                    levels = paste(unique_outcomes, collapse = ", ")
+                ))
+                self$results$insert(1, notice)
                 outcome_positive <- unique_outcomes[1]
-                warning("Selected positive outcome level not found. Using first level.")
+            }
+
+            # Clinical Profile Notices: Extreme Prevalence
+            n_diseased <- sum(outcomes == outcome_positive)
+            prevalence <- n_diseased / n_total
+
+            if (prevalence < 0.05 || prevalence > 0.95) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'extremePrevalence',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Extreme outcome prevalence: {prev}% ({n_diseased}/{n_total} cases). • Decision curves may be less interpretable with very low or very high event rates. • Net benefit calculations are sensitive to prevalence extremes. • Consider whether sample represents target clinical population. • Results may not generalize to populations with different event rates.',
+                    prev = round(prevalence * 100, 1),
+                    n_diseased = n_diseased,
+                    n_total = n_total
+                ))
+                self$results$insert(1, notice)
             }
 
             # Validate clinical decision rule variable if provided
@@ -601,11 +782,33 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 rule_data <- analysis_data[[rule_var]]
                 rule_levels <- unique(rule_data)
                 if (length(rule_levels) != 2) {
-                    stop("Clinical decision rule variable must be binary (exactly 2 levels)")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ruleNotBinary',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(jmvcore::format(
+                        'Clinical decision rule variable must be binary (exactly 2 levels). • Current rule variable "{rule}" has {n} levels: {levels}. • Please select a binary rule variable or disable "Clinical Decision Rule Integration".',
+                        rule = rule_var,
+                        n = length(rule_levels),
+                        levels = paste(rule_levels, collapse = ", ")
+                    ))
+                    self$results$insert(1, notice)
+                    return()
                 }
                 if (is.null(rule_positive) || !(rule_positive %in% rule_levels)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'rulePositiveLevelNotFound',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(jmvcore::format(
+                        'Selected positive rule level not found. • Using first level "{level}" instead. • Available levels: {levels}.',
+                        level = rule_levels[1],
+                        levels = paste(rule_levels, collapse = ", ")
+                    ))
+                    self$results$insert(1, notice)
                     rule_positive <- rule_levels[1]
-                    warning("Selected positive rule level not found. Using first level.")
                 }
             }
 
@@ -640,29 +843,35 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 pred_max <- max(predictions, na.rm = TRUE)
 
                 if (pred_min < 0 || pred_max > 1) {
-                    stop(sprintf(
-                        paste0(
-                            "Model '%s' contains values outside [0,1] range (min=%.3f, max=%.3f).\n\n",
-                            "Decision curve analysis requires CALIBRATED PROBABILITIES, not raw scores.\n\n",
-                            "Common solutions:\n",
-                            "  • If using logistic regression: Use predicted probabilities (predict(model, type='response')), not logits\n",
-                            "  • If using risk scores: Calibrate to probabilities first (e.g., via logistic calibration)\n",
-                            "  • If using other scores: Transform to probabilities using appropriate calibration method\n\n",
-                            "Why this matters: The threshold probability must have clinical meaning. ",
-                            "Min-max scaling would make thresholds uninterpretable."
-                        ),
-                        model_name, pred_min, pred_max
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('invalidProbabilities_', private$.escapeVar(model_name)),
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(jmvcore::format(
+                        'Model "{model}" contains values outside [0,1] range (min={min}, max={max}). • Decision curve analysis requires CALIBRATED PROBABILITIES, not raw scores. • If using logistic regression: Use predicted probabilities (predict(model, type="response")), not logits. • If using risk scores: Calibrate to probabilities first (e.g., via logistic calibration). • Why this matters: Threshold probability must have clinical meaning. Min-max scaling would make thresholds uninterpretable.',
+                        model = model_name,
+                        min = round(pred_min, 3),
+                        max = round(pred_max, 3)
                     ))
+                    self$results$insert(1, notice)
+                    return()
                 }
 
                 # Warn if probabilities are suspiciously concentrated
                 if (pred_max - pred_min < 0.05) {
-                    warning(sprintf(
-                        "Model '%s' has very narrow probability range (%.3f to %.3f). " +
-                        "Decision curve analysis may not be informative with such limited variation. " +
-                        "Consider checking model calibration or discrimination.",
-                        model_name, pred_min, pred_max
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = paste0('narrowProbabilityRange_', private$.escapeVar(model_name)),
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(jmvcore::format(
+                        'Model "{model}" has very narrow probability range ({min} to {max}). • Decision curve analysis may not be informative with such limited variation (range < 5%). • Consider checking model calibration or discrimination. • Models with poor discrimination may not show clinical utility.',
+                        model = model_name,
+                        min = round(pred_min, 3),
+                        max = round(pred_max, 3)
                     ))
+                    self$results$insert(1, notice)
                 }
 
                 # Optimized threshold calculations - vectorize when possible
@@ -839,6 +1048,30 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # Generate clinical interpretation
             private$.generateClinicalInterpretation()
+
+            # Success Completion Notice
+            n_models <- length(model_names)
+            n_cases <- sum(complete_cases)
+            n_diseased_final <- sum(outcomes == outcome_positive)
+            n_healthy_final <- n_cases - n_diseased_final
+            threshold_min <- min(thresholds) * 100
+            threshold_max <- max(thresholds) * 100
+
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            notice$setContent(jmvcore::format(
+                'Decision curve analysis completed successfully. • {n_models} model(s) evaluated using {n_cases} complete cases. • Outcome prevalence: {prev}% ({n_diseased}/{n_cases}). • Threshold range: {tmin}% to {tmax}%. • Review decision curves and optimal thresholds below.',
+                n_models = n_models,
+                n_cases = n_cases,
+                prev = round(prevalence * 100, 1),
+                n_diseased = n_diseased_final,
+                tmin = round(threshold_min, 1),
+                tmax = round(threshold_max, 1)
+            ))
+            self$results$insert(999, notice)
         },
 
         .populateResultsTable = function(treat_all_nb, treat_none_nb) {

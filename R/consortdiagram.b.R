@@ -22,6 +22,50 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, character(1), USE.NAMES = FALSE)
         },
 
+        # HTML generation helpers ----
+        .htmlError = function(title, message, details = NULL) {
+            html <- paste0(
+                "<p style='font-weight: bold; color: #721c24; margin-bottom: 10px;'>",
+                "ERROR: ", message, "</p>",
+                "<div style='background: #f8d7da; padding: 15px; margin: 10px; border: 1px solid #f5c6cb;'>",
+                "<h3>❌ ", title, "</h3>"
+            )
+            if (!is.null(details)) {
+                html <- paste0(html, "<ul>")
+                for (detail in details) {
+                    html <- paste0(html, "<li>", detail, "</li>")
+                }
+                html <- paste0(html, "</ul>")
+            }
+            paste0(html, "</div>")
+        },
+
+        .htmlWarning = function(title, message, details = NULL) {
+            html <- paste0(
+                "<p style='font-weight: bold; color: #856404; margin-bottom: 10px;'>",
+                "WARNING: ", message, "</p>",
+                "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
+                "<h4>⚠️ ", title, "</h4>"
+            )
+            if (!is.null(details)) {
+                html <- paste0(html, "<ul>")
+                for (detail in details) {
+                    html <- paste0(html, "<li>", detail, "</li>")
+                }
+                html <- paste0(html, "</ul>")
+            }
+            paste0(html, "</div>")
+        },
+
+        .htmlInfo = function(title, content, style = "background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;") {
+            paste0(
+                "<div style='", style, "'>",
+                "<h3>", title, "</h3>",
+                content,
+                "</div>"
+            )
+        },
+
         # init ----
         .init = function() {
             # Check for data
@@ -35,12 +79,14 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!requireNamespace("consort", quietly = TRUE)) {
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
-                    "<div style='background: #fff3cd; padding: 20px; margin: 10px; border: 1px solid #ffc107;'>
-                    <h3>⚠️ Required Package Missing</h3>
-                    <p>The <strong>consort</strong> package is required for creating CONSORT diagrams.</p>
-                    <p>Please install it using:</p>
-                    <pre style='background: #f5f5f5; padding: 10px;'>install.packages('consort')</pre>
-                    </div>"
+                    private$.htmlWarning(
+                        "Required Package Missing",
+                        "The consort package is required for creating CONSORT diagrams. Install using: install.packages('consort')",
+                        c(
+                            "The <strong>consort</strong> package is required for creating CONSORT diagrams",
+                            "Install using: <code style='background: #f5f5f5; padding: 2px 6px;'>install.packages('consort')</code>"
+                        )
+                    )
                 )
                 return()
             }
@@ -101,23 +147,35 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     final_n <- private$.flowData[["analysis"]]$n_remaining
                     total_excluded <- sum(sapply(private$.flowData, function(x) x$n_excluded))
                     if (!isTRUE(all.equal(total_n, final_n + total_excluded))) {
-                        notice <- jmvcore::Notice$new(options=self$options, name="imbalance",
-                            type=jmvcore::NoticeType$STRONG_WARNING)
-                        notice$setContent("Flow counts inconsistent: final analyzed + excluded does not equal total participants. Please verify exclusion columns and participant IDs.")
-                        self$results$insert(1, notice)
+                        self$results$flowImbalanceNotice$setContent(
+                            private$.htmlWarning(
+                                "Flow Count Inconsistency Detected",
+                                "Final analyzed + excluded ≠ total participants. Verify exclusion columns to prevent double-counting.",
+                                c(
+                                    "Participant IDs are unique",
+                                    "Exclusion columns are stage-specific (no double-counting)",
+                                    "NA values correctly indicate continuation to next stage"
+                                )
+                            )
+                        )
+                        self$results$flowImbalanceNotice$setVisible(TRUE)
                     }
                 }
 
             }, error = function(e) {
                 # Show error in todo section
                 self$results$todo$setVisible(TRUE)
-                self$results$todo$setContent(paste0(
-                    "<div style='background: #f8d7da; padding: 20px; margin: 10px; border: 1px solid #f5c6cb;'>
-                    <h3>❌ Error Processing Data</h3>
-                    <p>", e$message, "</p>
-                    <p>Please check your variable selections and data format.</p>
-                    </div>"
-                ))
+                self$results$todo$setContent(
+                    private$.htmlError(
+                        "Error Processing Data",
+                        paste0(e$message, " Please check your variable selections and data format."),
+                        c(
+                            paste0("<strong>Error message:</strong> ", e$message),
+                            "Check variable selections in left panel",
+                            "Verify data format matches requirements"
+                        )
+                    )
+                )
             })
         },
 
@@ -132,13 +190,18 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pid <- private$.escapeVar(self$options$participant_id)
                 dup_ids <- self$data[[pid]][duplicated(self$data[[pid]])]
                 if (length(dup_ids) > 0) {
-                    notice <- jmvcore::Notice$new(options=self$options, name="dup_ids",
-                        type=jmvcore::NoticeType$ERROR)
-                    notice$setContent(paste0(
-                        "Duplicate participant IDs detected (e.g., ", paste(head(dup_ids, 3), collapse = ", "),
-                        "). Please ensure one row per participant."
-                    ))
-                    self$results$insert(1, notice)
+                    self$results$duplicateIdNotice$setContent(
+                        private$.htmlError(
+                            "Duplicate Participant IDs Detected",
+                            paste0("Found ", length(dup_ids), " duplicate participant ID(s). Each row must represent one unique participant."),
+                            c(
+                                paste0("<strong>Examples:</strong> ", paste(head(dup_ids, 3), collapse = ", ")),
+                                "Each row must represent a unique participant",
+                                "Check your data and remove or merge duplicate entries"
+                            )
+                        )
+                    )
+                    self$results$duplicateIdNotice$setVisible(TRUE)
                     return(FALSE)
                 }
             }
@@ -147,11 +210,11 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$participant_id) || length(self$options$participant_id) == 0) {
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
-                    "<div style='background: #f9f9f9; padding: 20px; margin: 10px; border: 1px solid #ddd;'>
-                    <h3>Getting Started</h3>
-                    <p>Please select the <strong>Participant ID</strong> variable to begin.</p>
-                    <p>Then add exclusion variables for each stage of your study.</p>
-                    </div>"
+                    private$.htmlInfo(
+                        "Getting Started",
+                        "<p>Please select the <strong>Participant ID</strong> variable to begin.</p>
+                        <p>Then add exclusion variables for each stage of your study.</p>"
+                    )
                 )
                 return(FALSE)
             }
@@ -167,11 +230,15 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!has_exclusions) {
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
-                    "<div style='background: #fff3cd; padding: 20px; margin: 10px; border: 1px solid #ffc107;'>
-                    <h3>⚠️ No Exclusion Variables Selected</h3>
-                    <p>Please select at least one exclusion variable to create the flow diagram.</p>
-                    <p>Exclusion variables should have non-NA values for excluded participants.</p>
-                    </div>"
+                    private$.htmlWarning(
+                        "No Exclusion Variables Selected",
+                        "At least one exclusion variable is required to create the flow diagram.",
+                        c(
+                            "Select exclusion variables for at least one study stage",
+                            "Exclusion variables should have non-NA values for excluded participants",
+                            "NA values indicate participant continued to next stage"
+                        )
+                    )
                 )
                 return(FALSE)
             }

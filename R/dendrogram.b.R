@@ -5,8 +5,61 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "dendrogramClass",
     inherit = dendrogramBase,
     private = list(
+
+        # Helper method to escape variable names for safe handling
+        .escapeVar = function(varName) {
+            gsub("[^A-Za-z0-9]", "_", varName)
+        },
+
         .run = function() {
-            
+
+            # Check required packages for selected plot type
+            plotType <- self$options$plotType
+
+            if (plotType == "heatmap") {
+                missing_heatmap <- character(0)
+                if (!requireNamespace("tidyHeatmap", quietly = TRUE)) missing_heatmap <- c(missing_heatmap, "tidyHeatmap")
+                if (!requireNamespace("ComplexHeatmap", quietly = TRUE)) missing_heatmap <- c(missing_heatmap, "ComplexHeatmap")
+                if (!requireNamespace("tibble", quietly = TRUE)) missing_heatmap <- c(missing_heatmap, "tibble")
+
+                if (length(missing_heatmap) > 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'missingHeatmapPackages',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+
+                    install_cmd <- if ("ComplexHeatmap" %in% missing_heatmap) {
+                        'install.packages("tidyHeatmap"); BiocManager::install("ComplexHeatmap")'
+                    } else {
+                        paste0('install.packages(c("', paste(missing_heatmap, collapse = '", "'), '"))')
+                    }
+
+                    notice$setContent(jmvcore::format(
+                        'Heatmap plot requires missing packages: {pkgs}. • Install with {install_cmd}. • Alternatively, select Linear, Circular, or Base plot type to continue.',
+                        pkgs = paste(missing_heatmap, collapse = ", "),
+                        install_cmd = install_cmd
+                    ))
+                    self$results$insert(1, notice)
+                    return()
+                }
+            }
+
+            if (plotType %in% c("linear", "circular")) {
+                if (!requireNamespace("ggraph", quietly = TRUE) || !requireNamespace("igraph", quietly = TRUE)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'missingGgraphPackages',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(jmvcore::format(
+                        'ggraph and igraph packages recommended for {plot_type} plots. • Install with install.packages(c("ggraph", "igraph")). • Falling back to base plot.',
+                        plot_type = if (plotType == "linear") "linear" else "circular"
+                    ))
+                    self$results$insert(1, notice)
+                }
+            }
+
             # Get options
             vars <- self$options$vars
             clusterMethod <- self$options$clusterMethod
@@ -56,9 +109,18 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             removedRows <- sum(!completeCases)
 
             if (sum(completeCases) < 2) {
-                self$results$clusterInfo$setContent(
-                    "<p>Insufficient complete observations for clustering. At least 2 complete rows are required.</p>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficientCases',
+                    type = jmvcore::NoticeType$ERROR
                 )
+                notice$setContent(jmvcore::format(
+                    'Insufficient complete observations for clustering (n={n}, minimum 2 required). • Current dataset has {total} observations with {removed} removed due to missing values. • Remove missing values or collect additional complete cases.',
+                    n = sum(completeCases),
+                    total = nrow(data),
+                    removed = removedRows
+                ))
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -69,16 +131,30 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             groupLevels <- NULL
             if (colorGroups) {
                 if (is.null(group) || group == "") {
-                    self$results$clusterInfo$setContent(
-                        "<p>Please select a grouping variable when 'Color by groups' is enabled.</p>"
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'missingGroupVariable',
+                        type = jmvcore::NoticeType$ERROR
                     )
+                    notice$setContent(jmvcore::format(
+                        'Grouping variable required when "Color by groups" is enabled. • Please select a grouping variable in the "Grouping & Colors" panel. • Alternatively, disable "Color by groups" to continue without group coloring.'
+                    ))
+                    self$results$insert(1, notice)
                     return()
                 }
 
                 if (!group %in% names(data)) {
-                    self$results$clusterInfo$setContent(
-                        paste0("<p>Error: Grouping variable '", group, "' was not found in the dataset.</p>")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'groupVariableNotFound',
+                        type = jmvcore::NoticeType$ERROR
                     )
+                    notice$setContent(jmvcore::format(
+                        'Grouping variable "{group}" not found in dataset. • Available variables: {vars}. • Please select a valid grouping variable or disable "Color by groups".',
+                        group = group,
+                        vars = paste(names(data)[1:min(10, length(names(data)))], collapse = ", ")
+                    ))
+                    self$results$insert(1, notice)
                     return()
                 }
 
@@ -106,7 +182,13 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             prep <- private$.prepareClusterData(clusterData, standardize, distanceMethod)
             if (!prep$ok) {
-                self$results$clusterInfo$setContent(prep$message)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'dataPreparationError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(prep$message)
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -116,7 +198,13 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CRITICAL: Validate distance/linkage compatibility
             validationResult <- private$.validateDistanceLinkage(distanceMethod, clusterMethod)
             if (!validationResult$valid) {
-                self$results$clusterInfo$setContent(validationResult$message)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'invalidDistanceLinkage',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(validationResult$message)
+                self$results$insert(1, notice)
                 return()
             }
             if (!is.null(validationResult$warning)) {
@@ -163,6 +251,26 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         percent = clusterCounts$percent[i]
                     )
                 )
+            }
+
+            # Clinical Profile Notice: Sample Size Adequacy
+            n_clustered <- nrow(clusterData)
+            if (n_clustered < 30) {
+                notice_type <- if (n_clustered < 10) jmvcore::NoticeType$STRONG_WARNING else jmvcore::NoticeType$WARNING
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSampleClustering',
+                    type = notice_type
+                )
+
+                severity <- if (n_clustered < 10) "very small" else "small"
+                notice$setContent(jmvcore::format(
+                    '{severity_cap} sample size (n={n}) for hierarchical clustering. • Clusters may be unstable with fewer than 30 observations. • Dendrogram structure and cluster assignments should be interpreted cautiously. • Consider collecting additional data or using this as exploratory analysis only.',
+                    severity_cap = tools::toTitleCase(severity),
+                    n = n_clustered
+                ))
+                self$results$insert(1, notice)
             }
 
             highlightClusters <- highlightClusters && effectiveClusters > 1
@@ -235,6 +343,23 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</ul></div>"
             )
             self$results$clusterInfo$setContent(clusterInfoText)
+
+            # Success Completion Notice
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            notice$setContent(jmvcore::format(
+                'Hierarchical clustering completed successfully. • {n_obs} observations clustered using {n_vars} variables. • {n_clust} cluster{s} identified. • Distance: {dist}, Linkage: {link}. • Review dendrogram and cluster membership below.',
+                n_obs = nrow(clusterData),
+                n_vars = length(vars),
+                n_clust = effectiveClusters,
+                s = if (effectiveClusters == 1) "" else "s",
+                dist = distanceMethod,
+                link = clusterMethod
+            ))
+            self$results$insert(999, notice)
 
             # Store clustering result for plotting
             image <- self$results$plot
@@ -358,9 +483,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requireNamespace('tibble', quietly = TRUE)
 
             if (!tidyHeatmapAvailable) {
-                warning("tidyHeatmap or ComplexHeatmap packages not available. Please install with:\n",
-                       "install.packages('tidyHeatmap')\n",
-                       "BiocManager::install('ComplexHeatmap')")
+                private$.checkpoint()  # Track progress for jamovi
                 return(FALSE)
             }
 
@@ -423,7 +546,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Validate compatibility for row clustering
                 rowValid <- private$.validateDistanceLinkage(distanceMethod, clusterMethod)
                 if (!rowValid$valid) {
-                    warning("Row dendrogram skipped: ", gsub("<[^>]+>", "", rowValid$message))
+                    private$.checkpoint()  # Track progress for jamovi
                 } else {
                     rowDendro <- tryCatch({
                         stats::as.dendrogram(stats::hclust(
@@ -431,7 +554,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             method = clusterMethod
                         ))
                     }, error = function(e) {
-                        warning("Row dendrogram skipped: ", conditionMessage(e))
+                        private$.checkpoint()  # Track progress for jamovi
                         NULL
                     })
                 }
@@ -442,9 +565,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add group annotation if requested
             if (colorGroups && !is.null(groupData) && !is.null(groupLevels)) {
-                # CRITICAL FIX: Keep NA for unmatched samples, render with neutral color
-                groupColors <- private$.getColors(length(groupLevels), colorScheme)
-                names(groupColors) <- groupLevels
+                # Use centralized group coloring logic
+                colorInfo <- private$.prepareGroupColors(groupData, groupLevels, colorScheme)
+                groupColors <- colorInfo$palette
 
                 # Add annotation for samples (columns)
                 # Convert groupData to character, preserving NA
@@ -459,8 +582,11 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 tidyData <- tidyData %>%
                     dplyr::left_join(annotationData, by = "sample")
 
-                # Add neutral color for NA
-                groupColors["NA"] <- "grey70"
+                # groupColors already includes "Unmatched" = "grey70" if needed
+                # Map NA to "Unmatched" for display
+                if (colorInfo$hasUnmatched) {
+                    groupColors["NA"] <- "grey70"
+                }
 
                 hm <- hm %>%
                     tidyHeatmap::annotation_tile(group, palette = groupColors)
@@ -523,7 +649,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 if (colorGroups && !is.null(groupData) && !dendextendAvailable)
-                    warning("Install the 'dendextend' package to colour leaves by group in base plots.")
+                    private$.checkpoint()  # Track progress for jamovi
             }
 
             return(TRUE)
@@ -539,7 +665,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 requireNamespace('ggplot2', quietly = TRUE)
 
             if (!packagesAvailable) {
-                warning("ggraph/igraph packages not available, falling back to base plot")
+                private$.checkpoint()  # Track progress for jamovi
                 return(private$.plotBaseDendrogram(
                     hclustResult = hclustResult,
                     dendro = dendro,
@@ -581,24 +707,15 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             colourScale <- NULL
 
             if (colorGroups && !is.null(groupData)) {
-                levelsToUse <- groupLevels
-                if (is.null(levelsToUse) || length(levelsToUse) == 0)
-                    levelsToUse <- sort(unique(as.character(groupData)))
-
-                palette <- private$.getColors(max(1, length(levelsToUse)), colorScheme)
-                palette <- palette[seq_len(max(1, length(levelsToUse)))]
-                names(palette) <- levelsToUse
+                # Use centralized group coloring logic
+                colorInfo <- private$.prepareGroupColors(groupData, groupLevels, colorScheme)
+                palette <- colorInfo$palette
+                levelsToUse <- colorInfo$levels
 
                 # CRITICAL FIX: Handle NA group assignments explicitly
-                # Check if there are any unmatched samples
-                hasUnmatched <- any(is.na(vertices_df$group) & vertices_df$leaf)
-
-                # If there are unmatched, add "Unmatched" as a level
-                if (hasUnmatched) {
-                    # Replace NA with "Unmatched" for plotting
+                # Replace NA with "Unmatched" for plotting if needed
+                if (colorInfo$hasUnmatched) {
                     vertices_df$group[is.na(vertices_df$group)] <- "Unmatched"
-                    levelsToUse <- c(levelsToUse, "Unmatched")
-                    palette <- c(palette, "Unmatched" = "grey70")
                 }
 
                 vertices_df$group <- factor(vertices_df$group, levels = levelsToUse)
@@ -697,10 +814,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(nonBinary)) {
                     badVars <- names(clusterData)[nonBinary]
                     result$ok <- FALSE
-                    result$message <- paste0(
-                        "<p>Binary distance requires variables coded as 0/1 only. Non-binary values detected in: ",
-                        paste(badVars, collapse = ", "),
-                        ".</p>"
+                    result$message <- jmvcore::format(
+                        'Binary distance requires variables coded as 0/1 only. • Non-binary values detected in: {vars}. • Please recode variables to binary (0/1) or select a different distance method (e.g., Euclidean, Manhattan).',
+                        vars = paste(badVars, collapse = ", ")
                     )
                     return(result)
                 }
@@ -791,13 +907,10 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Color by groups takes precedence over cluster highlighting
             if (colorGroups && !is.null(groupData)) {
-                groupLevels <- levels(groupData)
-                if (is.null(groupLevels) || length(groupLevels) == 0)
-                    groupLevels <- sort(unique(as.character(groupData)))
-
-                palette <- private$.getColors(max(1, length(groupLevels)), colorScheme)
-                palette <- palette[seq_len(max(1, length(groupLevels)))]
-                names(palette) <- groupLevels
+                # Use centralized group coloring logic
+                colorInfo <- private$.prepareGroupColors(groupData, levels(groupData), colorScheme)
+                palette <- colorInfo$palette
+                groupLevels <- colorInfo$levels
 
                 # Get leaf labels from dendrogram
                 leafLabels <- labels(styled)
@@ -808,13 +921,8 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # CRITICAL FIX: Keep NA for unmatched samples, render with neutral color
                 # DO NOT silently reassign to first group level
-                numUnmatched <- sum(is.na(groupAssignments))
-                if (numUnmatched > 0) {
-                    warning(sprintf(
-                        "Group coloring: %d sample%s could not be matched to group data and will be shown in grey",
-                        numUnmatched,
-                        if (numUnmatched == 1) "" else "s"
-                    ))
+                if (colorInfo$hasUnmatched) {
+                    private$.checkpoint()  # Track progress for jamovi
                 }
 
                 # Build color vector: use palette for matched groups, grey70 for NA
@@ -829,13 +937,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dendextend::labels_colors(styled) <- labelColours
                 styled <- dendextend::set(styled, "labels_cex", 0.8)
 
-                # Add "Unmatched" to legend if there are any
-                legendLabels <- names(palette)
+                # Legend uses palette and levels from colorInfo
+                legendLabels <- groupLevels
                 legendColours <- palette
-                if (numUnmatched > 0) {
-                    legendLabels <- c(legendLabels, "Unmatched")
-                    legendColours <- c(legendColours, "grey70")
-                }
 
                 legendInfo <- list(
                     title = "Group",
@@ -891,11 +995,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Warn about unmatched samples
                 numUnmatched <- sum(is.na(vertices_df$group) & vertices_df$leaf)
                 if (numUnmatched > 0) {
-                    warning(sprintf(
-                        "Group coloring: %d leaf sample%s could not be matched to group data and will be shown in grey",
-                        numUnmatched,
-                        if (numUnmatched == 1) "" else "s"
-                    ))
+                    private$.checkpoint()  # Track progress for jamovi
                 }
             } else {
                 vertices_df$group <- NA_character_
@@ -947,6 +1047,31 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(grDevices::rainbow(n))
         },
 
+        .prepareGroupColors = function(groupData, groupLevels, colorScheme) {
+            # Standardize group levels
+            if (is.null(groupLevels) || length(groupLevels) == 0)
+                groupLevels <- sort(unique(as.character(groupData)))
+
+            # Get color palette
+            palette <- private$.getColors(max(1, length(groupLevels)), colorScheme)
+            palette <- palette[seq_len(max(1, length(groupLevels)))]
+            names(palette) <- groupLevels
+
+            # Check for unmatched samples (NA in groupData)
+            hasUnmatched <- any(is.na(groupData))
+
+            if (hasUnmatched) {
+                palette <- c(palette, "Unmatched" = "grey70")
+                groupLevels <- c(groupLevels, "Unmatched")
+            }
+
+            return(list(
+                palette = palette,
+                levels = groupLevels,
+                hasUnmatched = hasUnmatched
+            ))
+        },
+
         .getHeatmapPalette = function(paletteName) {
             if (paletteName == "viridis") {
                 if (requireNamespace('viridisLite', quietly = TRUE))
@@ -982,24 +1107,18 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (clusterMethod %in% euclideanOnly && distanceMethod != "euclidean") {
                 result$valid <- FALSE
-                result$message <- paste0(
-                    "<p style='color: #dc3545;'><strong>Invalid Distance/Linkage Combination</strong></p>",
-                    "<p>The <strong>", clusterMethod, "</strong> clustering method requires <strong>Euclidean</strong> distances ",
-                    "to maintain mathematical validity.</p>",
-                    "<p>You selected: <strong>", distanceMethod, "</strong> distance</p>",
-                    "<p><strong>Why this matters:</strong></p>",
-                    "<ul>",
-                    "<li><strong>Ward methods (ward.D, ward.D2)</strong> minimize within-cluster sum of squares, ",
-                    "which is only defined for Euclidean distances. Using other distances produces tree heights ",
-                    "that don't reflect Ward's criterion.</li>",
-                    "<li><strong>Centroid/median methods</strong> compute cluster centers as geometric centroids, ",
-                    "which requires Euclidean geometry. Non-Euclidean distances cause inversions (negative heights).</li>",
-                    "</ul>",
-                    "<p><strong>Solutions:</strong></p>",
-                    "<ul>",
-                    "<li>Change distance method to <strong>Euclidean</strong>, or</li>",
-                    "<li>Change clustering method to <strong>Complete</strong>, <strong>Average</strong>, or <strong>Single</strong> linkage</li>",
-                    "</ul>"
+
+                reason <- if (clusterMethod %in% c("ward.D", "ward.D2")) {
+                    "Ward methods minimize within-cluster sum of squares, which is only defined for Euclidean distances. Using other distances produces tree heights that don't reflect Ward's criterion."
+                } else {
+                    "Centroid/median methods compute cluster centers as geometric centroids, which requires Euclidean geometry. Non-Euclidean distances cause inversions (negative heights)."
+                }
+
+                result$message <- jmvcore::format(
+                    'Invalid distance/linkage combination: {method} clustering requires Euclidean distance. • Current distance: {dist}. • Why this matters: {reason} • Solutions: Change distance to Euclidean, OR change clustering to Complete/Average/Single linkage.',
+                    method = clusterMethod,
+                    dist = distanceMethod,
+                    reason = reason
                 )
             }
 

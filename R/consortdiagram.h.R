@@ -222,6 +222,8 @@ consortdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        flowImbalanceNotice = function() private$.items[["flowImbalanceNotice"]],
+        duplicateIdNotice = function() private$.items[["duplicateIdNotice"]],
         flowSummary = function() private$.items[["flowSummary"]],
         armSummary = function() private$.items[["armSummary"]],
         exclusionBreakdown = function() private$.items[["exclusionBreakdown"]],
@@ -248,6 +250,16 @@ consortdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="todo",
                 title="Welcome",
                 visible="(!participant_id)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="flowImbalanceNotice",
+                title="",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="duplicateIdNotice",
+                title="",
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="flowSummary",
@@ -488,6 +500,8 @@ consortdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$flowImbalanceNotice} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$duplicateIdNotice} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$flowSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$armSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$exclusionBreakdown} \tab \tab \tab \tab \tab a table \cr

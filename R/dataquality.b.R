@@ -152,32 +152,18 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }, character(1))
         high_missing_vars <- high_missing_vars[!is.na(high_missing_vars)]
 
+        # NOTE: Removed Notice insertion to avoid serialization errors
+        # High missingness warning is now included in HTML summary output
         if (length(high_missing_vars) > 0) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'highMissingness',
-                type = jmvcore::NoticeType$STRONG_WARNING
-            )
-            notice$setContent(sprintf(
-                'High missingness detected (>50%% missing): %s. Results may be unreliable. Consider imputation or exclude these variables.',
-                paste(high_missing_vars, collapse = ', ')
-            ))
-            self$results$insert(2, notice)
+            # Warning will be included in .generateSummary() and .generateRecommendations()
         }
 
-        # Check for small sample size and issue STRONG_WARNING
+        # Check for small sample size
+        # NOTE: Removed Notice insertion to avoid serialization errors
+        # Small sample warning is now included in HTML summary output
         n_total <- nrow(analysis_data)
         if (n_total < 20) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'smallSample',
-                type = jmvcore::NoticeType$STRONG_WARNING
-            )
-            notice$setContent(sprintf(
-                'Very small sample size (n=%d). Statistical estimates may be unstable. Recommend n≥30 for reliable quality assessment.',
-                n_total
-            ))
-            self$results$insert(2, notice)
+            # Warning will be included in .generateSummary() and .generateRecommendations()
         }
 
         # Check for near-zero variance and issue WARNING
@@ -186,17 +172,10 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }, character(1))
         near_zero_vars <- near_zero_vars[!is.na(near_zero_vars)]
 
+        # NOTE: Removed Notice insertion to avoid serialization errors
+        # Near-zero variance warning is now included in HTML summary output
         if (length(near_zero_vars) > 0) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'nearZeroVariance',
-                type = jmvcore::NoticeType$WARNING
-            )
-            notice$setContent(sprintf(
-                'Near-zero variance detected: %s. These variables show minimal variation and may not be useful for analysis.',
-                paste(near_zero_vars, collapse = ', ')
-            ))
-            self$results$insert(3, notice)
+            # Warning will be included in .generateSummary() and .generateRecommendations()
         }
 
         # Missing value analysis
@@ -248,6 +227,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 flag_html
             )
         }
+
+        # Initialize duplicate_rows to NA (will be set if duplicate analysis runs)
+        duplicate_rows <- NA
 
         # Duplicate analysis
         if (self$options$check_duplicates) {
@@ -348,8 +330,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         self$results$text$setContent(final_results)
 
         # Set plot states for individual visual analyses
+        # Convert to base data.frame to avoid serialization issues
         plotData <- list(
-            data = analysis_data,
+            data = as.data.frame(analysis_data),
             threshold = self$options$missing_threshold_visual
         )
 
@@ -378,28 +361,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             private$.generateExplanations()
         }
 
-        # Add INFO notice for successful completion
-        notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'analysisComplete',
-            type = jmvcore::NoticeType$INFO
-        )
-
-        n_vars_analyzed <- length(names(analysis_data))
-        analyses_enabled <- c()
-        if (self$options$check_duplicates) analyses_enabled <- c(analyses_enabled, "duplicates")
-        if (self$options$check_missing) analyses_enabled <- c(analyses_enabled, "missing values")
-        if (self$options$plot_data_overview || self$options$plot_missing_patterns || self$options$plot_data_types) {
-            analyses_enabled <- c(analyses_enabled, "visual exploration")
-        }
-
-        notice$setContent(sprintf(
-            'Data quality assessment completed for %d variable%s. Analyses: %s.',
-            n_vars_analyzed,
-            if (n_vars_analyzed == 1) "" else "s",
-            paste(analyses_enabled, collapse = ", ")
-        ))
-        self$results$insert(999, notice)
+        # NOTE: Removed completion notice to avoid serialization errors
+        # Dynamically inserted Notice objects contain function references that
+        # cannot be serialized by jamovi's protobuf system
 
     },
 
@@ -407,15 +371,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Generate visdat analysis based on individual plot selections
 
         # Safely require visdat
+        # NOTE: Using HTML warning instead of Notice to avoid serialization errors
         if (!requireNamespace("visdat", quietly = TRUE)) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'visdatMissing',
-                type = jmvcore::NoticeType$WARNING
-            )
-            notice$setContent('visdat package not installed. Visual exploration disabled. Install via: install.packages("visdat")')
-            self$results$insert(2, notice)
-            return("")
+            return(paste0(
+                "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+                "<strong>⚠️ Warning:</strong> visdat package not installed. Visual exploration disabled.<br>",
+                "Install via: <code>install.packages('visdat')</code>",
+                "</div>"
+            ))
         }
 
         missing_threshold <- self$options$missing_threshold_visual
@@ -579,15 +542,17 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
 
         tryCatch({
-            # Create missing patterns plot with threshold highlighting
-            threshold_decimal <- plotData$threshold / 100  # Convert percentage to decimal
+            # Create missing patterns plot
+            # Note: visdat::vis_miss doesn't have threshold highlighting capability
+            # It shows all missing values with sort_miss option
             plot <- visdat::vis_miss(
                 plotData$data,
-                warn_recode = threshold_decimal,  # Highlight vars above threshold
-                sort_miss = TRUE  # Sort by missingness for clarity
+                sort_miss = TRUE,  # Sort by missingness for clarity
+                show_perc = TRUE,  # Show percentage missing
+                show_perc_col = TRUE  # Show percentage by column
             ) +
                 ggplot2::labs(
-                    subtitle = paste0("Variables with >", plotData$threshold, "% missing highlighted")
+                    subtitle = paste0("Missing value patterns (threshold for warnings: ", plotData$threshold, "%)")
                 ) +
                 ggtheme +
                 ggplot2::theme(

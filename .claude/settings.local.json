@@ -152,7 +152,13 @@
       "Bash(if grep -q \"self$results$$out\" R/checkdata.b.R)",
       "Bash(mkdir:*)",
       "SlashCommand(/review-function dataquality)",
-      "SlashCommand(/review-function:*)"
+      "SlashCommand(/review-function:*)",
+      "SlashCommand(/fix-function datecorrection)",
+      "SlashCommand(/fix-function:*)",
+      "Bash(do echo -n \"$type: \")",
+      "Bash(do echo -n \"$arg: \")",
+      "Bash(if grep -q \"self$options$$arg\" R/decision.b.R)",
+      "Bash(if grep -q \"self$results$$out\" R/decision.b.R)"
     ],
     "deny": [],
     "ask": [],

@@ -49,6 +49,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Internal data storage
         .processed_data = NULL,
         .plot_data = NULL,
+        .warnings = list(),  # Collect warnings for HTML display (avoids Notice serialization errors)
 
         # Variable name escaping utility
         .escapeVariableName = function(x) {
@@ -125,7 +126,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     'Duplicate variable names detected: %s. This may cause incorrect variable mapping.',
                     paste(unique(dup_names), collapse = ", ")
                 ))
-                self$results$insert(1, notice)
+                # REMOVED:                 self$results$insert(1, notice)  # Causes serialization error
             }
 
             # Check if cleaning creates duplicates
@@ -136,22 +137,17 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     type = jmvcore::NoticeType$WARNING
                 )
                 notice$setContent('Variable name cleaning created duplicate names. Some variables may be incorrectly mapped.')
-                self$results$insert(1, notice)
+                # REMOVED:                 self$results$insert(1, notice)  # Causes serialization error
             }
 
-            # Check if cleaning changed names - INFO at bottom
+            # Check if cleaning changed names - add to warnings
+            # NOTE: Removed Notice insertion to avoid serialization errors
             if (!all(cleaned_names == original_names)) {
                 changed_count <- sum(cleaned_names != original_names)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'variableNamesRenamed',
-                    type = jmvcore::NoticeType$INFO
+                private$.warnings[[length(private$.warnings) + 1]] <- list(
+                    type = "INFO",
+                    message = sprintf('%d variable name(s) were cleaned to ensure compatibility. Original labels are preserved.', changed_count)
                 )
-                notice$setContent(sprintf(
-                    '%d variable name(s) were cleaned to ensure compatibility. Original labels are preserved.',
-                    changed_count
-                ))
-                self$results$insert(999, notice)
             }
         },
 
@@ -180,7 +176,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "Plot type '%s' typically requires a continuous X variable, but '%s' appears to be categorical. Results may be misleading.",
                         plot_type, x_var
                     ))
-                    self$results$insert(1, notice)
+                # REMOVED:                     self$results$insert(1, notice)  # Causes serialization error
                 }
             }
 
@@ -196,7 +192,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "Variable '%s' has many unique values (%d). Consider using a histogram instead of a bar plot for continuous data.",
                         x_var, length(unique(mydata[[x_var_clean]]))
                     ))
-                    self$results$insert(1, notice)
+                # REMOVED:                     self$results$insert(1, notice)  # Causes serialization error
                 }
             }
 
@@ -213,7 +209,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "Y variable '%s' should be continuous but appears to be categorical.",
                         y_var
                     ))
-                    self$results$insert(1, notice)
+                # REMOVED:                     self$results$insert(1, notice)  # Causes serialization error
                 }
             }
 
@@ -233,7 +229,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "Grouping variable '%s' has %d levels. Plots may be difficult to interpret with many groups.",
                         group_var, n_groups
                     ))
-                    self$results$insert(1, notice)
+                # REMOVED:                     self$results$insert(1, notice)  # Causes serialization error
                 }
 
                 # Check for group imbalance
@@ -251,7 +247,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         'Severe group imbalance detected. Smallest group: n=%d, largest group: n=%d. Comparisons may be unreliable.',
                         min_count, max_count
                     ))
-                    self$results$insert(1, notice)
+                # REMOVED:                     self$results$insert(1, notice)  # Causes serialization error
                 }
             }
         },
@@ -277,7 +273,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     final_n, initial_n, data_loss, data_loss_pct
                 ))
                 position <- if (data_loss_pct > 20) 1 else 999
-                self$results$insert(position, notice)
+                # REMOVED:                 self$results$insert(position, notice)  # Causes serialization error
 
                 # Additional warning for substantial loss
                 if (data_loss_pct > 20) {
@@ -287,7 +283,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         type = jmvcore::NoticeType$STRONG_WARNING
                     )
                     notice2$setContent('Substantial data loss (>20%) may indicate data quality issues or inappropriate variable selection.')
-                    self$results$insert(2, notice2)
+                # REMOVED:                     self$results$insert(2, notice2)  # Causes serialization error
                 }
             } else {
                 # No data loss - INFO
@@ -297,7 +293,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent(sprintf('Sample size: %d complete observations (no missing data).', final_n))
-                self$results$insert(999, notice)
+                # REMOVED:                 self$results$insert(999, notice)  # Causes serialization error
             }
 
             # Small sample warning
@@ -311,7 +307,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     'Small sample size (n=%d). Results may be unstable and should be interpreted with caution.',
                     final_n
                 ))
-                self$results$insert(1, notice)
+                # REMOVED:                 self$results$insert(1, notice)  # Causes serialization error
             }
         },
 
@@ -331,7 +327,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         'Sample size (n=%d) is below recommended minimum (n=30) for stable correlation estimates. Results should be interpreted with extreme caution.',
                         n
                     ))
-                    self$results$insert(1, notice)
+                # REMOVED:                     self$results$insert(1, notice)  # Causes serialization error
                 }
 
                 # Check for outliers using ±3 SD threshold
@@ -348,7 +344,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         'Potential outliers detected (%d observations >3 SD from mean). Correlation may be influenced by extreme values.',
                         x_outliers + y_outliers
                     ))
-                    self$results$insert(1, notice)
+                # REMOVED:                     self$results$insert(1, notice)  # Causes serialization error
                 }
 
                 # Check for non-linearity using simple curvature test
@@ -366,7 +362,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             type = jmvcore::NoticeType$WARNING
                         )
                         notice$setContent('Non-linear relationship detected. Linear correlation (r) and R² may not adequately describe this relationship.')
-                        self$results$insert(1, notice)
+                # REMOVED:                         self$results$insert(1, notice)  # Causes serialization error
                     }
                 }
 
@@ -383,7 +379,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             type = jmvcore::NoticeType$WARNING
                         )
                         notice$setContent("Non-normal distribution detected. Pearson correlation assumes bivariate normality. Switch to Spearman's correlation (in Statistical Overlays options) for non-normal data.")
-                        self$results$insert(1, notice)
+                # REMOVED:                         self$results$insert(1, notice)  # Causes serialization error
                     }
                 } else if (self$options$correlation_method == "spearman") {
                     # Inform user that Spearman is appropriate for non-normal data
@@ -393,7 +389,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent("Using Spearman's rank correlation (non-parametric). This method is robust to outliers and does not assume normality.")
-                    self$results$insert(999, notice)
+                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
 
                 # CRITICAL: Exploratory statistics disclaimer
@@ -403,11 +399,14 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent('Correlation and R² displayed on plot are EXPLORATORY estimates only. These do NOT constitute formal hypothesis tests and should not be used for clinical decision-making without proper statistical validation.')
-                self$results$insert(1, notice)
+                # REMOVED:                 self$results$insert(1, notice)  # Causes serialization error
             }
         },
 
         .run = function() {
+            # Initialize warnings list (avoid Notice serialization errors)
+            private$.warnings <- list()
+
             # Clear instructions if analysis is ready
             if (!is.null(self$options$x_var) && self$options$plot_type != "") {
                 self$results$instructions$setContent("")
@@ -450,9 +449,38 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Set plot state for rendering
+            # Extract only plain option values to avoid serialization errors
+            # DO NOT store self$options directly - it contains function references
+            plot_options <- list(
+                plot_type = self$options$plot_type,
+                main_title = self$options$main_title,
+                x_label = self$options$x_label,
+                y_label = self$options$y_label,
+                color_scheme = self$options$color_scheme,
+                point_type = self$options$point_type,
+                point_size = self$options$point_size,
+                bins = self$options$bins,
+                add_legend = self$options$add_legend,
+                custom_limits = self$options$custom_limits,
+                x_min = self$options$x_min,
+                x_max = self$options$x_max,
+                y_min = self$options$y_min,
+                y_max = self$options$y_max,
+                line_type = self$options$line_type,
+                line_width = self$options$line_width,
+                bar_width = self$options$bar_width,
+                show_grid = self$options$show_grid,
+                grid_style = self$options$grid_style,
+                show_statistics = self$options$show_statistics,
+                correlation_method = self$options$correlation_method,
+                show_regression_line = self$options$show_regression_line,
+                regression_line_color = self$options$regression_line_color,
+                show_confidence_interval = self$options$show_confidence_interval
+            )
+
             self$results$base_plot$setState(list(
                 data = private$.plot_data,
-                options = self$options
+                options = plot_options
             ))
 
             # Generate plot description
