@@ -9,7 +9,7 @@ cotest(
   test1_spec = 0.9,
   test2_sens = 0.75,
   test2_spec = 0.95,
-  indep = TRUE,
+  indep = FALSE,
   cond_dep_pos = 0.05,
   cond_dep_neg = 0.05,
   prevalence = 0.1,
@@ -27,7 +27,8 @@ cotest(
 
 \item{test2_spec}{Specificity (true negative rate) of Test 2.}
 
-\item{indep}{Assume tests are conditionally independent (default is true).}
+\item{indep}{Assume tests are conditionally independent (default is false
+for safety). Use true only if tests measure completely different phenomena.}
 
 \item{cond_dep_pos}{Conditional dependence between tests for subjects with
 disease. Value between 0 (independence) and 1 (complete dependence).}

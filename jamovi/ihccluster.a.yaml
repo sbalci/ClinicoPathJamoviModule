@@ -1,7 +1,7 @@
 ---
 name: ihccluster
 title: IHC Clustering Analysis
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: IHC Analysis
 menuSubtitle: 'Cluster cases by IHC expression patterns'
 version: '2.0.0'
@@ -139,7 +139,7 @@ options:
     - name: autoSelectK
       title: 'Automatically Select Optimal k'
       type: Bool
-      default: true
+      default: false
       description: 'Use silhouette width to find optimal number of clusters'
 
     - name: kRange
@@ -227,19 +227,19 @@ options:
     - name: showDendrogram
       title: 'Show Dendrogram'
       type: Bool
-      default: true
+      default: false
       description: 'Show dendrogram for hierarchical clustering'
 
     - name: showPCAPlot
       title: 'PCA/MCA Plot'
       type: Bool
-      default: true
+      default: false
       description: 'Show dimension reduction plot with clusters'
 
     - name: showBoxplots
       title: 'Marker Distributions'
       type: Bool
-      default: true
+      default: false
       description: 'Show boxplots of continuous markers by cluster'
 
 
@@ -259,7 +259,7 @@ options:
     - name: associationTests
       title: 'Association Tests'
       type: Bool
-      default: true
+      default: false
       description: 'Test marker-cluster associations'
 
     - name: multipleTestingCorrection
@@ -336,13 +336,13 @@ options:
     - name: markerSignificanceTest
       title: 'Test Marker Associations'
       type: Bool
-      default: true
+      default: false
       description: 'Perform statistical tests for marker-marker associations'
 
     - name: markerCutHeight
       title: 'Auto-detect Marker Groups'
       type: Bool
-      default: true
+      default: false
       description: 'Automatically identify statistically distinct marker groups'
 
     - name: clusterQualityMetrics
@@ -586,5 +586,11 @@ options:
       type: Bool
       default: false
       description: 'Display technical notes about the analysis'
+
+    - name: showDiagnosticGlossary
+      title: 'Show Diagnostic Glossary'
+      type: Bool
+      default: true
+      description: 'Display explanations of sensitivity, specificity, PPV, NPV'
 
 

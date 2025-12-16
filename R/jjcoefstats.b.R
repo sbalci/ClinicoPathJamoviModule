@@ -482,7 +482,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if ("p.value" %in% names(tidy_coefs)) {
                     p_val <- tidy_coefs$p.value[i]
                     if (self$options$showPValues) {
-                        if (self$options$pSymbols) {
+                        if (self$options$pValueDisplay == "symbols") {
                             if (is.na(p_val)) {
                                 p_out <- NA
                             } else if (p_val < 0.001) {
@@ -494,8 +494,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             } else {
                                 p_out <- ""
                             }
-                        } else {
+                        } else if (self$options$pValueDisplay == "numeric") {
                             p_out <- p_val
+                        } else {
+                            # "none" option
+                            p_out <- NA
                         }
                     }
                 }

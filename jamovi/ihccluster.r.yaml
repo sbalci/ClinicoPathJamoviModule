@@ -787,6 +787,11 @@ items:
       type: Html
       visible: (showTechnicalNotes)
 
+    - name: diagnosticGlossary
+      title: Diagnostic Metrics Glossary
+      type: Html
+      visible: (calculateDiagnosticMetrics && showDiagnosticGlossary)
+
     - name: executiveSummary
       title: Executive Summary (Copy-Ready)
       type: Preformatted
@@ -917,7 +922,7 @@ items:
       width: 1000
       height: 700
       renderFun: .plotSpatialHeatmap
-      visible: (performSpatialAnalysis && showHeatmap)
+      visible: false  # TODO: Implement .plotSpatialHeatmap() method
       clearWith:
           - spatialCompartment
           - catVars

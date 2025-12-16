@@ -1146,9 +1146,13 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             allVars <- c(catVars, contVars)
 
             if (length(allVars) < 2) {
-                self$results$summary$setContent(
-                    "<p><b>Error:</b> Please specify at least 2 IHC markers (categorical or continuous).</p>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficient_markers',
+                    type = jmvcore::NoticeType$ERROR
                 )
+                notice$setContent('At least 2 IHC markers required. Select categorical or continuous markers from the variable list to perform clustering analysis.')
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -1204,6 +1208,55 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.showBinaryConversionNotice(df, catVars, contVars)
             }
 
+            # Missing data transparency notice
+            missing_cat <- prepared$info$missingCategorical
+            missing_cont <- prepared$info$missingContinuous
+            has_missing_data <- length(missing_cat) > 0 || length(missing_cont) > 0
+
+            if (has_missing_data) {
+                handleMissingMethod <- if (is.null(opts$handleMissing)) "pairwise" else opts$handleMissing
+
+                # Build notice message
+                missing_parts <- character()
+                if (length(missing_cat) > 0) {
+                    missing_parts <- c(missing_parts,
+                        sprintf("Categorical markers with missing values: %s",
+                                paste(missing_cat, collapse = ", ")))
+                }
+                if (length(missing_cont) > 0) {
+                    missing_parts <- c(missing_parts,
+                        sprintf("Continuous markers with missing values: %s",
+                                paste(missing_cont, collapse = ", ")))
+                }
+
+                # Count total missing cases
+                all_missing_markers <- c(missing_cat, missing_cont)
+                n_complete <- sum(complete.cases(df[, all_missing_markers, drop = FALSE]))
+                n_total <- nrow(df)
+                n_with_missing <- n_total - n_complete
+
+                handling_method_text <- if (handleMissingMethod == "pairwise") {
+                    "pairwise Gower distances (cases with missing data are included using available markers)"
+                } else {
+                    sprintf("complete cases only (%d of %d cases with complete data)", n_complete, n_total)
+                }
+
+                notice_text <- paste0(
+                    sprintf("Missing data detected in %d marker(s) affecting %d case(s). ",
+                            length(all_missing_markers), n_with_missing),
+                    paste(missing_parts, collapse=". "),
+                    sprintf(". Handling method: %s.", handling_method_text)
+                )
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missing_data_transparency',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(notice_text)
+                self$results$insert(2, notice)
+            }
+
             # Validate data quality for clustering
             has_na <- any(is.na(df))
             handleMissing <- opts$handleMissing %||% "pairwise"
@@ -1213,36 +1266,16 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 na_vars <- names(which(sapply(df, function(x) any(is.na(x)))))
                 complete_n <- sum(complete.cases(df))
 
-                error_msg <- sprintf(
-                    "<div style='padding:15px; border-left: 4px solid #dc3545;'>
-                    <h4 style='color:#dc3545; margin-top:0;'>❌ Clustering Error: Missing Data Issue</h4>
-                    <p><b>Problem:</b> Analysis with continuous-only markers and missing data requires complete cases.</p>
-                    <p><b>Current settings:</b></p>
-                    <ul>
-                        <li>Variable type: %d continuous marker(s), 0 categorical</li>
-                        <li>Missing data handling: Pairwise distances</li>
-                        <li>Variables with missing values: %s</li>
-                    </ul>
-                    <p><b>SOLUTION - Choose one:</b></p>
-                    <p><b>Option 1 (Recommended):</b></p>
-                    <ol>
-                        <li>Go to <b>Data Preprocessing</b> section</li>
-                        <li>Under <b>Missing Data Handling</b>, select <b>'Complete cases only'</b></li>
-                        <li>This will use %d of %d cases with complete data</li>
-                    </ol>
-                    <p><b>Option 2:</b></p>
-                    <ol>
-                        <li>Add categorical variables (ER, PR, HER2, etc.) to your analysis</li>
-                        <li>Pairwise distance calculation works well with mixed categorical + continuous data</li>
-                    </ol>
-                    </div>",
-                    length(contVars),
-                    paste(na_vars, collapse = ", "),
-                    complete_n,
-                    nrow(df)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missing_data_error',
+                    type = jmvcore::NoticeType$ERROR
                 )
-
-                self$results$summary$setContent(error_msg)
+                notice$setContent(sprintf(
+                    'Cannot cluster %d continuous-only markers with missing data using pairwise distances. Solution: Change Missing Data Handling to "Complete cases only" (uses %d of %d cases) or add categorical markers to enable pairwise calculation.',
+                    length(contVars), complete_n, nrow(df)
+                ))
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -1844,6 +1877,44 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             method_name <- method_names[[method]] %||% method
 
+            # Compute overall silhouette for quality warnings
+            avg_silhouette <- NA
+            if (!is.null(clusterResult$dist) && !is.null(clusters)) {
+                sil <- cluster::silhouette(as.integer(clusters), clusterResult$dist)
+                avg_silhouette <- mean(sil[, "sil_width"], na.rm = TRUE)
+            }
+
+            # Notice 1: Small sample size warning
+            notice_position <- 1
+            if (nrow(df) < 30) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'small_sample_warning',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf(
+                    'Small sample size (N=%d). Clusters may be unstable with <30 cases. Consider reproducibility testing or increasing sample size for robust results.',
+                    nrow(df)
+                ))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+
+            # Notice 2: Poor cluster quality warning
+            if (!is.na(avg_silhouette) && avg_silhouette < 0.3) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'poor_cluster_quality',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf(
+                    'Poor cluster quality detected (avg silhouette=%.2f). Values <0.3 indicate weak cluster structure. Consider reducing cluster count, checking data quality, or using different markers.',
+                    avg_silhouette
+                ))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+
             txt <- paste(c(
                 sprintf("Method: %s", method_name),
                 sprintf("k: %s", ifelse(is.null(usedK), "NA", usedK)),
@@ -1902,6 +1973,34 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 #     warning(sprintf("Failed to prepare cluster export: %s", e$message))
                 # })
             }
+
+            # Populate interpretation guide if requested
+            if (isTRUE(opts$showInterpretation)) {
+                private$.populateInterpretationGuide()
+            }
+
+            # Populate technical notes if requested
+            if (isTRUE(opts$showTechnicalNotes)) {
+                private$.populateTechnicalNotes()
+            }
+
+            # Populate diagnostic glossary if diagnostic metrics are calculated
+            if (isTRUE(opts$calculateDiagnosticMetrics) && isTRUE(opts$showDiagnosticGlossary)) {
+                private$.populateDiagnosticGlossary()
+            }
+
+            # Add completion info notice at bottom
+            info <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysis_complete',
+                type = jmvcore::NoticeType$INFO
+            )
+            sil_text <- if (!is.na(avg_silhouette)) sprintf(", avg silhouette=%.2f", avg_silhouette) else ""
+            info$setContent(sprintf(
+                'Analysis completed: %d cases clustered into %d groups using %s method%s.',
+                nrow(df), usedK, method_name, sil_text
+            ))
+            self$results$insert(999, info)
         },
         
         # Initialize instruction panel with context-sensitive guidance
@@ -5699,6 +5798,344 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     classTable$setNote("cutoffs", note_text)
                 }
             }
+        },
+
+        .populateInterpretationGuide = function() {
+            html <- self$results$interpretationGuide
+
+            guide_html <- paste0(
+                "<div style='background-color: #e8f4f8; border: 2px solid #3498db; padding: 20px; margin: 10px 0;'>",
+                "<h3 style='color: #2c3e50; margin-top: 0;'>Clinical Interpretation Guide</h3>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Understanding Cluster Results</h4>",
+                "<ul style='line-height: 1.6;'>",
+                "<li><strong>Cluster Assignments:</strong> Each case is assigned to the most similar immunophenotypic group based on IHC marker expression patterns.</li>",
+                "<li><strong>Silhouette Scores:</strong> Measure cluster quality (0.7-1.0 = strong, 0.5-0.7 = reasonable, &lt;0.5 = weak or ambiguous).",
+                " Low scores may indicate atypical cases or borderline immunoprofiles requiring expert review.</li>",
+                "<li><strong>Cluster Profiles:</strong> Characteristic marker patterns for each cluster. High mean values indicate frequent positivity/high expression.</li>",
+                "<li><strong>Marker Associations:</strong> Statistical tests show which markers significantly differ across clusters (p &lt; 0.05 after correction).</li>",
+                "</ul>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Clinical Applications</h4>",
+                "<ul style='line-height: 1.6;'>",
+                "<li><strong>Diagnosis Support:</strong> Clusters may correspond to known diagnostic entities or reveal novel immunophenotypic subtypes.</li>",
+                "<li><strong>Biomarker Discovery:</strong> Identifying co-expressed markers and optimal antibody panels for differential diagnosis.</li>",
+                "<li><strong>Quality Control:</strong> Cases with low silhouette scores or unexpected cluster assignments warrant slide review.</li>",
+                "<li><strong>Research Insights:</strong> Unsupervised clustering can reveal biological subtypes independent of morphology.</li>",
+                "</ul>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Interpretation Caveats</h4>",
+                "<ul style='line-height: 1.6;'>",
+                "<li><strong>Data-Driven Results:</strong> Clusters are derived from the data and may not align with established diagnostic categories.</li>",
+                "<li><strong>Validation Required:</strong> Results should be validated in independent cohorts and correlated with clinical outcomes.</li>",
+                "<li><strong>Missing Data:</strong> Cases with incomplete IHC panels may cluster poorly or be excluded (depending on settings).</li>",
+                "<li><strong>Marker Selection:</strong> Results depend on which markers are included. Redundant markers may bias clustering.</li>",
+                "<li><strong>Sample Size:</strong> Small samples (&lt;30 cases) may produce unstable clusters. Consider reproducibility testing.</li>",
+                "</ul>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Recommended Next Steps</h4>",
+                "<ol style='line-height: 1.6;'>",
+                "<li>Review cluster profiles to understand characteristic immunophenotypes</li>",
+                "<li>Examine cases with low silhouette scores for data quality issues</li>",
+                "<li>Correlate clusters with known diagnoses (if available) to assess biological validity</li>",
+                "<li>Perform survival analysis or clinical correlation to assess prognostic significance</li>",
+                "<li>Consider reproducibility testing (random split validation) for publication-ready results</li>",
+                "</ol>",
+
+                "<p style='margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #f0ad4e;'>",
+                "<strong>⚠️ Important:</strong> IHC clustering results are exploratory and hypothesis-generating. ",
+                "Clinical decisions should integrate clustering results with morphology, clinical context, and expert pathologist review.",
+                "</p>",
+                "</div>"
+            )
+
+            html$setContent(guide_html)
+        },
+
+        .populateTechnicalNotes = function() {
+            html <- self$results$technicalNotes
+            opts <- self$options
+
+            # Determine method details
+            method_name <- switch(opts$method,
+                'pam' = "PAM (Partitioning Around Medoids)",
+                'hierarchical' = "Hierarchical Clustering",
+                'dimreduce' = "MCA/PCA + k-means",
+                opts$method
+            )
+
+            distance_name <- switch(opts$distanceMethod,
+                'gower' = "Gower Distance (handles mixed data types)",
+                'jaccard' = "Jaccard Distance (binary data)",
+                opts$distanceMethod
+            )
+
+            linkage_name <- if (opts$method == 'hierarchical') {
+                switch(opts$linkageMethod,
+                    'ward' = "Ward's Minimum Variance",
+                    'complete' = "Complete Linkage (Furthest Neighbor)",
+                    'average' = "Average Linkage (UPGMA)",
+                    'single' = "Single Linkage (Nearest Neighbor)",
+                    opts$linkageMethod
+                )
+            } else {
+                "N/A (not using hierarchical clustering)"
+            }
+
+            k_selection <- if (isTRUE(opts$autoSelectK)) {
+                sprintf("Automatic (silhouette width optimization, range: %s)", opts$kRange)
+            } else {
+                sprintf("User-specified: %d clusters", opts$nClusters)
+            }
+
+            missing_method <- switch(opts$handleMissing,
+                'complete' = "Complete cases only (listwise deletion)",
+                'pairwise' = "Pairwise deletion (variable-specific handling)",
+                opts$handleMissing
+            )
+
+            scaling_status <- if (isTRUE(opts$scaleContVars)) {
+                "Yes (z-score standardization)"
+            } else {
+                "No (raw values used)"
+            }
+
+            consensus_status <- if (isTRUE(opts$consensusClustering)) {
+                sprintf("Yes (%d bootstrap iterations)", opts$nBootstrap)
+            } else {
+                "No"
+            }
+
+            notes_html <- paste0(
+                "<div style='background-color: #f8f9fa; border: 2px solid #6c757d; padding: 20px; margin: 10px 0;'>",
+                "<h3 style='color: #2c3e50; margin-top: 0;'>Technical Implementation Details</h3>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Clustering Method</h4>",
+                "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
+                "<tr style='background-color: #e9ecef;'>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6; width: 40%;'><strong>Algorithm:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", method_name, "</td>",
+                "</tr>",
+                "<tr>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Distance Metric:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", distance_name, "</td>",
+                "</tr>",
+                "<tr style='background-color: #e9ecef;'>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Linkage Method:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", linkage_name, "</td>",
+                "</tr>",
+                "<tr>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Number of Clusters:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", k_selection, "</td>",
+                "</tr>",
+                "<tr style='background-color: #e9ecef;'>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Random Seed:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", opts$seed, " (for reproducibility)</td>",
+                "</tr>",
+                "</table>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Data Preprocessing</h4>",
+                "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
+                "<tr style='background-color: #e9ecef;'>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6; width: 40%;'><strong>Continuous Variable Scaling:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", scaling_status, "</td>",
+                "</tr>",
+                "<tr>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Missing Data Handling:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", missing_method, "</td>",
+                "</tr>",
+                "<tr style='background-color: #e9ecef;'>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Consensus Clustering:</strong></td>",
+                "<td style='padding: 8px; border: 1px solid #dee2e6;'>", consensus_status, "</td>",
+                "</tr>",
+                "</table>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Key References</h4>",
+                "<ul style='line-height: 1.8;'>",
+                "<li><strong>Gower Distance:</strong> Gower JC. A general coefficient of similarity and some of its properties. ",
+                "<em>Biometrics</em>. 1971;27(4):857-871. doi:10.2307/2528823</li>",
+                "<li><strong>PAM Algorithm:</strong> Kaufman L, Rousseeuw PJ. Clustering by means of medoids. ",
+                "In: <em>Statistical Data Analysis Based on the L1-Norm and Related Methods</em>. 1987:405-416.</li>",
+                "<li><strong>Silhouette Width:</strong> Rousseeuw PJ. Silhouettes: a graphical aid to the interpretation and validation of cluster analysis. ",
+                "<em>J Comput Appl Math</em>. 1987;20:53-65. doi:10.1016/0377-0427(87)90125-7</li>",
+                "<li><strong>IHC Clustering Application:</strong> Sterlacci W, et al. Putative Stem Cell Markers in Non-Small-Cell Lung Cancer: ",
+                "A Clinicopathologic Characterization. <em>J Thorac Oncol</em>. 2014;9(1):41-49. doi:10.1097/JTO.0000000000000021</li>",
+                "<li><strong>Diagnostic Markers:</strong> Olsen RJ, et al. Practical applications of immunohistochemistry in the diagnosis of hematopoietic neoplasms. ",
+                "<em>Arch Pathol Lab Med</em>. 2006;130(6):860-867. doi:10.1043/1543-2165(2006)130[860:PAOIIT]2.0.CO;2</li>",
+                "</ul>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Software Implementation</h4>",
+                "<p style='line-height: 1.6;'>",
+                "This analysis uses R packages: <code>cluster</code> (PAM, silhouette), <code>factoextra</code> (visualization), ",
+                "<code>FactoMineR</code> (MCA/PCA), <code>ComplexHeatmap</code> (heatmaps), and <code>ggplot2</code> (plotting). ",
+                "Gower distance is computed using <code>cluster::daisy()</code> which handles mixed data types appropriately.",
+                "</p>",
+
+                "<p style='margin-top: 15px; padding: 10px; background-color: #d1ecf1; border-left: 4px solid #17a2b8;'>",
+                "<strong>ℹ️ Note:</strong> For reproducible research, document all analysis settings including the random seed, ",
+                "clustering method, distance metric, and any data preprocessing steps (scaling, missing data handling).",
+                "</p>",
+                "</div>"
+            )
+
+            html$setContent(notes_html)
+        },
+
+        .populateDiagnosticGlossary = function() {
+            html <- self$results$diagnosticGlossary
+
+            glossary_html <- paste0(
+                "<div style='background-color: #fff8e1; border: 2px solid #ffc107; padding: 20px; margin: 10px 0;'>",
+                "<h3 style='color: #2c3e50; margin-top: 0;'>📚 Diagnostic Metrics Glossary</h3>",
+
+                "<h4 style='color: #34495e; margin-top: 15px;'>Understanding Marker Performance</h4>",
+
+                "<table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>",
+                "<tr style='background-color: #ffe082;'>",
+                "<th style='padding: 12px; border: 2px solid #ffa000; text-align: left; width: 25%;'>Metric</th>",
+                "<th style='padding: 12px; border: 2px solid #ffa000; text-align: left; width: 35%;'>Definition</th>",
+                "<th style='padding: 12px; border: 2px solid #ffa000; text-align: left; width: 40%;'>Clinical Interpretation</th>",
+                "</tr>",
+
+                "<tr>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>Sensitivity</strong></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>True Positive Rate<br><em>P(Marker+ | Disease+)</em></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
+                "Proportion of true positives correctly identified. ",
+                "<strong>High sensitivity (≥90%)</strong> is essential for screening tests - ",
+                "you don't want to miss cases. ",
+                "<strong>Low sensitivity</strong> means many false negatives (missed diagnoses).",
+                "</td>",
+                "</tr>",
+
+                "<tr style='background-color: #fff3e0;'>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>Specificity</strong></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>True Negative Rate<br><em>P(Marker- | Disease-)</em></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
+                "Proportion of true negatives correctly identified. ",
+                "<strong>High specificity (≥90%)</strong> is essential for confirmatory tests - ",
+                "you don't want false alarms. ",
+                "<strong>Low specificity</strong> means many false positives (overdiagnosis).",
+                "</td>",
+                "</tr>",
+
+                "<tr>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>PPV</strong><br>(Positive Predictive Value)</td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>Precision<br><em>P(Disease+ | Marker+)</em></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
+                "If marker is positive, what is the probability the patient truly has the disease? ",
+                "<strong>Depends on disease prevalence</strong> in your population. ",
+                "Same test has higher PPV in high-risk populations. ",
+                "<strong>Critical for patient counseling</strong> after a positive result.",
+                "</td>",
+                "</tr>",
+
+                "<tr style='background-color: #fff3e0;'>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>NPV</strong><br>(Negative Predictive Value)</td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>Negative Precision<br><em>P(Disease- | Marker-)</em></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
+                "If marker is negative, what is the probability the patient truly does NOT have the disease? ",
+                "<strong>Also depends on prevalence</strong>. ",
+                "In rare diseases, even poor tests can have high NPV. ",
+                "<strong>Important for ruling out disease</strong>.",
+                "</td>",
+                "</tr>",
+
+                "<tr>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>Accuracy</strong></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>Overall Correct Rate<br><em>(TP+TN) / Total</em></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
+                "Proportion of all cases classified correctly. ",
+                "<strong>Can be misleading</strong> in imbalanced datasets - ",
+                "a test that always predicts 'negative' has 95% accuracy if only 5% have disease! ",
+                "Use with caution.",
+                "</td>",
+                "</tr>",
+
+                "<tr style='background-color: #fff3e0;'>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>Likelihood Ratio+</strong></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>LR+ = Sensitivity / (1-Specificity)</td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
+                "How much a positive result increases disease probability. ",
+                "<strong>LR+ > 10</strong> = strong evidence for disease. ",
+                "<strong>LR+ 5-10</strong> = moderate evidence. ",
+                "<strong>LR+ < 2</strong> = weak evidence.",
+                "</td>",
+                "</tr>",
+
+                "<tr>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'><strong>Likelihood Ratio-</strong></td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>LR- = (1-Sensitivity) / Specificity</td>",
+                "<td style='padding: 10px; border: 1px solid #ffb74d;'>",
+                "How much a negative result decreases disease probability. ",
+                "<strong>LR- < 0.1</strong> = strong evidence against disease. ",
+                "<strong>LR- 0.1-0.5</strong> = moderate evidence. ",
+                "<strong>LR- > 0.5</strong> = weak evidence.",
+                "</td>",
+                "</tr>",
+                "</table>",
+
+                "<h4 style='color: #34495e; margin-top: 20px;'>📊 2×2 Confusion Matrix</h4>",
+                "<table style='width: 80%; margin: 15px auto; border-collapse: collapse; text-align: center;'>",
+                "<tr>",
+                "<td style='border: none;'></td>",
+                "<td style='border: none;'></td>",
+                "<td colspan='2' style='padding: 8px; background-color: #e3f2fd; border: 2px solid #1976d2;'><strong>Gold Standard Diagnosis</strong></td>",
+                "</tr>",
+                "<tr>",
+                "<td style='border: none;'></td>",
+                "<td style='border: none;'></td>",
+                "<td style='padding: 8px; background-color: #e3f2fd; border: 2px solid #1976d2;'><strong>Disease+</strong></td>",
+                "<td style='padding: 8px; background-color: #e3f2fd; border: 2px solid #1976d2;'><strong>Disease-</strong></td>",
+                "</tr>",
+                "<tr>",
+                "<td rowspan='2' style='padding: 8px; background-color: #fff3e0; border: 2px solid #ffa000; vertical-align: middle;'><strong>IHC Marker</strong></td>",
+                "<td style='padding: 8px; background-color: #fff3e0; border: 2px solid #ffa000;'><strong>Marker+</strong></td>",
+                "<td style='padding: 12px; border: 2px solid #4caf50; background-color: #c8e6c9;'><strong>TP</strong><br>True Positive</td>",
+                "<td style='padding: 12px; border: 2px solid #f44336; background-color: #ffcdd2;'><strong>FP</strong><br>False Positive</td>",
+                "</tr>",
+                "<tr>",
+                "<td style='padding: 8px; background-color: #fff3e0; border: 2px solid #ffa000;'><strong>Marker-</strong></td>",
+                "<td style='padding: 12px; border: 2px solid #f44336; background-color: #ffcdd2;'><strong>FN</strong><br>False Negative</td>",
+                "<td style='padding: 12px; border: 2px solid #4caf50; background-color: #c8e6c9;'><strong>TN</strong><br>True Negative</td>",
+                "</tr>",
+                "</table>",
+
+                "<h4 style='color: #34495e; margin-top: 20px;'>⚠️ Key Considerations</h4>",
+                "<ul style='line-height: 1.8;'>",
+                "<li><strong>Prevalence Matters:</strong> PPV and NPV depend heavily on disease prevalence in your cohort. ",
+                "A marker with 90% sensitivity/specificity has PPV=50% at 10% prevalence, but PPV=10% at 1% prevalence.</li>",
+
+                "<li><strong>Trade-offs:</strong> Sensitivity and specificity are often inversely related. ",
+                "Lowering a threshold increases sensitivity (catches more cases) but decreases specificity (more false positives). ",
+                "Choose based on clinical consequences of false negatives vs. false positives.</li>",
+
+                "<li><strong>Panel Combinations:</strong> Using multiple markers can improve performance. ",
+                "Markers in <strong>series</strong> (all must be positive) increases specificity. ",
+                "Markers in <strong>parallel</strong> (any can be positive) increases sensitivity.</li>",
+
+                "<li><strong>Clinical Context:</strong> Statistical significance ≠ clinical utility. ",
+                "A marker with sensitivity=60% and specificity=70% may be statistically significant but clinically useless. ",
+                "Consider minimum acceptable thresholds for your use case.</li>",
+
+                "<li><strong>Confidence Intervals:</strong> Small sample sizes produce wide confidence intervals. ",
+                "A reported sensitivity of 85% with CI [60%-95%] is unreliable. ",
+                "Aim for CI width < 20% for robust markers.</li>",
+                "</ul>",
+
+                "<h4 style='color: #34495e; margin-top: 20px;'>📖 Recommended Reading</h4>",
+                "<ul style='line-height: 1.8;'>",
+                "<li>Altman DG, Bland JM. Diagnostic tests 1-3 series. <em>BMJ</em>. 1994.</li>",
+                "<li>Lalkhen AG, McCluskey A. Clinical tests: sensitivity and specificity. ",
+                "<em>Contin Educ Anaesth Crit Care Pain</em>. 2008;8(6):221-223.</li>",
+                "<li>Trevethan R. Sensitivity, Specificity, and Predictive Values: Foundations, Pliabilities, and Pitfalls ",
+                "in Research and Practice. <em>Front Public Health</em>. 2017;5:307.</li>",
+                "</ul>",
+
+                "</div>"
+            )
+
+            html$setContent(glossary_html)
         }
 
     )

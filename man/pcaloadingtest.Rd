@@ -63,6 +63,7 @@ components, 1 shows only PC1, 2 shows only PC2, etc.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$results} \tab \tab \tab \tab \tab Permutation-based significance testing for each variable-component loading \cr
 \code{results$variance} \tab \tab \tab \tab \tab a table \cr
 \code{results$loadingplot} \tab \tab \tab \tab \tab Barplot showing loadings with confidence intervals from permutation \cr
@@ -97,13 +98,14 @@ Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease
 }
 
 \examples{
-# Example with mtcars dataset
-data("mtcars")
+# Example with pcaloadingtest_data (simulated dataset with known structure)
+data("pcaloadingtest_data")
 
 # Test loading significance for first 3 components
+# Expected: var1-3 load on PC1, var4-5 on PC2, var6-7 on PC3
 pcaloadingtest(
-  data = mtcars,
-  vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
+  data = pcaloadingtest_data,
+  vars = c("var1", "var2", "var3", "var4", "var5", "var6", "var7", "noise"),
   ncomp = 3,
   nperm = 1000,
   center = TRUE,

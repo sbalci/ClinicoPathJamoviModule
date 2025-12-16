@@ -13,11 +13,11 @@ items:
             type: Html
             visible: true
 
-          # Class Imbalance Warning
+          # Class Imbalance Warning (DEPRECATED - now using Notice API)
           - name: imbalanceWarning
             title: Class Imbalance Detection
             type: Html
-            visible: (detectImbalance && showImbalanceWarning)
+            visible: false
             description: Warning and recommendations for imbalanced datasets
 
           # Imbalance Metrics Table

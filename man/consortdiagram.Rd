@@ -85,6 +85,8 @@ validation.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$flowImbalanceNotice} \tab \tab \tab \tab \tab a html \cr
+\code{results$duplicateIdNotice} \tab \tab \tab \tab \tab a html \cr
 \code{results$flowSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$armSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$exclusionBreakdown} \tab \tab \tab \tab \tab a table \cr

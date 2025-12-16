@@ -1,7 +1,7 @@
 ---
 name: irecist
 title: iRECIST Analysis
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: Response Evaluation
 menuSubtitle: Immune-related Response Criteria
 version: '0.0.32'
@@ -331,5 +331,29 @@ options:
     description:
       R: >
         Display iRECIST guidelines reference (Seymour et al. 2017)
+
+  - name: showSummary
+    title: Show Executive Summary
+    type: Bool
+    default: true
+    description:
+      R: >
+        Display natural-language summary with copy-ready text
+
+  - name: showGlossary
+    title: Show iRECIST Glossary
+    type: Bool
+    default: true
+    description:
+      R: >
+        Display glossary of iRECIST terms and definitions
+
+  - name: showAssumptions
+    title: Show Assumptions & Caveats
+    type: Bool
+    default: true
+    description:
+      R: >
+        Display analysis assumptions and data requirements
 
 ...

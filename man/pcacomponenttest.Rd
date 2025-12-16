@@ -16,13 +16,15 @@ pcacomponenttest(
   conflevel = 0.95,
   adjustmethod = "BH",
   showpercent = TRUE,
-  colororiginal = "steelblue",
-  colorpermuted = "orange",
+  colororiginal = "#0072B2",
+  colorpermuted = "#E69F00",
   showScreePlot = FALSE,
   showLoadingsPlot = FALSE,
   nLoadings = 5,
   plotwidth = 600,
-  plotheight = 450
+  plotheight = 450,
+  showSummary = FALSE,
+  showGuide = FALSE
 )
 }
 \arguments{
@@ -61,10 +63,10 @@ Default: 0.95 for 95\\% CI.}
 (0-100) instead of proportion (0-1).}
 
 \item{colororiginal}{Color for original VAF line/points. Use color names or
-hex codes.}
+hex codes. Default is color-blind safe blue.}
 
 \item{colorpermuted}{Color for permuted VAF line/points. Use color names or
-hex codes.}
+hex codes. Default is color-blind safe orange.}
 
 \item{showScreePlot}{Display a scree plot of eigenvalues.}
 
@@ -76,6 +78,14 @@ components.}
 \item{plotwidth}{Width of the plot in pixels.}
 
 \item{plotheight}{Height of the plot in pixels.}
+
+\item{showSummary}{Display natural-language summary of results with
+clinical interpretation. Provides plain-language explanation of significant
+components and variance explained.}
+
+\item{showGuide}{Display guide explaining how to interpret VAF, p-values,
+and clinical implications. Includes definitions of key terms and guidance
+for clinical use.}
 }
 \value{
 A results object containing:
@@ -86,6 +96,8 @@ A results object containing:
 \code{results$vafplot} \tab \tab \tab \tab \tab Visualization comparing original VAF to permuted null distribution \cr
 \code{results$screePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$loadingsPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$guide} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -155,6 +155,7 @@ children:
           - type: TextBox
             name: ratioLowCutoff
             format: number
+            enable: (ratioClassification)
       - type: LayoutBox
         margin: large
         children:
@@ -163,6 +164,7 @@ children:
           - type: TextBox
             name: ratioHighCutoff
             format: number
+            enable: (ratioClassification)
   - type: CollapseBox
     label: Spatial Compartment Analysis
     collapsed: true
@@ -414,3 +416,6 @@ children:
       - type: CheckBox
         name: showTechnicalNotes
         label: Show technical notes
+      - type: CheckBox
+        name: showDiagnosticGlossary
+        label: Show diagnostic glossary (sensitivity, specificity, PPV, NPV)

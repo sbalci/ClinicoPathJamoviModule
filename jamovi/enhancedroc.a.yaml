@@ -1,7 +1,7 @@
 ---
 name: enhancedROC
 title: Clinical ROC Analysis
-menuGroup: meddecideT1
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
 version: '0.0.32'
@@ -78,7 +78,7 @@ options:
     - name: youdenOptimization
       title: 'Youden Index Optimization'
       type: Bool
-      default: true
+      default: false
       description: 'Find optimal cutoff using Youden Index (Sensitivity + Specificity - 1)'
 
     - name: customCutoffs
@@ -156,11 +156,11 @@ options:
       default: true
       description: 'Maintain outcome class proportions in bootstrap samples (recommended for imbalanced data)'
 
-    # Comparison Options  
+    # Comparison Options
     - name: pairwiseComparisons
       title: 'Pairwise Comparisons'
       type: Bool
-      default: true
+      default: false
       description: 'Perform pairwise comparisons between ROC curves'
 
     - name: comparisonMethod
@@ -192,25 +192,25 @@ options:
     - name: cutoffTable
       title: 'Cutoff Analysis Table'
       type: Bool
-      default: true
+      default: false
       description: 'Display detailed cutoff analysis'
 
     - name: optimalCutoffs
       title: 'Optimal Cutoffs Summary'
       type: Bool
-      default: true
+      default: false
       description: 'Display optimal cutoff summary'
 
     - name: diagnosticMetrics
       title: 'Diagnostic Metrics'
       type: Bool
-      default: true
+      default: false
       description: 'Display comprehensive diagnostic metrics'
 
     - name: clinicalMetrics
       title: 'Clinical Metrics'
       type: Bool
-      default: true
+      default: false
       description: 'Display clinical application metrics (PPV, NPV, LR+, LR-)'
 
     # Advanced Options

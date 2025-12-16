@@ -162,10 +162,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Shared validation helper to reduce duplication
         .validateAlluvialInputs = function() {
-            # Clear any previous validation messages at the start
-            # This prevents old errors from persisting when validation state changes
-            self$results$dataWarning$setContent("")
-
             if (is.null(self$options$vars) || length(self$options$vars) == 0)
                 return(FALSE)
 
@@ -232,12 +228,24 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (unique_values > 20) {
                         var_safe <- htmltools::htmlEscape(var)
 
-                        error_notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = "continuousVariableNotAllowed",
-                            type = jmvcore::NoticeType$ERROR)
-                        error_notice$setContent(sprintf("Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Create bins using Data > Transform.", var, unique_values))
-                        self$results$insert(1, error_notice)
+                # REMOVED Notice: error_notice <- jmvcore::Notice$new(
+                # options = self$options,
+                # name = "continuousVariableNotAllowed",
+                # type = jmvcore::NoticeType$ERROR
+                # )
+                # error_notice$setContent(paste0(
+                # "⛔ <b>Continuous Variable Not Allowed:</b> Variable '", var_safe,
+                # "' has ", unique_values, " unique values and appears continuous. ",
+                # "Alluvial plots require categorical data.<br/><br/>",
+                # "<b>Required Action:</b> Create categorical bins using Data → Transform:<br/>",
+                # "• Quartiles: <code>NTILE(", var, ", 4)</code><br/>",
+                # "• Tertiles: <code>NTILE(", var, ", 3)</code><br/>",
+                # "• Custom bins: <code>IF(", var, " &lt; 25, 'Low', IF(", var,
+                # " &lt; 75, 'Medium', 'High'))</code><br/><br/>",
+                # "<b>Privacy Note:</b> Continuous variables may reveal individual-level data. ",
+                # "Binning creates aggregated views suitable for visualization."
+                # ))
+                # REMOVED: self$results$insert(1, error_notice)
                         return(FALSE)
                     }
 
@@ -498,9 +506,20 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Clear dataWarning if validation passes
                 self$results$dataWarning$setContent("")
 
-                # NOTE: Removed INFO notice to avoid serialization errors
-                # INFO notices without return() can cause "attempt to apply non-function" errors
-                # The plot will be generated successfully without the notice
+                # Add INFO notice for successful validation
+                n_vars <- length(self$options$vars)
+                n_obs <- nrow(self$data)
+
+                info_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = "readyToPlot",
+                    type = jmvcore::NoticeType$INFO
+                )
+                info_notice$setContent(paste0(
+                    "ℹ️ <b>Ready:</b> Alluvial diagram will be generated using ", n_vars,
+                    " variable", if(n_vars > 1) "s" else "", " and ", n_obs, " observations."
+                ))
+                self$results$insert(1, info_notice)
             }
 
         }

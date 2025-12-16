@@ -54,9 +54,15 @@ enhancedROCClass <- R6::R6Class(
         .run = function() {
             # Check if we have required data
             if (is.null(private$.outcome) || is.null(private$.predictors) || length(private$.predictors) == 0) {
-                self$results$results$instructions$setContent(
-                    "<p>Please select an outcome variable and at least one predictor variable for ROC analysis.</p>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingVariables',
+                    type = jmvcore::NoticeType$ERROR
                 )
+                notice$setContent(jmvcore::format(
+                    'Please select an outcome variable and at least one predictor variable for ROC analysis. • Outcome variable: required (binary/factor). • Predictor variables: at least one numeric variable required for ROC curve calculation.'
+                ))
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -177,9 +183,15 @@ enhancedROCClass <- R6::R6Class(
 
 
             if (self$options$timeDependentROC || self$options$survivalROC) {
-                 self$results$results$instructions$setContent(
-                    "<p><b>Note:</b> Time-Dependent and Survival ROC analyses are not currently supported due to missing time-to-event input options.</p>"
-                 )
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'timeDependentNotSupported',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'Time-Dependent and Survival ROC analyses are not currently supported. • These features require time-to-event input variables (event time, censoring indicator) which are not yet available in this interface. • For survival ROC analysis, please use standard ROC analysis with risk scores or predicted probabilities from survival models.'
+                ))
+                self$results$insert(1, notice)
             }
             
             # Generate natural language summary
@@ -191,6 +203,42 @@ enhancedROCClass <- R6::R6Class(
             if (self$options$internalValidation) {
                 private$.checkpoint()
                 private$.populateInternalValidation()
+            }
+
+            # Success completion notice
+            if (length(private$.rocResults) > 0) {
+                n_predictors <- length(private$.rocResults)
+                n_obs <- nrow(self$data)
+
+                # Get best AUC
+                best_auc <- 0
+                best_predictor <- ""
+                for (pred in names(private$.rocResults)) {
+                    auc_val <- as.numeric(private$.rocObjects[[pred]]$auc)
+                    if (auc_val > best_auc) {
+                        best_auc <- auc_val
+                        best_predictor <- pred
+                    }
+                }
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+
+                predictor_text <- if (n_predictors == 1) {
+                    paste0("1 predictor (", best_predictor, ", AUC=", round(best_auc, 3), ")")
+                } else {
+                    paste0(n_predictors, " predictors (best: ", best_predictor, ", AUC=", round(best_auc, 3), ")")
+                }
+
+                notice$setContent(jmvcore::format(
+                    'ROC analysis completed successfully. • Analyzed {predictors} with n={n} observations. • Review AUC values, confidence intervals, and optimal cutoffs in results tables below. • Check any warnings or recommendations above for data quality concerns.',
+                    predictors = predictor_text,
+                    n = n_obs
+                ))
+                self$results$insert(999, notice)
             }
         },
 
@@ -591,6 +639,91 @@ enhancedROCClass <- R6::R6Class(
                         predictor = predictor
                     )
 
+                    # Clinical threshold notices for this predictor
+                    auc_value <- as.numeric(roc_obj$auc)
+                    n_obs <- length(roc_obj$response)
+                    n_positive <- sum(roc_obj$response == levels(roc_obj$response)[2])
+                    n_negative <- sum(roc_obj$response == levels(roc_obj$response)[1])
+                    prevalence <- n_positive / n_obs
+
+                    # Small sample size notice
+                    if (n_obs < 30) {
+                        notice_type <- if (n_obs < 10) {
+                            jmvcore::NoticeType$STRONG_WARNING
+                        } else {
+                            jmvcore::NoticeType$WARNING
+                        }
+
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('smallSample_', private$.escapeVar(predictor)),
+                            type = notice_type
+                        )
+
+                        notice$setContent(jmvcore::format(
+                            'Small sample size for {predictor}: n={n} ({n_pos} positive, {n_neg} negative). • ROC curve confidence intervals may be unreliable with limited data. • Consider collecting more data or using bootstrap resampling for more stable estimates. • Results should be interpreted cautiously and validated in larger samples.',
+                            predictor = predictor,
+                            n = n_obs,
+                            n_pos = n_positive,
+                            n_neg = n_negative
+                        ))
+                        self$results$insert(1, notice)
+                    }
+
+                    # Low AUC notice
+                    if (auc_value < 0.7) {
+                        notice_type <- if (auc_value < 0.5) {
+                            jmvcore::NoticeType$ERROR
+                        } else {
+                            jmvcore::NoticeType$STRONG_WARNING
+                        }
+
+                        interpretation <- if (auc_value < 0.5) {
+                            "AUC below 0.5 indicates worse than random performance - verify ROC direction is correct"
+                        } else {
+                            "AUC below 0.7 indicates limited discriminative ability"
+                        }
+
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('lowAUC_', private$.escapeVar(predictor)),
+                            type = notice_type
+                        )
+
+                        notice$setContent(jmvcore::format(
+                            'Limited diagnostic performance for {predictor}: AUC={auc}. • {interpretation}. • Consider: (1) Adding predictor variables or interaction terms, (2) Verifying data quality and coding, (3) Using multivariate models to improve discrimination, (4) Checking if direction setting is appropriate for your biomarker.',
+                            predictor = predictor,
+                            auc = round(auc_value, 3),
+                            interpretation = interpretation
+                        ))
+                        self$results$insert(1, notice)
+                    }
+
+                    # Extreme prevalence notice
+                    if (prevalence < 0.05 || prevalence > 0.95) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('extremePrevalence_', private$.escapeVar(predictor)),
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+
+                        direction <- if (prevalence < 0.05) "low" else "high"
+                        metric_concern <- if (prevalence < 0.05) {
+                            "Positive Predictive Value (PPV) will be unreliable even with high sensitivity/specificity"
+                        } else {
+                            "Negative Predictive Value (NPV) will be unreliable even with high sensitivity/specificity"
+                        }
+
+                        notice$setContent(jmvcore::format(
+                            'Extreme prevalence for {predictor}: {prev}% ({direction}). • {metric_concern}. • ROC/AUC analysis may be misleading - consider Precision-Recall Curve (PRC) instead. • Sensitivity and specificity remain valid, but predictive values (PPV/NPV) are heavily influenced by prevalence.',
+                            predictor = predictor,
+                            prev = round(prevalence * 100, 1),
+                            direction = direction,
+                            metric_concern = metric_concern
+                        ))
+                        self$results$insert(1, notice)
+                    }
+
                 }, error = function(e) {
                     # Provide specific error messages based on common ROC analysis issues
                     error_msg <- ""
@@ -833,7 +966,7 @@ enhancedROCClass <- R6::R6Class(
                     clinical_utility = clinical_utility
                 )
 
-                aucTable$addRow(rowKey = predictor, values = row)
+                aucTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
             }
         },
 
@@ -858,7 +991,7 @@ enhancedROCClass <- R6::R6Class(
                     clinical_recommendation = clinical_rec
                 )
 
-                cutoffTable$addRow(rowKey = predictor, values = row)
+                cutoffTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
             }
         },
 
@@ -1021,7 +1154,7 @@ enhancedROCClass <- R6::R6Class(
                     balanced_accuracy = balanced_acc
                 )
 
-                diagTable$addRow(rowKey = predictor, values = row)
+                diagTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
             }
         },
 
@@ -1076,7 +1209,7 @@ enhancedROCClass <- R6::R6Class(
                     clinical_interpretation = clinical_interp
                 )
 
-                clinTable$addRow(rowKey = predictor, values = row)
+                clinTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
             }
         },
 
@@ -1323,7 +1456,7 @@ enhancedROCClass <- R6::R6Class(
                         clinical_relevance = clinical_relevance
                     )
 
-                    paTable$addRow(rowKey = predictor, values = row)
+                    paTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
 
                 }, error = function(e) {
                     warning(paste("Partial AUC calculation failed for", predictor, ":", e$message))
@@ -1360,7 +1493,7 @@ enhancedROCClass <- R6::R6Class(
                         interpretation = interpretation
                     )
 
-                    crocTable$addRow(rowKey = predictor, values = row)
+                    crocTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
 
                 }, error = function(e) {
                     warning(paste("CROC calculation failed for", predictor, ":", e$message))
@@ -1396,7 +1529,7 @@ enhancedROCClass <- R6::R6Class(
                         interpretation = interpretation
                     )
 
-                    hullTable$addRow(rowKey = predictor, values = row)
+                    hullTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
 
                 }, error = function(e) {
                     warning(paste("Convex hull calculation failed for", predictor, ":", e$message))
@@ -1584,68 +1717,41 @@ enhancedROCClass <- R6::R6Class(
                 recommendation = recommendation
             ))
 
-            # Generate warning HTML if imbalanced
+            # Generate Notice if imbalanced (replaces HTML warning)
             if (is_imbalanced && self$options$showImbalanceWarning) {
-                private$.generateImbalanceWarning(
-                    n_positive, n_negative, ratio_text, prevalence,
-                    prc_baseline, severity
+                # Determine notice type based on severity
+                notice_type <- if (ratio_value >= 10) {
+                    jmvcore::NoticeType$STRONG_WARNING
+                } else if (ratio_value >= 5) {
+                    jmvcore::NoticeType$STRONG_WARNING
+                } else {
+                    jmvcore::NoticeType$WARNING
+                }
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'classImbalanceDetected',
+                    type = notice_type
                 )
+
+                # Build concise, single-line notice content
+                prc_recommendation <- if (self$options$recommendPRC) {
+                    " • Consider using Precision-Recall Curve (PRC) analysis instead of ROC for more reliable performance assessment with imbalanced data."
+                } else {
+                    " • Interpret ROC results cautiously given class imbalance."
+                }
+
+                notice$setContent(jmvcore::format(
+                    'Class imbalance detected: {ratio} ratio ({n_pos} positive, {n_neg} negative, prevalence {prev}%). • {severity}. • ROC curves may be optimistic because specificity is dominated by majority class. • High AUC may mask poor minority class performance.{prc_rec}',
+                    ratio = ratio_text,
+                    n_pos = n_positive,
+                    n_neg = n_negative,
+                    prev = round(prevalence * 100, 1),
+                    severity = severity,
+                    prc_rec = prc_recommendation
+                ))
+                self$results$insert(1, notice)
             }
-        },
-
-        .generateImbalanceWarning = function(n_pos, n_neg, ratio, prevalence, baseline, severity) {
-            warningHtml <- self$results$results$imbalanceWarning
-
-            # Create styled warning message
-            html <- paste0(
-                '<div style="background-color: #fff3cd; border: 2px solid #ffc107; ',
-                'border-radius: 5px; padding: 15px; margin: 10px 0;">',
-                '<h3 style="color: #856404; margin-top: 0;">',
-                '<span style="font-size: 1.2em;">⚠️</span> Class Imbalance Detected</h3>',
-                '<p style="color: #856404; margin: 10px 0;"><strong>',
-                severity, '</strong> - Your dataset has a ', ratio, ' class ratio.</p>',
-
-                '<div style="background-color: #fff; padding: 10px; border-radius: 3px; margin: 10px 0;">',
-                '<p style="margin: 5px 0;"><strong>Dataset composition:</strong></p>',
-                '<ul style="margin: 5px 0;">',
-                '<li>Positive class: ', n_pos, ' samples (',
-                sprintf("%.1f%%", prevalence * 100), ')</li>',
-                '<li>Negative class: ', n_neg, ' samples (',
-                sprintf("%.1f%%", (1 - prevalence) * 100), ')</li>',
-                '<li>PRC baseline: ', sprintf("%.3f", baseline), '</li>',
-                '</ul></div>',
-
-                '<div style="background-color: #d1ecf1; border-left: 4px solid #0c5460; ',
-                'padding: 10px; margin: 10px 0;">',
-                '<p style="color: #0c5460; margin: 5px 0;"><strong>Why this matters:</strong></p>',
-                '<p style="color: #0c5460; margin: 5px 0;">',
-                'ROC curves can be misleading with imbalanced data because specificity ',
-                '(True Negative Rate) is dominated by the majority class. A high AUC ',
-                'may mask poor performance on the minority (positive) class.</p></div>'
-            )
-
-            if (self$options$recommendPRC) {
-                html <- paste0(html,
-                    '<div style="background-color: #d4edda; border-left: 4px solid #28a745; ',
-                    'padding: 10px; margin: 10px 0;">',
-                    '<p style="color: #155724; margin: 5px 0;"><strong>📊 Recommendation:</strong></p>',
-                    '<p style="color: #155724; margin: 5px 0;">',
-                    'Use the <strong>Precision-Recall Curve (PRC)</strong> function instead of ROC. ',
-                    'PRC shows Precision (PPV) vs Recall (Sensitivity), which are more informative ',
-                    'for imbalanced datasets.</p>',
-                    '<p style="color: #155724; margin: 5px 0;">',
-                    '<strong>Location:</strong> meddecide → Diagnostic Test Evaluation → ',
-                    'Precision-Recall Curve</p>',
-                    '<p style="color: #155724; margin: 5px 0; font-size: 0.9em;">',
-                    '<em>Reference: Saito & Rehmsmeier (2015). The Precision-Recall Plot Is More ',
-                    'Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced ',
-                    'Datasets. PLoS ONE 10(3): e0118432.</em></p>',
-                    '</div>'
-                )
-            }
-
-            html <- paste0(html, '</div>')
-            warningHtml$setContent(html)
         },
 
         .populateComprehensiveAnalysis = function() {
@@ -1917,7 +2023,7 @@ enhancedROCClass <- R6::R6Class(
                 pr <- private$.computePRMetrics(scores, outcome,
                                                private$.positiveClass %||% levels(outcome)[2])
                 if (!is.null(pr)) {
-                    prTable$addRow(rowKey = predictor, values = list(
+                    prTable$addRow(rowKey = private$.escapeVar(predictor), values = list(
                         predictor = predictor,
                         auc_pr = pr$auprc,
                         f1_score = pr$max_f1,
@@ -2091,7 +2197,15 @@ enhancedROCClass <- R6::R6Class(
             }
             
             if (best_auc == 0) {
-                html$setContent("<p>No valid ROC results available for report generation.</p>")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noValidROCResults',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(jmvcore::format(
+                    'No valid ROC results available for report generation. • ROC analysis may have failed for all predictors. • Check that outcome variable is binary and predictors are numeric. • Verify sufficient data for each predictor-outcome combination.'
+                ))
+                self$results$insert(1, notice)
                 return()
             }
             
@@ -3113,7 +3227,7 @@ enhancedROCClass <- R6::R6Class(
                         calibration_in_large = cal_in_large,
                         interpretation = interpretation
                     )
-                    calTable$addRow(rowKey = predictor, values = row)
+                    calTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
                     
                     # Hosmer-Lemeshow Test
                     if (self$options$hosmerLemeshow) {
@@ -3151,7 +3265,7 @@ enhancedROCClass <- R6::R6Class(
                             n_groups = actual_groups,
                             conclusion = conclusion
                         )
-                        hlTable$addRow(rowKey = predictor, values = hl_row)
+                        hlTable$addRow(rowKey = private$.escapeVar(predictor), values = hl_row)
                     }
                     
                 }, error = function(e) {
@@ -3477,7 +3591,7 @@ enhancedROCClass <- R6::R6Class(
                         false_positive_rate = false_positive_rate,
                         net_benefit_per_100 = net_benefit * 100
                     )
-                    impactTable$addRow(rowKey = predictor, values = row)
+                    impactTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
                     
                     if (self$options$decisionImpactTable) {
                         thresholds <- unique(pmin(pmax(c(0.1, 0.2, 0.3, threshold_prob), 0.01), 0.99))

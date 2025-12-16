@@ -199,6 +199,12 @@ children:
           - type: CheckBox
             name: showReference
           - type: CheckBox
+            name: showSummary
+          - type: CheckBox
+            name: showGlossary
+          - type: CheckBox
+            name: showAssumptions
+          - type: CheckBox
             name: exportResults
 
 ...
