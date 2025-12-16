@@ -39,86 +39,102 @@ children:
     children:
       - type: ComboBox
         name: clinicalPreset
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
     children:
-      - type: ComboBox
-        name: plotType
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: Plot Configuration
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: plotType
+      - type: Label
+        label: Gene Selection
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: topn
+                format: number
+              - type: TextBox
+                name: genesToInclude
+                format: string
+              - type: TextBox
+                name: genesToIgnore
+                format: string
+      - type: Label
+        label: Sample Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: maxSamples
+                format: number
+              - type: ComboBox
+                name: sortBy
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
     children:
-      - type: TextBox
-        name: topn
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: Visual Components
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMutationLoad
+              - type: CheckBox
+                name: showGeneFreq
+              - type: CheckBox
+                name: drawMarginalPlots
+              - type: CheckBox
+                name: showClinicalAnnotation
+      - type: Label
+        label: Tumor Mutation Burden (TMB)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showTMB
+              - type: CheckBox
+                name: showTMBTable
+                enable: (showTMB)
+              - type: CheckBox
+                name: log10TransformTMB
+                enable: (showTMB)
+  - type: CollapseBox
+    label: Plot Appearance
+    collapsed: true
     children:
-      - type: TextBox
-        name: genesToInclude
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: genesToIgnore
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: maxSamples
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: sortBy
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: colorScheme
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showMutationLoad
-      - type: CheckBox
-        name: showGeneFreq
-      - type: CheckBox
-        name: drawMarginalPlots
-      - type: CheckBox
-        name: showTMB
-      - type: CheckBox
-        name: showTMBTable
-        enable: (showTMB)
-      - type: CheckBox
-        name: log10TransformTMB
-        enable: (showTMB)
-      - type: CheckBox
-        name: showClinicalAnnotation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plotWidth
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plotHeight
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: fontSize
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showLegend
-      - type: Output
-        name: tmbOutput
+      - type: Label
+        label: Colors and Legend
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: colorScheme
+              - type: CheckBox
+                name: showLegend
+      - type: Label
+        label: Plot Dimensions
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: fontSize
+                format: number
+              - type: TextBox
+                name: plotWidth
+                format: number
+              - type: TextBox
+                name: plotHeight
+                format: number

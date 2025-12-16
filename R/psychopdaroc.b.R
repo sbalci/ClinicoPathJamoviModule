@@ -261,6 +261,57 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     .prevalenceList = list(),         # Store prevalence values
     .aucList = list(),               # Store AUC values for clinical interpretation
     .forestPlotData = NULL,          # Store forest plot data for meta-analysis
+    
+    # ============================================================================
+    # INITIALIZATION AND VALIDATION
+    # ============================================================================
+
+    # COMMENTED OUT: Duplicate .init - see complete implementation at line ~1711
+    # .init = function() {
+    #   # Initialize tables and plots
+    #
+    #   # Hide advanced results by default
+    #   self$results$clinicalInterpretationTable$setVisible(
+    #     self$options$clinicalMode %in% c("basic", "advanced", "comprehensive")
+    #   )
+    #
+    #   # Show run summary if available (it's always visible in r.yaml/default, but we can set content)
+    #   self$results$runSummary$setContent("")
+    # },
+
+    .validateInputsOLD = function() {
+      # 1. Check if data is present
+      if (is.null(self$data) || nrow(self$data) == 0) {
+        return(list(valid = FALSE, message = "No data available for analysis."))
+      }
+      
+      # 2. Check class variable
+      classVar <- self$options$classVar
+      if (is.null(classVar) || !classVar %in% names(self$data)) {
+        return(list(valid = FALSE, message = "Class variable not specified or not found."))
+      }
+      
+      # 3. Check positive class
+      posClass <- self$options$positiveClass
+      if (!is.null(posClass) && posClass != "") {
+        # Verify positive class exists in data
+        actualLevels <- unique(as.character(self$data[[classVar]]))
+        if (!posClass %in% actualLevels) {
+          return(list(valid = FALSE, message = sprintf(
+            "Specified positive class '%s' not found in variable '%s'. Available levels: %s",
+            posClass, classVar, paste(actualLevels, collapse = ", ")
+          )))
+        }
+      }
+      
+      # 4. Check dependent variables
+      depVars <- self$options$dependentVars
+      if (is.null(depVars) || length(depVars) == 0) {
+        return(list(valid = FALSE, message = "No test variables selected."))
+      }
+      
+      return(list(valid = TRUE, message = ""))
+    },
 
     # ============================================================================
     # UTILITY METHODS
@@ -1759,6 +1810,14 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )
         return()
       } else {
+        # Strict Validation
+        val <- private$.validateInputs()
+        if (!val$valid) {
+          self$results$runSummary$setContent(paste("<b>Error:</b>", val$message))
+          self$results$instructions$setVisible(FALSE)
+          stop(val$message) # Stop execution
+        }
+
         # Hide instructions when inputs are provided
         self$results$instructions$setVisible(FALSE)
         

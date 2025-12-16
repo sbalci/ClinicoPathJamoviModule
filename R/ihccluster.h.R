@@ -16,7 +16,7 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             distanceMethod = "gower",
             linkageMethod = "ward",
             nClusters = 3,
-            autoSelectK = TRUE,
+            autoSelectK = FALSE,
             kRange = "medium",
             scaleContVars = TRUE,
             weights = "",
@@ -27,20 +27,20 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showSilhouette = TRUE,
             showHeatmap = TRUE,
             heatmapScale = "row",
-            showDendrogram = TRUE,
-            showPCAPlot = TRUE,
-            showBoxplots = TRUE,
+            showDendrogram = FALSE,
+            showPCAPlot = FALSE,
+            showBoxplots = FALSE,
             markerSummary = TRUE,
             clusterProfiles = TRUE,
-            associationTests = TRUE,
+            associationTests = FALSE,
             multipleTestingCorrection = "bonferroni",
             markerOptimization = FALSE,
             showMarkerCorrelation = FALSE,
             performMarkerClustering = FALSE,
             markerClusteringMethod = "chisquared",
             markerLinkage = "ward",
-            markerSignificanceTest = TRUE,
-            markerCutHeight = TRUE,
+            markerSignificanceTest = FALSE,
+            markerCutHeight = FALSE,
             clusterQualityMetrics = TRUE,
             iterativeRefinement = FALSE,
             refinementIterations = 3,
@@ -69,7 +69,8 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             fontSize = "medium",
             plotContrast = FALSE,
             showInterpretation = FALSE,
-            showTechnicalNotes = FALSE, ...) {
+            showTechnicalNotes = FALSE,
+            showDiagnosticGlossary = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -157,7 +158,7 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..autoSelectK <- jmvcore::OptionBool$new(
                 "autoSelectK",
                 autoSelectK,
-                default=TRUE)
+                default=FALSE)
             private$..kRange <- jmvcore::OptionList$new(
                 "kRange",
                 kRange,
@@ -214,15 +215,15 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showDendrogram <- jmvcore::OptionBool$new(
                 "showDendrogram",
                 showDendrogram,
-                default=TRUE)
+                default=FALSE)
             private$..showPCAPlot <- jmvcore::OptionBool$new(
                 "showPCAPlot",
                 showPCAPlot,
-                default=TRUE)
+                default=FALSE)
             private$..showBoxplots <- jmvcore::OptionBool$new(
                 "showBoxplots",
                 showBoxplots,
-                default=TRUE)
+                default=FALSE)
             private$..markerSummary <- jmvcore::OptionBool$new(
                 "markerSummary",
                 markerSummary,
@@ -234,7 +235,7 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..associationTests <- jmvcore::OptionBool$new(
                 "associationTests",
                 associationTests,
-                default=TRUE)
+                default=FALSE)
             private$..multipleTestingCorrection <- jmvcore::OptionList$new(
                 "multipleTestingCorrection",
                 multipleTestingCorrection,
@@ -281,11 +282,11 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..markerSignificanceTest <- jmvcore::OptionBool$new(
                 "markerSignificanceTest",
                 markerSignificanceTest,
-                default=TRUE)
+                default=FALSE)
             private$..markerCutHeight <- jmvcore::OptionBool$new(
                 "markerCutHeight",
                 markerCutHeight,
-                default=TRUE)
+                default=FALSE)
             private$..clusterQualityMetrics <- jmvcore::OptionBool$new(
                 "clusterQualityMetrics",
                 clusterQualityMetrics,
@@ -454,6 +455,10 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showTechnicalNotes",
                 showTechnicalNotes,
                 default=FALSE)
+            private$..showDiagnosticGlossary <- jmvcore::OptionBool$new(
+                "showDiagnosticGlossary",
+                showDiagnosticGlossary,
+                default=TRUE)
 
             self$.addOption(private$..catVars)
             self$.addOption(private$..contVars)
@@ -519,6 +524,7 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotContrast)
             self$.addOption(private$..showInterpretation)
             self$.addOption(private$..showTechnicalNotes)
+            self$.addOption(private$..showDiagnosticGlossary)
         }),
     active = list(
         catVars = function() private$..catVars$value,
@@ -584,7 +590,8 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         fontSize = function() private$..fontSize$value,
         plotContrast = function() private$..plotContrast$value,
         showInterpretation = function() private$..showInterpretation$value,
-        showTechnicalNotes = function() private$..showTechnicalNotes$value),
+        showTechnicalNotes = function() private$..showTechnicalNotes$value,
+        showDiagnosticGlossary = function() private$..showDiagnosticGlossary$value),
     private = list(
         ..catVars = NA,
         ..contVars = NA,
@@ -649,7 +656,8 @@ ihcclusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..fontSize = NA,
         ..plotContrast = NA,
         ..showInterpretation = NA,
-        ..showTechnicalNotes = NA)
+        ..showTechnicalNotes = NA,
+        ..showDiagnosticGlossary = NA)
 )
 
 ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -694,6 +702,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         medoidInfo = function() private$.items[["medoidInfo"]],
         interpretationGuide = function() private$.items[["interpretationGuide"]],
         technicalNotes = function() private$.items[["technicalNotes"]],
+        diagnosticGlossary = function() private$.items[["diagnosticGlossary"]],
         executiveSummary = function() private$.items[["executiveSummary"]],
         spatialCompartmentSummary = function() private$.items[["spatialCompartmentSummary"]],
         spatialConcordance = function() private$.items[["spatialConcordance"]],
@@ -1618,6 +1627,11 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="technicalNotes",
                 title="Technical Notes",
                 visible="(showTechnicalNotes)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="diagnosticGlossary",
+                title="Diagnostic Metrics Glossary",
+                visible="(calculateDiagnosticMetrics && showDiagnosticGlossary)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="executiveSummary",
@@ -1769,7 +1783,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=1000,
                 height=700,
                 renderFun=".plotSpatialHeatmap",
-                visible="(performSpatialAnalysis && showHeatmap)",
+                visible=FALSE,
                 clearWith=list(
                     "spatialCompartment",
                     "catVars",
@@ -1960,6 +1974,8 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotContrast Enable high contrast mode for better visibility
 #' @param showInterpretation Display clinical interpretation guide
 #' @param showTechnicalNotes Display technical notes about the analysis
+#' @param showDiagnosticGlossary Display explanations of sensitivity,
+#'   specificity, PPV, NPV
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -2000,6 +2016,7 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$diagnosticGlossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$executiveSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$spatialCompartmentSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$spatialConcordance} \tab \tab \tab \tab \tab a table \cr
@@ -2031,7 +2048,7 @@ ihccluster <- function(
     distanceMethod = "gower",
     linkageMethod = "ward",
     nClusters = 3,
-    autoSelectK = TRUE,
+    autoSelectK = FALSE,
     kRange = "medium",
     scaleContVars = TRUE,
     weights = "",
@@ -2042,20 +2059,20 @@ ihccluster <- function(
     showSilhouette = TRUE,
     showHeatmap = TRUE,
     heatmapScale = "row",
-    showDendrogram = TRUE,
-    showPCAPlot = TRUE,
-    showBoxplots = TRUE,
+    showDendrogram = FALSE,
+    showPCAPlot = FALSE,
+    showBoxplots = FALSE,
     markerSummary = TRUE,
     clusterProfiles = TRUE,
-    associationTests = TRUE,
+    associationTests = FALSE,
     multipleTestingCorrection = "bonferroni",
     markerOptimization = FALSE,
     showMarkerCorrelation = FALSE,
     performMarkerClustering = FALSE,
     markerClusteringMethod = "chisquared",
     markerLinkage = "ward",
-    markerSignificanceTest = TRUE,
-    markerCutHeight = TRUE,
+    markerSignificanceTest = FALSE,
+    markerCutHeight = FALSE,
     clusterQualityMetrics = TRUE,
     iterativeRefinement = FALSE,
     refinementIterations = 3,
@@ -2084,7 +2101,8 @@ ihccluster <- function(
     fontSize = "medium",
     plotContrast = FALSE,
     showInterpretation = FALSE,
-    showTechnicalNotes = FALSE) {
+    showTechnicalNotes = FALSE,
+    showDiagnosticGlossary = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihccluster requires jmvcore to be installed (restart may be required)")
@@ -2184,7 +2202,8 @@ ihccluster <- function(
         fontSize = fontSize,
         plotContrast = plotContrast,
         showInterpretation = showInterpretation,
-        showTechnicalNotes = showTechnicalNotes)
+        showTechnicalNotes = showTechnicalNotes,
+        showDiagnosticGlossary = showDiagnosticGlossary)
 
     analysis <- ihcclusterClass$new(
         options = options,

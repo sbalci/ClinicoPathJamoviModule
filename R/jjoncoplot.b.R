@@ -185,6 +185,75 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(cooccurrence_results)
         },
 
+        .getColorPalette = function(colorScheme, plotType = "oncoplot") {
+            # Centralized color palette configuration for all plot types
+            # Returns appropriate colors based on color scheme and plot type
+
+            palettes <- list(
+                default = list(
+                    oncoplot = c("Wild-type" = "#f0f0f0", "Mutation" = "#1f77b4", "Missing" = "#d9d9d9"),
+                    bar = "#1f77b4",
+                    gradient = list(low = "#3182bd", mid = "#f0f0f0", high = "#d62728"),
+                    mutation_type = c(
+                        "Wild-type" = "#f7f7f7",
+                        "Missense" = "#1f77b4",
+                        "Nonsense" = "#d62728",
+                        "Frame_Shift" = "#ff7f0e",
+                        "Splice_Site" = "#2ca02c",
+                        "In_Frame" = "#9467bd",
+                        "SNV" = "#17becf",
+                        "CNV" = "#8c564b",
+                        "Fusion" = "#e377c2",
+                        "Mutation" = "#1f77b4",
+                        "Missing" = "#d9d9d9"
+                    )
+                ),
+                clinical = list(
+                    oncoplot = c("Wild-type" = "#e5f5f9", "Mutation" = "#2ca02c", "Missing" = "#d9d9d9"),
+                    bar = "#2ca02c",
+                    gradient = list(low = "#2ca02c", mid = "#f0f0f0", high = "#d62728")
+                ),
+                viridis = list(
+                    oncoplot = c("Wild-type" = "#f0f0f0", "Mutation" = "#440154", "Missing" = "#d9d9d9"),
+                    bar = "#440154",
+                    gradient = list(low = "#440154", mid = "#21908c", high = "#fde725")
+                ),
+                high_contrast = list(
+                    oncoplot = c("Wild-type" = "#ffffff", "Mutation" = "#000000", "Missing" = "#d9d9d9"),
+                    bar = "#000000",
+                    gradient = list(low = "#000000", mid = "#808080", high = "#ffffff")
+                ),
+                mutation_type = list(
+                    oncoplot = c("Wild-type" = "#f7f7f7", "Mutation" = "#1f77b4", "Missing" = "#d9d9d9"),
+                    bar = "#1f77b4",
+                    gradient = list(low = "#1f77b4", mid = "#f0f0f0", high = "#ff7f0e"),
+                    mutation_type = c(
+                        "Wild-type" = "#f7f7f7",
+                        "Missense" = "#1f77b4",
+                        "Nonsense" = "#d62728",
+                        "Frame_Shift" = "#ff7f0e",
+                        "Splice_Site" = "#2ca02c",
+                        "In_Frame" = "#9467bd",
+                        "SNV" = "#17becf",
+                        "CNV" = "#8c564b",
+                        "Fusion" = "#e377c2",
+                        "Mutation" = "#1f77b4",
+                        "Missing" = "#d9d9d9"
+                    )
+                )
+            )
+
+            # Return appropriate palette, with fallback to default
+            if (colorScheme %in% names(palettes)) {
+                if (plotType %in% names(palettes[[colorScheme]])) {
+                    return(palettes[[colorScheme]][[plotType]])
+                }
+            }
+
+            # Fallback to default if scheme or type not found
+            return(palettes$default[[plotType]])
+        },
+
         .updateGuidanceMessage = function() {
             sampleVar <- self$options$sampleVar
             geneVars <- self$options$geneVars
@@ -340,11 +409,12 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mutation_matrix <- prepared_data$mutation_matrix
             selected_genes <- prepared_data$selected_genes
             clinical_data <- prepared_data$clinical_data
+            safe_sampleVar <- prepared_data$safe_sampleVar
 
             if (plotType == "oncoplot") {
                 # Create classic oncoplot
                 p <- mutation_matrix %>%
-                    ggplot2::ggplot(ggplot2::aes(x = gene, y = !!rlang::sym(self$options$sampleVar), fill = mutation_type)) +
+                    ggplot2::ggplot(ggplot2::aes(x = gene, y = !!rlang::sym(safe_sampleVar), fill = mutation_type)) +
                     ggplot2::geom_tile(color = "white", size = 0.1) +
                     ggplot2::scale_x_discrete(position = "top") +
                     ggplot2::theme_minimal() +
@@ -361,49 +431,20 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
 
                 # Apply clinical color schemes (color-blind safe options)
-                if (colorScheme == "default") {
-                    # Color-blind safe default (blue-orange)
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f0f0f0", "Mutation" = "#1f77b4", "Missing" = "#d9d9d9"))
-                } else if (colorScheme == "clinical") {
-                    # Clinical blue-green scale
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#e5f5f9", "Mutation" = "#2ca02c", "Missing" = "#d9d9d9"))
-                } else if (colorScheme == "viridis") {
-                    # Viridis color-blind safe palette
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#f0f0f0", "Mutation" = "#440154", "Missing" = "#d9d9d9"))
-                } else if (colorScheme == "high_contrast") {
-                    # High contrast for accessibility
-                    p <- p + ggplot2::scale_fill_manual(values = c("Wild-type" = "#ffffff", "Mutation" = "#000000", "Missing" = "#d9d9d9"))
-                } else if (colorScheme == "mutation_type") {
-                    # Create dynamic color palette for mutation types (color-blind considerations)
+                if (colorScheme == "mutation_type") {
+                    # For mutation_type, filter palette to only types present in data
                     unique_types <- unique(mutation_matrix$mutation_type)
-                    mutation_colors <- c(
-                        "Wild-type" = "#f7f7f7",
-                        "Missense" = "#1f77b4",      # Blue (color-blind safe)
-                        "Nonsense" = "#d62728",      # Red
-                        "Frame_Shift" = "#ff7f0e",   # Orange (color-blind safe)
-                        "Splice_Site" = "#2ca02c",   # Green
-                        "In_Frame" = "#9467bd",      # Purple
-                        "SNV" = "#17becf",           # Cyan
-                        "CNV" = "#8c564b",           # Brown
-                        "Fusion" = "#e377c2",        # Pink
-                        "Mutation" = "#1f77b4",       # Blue fallback
-                        "Missing" = "#d9d9d9"
-                    )
-                    # Filter colors to only those present in data
+                    mutation_colors <- private$.getColorPalette(colorScheme, "mutation_type")
                     available_colors <- mutation_colors[names(mutation_colors) %in% unique_types]
                     p <- p + ggplot2::scale_fill_manual(values = available_colors)
+                } else {
+                    # Use centralized palette for other schemes
+                    p <- p + ggplot2::scale_fill_manual(values = private$.getColorPalette(colorScheme, "oncoplot"))
                 }
                 
             } else if (plotType == "frequency") {
                 # Create gene frequency plot with color scheme support
-                freq_color <- switch(colorScheme,
-                    "default" = "#1f77b4",
-                    "clinical" = "#2ca02c", 
-                    "viridis" = "#440154",
-                    "high_contrast" = "#000000",
-                    "mutation_type" = "#1f77b4",
-                    "#1f77b4"  # fallback
-                )
+                freq_color <- private$.getColorPalette(colorScheme, "bar")
                 
                 p <- prepared_data$gene_frequencies %>%
                     ggplot2::ggplot(ggplot2::aes(x = reorder(gene, frequency), y = frequency)) +
@@ -444,15 +485,8 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         stringsAsFactors = FALSE
                     )
                     cooccurrence_df$Log2OR <- as.numeric(as.vector(log_or))
-                    
-                    color_scheme_gradient <- switch(colorScheme,
-                        "default" = list(low = "#3182bd", mid = "#f0f0f0", high = "#d62728"),
-                        "clinical" = list(low = "#2ca02c", mid = "#f0f0f0", high = "#d62728"), 
-                        "viridis" = list(low = "#440154", mid = "#21908c", high = "#fde725"),
-                        "high_contrast" = list(low = "#000000", mid = "#808080", high = "#ffffff"),
-                        "mutation_type" = list(low = "#1f77b4", mid = "#f0f0f0", high = "#ff7f0e"),
-                        list(low = "#3182bd", mid = "#f0f0f0", high = "#d62728")  # fallback
-                    )
+
+                    color_scheme_gradient <- private$.getColorPalette(colorScheme, "gradient")
 
                     p <- cooccurrence_df %>%
                         ggplot2::ggplot(ggplot2::aes(x = Gene1, y = Gene2, fill = Log2OR)) +
@@ -481,14 +515,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             } else {
                 # Default to frequency plot with color scheme support
-                freq_color <- switch(colorScheme,
-                    "default" = "#1f77b4",
-                    "clinical" = "#2ca02c", 
-                    "viridis" = "#440154",
-                    "high_contrast" = "#000000",
-                    "mutation_type" = "#1f77b4",
-                    "#1f77b4"  # fallback
-                )
+                freq_color <- private$.getColorPalette(colorScheme, "bar")
                 
                 p <- prepared_data$gene_frequencies %>%
                     ggplot2::ggplot(ggplot2::aes(x = reorder(gene, frequency), y = frequency)) +
@@ -504,14 +531,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create marginal plots if requested (ggoncoplot style)
             if (drawMarginalPlots && plotType == "oncoplot") {
                 # Get color for marginal plots
-                marginal_color <- switch(colorScheme,
-                    "default" = "#1f77b4",
-                    "clinical" = "#2ca02c", 
-                    "viridis" = "#440154",
-                    "high_contrast" = "#000000",
-                    "mutation_type" = "#1f77b4",
-                    "#1f77b4"  # fallback
-                )
+                marginal_color <- private$.getColorPalette(colorScheme, "bar")
                 
                 # Create gene frequency marginal plot (right side)
                 gene_plot <- prepared_data$gene_frequencies %>%
@@ -536,7 +556,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         dplyr::mutate(
                             total_mutations = rowSums(dplyr::select(., dplyr::all_of(selected_genes)), na.rm = TRUE)
                         ) %>%
-                        dplyr::select(!!rlang::sym(self$options$sampleVar), total_mutations)
+                        dplyr::select(!!rlang::sym(safe_sampleVar), total_mutations)
                     
                     # Apply log transformation if requested
                     if (log10TransformTMB) {
@@ -557,7 +577,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     
                     tmb_plot <- sample_tmb %>%
-                        ggplot2::ggplot(ggplot2::aes(x = reorder(!!rlang::sym(self$options$sampleVar), total_mutations), y = total_mutations)) +
+                        ggplot2::ggplot(ggplot2::aes(x = reorder(!!rlang::sym(safe_sampleVar), total_mutations), y = total_mutations)) +
                         ggplot2::geom_col(fill = tmb_color, alpha = 0.7) +
                         ggplot2::theme_minimal() +
                         ggplot2::theme(
@@ -584,14 +604,14 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Reshape clinical data for plotting
                 clinical_long <- clinical_data %>%
                     tidyr::pivot_longer(
-                        cols = -!!rlang::sym(self$options$sampleVar),
+                        cols = -!!rlang::sym(safe_sampleVar),
                         names_to = "variable",
                         values_to = "value"
                     )
-                
+
                 # Create clinical heatmap
                 clinical_plot <- clinical_long %>%
-                    ggplot2::ggplot(ggplot2::aes(x = !!rlang::sym(self$options$sampleVar), y = variable, fill = value)) +
+                    ggplot2::ggplot(ggplot2::aes(x = !!rlang::sym(safe_sampleVar), y = variable, fill = value)) +
                     ggplot2::geom_tile(color = "white", size = 0.1) +
                     ggplot2::theme_minimal() +
                     ggplot2::theme(
@@ -627,22 +647,40 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Update guidance message instead of throwing errors
             private$.updateGuidanceMessage()
 
-            # Silent validation - return FALSE without error messages
+            # ERROR: Missing sample variable
             if (is.null(sampleVar) || length(sampleVar) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingSampleVar',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Sample ID variable is required. Please select a variable containing unique patient or sample identifiers (e.g., PatientID, SampleID, TCGA-ID).')
+                self$results$insert(1, notice)
                 return(FALSE)
             }
 
+            # ERROR: Missing gene variables
             if (is.null(geneVars) || length(geneVars) < 1) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingGeneVars',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('At least one gene variable is required. Please select variables representing mutation status (0 = wild-type, 1 = mutated). Common examples: TP53, KRAS, PIK3CA, EGFR, BRAF.')
+                self$results$insert(1, notice)
                 return(FALSE)
             }
 
+            # ERROR: No data loaded
             if (is.null(data) || nrow(data) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noData',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('No data loaded. Please open a dataset containing genomic mutation information to begin analysis.')
+                self$results$insert(1, notice)
                 return(FALSE)
-            }
-
-            # Duplicate sample IDs
-            if (anyDuplicated(data[[sampleVar]]) > 0) {
-                private$.guidanceNotes <- c(private$.guidanceNotes, "Duplicate sample IDs detected; duplicates will be dropped keeping the first occurrence.")
             }
 
             # Check if variables exist in data
@@ -655,24 +693,69 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     missing_vars <- c(missing_vars, var)
                 }
             }
+
+            # ERROR: Variables not found in dataset
             if (length(missing_vars) > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'variablesNotFound',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('The following variables were not found in your dataset: %s. Please check variable names for typos, case sensitivity, or ensure your dataset contains these columns.', paste(missing_vars, collapse = ', ')))
+                self$results$insert(1, notice)
                 return(FALSE)
             }
 
-            # Check for minimum data requirements
+            # ERROR: Insufficient data
             if (nrow(data) < 2) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficientData',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('At least 2 samples are required for oncoplot visualization. Your dataset contains %d sample(s). Please load a dataset with multiple samples.', nrow(data)))
+                self$results$insert(1, notice)
                 return(FALSE)
             }
 
-            # Non-binary mutation values
+            # STRONG_WARNING: Duplicate sample IDs
+            if (anyDuplicated(data[[sampleVar]]) > 0) {
+                dup_count <- sum(duplicated(data[[sampleVar]]))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'duplicateSamples',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('%d duplicate sample IDs detected in the %s variable. Only the first occurrence of each sample will be retained for analysis. Consider deduplicating your data before analysis to ensure data integrity.', dup_count, sampleVar))
+                self$results$insert(1, notice)
+                private$.guidanceNotes <- c(private$.guidanceNotes, sprintf("Duplicate sample IDs (n=%d) will be removed", dup_count))
+            }
+
+            # STRONG_WARNING: Non-binary mutation values
             nonbinary <- vapply(geneVars, function(v) {
                 any(!is.na(data[[v]]) & !(data[[v]] %in% c(0, 1)), na.rm = TRUE)
             }, logical(1))
             if (any(nonbinary)) {
                 bad_genes <- paste(geneVars[nonbinary], collapse = ", ")
-                private$.guidanceNotes <- c(private$.guidanceNotes,
-                    paste0("Non-binary mutation values detected in: ", bad_genes, ". Values will be clipped to 0/1 for analysis.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'nonBinaryMutations',
+                    type = jmvcore::NoticeType$STRONG_WARNING
                 )
+                notice$setContent(sprintf('Non-binary mutation values detected in the following genes: %s. Expected values are 0 (wild-type) or 1 (mutated). All non-zero values will be clipped to 1, and zero/negative values to 0 for analysis.', bad_genes))
+                self$results$insert(1, notice)
+                private$.guidanceNotes <- c(private$.guidanceNotes, sprintf("Non-binary values in %d genes", sum(nonbinary)))
+            }
+
+            # STRONG_WARNING: Small sample size
+            if (nrow(data) < 10) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSampleSize',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('Small sample size detected (n = %d). For robust mutation frequency analysis and statistical testing, a minimum of 10-20 samples is recommended. Findings should be interpreted with caution and validated in larger cohorts.', nrow(data)))
+                self$results$insert(1, notice)
             }
 
             return(TRUE)
@@ -689,6 +772,9 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             genesToInclude <- effectiveOptions$genesToInclude
             genesToIgnore <- effectiveOptions$genesToIgnore
 
+            # Create safe variable names for use in formulas and rlang (handles spaces, special chars)
+            safe_sampleVar <- jmvcore::composeTerm(sampleVar)
+
             # Convert to data frame and handle missing values
             df <- as.data.frame(data)
 
@@ -697,11 +783,14 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Drop duplicate samples keeping first
             df <- df[!duplicated(df[[sampleVar]]), , drop = FALSE]
 
-            # Process gene variables - convert to numeric (0/1)
-            for (var in geneVars) {
-                df[[var]] <- as.numeric(as.character(df[[var]]))
-                df[[var]][is.na(df[[var]])] <- NA
-                df[[var]] <- ifelse(df[[var]] > 0, 1, ifelse(df[[var]] <= 0, 0, df[[var]]))
+            # Process gene variables - convert to numeric (0/1) - VECTORIZED
+            if (length(geneVars) > 0) {
+                gene_matrix <- as.matrix(df[, geneVars, drop = FALSE])
+                gene_matrix <- apply(gene_matrix, 2, function(x) {
+                    x_num <- as.numeric(as.character(x))
+                    ifelse(x_num > 0, 1, ifelse(x_num <= 0, 0, x_num))
+                })
+                df[, geneVars] <- as.data.frame(gene_matrix)
             }
 
             # Apply gene filtering logic (ggoncoplot style)
@@ -718,9 +807,42 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 genes_to_include <- trimws(strsplit(genesToInclude, ",")[[1]])
                 # Filter to genes that exist in data
                 selected_genes <- intersect(genes_to_include, available_genes)
+
+                # ERROR: No requested genes found in dataset
                 if (length(selected_genes) == 0) {
-                    # Silent handling - will be shown in guidance message
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noGenesFound',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    missing_genes <- setdiff(genes_to_include, available_genes)
+                    available_sample <- paste(head(available_genes, 10), collapse = ", ")
+                    if (length(available_genes) > 10) {
+                        available_sample <- paste0(available_sample, ", ...")
+                    }
+                    notice$setContent(sprintf(
+                        'None of the requested genes (%s) were found in your dataset. Available genes include: %s. Please check gene names for typos (they are case-sensitive) or select genes from the available list.',
+                        paste(missing_genes, collapse = ', '),
+                        available_sample
+                    ))
+                    self$results$insert(1, notice)
                     return(NULL)
+                }
+
+                # WARNING: Partial gene match
+                if (length(selected_genes) < length(genes_to_include)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'partialGeneMatch',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    missing_genes <- setdiff(genes_to_include, selected_genes)
+                    notice$setContent(sprintf(
+                        'Some requested genes were not found in your dataset. Found: %s. Missing: %s. Gene names are case-sensitive - please verify spelling and capitalization.',
+                        paste(selected_genes, collapse = ', '),
+                        paste(missing_genes, collapse = ', ')
+                    ))
+                    self$results$insert(1, notice)
                 }
             } else {
                 # Calculate mutation frequencies and select top N genes
@@ -829,6 +951,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 gene_frequencies = gene_frequencies,
                 clinical_data = clinical_data,
                 sampleVar = sampleVar,
+                safe_sampleVar = safe_sampleVar,
                 effectiveOptions = effectiveOptions
             ))
         },
@@ -952,7 +1075,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         genes_mutated = sum(c_across(prepared_data$selected_genes) > 0, na.rm = TRUE)
                     ) %>%
                     dplyr::ungroup() %>%
-                    dplyr::select(sample = !!rlang::sym(self$options$sampleVar), mutation_count, genes_mutated) %>%
+                    dplyr::select(sample = !!rlang::sym(prepared_data$safe_sampleVar), mutation_count, genes_mutated) %>%
                     dplyr::mutate(
                         total_mutations = mutation_count,
                         mutation_burden = genes_mutated / length(prepared_data$selected_genes)
@@ -971,7 +1094,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     dplyr::mutate(
                         total_mutations = rowSums(dplyr::select(., dplyr::all_of(prepared_data$selected_genes)), na.rm = TRUE)
                     ) %>%
-                    dplyr::select(sample = !!rlang::sym(self$options$sampleVar), total_mutations)
+                    dplyr::select(sample = !!rlang::sym(prepared_data$safe_sampleVar), total_mutations)
 
                 sample_tmb <- sample_tmb %>%
                     dplyr::mutate(
@@ -1037,7 +1160,66 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (i in seq_len(nrow(plot_info))) {
                 self$results$plotInfo$addRow(rowKey = i, values = plot_info[i, ])
             }
-            
+
+            # INFO: Hierarchical sorting explanation
+            if (effectiveOptions$sortBy == "hierarchical") {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'hierarchicalSorting',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent('Hierarchical sorting algorithm applied: Samples are ordered using ggoncoplot\'s base-2 exponential weighting based on gene frequency rank. Most frequently mutated genes contribute exponentially more weight (2^rank) to sample ordering, creating intuitive visual patterns.')
+                self$results$insert(999, notice)
+            }
+
+            # INFO: Gene selection method
+            if (!is.null(self$options$genesToInclude) && nchar(self$options$genesToInclude) > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'geneSelectionMethod',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(sprintf('Gene selection: Specific genes requested (%s). Displaying %d genes that were found in your dataset. Top N setting is overridden when specific genes are requested.', self$options$genesToInclude, length(prepared_data$selected_genes)))
+                self$results$insert(999, notice)
+            } else {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'geneSelectionMethod',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(sprintf('Gene selection: Displaying top %d most frequently mutated genes from your dataset (%d total gene variables). Use "Specific Genes to Include" to focus on genes of clinical interest.', effectiveOptions$topn, length(self$options$geneVars)))
+                self$results$insert(999, notice)
+            }
+
+            # INFO: TMB transformation
+            if (effectiveOptions$showTMB && effectiveOptions$log10TransformTMB) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'tmbTransformation',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent('Tumor Mutation Burden (TMB) values displayed using log10(TMB + 1) transformation. This transformation improves visualization when datasets contain hypermutator samples with extremely high mutation counts. Disable "Log10 Transform TMB" to view raw counts.')
+                self$results$insert(999, notice)
+            }
+
+            # WARNING: High missing rate in clinical variables
+            if (!is.null(effectiveOptions$clinicalVars) && length(effectiveOptions$clinicalVars) > 0) {
+                for (var in effectiveOptions$clinicalVars) {
+                    var_data <- prepared_data$data[[var]]
+                    missing_pct <- sum(is.na(var_data)) / length(var_data) * 100
+
+                    if (missing_pct > 50) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = paste0('highMissing_', var),
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(sprintf('Clinical variable "%s" has high missing data rate (%.1f%% missing). Consider imputation or removal of this variable for more reliable clinical correlations.', var, missing_pct))
+                        self$results$insert(500, notice)
+                    }
+                }
+            }
+
             # Generate clinical interpretation
             private$.generateClinicalInterpretation(prepared_data, effectiveOptions)
         },

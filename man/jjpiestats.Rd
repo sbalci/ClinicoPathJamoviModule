@@ -17,14 +17,14 @@ jjpiestats(
   label = "percentage",
   digits = 2,
   conflevel = 0.95,
-  proportiontest = TRUE,
-  bfmessage = TRUE,
+  proportiontest = FALSE,
+  bfmessage = FALSE,
   messages = FALSE,
   clinicalpreset = "custom",
-  showexplanations = TRUE,
+  showexplanations = FALSE,
   resultssubtitle = FALSE,
-  showSummary = TRUE,
-  showAssumptions = TRUE,
+  showSummary = FALSE,
+  showAssumptions = FALSE,
   showInterpretation = FALSE,
   addGGPubrDonut = FALSE,
   ggpubrDonutPalette = "jco"
@@ -75,7 +75,7 @@ pie slice.}
 \item{conflevel}{Confidence/credible interval level.}
 
 \item{proportiontest}{Decides whether proportion test for x variable is to
-be  carried out for each level of y.}
+be carried out for each level of y.}
 
 \item{bfmessage}{Display Bayes Factor in favor of the null hypothesis.
 Only relevant for parametric test.}
@@ -88,7 +88,7 @@ scenarios.  Automatically sets appropriate statistical methods and
 parameters.}
 
 \item{showexplanations}{Display detailed explanations of statistical
-methods, assumptions,  and clinical interpretations to guide analysis and
+methods, assumptions, and clinical interpretations to guide analysis and
 result interpretation.}
 
 \item{resultssubtitle}{Whether to display statistical test results as

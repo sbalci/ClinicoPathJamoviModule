@@ -37,6 +37,21 @@ items:
       title: Clinical Interpretation
       type: Html
 
+    - name:  about
+      title: About
+      type:  Html
+      visible: (showexplanations)
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: (showexplanations)
+
+    - name:  assumptions
+      title: Statistical Assumptions
+      type:  Html
+      visible: (showexplanations)
+
     - name: plot2
       title: Chart
       type: Image

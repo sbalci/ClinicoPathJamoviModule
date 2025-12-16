@@ -181,8 +181,6 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showLegend",
                 showLegend,
                 default=FALSE)
-            private$..tmbOutput <- jmvcore::OptionOutput$new(
-                "tmbOutput")
 
             self$.addOption(private$..sampleVar)
             self$.addOption(private$..geneVars)
@@ -207,7 +205,6 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotHeight)
             self$.addOption(private$..fontSize)
             self$.addOption(private$..showLegend)
-            self$.addOption(private$..tmbOutput)
         }),
     active = list(
         sampleVar = function() private$..sampleVar$value,
@@ -232,8 +229,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotWidth = function() private$..plotWidth$value,
         plotHeight = function() private$..plotHeight$value,
         fontSize = function() private$..fontSize$value,
-        showLegend = function() private$..showLegend$value,
-        tmbOutput = function() private$..tmbOutput$value),
+        showLegend = function() private$..showLegend$value),
     private = list(
         ..sampleVar = NA,
         ..geneVars = NA,
@@ -257,8 +253,7 @@ jjoncoplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plotWidth = NA,
         ..plotHeight = NA,
         ..fontSize = NA,
-        ..showLegend = NA,
-        ..tmbOutput = NA)
+        ..showLegend = NA)
 )
 
 jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -536,7 +531,7 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'none')
+                weightsSupport = 'auto')
         }))
 
 #' Genomic Landscape Visualization

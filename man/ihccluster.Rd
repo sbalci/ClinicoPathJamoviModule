@@ -16,7 +16,7 @@ ihccluster(
   distanceMethod = "gower",
   linkageMethod = "ward",
   nClusters = 3,
-  autoSelectK = TRUE,
+  autoSelectK = FALSE,
   kRange = "medium",
   scaleContVars = TRUE,
   weights = "",
@@ -27,20 +27,20 @@ ihccluster(
   showSilhouette = TRUE,
   showHeatmap = TRUE,
   heatmapScale = "row",
-  showDendrogram = TRUE,
-  showPCAPlot = TRUE,
-  showBoxplots = TRUE,
+  showDendrogram = FALSE,
+  showPCAPlot = FALSE,
+  showBoxplots = FALSE,
   markerSummary = TRUE,
   clusterProfiles = TRUE,
-  associationTests = TRUE,
+  associationTests = FALSE,
   multipleTestingCorrection = "bonferroni",
   markerOptimization = FALSE,
   showMarkerCorrelation = FALSE,
   performMarkerClustering = FALSE,
   markerClusteringMethod = "chisquared",
   markerLinkage = "ward",
-  markerSignificanceTest = TRUE,
-  markerCutHeight = TRUE,
+  markerSignificanceTest = FALSE,
+  markerCutHeight = FALSE,
   clusterQualityMetrics = TRUE,
   iterativeRefinement = FALSE,
   refinementIterations = 3,
@@ -69,7 +69,8 @@ ihccluster(
   fontSize = "medium",
   plotContrast = FALSE,
   showInterpretation = FALSE,
-  showTechnicalNotes = FALSE
+  showTechnicalNotes = FALSE,
+  showDiagnosticGlossary = TRUE
 )
 }
 \arguments{
@@ -224,6 +225,9 @@ available)}
 \item{showInterpretation}{Display clinical interpretation guide}
 
 \item{showTechnicalNotes}{Display technical notes about the analysis}
+
+\item{showDiagnosticGlossary}{Display explanations of sensitivity,
+specificity, PPV, NPV}
 }
 \value{
 A results object containing:
@@ -266,6 +270,7 @@ A results object containing:
 \code{results$medoidInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$diagnosticGlossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$executiveSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$spatialCompartmentSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$spatialConcordance} \tab \tab \tab \tab \tab a table \cr

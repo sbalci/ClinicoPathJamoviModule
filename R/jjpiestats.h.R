@@ -17,14 +17,14 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             label = "percentage",
             digits = 2,
             conflevel = 0.95,
-            proportiontest = TRUE,
-            bfmessage = TRUE,
+            proportiontest = FALSE,
+            bfmessage = FALSE,
             messages = FALSE,
             clinicalpreset = "custom",
-            showexplanations = TRUE,
+            showexplanations = FALSE,
             resultssubtitle = FALSE,
-            showSummary = TRUE,
-            showAssumptions = TRUE,
+            showSummary = FALSE,
+            showAssumptions = FALSE,
             showInterpretation = FALSE,
             addGGPubrDonut = FALSE,
             ggpubrDonutPalette = "jco", ...) {
@@ -113,11 +113,11 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..proportiontest <- jmvcore::OptionBool$new(
                 "proportiontest",
                 proportiontest,
-                default=TRUE)
+                default=FALSE)
             private$..bfmessage <- jmvcore::OptionBool$new(
                 "bfmessage",
                 bfmessage,
-                default=TRUE)
+                default=FALSE)
             private$..messages <- jmvcore::OptionBool$new(
                 "messages",
                 messages,
@@ -134,7 +134,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showexplanations <- jmvcore::OptionBool$new(
                 "showexplanations",
                 showexplanations,
-                default=TRUE)
+                default=FALSE)
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
@@ -142,11 +142,11 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showSummary <- jmvcore::OptionBool$new(
                 "showSummary",
                 showSummary,
-                default=TRUE)
+                default=FALSE)
             private$..showAssumptions <- jmvcore::OptionBool$new(
                 "showAssumptions",
                 showAssumptions,
-                default=TRUE)
+                default=FALSE)
             private$..showInterpretation <- jmvcore::OptionBool$new(
                 "showInterpretation",
                 showInterpretation,
@@ -436,7 +436,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param digits Number of digits after decimal point for statistical results.
 #' @param conflevel Confidence/credible interval level.
 #' @param proportiontest Decides whether proportion test for x variable is to
-#'   be  carried out for each level of y.
+#'   be carried out for each level of y.
 #' @param bfmessage Display Bayes Factor in favor of the null hypothesis.
 #'   Only relevant for parametric test.
 #' @param messages Display statistical messages in console.  Disabling
@@ -445,7 +445,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   scenarios.  Automatically sets appropriate statistical methods and
 #'   parameters.
 #' @param showexplanations Display detailed explanations of statistical
-#'   methods, assumptions,  and clinical interpretations to guide analysis and
+#'   methods, assumptions, and clinical interpretations to guide analysis and
 #'   result interpretation.
 #' @param resultssubtitle Whether to display statistical test results as
 #'   subtitle in the pie chart. Shows test statistics, p-values, effect sizes,
@@ -489,14 +489,14 @@ jjpiestats <- function(
     label = "percentage",
     digits = 2,
     conflevel = 0.95,
-    proportiontest = TRUE,
-    bfmessage = TRUE,
+    proportiontest = FALSE,
+    bfmessage = FALSE,
     messages = FALSE,
     clinicalpreset = "custom",
-    showexplanations = TRUE,
+    showexplanations = FALSE,
     resultssubtitle = FALSE,
-    showSummary = TRUE,
-    showAssumptions = TRUE,
+    showSummary = FALSE,
+    showAssumptions = FALSE,
     showInterpretation = FALSE,
     addGGPubrDonut = FALSE,
     ggpubrDonutPalette = "jco") {

@@ -36,6 +36,9 @@ irecist(
   calculateDCR = TRUE,
   showPseudoprogressionRate = TRUE,
   showReference = TRUE,
+  showSummary = TRUE,
+  showGlossary = TRUE,
+  showAssumptions = TRUE,
   formula
 )
 }
@@ -115,6 +118,12 @@ and transitions}
 \item{showReference}{Display iRECIST guidelines reference (Seymour et al.
 2017)}
 
+\item{showSummary}{Display natural-language summary with copy-ready text}
+
+\item{showGlossary}{Display glossary of iRECIST terms and definitions}
+
+\item{showAssumptions}{Display analysis assumptions and data requirements}
+
 \item{formula}{(optional) the formula to use, see the examples}
 }
 \value{
@@ -135,6 +144,9 @@ A results object containing:
 \code{results$stratifiedTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$referenceInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$executiveSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

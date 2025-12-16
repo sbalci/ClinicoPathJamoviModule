@@ -245,6 +245,19 @@ children:
             name: dpi
             label: Plot DPI
             format: number
+  - type: CollapseBox
+    label: Help & Guidance
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showAboutPanel
+            label: Show About Panel
+          - type: CheckBox
+            name: showAssumptions
+            label: Show Statistical Assumptions
   - type: LayoutBox
     margin: large
     children:

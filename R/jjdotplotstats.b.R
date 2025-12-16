@@ -20,6 +20,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .messages = NULL,
         .currentPreset = "basic",
 
+        # Variable name escaping for special characters
+        .escapeVar = function(var) {
+            if (is.null(var)) return(NULL)
+            # Use backticks for variables with spaces/special chars
+            if (grepl("[^A-Za-z0-9_\\.]", var)) {
+                return(paste0("`", var, "`"))
+            }
+            return(var)
+        },
+
         # init ----
 
         .init = function() {
@@ -56,25 +66,41 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .validateInputs = function() {
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return(FALSE)
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-            
+
+            if (nrow(self$data) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noCompleteRows',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Data contains no complete rows. Please check for missing values in your selected variables.')
+                self$results$insert(1, notice)
+                return(FALSE)
+            }
+
             # Check variable existence with better context
             if (!(self$options$dep %in% names(self$data))) {
                 available_vars <- paste(names(self$data), collapse=", ")
-                stop(glue::glue(
-                    'Variable "{self$options$dep}" not found in data.\n',
-                    'Available variables: {available_vars}\n',
-                    'Please select a valid continuous variable for the dependent variable.'
-                ))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'depVarNotFound',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid continuous variable for the dependent variable.', self$options$dep, available_vars))
+                self$results$insert(1, notice)
+                return(FALSE)
             }
+
             if (!(self$options$group %in% names(self$data))) {
                 available_vars <- paste(names(self$data), collapse=", ")
-                stop(glue::glue(
-                    'Variable "{self$options$group}" not found in data.\n',
-                    'Available variables: {available_vars}\n',
-                    'Please select a valid grouping variable.'
-                ))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'groupVarNotFound',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid grouping variable.', self$options$group, available_vars))
+                self$results$insert(1, notice)
+                return(FALSE)
             }
 
             # Require at least two groups with complete data
@@ -84,36 +110,79 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             complete_rows <- complete.cases(self$data[relevant_cols])
             group_levels <- nlevels(droplevels(as.factor(self$data[[self$options$group]][complete_rows])))
             if (group_levels < 2) {
-                private$.accumulateMessage(
-                    "<br>⚠️ At least two groups with data are required for a comparison.<br>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficientGroups',
+                    type = jmvcore::NoticeType$ERROR
                 )
+                notice$setContent(sprintf('At least two groups with data are required for comparison. Found %d group(s) with complete data. Please check for missing values or select different variables.', group_levels))
+                self$results$insert(1, notice)
                 return(FALSE)
             }
-            
+
+            # Check total sample size
+            n_total <- sum(complete_rows)
+            if (n_total < 30) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'smallSampleSize',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('Small total sample size (N = %d). Statistical tests may be unreliable with N < 30. Consider interpreting results cautiously or collecting more data.', n_total))
+                self$results$insert(1, notice)
+            }
+
+            # Check minimum group size
+            group_data <- self$data[[self$options$group]][complete_rows]
+            group_sizes <- table(droplevels(as.factor(group_data)))
+            min_group_n <- min(group_sizes)
+            if (min_group_n < 10) {
+                min_group_name <- names(which.min(group_sizes))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'verySmallGroups',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('Very small group sizes detected (minimum n = %d in group "%s"). Groups with n < 10 may produce unreliable test results. Consider combining groups or collecting more data.', min_group_n, min_group_name))
+                self$results$insert(1, notice)
+            }
+
             # Validate centrality parameter consistency
             private$.validateCentralityOptions()
-                
+
             return(TRUE)
         },
         
         # Centrality parameter validation helper
         .validateCentralityOptions = function() {
             if (self$options$centralityparameter == "none" && self$options$centralityk != 2) {
-                private$.accumulateMessage(
-                    "<br>ℹ️ Note: Centrality decimal places specified but centrality parameter is 'none'<br>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'centralityKUnused',
+                    type = jmvcore::NoticeType$INFO
                 )
+                notice$setContent('Centrality decimal places specified but centrality parameter is "none". The precision setting will have no effect.')
+                self$results$insert(999, notice)
             }
-            
+
             if (self$options$centralityplotting && self$options$centralityparameter == "none") {
-                private$.accumulateMessage(
-                    "<br>⚠️ Warning: Centrality plotting enabled but centrality parameter is 'none'<br>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'centralityPlotMismatch',
+                    type = jmvcore::NoticeType$WARNING
                 )
+                notice$setContent('Centrality plotting enabled but centrality parameter is "none". No centrality lines will be displayed.')
+                self$results$insert(1, notice)
             }
-            
+
             if (!self$options$centralityplotting && self$options$centralitytype != "parametric") {
-                private$.accumulateMessage(
-                    "<br>ℹ️ Note: Centrality type specified but centrality plotting is disabled<br>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'centralityTypeUnused',
+                    type = jmvcore::NoticeType$INFO
                 )
+                notice$setContent('Centrality type specified but centrality plotting is disabled. The type setting will have no effect.')
+                self$results$insert(999, notice)
             }
         },
         
@@ -242,7 +311,20 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Check data distribution characteristics
                 numeric_data <- jmvcore::toNumeric(mydata[[dep_var]])
-                skewness_rough <- (mean(numeric_data, na.rm = TRUE) - median(numeric_data, na.rm = TRUE)) / sd(numeric_data, na.rm = TRUE)
+
+                # Calculate proper skewness with fallback
+                if (requireNamespace("e1071", quietly = TRUE)) {
+                    # Use proper skewness (standardized third moment)
+                    skewness_rough <- tryCatch({
+                        e1071::skewness(numeric_data, na.rm = TRUE, type = 2)  # Type 2 is SAS/SPSS method
+                    }, error = function(e) {
+                        # Fallback to approximation if error
+                        (mean(numeric_data, na.rm = TRUE) - median(numeric_data, na.rm = TRUE)) / sd(numeric_data, na.rm = TRUE)
+                    })
+                } else {
+                    # Fallback to approximation if e1071 not available
+                    skewness_rough <- (mean(numeric_data, na.rm = TRUE) - median(numeric_data, na.rm = TRUE)) / sd(numeric_data, na.rm = TRUE)
+                }
                 
                 distribution_note <- if(abs(skewness_rough) > 1) {
                     "ℹ️ <strong>Skewed distribution</strong> detected. Non-parametric tests recommended."
@@ -255,6 +337,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Generate recommendations
                 test_recommendation <- switch(self$options$typestatistics,
                     "parametric" = if(abs(skewness_rough) > 1 || min_n < 10) {
+                        # Add Notice for clinical safety
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'testDataMismatch',
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(sprintf('Parametric test selected but data shows high skewness (%.2f) and/or small sample sizes (minimum n = %d). Parametric tests assume normality. Consider switching to nonparametric test (Mann-Whitney/Kruskal-Wallis) for more reliable results.', skewness_rough, min_n))
+                        self$results$insert(1, notice)
                         "💡 <strong>Recommendation:</strong> Consider switching to non-parametric test due to distribution or sample size."
                     } else {
                         "✓ <strong>Parametric test</strong> is appropriate for your data."
@@ -740,27 +830,39 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 self$results$todo$setContent(todo)
 
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
+                if (nrow(self$data) == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'noDataInRun',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent('Data contains no complete rows after filtering. Please check for missing values.')
+                    self$results$insert(1, notice)
+                    return()
+                }
 
                 # Pre-process data and options for performance with enhanced validation
                 tryCatch({
                     mydata <- private$.prepareData()
                     private$.prepareOptions()
-                    
+
                     # Generate clinical interpretation and assumptions
                     private$.generateClinicalInterpretation(mydata)
                     private$.checkAssumptions(mydata)
                     private$.generateReportSentence()
-                    
+
                     # Generate guided mode content if enabled
                     private$.generateGuidedSteps()
                     private$.generateRecommendations()
                 }, error = function(e) {
-                    private$.accumulateMessage(
-                        glue::glue("<br>❌ Error during processing: {e$message}<br>")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'dataProcessingFailed',
+                        type = jmvcore::NoticeType$ERROR
                     )
-                    stop(paste("Data processing failed:", e$message, "\nPlease check your variable selections."))
+                    notice$setContent(sprintf('Data processing failed: %s. Please check your variable selections and try again.', e$message))
+                    self$results$insert(1, notice)
+                    return()
                 })
 
             }
@@ -784,24 +886,56 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint before expensive ggstatsplot computation
             private$.checkpoint()
 
-            plot <- ggstatsplot::ggbetweenstats(
-                data = mydata,
-                x = !!rlang::sym(options_data$group),
-                y = !!rlang::sym(options_data$dep),
-                title = options_data$mytitle,
-                xlab = options_data$xlab,
-                ylab = options_data$ylab,
-                type = options_data$typestatistics,
-                effsize.type = options_data$effsizetype,
-                conf.level = options_data$conflevel,
-                digits = options_data$digits,
-                bf.message = options_data$bfmessage,
-                centrality.plotting = options_data$centrality.plotting,
-                centrality.type = options_data$centrality.type,
-                results.subtitle = options_data$resultssubtitle,
-                ggplot.component = options_data$ggplot.component,
-                ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
+            plot <- tryCatch({
+                ggstatsplot::ggbetweenstats(
+                    data = mydata,
+                    x = !!rlang::sym(private$.escapeVar(options_data$group)),
+                    y = !!rlang::sym(private$.escapeVar(options_data$dep)),
+                    title = options_data$mytitle,
+                    xlab = options_data$xlab,
+                    ylab = options_data$ylab,
+                    type = options_data$typestatistics,
+                    effsize.type = options_data$effsizetype,
+                    conf.level = options_data$conflevel,
+                    digits = options_data$digits,
+                    bf.message = options_data$bfmessage,
+                    centrality.plotting = options_data$centrality.plotting,
+                    centrality.type = options_data$centrality.type,
+                    results.subtitle = options_data$resultssubtitle,
+                    ggplot.component = options_data$ggplot.component,
+                    ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
+                )
+            }, error = function(e) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'plotGenerationFailed',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Plot generation failed: %s. Please check your data for issues (constant variables, insufficient variation, or extreme outliers) or try a different statistical test.', e$message))
+                self$results$insert(1, notice)
+                return(NULL)
+            })
+
+            if (is.null(plot)) return()
+
+            # Add success notice
+            n_obs <- nrow(mydata)
+            n_groups <- length(unique(mydata[[options_data$group]]))
+            test_name <- switch(options_data$typestatistics,
+                "parametric" = "parametric (t-test/ANOVA)",
+                "nonparametric" = "nonparametric (Mann-Whitney/Kruskal-Wallis)",
+                "robust" = "robust (trimmed means)",
+                "bayes" = "Bayesian",
+                "selected"
             )
+
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            notice$setContent(sprintf('Analysis completed successfully using %s test. Compared %d groups with N = %d total observations.', test_name, n_groups, n_obs))
+            self$results$insert(999, notice)
 
             # Print Plot ----
 
@@ -833,26 +967,39 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Checkpoint before expensive grouped ggstatsplot computation
                 private$.checkpoint()
-                
-                plot2 <- ggstatsplot::grouped_ggbetweenstats(
-                    data = mydata,
-                    x = !!rlang::sym(options_data$group),
-                    y = !!rlang::sym(options_data$dep),
-                    grouping.var = !!rlang::sym(grvar),
-                    type = options_data$typestatistics,
-                    effsize.type = options_data$effsizetype,
-                    conf.level = options_data$conflevel,
-                    digits = options_data$digits,
-                    bf.message = options_data$bfmessage,
-                    results.subtitle = options_data$resultssubtitle,
-                    centrality.plotting = options_data$centrality.plotting,
-                    centrality.type = options_data$centrality.type,
-                    ggplot.component = options_data$ggplot.component,
-                    ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme,
-                    xlab = options_data$xlab,
-                    ylab = options_data$ylab,
-                    title = options_data$mytitle
-                )
+
+                plot2 <- tryCatch({
+                    ggstatsplot::grouped_ggbetweenstats(
+                        data = mydata,
+                        x = !!rlang::sym(private$.escapeVar(options_data$group)),
+                        y = !!rlang::sym(private$.escapeVar(options_data$dep)),
+                        grouping.var = !!rlang::sym(grvar),
+                        type = options_data$typestatistics,
+                        effsize.type = options_data$effsizetype,
+                        conf.level = options_data$conflevel,
+                        digits = options_data$digits,
+                        bf.message = options_data$bfmessage,
+                        results.subtitle = options_data$resultssubtitle,
+                        centrality.plotting = options_data$centrality.plotting,
+                        centrality.type = options_data$centrality.type,
+                        ggplot.component = options_data$ggplot.component,
+                        ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme,
+                        xlab = options_data$xlab,
+                        ylab = options_data$ylab,
+                        title = options_data$mytitle
+                    )
+                }, error = function(e) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'groupedPlotFailed',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Grouped plot generation failed: %s. Please check your grouping variable and data.', e$message))
+                    self$results$insert(1, notice)
+                    return(NULL)
+                })
+
+                if (is.null(plot2)) return()
             }
 
 

@@ -238,6 +238,9 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         interpretation = function() private$.items[["interpretation"]],
+        about = function() private$.items[["about"]],
+        summary = function() private$.items[["summary"]],
+        assumptions = function() private$.items[["assumptions"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]],
         table = function() private$.items[["table"]]),
@@ -282,6 +285,21 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About",
+                visible="(showexplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible="(showexplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Statistical Assumptions",
+                visible="(showexplanations)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -448,6 +466,9 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$table} \tab \tab \tab \tab \tab a table \cr

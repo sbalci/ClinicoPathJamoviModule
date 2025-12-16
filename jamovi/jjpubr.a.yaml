@@ -1,7 +1,7 @@
 ---
 name: jjpubr
 title: Publication-Ready Plots (ggpubr)
-menuGroup: JJStatsPlotT1
+menuGroup: JJStatsPlotT
 menuSubgroup: All-In-One
 menuTitle: ggpubr Plots
 menuSubtitle: Publication-ready visualizations
@@ -234,7 +234,7 @@ options:
     - name: addSmoothLine
       title: Add Smooth Line
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Add smoothed trend line (for scatter plots)
@@ -464,7 +464,7 @@ options:
     - name: showExplanations
       title: Show Explanations
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Show detailed clinical explanations and guidance

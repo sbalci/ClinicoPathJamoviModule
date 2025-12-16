@@ -19,7 +19,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showPlot = TRUE,
             plotStyle = "standard",
             showReferenceLinesLabels = TRUE,
-            showCalibrationPlot = FALSE,
             highlightRange = FALSE,
             highlightMin = 0.1,
             highlightMax = 0.3,
@@ -129,10 +128,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showReferenceLinesLabels",
                 showReferenceLinesLabels,
                 default=TRUE)
-            private$..showCalibrationPlot <- jmvcore::OptionBool$new(
-                "showCalibrationPlot",
-                showCalibrationPlot,
-                default=FALSE)
             private$..highlightRange <- jmvcore::OptionBool$new(
                 "highlightRange",
                 highlightRange,
@@ -288,7 +283,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showPlot)
             self$.addOption(private$..plotStyle)
             self$.addOption(private$..showReferenceLinesLabels)
-            self$.addOption(private$..showCalibrationPlot)
             self$.addOption(private$..highlightRange)
             self$.addOption(private$..highlightMin)
             self$.addOption(private$..highlightMax)
@@ -333,7 +327,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showPlot = function() private$..showPlot$value,
         plotStyle = function() private$..plotStyle$value,
         showReferenceLinesLabels = function() private$..showReferenceLinesLabels$value,
-        showCalibrationPlot = function() private$..showCalibrationPlot$value,
         highlightRange = function() private$..highlightRange$value,
         highlightMin = function() private$..highlightMin$value,
         highlightMax = function() private$..highlightMax$value,
@@ -377,7 +370,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showPlot = NA,
         ..plotStyle = NA,
         ..showReferenceLinesLabels = NA,
-        ..showCalibrationPlot = NA,
         ..highlightRange = NA,
         ..highlightMin = NA,
         ..highlightMax = NA,
@@ -935,7 +927,6 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotStyle Style of the decision curve plot.
 #' @param showReferenceLinesLabels Show labels for "Treat All" and "Treat
 #'   None" reference lines.
-#' @param showCalibrationPlot Display calibration plot to assess model fit.
 #' @param highlightRange Highlight a clinically relevant threshold range on
 #'   the plot.
 #' @param highlightMin Minimum threshold for highlighted range.
@@ -1031,7 +1022,6 @@ decisioncurve <- function(
     showPlot = TRUE,
     plotStyle = "standard",
     showReferenceLinesLabels = TRUE,
-    showCalibrationPlot = FALSE,
     highlightRange = FALSE,
     highlightMin = 0.1,
     highlightMax = 0.3,
@@ -1092,7 +1082,6 @@ decisioncurve <- function(
         showPlot = showPlot,
         plotStyle = plotStyle,
         showReferenceLinesLabels = showReferenceLinesLabels,
-        showCalibrationPlot = showCalibrationPlot,
         highlightRange = highlightRange,
         highlightMin = highlightMin,
         highlightMax = highlightMax,

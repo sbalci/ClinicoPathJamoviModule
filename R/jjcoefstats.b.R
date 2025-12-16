@@ -21,6 +21,12 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(var)
         },
 
+        .cleanVarName = function(var) {
+            # Clean variable name without copying entire dataset
+            if (is.null(var)) return(NULL)
+            janitor::make_clean_names(var)
+        },
+
         .init = function() {
             # Show initial instructions
             instructions <- glue::glue("
@@ -79,10 +85,24 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # Check required packages
     if (!requireNamespace('ggstatsplot', quietly = TRUE)) {
-        stop('The ggstatsplot package is required but not installed')
+        notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'missingGgstatsplot',
+            type = jmvcore::NoticeType$ERROR
+        )
+        notice$setContent('The ggstatsplot package is required but not installed. Please install it with install.packages("ggstatsplot") and try again.')
+        self$results$insert(1, notice)
+        return()
     }
     if (!requireNamespace('broom', quietly = TRUE)) {
-        stop('The broom package is required but not installed')
+        notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'missingBroom',
+            type = jmvcore::NoticeType$ERROR
+        )
+        notice$setContent('The broom package is required but not installed. Please install it with install.packages("broom") and try again.')
+        self$results$insert(1, notice)
+        return()
     }
 
     # Process based on input mode
@@ -94,6 +114,37 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # Generate model summary
     private$.generateModelSummary()
+
+    # Generate plain-language summary if explanations requested
+    if (isTRUE(self$options$showexplanations)) {
+        private$.generatePlainSummary()
+    }
+
+    # Add success notice if analysis completed
+    if (!is.null(private$.tidyCoefs)) {
+        n_obs <- if (!is.null(private$.modelFit)) {
+            tryCatch(nobs(private$.modelFit), error = function(e) nrow(self$data))
+        } else {
+            nrow(self$data)
+        }
+
+        notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'analysisComplete',
+            type = jmvcore::NoticeType$INFO
+        )
+
+        dist_method <- if (self$options$inputMode == "precomputed" &&
+                          !is.null(self$options$degreesOfFreedom) &&
+                          self$options$degreesOfFreedom > 0) {
+            sprintf('t-distribution (df = %d)', self$options$degreesOfFreedom)
+        } else {
+            'normal approximation'
+        }
+
+        notice$setContent(sprintf('Analysis completed successfully. %d coefficients plotted from N = %d observations. Confidence intervals and p-values calculated using %s.', nrow(private$.tidyCoefs), n_obs, dist_method))
+        self$results$insert(999, notice)
+    }
 },
 
 .generateAboutContent = function() {
@@ -155,6 +206,13 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # Check required variables
     if (is.null(self$options$term) || is.null(self$options$estimate) ||
         is.null(self$options$stdError)) {
+        notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'missingRequiredVars',
+            type = jmvcore::NoticeType$ERROR
+        )
+        notice$setContent('Pre-computed mode requires three variables: Term names, Estimates, and Standard Errors. Please select all three and re-run.')
+        self$results$insert(1, notice)
         return()
     }
 
@@ -228,9 +286,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
     }
 
-    # Filter out intercept if requested (broader match)
+    # Filter out intercept if requested (robust pattern)
     if (self$options$excludeIntercept) {
-        tidy_coefs <- tidy_coefs[!grepl("intercept|\\(intercept\\)|const", tolower(tidy_coefs$term)), ]
+        # More robust pattern: match whole word only, anchor to start/end
+        intercept_pattern <- "^(\\()?intercept(\\))?$|^const(ant)?$"
+        tidy_coefs <- tidy_coefs[!grepl(intercept_pattern, tolower(tidy_coefs$term)), ]
     }
 
     # Exponentiate if requested
@@ -260,14 +320,34 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 },
         .runFitModel = function() {
             # Check required variables
-            # Check required variables
             if (self$options$modelType != "cox" && is.null(self$options$outcome)) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingOutcome',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Please select an outcome variable for model fitting.')
+                self$results$insert(1, notice)
                 return()
             }
             if (self$options$modelType == "cox" && (is.null(self$options$survivalTime) || is.null(self$options$eventStatus))) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingSurvivalVars',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Cox proportional hazards model requires both Survival Time and Event Status variables. Please select both and re-run.')
+                self$results$insert(1, notice)
                 return()
             }
             if (is.null(self$options$predictors) || length(self$options$predictors) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingPredictors',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Please select at least one predictor variable for the model.')
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -300,19 +380,31 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     outcome_unique <- outcome_unique[!is.na(outcome_unique)]
 
                     if (length(outcome_unique) != 2) {
-                        stop(paste0("Logistic regression requires a binary outcome variable. ",
-                                   "The outcome '", outcome_var, "' has ", length(outcome_unique),
-                                   " unique values. Expected exactly 2 (e.g., 0/1, TRUE/FALSE)."))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'nonBinaryOutcome',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf('Logistic regression requires a binary outcome (exactly 2 unique values). Found %d unique values in %s. Expected 0/1 or TRUE/FALSE.', length(outcome_unique), self$options$outcome))
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     # Force to 0/1 if logical
                     if (is.logical(mydata[[outcome_var]])) {
                         mydata[[outcome_var]] <- as.numeric(mydata[[outcome_var]])
+                        outcome_unique <- c(0, 1)
                     }
 
                     if (!all(outcome_unique %in% c(0, 1))) {
-                        stop(paste0("Outcome variable '", outcome_var, "' must be coded as 0/1 for logistic regression. Values found: ",
-                                   paste(outcome_unique, collapse = ", ")))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'wrongOutcomeCoding',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf('Outcome variable must be coded as 0/1 for logistic regression. Found values: %s', paste(outcome_unique, collapse = ', ')))
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     model <- glm(formula, data = mydata, family = binomial(link = "logit"))
@@ -320,11 +412,25 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (model_type == "cox") {
                     # Cox proportional hazards
                     if (is.null(self$options$survivalTime) || is.null(self$options$eventStatus)) {
-                        stop("Survival time and event status are required for Cox model")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'missingSurvivalVarsInCox',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Survival time and event status are required for Cox model. Please select both variables.')
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     if (!requireNamespace('survival', quietly = TRUE)) {
-                        stop('The survival package is required for Cox models')
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'missingSurvivalPackage',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('The survival package is required for Cox models. Please install it with install.packages("survival") and try again.')
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     time_var <- janitor::make_clean_names(self$options$survivalTime)
@@ -340,15 +446,30 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     if (!all(event_unique %in% c(0, 1))) {
-                        stop(paste0("Event status for Cox model must be coded as 0/1 or TRUE/FALSE. Found values: ",
-                                   paste(event_unique, collapse = ", "),
-                                   ". Use 0 for censored and 1 for events."))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'wrongEventCoding',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf('Event status for Cox model must be coded as 0 (censored) or 1 (event). Found values: %s', paste(event_unique, collapse = ', ')))
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     # Validate survival time is positive; warn and drop non-positive
                     if (any(mydata[[time_var]] <= 0, na.rm = TRUE)) {
-                        warning("Survival time contains non-positive values; these rows will be removed.")
+                        n_removed <- sum(mydata[[time_var]] <= 0, na.rm = TRUE)
+                        n_before <- nrow(mydata)
                         mydata <- mydata[mydata[[time_var]] > 0, ]
+                        n_after <- nrow(mydata)
+
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'nonPositiveTimes',
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(sprintf('Removed %d observations with non-positive survival times. Cox models require time > 0. Final sample: N = %d (from original N = %d).', n_removed, n_after, n_before))
+                        self$results$insert(1, notice)
                     }
 
                     # Create Surv object and formula with escaped predictors
@@ -360,11 +481,25 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (model_type == "mixed") {
                     # Mixed effects models
                     if (is.null(self$options$randomEffects)) {
-                        stop("Random effects grouping variable is required for mixed effects models. Please specify a grouping variable (e.g., subject ID).")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'missingRandomEffects',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Mixed effects models require a grouping variable for random effects (e.g., subject ID, cluster ID). Please select a grouping variable.')
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     if (!requireNamespace('lme4', quietly = TRUE)) {
-                        stop('The lme4 package is required for mixed effects models')
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'missingLme4',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('The lme4 package is required for mixed effects models. Please install it with install.packages("lme4") and try again.')
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     random_var <- janitor::make_clean_names(self$options$randomEffects)
@@ -381,7 +516,14 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (length(outcome_unique) == 2) {
                         # Binary outcome - use glmer
                         if (!all(outcome_unique %in% c(0, 1))) {
-                            stop("For mixed-effects logistic regression (glmer), the outcome variable must be coded as 0 and 1.")
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'wrongGlmerOutcome',
+                                type = jmvcore::NoticeType$ERROR
+                            )
+                            notice$setContent('For mixed-effects logistic regression (glmer), outcome must be coded as 0 and 1.')
+                            self$results$insert(1, notice)
+                            return()
                         }
                         model <- lme4::glmer(mixed_formula, data = mydata, family = binomial(link = "logit"))
                     } else {
@@ -390,7 +532,14 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                 } else {
-                    stop(paste("Unknown or unsupported model type:", model_type))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'unknownModelType',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Unknown or unsupported model type: %s', model_type))
+                    self$results$insert(1, notice)
+                    return()
                 }
 
                 private$.modelFit <- model
@@ -398,16 +547,25 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Extract tidy coefficients using broom
                 if (inherits(model, "lmerMod")) {
                     if (!requireNamespace("broom.mixed", quietly = TRUE)) {
-                        stop("The broom.mixed package is required for mixed-effects models. Please install it.")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'missingBroomMixed',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('The broom.mixed package is required for mixed-effects models. Please install it with install.packages("broom.mixed") and try again.')
+                        self$results$insert(1, notice)
+                        return()
                     }
                     tidy_coefs <- broom.mixed::tidy(model, conf.int = TRUE, conf.level = self$options$ciLevel)
                 } else {
                     tidy_coefs <- broom::tidy(model, conf.int = TRUE, conf.level = self$options$ciLevel)
                 }
 
-                # Filter out intercept if requested
+                # Filter out intercept if requested (robust pattern)
                 if (self$options$excludeIntercept) {
-                    tidy_coefs <- tidy_coefs[!grepl("intercept", tolower(tidy_coefs$term)), ]
+                    # More robust pattern: match whole word only, anchor to start/end
+                    intercept_pattern <- "^(\\()?intercept(\\))?$|^const(ant)?$"
+                    tidy_coefs <- tidy_coefs[!grepl(intercept_pattern, tolower(tidy_coefs$term)), ]
                 }
 
                 # Exponentiate if requested
@@ -439,6 +597,9 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 private$.tidyCoefs <- tidy_coefs
 
+                # Check for small sample size / low events-per-predictor and add warnings
+                private$.checkSampleSize(model, mydata, outcome_var, event_var, predictor_vars)
+
                 # Populate table
                 private$.populateCoefTable(tidy_coefs)
 
@@ -446,7 +607,92 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.populateModelMetrics(model)
 
             }, error = function(e) {
-                stop(paste("Model fitting failed:", e$message))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'modelFittingError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Model fitting failed: %s', e$message))
+                self$results$insert(1, notice)
+                return()
+            })
+        },
+
+        .checkSampleSize = function(model, mydata, outcome_var, event_var, predictor_vars) {
+            # Check for small sample size warnings for binary/event outcomes
+            tryCatch({
+                if (inherits(model, c("glm", "glmerMod"))) {
+                    # Logistic regression - check events-per-variable (EPV)
+                    n_events <- sum(mydata[[outcome_var]] == 1, na.rm = TRUE)
+                    n_predictors <- length(predictor_vars)
+                    epv <- n_events / n_predictors
+
+                    if (epv < 10) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'lowEventsPerPredictor',
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(sprintf('Low events-per-variable ratio (EPV = %.1f, with %d events and %d predictors). Models with EPV < 10 may have unstable estimates and inflated Type I error rates. Consider reducing predictors or collecting more data.', epv, n_events, n_predictors))
+                        self$results$insert(1, notice)
+                    }
+                } else if (inherits(model, "coxph")) {
+                    # Cox model - check events-per-variable
+                    n_events <- sum(mydata[[event_var]] == 1, na.rm = TRUE)
+                    n_predictors <- length(predictor_vars)
+                    epv <- n_events / n_predictors
+
+                    if (n_events < 10) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'veryLowEvents',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf('Very low number of events (N = %d). Cox models require at least 10 events for reliable estimation. Results may be highly unstable.', n_events))
+                        self$results$insert(1, notice)
+                    } else if (epv < 10) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'lowEventsPerPredictorCox',
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        notice$setContent(sprintf('Low events-per-variable ratio (EPV = %.1f, with %d events and %d predictors). Cox models with EPV < 10 may produce biased estimates. Consider reducing predictors or collecting more data.', epv, n_events, n_predictors))
+                        self$results$insert(1, notice)
+                    } else if (epv < 20) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'moderateEventsPerPredictorCox',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(sprintf('Moderate events-per-variable ratio (EPV = %.1f). EPV between 10-20 is acceptable but EPV > 20 is preferred for optimal performance.', epv))
+                        self$results$insert(1, notice)
+                    }
+                } else if (inherits(model, "lm")) {
+                    # Linear regression - check sample size
+                    n_obs <- nobs(model)
+                    n_predictors <- length(predictor_vars)
+                    ratio <- n_obs / n_predictors
+
+                    if (n_obs < 30) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'smallSampleSize',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(sprintf('Small sample size (N = %d). Linear models typically require N > 30 for reliable inference. Consider interpreting results cautiously.', n_obs))
+                        self$results$insert(1, notice)
+                    } else if (ratio < 10) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'lowObsPerPredictor',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(sprintf('Low observations-per-predictor ratio (%.1f with N = %d and %d predictors). A ratio of at least 10-15 observations per predictor is recommended.', ratio, n_obs, n_predictors))
+                        self$results$insert(1, notice)
+                    }
+                }
+            }, error = function(e) {
+                # Silently skip sample size checks if they fail
             })
         },
 
@@ -588,7 +834,114 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             </ul>
             ")
 
-            self$results$modelSummary$setContent(summary_text)
+            # Control visibility based on showexplanations option
+            if (isTRUE(self$options$showexplanations)) {
+                self$results$modelSummary$setVisible(TRUE)
+                self$results$modelSummary$setContent(summary_text)
+            } else {
+                self$results$modelSummary$setVisible(FALSE)
+            }
+        },
+
+        .generatePlainSummary = function() {
+            if (!isTRUE(self$options$showexplanations)) return()
+            if (is.null(private$.tidyCoefs)) return()
+
+            # Determine model type label
+            model_type_label <- if (self$options$inputMode == "precomputed") {
+                "pre-computed coefficients"
+            } else {
+                switch(self$options$modelType,
+                    "lm" = "linear regression",
+                    "glm" = "logistic regression",
+                    "cox" = "Cox proportional hazards regression",
+                    "mixed" = "mixed-effects model",
+                    "regression model"
+                )
+            }
+
+            # Scale label
+            scale_label <- if (self$options$exponentiate) {
+                if (self$options$inputMode == "precomputed") {
+                    switch(self$options$expScaleLabel,
+                        "or" = "odds ratios",
+                        "hr" = "hazard ratios",
+                        "exp" = "exponentiated coefficients"
+                    )
+                } else {
+                    switch(self$options$modelType,
+                        "glm" = "odds ratios",
+                        "cox" = "hazard ratios",
+                        "exponentiated coefficients"
+                    )
+                }
+            } else {
+                "regression coefficients"
+            }
+
+            n_coefs <- nrow(private$.tidyCoefs)
+
+            # Get sample size
+            n_obs <- if (!is.null(private$.modelFit)) {
+                tryCatch(nobs(private$.modelFit), error = function(e) nrow(self$data))
+            } else {
+                nrow(self$data)
+            }
+
+            # Find most significant predictor for example
+            example_text <- ""
+            if ("p.value" %in% names(private$.tidyCoefs) && nrow(private$.tidyCoefs) > 0) {
+                sig_idx <- which.min(private$.tidyCoefs$p.value)
+                if (length(sig_idx) > 0) {
+                    example_term <- private$.tidyCoefs$term[sig_idx]
+                    example_est <- private$.tidyCoefs$estimate[sig_idx]
+                    example_ci_low <- private$.tidyCoefs$conf.low[sig_idx]
+                    example_ci_high <- private$.tidyCoefs$conf.high[sig_idx]
+                    example_p <- private$.tidyCoefs$p.value[sig_idx]
+
+                    # Format p-value
+                    p_text <- if (example_p < 0.001) "p < 0.001" else sprintf("p = %.3f", example_p)
+
+                    # Determine scale label for example
+                    scale_abbrev <- if (self$options$exponentiate) {
+                        if (self$options$inputMode == "precomputed") {
+                            switch(self$options$expScaleLabel,
+                                "or" = "OR",
+                                "hr" = "HR",
+                                "exp(β)"
+                            )
+                        } else {
+                            switch(self$options$modelType,
+                                "glm" = "OR",
+                                "cox" = "HR",
+                                "exp(β)"
+                            )
+                        }
+                    } else {
+                        "β"
+                    }
+
+                    example_text <- sprintf(
+                        "The strongest effect was for <b>%s</b>, with %s = %.2f (95%% CI: %.2f to %.2f, %s).",
+                        example_term,
+                        scale_abbrev,
+                        example_est, example_ci_low, example_ci_high, p_text
+                    )
+                }
+            }
+
+            summary_html <- glue::glue("
+            <h4>Plain-Language Summary</h4>
+            <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>
+            <p>This analysis examined <b>{n_coefs} predictors</b> using <b>{model_type_label}</b> (N = {n_obs} observations).
+            Results are presented as <b>{scale_label}</b> with <b>{self$options$ciLevel * 100}% confidence intervals</b>.</p>
+            {if (example_text != '') paste0('<p>', example_text, '</p>') else ''}
+            <p><i>💡 Copy this summary to your report and customize as needed.</i></p>
+            </div>
+            ")
+
+            self$results$plainSummary$setVisible(TRUE)
+            self$results$plainSummary$setContent(summary_html)
         },
 
         .coefPlot = function(image, ggtheme, theme, ...) {

@@ -156,13 +156,13 @@ children:
         name: plotHeight
         label: Height (px)
         format: number
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Clinical Analysis
+    collapsed: true
     children:
       - type: CheckBox
         name: showExplanations
-  - type: LayoutBox
-    margin: large
-    children:
+        label: Show clinical explanations
       - type: ComboBox
         name: clinicalPreset
+        label: Clinical preset

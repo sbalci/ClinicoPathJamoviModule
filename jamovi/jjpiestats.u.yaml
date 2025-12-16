@@ -126,6 +126,17 @@ children:
                 name: digits
                 label: Decimal Places (Statistics)
                 format: number
+      - type: Label
+        label: Donut Chart Options
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: ggpubrDonutPalette
+                label: Donut Color Palette
+                enable: (addGGPubrDonut)
   - type: CollapseBox
     label: Report & Explanations
     collapsed: true
@@ -146,8 +157,3 @@ children:
               - type: CheckBox
                 name: showInterpretation
                 label: Show Interpretation Guide
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: ggpubrDonutPalette

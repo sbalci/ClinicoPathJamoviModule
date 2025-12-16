@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.46
+version: 0.0.32.48
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-12-14'
+date: '2025-12-16'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -370,7 +370,7 @@ analyses:
   - title: Multi-Variable Visual Quality
     name: dataquality
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Multi-Variable Visual Quality
     description: >
@@ -806,7 +806,7 @@ analyses:
   - title: Single Variable Quality Check
     name: checkdata
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuTitle: Single Variable Quality Check
     menuSubgroup: ClinicoPath Data Quality
     ribbon: analyses
@@ -1428,7 +1428,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1488,7 +1488,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
@@ -1557,7 +1557,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -1628,9 +1628,9 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuTitle: Dendrogram
-    menuSubgroup: Drafts
+    menuSubgroup: Hierarchical Clustering
     ribbon: analyses
     category: analyses
   - title: Intraclass Correlation Coefficient
@@ -1711,7 +1711,7 @@ analyses:
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
@@ -1723,7 +1723,7 @@ analyses:
   - title: Dot Chart
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart
     ribbon: analyses
@@ -1776,7 +1776,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -3856,7 +3856,7 @@ analyses:
     name: ihccluster
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: IHC Clustering Analysis
     menuSubtitle: Cluster cases by IHC expression patterns
@@ -4780,7 +4780,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -4981,7 +4981,7 @@ analyses:
     name: jjoncoplot
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: Molecular Pathology Plots
     menuTitle: Genomic Landscape Visualization
     menuSubtitle: Oncoplot, Mutation Landscape, Clinical Annotations
@@ -5664,7 +5664,7 @@ analyses:
     name: jjcoefstats
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Regression Plots
     menuTitle: Coefficient Forest Plot (ggcoefstats)
     description: >
@@ -5701,7 +5701,7 @@ analyses:
     name: irecist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: Response Evaluation
     menuTitle: iRECIST Analysis
     menuSubtitle: Immune-related Response Criteria

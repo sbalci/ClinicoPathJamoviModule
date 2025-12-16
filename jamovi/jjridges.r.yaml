@@ -12,14 +12,6 @@ items:
         - x_var
         - y_var
 
-    - name: warnings
-      title: Data Quality Warnings
-      type: Html
-      visible: false
-      clearWith:
-        - x_var
-        - y_var
-
     - name: clinicalSummary
       title: Clinical Summary
       type: Html
@@ -28,6 +20,31 @@ items:
         - x_var
         - y_var
         - show_stats
+
+    - name: reportSummary
+      title: Report Summary (Copy-Ready)
+      type: Html
+      visible: true
+      clearWith:
+        - x_var
+        - y_var
+        - show_stats
+        - test_type
+        - effsize_type
+
+    - name: aboutPanel
+      title: About Ridge Plots
+      type: Html
+      visible: false
+      clearWith: []
+
+    - name: assumptionsPanel
+      title: Statistical Assumptions & Caveats
+      type: Html
+      visible: false
+      clearWith:
+        - show_stats
+        - test_type
 
     - name: plot
       title: Ridge Plot

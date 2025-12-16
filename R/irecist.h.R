@@ -35,7 +35,10 @@ irecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             calculateORR = TRUE,
             calculateDCR = TRUE,
             showPseudoprogressionRate = TRUE,
-            showReference = TRUE, ...) {
+            showReference = TRUE,
+            showSummary = TRUE,
+            showGlossary = TRUE,
+            showAssumptions = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -189,6 +192,18 @@ irecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showReference",
                 showReference,
                 default=TRUE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=TRUE)
+            private$..showGlossary <- jmvcore::OptionBool$new(
+                "showGlossary",
+                showGlossary,
+                default=TRUE)
+            private$..showAssumptions <- jmvcore::OptionBool$new(
+                "showAssumptions",
+                showAssumptions,
+                default=TRUE)
 
             self$.addOption(private$..patientId)
             self$.addOption(private$..assessmentTime)
@@ -220,6 +235,9 @@ irecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..calculateDCR)
             self$.addOption(private$..showPseudoprogressionRate)
             self$.addOption(private$..showReference)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showGlossary)
+            self$.addOption(private$..showAssumptions)
         }),
     active = list(
         patientId = function() private$..patientId$value,
@@ -251,7 +269,10 @@ irecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         calculateORR = function() private$..calculateORR$value,
         calculateDCR = function() private$..calculateDCR$value,
         showPseudoprogressionRate = function() private$..showPseudoprogressionRate$value,
-        showReference = function() private$..showReference$value),
+        showReference = function() private$..showReference$value,
+        showSummary = function() private$..showSummary$value,
+        showGlossary = function() private$..showGlossary$value,
+        showAssumptions = function() private$..showAssumptions$value),
     private = list(
         ..patientId = NA,
         ..assessmentTime = NA,
@@ -282,7 +303,10 @@ irecistOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..calculateORR = NA,
         ..calculateDCR = NA,
         ..showPseudoprogressionRate = NA,
-        ..showReference = NA)
+        ..showReference = NA,
+        ..showSummary = NA,
+        ..showGlossary = NA,
+        ..showAssumptions = NA)
 )
 
 irecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -303,7 +327,10 @@ irecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         timelinePlot = function() private$.items[["timelinePlot"]],
         stratifiedTable = function() private$.items[["stratifiedTable"]],
         clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
-        referenceInfo = function() private$.items[["referenceInfo"]]),
+        referenceInfo = function() private$.items[["referenceInfo"]],
+        executiveSummary = function() private$.items[["executiveSummary"]],
+        glossary = function() private$.items[["glossary"]],
+        assumptions = function() private$.items[["assumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -659,7 +686,22 @@ irecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="referenceInfo",
                 title="Reference Information",
-                visible="(showReference)"))}))
+                visible="(showReference)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="executiveSummary",
+                title="Executive Summary",
+                visible="(showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="iRECIST Glossary",
+                visible="(showGlossary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Assumptions & Caveats",
+                visible="(showAssumptions)"))}))
 
 irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "irecistBase",
@@ -750,6 +792,9 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   → non-iCPD)
 #' @param showReference Display iRECIST guidelines reference (Seymour et al.
 #'   2017)
+#' @param showSummary Display natural-language summary with copy-ready text
+#' @param showGlossary Display glossary of iRECIST terms and definitions
+#' @param showAssumptions Display analysis assumptions and data requirements
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -768,6 +813,9 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$stratifiedTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$referenceInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$executiveSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -809,6 +857,9 @@ irecist <- function(
     calculateDCR = TRUE,
     showPseudoprogressionRate = TRUE,
     showReference = TRUE,
+    showSummary = TRUE,
+    showGlossary = TRUE,
+    showAssumptions = TRUE,
     formula) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -896,7 +947,10 @@ irecist <- function(
         calculateORR = calculateORR,
         calculateDCR = calculateDCR,
         showPseudoprogressionRate = showPseudoprogressionRate,
-        showReference = showReference)
+        showReference = showReference,
+        showSummary = showSummary,
+        showGlossary = showGlossary,
+        showAssumptions = showAssumptions)
 
     analysis <- irecistClass$new(
         options = options,

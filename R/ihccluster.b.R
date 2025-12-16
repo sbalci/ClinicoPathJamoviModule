@@ -4510,7 +4510,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Highlight groups
                 nGroups <- length(unique(cutree(hc, h = cutHeight)))
-                rect.hclust(hc, k = nGroups, border = "blue", lwd = 2)
+                rect.hclust(hc, k = nGroups, border = "blue")
             }
         },
 

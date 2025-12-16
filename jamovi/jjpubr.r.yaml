@@ -48,6 +48,18 @@ items:
         - ggpubr
         - ggplot2
 
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (addStats)
+      clearWith:
+        - plotType
+        - xvar
+        - yvar
+        - groupvar
+        - statMethod
+        - pairwiseComparisons
+
     - name: statistics
       title: Statistical Summary
       type: Table
@@ -67,6 +79,9 @@ items:
           title: p-value
           type: number
           format: zto,pvalue
+        - name: effectSize
+          title: Effect Size
+          type: text
         - name: significance
           title: Significance
           type: text

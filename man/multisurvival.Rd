@@ -43,24 +43,11 @@ multisurvival(
   adjexplanatory = NULL,
   ac_method = "average",
   showNomogram = FALSE,
-  use_modelSelection = FALSE,
-  modelSelection = "enter",
-  selectionCriteria = "aic",
-  pEntry = 0.05,
-  pRemoval = 0.1,
   use_stratify = FALSE,
   stratvar = NULL,
-  use_aft = FALSE,
-  aft_distribution = "weibull",
-  aft_show_hr_equivalent = FALSE,
-  aft_show_interpretation = FALSE,
   person_time = FALSE,
   time_intervals = "12, 36, 60",
   rate_multiplier = 100,
-  show_survmetrics = FALSE,
-  survmetrics_timepoints = "12, 24, 36, 60",
-  survmetrics_ibs_points = 100,
-  survmetrics_show_plots = FALSE,
   showExplanations = FALSE,
   showSummaries = TRUE
 )
@@ -190,27 +177,6 @@ based on their calculated risk scores and plots their survival curves.}
 
 \item{showNomogram}{.}
 
-\item{use_modelSelection}{(DEPRECATED - Not used) Model selection is
-controlled by the 'modelSelection' option below. Set modelSelection to
-'forward', 'backward', or 'both' to enable selection, or 'enter' to include
-all variables without selection. This boolean flag is maintained for
-backward compatibility but has no effect on the analysis.}
-
-\item{modelSelection}{The method used to select variables: - enter:
-Includes all variables (no selection) - forward: Adds variables one at a
-time if they improve the model - backward: Removes variables that do not
-significantly contribute - both: Combination of forward and backward steps}
-
-\item{selectionCriteria}{The criterion used for adding or removing
-variables in model selection: - aic: Balances model fit and complexity -
-lrt: Uses likelihood ratio tests to decide inclusion/removal}
-
-\item{pEntry}{Significance level at which a variable enters the model
-during forward or stepwise selection.}
-
-\item{pRemoval}{Significance level at which a variable is removed from the
-model during backward or stepwise selection.}
-
 \item{use_stratify}{If true, uses stratification to handle variables that
 violate the proportional hazards assumption. Stratification creates
 separate baseline hazard functions for different groups.}
@@ -218,25 +184,6 @@ separate baseline hazard functions for different groups.}
 \item{stratvar}{Variables used for stratification. When proportional
 hazards are not met, stratification can adjust the model to better fit the
 data by allowing different baseline hazards.}
-
-\item{use_aft}{If true, fits an Accelerated Failure Time (AFT) model
-instead of Cox Proportional Hazards. AFT models provide intuitive "Time
-Ratios" (TR) showing how covariates accelerate or decelerate survival time.
-Useful when PH assumption is violated or for more interpretable results
-(e.g., "treatment makes patients live 1.5x longer").}
-
-\item{aft_distribution}{Distribution family for survival times in AFT
-model. Weibull is most flexible and can represent both PH and AFT
-frameworks. Log-normal and log-logistic allow non-monotonic hazards. Choice
-should be guided by Kaplan-Meier curve shape and diagnostic plots.}
-
-\item{aft_show_hr_equivalent}{If true (and using Weibull distribution),
-shows equivalent Hazard Ratios alongside Time Ratios for comparison with
-Cox model results.}
-
-\item{aft_show_interpretation}{If true, adds a column to the AFT results
-table with natural language interpretation of Time Ratios (e.g.,
-"Associated with 50\\% longer survival time").}
 
 \item{person_time}{Enable this option to calculate and display person-time
 metrics, including total follow-up time and incidence rates. These metrics
@@ -249,21 +196,6 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
-
-\item{show_survmetrics}{Calculate comprehensive survival model performance
-metrics using the SurvMetrics package. Includes Concordance Index, Brier
-Score, Integrated Brier Score, and prediction accuracy metrics.}
-
-\item{survmetrics_timepoints}{Comma-separated time points at which to
-calculate Brier Score. Should correspond to clinically meaningful follow-up
-times.}
-
-\item{survmetrics_ibs_points}{Number of time points to use for calculating
-Integrated Brier Score. More points provide smoother estimates but increase
-computation time.}
-
-\item{survmetrics_show_plots}{Generate plots of model performance metrics
-over time (Brier Score, calibration).}
 
 \item{showExplanations}{Display detailed explanations for each analysis
 component to help interpret the statistical methods and results.}
@@ -284,16 +216,6 @@ A results object containing:
 \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
-\code{results$aftModelHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$aftModelTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$aftSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$aftSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$aftModelInfo} \tab \tab \tab \tab \tab a html \cr
-\code{results$survMetricsHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$survMetricsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$survMetricsSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$survMetricsSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$survMetricsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -339,9 +261,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$aftModelTable$asDF}
+\code{results$personTimeTable$asDF}
 
-\code{as.data.frame(results$aftModelTable)}
+\code{as.data.frame(results$personTimeTable)}
 }
 \description{
 Performs multivariable survival analysis using Cox proportional hazards

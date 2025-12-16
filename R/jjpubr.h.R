@@ -16,7 +16,7 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pairwiseComparisons = FALSE,
             addCorr = FALSE,
             corrMethod = "pearson",
-            addSmoothLine = TRUE,
+            addSmoothLine = FALSE,
             addMarginal = FALSE,
             addDensity = FALSE,
             bins = 30,
@@ -34,7 +34,7 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             theme = "pubr",
             plotWidth = 600,
             plotHeight = 500,
-            showExplanations = TRUE,
+            showExplanations = FALSE,
             clinicalPreset = "custom", ...) {
 
             super$initialize(
@@ -123,7 +123,7 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..addSmoothLine <- jmvcore::OptionBool$new(
                 "addSmoothLine",
                 addSmoothLine,
-                default=TRUE)
+                default=FALSE)
             private$..addMarginal <- jmvcore::OptionBool$new(
                 "addMarginal",
                 addMarginal,
@@ -224,7 +224,7 @@ jjpubrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
-                default=TRUE)
+                default=FALSE)
             private$..clinicalPreset <- jmvcore::OptionList$new(
                 "clinicalPreset",
                 clinicalPreset,
@@ -644,7 +644,7 @@ jjpubr <- function(
     pairwiseComparisons = FALSE,
     addCorr = FALSE,
     corrMethod = "pearson",
-    addSmoothLine = TRUE,
+    addSmoothLine = FALSE,
     addMarginal = FALSE,
     addDensity = FALSE,
     bins = 30,
@@ -662,7 +662,7 @@ jjpubr <- function(
     theme = "pubr",
     plotWidth = 600,
     plotHeight = 500,
-    showExplanations = TRUE,
+    showExplanations = FALSE,
     clinicalPreset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

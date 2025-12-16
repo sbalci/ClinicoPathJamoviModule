@@ -15,6 +15,11 @@ items:
       type:  Html
       visible: true
 
+    - name:  plainSummary
+      title: Plain-Language Summary
+      type:  Html
+      visible: (showexplanations)
+
     - name:  coefPlot
       title: Coefficient Forest Plot
       type:  Image

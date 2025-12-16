@@ -1,7 +1,7 @@
 ---
 name: jjridges
 title: Ridge Plot
-menuGroup: JJStatsPlotT1
+menuGroup: JJStatsPlotT
 menuSubgroup: Distribution
 # menuSubtitle: 'Ridge Visualization'
 version: '0.0.32'
@@ -560,4 +560,23 @@ options:
             tests with Cliff's delta. Treatment Response: violin plots with Bonferroni correction.
             Age by Stage: parametric tests with Cohen's d. Tumor Size: Hodges-Lehmann shift.
             Lab Values: robust tests with Hedges' g. Survival Time: median with quartiles.
+
+    # Help & Guidance
+    - name: showAboutPanel
+      title: Show About Panel
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display comprehensive information about ridge plots, interpretation guidance,
+            and clinical examples.
+
+    - name: showAssumptions
+      title: Show Statistical Assumptions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display statistical assumptions, caveats, and methodological notes for
+            the selected test type.
 ...

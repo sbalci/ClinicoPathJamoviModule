@@ -161,6 +161,7 @@ children:
             name: seed
             format: number
             label: Random Seed
+            enable: (method:maximize_boot_metric || method:minimize_boot_metric || bootstrapCI || calculateIDI || calculateNRI || bayesianAnalysis)
   - type: CollapseBox
     label: Analysis Options
     margin: normal

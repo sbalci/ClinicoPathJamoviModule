@@ -12,6 +12,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..inferredMethod = NULL,
         ..assumptionReason = NULL,
 
+        # === Helper: Escape Variable Names ===
+        .escapeVarName = function(var) {
+            if (is.null(var) || var == "") return(var)
+            # Wrap in backticks if contains spaces or special chars
+            if (grepl("[^A-Za-z0-9_.]", var)) {
+                return(paste0("`", var, "`"))
+            }
+            return(var)
+        },
+
         # === Initialization ===
         .init = function() {
             private$.applyClinicalPreset()
@@ -45,7 +55,9 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Calculate statistics once for both plot and table (includes assumption checks/inference)
             private$.calculateStatistics()
+            private$.checkAssumptions()  # CRITICAL: Check parametric test assumptions
             private$.populateStatistics()
+            private$.generateSummary()
         },
 
         # === Validation ===
@@ -557,7 +569,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 var_failed <- FALSE
                 if (n_groups >= 2 && requireNamespace("car", quietly = TRUE)) {
-                    formula_str <- paste(y_col, "~", x_col)
+                    formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
                     lv <- tryCatch(car::leveneTest(as.formula(formula_str), data = data, center = median), error = function(e) NULL)
                     if (!is.null(lv) && !is.na(lv$`Pr(>F)`[1]) && lv$`Pr(>F)`[1] < 0.05) var_failed <- TRUE
                 }
@@ -647,7 +659,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check variance homogeneity (Levene's test)
             if (length(groups) >= 2 && requireNamespace("car", quietly = TRUE)) {
-                formula_str <- paste(y_col, "~", x_col)
+                formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
                 formula_obj <- as.formula(formula_str)
 
                 levene_result <- tryCatch({
@@ -693,6 +705,21 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Correlation requires numeric variables. ",
                         "Y variable '", y_col, "' is ", class(y_data)[1], " (must be numeric)."
                     ))
+                }
+
+                # Kendall CI notice
+                if (self$options$corrMethod == "kendall") {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'kendallNoCI',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(paste0(
+                        "Kendall's tau correlation does not provide confidence intervals in the standard cor.test() implementation. ",
+                        "The correlation coefficient and p-value are still valid. ",
+                        "Consider using Spearman correlation if confidence intervals are needed for robust correlation analysis."
+                    ))
+                    self$results$insert(999, notice)
                 }
 
                 # Helper to compute correlation for a subset
@@ -754,15 +781,30 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!is.null(pooled_res$values)) {
                         self$results$correlation$addRow(rowKey = "pooled", values = pooled_res$values)
                     }
+                    if (!is.null(pooled_res$msg)) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'correlationMissingDataPooled',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(pooled_res$msg)
+                        self$results$insert(100, notice)
+                    }
                     notice <- jmvcore::Notice$new(
                         options = self$options,
                         name = 'correlationGrouping',
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent("Correlations are computed per group and pooled. Within-group effects may differ from the pooled estimate.")
-                    self$results$insert(200, notice)
+                    self$results$insert(999, notice)
                     if (!is.null(self$options$facetvar)) {
-                        warning("Correlation with faceting: pooled and per-group correlations may differ across facets.")
+                        notice_facet <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'correlationFacetingWarning',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice_facet$setContent("Correlation with faceting: pooled and per-group correlations may differ across facets.")
+                        self$results$insert(999, notice_facet)
                     }
                 } else {
                     pooled_res <- compute_cor(seq_along(x_data), "Overall")
@@ -779,7 +821,13 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         self$results$insert(100, notice)
                     }
                     if (!is.null(self$options$facetvar)) {
-                        warning("Correlation with faceting: pooled correlation may differ across facets.")
+                        notice_facet <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'correlationFacetingWarningOverall',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice_facet$setContent("Correlation with faceting: pooled correlation may differ across facets.")
+                        self$results$insert(999, notice_facet)
                     }
                 }
 
@@ -812,7 +860,20 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Small-sample warning
                 group_sizes <- table(complete_data[[x_col]])
                 if (any(group_sizes < 5)) {
-                    warning("Small sample size: at least one group has fewer than 5 observations.")
+                    small_groups <- names(group_sizes[group_sizes < 5])
+                    small_sizes <- group_sizes[group_sizes < 5]
+                    group_details <- paste(paste0(small_groups, " (n=", small_sizes, ")"), collapse = ", ")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallSampleSize',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(paste0(
+                        "Small sample size detected: ", group_details, ". ",
+                        "Groups with fewer than 5 observations may not meet assumptions for statistical tests. ",
+                        "Results should be interpreted with caution."
+                    ))
+                    self$results$insert(1, notice)
                 }
 
                 # Infer parametric vs nonparametric based on assumptions when auto
@@ -826,7 +887,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(infer$reason)
-                    self$results$insert(2, notice)
+                    self$results$insert(999, notice)
                 }
 
                 # HIERARCHICAL TESTING: For >2 groups, perform omnibus test first
@@ -835,7 +896,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Perform omnibus test (ANOVA or Kruskal-Wallis)
                     omnibus_result <- if (infer$omnibus == "anova") {
                         # One-way ANOVA
-                        formula_str <- paste(y_col, "~", x_col)
+                        formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
                         anova_result <- aov(as.formula(formula_str), data = complete_data)
                         summary_result <- summary(anova_result)
                         list(
@@ -847,13 +908,40 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                     } else { # kruskal.test
                         # Kruskal-Wallis test
-                        kw_result <- kruskal.test(as.formula(paste(y_col, "~", x_col)), data = complete_data)
+                        kw_result <- kruskal.test(as.formula(paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))), data = complete_data)
                         list(
                             statistic = kw_result$statistic,
                             p.value = kw_result$p.value,
                             method = "Kruskal-Wallis",
                             df = kw_result$parameter
                         )
+                    }
+
+                    # Calculate effect size for omnibus test
+                    omnibus_effect_size <- if (infer$omnibus == "anova") {
+                        # Eta-squared for ANOVA: SS_between / SS_total
+                        formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
+                        anova_result <- aov(as.formula(formula_str), data = complete_data)
+                        summary_result <- summary(anova_result)
+                        ss_between <- summary_result[[1]]$`Sum Sq`[1]
+                        ss_total <- sum(summary_result[[1]]$`Sum Sq`)
+                        eta_sq <- ss_between / ss_total
+                        effect_interp <- if (eta_sq < 0.01) "negligible"
+                                        else if (eta_sq < 0.06) "small"
+                                        else if (eta_sq < 0.14) "medium"
+                                        else "large"
+                        paste0("η²=", round(eta_sq, 3), " (", effect_interp, ")")
+                    } else {
+                        # Epsilon-squared for Kruskal-Wallis: (H - k + 1) / (n - k)
+                        H <- omnibus_result$statistic
+                        n <- nrow(complete_data)
+                        k <- length(groups)
+                        epsilon_sq <- (H - k + 1) / (n - k)
+                        effect_interp <- if (epsilon_sq < 0.01) "negligible"
+                                        else if (epsilon_sq < 0.06) "small"
+                                        else if (epsilon_sq < 0.14) "medium"
+                                        else "large"
+                        paste0("ε²=", round(epsilon_sq, 3), " (", effect_interp, ")")
                     }
 
                     # Add omnibus test result to statistics table
@@ -868,6 +956,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         method = omnibus_result$method,
                         statistic = omnibus_result$statistic,
                         pvalue = omnibus_result$p.value,
+                        effectSize = omnibus_effect_size,
                         significance = if (omnibus_result$p.value < 0.001) "***" else if (omnibus_result$p.value < 0.01) "**" else if (omnibus_result$p.value < 0.05) "*" else "ns"
                     ))
 
@@ -886,7 +975,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "as this increases Type I error risk. ",
                             if (self$options$pairwiseComparisons) "Pairwise results shown below should be interpreted with caution." else ""
                         ))
-                        self$results$insert(2, notice)
+                        self$results$insert(999, notice)
 
                         # If pairwise not requested, stop here
                         if (!self$options$pairwiseComparisons) {
@@ -905,7 +994,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "Omnibus test is significant (p = ", round(omnibus_result$p.value, 4), "). ",
                             "Enable 'Show Pairwise Comparisons' to see which specific groups differ."
                         ))
-                        self$results$insert(2, notice)
+                        self$results$insert(999, notice)
                         return()
                     }
                 } else {
@@ -938,6 +1027,8 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     group2 = character(n_comparisons),
                     p = numeric(n_comparisons),
                     statistic = numeric(n_comparisons),
+                    effect_size = numeric(n_comparisons),
+                    effect_label = character(n_comparisons),
                     method = character(n_comparisons),  # Track which test was used
                     stringsAsFactors = FALSE
                 )
@@ -967,8 +1058,6 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "At least 2 observations per group required for comparison."
                         ))
                         self$results$insert(1, notice)
-
-                        warning("Insufficient data for statistical comparison.")
                         stop("Insufficient data for statistical comparison.")
                     }
 
@@ -980,10 +1069,51 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         wilcox.test(data1, data2, na.action = na.omit, exact = FALSE)
                     }
 
+                    # Calculate effect size
+                    effect_size <- if (infer$pairwise == "t.test") {
+                        # Cohen's d for t-test
+                        n1 <- length(data1)
+                        n2 <- length(data2)
+                        mean1 <- mean(data1, na.rm = TRUE)
+                        mean2 <- mean(data2, na.rm = TRUE)
+                        sd1 <- sd(data1, na.rm = TRUE)
+                        sd2 <- sd(data2, na.rm = TRUE)
+                        pooled_sd <- sqrt(((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))
+                        cohens_d <- (mean1 - mean2) / pooled_sd
+                        cohens_d
+                    } else {
+                        # Rank-biserial correlation for Wilcoxon/Mann-Whitney
+                        n1 <- length(data1)
+                        n2 <- length(data2)
+                        U <- test_result$statistic
+                        r <- 1 - (2 * U) / (n1 * n2)
+                        r
+                    }
+
+                    # Effect size interpretation
+                    effect_interp <- if (infer$pairwise == "t.test") {
+                        # Cohen's d interpretation
+                        if (abs(effect_size) < 0.2) "negligible"
+                        else if (abs(effect_size) < 0.5) "small"
+                        else if (abs(effect_size) < 0.8) "medium"
+                        else "large"
+                    } else {
+                        # Rank-biserial r interpretation
+                        if (abs(effect_size) < 0.1) "negligible"
+                        else if (abs(effect_size) < 0.3) "small"
+                        else if (abs(effect_size) < 0.5) "medium"
+                        else "large"
+                    }
+
                     stats_df$group1[i] <- as.character(g1)
                     stats_df$group2[i] <- as.character(g2)
                     stats_df$p[i] <- test_result$p.value
                     stats_df$statistic[i] <- test_result$statistic
+                    stats_df$effect_size[i] <- effect_size
+                    stats_df$effect_label[i] <- paste0(
+                        if (infer$pairwise == "t.test") "d=" else "r=",
+                        round(effect_size, 2), " (", effect_interp, ")"
+                    )
                     stats_df$method[i] <- actual_method_name
                 }
                 
@@ -1029,6 +1159,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     method = df$method[i],  # Show which test was actually performed
                     statistic = df$statistic[i],
                     pvalue = df$p[i],
+                    effectSize = df$effect_label[i],
                     significance = paste0(
                         symnum(df$p[i], corr = FALSE, na = FALSE,
                                cutpoints = c(0, 0.001, 0.01, 0.05, 1),
@@ -1049,6 +1180,91 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(private$..assumptionReason)) {
                     table$setNote("assumption", private$..assumptionReason)
                 }
+        },
+
+        .generateSummary = function() {
+            if (!self$options$addStats) return()
+            if (is.null(private$..stats_df)) return()
+
+            df <- private$..stats_df
+            infer <- private$..inferredMethod
+            n_groups <- length(unique(self$data[[self$options$xvar]]))
+            x_var <- self$options$xvar
+            y_var <- self$options$yvar
+
+            # Omnibus result summary (if >2 groups)
+            omnibus_text <- ""
+            if (n_groups > 2 && !is.null(infer$omnibus)) {
+                omnibus_method <- switch(infer$omnibus,
+                    "anova" = "one-way ANOVA",
+                    "kruskal.test" = "Kruskal-Wallis test",
+                    infer$omnibus
+                )
+                omnibus_text <- paste0(
+                    "A <strong>", omnibus_method, "</strong> comparing ", n_groups, " groups ",
+                    "was performed as the omnibus test. "
+                )
+            }
+
+            # Pairwise summary
+            sig_pairs <- sum(df$p.adj < 0.05, na.rm = TRUE)
+            total_pairs <- nrow(df)
+            pairwise_text <- paste0(
+                "<strong>", sig_pairs, " of ", total_pairs, " pairwise comparison",
+                if (total_pairs > 1) "s were" else " was",
+                " significant</strong> after Bonferroni correction (adjusted p < 0.05). "
+            )
+
+            # Effect size summary
+            if ("effect_size" %in% names(df) && any(!is.na(df$effect_size))) {
+                max_effect_idx <- which.max(abs(df$effect_size))
+                max_effect <- df$effect_size[max_effect_idx]
+                max_effect_comp <- paste(df$group1[max_effect_idx], "vs", df$group2[max_effect_idx])
+                effect_type <- if (infer$pairwise == "t.test") "Cohen's d" else "rank-biserial r"
+
+                effect_interp <- if (infer$pairwise == "t.test") {
+                    if (abs(max_effect) >= 0.8) "large"
+                    else if (abs(max_effect) >= 0.5) "medium"
+                    else if (abs(max_effect) >= 0.2) "small"
+                    else "negligible"
+                } else {
+                    if (abs(max_effect) >= 0.5) "large"
+                    else if (abs(max_effect) >= 0.3) "medium"
+                    else if (abs(max_effect) >= 0.1) "small"
+                    else "negligible"
+                }
+
+                effect_text <- paste0(
+                    "The largest effect size was <strong>", effect_interp, "</strong> (",
+                    effect_type, " = ", round(max_effect, 2), ") for the comparison between ",
+                    max_effect_comp, ". "
+                )
+            } else {
+                effect_text <- ""
+            }
+
+            # Clinical interpretation
+            clinical_text <- paste0(
+                "These results suggest ",
+                if (sig_pairs > 0) {
+                    paste0("statistically significant differences in <strong>", y_var,
+                           "</strong> across levels of <strong>", x_var, "</strong>. ")
+                } else {
+                    paste0("no statistically significant differences in <strong>", y_var,
+                           "</strong> across levels of <strong>", x_var, "</strong> after multiple comparison adjustment. ")
+                },
+                "Interpret these results in the context of your research question and consider clinical significance alongside statistical significance."
+            )
+
+            summary_html <- paste0(
+                "<div style='padding: 15px; background: linear-gradient(to right, #f0f8ff, #e6f3ff); border-left: 4px solid #4CAF50; border-radius: 4px;'>",
+                "<h4 style='margin-top: 0; color: #2c3e50;'>📊 Analysis Summary</h4>",
+                "<p>", omnibus_text, pairwise_text, effect_text, "</p>",
+                "<p style='margin-bottom: 0;'><em style='color: #555;'>", clinical_text, "</em></p>",
+                "</div>"
+            )
+
+            self$results$summary$setContent(summary_html)
         },
 
         .generatePlotInfo = function() {
@@ -1138,9 +1354,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(overrides) > 0) {
                 preset_name <- tools::toTitleCase(gsub("_", " ", preset))
-                warning(paste0(
-                    "CLINICAL PRESET OVERRIDE: ", preset_name, " (", paste(overrides, collapse = "; "), ")."
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'clinicalPresetOverride',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(paste0(
+                    "Clinical Preset Applied: ", preset_name, ". ",
+                    "The following options have been configured: ", paste(overrides, collapse = "; "), "."
                 ))
+                self$results$insert(999, notice)
             }
         },
 

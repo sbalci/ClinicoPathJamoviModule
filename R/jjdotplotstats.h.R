@@ -270,7 +270,9 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "glue",
+                    "digest"),
                 clearWith=list(
                     "dep",
                     "group",
@@ -319,23 +321,28 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
-                title="Clinical Interpretation"))
+                title="Clinical Interpretation",
+                visible="(guidedMode)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
-                title="Data Assessment & Recommendations"))
+                title="Data Assessment & Recommendations",
+                visible="(guidedMode)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentence",
-                title="Report Template"))
+                title="Report Template",
+                visible="(guidedMode)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="guidedSteps",
-                title="Analysis Steps"))
+                title="Analysis Steps",
+                visible="(guidedMode)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="recommendations",
-                title="Next Steps"))}))
+                title="Next Steps",
+                visible="(guidedMode)"))}))
 
 jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjdotplotstatsBase",

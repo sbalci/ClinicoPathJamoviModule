@@ -11,7 +11,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             predictors = NULL,
             analysisType = "single",
             direction = "auto",
-            youdenOptimization = TRUE,
+            youdenOptimization = FALSE,
             customCutoffs = NULL,
             sensitivityThreshold = 0.8,
             specificityThreshold = 0.8,
@@ -22,14 +22,14 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             bootstrapCutoffCI = FALSE,
             bootstrapPartialAUC = FALSE,
             stratifiedBootstrap = TRUE,
-            pairwiseComparisons = TRUE,
+            pairwiseComparisons = FALSE,
             comparisonMethod = "delong",
             rocCurve = TRUE,
             aucTable = TRUE,
-            cutoffTable = TRUE,
-            optimalCutoffs = TRUE,
-            diagnosticMetrics = TRUE,
-            clinicalMetrics = TRUE,
+            cutoffTable = FALSE,
+            optimalCutoffs = FALSE,
+            diagnosticMetrics = FALSE,
+            clinicalMetrics = FALSE,
             smoothMethod = "none",
             partialAuc = FALSE,
             partialAucType = "specificity",
@@ -138,7 +138,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..youdenOptimization <- jmvcore::OptionBool$new(
                 "youdenOptimization",
                 youdenOptimization,
-                default=TRUE)
+                default=FALSE)
             private$..customCutoffs <- jmvcore::OptionString$new(
                 "customCutoffs",
                 customCutoffs)
@@ -193,7 +193,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..pairwiseComparisons <- jmvcore::OptionBool$new(
                 "pairwiseComparisons",
                 pairwiseComparisons,
-                default=TRUE)
+                default=FALSE)
             private$..comparisonMethod <- jmvcore::OptionList$new(
                 "comparisonMethod",
                 comparisonMethod,
@@ -213,19 +213,19 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..cutoffTable <- jmvcore::OptionBool$new(
                 "cutoffTable",
                 cutoffTable,
-                default=TRUE)
+                default=FALSE)
             private$..optimalCutoffs <- jmvcore::OptionBool$new(
                 "optimalCutoffs",
                 optimalCutoffs,
-                default=TRUE)
+                default=FALSE)
             private$..diagnosticMetrics <- jmvcore::OptionBool$new(
                 "diagnosticMetrics",
                 diagnosticMetrics,
-                default=TRUE)
+                default=FALSE)
             private$..clinicalMetrics <- jmvcore::OptionBool$new(
                 "clinicalMetrics",
                 clinicalMetrics,
-                default=TRUE)
+                default=FALSE)
             private$..smoothMethod <- jmvcore::OptionList$new(
                 "smoothMethod",
                 smoothMethod,
@@ -868,7 +868,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="imbalanceWarning",
                             title="Class Imbalance Detection",
-                            visible="(detectImbalance && showImbalanceWarning)"))
+                            visible=FALSE))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="imbalanceMetrics",
@@ -2020,7 +2020,7 @@ enhancedROC <- function(
     predictors,
     analysisType = "single",
     direction = "auto",
-    youdenOptimization = TRUE,
+    youdenOptimization = FALSE,
     customCutoffs,
     sensitivityThreshold = 0.8,
     specificityThreshold = 0.8,
@@ -2031,14 +2031,14 @@ enhancedROC <- function(
     bootstrapCutoffCI = FALSE,
     bootstrapPartialAUC = FALSE,
     stratifiedBootstrap = TRUE,
-    pairwiseComparisons = TRUE,
+    pairwiseComparisons = FALSE,
     comparisonMethod = "delong",
     rocCurve = TRUE,
     aucTable = TRUE,
-    cutoffTable = TRUE,
-    optimalCutoffs = TRUE,
-    diagnosticMetrics = TRUE,
-    clinicalMetrics = TRUE,
+    cutoffTable = FALSE,
+    optimalCutoffs = FALSE,
+    diagnosticMetrics = FALSE,
+    clinicalMetrics = FALSE,
     smoothMethod = "none",
     partialAuc = FALSE,
     partialAucType = "specificity",

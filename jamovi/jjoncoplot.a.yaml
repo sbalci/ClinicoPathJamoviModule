@@ -1,7 +1,7 @@
 ---
 name: jjoncoplot
 title: Genomic Landscape Visualization
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: 'Molecular Pathology Plots'
 menuSubtitle: 'Oncoplot, Mutation Landscape, Clinical Annotations'
 version: '0.0.1'
@@ -320,11 +320,5 @@ options:
             Display plot legend.
           jamovi: >
             Display legend explaining mutation types and colors.
-
-    - name: tmbOutput
-      title: Save Tumor Mutation Burden (TMB)
-      type: Output
-      description:
-          R: Output variable for Tumor Mutation Burden (TMB).
 
 ...

@@ -126,7 +126,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent(paste(ratio_warnings, collapse = "<br>"))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             private$.effectiveOptions <- opts
@@ -283,31 +283,42 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateInterpretationContent = function() {
             method_guidance <- switch(self$options$typestatistics,
-                "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations.'),
-                "nonparametric" = .('Fisher\'s exact test provides precise p-values for small samples. Recommended when expected cell counts are < 5.'),
-                "robust" = .('Robust methods provide reliable results even with outliers or non-normal distributions.'),
-                "bayes" = .('Bayesian analysis provides evidence for or against group differences. Bayes factors > 3 suggest evidence for differences.'),
+                "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations. Example: χ²(1) = 5.2, p = 0.023 indicates significant difference between groups.'),
+                "nonparametric" = .('Fisher\'s exact test provides precise p-values for small samples. Recommended when expected cell counts are < 5. Example: p = 0.031 (two-sided) indicates significant association, with odds ratio quantifying effect strength.'),
+                "robust" = .('Robust methods provide reliable results even with outliers or non-normal distributions. Example: Robust estimate = 0.45 [0.32, 0.58] shows effect with 95% confidence interval.'),
+                "bayes" = .('Bayesian analysis provides evidence for or against group differences. Bayes factors > 3 suggest evidence for differences. Example: BF₁₀ = 5.2 indicates data are 5.2 times more likely under alternative hypothesis than null.'),
                 .('Statistical analysis will be performed based on your data characteristics.')
             )
-            
+
             clinical_context <- switch(self$options$clinicalpreset %||% "custom",
-                "diagnostic" = .('For diagnostic tests: Focus on sensitivity (true positive rate) and specificity (true negative rate). Consider positive and negative predictive values for clinical decision-making.'),
-                "treatment" = .('For treatment response: Look for significant differences between treatment arms. Consider clinical significance alongside statistical significance.'),
-                "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Consider biological relevance of observed differences.'),
-                .('Interpret results in the context of your specific research question and clinical setting.')
+                "diagnostic" = .('For diagnostic tests: Focus on sensitivity (true positive rate) and specificity (true negative rate). Example: Sensitivity = 85% means test correctly identifies 85 out of 100 diseased patients. Specificity = 92% means test correctly identifies 92 out of 100 healthy individuals. PPV and NPV depend on disease prevalence in your population.'),
+                "treatment" = .('For treatment response: Look for significant differences between treatment arms. Example: 45% response in Treatment A vs 25% in Treatment B (p = 0.012, Cramér\'s V = 0.31) indicates moderate effect size with clinical relevance. Consider absolute risk reduction (20%) and number needed to treat (NNT = 5).'),
+                "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Example: High biomarker expression in 65% of responders vs 30% in non-responders (p < 0.001, OR = 4.3 [2.1-8.7]) suggests biomarker may predict treatment response. Consider biological mechanisms and validation cohorts.'),
+                .('Interpret results in the context of your specific research question and clinical setting. Focus on effect sizes (Cramér\'s V, odds ratios) alongside p-values for clinical significance assessment.')
             )
-            
+
+            # Effect size interpretation guide
+            effect_size_guide <- paste0(
+                "<p><strong>", .('Effect Size Interpretation (Cramér\'s V):'), "</strong></p>",
+                "<ul>",
+                "<li>", .('Small effect: V = 0.10 (subtle association, may require large samples to detect)'), "</li>",
+                "<li>", .('Medium effect: V = 0.30 (noticeable association, clinically relevant in many contexts)'), "</li>",
+                "<li>", .('Large effect: V = 0.50 (strong association, typically clinically important)'), "</li>",
+                "</ul>"
+            )
+
             glue::glue(
                 "<h4>{interpretation_title}</h4>
                 <p><strong>{method_title}:</strong> {method_guidance}</p>
                 <p><strong>{clinical_title}:</strong> {clinical_context}</p>
+                {effect_size_guide}
                 <p><strong>{general_title}:</strong> {general_guidance}</p>
                 <hr>",
                 interpretation_title = .('How to Interpret Your Results'),
                 method_title = .('Statistical Method'),
                 clinical_title = .('Clinical Context'),
                 general_title = .('General Guidance'),
-                general_guidance = .('Pie charts show proportions visually - larger slices represent higher frequencies. Statistical tests determine if observed differences are likely due to chance or represent true group differences.')
+                general_guidance = .('Pie charts show proportions visually - larger slices represent higher frequencies. Statistical tests determine if observed differences are likely due to chance or represent true group differences. Always report both statistical significance (p-values) and effect sizes (Cramér\'s V, odds ratios) for complete interpretation.')
             )
         },
         
@@ -388,6 +399,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(counts_var) && counts_var != "") {
                 counts_validation <- private$.validateCounts(self$data, counts_var)
                 if (!counts_validation$valid) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'countsValidationError',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(counts_validation$message)
+                    self$results$insert(1, notice)
                     stop(counts_validation$message)
                 }
             }
@@ -806,26 +824,61 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to parse ratio string
         .parseRatio = function(ratio_string) {
             if (is.null(ratio_string) || ratio_string == "") return(NULL)
-            
+
             tryCatch({
                 ratios <- as.numeric(strsplit(ratio_string, ",")[[1]])
+
+                # ERROR: Non-numeric values
                 if (any(is.na(ratios))) {
-                    warning(.('Invalid ratio specification - contains non-numeric values. Using equal proportions.'))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ratioNonNumeric',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(.('Ratio specification contains non-numeric values. Expected format: "0.5,0.5" for two equal groups or "0.25,0.5,0.25" for three groups. Using equal proportions as fallback.'))
+                    self$results$insert(1, notice)
                     return(NULL)
                 }
+
+                # ERROR: Ratios don't sum to 1
                 if (abs(sum(ratios) - 1) > 0.001) {
-                    warning(paste(.('Ratios sum to {sum} but should sum to 1. Using equal proportions.'),
-                                list(sum = round(sum(ratios), 3))))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ratioSumError',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf(
+                        .('Ratios must sum to 1.0 but your values sum to %s. Example valid input: "0.3,0.7" (sums to 1.0). Using equal proportions as fallback.'),
+                        round(sum(ratios), 3)
+                    ))
+                    self$results$insert(1, notice)
                     return(NULL)
                 }
+
+                # ERROR: Non-positive ratios
                 if (any(ratios <= 0)) {
-                    warning(.('Ratios must be positive. Using equal proportions.'))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'ratioNegative',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(.('All ratio values must be positive (> 0). Negative or zero values are not allowed in proportion specifications. Using equal proportions as fallback.'))
+                    self$results$insert(1, notice)
                     return(NULL)
                 }
+
                 return(ratios)
             }, error = function(e) {
-                warning(paste(.('Error parsing ratio: {error}. Using equal proportions.'),
-                             list(error = e$message)))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'ratioParseError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf(
+                    .('Error parsing ratio specification: %s. Please use comma-separated decimal values (e.g., "0.5,0.5"). Using equal proportions as fallback.'),
+                    e$message
+                ))
+                self$results$insert(1, notice)
                 return(NULL)
             })
         },
@@ -942,7 +995,20 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     
                     self$results$todo$setContent(todo)
-                    
+
+                    # Add analysis completion Notice
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'analysisComplete',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf(
+                        'Pie chart analysis completed successfully using %d observations with %s statistical method.',
+                        nrow(prepared_data),
+                        tools::toTitleCase(self$options$typestatistics)
+                    ))
+                    self$results$insert(999, notice)
+
                 }, error = function(e) {
                     # Reset cache on error
                     private$.processedData <- NULL
@@ -1036,7 +1102,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 notice$setContent(
                     .('Paired/repeated measures analysis requires a grouping variable (e.g., Pre vs Post). Single variable pie charts cannot use paired option. Please add a grouping variable or disable the paired option.')
                 )
-                self$results$insert(0, notice)
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -1134,7 +1200,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(validation$message)
-                    self$results$insert(0, notice)
+                    self$results$insert(1, notice)
                     return()
                 }
             }
@@ -1156,7 +1222,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         fisher_check$total_cells,
                         fisher_check$pct_low
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
             }
 
@@ -1165,6 +1231,14 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Checkpoint before expensive statistical computation
             private$.checkpoint()
+
+            # Additional checkpoint with timing for Bayesian analysis
+            if (override_type == "bayes") {
+                self$results$todo$setContent(
+                    glue::glue("<br>⏳ {msg}<br><hr>", msg = .('Computing Bayesian analysis... This may take 30-60 seconds depending on data size.'))
+                )
+                private$.checkpoint(flush = TRUE)
+            }
 
             plot2 <-
                 ggstatsplot::ggpiestats(
@@ -1272,7 +1346,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent(validation$message)
-                        self$results$insert(0, notice)
+                        self$results$insert(1, notice)
                         return()
                     }
                 }
@@ -1294,12 +1368,20 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             fisher_check$total_cells,
                             fisher_check$pct_low
                         ))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                     }
                 }
 
                 # Checkpoint before expensive grouped statistical computation
                 private$.checkpoint()
+
+                # Additional checkpoint with timing for Bayesian analysis
+                if (override_type == "bayes") {
+                    self$results$todo$setContent(
+                        glue::glue("<br>⏳ {msg}<br><hr>", msg = .('Computing Bayesian analysis for grouped data... This may take 1-2 minutes depending on number of groups and data size.'))
+                    )
+                    private$.checkpoint(flush = TRUE)
+                }
 
                 plot4 <- ggstatsplot::grouped_ggpiestats(
                     data = mydata,

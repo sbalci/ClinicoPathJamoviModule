@@ -57,27 +57,34 @@ items:
     - name: interpretation
       title: Clinical Interpretation
       type: Html
+      visible: (guidedMode)
 
     - name: assumptions
       title: Data Assessment & Recommendations
       type: Html
+      visible: (guidedMode)
 
     - name: reportSentence
       title: Report Template
       type: Html
+      visible: (guidedMode)
 
     - name: guidedSteps
       title: Analysis Steps
       type: Html
+      visible: (guidedMode)
 
     - name: recommendations
       title: Next Steps
       type: Html
+      visible: (guidedMode)
 
 
 refs:
     - ggplot2
     - ggstatsplot
     - ClinicoPathJamoviModule
+    - glue
+    - digest
 
 ...

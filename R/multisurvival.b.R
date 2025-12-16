@@ -69,13 +69,25 @@ if (!exists(".")) {
 
   # Check for negative survival times
   if (time_var %in% names(data)) {
-    negative_times <- sum(data[[time_var]] < 0, na.rm = TRUE)
+    time_vec <- data[[time_var]]
+
+    # Handle jamovi survival variables that arrive as Surv objects or matrices
+    if (survival::is.Surv(time_vec)) {
+      time_vec <- as.numeric(time_vec[, "time"])
+    } else if (is.matrix(time_vec) && ncol(time_vec) >= 1) {
+      time_vec <- as.numeric(time_vec[, 1])
+    }
+
+    # Replace in data copy so downstream checks work on numeric values
+    data[[time_var]] <- time_vec
+
+    negative_times <- sum(time_vec < 0, na.rm = TRUE)
     if (negative_times > 0) {
       issues <- append(issues, paste(.("Negative survival times detected:"), negative_times, .("observations")))
     }
 
     # Check for zero survival times
-    zero_times <- sum(data[[time_var]] == 0, na.rm = TRUE)
+    zero_times <- sum(time_vec == 0, na.rm = TRUE)
     if (zero_times > 0) {
       warnings <- append(warnings, paste(.("Zero survival times detected:"), zero_times, .("observations. Consider adding small constant (0.5 days).")))
     }
@@ -138,7 +150,8 @@ if (!exists(".")) {
     # IMPROVEMENT: Throw error instead of silent NA return for unsupported factor levels
     # This prevents misleading results from incorrectly encoded outcomes
     stop(sprintf(
-      "Outcome factor has non-numeric, non-'Event' levels: %s. Please recode as numeric (0/1), logical (TRUE/FALSE), or use competing risk encoding with 'Event'/'Censored'/'Competing' levels.",
+      "Outcome Factor Has Unsupported Levels: The outcome variable has non-numeric levels that cannot be interpreted as events: %s\n\nTo Fix:\n1. For binary outcomes: Recode as numeric (0 = censored, 1 = event) or logical (FALSE/TRUE)\n2. For competing risks: Use factor with exactly 3 levels: 'Censored', 'Event', 'Competing'\n3. In jamovi: Use Transform > Recode to convert to appropriate format\n4. Example numeric coding: 0 = Alive/Censored, 1 = Dead/Event occurred\n\nCurrent levels detected: %s",
+      paste(levels(outcome_vec), collapse=", "),
       paste(levels(outcome_vec), collapse=", ")
     ))
   }
@@ -149,7 +162,8 @@ if (!exists(".")) {
 
   # IMPROVEMENT: Throw error for unsupported types instead of returning NA
   stop(sprintf(
-    "Outcome variable type '%s' is not supported. Please use numeric (0/1), logical (TRUE/FALSE), or factor with appropriate levels.",
+    "Outcome Variable Type Not Supported: The outcome variable has type '%s' which cannot be used for survival analysis.\n\nSupported Types:\n1. Numeric: 0 (censored) and 1 (event)\n2. Logical: FALSE (censored) and TRUE (event)\n3. Factor: Either numeric levels ('0'/'1') or competing risk levels ('Censored'/'Event'/'Competing')\n\nTo Fix:\n1. Check that you selected the correct outcome variable\n2. In jamovi: Use Data > Setup to verify variable type\n3. Convert text/character variables to numeric or factor format\n4. Use Transform > Compute to create binary outcome: outcome = ifelse(status == 'Dead', 1, 0)\n\nCurrent type: %s",
+    class(outcome_vec)[1],
     class(outcome_vec)[1]
   ))
 }
@@ -1301,6 +1315,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     <br><br>
                     "
         )
+
         # https://finalfit.org/articles/all_tables_examples.html#cox-proportional-hazards-model-survival-time-to-event
 
 
@@ -1340,6 +1355,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           mydata[["mytime"]] <-
             jmvcore::toNumeric(mydata[[mytime_labelled]])
+
+          # If a jamovi survival/time variable was passed (Surv object), keep only its time column
+          if (survival::is.Surv(mydata[["mytime"]])) {
+            mydata[["mytime"]] <- as.numeric(mydata[["mytime"]][, "time"])
+          } else if (is.matrix(mydata[["mytime"]]) && ncol(mydata[["mytime"]]) >= 1) {
+            # Defensive: handle matrices coming from special column types
+            mydata[["mytime"]] <- as.numeric(mydata[["mytime"]][, 1])
+          }
 
 
         } else if (tint) {
@@ -1408,6 +1431,24 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         }
 
+        ### Early validation: Check for negative times immediately after calculation ----
+        # This prevents wasted computation in downstream cleaning and model fitting
+        if (any(mydata$mytime < 0, na.rm = TRUE)) {
+          n_negative <- sum(mydata$mytime < 0, na.rm = TRUE)
+          # Notice Disabled per user request (serialization issues)
+          # notice <- jmvcore::Notice$new(...)
+          
+          error_msg <- sprintf(
+              "Negative Survival Times Detected: %d observation(s) have negative time values. This typically indicates:\n• Follow-up date occurs before diagnosis date\n• Incorrect date variable selection (dates reversed)\n• Data entry errors in date fields\n\nTo Fix:\n1. Verify 'Diagnosis Date' and 'Follow-up Date' are correctly assigned\n2. Check that diagnosis always precedes follow-up\n3. Review date formats and ensure consistency\n4. Examine observations with negative times for data errors",
+              n_negative
+          )
+          
+          self$results$todo$setVisible(TRUE)
+          self$results$todo$setContent(paste0("<b>Error:</b> ", error_msg))
+          
+          # Return NULL to stop analysis early
+          return(NULL)
+        }
 
         df_time <- mydata %>% jmvcore::select(c("row_names", "mytime"))
 
@@ -1751,13 +1792,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$multievent) {
           if (is.null(self$options$dod) && is.null(self$options$dooc)) {
             # Convert to Notice for consistent UX
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'multiEventConfigError',
-              type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent("Multiple Events Configuration Error: When using multiple event levels, you must specify at least one event type (Dead of Disease or Dead of Other Causes). Select at least one event level from the outcome variable and ensure it has the appropriate levels.")
-            self$results$insert(1, notice)
+            # Notice Disabled
+            # notice <- jmvcore::Notice$new(...)
+            
+            self$results$todo$setContent("<b>Error:</b> Multiple Events Configuration Error: When using multiple event levels, you must specify at least one event type (Dead of Disease or Dead of Other Causes). Select at least one event level from the outcome variable and ensure it has the appropriate levels.")
             self$results$todo$setVisible(TRUE)
             return(FALSE)
           }
@@ -1825,17 +1863,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return(analysis_results)
 
         }, error = function(e) {
-          # Convert to Notice for consistent UX
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'survivalAnalysisError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent(paste0(
-            .("Survival Analysis Error: "), e$message, ". ",
-            .("Recommendations: (1) Check data for missing/invalid values in time and outcome variables, (2) Ensure time variable contains positive numeric values, (3) Verify outcome is binary (0/1 or FALSE/TRUE), (4) Check sufficient events (≥10), (5) Ensure explanatory variables have appropriate types, (6) Try fewer variables, or (7) Check for outliers.")
+          # Notice Disabled
+          # notice <- jmvcore::Notice$new(...)
+          
+          self$results$todo$setContent(paste0(
+            "<b>Survival Analysis Error:</b> ", e$message, "<br><br>",
+            "Recommendations: (1) Check data for missing/invalid values in time and outcome variables, (2) Ensure time variable contains positive numeric values, (3) Verify outcome is binary (0/1 or FALSE/TRUE), (4) Check sufficient events (≥10), (5) Ensure explanatory variables have appropriate types, (6) Try fewer variables, or (7) Check for outliers."
           ))
-          self$results$insert(1, notice)
           self$results$todo$setVisible(TRUE)
           return(NULL)
         })
@@ -1867,6 +1901,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           stop('Data contains no (complete) rows')
         }
 
+        # Pass cleaned data to plot renderers so state is available when jamovi requests images
+        if (self$options$hr) {
+          self$results$plot$setState(cleaneddata)
+          self$results$plot3$setState(cleaneddata)
+        }
+        if (self$options$km) {
+          self$results$plotKM$setState(cleaneddata)
+        }
+        if (self$options$ac) {
+          self$results$plot_adj$setState(cleaneddata)
+        }
+
         # Execute the main analysis components
         private$.checkpoint()
         private$.final_fit2()
@@ -1888,15 +1934,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           private$.calculate_nomogram()
         }
 
-        # AFT Model Analysis
-        if (self$options$use_aft) {
-          private$.calculate_aft()
-        }
+        # AFT Model Analysis - COMMENTED OUT (options disabled in .a.yaml/.u.yaml)
+        # if (self$options$use_aft) {
+        #   private$.calculate_aft()
+        # }
 
-        # SurvMetrics - Model Performance Metrics
-        if (self$options$show_survmetrics) {
-          private$.calculate_survmetrics()
-        }
+        # SurvMetrics - Model Performance Metrics - COMMENTED OUT (options disabled in .a.yaml/.u.yaml)
+        # if (self$options$show_survmetrics) {
+        #   private$.calculate_survmetrics()
+        # }
 
         # EXPERIMENTAL:         if (self$options$use_tree) {
         # EXPERIMENTAL:           private$.calculate_survivaldecisiontree()
@@ -1919,13 +1965,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         if (self$options$multievent && self$options$analysistype == "compete") {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'riskScoreCompete',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent("Risk scores are derived from a Fine-Gray subdistribution model; interpret as subdistribution hazard-based scores rather than cause-specific hazards.")
-          self$results$insert(3, notice)
+          # Notice Disabled
+          # notice <- jmvcore::Notice$new(...)
+          
+          # self$results$insert(3, notice)
         }
 
         private$.calculateRiskScore(cox_model, cleaneddata$cleanData)
@@ -1968,16 +2011,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             median_followup,
             time_unit
           ))
-          self$results$insert(999, notice)
+          self$results$add(notice)
         }, error = function(e) {
-          # If summary generation fails, use simple completion message
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'analysisComplete',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent("Analysis completed successfully.")
-          self$results$insert(999, notice)
+          # Notice Disabled
+          # notice <- jmvcore::Notice$new(...)
+          
+          # self$results$add(notice)
         })
 
         # Analysis completed successfully
@@ -2007,13 +2046,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           notice$setContent(sprintf("Missing time/outcome values detected; %d row(s) may be excluded from the Cox model.", dropped))
           self$results$insert(2, notice)
         }
+        # Safety check: Negative times should already be caught in .definemytime()
+        # This is defensive programming in case time is provided directly (not calculated)
         if (any(mydata$mytime < 0, na.rm = TRUE)) {
+          n_negative <- sum(mydata$mytime < 0, na.rm = TRUE)
           notice <- jmvcore::Notice$new(
             options = self$options,
             name = 'negativeTime',
             type = jmvcore::NoticeType$ERROR
           )
-          notice$setContent("Negative survival times detected. Please correct time variables before fitting the model.")
+          notice$setContent(
+            sprintf(
+              "Negative Survival Times Detected: %d observation(s) have negative time values.\n\nTo Fix:\n1. If using 'Elapsed Time' variable directly, verify all values are positive\n2. If calculating from dates, check that diagnosis date precedes follow-up date\n3. Review data for entry errors (negative values, incorrect date sequences)\n4. Consider excluding problematic observations",
+              n_negative
+            )
+          )
           self$results$insert(2, notice)
           return(NULL)
         }
@@ -2529,11 +2576,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       ,
       # AFT Model (Accelerated Failure Time) ----
+      # DISABLED: Options commented out in .a.yaml and .u.yaml
+      # Function call commented out in .run() (line ~1914)
       .calculate_aft = function() {
+        # SAFEGUARD: Feature disabled
+        if (TRUE) return()
+
         # Early return if AFT not requested
-        if (!self$options$use_aft) {
-          return()
-        }
+        # if (!self$options$use_aft) {
+        #   return()
+        # }
 
         # Set headings for AFT section
         self$results$aftModelHeading$setContent("<h3>Accelerated Failure Time Model</h3>")
@@ -2564,6 +2616,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # Binary factor: use level matching outcomeLevel or second level as event
             mydata$myoutcome <- as.numeric(mydata$myoutcome == levels(mydata$myoutcome)[2])
           } else {
+
             # Convert to Notice for consistent UX
             notice <- jmvcore::Notice$new(
               options = self$options,
@@ -2719,7 +2772,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       ,
       # SurvMetrics - Model Performance Metrics ----
+      # DISABLED: Options commented out in .a.yaml and .u.yaml
+      # Function call commented out in .run() (line ~1919)
       .calculate_survmetrics = function() {
+        # SAFEGUARD: Feature disabled
+        if (TRUE) return()
+
         # Early return if SurvMetrics not requested
         if (!self$options$show_survmetrics) {
           return()
@@ -2921,7 +2979,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       }
 
       ,
+      # DISABLED: Options commented out in .a.yaml and .u.yaml
       .plotSurvMetrics = function(image, ...) {
+        # SAFEGUARD: Feature disabled
+        if (TRUE) return(FALSE)
+
         # Early return if plots not requested
         if (!self$options$show_survmetrics || !self$options$survmetrics_show_plots) {
           return(FALSE)
@@ -3909,6 +3971,24 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         #   include.lowest = TRUE
         # )
 
+        ### Check variance in risk scores before attempting quantile grouping ----
+        risk_variance <- var(mydata$risk_score, na.rm = TRUE)
+        if (is.na(risk_variance) || risk_variance < 1e-10) {
+          notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'lowRiskVariance',
+            type = jmvcore::NoticeType$WARNING
+          )
+          notice$setContent(
+            sprintf(
+              "Risk Score Variation Insufficient for Grouping: All patients have nearly identical risk scores (variance = %.2e). This occurs when:\n• Covariate patterns are very similar across patients\n• Model coefficients are very small\n• Limited prognostic information in predictors\n\nRecommendations:\n• Review predictor selection for discriminative variables\n• Consider simpler risk stratification approaches\n• Interpret C-index instead of risk groups",
+              risk_variance
+            )
+          )
+          self$results$insert(3, notice)
+          # Skip risk grouping but continue with other analyses
+          return(NULL)
+        }
 
         ### Function to try creating risk groups ----
         createRiskGroups <- function(n_groups) {
@@ -5529,6 +5609,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
       ,
     ## Fit Cox Model with Selection ----
+    ## DISABLED: Model selection options commented out in .a.yaml and .u.yaml
+    ## This function will not be called when modelSelection options are unavailable
 .fitModelWithSelection = function(formula, data) {
   tryCatch({
     # Get the selection method and criteria from options
@@ -5839,7 +5921,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
   explanatory_formula <- c(myexplanatory, mycontexpl)
 
   # Prepare the dependent variable formula
-  dependent_formula <- "survival::Surv(mytime, myoutcome)"
+  dependent_formula <- "Surv(mytime, myoutcome)"
 
   private$.checkpoint()
 
@@ -7399,7 +7481,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       }
 
       ,
-.populatePredictionIntervals = function(predictions, cleaneddata) {
+      .populatePredictionIntervals = function(predictions, cleaneddata) {
         # Populate prediction intervals table (simplified)
         if (!is.null(predictions)) {
           n_show <- min(10, nrow(cleaneddata))  # Show first 10 observations
@@ -7421,8 +7503,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       }
 
         # Natural Language Summary Generation ----
-        ,
-        .generateMultivariableCoxSummary = function(tMultivariable, explanatory_vars, outcome_var) {
+      ,
+      .generateMultivariableCoxSummary = function(tMultivariable, explanatory_vars, outcome_var) {
             tryCatch({
                 # Extract the results table and metrics
                 cox_table <- tMultivariable[[1]]

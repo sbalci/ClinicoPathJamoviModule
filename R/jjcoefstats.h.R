@@ -317,6 +317,7 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         instructions = function() private$.items[["instructions"]],
         about = function() private$.items[["about"]],
+        plainSummary = function() private$.items[["plainSummary"]],
         coefPlot = function() private$.items[["coefPlot"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficientTable = function() private$.items[["coefficientTable"]],
@@ -348,6 +349,11 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="about",
                 title="About",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="plainSummary",
+                title="Plain-Language Summary",
+                visible="(showexplanations)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="coefPlot",
@@ -512,6 +518,7 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plainSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefficientTable} \tab \tab \tab \tab \tab a table \cr

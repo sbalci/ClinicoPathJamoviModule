@@ -1,7 +1,7 @@
 ---
 name:  jjpiestats
 title: Pie Charts
-menuGroup: JJStatsPlotT1
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Pie Charts'
 version: '0.0.32'
@@ -191,16 +191,16 @@ options:
     - name: proportiontest
       title: Proportion Test
       type: Bool
-      default: true
+      default: false
       description:
           R: >
-            Decides whether proportion test for x variable is to be 
+            Decides whether proportion test for x variable is to be
             carried out for each level of y.
 
     - name: bfmessage
       title: Bayes Factor Message
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display Bayes Factor in favor of the null hypothesis. 
@@ -236,10 +236,10 @@ options:
     - name: showexplanations
       title: Show Clinical Explanations
       type: Bool
-      default: true
+      default: false
       description:
           R: >
-            Display detailed explanations of statistical methods, assumptions, 
+            Display detailed explanations of statistical methods, assumptions,
             and clinical interpretations to guide analysis and result interpretation.
 
     - name: resultssubtitle
@@ -255,7 +255,7 @@ options:
     - name: showSummary
       title: Show Analysis Summary
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display natural-language summary paragraph with key findings
@@ -264,7 +264,7 @@ options:
     - name: showAssumptions
       title: Show Assumptions & Warnings
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display statistical assumptions panel with detected violations,

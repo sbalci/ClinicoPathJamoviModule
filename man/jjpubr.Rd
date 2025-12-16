@@ -16,7 +16,7 @@ jjpubr(
   pairwiseComparisons = FALSE,
   addCorr = FALSE,
   corrMethod = "pearson",
-  addSmoothLine = TRUE,
+  addSmoothLine = FALSE,
   addMarginal = FALSE,
   addDensity = FALSE,
   bins = 30,
@@ -34,7 +34,7 @@ jjpubr(
   theme = "pubr",
   plotWidth = 600,
   plotHeight = 500,
-  showExplanations = TRUE,
+  showExplanations = FALSE,
   clinicalPreset = "custom"
 )
 }
