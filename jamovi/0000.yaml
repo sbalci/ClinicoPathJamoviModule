@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -1061,7 +1061,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1676,7 +1676,7 @@ analyses:
   - title: Syndromic Plot (PCA Loadings)
     name: jjsyndromicplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Multivariate Analysis
     menuTitle: Syndromic Plot (PCA Loadings)
     menuSubtitle: PCA Loading Visualization
@@ -1750,7 +1750,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -1788,7 +1788,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >

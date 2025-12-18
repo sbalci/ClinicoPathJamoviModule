@@ -477,7 +477,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        mydataview_plot = function() private$.items[["mydataview_plot"]],
         multivariableCoxHeading = function() private$.items[["multivariableCoxHeading"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
@@ -557,10 +556,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_plot",
-                title="mydataview_plot"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="multivariableCoxHeading",
@@ -1060,7 +1055,18 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 height=600,
                 requiresData=TRUE,
                 renderFun=".plot_nomogram",
-                visible="(showNomogram)"))
+                visible="(showNomogram)",
+                clearWith=list(
+                    "showNomogram",
+                    "explanatory",
+                    "contexpl",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogram_display",
@@ -1384,7 +1390,6 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$mydataview_plot} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
@@ -1560,8 +1565,7 @@ multisurvival <- function(
         time_intervals = time_intervals,
         rate_multiplier = rate_multiplier,
         showExplanations = showExplanations,
-        showSummaries = showSummaries,
-        )
+        showSummaries = showSummaries)
 
     analysis <- multisurvivalClass$new(
         options = options,
@@ -1571,3 +1575,4 @@ multisurvival <- function(
 
     analysis$results
 }
+

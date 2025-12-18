@@ -12,7 +12,7 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             rows = 5,
             flip = FALSE,
             color_palette = "default",
-            show_legend = TRUE,
+            show_legend = FALSE,
             mytitle = "",
             legendtitle = "",
             showSummaries = FALSE,
@@ -73,7 +73,7 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..show_legend <- jmvcore::OptionBool$new(
                 "show_legend",
                 show_legend,
-                default=TRUE)
+                default=FALSE)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -194,7 +194,17 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=500,
                 renderFun=".plot",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                clearWith=list(
+                    "counts",
+                    "groups",
+                    "facet",
+                    "rows",
+                    "flip",
+                    "color_palette",
+                    "show_legend",
+                    "mytitle",
+                    "legendtitle")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodExplanation",
@@ -273,7 +283,7 @@ jwaffle <- function(
     rows = 5,
     flip = FALSE,
     color_palette = "default",
-    show_legend = TRUE,
+    show_legend = FALSE,
     mytitle = "",
     legendtitle = "",
     showSummaries = FALSE,

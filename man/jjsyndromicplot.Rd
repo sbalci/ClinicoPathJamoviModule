@@ -93,6 +93,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a notification \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$loadings} \tab \tab \tab \tab \tab Standardized loadings for the selected principal component \cr
 \code{results$plot} \tab \tab \tab \tab \tab Syndromic visualization of PCA loadings \cr

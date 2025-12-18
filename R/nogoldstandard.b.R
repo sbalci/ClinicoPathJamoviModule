@@ -15,32 +15,64 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = nogoldstandardBase,
     private = list(
         .preset_info = NULL,
-        .messages = NULL,
+        .notices = list(),
 
-        .accumulateMessage = function(message) {
-            if (is.null(private$.messages)) {
-                private$.messages <- message
-            } else {
-                private$.messages <- c(private$.messages, message)
+        .addNotice = function(type, message, name = NULL) {
+            if (is.null(name)) {
+                name <- paste0('notice', length(private$.notices) + 1)
+            }
+
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = name,
+                type = type
+            )
+            notice$setContent(message)
+
+            # Store with priority for sorting
+            priority <- switch(
+                as.character(type),
+                "1" = 1,  # ERROR
+                "2" = 2,  # STRONG_WARNING
+                "3" = 3,  # WARNING
+                "4" = 4,  # INFO
+                3         # Default to WARNING
+            )
+
+            private$.notices[[length(private$.notices) + 1]] <- list(
+                notice = notice,
+                priority = priority
+            )
+        },
+
+        .insertNotices = function() {
+            if (length(private$.notices) == 0) return()
+
+            # Sort by priority (ERROR > STRONG_WARNING > WARNING > INFO)
+            notices_sorted <- private$.notices[order(sapply(private$.notices, function(x) x$priority))]
+
+            # Insert in order
+            position <- 1
+            for (n in notices_sorted) {
+                self$results$insert(position, n$notice)
+                position <- position + 1
             }
         },
 
-        .resetMessages = function() {
-            private$.messages <- NULL
-            # clearWith handles strict clearing, but we can set empty string
-            self$results$warnings$setContent("")
+        .resetNotices = function() {
+            private$.notices <- list()
         },
 
         .init = function() {
-            # Reset messages
-            private$.resetMessages()
+            # Reset notices for new analysis
+            private$.resetNotices()
 
             # Apply clinical preset if selected
             private$.applyPreset()
-            
+
             # Show method selection guide
             private$.showMethodGuide()
-            
+
             # Show welcome message initially
             private$.showWelcomeMessage()
         },
@@ -299,6 +331,9 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            # Reset notices for new analysis run
+            private$.resetNotices()
+
             # Show welcome message if needed and return early if instructions are displayed
             if (private$.showWelcomeMessage()) {
                 return()
@@ -445,21 +480,8 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Populate Agreement Statistics Table
             private$.populateAgreementStats(test_data, tests, test_levels)
 
-            # Update warnings panel
-            if (!is.null(private$.messages) && length(private$.messages) > 0) {
-                self$results$warnings$setContent(paste(
-                    "<div class='alert alert-warning'>",
-                    "<h6>Analysis Messages</h6>",
-                    "<ul>",
-                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
-                    "</ul></div>",
-                    sep = ""
-                ))
-            }
-
-
-
-
+            # Insert all notices in priority order (ERROR > STRONG_WARNING > WARNING > INFO)
+            private$.insertNotices()
         },
 
         .populatePrevalence = function(results) {
@@ -1064,7 +1086,11 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (error_count > 0) {
-                 private$.accumulateMessage(sprintf(.("Bootstrap: %d sample(s) failed to converge or produced errors (%d%%). CIs may be affected."), error_count, round(error_count/nboot*100)))
+                 private$.addNotice(
+                     jmvcore::NoticeType$WARNING,
+                     sprintf(.("Bootstrap: %d sample(s) failed to converge or produced errors (%d%%). CIs may be affected."), error_count, round(error_count/nboot*100)),
+                     'bootstrapConvergence'
+                 )
             }
 
             # Calculate percentile CI
@@ -1319,45 +1345,73 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .validateClinicalAssumptions = function(data, tests, method) {
             n_obs <- nrow(data)
             n_tests <- length(tests)
-            
+
             # Sample size warnings based on method
             if (method == "latent_class" && n_obs < 100) {
-                private$.accumulateMessage(sprintf(.("LCA typically requires 100+ observations for stable results. Current N = %d. Consider using composite reference method for smaller samples."), n_obs))
+                private$.addNotice(
+                    jmvcore::NoticeType$STRONG_WARNING,
+                    sprintf(.("LCA typically requires 100+ observations for stable results. Current N = %d. Consider using composite reference method for smaller samples."), n_obs),
+                    'lcaSampleSize'
+                )
             }
-            
+
             if (method == "bayesian" && n_obs < 50) {
-                private$.accumulateMessage(sprintf(.("Bayesian analysis may be unstable with N < 50. Current N = %d. Consider collecting more data."), n_obs))
+                private$.addNotice(
+                    jmvcore::NoticeType$STRONG_WARNING,
+                    sprintf(.("Bayesian analysis may be unstable with N < 50. Current N = %d. Consider collecting more data."), n_obs),
+                    'bayesianSampleSize'
+                )
             }
             
             # Check test result distributions
             for (i in seq_along(tests)) {
                 test_name <- tests[[i]]
                 test_values <- table(data[[test_name]])
-                
+
                 if (any(test_values < 5)) {
-                    private$.accumulateMessage(sprintf(.("Test '%s' has categories with <5 observations. Results may be unstable. Consider combining categories if clinically appropriate."), test_name))
+                    private$.addNotice(
+                        jmvcore::NoticeType$WARNING,
+                        sprintf(.("Test '%s' has categories with <5 observations. Results may be unstable. Consider combining categories if clinically appropriate."), test_name),
+                        paste0('smallCategories_', i)
+                    )
                 }
-                
+
                 # Check for extreme imbalances
                 min_prop <- min(test_values) / sum(test_values)
                 if (min_prop < 0.05) {
-                    private$.accumulateMessage(sprintf(.("Test '%s' shows extreme imbalance (minority category %.1f%%). This may affect parameter estimation."), test_name, min_prop * 100))
+                    private$.addNotice(
+                        jmvcore::NoticeType$WARNING,
+                        sprintf(.("Test '%s' shows extreme imbalance (minority category %.1f%%). This may affect parameter estimation."), test_name, min_prop * 100),
+                        paste0('extremeImbalance_', i)
+                    )
                 }
             }
             
             # Method-specific warnings
             if (method == "latent_class" && n_tests < 3) {
                  # checking this earlier in .run now, but good to keep as message if we relax allow
-                 private$.accumulateMessage(.("LCA with only 2 tests is under-identified."))
+                 private$.addNotice(
+                     jmvcore::NoticeType$WARNING,
+                     .("LCA with only 2 tests is under-identified."),
+                     'lcaUnderIdentified'
+                 )
             }
-            
+
             if (method == "composite" && n_tests %% 2 == 0) {
-                private$.accumulateMessage(.("Composite reference with even number of tests may result in ties. Consider using an odd number of tests or a different method."))
+                private$.addNotice(
+                    jmvcore::NoticeType$WARNING,
+                    .("Composite reference with even number of tests may result in ties. Consider using an odd number of tests or a different method."),
+                    'compositeTies'
+                )
             }
-            
+
             # Clinical context message
             if (self$options$verbose) {
-                private$.accumulateMessage(sprintf(.("Clinical validation: %d tests analyzed with N=%d using %s method"), n_tests, n_obs, method))
+                private$.addNotice(
+                    jmvcore::NoticeType$INFO,
+                    sprintf(.("Clinical validation: %d tests analyzed with N=%d using %s method"), n_tests, n_obs, method),
+                    'clinicalValidation'
+                )
             }
         },
 

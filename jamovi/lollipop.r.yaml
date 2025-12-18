@@ -9,19 +9,6 @@ items:
       type: Html
       visible: true
 
-    - name: warnings
-      title: Messages
-      type: Html
-      visible: true
-      clearWith:
-        - dep
-        - group
-        - useHighlight
-        - highlight
-        - aggregation
-        - conditionalColor
-        - colorThreshold
-
     - name: summary
       title: Data Summary
       type: Table
@@ -36,8 +23,8 @@ items:
     - name: plot
       title: '`Lollipop Chart {dep} vs {group}`'
       type: Image
-      width: 700
-      height: 500
+      width: (width)
+      height: (height)
       renderFun: .plot
       requiresData: true
 

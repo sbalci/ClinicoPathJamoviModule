@@ -12,7 +12,7 @@ jwaffle(
   rows = 5,
   flip = FALSE,
   color_palette = "default",
-  show_legend = TRUE,
+  show_legend = FALSE,
   mytitle = "",
   legendtitle = "",
   showSummaries = FALSE,

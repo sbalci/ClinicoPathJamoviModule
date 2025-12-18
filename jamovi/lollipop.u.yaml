@@ -39,22 +39,23 @@ children:
         margin: large
         children:
           - type: ComboBox
+            name: aggregation
+            label: Data Aggregation
+          - type: ComboBox
             name: sortBy
             label: Sort Order
           - type: ComboBox
             name: orientation
             label: Chart Orientation
+      - type: LayoutBox
+        margin: large
+        children:
           - type: CheckBox
             name: showValues
             label: Show Value Labels on Points
           - type: CheckBox
             name: showMean
             label: Show Mean Reference Line
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: aggregation
   - type: CollapseBox
     label: Visual Appearance
     collapsed: true
