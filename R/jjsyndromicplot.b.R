@@ -25,6 +25,35 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .componentToUse = NULL,
         .presetMessage = "",
 
+        # Variable name escaping utility for special characters
+        .escapeVar = function(x) {
+            # Convert variable names with special characters to safe R names
+            # This mirrors the modelbuilder behavior for handling spaces and punctuation
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        # Notice creation helper with single-line enforcement
+        .setNotice = function(content, type = 3) {
+            # Convert multi-line content to single line
+            content <- gsub("\\n", " ", content)
+            content <- gsub("\\s+", " ", trimws(content))
+
+            # Create fresh Notice object
+            notice <- jmvcore::Notice$new(
+                content = content,
+                type = type
+            )
+
+            # Dynamic insertion based on type
+            # ERROR (1) and STRONG_WARNING (2) at top
+            # WARNING (3) and INFO (4) at bottom
+            if (type <= 2) {
+                self$results$notices$insert(0, notice)
+            } else {
+                self$results$notices$insert(999, notice)
+            }
+        },
+
         # init ----
 
         .init = function() {
@@ -84,8 +113,10 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 self$results$todo$setContent(todo)
 
-                if (nrow(self$data) == 0)
+                if (nrow(self$data) == 0) {
+                    private$.setNotice("Data contains no complete rows after removing missing values.", type = 1)
                     stop('Data contains no (complete) rows')
+                }
             }
 
             # Apply clinical preset
@@ -238,6 +269,13 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Data Summary Message
             dropped_n <- initial_n - final_n
+            if (dropped_n > 0) {
+                private$.setNotice(
+                    paste0("Analyzed N=", final_n, " (", dropped_n, " cases removed using ",
+                           ifelse(missing_method=="mean_imputation", "mean imputation", "listwise deletion"), ")"),
+                    type = 4
+                )
+            }
             summary_msg <- paste0(
                 "<div style='background:#f5f5f5; padding:10px; margin:10px 0; border:1px solid #ddd;'>",
                 "<strong>Data Summary:</strong>",
@@ -264,6 +302,11 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 else if (is.numeric(col_data)) {
                     unique_vals <- length(unique(col_data[!is.na(col_data)]))
                     if (unique_vals <= 5 && unique_vals < nrow(pca_data) * 0.1) {
+                        private$.setNotice(
+                            paste0("Variable '", var_name, "' has only ", unique_vals,
+                                   " unique values and may be categorical rather than continuous."),
+                            type = 3
+                        )
                         warning_msgs <- c(
                             warning_msgs,
                             paste0(
@@ -278,6 +321,11 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # If categorical variables found, stop with clear error
             if (length(non_numeric_vars) > 0) {
+                private$.setNotice(
+                    paste0("PCA requires continuous numeric variables. Categorical variables detected: ",
+                           paste(non_numeric_vars, collapse = ", ")),
+                    type = 1
+                )
                 error_msg <- paste0(
                     "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
                     "<h4 style='color:#ff6f00; margin-top:0;'>❌ Categorical Variables Detected</h4>",
@@ -301,6 +349,10 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             sd_vals <- apply(pca_matrix, 2, sd)
             zero_var_names <- names(sd_vals[sd_vals == 0 | is.na(sd_vals)])
             if (length(zero_var_names) > 0) {
+                private$.setNotice(
+                    paste0("Zero-variance variables removed: ", paste(zero_var_names, collapse = ", ")),
+                    type = 3
+                )
                 warning_msgs <- c(
                     warning_msgs,
                     paste0(
@@ -313,6 +365,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pca_matrix <- pca_matrix[, keep_vars, drop = FALSE]
                 vars <- vars[keep_vars]
                 if (length(vars) < 3) {
+                    private$.setNotice("Insufficient variables remaining after removing zero-variance variables (need at least 3).", type = 1)
                     self$results$warnings$setContent(paste0(warning_msgs, collapse = ""))
                     self$results$warnings$setVisible(TRUE)
                     return()
@@ -321,6 +374,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
+                private$.setNotice("Insufficient data for PCA. Need at least 3 complete observations.", type = 1)
                 stop('Insufficient data for PCA. Need at least 3 complete observations.')
             }
 
@@ -333,6 +387,12 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             component_to_use <- requested_component
 
             if (requested_component > n_components) {
+                private$.setNotice(
+                    paste0("Requested component PC", requested_component,
+                           " exceeds available components (PC1-PC", n_components,
+                           "). Reset to PC1."),
+                    type = 3
+                )
                 warning_msgs <- c(
                     warning_msgs,
                     paste0(
@@ -361,6 +421,14 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Store PCA results for plotting
             private$.pcaResults <- pca
             private$.pcaData <- pca_matrix
+
+            # Analysis completion notice
+            variance_explained <- round(pca$sdev[component_to_use]^2 / sum(pca$sdev^2) * 100, 1)
+            private$.setNotice(
+                paste0("PCA completed: PC", component_to_use, " explains ", variance_explained,
+                       "% of variance (N=", final_n, ", p=", length(vars), ")"),
+                type = 4
+            )
 
             # Populate results table
             private$.populateTable()
@@ -521,6 +589,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             p <- load_df
 
             if (length(p$loading) < 1) {
+                private$.setNotice(paste0(pc, " has no loadings above cutoff. Try lowering the cutoff threshold."), type = 1)
                 stop(paste(pc, 'has no loadings above cutoff'))
             }
 
@@ -539,6 +608,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             p <- p %>% dplyr::filter(abs(.data$loading) >= cutoff)
 
             if (nrow(p) < 1) {
+                private$.setNotice(paste0("No loadings above cutoff (", cutoff, ") for ", pc, ". Try lowering the cutoff threshold."), type = 1)
                 stop(paste('There is no loading above cutoff for', pc))
             }
 

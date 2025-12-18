@@ -29,6 +29,11 @@ items:
     #   title: mydataview_cox
     #   type:  Preformatted
 
+    # - name:  mydataview_plot
+    #   title: mydataview_plot
+    #   type:  Preformatted
+
+
     - name:  multivariableCoxHeading
       title: Multivariable Cox Regression
       type:  Preformatted
@@ -831,6 +836,17 @@ items:
       requiresData: true
       renderFun: .plot_nomogram
       visible: (showNomogram)
+      clearWith:
+          - showNomogram
+          - explanatory
+          - contexpl
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
 
     - name: nomogram_display
       title: "Nomogram Scoring Guide"

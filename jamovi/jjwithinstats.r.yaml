@@ -31,6 +31,7 @@ clearWith:
     - k
     - plotwidth
     - plotheight
+    - showExplanations
 
 
 items:
@@ -55,20 +56,64 @@ items:
     - name: interpretation
       title: Clinical Interpretation
       type: Html
+      clearWith:
+        - dep1
+        - dep2
+        - dep3
+        - dep4
+        - typestatistics
 
     - name: explanations
       title: Explanations
       type: Html
+      clearWith:
+        - showExplanations
 
     - name: plot
       title: 'Violin Plots'
       type: Image
       renderFun: .plot
       requiresData: true
+      clearWith:
+        - dep1
+        - dep2
+        - dep3
+        - dep4
+        - typestatistics
+        - pairwisecomparisons
+        - pairwisedisplay
+        - padjustmethod
+        - effsizetype
+        - pointpath
+        - centralityplotting
+        - centralitytype
+        - centralitypath
+        - violin
+        - boxplot
+        - point
+        - mytitle
+        - xtitle
+        - ytitle
+        - originaltheme
+        - resultssubtitle
+        - bfmessage
+        - conflevel
+        - k
+        - plotwidth
+        - plotheight
 
     - name: summary
       title: Analysis Summary
       type: Html
+      clearWith:
+        - dep1
+        - dep2
+        - dep3
+        - dep4
+        - typestatistics
+        - pairwisecomparisons
+        - centralityplotting
+        - pointpath
 
     - name: ggpubrPlot
       title: 'Publication-Ready Within-Subjects Plot (ggpubr)'
@@ -83,6 +128,7 @@ items:
         - dep2
         - dep3
         - dep4
+        - typestatistics
         - ggpubrPlotType
         - ggpubrPalette
         - ggpubrAddStats

@@ -48,6 +48,16 @@ items:
       height: 500
       renderFun: .plot
       requiresData: true
+      clearWith:
+        - counts
+        - groups
+        - facet
+        - rows
+        - flip
+        - color_palette
+        - show_legend
+        - mytitle
+        - legendtitle
 
 
     - name: methodExplanation

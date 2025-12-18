@@ -11,10 +11,10 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             y_var = NULL,
             fill_var = NULL,
             facet_var = NULL,
-            show_plot = TRUE,
+            show_plot = FALSE,
             chart_style = "clinical",
             color_palette = "clinical",
-            show_percentages = TRUE,
+            show_percentages = FALSE,
             percentage_format = "integer",
             show_counts = FALSE,
             label_threshold = 5,
@@ -28,12 +28,12 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             bar_width = 0.8,
             plot_width = 10,
             plot_height = 6,
-            add_outline = TRUE,
+            add_outline = FALSE,
             outline_color = "white",
-            export_ready = TRUE,
+            export_ready = FALSE,
             show_statistical_tests = FALSE,
             confidence_level = 0.95,
-            showExplanations = TRUE, ...) {
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -87,7 +87,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..show_plot <- jmvcore::OptionBool$new(
                 "show_plot",
                 show_plot,
-                default=TRUE)
+                default=FALSE)
             private$..chart_style <- jmvcore::OptionList$new(
                 "chart_style",
                 chart_style,
@@ -118,7 +118,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..show_percentages <- jmvcore::OptionBool$new(
                 "show_percentages",
                 show_percentages,
-                default=TRUE)
+                default=FALSE)
             private$..percentage_format <- jmvcore::OptionList$new(
                 "percentage_format",
                 percentage_format,
@@ -200,7 +200,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..add_outline <- jmvcore::OptionBool$new(
                 "add_outline",
                 add_outline,
-                default=TRUE)
+                default=FALSE)
             private$..outline_color <- jmvcore::OptionList$new(
                 "outline_color",
                 outline_color,
@@ -213,7 +213,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..export_ready <- jmvcore::OptionBool$new(
                 "export_ready",
                 export_ready,
-                default=TRUE)
+                default=FALSE)
             private$..show_statistical_tests <- jmvcore::OptionBool$new(
                 "show_statistical_tests",
                 show_statistical_tests,
@@ -227,7 +227,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..analysis_preset)
             self$.addOption(private$..x_var)
@@ -609,10 +609,10 @@ jjsegmentedtotalbar <- function(
     y_var,
     fill_var,
     facet_var = NULL,
-    show_plot = TRUE,
+    show_plot = FALSE,
     chart_style = "clinical",
     color_palette = "clinical",
-    show_percentages = TRUE,
+    show_percentages = FALSE,
     percentage_format = "integer",
     show_counts = FALSE,
     label_threshold = 5,
@@ -626,12 +626,12 @@ jjsegmentedtotalbar <- function(
     bar_width = 0.8,
     plot_width = 10,
     plot_height = 6,
-    add_outline = TRUE,
+    add_outline = FALSE,
     outline_color = "white",
-    export_ready = TRUE,
+    export_ready = FALSE,
     show_statistical_tests = FALSE,
     confidence_level = 0.95,
-    showExplanations = TRUE) {
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjsegmentedtotalbar requires jmvcore to be installed (restart may be required)")

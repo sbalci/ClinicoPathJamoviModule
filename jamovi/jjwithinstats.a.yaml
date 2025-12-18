@@ -1,7 +1,7 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: JJStatsPlotT1
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
 version: '0.0.32'
@@ -256,12 +256,12 @@ options:
     - name: violin
       title: Violin Plot
       type: Bool
-      default: true
+      default: false
 
     - name: boxplot
       title: Box Plot
       type: Bool
-      default: true
+      default: false
 
     - name: point
       title: Points
@@ -291,7 +291,7 @@ options:
     - name: resultssubtitle
       title: Statistical Results
       type: Bool
-      default: true
+      default: false
 
     - name: bfmessage
       title: Bayes Factor Message
@@ -390,7 +390,7 @@ options:
     - name: ggpubrAddStats
       title: Add Statistical Comparisons (ggpubr)
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Add statistical comparison p-values to ggpubr plot.
@@ -398,7 +398,7 @@ options:
     - name: ggpubrShowLines
       title: Show Connecting Lines (paired plot)
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show individual subject trajectories for paired plot.

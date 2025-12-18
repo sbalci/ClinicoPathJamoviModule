@@ -2,13 +2,128 @@
 % Please edit documentation in R/jwaffle.b.R
 \name{jwaffleClass}
 \alias{jwaffleClass}
-\title{Waffle Charts}
+\title{Waffle Charts for Categorical Data Visualization}
 \value{
-The function produces a waffle chart.
+A jamovi analysis object with waffle chart visualization, optional summary,
+and optional methodology explanation
 }
 \description{
-Create Waffle Charts to visualize distributions.
+Creates professional waffle charts (square pie charts) to visualize categorical
+distributions using a grid of colored squares. Each square represents a fixed
+proportion of the total, making it ideal for showing parts-of-whole relationships
+in clinical and pathological data.
 }
+\details{
+\strong{Data Requirements:}
+\itemize{
+\item Categorical grouping variable (factor, character, or logical)
+\item Minimum 30 cases recommended for stable proportions
+\item 2-10 categories optimal for visual clarity (>10 categories may be cluttered)
+\item Haven labelled data automatically converted to factors
+}
+
+\strong{How Waffle Charts Work:}
+A waffle chart uses a grid of colored squares (typically 10x10 = 100 squares)
+where each square represents a fixed proportion of the total sample. This makes
+percentages immediately intuitive - each square ≈ 1\% of the sample.
+
+\strong{Clinical Applications:}
+\itemize{
+\item \strong{Disease Classification:} Show distribution of tumor grades, cancer stages,
+or pathological subtypes
+\item \strong{Treatment Outcomes:} Display response rates (complete/partial/no response)
+across patient cohorts
+\item \strong{Demographic Analysis:} Present patient characteristics, risk factors, or
+comorbidity patterns
+\item \strong{Quality Metrics:} Visualize compliance rates, diagnostic accuracy, or
+safety outcomes
+}
+
+\strong{Advantages over Other Charts:}
+\itemize{
+\item More intuitive than pie charts for showing proportions
+\item Each square = 1\% makes percentages immediately clear
+\item Handles many categories better than bar charts
+\item Effective for presentations and publications
+\item Faceting enables subgroup comparisons
+}
+
+\strong{Statistical Considerations:}
+\itemize{
+\item Most effective with n≥30; smaller samples may show unstable proportions
+\item Works best when no single category dominates (>80\%)
+\item Each square represents approximately 1\% of the sample
+\item Categories with <5 cases may be statistically unreliable
+\item Chi-square tests can evaluate proportion differences between groups
+}
+}
+\section{Performance Optimization}{
+
+The function implements sophisticated caching:
+\itemize{
+\item Data aggregation cached based on variable selection and data content
+\item Color palettes cached separately to minimize recomputation
+\item Plot state management prevents unnecessary regeneration
+\item Automatic width scaling for faceted plots
+}
+}
+
+\section{Clinical Validation}{
+
+The function performs comprehensive data quality checks:
+\itemize{
+\item Validates categorical data types (with automatic labelled data conversion)
+\item Detects single-category data (requires multiple categories)
+\item Warns about many categories (>10 may need grouping)
+\item Alerts to small samples (<30 cases)
+\item Identifies rare categories (<5 cases)
+\item Checks for negative count values (must be non-negative)
+}
+}
+
+\examples{
+\dontrun{
+# Basic tumor grade distribution
+jwaffle(
+    data = pathology_data,
+    groups = "TumorGrade",
+    color_palette = "colorblind",
+    show_legend = TRUE,
+    showSummaries = TRUE
+)
+
+# Treatment response by cohort with faceting
+jwaffle(
+    data = clinical_data,
+    groups = "Response",
+    facet = "TreatmentArm",
+    color_palette = "professional",
+    mytitle = "Treatment Response Rates by Arm",
+    showSummaries = TRUE
+)
+
+# Weighted risk distribution
+jwaffle(
+    data = aggregated_data,
+    groups = "RiskCategory",
+    counts = "PatientCount",
+    color_palette = "presentation",
+    legendtitle = "Risk Level"
+)
+}
+
+}
+\references{
+Wilke, C. O. (2019). waffle: Create Waffle Chart Visualizations in R.
+R package version 1.0.1.
+}
+\seealso{
+\code{\link[waffle]{geom_waffle}} for the underlying waffle geom
+}
+\concept{JJStatsPlot visualization functions}
+\keyword{categorical}
+\keyword{distribution}
+\keyword{hplot}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::jwaffleBase} -> \code{jwaffleClass}
 }

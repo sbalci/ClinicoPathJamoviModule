@@ -512,3 +512,17 @@ children:
                 name: showExplanations
               - type: CheckBox
                 name: showSummaries
+
+  # Debug (disabled)
+  # - type: CollapseBox
+  #   label: Debug
+  #   collapsed: true
+  #   children:
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: CheckBox
+  #           name: debug
+  #         - type: CheckBox
+  #           name: debug_dummy_plot
+  #           enable: (debug)

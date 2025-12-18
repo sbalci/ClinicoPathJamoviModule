@@ -27,6 +27,18 @@ items:
         - scale
         - clinicalPreset
 
+    - name: notices
+      title: Notices
+      type: Notification
+      visible: false
+      clearWith:
+        - vars
+        - component
+        - cutoff
+        - center
+        - scale
+        - clinicalPreset
+
     - name: explanations
       title: Explanations
       type: Html

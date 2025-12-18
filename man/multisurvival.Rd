@@ -49,7 +49,9 @@ multisurvival(
   time_intervals = "12, 36, 60",
   rate_multiplier = 100,
   showExplanations = FALSE,
-  showSummaries = TRUE
+  showSummaries = TRUE,
+  debug = FALSE,
+  debug_dummy_plot = FALSE
 )
 }
 \arguments{
@@ -204,11 +206,19 @@ component to help interpret the statistical methods and results.}
 and plots. These summaries provide plain-language interpretations of the
 statistical results. Recommended for clinical users. Turn off to reduce
 visual clutter when summaries are not needed.}
+
+\item{debug}{If true, writes extra diagnostic information during plot
+rendering to \code{results$mydataview_plot} and to the R console (when
+available).}
+
+\item{debug_dummy_plot}{If true, plot renderers draw a simple dummy plot
+instead of the real plot to help isolate rendering/device issues.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$mydataview_plot} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr

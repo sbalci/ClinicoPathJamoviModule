@@ -89,7 +89,7 @@ options:
     - name: show_legend
       title: Show Legend
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Whether to display the legend

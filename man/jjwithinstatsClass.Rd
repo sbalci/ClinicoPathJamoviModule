@@ -2,12 +2,123 @@
 % Please edit documentation in R/jjwithinstats.b.R
 \name{jjwithinstatsClass}
 \alias{jjwithinstatsClass}
-\title{Violin Plots to Compare Within Group}
-\description{
-Violin Plots to Compare Within Group
-
-Violin Plots to Compare Within Group
+\title{Violin Plots to Compare Within Group (Repeated Measures)}
+\value{
+A jamovi analysis object with violin plots, statistical tests, and
+clinical interpretation
 }
+\description{
+Creates violin plots for within-subjects (repeated measures) analysis using
+ggstatsplot::ggwithinstats. Compares 2-4 measurements from the same subjects
+with statistical testing and pairwise comparisons. Ideal for biomarker tracking,
+treatment response monitoring, and longitudinal clinical studies.
+}
+\details{
+\strong{Data Requirements:}
+\itemize{
+\item Wide format required (one row per subject)
+\item Each column represents a different time point or condition
+\item Complete data required for paired analysis (listwise deletion)
+\item Minimum 3 subjects with complete data across all measurements
+}
+
+\strong{Statistical Tests:}
+\itemize{
+\item Parametric: Repeated measures ANOVA (assumes normality)
+\item Nonparametric: Friedman test (no distribution assumptions)
+\item Robust: Uses trimmed means (resistant to outliers)
+\item Bayesian: Provides evidence strength via Bayes Factors
+}
+
+\strong{Clinical Presets:}
+\itemize{
+\item Biomarker: Optimized for laboratory biomarker tracking (nonparametric)
+\item Treatment: Optimized for treatment response monitoring (parametric with pairwise)
+\item Laboratory: Optimized for clinical lab values (robust)
+}
+}
+\section{Performance Optimization}{
+
+The function implements sophisticated caching:
+\itemize{
+\item Data preparation cached based on variable selection and data content
+\item Options cached separately to minimize reprocessing
+\item Plot state management prevents unnecessary regeneration
+\item Checkpoint calls before expensive operations for responsiveness
+}
+}
+
+\section{Clinical Validation}{
+
+The function performs comprehensive data quality checks:
+\itemize{
+\item Validates paired design requirements (complete cases)
+\item Detects small sample sizes (< 10 subjects)
+\item Identifies potential outliers (> 10\% outliers)
+\item Warns about skewed data for parametric tests
+\item Alerts to high missing data rates (> 50\%)
+}
+}
+
+\examples{
+\dontrun{
+# Basic within-subjects analysis
+data(iris)
+iris_wide <- data.frame(
+    Subject = 1:50,
+    Baseline = iris$Sepal.Length[1:50],
+    Month3 = iris$Sepal.Width[1:50] * 2.5,
+    Month6 = iris$Petal.Length[1:50] * 1.8
+)
+
+jjwithinstats(
+    data = iris_wide,
+    dep1 = "Baseline",
+    dep2 = "Month3",
+    dep3 = "Month6",
+    typestatistics = "parametric",
+    pairwisecomparisons = TRUE,
+    centralityplotting = TRUE,
+    pointpath = TRUE
+)
+
+# Clinical biomarker tracking (nonparametric)
+jjwithinstats(
+    data = clinical_data,
+    dep1 = "CRP_baseline",
+    dep2 = "CRP_week4",
+    dep3 = "CRP_week12",
+    clinicalpreset = "biomarker",
+    typestatistics = "nonparametric",
+    pairwisecomparisons = TRUE,
+    mytitle = "C-Reactive Protein Levels During Treatment"
+)
+
+# Robust analysis with publication plot
+jjwithinstats(
+    data = lab_data,
+    dep1 = "ALT_pre",
+    dep2 = "ALT_post",
+    typestatistics = "robust",
+    centralityplotting = TRUE,
+    centralitytype = "robust",
+    addGGPubrPlot = TRUE,
+    ggpubrPlotType = "paired",
+    ggpubrAddStats = TRUE
+)
+}
+
+}
+\references{
+Patil, I. (2021). Visualizations with statistical details: The 'ggstatsplot' approach.
+Journal of Open Source Software, 6(61), 3167. \doi{10.21105/joss.03167}
+}
+\seealso{
+\code{\link[ggstatsplot]{ggwithinstats}} for the underlying plotting function
+}
+\concept{JJStatsPlot functions}
+\keyword{hplot}
+\keyword{htest}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::jjwithinstatsBase} -> \code{jjwithinstatsClass}
 }

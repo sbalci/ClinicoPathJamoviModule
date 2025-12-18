@@ -1164,6 +1164,18 @@ options:
         results. Recommended for clinical users. Turn off to reduce visual
         clutter when summaries are not needed.
 
+    # DEBUG OPTIONS (disabled)
+    # These were used for temporary plot debugging and are intentionally hidden.
+    # - name: debug
+    #   title: "Debug Logging"
+    #   type: Bool
+    #   default: false
+    #
+    # - name: debug_dummy_plot
+    #   title: "Debug: Dummy Plot"
+    #   type: Bool
+    #   default: false
+
     # ============================================================================
     # PLANNED FEATURES (Future Development)
     # ============================================================================

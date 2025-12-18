@@ -1,7 +1,7 @@
 ---
 name:  jjsyndromicplot
 title: Syndromic Plot (PCA Loadings)
-menuGroup: JJStatsPlotT1
+menuGroup: JJStatsPlotT
 menuSubgroup: Multivariate Analysis
 version: '0.0.32'
 jas: '1.2'
@@ -247,7 +247,7 @@ options:
     - name: showExplanations
       title: Show Explanations
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show explanations of the PCA results and syndromic plot.

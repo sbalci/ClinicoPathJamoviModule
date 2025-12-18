@@ -37,10 +37,10 @@ jjscatterstats(
   plotheight = 450,
   addGGPubrPlot = FALSE,
   ggpubrPalette = "jco",
-  ggpubrAddCorr = TRUE,
+  ggpubrAddCorr = FALSE,
   ggpubrCorrMethod = "pearson",
-  ggpubrAddSmooth = TRUE,
-  showExplanations = TRUE,
+  ggpubrAddSmooth = FALSE,
+  showExplanations = FALSE,
   clinicalPreset = "custom"
 )
 }
@@ -148,7 +148,6 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
-\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr

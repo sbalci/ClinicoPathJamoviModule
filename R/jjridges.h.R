@@ -50,7 +50,9 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             width = 800,
             height = 600,
             dpi = 300,
-            clinicalPreset = "custom", ...) {
+            clinicalPreset = "custom",
+            showAboutPanel = FALSE,
+            showAssumptions = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -328,6 +330,14 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "lab_values_by_group",
                     "survival_time_distribution"),
                 default="custom")
+            private$..showAboutPanel <- jmvcore::OptionBool$new(
+                "showAboutPanel",
+                showAboutPanel,
+                default=FALSE)
+            private$..showAssumptions <- jmvcore::OptionBool$new(
+                "showAssumptions",
+                showAssumptions,
+                default=FALSE)
 
             self$.addOption(private$..x_var)
             self$.addOption(private$..y_var)
@@ -374,6 +384,8 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..height)
             self$.addOption(private$..dpi)
             self$.addOption(private$..clinicalPreset)
+            self$.addOption(private$..showAboutPanel)
+            self$.addOption(private$..showAssumptions)
         }),
     active = list(
         x_var = function() private$..x_var$value,
@@ -420,7 +432,9 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         width = function() private$..width$value,
         height = function() private$..height$value,
         dpi = function() private$..dpi$value,
-        clinicalPreset = function() private$..clinicalPreset$value),
+        clinicalPreset = function() private$..clinicalPreset$value,
+        showAboutPanel = function() private$..showAboutPanel$value,
+        showAssumptions = function() private$..showAssumptions$value),
     private = list(
         ..x_var = NA,
         ..y_var = NA,
@@ -466,7 +480,9 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..width = NA,
         ..height = NA,
         ..dpi = NA,
-        ..clinicalPreset = NA)
+        ..clinicalPreset = NA,
+        ..showAboutPanel = NA,
+        ..showAssumptions = NA)
 )
 
 jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -474,8 +490,10 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        warnings = function() private$.items[["warnings"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
+        reportSummary = function() private$.items[["reportSummary"]],
+        aboutPanel = function() private$.items[["aboutPanel"]],
+        assumptionsPanel = function() private$.items[["assumptionsPanel"]],
         plot = function() private$.items[["plot"]],
         statistics = function() private$.items[["statistics"]],
         tests = function() private$.items[["tests"]],
@@ -502,14 +520,6 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "y_var")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="warnings",
-                title="Data Quality Warnings",
-                visible=FALSE,
-                clearWith=list(
-                    "x_var",
-                    "y_var")))
-            self$add(jmvcore::Html$new(
-                options=options,
                 name="clinicalSummary",
                 title="Clinical Summary",
                 visible=FALSE,
@@ -517,6 +527,31 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "x_var",
                     "y_var",
                     "show_stats")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSummary",
+                title="Report Summary (Copy-Ready)",
+                visible=TRUE,
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "show_stats",
+                    "test_type",
+                    "effsize_type")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="aboutPanel",
+                title="About Ridge Plots",
+                visible=FALSE,
+                clearWith=list()))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptionsPanel",
+                title="Statistical Assumptions & Caveats",
+                visible=FALSE,
+                clearWith=list(
+                    "show_stats",
+                    "test_type")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -794,11 +829,17 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   violin plots with Bonferroni correction. Age by Stage: parametric tests
 #'   with Cohen's d. Tumor Size: Hodges-Lehmann shift. Lab Values: robust tests
 #'   with Hedges' g. Survival Time: median with quartiles.
+#' @param showAboutPanel Display comprehensive information about ridge plots,
+#'   interpretation guidance, and clinical examples.
+#' @param showAssumptions Display statistical assumptions, caveats, and
+#'   methodological notes for the selected test type.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$statistics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tests} \tab \tab \tab \tab \tab a table \cr
@@ -858,7 +899,9 @@ jjridges <- function(
     width = 800,
     height = 600,
     dpi = 300,
-    clinicalPreset = "custom") {
+    clinicalPreset = "custom",
+    showAboutPanel = FALSE,
+    showAssumptions = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjridges requires jmvcore to be installed (restart may be required)")
@@ -924,7 +967,9 @@ jjridges <- function(
         width = width,
         height = height,
         dpi = dpi,
-        clinicalPreset = clinicalPreset)
+        clinicalPreset = clinicalPreset,
+        showAboutPanel = showAboutPanel,
+        showAssumptions = showAssumptions)
 
     analysis <- jjridgesClass$new(
         options = options,

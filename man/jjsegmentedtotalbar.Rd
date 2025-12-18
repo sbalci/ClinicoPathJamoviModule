@@ -11,10 +11,10 @@ jjsegmentedtotalbar(
   y_var,
   fill_var,
   facet_var = NULL,
-  show_plot = TRUE,
+  show_plot = FALSE,
   chart_style = "clinical",
   color_palette = "clinical",
-  show_percentages = TRUE,
+  show_percentages = FALSE,
   percentage_format = "integer",
   show_counts = FALSE,
   label_threshold = 5,
@@ -28,12 +28,12 @@ jjsegmentedtotalbar(
   bar_width = 0.8,
   plot_width = 10,
   plot_height = 6,
-  add_outline = TRUE,
+  add_outline = FALSE,
   outline_color = "white",
-  export_ready = TRUE,
+  export_ready = FALSE,
   show_statistical_tests = FALSE,
   confidence_level = 0.95,
-  showExplanations = TRUE
+  showExplanations = FALSE
 )
 }
 \arguments{

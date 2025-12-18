@@ -24,7 +24,7 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             plotwidth = 600,
             plotheight = 600,
             clinicalPreset = "none",
-            showExplanations = TRUE, ...) {
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -134,7 +134,7 @@ jjsyndromicplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..missing)
@@ -449,7 +449,7 @@ jjsyndromicplot <- function(
     plotwidth = 600,
     plotheight = 600,
     clinicalPreset = "none",
-    showExplanations = TRUE) {
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjsyndromicplot requires jmvcore to be installed (restart may be required)")

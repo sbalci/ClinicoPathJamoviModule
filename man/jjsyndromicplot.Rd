@@ -24,7 +24,7 @@ jjsyndromicplot(
   plotwidth = 600,
   plotheight = 600,
   clinicalPreset = "none",
-  showExplanations = TRUE
+  showExplanations = FALSE
 )
 }
 \arguments{

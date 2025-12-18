@@ -47,11 +47,6 @@ items:
       type:  Html
       visible: (clinicalPreset != "custom")
 
-    - name:  warnings
-      title: Warnings
-      type:  Html
-      visible: true
-
     - name:  explanations
       title: Explanations
       type:  Html

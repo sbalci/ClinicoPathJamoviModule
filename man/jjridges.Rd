@@ -50,7 +50,9 @@ jjridges(
   width = 800,
   height = 600,
   dpi = 300,
-  clinicalPreset = "custom"
+  clinicalPreset = "custom",
+  showAboutPanel = FALSE,
+  showAssumptions = FALSE
 )
 }
 \arguments{
@@ -176,13 +178,21 @@ Distribution: nonparametric tests with Cliff's delta. Treatment Response:
 violin plots with Bonferroni correction. Age by Stage: parametric tests
 with Cohen's d. Tumor Size: Hodges-Lehmann shift. Lab Values: robust tests
 with Hedges' g. Survival Time: median with quartiles.}
+
+\item{showAboutPanel}{Display comprehensive information about ridge plots,
+interpretation guidance, and clinical examples.}
+
+\item{showAssumptions}{Display statistical assumptions, caveats, and
+methodological notes for the selected test type.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$statistics} \tab \tab \tab \tab \tab a table \cr
 \code{results$tests} \tab \tab \tab \tab \tab a table \cr

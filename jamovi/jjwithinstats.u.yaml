@@ -177,29 +177,43 @@ children:
                 name: plotheight
                 format: number
                 width: small
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Publication Plot (ggpubr)
+    collapsed: true
     children:
       - type: CheckBox
         name: addGGPubrPlot
+      - type: Label
+        label: Plot Configuration
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: ggpubrPlotType
+                enable: (addGGPubrPlot)
+              - type: ComboBox
+                name: ggpubrPalette
+                enable: (addGGPubrPlot)
+      - type: Label
+        label: Display Options
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: ggpubrAddStats
+                enable: (addGGPubrPlot)
+              - type: CheckBox
+                name: ggpubrShowLines
+                enable: (addGGPubrPlot)
+              - type: CheckBox
+                name: ggpubrAddPoints
+                enable: (addGGPubrPlot)
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: ggpubrPlotType
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: ggpubrPalette
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: ggpubrAddStats
-      - type: CheckBox
-        name: ggpubrShowLines
-      - type: CheckBox
-        name: ggpubrAddPoints
       - type: CheckBox
         name: showExplanations

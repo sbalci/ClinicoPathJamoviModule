@@ -37,10 +37,10 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             plotheight = 450,
             addGGPubrPlot = FALSE,
             ggpubrPalette = "jco",
-            ggpubrAddCorr = TRUE,
+            ggpubrAddCorr = FALSE,
             ggpubrCorrMethod = "pearson",
-            ggpubrAddSmooth = TRUE,
-            showExplanations = TRUE,
+            ggpubrAddSmooth = FALSE,
+            showExplanations = FALSE,
             clinicalPreset = "custom", ...) {
 
             super$initialize(
@@ -247,7 +247,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..ggpubrAddCorr <- jmvcore::OptionBool$new(
                 "ggpubrAddCorr",
                 ggpubrAddCorr,
-                default=TRUE)
+                default=FALSE)
             private$..ggpubrCorrMethod <- jmvcore::OptionList$new(
                 "ggpubrCorrMethod",
                 ggpubrCorrMethod,
@@ -258,11 +258,11 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..ggpubrAddSmooth <- jmvcore::OptionBool$new(
                 "ggpubrAddSmooth",
                 ggpubrAddSmooth,
-                default=TRUE)
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
-                default=TRUE)
+                default=FALSE)
             private$..clinicalPreset <- jmvcore::OptionList$new(
                 "clinicalPreset",
                 clinicalPreset,
@@ -392,7 +392,6 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     active = list(
         todo = function() private$.items[["todo"]],
         presetInfo = function() private$.items[["presetInfo"]],
-        warnings = function() private$.items[["warnings"]],
         explanations = function() private$.items[["explanations"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]],
@@ -450,11 +449,6 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="presetInfo",
                 title="Clinical Preset Info",
                 visible="(clinicalPreset != \"custom\")"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="warnings",
-                title="Warnings",
-                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",
@@ -653,7 +647,6 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -696,10 +689,10 @@ jjscatterstats <- function(
     plotheight = 450,
     addGGPubrPlot = FALSE,
     ggpubrPalette = "jco",
-    ggpubrAddCorr = TRUE,
+    ggpubrAddCorr = FALSE,
     ggpubrCorrMethod = "pearson",
-    ggpubrAddSmooth = TRUE,
-    showExplanations = TRUE,
+    ggpubrAddSmooth = FALSE,
+    showExplanations = FALSE,
     clinicalPreset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

@@ -44,8 +44,43 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .preset_style_override = NULL,
         .preset_palette_override = NULL,
 
+        # Variable name escaping utility for special characters
+        .escapeVar = function(x) {
+            # Convert variable names with special characters to safe R names
+            # This mirrors the modelbuilder behavior for handling spaces and punctuation
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        # Notice helper function to create and insert notices
+        # Creates fresh Notice objects to avoid serialization issues
+        .setNotice = function(noticeName, type, content, position = NULL) {
+            # Ensure content is single-line (replace any newlines with spaces)
+            content <- gsub("\n", " ", content, fixed = TRUE)
+
+            # Create notice object
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = noticeName,
+                type = type
+            )
+            notice$setContent(content)
+
+            # Determine position based on type if not specified
+            if (is.null(position)) {
+                position <- switch(as.character(type),
+                    "1" = 1,        # ERROR at top
+                    "2" = 2,        # STRONG_WARNING after errors
+                    "3" = 50,       # WARNING mid-results
+                    "4" = 999,      # INFO at bottom
+                    50              # Default to mid
+                )
+            }
+
+            # Insert notice at appropriate position
+            self$results$insert(position, notice)
+        },
+
         .init = function() {
-            print("Debug: Init start")
             # Initialize comprehensive instructions with clinical context
 
             html_content <- paste(
@@ -60,10 +95,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 "<p><b>Clinical Presets:</b> Use the 'Analysis Template' dropdown to quickly apply settings for common clinical research scenarios.</p>",
                 "</div>"
             )
-            print("Debug: Checking instructions")
             self$results$instructions$setContent(html_content)
-            
-            print("Debug: Setting dimensions")
+
             # Set plot size based on user options
             width_px <- self$options$plot_width * 72
             height_px <- self$options$plot_height * 72
@@ -77,13 +110,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
             
             image_set(self$results$plot, width_px, height_px, self$options$show_plot)
-            
+
             if (!is.null(self$results$statistical_tests) && is.function(self$results$statistical_tests$setVisible)) {
                 self$results$statistical_tests$setVisible(self$options$show_statistical_tests)
             }
-            
-            print("Debug: Applying presets")
-            
+
             # Apply clinical presets if selected
             private$.applyPresetConfiguration()
             
@@ -97,15 +128,20 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 if (!is.null(self$results$presetInfo)) self$results$presetInfo$setVisible(FALSE)
             }
             
-            # Clear warnings initially
+            # Hide legacy HTML warnings (now using Notices)
             if (!is.null(self$results$warnings)) {
-                 self$results$warnings$setContent("")
                  self$results$warnings$setVisible(FALSE)
             }
+
+            # Ensure all notices are initially hidden
+            if (!is.null(self$results$validationError)) self$results$validationError$setVisible(FALSE)
+            if (!is.null(self$results$dataQualityWarning)) self$results$dataQualityWarning$setVisible(FALSE)
+            if (!is.null(self$results$smallSampleWarning)) self$results$smallSampleWarning$setVisible(FALSE)
+            if (!is.null(self$results$nonCountDataWarning)) self$results$nonCountDataWarning$setVisible(FALSE)
+            if (!is.null(self$results$analysisInfo)) self$results$analysisInfo$setVisible(FALSE)
         },
 
         .run = function() {
-            print("Debug: Run start")
             # Check if required variables are specified
             if (is.null(self$options$x_var) ||
                 is.null(self$options$y_var) ||
@@ -114,26 +150,19 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
 
             # Clear existing tables to prevent accumulation
-            print("Debug: Clearing composition_table")
             self$results$composition_table$setRow(rowNo=1, values=list(category="", segment="", count=0, percentage=0, overall_percentage=0, total_in_category=0))
             self$results$composition_table$deleteRows()
-            
-            print("Debug: Clearing detailed_stats")
+
             self$results$detailed_stats$setRow(rowNo=1, values=list(measure="", value=""))
             self$results$detailed_stats$deleteRows()
-            
-            print("Debug: Clearing stats tests check")
-            
+
             if (self$options$show_statistical_tests) {
-                 print("Debug: Clearing statistical_tests")
                  self$results$statistical_tests$setRow(rowNo=1, values=list(test_name="", statistic=0, df=0, p_value=0, interpretation=""))
                  self$results$statistical_tests$deleteRows()
             }
 
-            print("Debug: Accessing data")
             # Get data
             data <- self$data
-            print("Debug: Got data")
 
             # Extract variable names
             x_var <- self$options$x_var
@@ -175,27 +204,16 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Create clinical summary
             private$.createClinicalSummary()
-            
-            # Perform statistical tests if requested
-            print("Debug: Starting validation")
+
             # Perform statistical tests if requested
             if (self$options$show_statistical_tests) {
-                print("Debug: Checking count data")
                 # Validate that data implies counts (integers)
-                if (is.null(private$.processed_data)) print("Debug: processed_data is NULL")
-                else print(glue::glue("Debug: processed_data rows: {nrow(private$.processed_data)}"))
-                
                 is_count_data <- all(private$.processed_data$count %% 1 == 0) && all(private$.processed_data$count >= 0)
-                print(glue::glue("Debug: is_count_data: {is_count_data}"))
-                
+
                 if (!is_count_data) {
-                    warning_msg <- "<div style='color: #856404; background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffeeba;'>
-                        <strong>Warning:</strong> Statistical tests skipped. The 'Value Variable' contains non-integer or negative values, which suggests continuous data rather than counts. 
-                        Chi-square tests are only valid for count/frequency data.</div>"
-                    self$results$warnings$setContent(warning_msg)
-                    self$results$warnings$setVisible(TRUE)
+                    private$.setNotice('nonCountDataWarning', jmvcore::NoticeType$STRONG_WARNING,
+                        .("Statistical tests skipped. Value Variable contains non-integer or negative values suggesting continuous data rather than counts. Chi-square tests are only valid for count/frequency data."))
                 } else {
-                    print("Debug: Calling performStatisticalTests")
                     private$.performStatisticalTests()
                 }
             }
@@ -203,6 +221,17 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Generate explanations if requested
             if (self$options$showExplanations) {
                 private$.generateExplanations()
+            }
+
+            # Add completion info notice
+            if (!is.null(private$.processed_data) && nrow(private$.processed_data) > 0) {
+                n_total <- sum(private$.processed_data$count, na.rm = TRUE)
+                n_categories <- length(unique(private$.processed_data[[self$options$x_var]]))
+                n_segments <- length(unique(private$.processed_data[[self$options$fill_var]]))
+
+                private$.setNotice('analysisInfo', jmvcore::NoticeType$INFO,
+                    sprintf(.("Analysis completed successfully using %d observations across %d categories and %d segments."),
+                        n_total, n_categories, n_segments))
             }
         },
 
@@ -231,23 +260,31 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             required_vars <- c(x_var, y_var, fill_var)
             missing_vars <- setdiff(required_vars, names(data))
             if (length(missing_vars) > 0) {
-                stop(paste(.("Missing variables in data:"), paste(missing_vars, collapse = ", ")))
+                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                    paste(.("Missing variables in data:"), paste(missing_vars, collapse = ", ")))
+                return()
             }
 
             # Check for NA values in key variables
             if (sum(is.na(data[[x_var]])) > 0) {
-                warning(paste("Found", sum(is.na(data[[x_var]])), "NA values in", x_var, "- these will be removed"))
+                na_count <- sum(is.na(data[[x_var]]))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                    paste("Found", na_count, "NA values in", x_var, "- these will be removed"))
                 data <- data[!is.na(data[[x_var]]), ]
             }
 
             if (sum(is.na(data[[fill_var]])) > 0) {
-                warning(paste("Found", sum(is.na(data[[fill_var]])), "NA values in", fill_var, "- these will be removed"))
+                na_count <- sum(is.na(data[[fill_var]]))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                    paste("Found", na_count, "NA values in", fill_var, "- these will be removed"))
                 data <- data[!is.na(data[[fill_var]]), ]
             }
 
             # Check if y_var is numeric
             if (!is.numeric(data[[y_var]])) {
-                stop(paste(y_var, .("must be a numeric variable")))
+                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                    paste(y_var, .("must be a numeric variable")))
+                return()
             }
 
             # Convert variables to factors if needed
@@ -256,16 +293,22 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Check for sufficient levels
             if (length(levels(data[[x_var]])) < 1) {
-                stop(paste(x_var, "must have at least one category"))
+                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                    paste(x_var, "must have at least one category"))
+                return()
             }
 
             if (length(levels(data[[fill_var]])) < 1) {
-                stop(paste(fill_var, "must have at least one segment"))
+                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                    paste(fill_var, "must have at least one segment"))
+                return()
             }
 
             if (!is.null(facet_var)) {
                 if (!facet_var %in% names(data)) {
-                    stop(paste("Facet variable", facet_var, "not found in data"))
+                    private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                        paste("Facet variable", facet_var, "not found in data"))
+                    return()
                 }
                 data[[facet_var]] <- as.factor(data[[facet_var]])
             }
@@ -322,7 +365,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Check for empty groups
             if (nrow(processed_data) == 0) {
-                stop(.("No valid data after processing. Please check your input variables."))
+                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                    .("No valid data after processing. Please check your input variables."))
+                return()
             }
 
             # Check for zero totals
@@ -332,9 +377,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(total == 0)
 
             if (nrow(zero_totals) > 0) {
-                warning(paste("Categories with zero totals found:",
-                            paste(zero_totals[[x_var]], collapse = ", "),
-                            "- these may appear empty in the plot"))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                    paste("Categories with zero totals found:",
+                        paste(zero_totals[[x_var]], collapse = ", "),
+                        "- these may appear empty in the plot"))
             }
 
             # Apply sorting if requested
@@ -419,8 +465,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(total_count < 5)
 
             if (nrow(small_categories) > 0) {
-                warning(.("Some categories have fewer than 5 observations. Results may be unreliable for small groups: "),
-                       paste(small_categories[[x_var]], collapse = ", "))
+                private$.setNotice('smallSampleWarning', jmvcore::NoticeType$STRONG_WARNING,
+                    paste(.("Some categories have fewer than 5 observations. Results may be unreliable for small groups:"),
+                        paste(small_categories[[x_var]], collapse = ", ")))
             }
 
             # Check for extreme proportions that may indicate data quality issues
@@ -428,7 +475,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(percentage > 95)
 
             if (nrow(extreme_segments) > 0) {
-                warning(.("Some segments represent >95% of their category. Consider combining rare categories or checking data quality."))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$STRONG_WARNING,
+                    .("Some segments represent >95% of their category. Consider combining rare categories or checking data quality."))
             }
 
             # Check for very small segments that may not be clinically meaningful
@@ -436,21 +484,24 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(percentage < 1 & count < 3)
 
             if (nrow(tiny_segments) > 0) {
-                warning(.("Some segments represent <1% with very small counts. These may not be clinically meaningful."))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                    .("Some segments represent <1% with very small counts. These may not be clinically meaningful."))
             }
 
             # Check for reasonable number of categories for visualization
             n_categories <- length(unique(data[[x_var]]))
             if (n_categories > 10) {
-                warning(paste(.("Large number of categories ("), n_categories,
-                             .(") may make the chart difficult to interpret. Consider grouping similar categories.")))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                    paste(.("Large number of categories ("), n_categories,
+                        .(") may make the chart difficult to interpret. Consider grouping similar categories.")))
             }
 
             # Check for reasonable number of segments
             n_segments <- length(unique(data[[fill_var]]))
             if (n_segments > 8) {
-                warning(paste(.("Large number of segments ("), n_segments,
-                             .(") may make colors difficult to distinguish. Consider grouping similar segments.")))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                    paste(.("Large number of segments ("), n_segments,
+                        .(") may make colors difficult to distinguish. Consider grouping similar segments.")))
             }
 
             # Check for missing combinations (empty cells)
@@ -458,8 +509,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             actual_combinations <- nrow(data)
             if (actual_combinations < expected_combinations) {
                 missing_combinations <- expected_combinations - actual_combinations
-                warning(paste(.("Missing data combinations detected: "), missing_combinations,
-                             .(" empty category-segment pairs. This may indicate sparse data.")))
+                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                    paste(.("Missing data combinations detected:"), missing_combinations,
+                        .("empty category-segment pairs. This may indicate sparse data.")))
             }
         },
 
@@ -1111,41 +1163,27 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 # Create contingency table for chi-square test
                 x_var <- self$options$x_var
                 fill_var <- self$options$fill_var
-                
-                print(glue::glue("Debug: Stats vars {x_var}, {fill_var}"))
-                
+
                 # Convert processed data back to contingency table format
                 contingency_data <- data %>%
                     dplyr::select(!!rlang::sym(x_var), !!rlang::sym(fill_var), count)
-                
-                print("Debug: XTABS start")
+
                 # Create matrix for chi-square test
                 contingency_matrix <- xtabs(count ~ ., data = contingency_data)
-                
+
                 # Perform chi-square test
                 chi_test <- chisq.test(contingency_matrix)
-                
-                print("Debug: Chi-test done")
-                print(glue::glue("Debug: p-value {chi_test$p.value}"))
-                
+
                 # Determine significance
                 alpha <- 1 - self$options$confidence_level
-                print(glue::glue("Debug: alpha {alpha}"))
-                
-                print(glue::glue("Debug: is_sig {is_significant}"))
-                
+                is_significant <- chi_test$p.value < alpha
+
                 interpretation <- if (is_significant) {
-                    print("Debug: Sig TRUE")
                     paste0("Significant association between ", x_var, " and ", fill_var, " (p < ", alpha, ")")
                 } else {
-                    print("Debug: Sig FALSE")
                     paste0("No significant association between ", x_var, " and ", fill_var, " (p >= ", alpha, ")")
                 }
-                
-                print("Debug: Interpretation done")
-                print(glue::glue("Debug: stat {chi_test$statistic[[1]]}"))
-                print(glue::glue("Debug: df {chi_test$parameter[[1]]}"))
-                
+
                 # Add test results to table
                 test_row <- list(
                     test_name = "Pearson's Chi-square",
@@ -1154,8 +1192,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     p_value = chi_test$p.value,
                     interpretation = interpretation
                 )
-                
-                print("Debug: Adding row")
+
                 self$results$statistical_tests$addRow(rowKey = 1, values = test_row)
                 
                 # If significant, add post-hoc analysis

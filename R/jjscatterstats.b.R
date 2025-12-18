@@ -9,6 +9,16 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjscatterstatsBase,
     private = list(
 
+        # === Variable Name Safety ===
+        .escapeVar = function(varname) {
+            if (is.null(varname) || varname == "") return(varname)
+            # Wrap in backticks if contains spaces or special chars
+            if (grepl("[^A-Za-z0-9_.]", varname)) {
+                return(paste0("`", varname, "`"))
+            }
+            return(varname)
+        },
+
         # init ----
 
         .init = function() {
@@ -394,19 +404,19 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             point_aes <- list()
 
             if (!is.null(self$options$colorvar) && self$options$colorvar != "") {
-                point_aes$colour <- rlang::sym(self$options$colorvar)
+                point_aes$colour <- rlang::sym(private$.escapeVar(self$options$colorvar))
             }
 
             if (!is.null(self$options$sizevar) && self$options$sizevar != "") {
-                point_aes$size <- rlang::sym(self$options$sizevar)
+                point_aes$size <- rlang::sym(private$.escapeVar(self$options$sizevar))
             }
 
             if (!is.null(self$options$shapevar) && self$options$shapevar != "") {
-                point_aes$shape <- rlang::sym(self$options$shapevar)
+                point_aes$shape <- rlang::sym(private$.escapeVar(self$options$shapevar))
             }
 
             if (!is.null(self$options$alphavar) && self$options$alphavar != "") {
-                point_aes$alpha <- rlang::sym(self$options$alphavar)
+                point_aes$alpha <- rlang::sym(private$.escapeVar(self$options$alphavar))
             }
 
             # Add points with aesthetics

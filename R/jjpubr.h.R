@@ -336,6 +336,7 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         plot = function() private$.items[["plot"]],
+        summary = function() private$.items[["summary"]],
         statistics = function() private$.items[["statistics"]],
         correlation = function() private$.items[["correlation"]],
         descriptives = function() private$.items[["descriptives"]],
@@ -395,6 +396,18 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ggpubr",
                     "ggplot2")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible="(addStats)",
+                clearWith=list(
+                    "plotType",
+                    "xvar",
+                    "yvar",
+                    "groupvar",
+                    "statMethod",
+                    "pairwiseComparisons")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="statistics",
@@ -419,6 +432,10 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"),
+                    list(
+                        `name`="effectSize", 
+                        `title`="Effect Size", 
+                        `type`="text"),
                     list(
                         `name`="significance", 
                         `title`="Significance", 
@@ -619,6 +636,7 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$statistics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$correlation} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$descriptives} \tab \tab \tab \tab \tab a table \cr

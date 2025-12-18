@@ -67,6 +67,11 @@ if (!exists(".")) {
   warnings <- list()
   event_indicator <- NULL
 
+  # DEBUG: show the incoming time variable class/summary when needed
+  if (isTRUE(getOption("multisurvival.debug"))) {
+    message("[multisurvival.debug] validate: time_var class = ", paste(class(data[[time_var]]), collapse = "/"))
+  }
+
   # Check for negative survival times
   if (time_var %in% names(data)) {
     time_vec <- data[[time_var]]
@@ -80,6 +85,10 @@ if (!exists(".")) {
 
     # Replace in data copy so downstream checks work on numeric values
     data[[time_var]] <- time_vec
+
+    if (isTRUE(getOption("multisurvival.debug"))) {
+      message("[multisurvival.debug] validate: time_var summary = ", paste(utils::head(time_vec, 5), collapse = ", "))
+    }
 
     negative_times <- sum(time_vec < 0, na.rm = TRUE)
     if (negative_times > 0) {
@@ -392,6 +401,32 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       PLOT_HEIGHT_FACTOR = 300,
       DEFAULT_PLOT_WIDTH = 600,
       DEFAULT_PLOT_HEIGHT = 450,
+
+      # Debug helpers (disabled)
+      # Temporarily used during plot debugging; intentionally disabled and hidden.
+      .debug_enabled = function() FALSE,
+      .debug_dummy_plot_enabled = function() FALSE,
+      .debug_write = function(lines) invisible(FALSE),
+
+      .setPlotVisibility = function() {
+        visible_flags <- list(
+          plot = isTRUE(self$options$hr) && self$options$sty == "t1",
+          plot3 = isTRUE(self$options$hr) && self$options$sty == "t3",
+          plotKM = isTRUE(self$options$km),
+          plot_adj = isTRUE(self$options$ac),
+          plot_nomogram = isTRUE(self$options$showNomogram),
+          plot8 = isTRUE(self$options$ph_cox)
+        )
+
+        self$results$plot$setVisible(visible_flags$plot)
+        self$results$plot3$setVisible(visible_flags$plot3)
+        self$results$plotKM$setVisible(visible_flags$plotKM)
+        self$results$plot_adj$setVisible(visible_flags$plot_adj)
+        self$results$plot_nomogram$setVisible(visible_flags$plot_nomogram)
+        self$results$plot8$setVisible(visible_flags$plot8)
+
+        invisible(visible_flags)
+      },
 
       # Constants for analysis parameters
       DEFAULT_MIN_NODE = 20,
@@ -789,6 +824,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         self$results$plotKM$setVisible(FALSE)
         self$results$plot_adj$setVisible(FALSE)
         self$results$plot_nomogram$setVisible(FALSE)
+        self$results$plot8$setVisible(FALSE)
+
+        # Restore plot visibility based on current options (avoids .init() overriding
+        # the .r.yaml visibility expressions permanently).
+        vis_flags <- private$.setPlotVisibility()
+        private$.debug_write(list(
+          phase = ".init(visibility)",
+          options = list(
+            hr = self$options$hr,
+            sty = self$options$sty,
+            km = self$options$km,
+            ac = self$options$ac,
+            ph_cox = self$options$ph_cox,
+            showNomogram = self$options$showNomogram
+          ),
+          visible = vis_flags
+        ))
 
         # Initialize all summary outputs and headings to FALSE first
         self$results$multivariableCoxSummaryHeading$setVisible(FALSE)
@@ -1343,6 +1395,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         tint <- self$options$tint
 
+        if (isTRUE(getOption("multisurvival.debug"))) {
+          message("[multisurvival.debug] definemytime: tint = ", tint,
+                  ", mytime_labelled = ", mytime_labelled)
+        }
+
 
         if (!tint) {
           ### Precalculated Time ----
@@ -1355,6 +1412,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           mydata[["mytime"]] <-
             jmvcore::toNumeric(mydata[[mytime_labelled]])
+
+          if (isTRUE(getOption("multisurvival.debug"))) {
+            message("[multisurvival.debug] definemytime: mytime after toNumeric class = ",
+                    paste(class(mydata[["mytime"]]), collapse = "/"))
+          }
 
           # If a jamovi survival/time variable was passed (Surv object), keep only its time column
           if (survival::is.Surv(mydata[["mytime"]])) {
@@ -1901,10 +1963,30 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           stop('Data contains no (complete) rows')
         }
 
+        # Fit central Cox model once for downstream plots
+        cox_model <- private$.cox_model()
+
+        if (isTRUE(getOption("multisurvival.debug"))) {
+          message("[multisurvival.debug] performSurvivalAnalysis: cox_model fitted = ", !is.null(cox_model))
+        }
+
+        private$.debug_write(list(
+          phase = ".performSurvivalAnalysis",
+          cox_model_null = is.null(cox_model),
+          hr = self$options$hr,
+          km = self$options$km,
+          ac = self$options$ac
+        ))
+
+        # Short-circuit if model fails
+        if (is.null(cox_model)) {
+          return(NULL)
+        }
+
         # Pass cleaned data to plot renderers so state is available when jamovi requests images
         if (self$options$hr) {
-          self$results$plot$setState(cleaneddata)
-          self$results$plot3$setState(cleaneddata)
+          self$results$plot$setState(c(cleaneddata, list(cox_model = cox_model)))
+          self$results$plot3$setState(c(cleaneddata, list(cox_model = cox_model)))
         }
         if (self$options$km) {
           self$results$plotKM$setState(cleaneddata)
@@ -1916,6 +1998,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Execute the main analysis components
         private$.checkpoint()
         private$.final_fit2()
+
+        # Proportional hazards assumption diagnostics (drives plot8 state)
+        if (self$options$ph_cox) {
+          tryCatch(
+            private$.cox_ph(cox_model),
+            error = function(e) {
+              private$.debug_write(list(
+                phase = ".cox_ph(error)",
+                message = e$message
+              ))
+              self$results$plot8$setVisible(FALSE)
+              NULL
+            }
+          )
+        }
 
         # Additional analysis modules
         if (self$options$person_time) {
@@ -2303,10 +2400,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             fg_formula <- update(coxformula, survival::Surv(fgstart, fgstop, fgstatus) ~ .)
             
             # Fit Cox model on expanded data with weights
-            cox_model <- survival::coxph(fg_formula, data = fg_data, weights = fgwt)
+            cox_model <- survival::coxph(
+              fg_formula,
+              data = fg_data,
+              weights = fgwt,
+              x = TRUE,
+              y = TRUE,
+              model = TRUE
+            )
         } else {
             # Standard Cox model
-            cox_model <- survival::coxph(coxformula, data = mydata)
+            cox_model <- survival::coxph(
+              coxformula,
+              data = mydata,
+              x = TRUE,
+              y = TRUE,
+              model = TRUE
+            )
         }
 
         if (self$options$multievent && self$options$analysistype == 'compete') {
@@ -2349,8 +2459,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return()
         }
 
-        # Set heading for person-time analysis section
-        self$results$personTimeHeading$setContent("<h3>Person-Time Analysis</h3>")
 
         cleaneddata <- private$.cleandata()
 
@@ -2587,9 +2695,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         #   return()
         # }
 
-        # Set headings for AFT section
-        self$results$aftModelHeading$setContent("<h3>Accelerated Failure Time Model</h3>")
-        self$results$aftSummaryHeading$setContent("<h4>Model Summary</h4>")
 
         if (self$options$multievent && self$options$analysistype == "compete") {
           notice <- jmvcore::Notice$new(
@@ -2782,10 +2887,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (!self$options$show_survmetrics) {
           return()
         }
-
-        # Set headings for survMetrics section
-        self$results$survMetricsHeading$setContent("<h3>Survival Model Performance Metrics</h3>")
-        self$results$survMetricsSummaryHeading$setContent("<h4>Summary</h4>")
 
         private$.checkpoint()
 
@@ -3069,9 +3170,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return()
         }
 
-        # Set heading for nomogram section
-        self$results$nomogramHeading$setContent("<h3>Nomogram</h3>")
-
         private$.checkpoint()
 
         # Get cleaned data
@@ -3242,6 +3340,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       ,
       # Plotting function
       .plot_nomogram = function(image, ggtheme, theme, ...) {
+        if (private$.debug_dummy_plot_enabled()) {
+          private$.debug_write(list(
+            phase = ".plot_nomogram(dummy)",
+            nom_object_is_null = is.null(private$.nom_object)
+          ))
+          graphics::plot(
+            1:10, (1:10)^2,
+            type = "b",
+            xlab = "x",
+            ylab = "y",
+            main = "multisurvival debug dummy plot (.plot_nomogram)"
+          )
+          return(TRUE)
+        }
+
         if(is.null(private$.nom_object)) {
           return(FALSE)
         }
@@ -3500,46 +3613,63 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         private$.checkpoint()
 
-        zph <- survival::cox.zph(cox_model)
+        zph <- tryCatch(
+          survival::cox.zph(cox_model),
+          error = function(e) {
+            private$.debug_write(list(
+              phase = ".cox_ph(cox.zph error)",
+              message = e$message,
+              cox_model_class = class(cox_model)[1]
+            ))
+            structure(list(error = e$message), class = "multisurvival_ph_error")
+          }
+        )
 
 
 
 
-        # Add suggestions for stratification
-        significant_violations <- which(zph$table[,"p"] < 0.05)
-        if (length(significant_violations) > 0) {
-          violation_vars <- rownames(zph$table)[significant_violations]
-          suggestion <- glue::glue(
-            "<br><br>Note: The proportional hazards assumption appears to be
-            violated for: {paste(violation_vars, collapse=', ')}.
-            Consider using these as stratification variables instead of
-            covariates."
-          )
-
-          self$results$cox_ph$setContent(
-            paste(print(zph), suggestion)
-          )
-        }
-
-
-
-        # Display test results
-        self$results$cox_ph$setContent(print(zph))
-
-
-
-
-
-
-        # Only create plots if there are variables to plot
-        if (!is.null(zph$y)) {
-          # Pass zph object to plot function
-          image8 <- self$results$plot8
-          image8$setState(zph)
+        if (inherits(zph, "multisurvival_ph_error")) {
+          self$results$cox_ph$setContent(paste0(
+            "Unable to compute proportional hazards diagnostics (cox.zph):\n",
+            zph$error
+          ))
         } else {
-          # If no variables to plot, hide the plot
-          self$results$plot8$setVisible(FALSE)
+          zph_table <- zph$table
+
+          ph_text <- paste(utils::capture.output(print(zph_table)), collapse = "\n")
+
+          suggestion <- ""
+          if (!is.null(zph_table) && nrow(zph_table) > 0 && "p" %in% colnames(zph_table)) {
+            violating <- rownames(zph_table)[which(zph_table[, "p"] < 0.05)]
+            violating <- setdiff(violating, "GLOBAL")
+            if (length(violating) > 0) {
+              suggestion <- paste0(
+                "\n\nNote: The proportional hazards assumption appears to be violated for: ",
+                paste(violating, collapse = ", "),
+                ". Consider using these as stratification variables instead of covariates."
+              )
+            }
+          }
+
+          self$results$cox_ph$setContent(paste0(ph_text, suggestion))
         }
+
+
+
+
+
+
+        # Always set state so the renderer can show a diagnostic message if needed
+        # (returning FALSE from an Image render function yields a blank image in jamovi).
+        image8 <- self$results$plot8
+        image8$setState(zph)
+
+        private$.debug_write(list(
+          phase = ".cox_ph(state set)",
+          zph_class = class(zph)[1],
+          has_y = !inherits(zph, "multisurvival_ph_error") && !is.null(zph$y),
+          table_dim = if (inherits(zph, "multisurvival_ph_error") || is.null(zph$table)) NULL else dim(zph$table)
+        ))
 
       }
 
@@ -3550,20 +3680,41 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       ,
       .plot = function(image, ggtheme, theme, ...) {
         if (!self$options$hr) {
-          return()
+          return(FALSE)
         }
 
         if (!(self$options$sty == "t1")) {
-          return()
+          return(FALSE)
         }
-
-        # Set heading for survival plots section
-        self$results$survivalPlotsHeading$setContent("<h3>Survival Plots</h3>")
 
         plotData <- image$state
 
+        if (private$.debug_dummy_plot_enabled()) {
+          private$.debug_write(list(
+            phase = ".plot(dummy)",
+            state_is_null = is.null(plotData),
+            state_names = if (is.null(plotData)) NULL else names(plotData)
+          ))
+          graphics::plot(
+            1:10, 1:10,
+            type = "b",
+            xlab = "x",
+            ylab = "y",
+            main = "multisurvival debug dummy plot (.plot)"
+          )
+          return(TRUE)
+        }
+        
         if (is.null(plotData)) {
-          return()
+          if (isTRUE(getOption("multisurvival.debug"))) {
+            message("[multisurvival.debug] .plot: state is NULL, recomputing...")
+          }
+          plotData <- private$.cleandata()
+          if (is.null(plotData$cleanData)) return(FALSE)
+        } else {
+          if (isTRUE(getOption("multisurvival.debug"))) {
+            message("[multisurvival.debug] .plot: state found.")
+          }
         }
 
         name1time <- plotData$name1time
@@ -3580,6 +3731,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         myexplanatory_labelled <- plotData$myexplanatory_labelled
         mycontexpl_labelled <- plotData$mycontexpl_labelled
         mystratvar_labelled <- plotData$mystratvar_labelled
+
+        # Debug output disabled
+
 
 
         ### prepare formula ----
@@ -3613,7 +3767,24 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # hr_plot ----
         # https://finalfit.org/reference/hr_plot.html
 
-        plot <-
+        # Prefer cached model from state (avoids recomputation)
+        cox_model <- NULL
+        if (!is.null(image$state$cox_model)) {
+          cox_model <- image$state$cox_model
+        }
+
+        # Fall back to recomputing if needed
+        if (is.null(cox_model)) {
+          cox_model <- private$.cox_model()
+        }
+
+        if (length(formula2) == 0 || is.null(cox_model)) {
+          grid::grid.newpage()
+          grid::grid.text("Hazard ratio plot requires at least one explanatory variable and a fitted Cox model.", 0.5, 0.5)
+          return(TRUE)
+        }
+
+        plot <- tryCatch({
           finalfit::hr_plot(
             .data = mydata,
             dependent = myformula,
@@ -3627,12 +3798,25 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                                ggplot2::element_text(size = 12))
             )
           )
+        }, error = function(e) {
+          grid::grid.newpage()
+          grid::grid.text(
+            paste0("Unable to draw hazard ratio plot: ", e$message),
+            x = 0.05, y = 0.95, just = c("left", "top"),
+            gp = grid::gpar(fontsize = 11)
+          )
+          return(NULL)
+        })
 
 
         # print plot ----
 
-        print(plot)
-        TRUE
+        if (!is.null(plot)) {
+          print(plot)
+          TRUE
+        } else {
+          TRUE
+        }
 
       }
 
@@ -3645,18 +3829,48 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       ,
       .plot3 = function(image3, ggtheme, theme, ...) {
         if (!self$options$hr) {
-          return()
+          return(FALSE)
         }
 
         if (!(self$options$sty == "t3")) {
-          return()
+          return(FALSE)
         }
 
         plotData <- image3$state
 
-        if (is.null(plotData)) {
-          return()
+        if (private$.debug_dummy_plot_enabled()) {
+          private$.debug_write(list(
+            phase = ".plot3(dummy)",
+            state_is_null = is.null(plotData),
+            state_names = if (is.null(plotData)) NULL else names(plotData)
+          ))
+          graphics::plot(
+            1:10, 10:1,
+            type = "b",
+            xlab = "x",
+            ylab = "y",
+            main = "multisurvival debug dummy plot (.plot3)"
+          )
+          return(TRUE)
         }
+        
+        if (is.null(plotData)) {
+          if (isTRUE(getOption("multisurvival.debug"))) {
+            message("[multisurvival.debug] .plot3: state is NULL, recomputing...")
+          }
+          plotData <- private$.cleandata()
+          if (is.null(plotData$cleanData)) return(FALSE)
+        } else {
+          if (isTRUE(getOption("multisurvival.debug"))) {
+            message("[multisurvival.debug] .plot3: state found.")
+          }
+        }
+
+        private$.debug_write(list(
+          phase = ".plot3",
+          state_is_null = is.null(plotData),
+          cleanData_dim = if (is.null(plotData$cleanData)) NULL else dim(plotData$cleanData)
+        ))
 
         name1time <- plotData$name1time
         name2outcome <- plotData$name2outcome
@@ -3698,45 +3912,42 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # ggforest ----
 
-        # Use the central model (handles Fine-Gray if needed)
-        cox_model <- private$.cox_model()
-        
+        # Use cached Cox model when available to match table output
+        cox_model <- image3$state$cox_model
         if (is.null(cox_model)) {
-            return()
+          cox_model <- private$.cox_model()
+        }
+
+        if (is.null(cox_model)) {
+          grid::grid.newpage()
+          grid::grid.text(
+            "Forest plot unavailable: Cox model could not be estimated.",
+            x = 0.05, y = 0.95, just = c("left", "top"),
+            gp = grid::gpar(fontsize = 11)
+          )
+          return(TRUE)
         }
 
         # Check if it is a Fine-Gray model
         is_finegray <- !is.null(cox_model$weights) && self$options$multievent && self$options$analysistype == 'compete'
         
-        if (is_finegray) {
-            # ggforest might not support weighted models directly or might need specific handling
-            # For now, we try passing it. If it fails, we might need a warning.
-            # Note: survminer::ggforest primarily visualizes HRs, which are valid for FG.
-            # However, the data passed to ggforest must match the model (expanded data for FG).
-            
-            # We need to get the expanded data used for the model
-            # .cox_model() creates it internally but doesn't return it.
-            # This is a design issue. 
-            
-            # Solution: Retieve the data from the model object if possible, or re-create it.
-            # Ideally, .cox_model should calculate and store the model AND the data used.
-            # But refactoring .cox_model return type might break other things.
-            
-            # Alternative: Re-run Fine-Gray logic here to get the proper data
-            fg_data <- survival::finegray(survival::Surv(mytime, myoutcome) ~ ., data = mydata, etype = "Event")
-            
-            # Use the expanded data for plotting
-            plot3 <- tryCatch({
-                survminer::ggforest(model = cox_model, data = fg_data)
-            }, error = function(e) {
-                self$results$plot3$setVisible(FALSE) # Hide if fails
-                warning("Forest plot not available for Fine-Gray model: ", e$message)
-                return(NULL)
-            })
-            
-        } else {
-            plot3 <- survminer::ggforest(model = cox_model, data = mydata)
-        }
+        plot3 <- tryCatch({
+          if (is_finegray) {
+              # ggforest might not support weighted models directly or might need specific handling
+              fg_data <- survival::finegray(survival::Surv(mytime, myoutcome) ~ ., data = mydata, etype = "Event")
+              survminer::ggforest(model = cox_model, data = fg_data)
+          } else {
+              survminer::ggforest(model = cox_model, data = mydata)
+          }
+        }, error = function(e) {
+          grid::grid.newpage()
+          grid::grid.text(
+            paste0("Forest plot not available: ", e$message),
+            x = 0.05, y = 0.95, just = c("left", "top"),
+            gp = grid::gpar(fontsize = 11)
+          )
+          return(NULL)
+        })
 
 
         # print plot ----
@@ -3755,23 +3966,94 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       ,
       .plot8 = function(image8, ggtheme, theme, ...) {
         if (!self$options$ph_cox)
-          return()
+          return(FALSE)
 
-        zph <- image8$state
+        zph_state <- image8$state
 
-        if (is.null(zph)) {
-          return()
+        if (private$.debug_dummy_plot_enabled()) {
+          private$.debug_write(list(
+            phase = ".plot8(dummy)",
+            state_is_null = is.null(zph_state),
+            state_class = class(zph_state)[1]
+          ))
+          graphics::plot(
+            1:10, stats::rnorm(10),
+            type = "b",
+            xlab = "index",
+            ylab = "value",
+            main = "multisurvival debug dummy plot (.plot8)"
+          )
+          return(TRUE)
         }
+
+        if (is.null(zph_state)) {
+          private$.debug_write(list(phase = ".plot8", state_is_null = TRUE))
+          grid::grid.newpage()
+          grid::grid.text(
+            "PH plot is unavailable because diagnostics were not computed (state is NULL). Re-run the analysis.",
+            x = 0.05, y = 0.95, just = c("left", "top"),
+            gp = grid::gpar(fontsize = 11)
+          )
+          return(TRUE)
+        }
+
+        zph <- zph_state
+        if (inherits(zph_state, "multisurvival_ph_error")) {
+          private$.debug_write(list(
+            phase = ".plot8",
+            state_class = class(zph_state)[1],
+            error = zph_state$error
+          ))
+          grid::grid.newpage()
+          grid::grid.text(
+            paste0("Unable to compute PH diagnostics (cox.zph): ", zph_state$error),
+            x = 0.05, y = 0.95, just = c("left", "top"),
+            gp = grid::gpar(fontsize = 11)
+          )
+          return(TRUE)
+        }
+
+        private$.debug_write(list(
+          phase = ".plot8",
+          state_class = class(zph)[1],
+          state_names = names(zph),
+          has_y = !is.null(zph$y),
+          table_dim = if (is.null(zph$table)) NULL else dim(zph$table)
+        ))
 
         # Check if there are variables to plot
         if (is.null(zph$y)) {
-          return()
+          grid::grid.newpage()
+          grid::grid.text(
+            "PH plot is unavailable (cox.zph object has no plottable residuals).",
+            x = 0.05, y = 0.95, just = c("left", "top"),
+            gp = grid::gpar(fontsize = 11)
+          )
+          return(TRUE)
         }
 
         # Create plot using survminer
-        plot8 <- survminer::ggcoxzph(zph)
+        plot8 <- tryCatch(
+          survminer::ggcoxzph(zph),
+          error = function(e) {
+            private$.debug_write(list(
+              phase = ".plot8(ggcoxzph error)",
+              message = e$message
+            ))
+            grid::grid.newpage()
+            grid::grid.text(
+              paste0("Unable to draw PH plot (ggcoxzph): ", e$message),
+              x = 0.05, y = 0.95, just = c("left", "top"),
+              gp = grid::gpar(fontsize = 11)
+            )
+            NULL
+          }
+        )
 
-        print(plot8)
+        if (!is.null(plot8)) {
+          print(plot8)
+        }
+
         TRUE
 
       }
@@ -3782,6 +4064,25 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
       .plotKM = function(imageKM, ggtheme, theme, ...) {
+
+        if (private$.debug_dummy_plot_enabled()) {
+          private$.debug_write(list(
+            phase = ".plotKM(dummy)",
+            state_is_null = is.null(imageKM$state),
+            explanatory = self$options$explanatory,
+            contexpl = self$options$contexpl
+          ))
+          graphics::plot(
+            1:10, (1:10) / 10,
+            type = "b",
+            xlab = "time",
+            ylab = "survival",
+            ylim = c(0, 1),
+            main = "multisurvival debug dummy plot (.plotKM)"
+          )
+          return(TRUE)
+        }
+      
         # Check conditions and show message if not met
         if (length(self$options$explanatory) > 2) {
           text_warning <- "Kaplan-Meier plot requires 2 categorical explanatory variables.\nYou have selected more than 2 variables."
@@ -3851,10 +4152,20 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
         plotData <- imageKM$state
-
+        
         if (is.null(plotData)) {
-          return()
+          if (isTRUE(getOption("multisurvival.debug"))) {
+            message("[multisurvival.debug] .plotKM: state is NULL, recomputing...")
+          }
+          plotData <- private$.cleandata()
+          if (is.null(plotData$cleanData)) return(FALSE)
         }
+
+        private$.debug_write(list(
+          phase = ".plotKM",
+          state_is_null = is.null(plotData),
+          cleanData_dim = if (is.null(plotData$cleanData)) NULL else dim(plotData$cleanData)
+        ))
 
         name1time <- plotData$name1time
         name2outcome <- plotData$name2outcome
@@ -3939,9 +4250,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       ## Calculate Risk Score ----
 
       .calculateRiskScore = function(cox_model, mydata) {
-
-        # Set heading for risk score analysis section
-        self$results$riskScoreHeading$setContent("<h3>Risk Score Analysis</h3>")
 
         ### Calculate risk scores ----
         risk_scores <- predict(cox_model, type = "risk")
@@ -4352,8 +4660,6 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Skip if adjusted curves not requested
         if (!self$options$ac) return(NULL)
 
-        # Set heading for adjusted survival curves section
-        self$results$adjustedSurvivalHeading$setContent("<h3>Adjusted Survival Curves</h3>")
 
         # Get cleaned data and check requirements
         cleaneddata <- private$.cleandata()
@@ -4690,13 +4996,42 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
     ## Adjusted Survival Plot ----
       .plot_adj = function(image_plot_adj, ggtheme, theme, ...) {
 
-        if (!self$options$ac) return()
+        if (!self$options$ac) return(FALSE)
+
+        if (private$.debug_dummy_plot_enabled()) {
+          private$.debug_write(list(
+            phase = ".plot_adj(dummy)",
+            state_is_null = is.null(image_plot_adj$state),
+            adjexplanatory = self$options$adjexplanatory
+          ))
+          graphics::plot(
+            1:10, seq(0.1, 1, length.out = 10),
+            type = "b",
+            xlab = "time",
+            ylab = "adjusted survival",
+            ylim = c(0, 1),
+            main = "multisurvival debug dummy plot (.plot_adj)"
+          )
+          return(TRUE)
+        }
+
 
         plotData <- image_plot_adj$state
-
+        
         if (is.null(plotData)) {
-          return()
+          if (isTRUE(getOption("multisurvival.debug"))) {
+            message("[multisurvival.debug] .plot_adj: state is NULL, recomputing...")
+          }
+          plotData <- private$.cleandata()
+          if (is.null(plotData$cleanData)) return(FALSE)
         }
+
+        private$.debug_write(list(
+          phase = ".plot_adj",
+          state_is_null = is.null(plotData),
+          cleanData_dim = if (is.null(plotData$cleanData)) NULL else dim(plotData$cleanData),
+          adjexplanatory_name = plotData$adjexplanatory_name
+        ))
 
         name1time <- plotData$name1time
         name2outcome <- plotData$name2outcome
@@ -5925,8 +6260,6 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
   private$.checkpoint()
 
-  # Set heading for multivariable Cox regression section
-  self$results$multivariableCoxHeading$setContent("<h3>Multivariable Cox Regression</h3>")
 
   # Use finalfit to generate nicely formatted Cox regression table
   tryCatch({

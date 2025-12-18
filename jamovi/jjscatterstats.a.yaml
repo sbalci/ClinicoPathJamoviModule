@@ -1,7 +1,7 @@
 ---
 name:  jjscatterstats
 title: Scatter Plot
-menuGroup: JJStatsPlotT1
+menuGroup: JJStatsPlotT
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
 version: '0.0.32'
@@ -377,7 +377,7 @@ options:
     - name: ggpubrAddCorr
       title: Add Correlation (ggpubr)
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Add correlation statistics to ggpubr scatter plot.
@@ -398,7 +398,7 @@ options:
     - name: ggpubrAddSmooth
       title: Add Smooth Line (ggpubr)
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Add smoothed trend line to ggpubr scatter plot.
@@ -406,7 +406,7 @@ options:
     - name: showExplanations
       title: Show Explanations
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Show explanations of the statistical results

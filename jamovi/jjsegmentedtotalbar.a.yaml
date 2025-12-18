@@ -1,7 +1,7 @@
 ---
 name: jjsegmentedtotalbar
 title: "Segmented Total Bar Charts"
-menuGroup: JJStatsPlotT1
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
 version: '0.0.32'
@@ -87,7 +87,7 @@ options:
     - name: show_plot
       title: "Show Plot"
       type: Bool
-      default: true
+      default: false
       description:
         R: Show segmented total bar chart.
         jamovi: Display segmented total bar chart.
@@ -147,7 +147,7 @@ options:
     - name: show_percentages
       title: "Show Percentages"
       type: Bool
-      default: true
+      default: false
       description:
         R: Whether to display percentage labels on segments.
         jamovi: Show percentage values on each segment.
@@ -299,7 +299,7 @@ options:
     - name: add_outline
       title: "Add Segment Outlines"
       type: Bool
-      default: true
+      default: false
       description:
         R: Whether to add white outlines around segments.
         jamovi: Add white borders around each segment for clarity.
@@ -324,7 +324,7 @@ options:
     - name: export_ready
       title: "Export Ready"
       type: Bool
-      default: true
+      default: false
       description:
         R: Whether to optimize plot for high-quality export.
         jamovi: Optimize plot for publication/presentation export.
@@ -350,7 +350,7 @@ options:
     - name: showExplanations
       title: Show Explanations
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Show explanations of the statistical results

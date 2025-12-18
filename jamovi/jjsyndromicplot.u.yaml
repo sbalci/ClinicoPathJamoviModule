@@ -38,9 +38,6 @@ children:
               - type: CheckBox
                 name: scale
                 enable: (vars)
-              - type: CheckBox
-                name: scale
-                enable: (vars)
               - type: ComboBox
                 name: missing
                 label: Missing Data

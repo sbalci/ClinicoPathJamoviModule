@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -1664,7 +1664,7 @@ analyses:
   - title: Scatter Plot
     name: jjscatterstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Continuous vs Continuous
     menuTitle: Scatter Plot
     ribbon: analyses
@@ -1905,7 +1905,7 @@ analyses:
   - title: Ridge Plot
     name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization
@@ -2060,7 +2060,7 @@ analyses:
   - title: Segmented Total Bar Charts
     name: jjsegmentedtotalbar
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuTitle: Segmented Total Bar Charts
     menuSubgroup: Categorical vs Categorical
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
@@ -5263,7 +5263,7 @@ analyses:
     name: jjpubr
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: All-In-One
     menuTitle: ggpubr Plots
     menuSubtitle: Publication-ready visualizations
