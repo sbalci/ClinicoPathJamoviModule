@@ -1,7 +1,7 @@
 ---
 name: pathologyagreement
 title: Pathology Agreement Analysis
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: Agreement
 menuSubtitle: Agreement on Continuous Data
 version: '1.0.0'
@@ -168,5 +168,29 @@ options:
       description:
           R: >
             provide clinical interpretation of agreement statistics
+
+    - name: show_summary
+      title: Show Plain Language Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            generate a plain-language summary paragraph suitable for copy-pasting into reports
+          ui: >
+            Display a one-paragraph summary of results in plain language, suitable for copying
+            into pathology reports or research manuscripts. This provides key findings without
+            statistical jargon.
+
+    - name: show_explanations
+      title: Show Educational Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            display educational content explaining when to use this analysis, assumptions, and interpretation
+          ui: >
+            Display a comprehensive guide explaining what this analysis does, when to use it,
+            key assumptions, and how to interpret results. Helpful for learning or teaching
+            agreement analysis methods.
 
 ...

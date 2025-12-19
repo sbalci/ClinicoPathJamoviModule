@@ -158,16 +158,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$groupvar)) {
                     group_data <- self$data[[self$options$groupvar]]
                     if (!is.factor(group_data) && !is.character(group_data)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'numericGroupingVariable',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(paste0(
-                            "Grouping variable '", self$options$groupvar, "' is numeric and will be converted to factor for visualization. ",
-                            "Ensure this is appropriate (e.g., not a continuous measurement)."
-                        ))
-                        self$results$insert(100, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'numericGroupingVariable',
+                        #     type = jmvcore::NoticeType$WARNING
+                        # )
+                        # notice$setContent(paste0(
+                        #     "Grouping variable '", self$options$groupvar, "' is numeric and will be converted to factor for visualization. ",
+                        #     "Ensure this is appropriate (e.g., not a continuous measurement)."
+                        # ))
+                        # self$results$insert(100, notice)
                     }
                 }
 
@@ -311,15 +311,15 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (requireNamespace("ggExtra", quietly = TRUE)) {
                     p <- ggExtra::ggMarginal(p, type = "density", fill = "lightgray", alpha = 0.5)
                 } else {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'ggExtraNotAvailable',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(
-                        "Marginal plots require the 'ggExtra' package. Install with: install.packages('ggExtra')"
-                    )
-                    self$results$insert(100, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'ggExtraNotAvailable',
+                    #     type = jmvcore::NoticeType$WARNING
+                    # )
+                    # notice$setContent(
+                    #     "Marginal plots require the 'ggExtra' package. Install with: install.packages('ggExtra')"
+                    # )
+                    # self$results$insert(100, notice)
                 }
             }
 
@@ -627,32 +627,32 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }, error = function(e) NULL)
 
                     if (!is.null(sw_test) && sw_test$p.value < 0.05) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('normalityViolation_', make.names(as.character(g))),
-                            type = jmvcore::NoticeType$STRONG_WARNING
-                        )
-                        notice$setContent(paste0(
-                            "Normality assumption violated for group '", g, "' (Shapiro-Wilk p = ",
-                            round(sw_test$p.value, 3), "). t-test results may be unreliable. ",
-                            "Consider using 'Pairwise Wilcoxon tests' for non-normal data."
-                        ))
-                        self$results$insert(1, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = paste0('normalityViolation_', make.names(as.character(g))),
+                        #     type = jmvcore::NoticeType$STRONG_WARNING
+                        # )
+                        # notice$setContent(paste0(
+                        #     "Normality assumption violated for group '", g, "' (Shapiro-Wilk p = ",
+                        #     round(sw_test$p.value, 3), "). t-test results may be unreliable. ",
+                        #     "Consider using 'Pairwise Wilcoxon tests' for non-normal data."
+                        # ))
+                        # self$results$insert(1, notice)
                     }
                 } else if (n > 200) {
                     # Skewness check for large samples
                     skew <- (mean(subset_data) - median(subset_data)) / sd(subset_data)
                     if (abs(skew) > 1) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('skewnessWarning_', make.names(as.character(g))),
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(paste0(
-                            "Data for group '", g, "' appears skewed (skewness coefficient = ",
-                            round(skew, 2), "). Consider using 'Pairwise Wilcoxon tests'."
-                        ))
-                        self$results$insert(100, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = paste0('skewnessWarning_', make.names(as.character(g))),
+                        #     type = jmvcore::NoticeType$WARNING
+                        # )
+                        # notice$setContent(paste0(
+                        #     "Data for group '", g, "' appears skewed (skewness coefficient = ",
+                        #     round(skew, 2), "). Consider using 'Pairwise Wilcoxon tests'."
+                        # ))
+                        # self$results$insert(100, notice)
                     }
                 }
             }
@@ -667,18 +667,18 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }, error = function(e) NULL)
 
                 if (!is.null(levene_result) && !is.na(levene_result$`Pr(>F)`[1]) && levene_result$`Pr(>F)`[1] < 0.05) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'varianceHeterogeneity',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(paste0(
-                        "Unequal variances detected across groups (Levene's test p = ",
-                        round(levene_result$`Pr(>F)`[1], 3), "). ",
-                        "Standard t-test assumes equal variances; results may be less reliable. ",
-                        "Consider Welch correction or non-parametric alternatives."
-                    ))
-                    self$results$insert(100, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'varianceHeterogeneity',
+                    #     type = jmvcore::NoticeType$WARNING
+                    # )
+                    # notice$setContent(paste0(
+                    #     "Unequal variances detected across groups (Levene's test p = ",
+                    #     round(levene_result$`Pr(>F)`[1], 3), "). ",
+                    #     "Standard t-test assumes equal variances; results may be less reliable. ",
+                    #     "Consider Welch correction or non-parametric alternatives."
+                    # ))
+                    # self$results$insert(100, notice)
                 }
             }
         },
@@ -709,17 +709,17 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Kendall CI notice
                 if (self$options$corrMethod == "kendall") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'kendallNoCI',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(paste0(
-                        "Kendall's tau correlation does not provide confidence intervals in the standard cor.test() implementation. ",
-                        "The correlation coefficient and p-value are still valid. ",
-                        "Consider using Spearman correlation if confidence intervals are needed for robust correlation analysis."
-                    ))
-                    self$results$insert(999, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'kendallNoCI',
+                    #     type = jmvcore::NoticeType$INFO
+                    # )
+                    # notice$setContent(paste0(
+                    #     "Kendall's tau correlation does not provide confidence intervals in the standard cor.test() implementation. ",
+                    #     "The correlation coefficient and p-value are still valid. ",
+                    #     "Consider using Spearman correlation if confidence intervals are needed for robust correlation analysis."
+                    # ))
+                    # self$results$insert(999, notice)
                 }
 
                 # Helper to compute correlation for a subset
@@ -766,13 +766,13 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 self$results$correlation$addRow(rowKey = paste0("group_", g), values = res$values)
                             }
                             if (!is.null(res$msg)) {
-                                notice <- jmvcore::Notice$new(
-                                    options = self$options,
-                                    name = paste0('correlationMissingData_', make.names(g)),
-                                    type = jmvcore::NoticeType$WARNING
-                                )
-                                notice$setContent(res$msg)
-                                self$results$insert(100, notice)
+                                # notice <- jmvcore::Notice$new(
+                                #     options = self$options,
+                                #     name = paste0('correlationMissingData_', make.names(g)),
+                                #     type = jmvcore::NoticeType$WARNING
+                                # )
+                                # notice$setContent(res$msg)
+                                # self$results$insert(100, notice)
                             }
                         }
                     }
@@ -782,29 +782,29 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         self$results$correlation$addRow(rowKey = "pooled", values = pooled_res$values)
                     }
                     if (!is.null(pooled_res$msg)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'correlationMissingDataPooled',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(pooled_res$msg)
-                        self$results$insert(100, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'correlationMissingDataPooled',
+                        #     type = jmvcore::NoticeType$WARNING
+                        # )
+                        # notice$setContent(pooled_res$msg)
+                        # self$results$insert(100, notice)
                     }
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'correlationGrouping',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent("Correlations are computed per group and pooled. Within-group effects may differ from the pooled estimate.")
-                    self$results$insert(999, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'correlationGrouping',
+                    #     type = jmvcore::NoticeType$INFO
+                    # )
+                    # notice$setContent("Correlations are computed per group and pooled. Within-group effects may differ from the pooled estimate.")
+                    # self$results$insert(999, notice)
                     if (!is.null(self$options$facetvar)) {
-                        notice_facet <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'correlationFacetingWarning',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice_facet$setContent("Correlation with faceting: pooled and per-group correlations may differ across facets.")
-                        self$results$insert(999, notice_facet)
+                        # notice_facet <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'correlationFacetingWarning',
+                        #     type = jmvcore::NoticeType$INFO
+                        # )
+                        # notice_facet$setContent("Correlation with faceting: pooled and per-group correlations may differ across facets.")
+                        # self$results$insert(999, notice_facet)
                     }
                 } else {
                     pooled_res <- compute_cor(seq_along(x_data), "Overall")
@@ -812,33 +812,33 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         self$results$correlation$addRow(rowKey = 1, values = pooled_res$values)
                     }
                     if (!is.null(pooled_res$msg)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'correlationMissingData',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(pooled_res$msg)
-                        self$results$insert(100, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'correlationMissingData',
+                        #     type = jmvcore::NoticeType$WARNING
+                        # )
+                        # notice$setContent(pooled_res$msg)
+                        # self$results$insert(100, notice)
                     }
                     if (!is.null(self$options$facetvar)) {
-                        notice_facet <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'correlationFacetingWarningOverall',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice_facet$setContent("Correlation with faceting: pooled correlation may differ across facets.")
-                        self$results$insert(999, notice_facet)
+                        # notice_facet <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'correlationFacetingWarningOverall',
+                        #     type = jmvcore::NoticeType$INFO
+                        # )
+                        # notice_facet$setContent("Correlation with faceting: pooled correlation may differ across facets.")
+                        # self$results$insert(999, notice_facet)
                     }
                 }
 
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'correlationFailed',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(paste("Correlation analysis failed:", e$message))
-                self$results$insert(1, notice)
+                # notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'correlationFailed',
+                #     type = jmvcore::NoticeType$STRONG_WARNING
+                # )
+                # notice$setContent(paste("Correlation analysis failed:", e$message))
+                # self$results$insert(1, notice)
             })
         },
 
@@ -863,17 +863,17 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     small_groups <- names(group_sizes[group_sizes < 5])
                     small_sizes <- group_sizes[group_sizes < 5]
                     group_details <- paste(paste0(small_groups, " (n=", small_sizes, ")"), collapse = ", ")
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'smallSampleSize',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(paste0(
-                        "Small sample size detected: ", group_details, ". ",
-                        "Groups with fewer than 5 observations may not meet assumptions for statistical tests. ",
-                        "Results should be interpreted with caution."
-                    ))
-                    self$results$insert(1, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'smallSampleSize',
+                    #     type = jmvcore::NoticeType$WARNING
+                    # )
+                    # notice$setContent(paste0(
+                    #     "Small sample size detected: ", group_details, ". ",
+                    #     "Groups with fewer than 5 observations may not meet assumptions for statistical tests. ",
+                    #     "Results should be interpreted with caution."
+                    # ))
+                    # self$results$insert(1, notice)
                 }
 
                 # Infer parametric vs nonparametric based on assumptions when auto
@@ -881,13 +881,13 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$..inferredMethod <- infer
                 private$..assumptionReason <- infer$reason
                 if (!is.null(infer$reason)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'autoMethodSwitch',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(infer$reason)
-                    self$results$insert(999, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'autoMethodSwitch',
+                    #     type = jmvcore::NoticeType$INFO
+                    # )
+                    # notice$setContent(infer$reason)
+                    # self$results$insert(999, notice)
                 }
 
                 # HIERARCHICAL TESTING: For >2 groups, perform omnibus test first
@@ -963,20 +963,20 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Check if omnibus test is significant at alpha = 0.05
                     if (omnibus_result$p.value >= 0.05) {
                         # Omnibus not significant - inform user
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'omnibusNotSignificant',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent(paste0(
-                            "The omnibus test (", omnibus_result$method, ") was not significant (p = ",
-                            round(omnibus_result$p.value, 4), "). ",
-                            "Post-hoc pairwise comparisons are not recommended when the overall test is non-significant, ",
-                            "as this increases Type I error risk. ",
-                            if (self$options$pairwiseComparisons) "Pairwise results shown below should be interpreted with caution." else ""
-                        ))
-                        self$results$insert(999, notice)
-
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'omnibusNotSignificant',
+                        #     type = jmvcore::NoticeType$INFO
+                        # )
+                        # notice$setContent(paste0(
+                        #     "The omnibus test (", omnibus_result$method, ") was not significant (p = ",
+                        #     round(omnibus_result$p.value, 4), "). ",
+                        #     "Post-hoc pairwise comparisons are not recommended when the overall test is non-significant, ",
+                        #     "as this increases Type I error risk. ",
+                        #     if (self$options$pairwiseComparisons) "Pairwise results shown below should be interpreted with caution." else ""
+                        # ))
+                        # self$results$insert(999, notice)
+                    
                         # If pairwise not requested, stop here
                         if (!self$options$pairwiseComparisons) {
                             return()
@@ -985,16 +985,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # If pairwise comparisons not enabled, stop after omnibus test
                     if (!self$options$pairwiseComparisons) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'pairwiseNotEnabled',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent(paste0(
-                            "Omnibus test is significant (p = ", round(omnibus_result$p.value, 4), "). ",
-                            "Enable 'Show Pairwise Comparisons' to see which specific groups differ."
-                        ))
-                        self$results$insert(999, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'pairwiseNotEnabled',
+                        #     type = jmvcore::NoticeType$INFO
+                        # )
+                        # notice$setContent(paste0(
+                        #     "Omnibus test is significant (p = ", round(omnibus_result$p.value, 4), "). ",
+                        #     "Enable 'Show Pairwise Comparisons' to see which specific groups differ."
+                        # ))
+                        # self$results$insert(999, notice)
                         return()
                     }
                 } else {
@@ -1047,17 +1047,17 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Check sample sizes
                     if (length(data1) < 2 || length(data2) < 2) {
                         # Create descriptive notice for user
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('insufficientSampleSize_', i),
-                            type = jmvcore::NoticeType$STRONG_WARNING
-                        )
-                        notice$setContent(paste0(
-                            "Insufficient data for statistical test between '", g1, "' (n=", length(data1),
-                            ") and '", g2, "' (n=", length(data2), "). ",
-                            "At least 2 observations per group required for comparison."
-                        ))
-                        self$results$insert(1, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = paste0('insufficientSampleSize_', i),
+                        #     type = jmvcore::NoticeType$STRONG_WARNING
+                        # )
+                        # notice$setContent(paste0(
+                        #     "Insufficient data for statistical test between '", g1, "' (n=", length(data1),
+                        #     ") and '", g2, "' (n=", length(data2), "). ",
+                        #     "At least 2 observations per group required for comparison."
+                        # ))
+                        # self$results$insert(1, notice)
                         stop("Insufficient data for statistical comparison.")
                     }
 
@@ -1132,13 +1132,13 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$..stats_df <- stats_df
                 
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'statisticsCalculationFailed',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(paste("Statistics calculation failed:", e$message))
-                self$results$insert(1, notice)
+                # notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'statisticsCalculationFailed',
+                #     type = jmvcore::NoticeType$STRONG_WARNING
+                # )
+                # notice$setContent(paste("Statistics calculation failed:", e$message))
+                # self$results$insert(1, notice)
                 stop(e)
             })
         },
@@ -1354,16 +1354,16 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(overrides) > 0) {
                 preset_name <- tools::toTitleCase(gsub("_", " ", preset))
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'clinicalPresetOverride',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(paste0(
-                    "Clinical Preset Applied: ", preset_name, ". ",
-                    "The following options have been configured: ", paste(overrides, collapse = "; "), "."
-                ))
-                self$results$insert(999, notice)
+                # notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'clinicalPresetOverride',
+                #     type = jmvcore::NoticeType$INFO
+                # )
+                # notice$setContent(paste0(
+                #     "Clinical Preset Applied: ", preset_name, ". ",
+                #     "The following options have been configured: ", paste(overrides, collapse = "; "), "."
+                # ))
+                # self$results$insert(999, notice)
             }
         },
 

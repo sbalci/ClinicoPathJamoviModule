@@ -53,6 +53,16 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
         },
 
+        .escapeVar = function(var_name) {
+            # Safely escape variable names for formulas and aes
+            if (is.null(var_name) || var_name == "") return(NULL)
+            # Add backticks if name contains spaces or special chars
+            if (grepl("[^A-Za-z0-9_.]", var_name) || grepl("^[0-9]", var_name)) {
+                return(paste0("`", var_name, "`"))
+            }
+            return(var_name)
+        },
+
         .run = function() {
 
             # Check if required variables have been selected
@@ -204,19 +214,39 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             interpretation_html <- private$.generate_interpretation_guide(analysis_data, dep_var, group_var)
             self$results$interpretation$setContent(interpretation_html)
 
-            # Store data for plotting using setState
+            # Store data AND visual options for plotting using setState
             image <- self$results$plot
-            image$setState(analysis_data)
+            plotState <- list(
+                data = analysis_data,
+                # Include visual options to trigger updates
+                color_palette = self$options$color_palette,
+                plot_theme = self$options$plot_theme,
+                show_violin = self$options$show_violin,
+                show_boxplot = self$options$show_boxplot,
+                show_dots = self$options$show_dots,
+                dots_side = self$options$dots_side,
+                orientation = self$options$orientation,
+                violin_width = self$options$violin_width,
+                box_width = self$options$box_width,
+                dots_size = self$options$dots_size,
+                alpha_violin = self$options$alpha_violin,
+                alpha_dots = self$options$alpha_dots,
+                plot_title = self$options$plot_title,
+                x_label = self$options$x_label,
+                y_label = self$options$y_label,
+                log_transform = self$options$log_transform
+            )
+            image$setState(plotState)
 
         },
 
         .plot = function(image, ggtheme, theme, ...) {
-            
-            # Get data from setState
-            analysis_data <- image$state
-            if (is.null(analysis_data)) {
+
+            # Extract data from state
+            if (is.null(image$state) || is.null(image$state$data)) {
                 return()
             }
+            analysis_data <- image$state$data
             dep_var <- self$options$dep_var
             group_var <- self$options$group_var
             facet_var <- self$options$facet_var
@@ -230,8 +260,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
             
             # Create base plot
-            p <- ggplot2::ggplot(analysis_data, ggplot2::aes_string(x = group_var, y = dep_var, 
-                                                                   fill = color_mapping, color = color_mapping))
+            # Use aes() with .data pronoun for safety with special characters
+            p <- ggplot2::ggplot(analysis_data, ggplot2::aes(x = .data[[group_var]], y = .data[[dep_var]],
+                                                             fill = .data[[color_mapping]], color = .data[[color_mapping]]))
             
             # Add raincloud components based on options
             if (self$options$show_violin) {
@@ -267,7 +298,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             # Add faceting if specified
             if (!is.null(facet_var) && facet_var != "") {
-                p <- p + ggplot2::facet_wrap(as.formula(paste("~", facet_var)))
+                facet_safe <- private$.escapeVar(facet_var)
+                p <- p + ggplot2::facet_wrap(as.formula(paste("~", facet_safe)))
             }
             
             # Apply color palette
@@ -739,7 +771,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 test_details <- paste0("W = ", test_stat)
                 
             } else if (test_method == "ANOVA") {
-                formula_str <- paste(dep_var, "~", group_var)
+                dep_safe <- private$.escapeVar(dep_var)
+                group_safe <- private$.escapeVar(group_var)
+                formula_str <- paste(dep_safe, "~", group_safe)
                 aov_result <- aov(as.formula(formula_str), data = data)
                 summary_aov <- summary(aov_result)
                 
@@ -750,7 +784,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 test_details <- paste0("F(", df1, ",", df2, ") = ", f_stat)
                 
             } else if (test_method == "Kruskal-Wallis") {
-                formula_str <- paste(dep_var, "~", group_var)
+                dep_safe <- private$.escapeVar(dep_var)
+                group_safe <- private$.escapeVar(group_var)
+                formula_str <- paste(dep_safe, "~", group_safe)
                 kw_result <- kruskal.test(as.formula(formula_str), data = data)
                 
                 test_stat <- round(kw_result$statistic, 4)

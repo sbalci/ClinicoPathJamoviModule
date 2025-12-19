@@ -1,7 +1,7 @@
 ---
 name:  pathagreement
 title: Pathology Interrater Reliability
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: Agreement
 menuSubtitle: Agreement on Categorical and Ordinal Data
 version: '0.0.31'
@@ -224,7 +224,7 @@ options:
     - name: show_consensus_table
       title: Show Consensus Results
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display detailed consensus scoring results including individual rater scores and consensus outcomes.
@@ -256,7 +256,7 @@ options:
     - name: showWeightedKappaGuide
       title: Weighted Kappa Guide
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show explanatory guide for weighted kappa options, including when to use linear vs quadratic weighting schemes.
@@ -369,7 +369,7 @@ options:
     - name: styleHeatmap
       title: Show Diagnostic Style Heatmap
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display diagnostic style heatmap.
@@ -592,7 +592,7 @@ options:
     - name: identifyDiscordant
       title: 'Identify Discordant Cases'
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Flag cases with high inter-rater disagreement that distinguish diagnostic style groups.

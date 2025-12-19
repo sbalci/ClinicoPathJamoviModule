@@ -1,7 +1,7 @@
 ---
 name:  patientsimilarity
 title: Patient Similarity Clustering
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: ClinicoPath Descriptives
 menuSubtitle: 't-SNE, UMAP, PCA - Discover Patient Subgroups'
 version: '0.0.31'
@@ -243,7 +243,7 @@ options:
     - name: showClusterStats
       title: Show Cluster Statistics
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display summary statistics for each cluster including size,
@@ -293,7 +293,7 @@ options:
     - name: scaleVars
       title: Standardize Variables
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Standardize variables to mean=0, sd=1 before analysis.

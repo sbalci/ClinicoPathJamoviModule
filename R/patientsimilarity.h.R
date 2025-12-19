@@ -20,12 +20,12 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             nClusters = 3,
             dbscan_eps = 0.5,
             dbscan_minpts = 5,
-            showClusterStats = TRUE,
+            showClusterStats = FALSE,
             survivalAnalysis = FALSE,
             survivalTime = NULL,
             survivalEvent = NULL,
             survivalEventLevel = NULL,
-            scaleVars = TRUE,
+            scaleVars = FALSE,
             removeOutliers = FALSE,
             showLoadings = FALSE,
             show3DPlot = FALSE, ...) {
@@ -132,7 +132,7 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..showClusterStats <- jmvcore::OptionBool$new(
                 "showClusterStats",
                 showClusterStats,
-                default=TRUE)
+                default=FALSE)
             private$..survivalAnalysis <- jmvcore::OptionBool$new(
                 "survivalAnalysis",
                 survivalAnalysis,
@@ -163,7 +163,7 @@ patientsimilarityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..scaleVars <- jmvcore::OptionBool$new(
                 "scaleVars",
                 scaleVars,
-                default=TRUE)
+                default=FALSE)
             private$..removeOutliers <- jmvcore::OptionBool$new(
                 "removeOutliers",
                 removeOutliers,
@@ -267,7 +267,6 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     active = list(
         instructions = function() private$.items[["instructions"]],
         summaryText = function() private$.items[["summaryText"]],
-        warnings = function() private$.items[["warnings"]],
         projectionPlot = function() private$.items[["projectionPlot"]],
         projection3D = function() private$.items[["projection3D"]],
         varianceTable = function() private$.items[["varianceTable"]],
@@ -313,11 +312,6 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="summaryText",
                 title="Analysis Summary",
-                visible=TRUE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="warnings",
-                title="Analysis Messages",
                 visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -666,7 +660,6 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$projectionPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$projection3D} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$varianceTable} \tab \tab \tab \tab \tab a table \cr
@@ -708,12 +701,12 @@ patientsimilarity <- function(
     nClusters = 3,
     dbscan_eps = 0.5,
     dbscan_minpts = 5,
-    showClusterStats = TRUE,
+    showClusterStats = FALSE,
     survivalAnalysis = FALSE,
     survivalTime = NULL,
     survivalEvent = NULL,
     survivalEventLevel,
-    scaleVars = TRUE,
+    scaleVars = FALSE,
     removeOutliers = FALSE,
     showLoadings = FALSE,
     show3DPlot = FALSE) {

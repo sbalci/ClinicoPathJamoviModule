@@ -254,7 +254,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             if (nrow(self$data) == 0) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'emptyDataset',
+                    name = '.emptyDataset',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Dataset contains no rows. Please provide data with at least one observation.')
@@ -266,7 +266,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             if (!requireNamespace("performance", quietly = TRUE)) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'missingPerformance',
+                    name = '.missingPerformance',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('The performance package is required for outlier detection. Install via: install.packages("performance")')
@@ -284,7 +284,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     !requireNamespace("dbscan", quietly = TRUE)) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'missingDbscan',
+                        name = '.missingDbscan',
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Method %s requires dbscan package. Install via: install.packages("dbscan") or select a different method.', multivariate_method))
@@ -296,7 +296,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     !requireNamespace("robustbase", quietly = TRUE)) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'missingRobustbase',
+                        name = '.missingRobustbase',
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent('MCD method requires robustbase package. Install via: install.packages("robustbase") or select a different method.')
@@ -345,7 +345,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             if (original_n < 30) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'smallSample',
+                    name = '.smallSample',
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent(sprintf('Sample size is small (N=%d). Outlier detection may be unreliable. Recommended N >= 30.', original_n))
@@ -365,13 +365,13 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                          skew <- m3 / s3
                          
                          if (!is.na(skew) && abs(skew) > 2) {
-                             notice <- jmvcore::Notice$new(
-                                 options = self$options,
-                                 name = paste0('highSkew_', col),
-                                 type = jmvcore::NoticeType$WARNING
-                             )
-                             notice$setContent(sprintf('Variable %s is highly skewed (%.2f). Standard methods may flag valid values. Consider Robust Z-score.', col, skew))
-                             self$results$insert(3, notice)
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = sprintf('.highSkew_%s', col),
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(sprintf('Variable %s is highly skewed (%.2f). Standard methods may flag valid values. Consider Robust Z-score.', col, skew))
+                            self$results$insert(3, notice)
                          }
                      }
                  }
@@ -426,7 +426,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             if (is.null(analysis_data) || nrow(analysis_data) == 0) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'noCompleteCases',
+                    name = '.noCompleteCases',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No complete cases found. Selected variables contain only missing values. Choose variables with complete data.')
@@ -520,18 +520,17 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 ))
             }
 
-            # Add success completion notice
             if (!is.null(outlier_results)) {
                 success_notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'analysisComplete',
+                    name = '.analysisComplete',
                     type = jmvcore::NoticeType$INFO
                 )
-
+                
                 n_analyzed <- nrow(analysis_data)
                 n_outliers <- sum(outlier_results$outlier_logical >= self$options$composite_threshold, na.rm = TRUE)
                 outlier_pct <- round(n_outliers / n_analyzed * 100, 1)
-
+                
                 success_notice$setContent(sprintf(
                     'Analysis completed: %d observations analyzed, %d outliers detected (%.1f%%) using %s method.',
                     n_analyzed, n_outliers, outlier_pct, private$.get_method_description()

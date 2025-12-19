@@ -19,7 +19,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Check for required inputs
             if (is.null(self$options$time) || is.null(self$options$event) ||
                 is.null(self$options$predictor)) {
-                notice <- jmvcore::Notice$new(options=self$options, name='requiredInputs', type=jmvcore::NoticeType$ERROR)
+                notice <- jmvcore::Notice$new(options=self$options, name='.requiredInputs', type=jmvcore::NoticeType$ERROR)
                 notice$setContent('Time, Event, and Predictor variables are all required. Please select all three variables and re-run the analysis.')
                 self$results$insert(1, notice)
                 return()
@@ -52,7 +52,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     if (!all(unique_vals %in% c(0, 1))) {
                         notice <- jmvcore::Notice$new(
                             options = self$options,
-                            name = "nonBinaryEvent",
+                            name = ".nonBinaryEvent",
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent(sprintf(
@@ -74,7 +74,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (self$options$competing_risks) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = "competingRisksNotImplemented",
+                    name = ".competingRisksNotImplemented",
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(
@@ -86,7 +86,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (self$options$decompose_cindex) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = "decompositionNotImplemented",
+                    name = ".decompositionNotImplemented",
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(
@@ -98,7 +98,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (self$options$stratified_cindex) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = "stratifiedNotImplemented",
+                    name = ".stratifiedNotImplemented",
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(
@@ -115,7 +115,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (any(unimplemented_plots)) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = "plotsNotImplemented",
+                    name = ".plotsNotImplemented",
                     type = jmvcore::NoticeType$WARNING
                 )
                 notice$setContent(
@@ -133,9 +133,11 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     time_var[beyond_max] <- max_time
                     event_var[beyond_max] <- 0  # Administratively censor
 
+                    event_var[beyond_max] <- 0  # Administratively censor
+
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = "restrictedTime",
+                        name = ".restrictedTime",
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(sprintf(
@@ -143,6 +145,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         max_time, sum(beyond_max)
                     ))
                     self$results$insert(999, notice)
+                }
                 }
             }
 
@@ -247,6 +250,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             pct_missing <- 100 * n_missing / length(complete_cases)
 
             # Notice: missing data handling (always inform if any missing)
+            # Notice: missing data handling (always inform if any missing)
             if (n_missing > 0) {
                 notice_type <- if (pct_missing > 20) {
                     jmvcore::NoticeType$WARNING
@@ -256,7 +260,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'missingDataHandling',
+                    name = '.missingDataHandling',
                     type = notice_type
                 )
 
@@ -293,19 +297,19 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             censoring_rate <- 100 * (1 - n_events / length(event_var))
 
             if (n_events < 10) {
-                notice <- jmvcore::Notice$new(options=self$options, name='tooFewEvents', type=jmvcore::NoticeType$ERROR)
+                notice <- jmvcore::Notice$new(options=self$options, name='.tooFewEvents', type=jmvcore::NoticeType$ERROR)
                 notice$setContent(sprintf('Too few events for reliable C-index estimation (n_events=%d). Minimum 10 events required, 100+ recommended for stable estimates. Results may be unreliable.', n_events))
                 self$results$insert(1, notice)
                 return()
             } else if (n_events < 50) {
-                notice <- jmvcore::Notice$new(options=self$options, name='lowEvents', type=jmvcore::NoticeType$STRONG_WARNING)
+                notice <- jmvcore::Notice$new(options=self$options, name='.lowEvents', type=jmvcore::NoticeType$STRONG_WARNING)
                 notice$setContent(sprintf('Low number of events (n_events=%d). Standard errors and confidence intervals may be unstable. Consider cautious interpretation. Recommended minimum: 100 events.', n_events))
                 self$results$insert(1, notice)
             }
 
             # Notice: extreme censoring
             if (censoring_rate > 70) {
-                notice <- jmvcore::Notice$new(options=self$options, name='heavyCensoring', type=jmvcore::NoticeType$WARNING)
+                notice <- jmvcore::Notice$new(options=self$options, name='.heavyCensoring', type=jmvcore::NoticeType$WARNING)
                 notice$setContent(sprintf('Heavy censoring detected (%.1f%% censored). C-index estimates may be biased. Consider sensitivity analyses or alternative discrimination metrics.', censoring_rate))
                 self$results$insert(1, notice)
             }
@@ -392,7 +396,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Notice: analysis completion summary (INFO at bottom)
             {
-                notice_info <- jmvcore::Notice$new(options=self$options, name='analysisComplete', type=jmvcore::NoticeType$INFO)
+                notice_info <- jmvcore::Notice$new(options=self$options, name='.analysisComplete', type=jmvcore::NoticeType$INFO)
                 notice_info$setContent(sprintf('C-index analysis completed: %d observations, %d events (%.1f%% event rate), method=Harrell.',
                     length(event_var), n_events, 100 * n_events / length(event_var)))
                 self$results$insert(999, notice_info)
@@ -568,7 +572,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # Notice: bootstrap failures
                 n_failed <- sum(is.na(boot_cindex))
                 if (n_failed > 0.1 * n_boot) {
-                    notice <- jmvcore::Notice$new(options=self$options, name='bootstrapFailures', type=jmvcore::NoticeType$WARNING)
+                    notice <- jmvcore::Notice$new(options=self$options, name='.bootstrapFailures', type=jmvcore::NoticeType$WARNING)
                     notice$setContent(sprintf('%d/%d bootstrap samples failed (%.1f%%). Confidence intervals may be unreliable. Consider using asymptotic CI method or checking data quality.',
                         n_failed, n_boot, 100 * n_failed / n_boot))
                     self$results$insert(1, notice)
@@ -597,9 +601,10 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # WARNING: This is a simplified approximation, NOT proper time-dependent C-index
 
             # Warn users about limitations
+            # Warn users about limitations
             notice <- jmvcore::Notice$new(
                 options = self$options,
-                name = "tdCindexNotImplemented",
+                name = ".tdCindexNotImplemented",
                 type = jmvcore::NoticeType$STRONG_WARNING
             )
             notice$setContent(
@@ -625,7 +630,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 include <- (time_var > t_horizon) | (time_var <= t_horizon & event_var == 1)
 
                 if (sum(include) < 10) {
-                    notice <- jmvcore::Notice$new(options=self$options, name=paste0('tdCindexSkipped_', i), type=jmvcore::NoticeType$WARNING)
+                    notice <- jmvcore::Notice$new(options=self$options, name=paste0('.tdCindexSkipped_', i), type=jmvcore::NoticeType$WARNING)
                     notice$setContent(sprintf('Time-dependent C-index at time point %.1f skipped due to insufficient observations (n=%d < 10). Consider removing this time point or using shorter evaluation times.',
                         t_horizon, sum(include)))
                     self$results$insert(1, notice)
@@ -752,7 +757,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Warning: test assumes independence (models are actually correlated)
             notice <- jmvcore::Notice$new(
                 options = self$options,
-                name = "pairwiseTestLimitation",
+                name = ".pairwiseTestLimitation",
                 type = jmvcore::NoticeType$STRONG_WARNING
             )
             notice$setContent(

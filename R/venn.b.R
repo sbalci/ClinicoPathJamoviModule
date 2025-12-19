@@ -1200,7 +1200,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                 # Create the base ComplexUpset plot with proper annotations
                 base_annotations_list <- list(
                     'Intersection size' = ComplexUpset::intersection_size(
-                        counts = TRUE,
                         text = list(size = 3)
                     )
                 )
@@ -1210,7 +1209,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                 annotations_list <- if (showAnnotations) {
                     list(
                         'Intersection percentages' = ComplexUpset::intersection_size(
-                            counts = FALSE,
                             text = list(size = 3),
                             text_mapping = ggplot2::aes(label = paste0(round(100 * !!rlang::sym('intersection_size') / sum(!!rlang::sym('intersection_size')), 1), '%'))
                         )

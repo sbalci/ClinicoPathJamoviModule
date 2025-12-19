@@ -138,39 +138,47 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: show_statistics
-            label: "Show Summary Statistics"
+          - type: Label
+            label: "Summary Statistics"
+            children:
+              - type: CheckBox
+                name: show_statistics
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: "Outlier Detection"
           - type: CheckBox
             name: show_outliers
-            label: "Highlight Outliers"
-      - type: LayoutBox
-        margin: large
-        children:
           - type: ComboBox
             name: outlier_method
-            label: "Outlier Detection Method"
+            enable: (show_outliers)
       - type: LayoutBox
         margin: large
         children:
+          - type: Label
+            label: "Normality Assessment"
           - type: CheckBox
             name: normality_test
-            label: "Test for Normality"
-          - type: CheckBox
-            name: comparison_test
-            label: "Group Comparison Test"
       - type: LayoutBox
         margin: large
         children:
+          - type: Label
+            label: "Group Comparisons"
+          - type: CheckBox
+            name: comparison_test
           - type: ComboBox
             name: comparison_method
-            label: "Comparison Method"
+            enable: (comparison_test)
           - type: ComboBox
             name: adjust_method
-            label: "P-value Adjustment"
+            enable: (comparison_test)
           - type: CheckBox
             name: effect_size
-            label: "Show Effect Size (2 groups)"
+            enable: (comparison_test)
+      - type: LayoutBox
+        margin: large
+        children:
           - type: CheckBox
             name: log_transform
             label: "Log-transform Y-axis"

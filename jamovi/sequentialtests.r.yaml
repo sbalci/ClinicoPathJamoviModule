@@ -4,6 +4,11 @@ title: Sequential Testing Analysis
 jrs: '1.1'
 
 items:
+    - name: plain_summary
+      title: 'Summary (Plain Language)'
+      type: Html
+      visible: (show_explanation)
+
     - name: summary_table
       title: 'Summary of Testing Strategy'
       type: Table
@@ -38,6 +43,9 @@ items:
           title: 'Combined NPV'
           type: number
           format: pc
+        - name: nnt
+          title: 'Number Needed to Screen'
+          type: integer
 
     - name: individual_tests_table
       title: 'Individual Test Performance'
@@ -165,6 +173,14 @@ items:
       width: 600
       height: 400
       renderFun: .plot_population_flow
+      visible: (show_nomogram)
+
+    - name: plot_sensitivity_analysis
+      title: 'Sensitivity Analysis: PPV/NPV vs Prevalence'
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot_sensitivity_analysis
       visible: (show_nomogram)
 
     - name: clinical_guidance

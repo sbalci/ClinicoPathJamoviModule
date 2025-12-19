@@ -37,6 +37,58 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .style_clustering_results = NULL,
         .rater_metadata = NULL,
 
+        # Variable name handling utilities
+        .escapeVar = function(x) {
+            # Convert problematic variable names to safe R identifiers
+            # Handles spaces, special characters, Unicode, etc.
+            if (is.null(x) || length(x) == 0) return(NULL)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        .cleanVarNames = function(df) {
+            # Clean all variable names while preserving originals
+            orig_names <- names(df)
+            clean_names <- sapply(orig_names, private$.escapeVar)
+            names(df) <- clean_names
+            attr(df, "original_names") <- orig_names
+            attr(df, "name_mapping") <- setNames(orig_names, clean_names)
+            return(df)
+        },
+
+        .getOriginalName = function(clean_name, df = NULL) {
+            # Reverse lookup for display purposes
+            if (!is.null(df)) {
+                name_map <- attr(df, "name_mapping")
+                if (!is.null(name_map) && clean_name %in% names(name_map)) {
+                    return(name_map[[clean_name]])
+                }
+            }
+            return(clean_name)
+        },
+
+        .extractLabels = function(data, vars) {
+            # Extract and preserve factor labels from labelled variables
+            labels <- lapply(vars, function(v) {
+                col <- data[[v]]
+                if (is.factor(col)) {
+                    attr(col, "labels", exact = TRUE) %||% levels(col)
+                } else {
+                    NULL
+                }
+            })
+            names(labels) <- vars
+            return(labels)
+        },
+
+        .formatWithLabels = function(value, var, labels_list) {
+            # Use labels when displaying categorical values
+            labels <- labels_list[[var]]
+            if (!is.null(labels) && value %in% names(labels)) {
+                return(labels[value])
+            } else {
+                return(value)
+            }
+        },
 
         # Initialization
         .init = function() {
@@ -654,7 +706,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .performKrippendorffAnalysis = function() {
             kripp_table <- self$results$krippTable
             kripp_method <- self$options$krippMethod
-            bootstrap <- FALSE # self$options$bootstrap
+            bootstrap <- self$options$bootstrap  # Use user-specified bootstrap option
 
 
             # Try to calculate Krippendorff's alpha
@@ -1113,27 +1165,29 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             hc <- hclust(distance_matrix, method = cluster_method)
 
             # Cut dendrogram to get specified number of groups
-            n_groups <- self$options$nStyleGroups
+            # Use styleGroups for diagnosticStyleAnalysis, nStyleGroups for performClustering
+            n_groups <- self$options$styleGroups
             style_groups <- cutree(hc, k = n_groups)
 
             # Populate style clustering results table
             rater_names <- private$.rater_names
             for (i in 1:length(rater_names)) {
                 # Calculate rater characteristics if available
-                experience <- if (self$options$raterCharacteristics) {
-                    .("Not specified")
+                experience <- if (self$options$raterCharacteristics && !is.null(self$options$experienceVar)) {
+                    # Extract from experienceVar if available
+                    as.character(self$data[[self$options$experienceVar]][i])
                 } else { "Not specified" }
 
-                training <- if (self$options$raterCharacteristics) {
-                    .("Not specified")
+                training <- if (self$options$raterCharacteristics && !is.null(self$options$trainingVar)) {
+                    as.character(self$data[[self$options$trainingVar]][i])
                 } else { "Not specified" }
 
-                institution <- if (self$options$raterCharacteristics) {
-                    .("Not specified")
+                institution <- if (self$options$raterCharacteristics && !is.null(self$options$institutionVar)) {
+                    as.character(self$data[[self$options$institutionVar]][i])
                 } else { "Not specified" }
 
-                specialty <- if (self$options$raterCharacteristics) {
-                    .("Not specified")
+                specialty <- if (self$options$raterCharacteristics && !is.null(self$options$specialtyVar)) {
+                    as.character(self$data[[self$options$specialtyVar]][i])
                 } else { "Not specified" }
 
                 # Calculate agreement with other raters in same style group
@@ -2898,6 +2952,69 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             self$results$weightedKappaGuide$setVisible(TRUE)
         },
 
+        .generateClusteringInterpretation = function(clustering_result = NULL) {
+            interp_html <- paste0(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>",
+                "<h3 style='color: #2E5984; border-bottom: 2px solid #2E5984; padding-bottom: 8px;'>",
+                "Understanding Diagnostic Style Clustering Results</h3>",
+
+                "<div style='background: #F0F7FF; border-left: 4px solid #4A90E2; padding: 12px; margin: 15px 0;'>",
+                "<p><strong>What is Diagnostic Style Clustering?</strong></p>",
+                "<p>This analysis identifies distinct 'diagnostic schools' or patterns among pathologists based on ",
+                "how they categorize cases. It uses hierarchical clustering (Usubutun et al., 2012) to group ",
+                "raters with similar diagnostic tendencies.</p>",
+                "</div>",
+
+                "<h4 style='color: #2E5984;'>Interpreting Your Results:</h4>",
+                "<ul style='line-height: 1.8;'>",
+                "<li><strong>Style Groups:</strong> Raters clustered together tend to make similar diagnostic decisions. ",
+                "This doesn't mean one group is 'correct' - it reveals systematic differences in thresholds or criteria.</li>",
+                "<li><strong>Dendrogram:</strong> Shows hierarchical relationships. Raters closer together in the tree ",
+                "have more similar diagnostic patterns.</li>",
+                "<li><strong>Heatmap:</strong> Displays case-by-case diagnoses with color coding. Look for vertical bands ",
+                "(cases that split groups) - these are diagnostically challenging cases worth reviewing.</li>",
+                "<li><strong>Discordant Cases:</strong> Cases with high disagreement between style groups. These represent ",
+                "the most educationally valuable cases for consensus discussions and training.</li>",
+                "</ul>",
+
+                "<h4 style='color: #2E5984;'>Clinical Applications:</h4>",
+                "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;' border='1'>",
+                "<tr style='background: #E8F4F8;'><th style='padding: 8px;'>Finding</th><th style='padding: 8px;'>Action</th></tr>",
+                "<tr><td style='padding: 6px;'>Multiple style groups identified</td>",
+                "<td style='padding: 6px;'>Convene consensus conference to align diagnostic criteria</td></tr>",
+                "<tr><td style='padding: 6px;'>One group aligns with expert</td>",
+                "<td style='padding: 6px;'>Use this group's cases for training examples</td></tr>",
+                "<tr><td style='padding: 6px;'>Specific discordant cases</td>",
+                "<td style='padding: 6px;'>Add to teaching file; discuss at tumor board</td></tr>",
+                "<tr><td style='padding: 6px;'>Experience/training association</td>",
+                "<td style='padding: 6px;'>Tailor education to specific career stages</td></tr>",
+                "</table>",
+
+                "<div style='background: #FFF8DC; border: 1px solid #DAA520; padding: 10px; margin: 15px 0;'>",
+                "<p><strong>Key Insight from Usubutun (2012):</strong></p>",
+                "<p>Diagnostic style was found to be <em>personal</em> rather than institutional - even pathologists ",
+                "trained at the same institution may belong to different style groups. This emphasizes the importance ",
+                "of ongoing calibration exercises and consensus conferences.</p>",
+                "</div>",
+
+                "<h4 style='color: #2E5984;'>Quality Assurance Recommendations:</h4>",
+                "<ol style='line-height: 1.8;'>",
+                "<li><strong>Document findings:</strong> Record which style groups exist and their characteristics</li>",
+                "<li><strong>Identify outliers:</strong> Review discordant cases as a team</li>",
+                "<li><strong>Establish consensus:</strong> Use cases with perfect agreement as gold standard examples</li>",
+                "<li><strong>Monitor over time:</strong> Repeat analysis after training to measure convergence</li>",
+                "<li><strong>Consider context:</strong> Some diagnostic variation may be clinically acceptable</li>",
+                "</ol>",
+
+                "<p style='margin-top: 15px; font-size: 0.9em; color: #666;'>",
+                "<em>Reference:</em> Usubutun A, Messing-Jünger M, Lopes MB, et al. World Health Organization ",
+                "grade I meningioma histopathology: a reproducibility study validating the diagnostic criteria. ",
+                "Modern Pathology. 2012;25(4):565-573.</p>",
+                "</div>"
+            )
+            self$results$clusteringInterpretation$setContent(interp_html)
+        },
+
         .generateStatisticalGlossary = function() {
             glossary_html <- paste0(
                 "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.5;'>",
@@ -3907,7 +4024,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .performBootstrapStability = function() {
             data_matrix <- private$.data_matrix
             n_cases <- nrow(data_matrix)
-            n_bootstrap <- 100  # Reduced for performance
+            # Use user-specified bootstrap samples, with validation
+            n_bootstrap <- self$options$bootstrapSamples
+            if (is.null(n_bootstrap) || n_bootstrap < 100) n_bootstrap <- 1000
+            if (n_bootstrap > 5000) n_bootstrap <- 5000  # Cap for performance
             
             # Store original statistics
             original_stats <- private$.calculateOriginalStatistics()
@@ -5063,7 +5183,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # Render clustering heatmap with dual dendrograms
         .clusteringHeatmap = function(image, ggtheme, theme, ...) {
-            if (!self$options$performClustering) {
+            # Check both performClustering and showClusteringHeatmap options
+            if (!self$options$performClustering || !self$options$showClusteringHeatmap) {
                 return(FALSE)
             }
 

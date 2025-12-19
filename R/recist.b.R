@@ -103,6 +103,12 @@ recistClass <- R6::R6Class(
              private$.summaryStatus$warnings <- c(private$.summaryStatus$warnings, msg)
         },
 
+        # ---- Helper: Escape Variable Names ----
+        .escapeVar = function(x) {
+            # Make syntactically valid R names for variables with spaces/special chars
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         # ---- Main Analysis ----
         .run = function() {
 
@@ -141,13 +147,21 @@ recistClass <- R6::R6Class(
                     private$.populateEfficacyMetrics()
                 }
 
+                if (self$options$stratifiedAnalysis && !is.null(self$options$groupVar)) {
+                    private$.populateStratifiedTable()
+                }
+
                 private$.populateClinicalInterpretation()
 
                 if (self$options$showReference) {
                     private$.populateReferenceInfo()
                 }
-                
+
                 private$.populateRunSummary()
+
+                if (self$options$exportLesionData) {
+                    private$.exportData()
+                }
 
             }, error = function(e) {
                 self$results$instructions$setContent(
@@ -171,10 +185,10 @@ recistClass <- R6::R6Class(
 
             mydata <- self$data
 
-            patientId <- self$options$patientId
-            assessmentTime <- self$options$assessmentTime
-            lesionId <- self$options$lesionId
-            lesionType <- self$options$lesionType
+            patientId <- jmvcore::composeTerm(self$options$patientId)
+            assessmentTime <- jmvcore::composeTerm(self$options$assessmentTime)
+            lesionId <- jmvcore::composeTerm(self$options$lesionId)
+            lesionType <- jmvcore::composeTerm(self$options$lesionType)
 
             data <- data.frame(
                 patientId = mydata[[patientId]],
@@ -186,7 +200,7 @@ recistClass <- R6::R6Class(
 
             # Add diameter if provided
             if (!is.null(self$options$lesionDiameter)) {
-                lesionDiameter <- self$options$lesionDiameter
+                lesionDiameter <- jmvcore::composeTerm(self$options$lesionDiameter)
                 data$diameter <- as.numeric(mydata[[lesionDiameter]])
             } else {
                 data$diameter <- NA
@@ -194,7 +208,7 @@ recistClass <- R6::R6Class(
 
             # Add organ if provided
             if (!is.null(self$options$organ)) {
-                organ <- self$options$organ
+                organ <- jmvcore::composeTerm(self$options$organ)
                 data$organ <- as.character(mydata[[organ]])
             } else {
                 data$organ <- "unknown"
@@ -202,7 +216,7 @@ recistClass <- R6::R6Class(
 
             # Add non-target status if provided
             if (!is.null(self$options$nonTargetStatus)) {
-                nonTarget <- self$options$nonTargetStatus
+                nonTarget <- jmvcore::composeTerm(self$options$nonTargetStatus)
                 data$nonTargetStatus <- tolower(as.character(mydata[[nonTarget]]))
             } else {
                 data$nonTargetStatus <- NA
@@ -322,7 +336,8 @@ recistClass <- R6::R6Class(
                     # We need to know if ALL tracked lesions are present.
                     # This simple group_by might miss lesions that are completely missing rows for a timepoint.
                     # Strict way: Count tracked lesions per patient.
-                    n_present = n(), 
+                    n_present = n(),
+                    numTargetLesions = n(),
                     .groups = "drop"
                 )
             
@@ -788,6 +803,52 @@ recistClass <- R6::R6Class(
             ))
         },
 
+        .populateStratifiedTable = function() {
+
+            table <- self$results$stratifiedTable
+            bestData <- private$.bestResponseData
+
+            mydata <- self$data
+            groupVar <- jmvcore::composeTerm(self$options$groupVar)
+            patientIdVar <- jmvcore::composeTerm(self$options$patientId)
+
+            # Merge group variable with best response
+            groups <- data.frame(
+                patientId = mydata[[patientIdVar]],
+                group = as.character(mydata[[groupVar]]),
+                stringsAsFactors = FALSE
+            )
+            groups <- unique(groups)
+
+            stratData <- bestData %>%
+                left_join(groups, by = "patientId") %>%
+                filter(!is.na(group)) %>%
+                group_by(group) %>%
+                summarise(
+                    n = n(),
+                    CR = sum(bestResponse == "CR", na.rm=TRUE) / n() * 100,
+                    PR = sum(bestResponse == "PR", na.rm=TRUE) / n() * 100,
+                    SD = sum(bestResponse == "SD", na.rm=TRUE) / n() * 100,
+                    PD = sum(bestResponse == "PD", na.rm=TRUE) / n() * 100,
+                    ORR = sum(bestResponse %in% c("CR", "PR"), na.rm=TRUE) / n() * 100,
+                    DCR = sum(bestResponse %in% c("CR", "PR", "SD"), na.rm=TRUE) / n() * 100,
+                    .groups = "drop"
+                )
+
+            for (i in 1:nrow(stratData)) {
+                table$addRow(rowKey = i, values = list(
+                    group = stratData$group[i],
+                    n = as.integer(stratData$n[i]),
+                    CR = stratData$CR[i],
+                    PR = stratData$PR[i],
+                    SD = stratData$SD[i],
+                    PD = stratData$PD[i],
+                    ORR = stratData$ORR[i],
+                    DCR = stratData$DCR[i]
+                ))
+            }
+        },
+
         .populateClinicalInterpretation = function() {
 
             data <- private$.bestResponseData
@@ -882,6 +943,26 @@ recistClass <- R6::R6Class(
              
              html <- paste0(html, "</div>")
              self$results$runSummary$setContent(html)
+        },
+
+        # ---- Export Data ----
+        .exportData = function() {
+            data <- private$.lesionData
+            if (!is.null(data) && nrow(data) > 0) {
+                filepath <- file.path(getwd(), "recist_lesion_data.csv")
+                tryCatch({
+                    write.csv(data, filepath, row.names = FALSE)
+                    # Append export notification to run summary
+                    currentHtml <- self$results$runSummary$state
+                    if (is.null(currentHtml)) currentHtml <- ""
+                    newHtml <- paste0(currentHtml,
+                        "<p style='color: green;'><b>✓ Data Exported:</b> ",
+                        filepath, "</p>")
+                    self$results$runSummary$setContent(newHtml)
+                }, error = function(e) {
+                    private$.addWarning(paste0("Failed to export data: ", e$message))
+                })
+            }
         },
 
         # ---- Plotting Functions ----

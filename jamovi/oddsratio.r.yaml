@@ -13,10 +13,6 @@ items:
           - outcome
 
     # === MAIN ODDS RATIO ANALYSIS ===
-    - name:  oddsRatioHeading
-      title: Odds Ratio Analysis
-      type:  Preformatted
-
     - name:  text
       title: Odds Ratio Table
       type:  Html
@@ -29,11 +25,6 @@ items:
       type:  Html
 
     # Natural Language Summary (right after main analysis)
-    - name: oddsRatioSummaryHeading
-      title: Natural Language Summary
-      type: Preformatted
-      visible: (showSummaries)
-
     - name: oddsRatioSummary
       title: ''
       type: Html
@@ -43,10 +34,6 @@ items:
           - outcome
 
     # Plot Section
-    - name: oddsRatioPlotHeading
-      title: Odds Ratio Plot
-      type: Preformatted
-
     - name: plot
       title: ''
       type: Image
@@ -59,11 +46,6 @@ items:
           - outcome
 
     # Odds Ratio Explanations (right after odds ratio analysis)
-    - name: oddsRatioExplanationHeading
-      title: Odds Ratio Analysis Explanations
-      type: Preformatted
-      visible: (showExplanations)
-
     - name: oddsRatioExplanation
       title: 'Understanding Odds Ratio Analysis'
       type: Html
@@ -89,11 +71,6 @@ items:
           - outcome
 
     # === NOMOGRAM ANALYSIS ===
-    - name:  nomogramHeading
-      title: Nomogram Analysis
-      type:  Preformatted
-      visible: (showNomogram)
-
     - name: plot_nomogram
       title: Nomogram
       type: Image
@@ -109,11 +86,6 @@ items:
       visible: (showNomogram)
 
     # Nomogram Summary (right after nomogram analysis)
-    - name: nomogramSummaryHeading
-      title: 'Nomogram Analysis Summary'
-      type: Preformatted
-      visible: (showNomogram && showSummaries)
-
     - name: nomogramSummary
       title: ''
       type: Html
@@ -123,11 +95,6 @@ items:
           - outcome
 
     # Nomogram Explanations (right after nomogram analysis)
-    - name: nomogramExplanationHeading
-      title: 'Understanding Nomogram Analysis'
-      type: Preformatted
-      visible: (showNomogram && showExplanations)
-
     - name: nomogramAnalysisExplanation
       title: ''
       type: Html

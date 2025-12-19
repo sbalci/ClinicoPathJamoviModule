@@ -4,22 +4,22 @@ title: Pathology Agreement Analysis
 jrs: '1.1'
 
 items:
-    - name: warnings
-      title: Analysis Messages
-      type: Html
-      visible: true
-      clearWith:
-        - dep1
-        - dep2
-        - additional_methods
-        - bootstrap_n
-        - conf_level
-        - missing_data
-
     - name: interpretation
       title: Clinical Interpretation and Analysis Summary
       type: Html
       visible: (show_interpretation)
+
+    - name: summary
+      title: Plain Language Summary
+      type: Html
+      visible: (show_summary)
+      description: One-paragraph summary of results in plain language
+
+    - name: explanations
+      title: About This Analysis
+      type: Html
+      visible: (show_explanations)
+      description: Educational guide on agreement analysis
 
     - name: agreementtable
       title: Agreement Statistics

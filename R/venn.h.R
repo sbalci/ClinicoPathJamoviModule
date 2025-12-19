@@ -22,7 +22,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             var7true = NULL,
             show_upsetR = FALSE,
             show_complexUpset = FALSE,
-            show_ggvenn = FALSE,
+            show_ggvenn = TRUE,
             show_ggVennDiagram = FALSE,
             sortBy = "freq",
             minSize = 0,
@@ -160,7 +160,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..show_ggvenn <- jmvcore::OptionBool$new(
                 "show_ggvenn",
                 show_ggvenn,
-                default=FALSE)
+                default=TRUE)
             private$..show_ggVennDiagram <- jmvcore::OptionBool$new(
                 "show_ggVennDiagram",
                 show_ggVennDiagram,
@@ -823,7 +823,7 @@ venn <- function(
     var7true,
     show_upsetR = FALSE,
     show_complexUpset = FALSE,
-    show_ggvenn = FALSE,
+    show_ggvenn = TRUE,
     show_ggVennDiagram = FALSE,
     sortBy = "freq",
     minSize = 0,

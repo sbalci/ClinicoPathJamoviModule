@@ -186,7 +186,6 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        warnings = function() private$.items[["warnings"]],
         agreement_stats = function() private$.items[["agreement_stats"]],
         clinical_summary = function() private$.items[["clinical_summary"]],
         method_guide = function() private$.items[["method_guide"]],
@@ -212,24 +211,6 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="instructions",
                 title="Instructions",
                 visible=TRUE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="warnings",
-                title="Analysis Messages",
-                visible=TRUE,
-                clearWith=list(
-                    "data",
-                    "test1",
-                    "test1Positive",
-                    "test2",
-                    "test2Positive",
-                    "test3",
-                    "test3Positive",
-                    "test4",
-                    "test4Positive",
-                    "test5",
-                    "test5Positive",
-                    "method")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="agreement_stats",
@@ -486,7 +467,6 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$agreement_stats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$method_guide} \tab \tab \tab \tab \tab a html \cr

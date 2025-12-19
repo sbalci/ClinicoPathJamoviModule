@@ -165,6 +165,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Clear any previous validation messages at the start
             # This prevents old errors from persisting when validation state changes
             self$results$dataWarning$setContent("")
+            self$results$dataWarning$setVisible(FALSE)
 
             if (is.null(self$options$vars) || length(self$options$vars) == 0)
                 return(FALSE)
@@ -178,6 +179,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</div>"
                 )
                 self$results$dataWarning$setContent(html)
+                self$results$dataWarning$setVisible(TRUE)
                 return(FALSE)
             }
 
@@ -218,6 +220,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "</div>"
                     )
                     self$results$dataWarning$setContent(html)
+                    self$results$dataWarning$setVisible(TRUE)
                     return(FALSE)
                 }
 
@@ -236,7 +239,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             options = self$options,
                             name = "continuousVariableNotAllowed",
                             type = jmvcore::NoticeType$ERROR)
-                        error_notice$setContent(sprintf("Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Create bins using Data > Transform.", var, unique_values))
+                        error_notice$setContent(sprintf("Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.", var, unique_values))
                         self$results$insert(1, error_notice)
                         return(FALSE)
                     }
@@ -418,7 +421,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <ul style='margin-bottom: 0;'>
                       <li>Select <strong>2-5 categorical variables</strong> (optimal: 3-4)</li>
                       <li>Each variable should have <strong>3-7 categories</strong> for best readability</li>
-                      <li>For continuous variables, use <em>Data → Transform</em> to create bins first</li>
+                      <li>For continuous variables, use the <em>categorize function</em> to create bins first</li>
                     </ul>
                   </div>
 
@@ -454,6 +457,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Clear validation messages when no variables selected
                 self$results$dataWarning$setContent("")
+                self$results$dataWarning$setVisible(FALSE)
 
             } else {
                 # Clear the to-do message
@@ -497,6 +501,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Clear dataWarning if validation passes
                 self$results$dataWarning$setContent("")
+                self$results$dataWarning$setVisible(FALSE)
 
                 # NOTE: Removed INFO notice to avoid serialization errors
                 # INFO notices without return() can cause "attempt to apply non-function" errors
@@ -613,6 +618,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else {
                         self$results$dataWarning$setContent(warning_html)
                     }
+                    self$results$dataWarning$setVisible(TRUE)
                 }
 
                 # Get engine selection

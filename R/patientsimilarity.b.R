@@ -51,14 +51,11 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         # Store projection results
         .projectionData = NULL,
-        .messages = list(),
 
-        .accumulateMessage = function(message) {
-            private$.messages <- c(private$.messages, message)
-        },
-
-        .resetMessages = function() {
-            private$.messages <- list()
+        .escapeVar = function(x) {
+            # Safely escape variable names for data.frame access
+            if (is.null(x) || length(x) == 0) return(NULL)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
         # Initialize ----
@@ -83,11 +80,15 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
             # Check for required inputs
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingVariables',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Please select at least 2 variables for similarity analysis.')
+                self$results$insert(1, notice)
                 return()
             }
-
-            # Reset messages
-            private$.resetMessages()
 
             # Set seed for reproducibility
             if (!is.null(self$options$seed)) {
@@ -129,19 +130,6 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
             # Interpretation
             private$.generateInterpretation(projection)
-
-            # Populate warnings
-            if (length(private$.messages) > 0) {
-                 self$results$warnings$setContent(paste(
-                    "<div class='alert alert-warning'>",
-                    "<h6>Analysis Messages</h6>",
-                    "<ul>",
-                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
-                    "</ul></div>",
-                    sep = ""))
-            } else {
-                self$results$warnings$setVisible(FALSE)
-            }
         },
 
         # Data preparation ----
@@ -159,8 +147,32 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 complete_idx <- complete.cases(data)
                 data <- data[complete_idx, ]
 
-                if (nrow(data) < 10) {
-                    private$.accumulateMessage("Sample size is very small (< 10). Results may be unreliable.")
+                # Check sample size
+                if (nrow(data) < 5) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientData',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Insufficient data for analysis (n=%d after removing missing values). At least 5 complete observations required.', nrow(data)))
+                    self$results$insert(1, notice)
+                    return(NULL)
+                } else if (nrow(data) < 10) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'verySmallSample',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(sprintf('Sample size is very small (n=%d). Results may be unreliable. Consider collecting more data for robust analysis.', nrow(data)))
+                    self$results$insert(6, notice)
+                } else if (nrow(data) < 30) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallSample',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('Sample size is small (n=%d). Results should be interpreted with caution.', nrow(data)))
+                    self$results$insert(21, notice)
                 }
 
                 # Remove outliers if requested
@@ -190,7 +202,13 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 )
 
             }, error = function(e) {
-                jmvcore::reject(paste("Error preparing data:", e$message), code='')
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'dataPreparationError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(paste('Error preparing data:', e$message, 'Please check that all selected variables contain valid numeric values.'))
+                self$results$insert(1, notice)
                 return(NULL)
             })
         },
@@ -229,7 +247,13 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 result
 
             }, error = function(e) {
-                jmvcore::reject(paste("Error in projection:", e$message), code='')
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'projectionError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(paste('Error in projection:', e$message, 'This may be due to insufficient data or numerical issues. Try a different method or check your input data.'))
+                self$results$insert(1, notice)
                 return(NULL)
             })
         },
@@ -268,21 +292,30 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         .runTSNE = function(data, n_dims) {
             if (!requireNamespace("Rtsne", quietly = TRUE)) {
-                jmvcore::reject("Package 'Rtsne' required for t-SNE. Please install it.", code='')
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingRtsne',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Package "Rtsne" is required for t-SNE analysis. Install with: install.packages("Rtsne")')
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
-
-
             # Perplexity validation
             if (nrow(data) < 3 * self$options$perplexity) {
-                # Warn and adjust or just warn?
-                # Rtsne will error. We should warn and maybe return NULL or let it error with a friendly message?
-                # User asked for "Check t-SNE perplexity ... Warn and adjust if needed."
-                # Adjusting is better to prevent crash.
                 new_perp <- floor((nrow(data) - 1) / 3)
                 if (new_perp < 1) new_perp <- 1
-                private$.accumulateMessage(paste0("t-SNE Perplexity (", self$options$perplexity, ") is too high for sample size (", nrow(data), "). Adjusted to ", new_perp, "."))
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'perplexityAdjusted',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('t-SNE Perplexity (%d) is too high for sample size (n=%d). Automatically adjusted to %d. For optimal results, use perplexity < n/3.',
+                    self$options$perplexity, nrow(data), new_perp))
+                self$results$insert(21, notice)
+
                 perplexity <- new_perp
             } else {
                 perplexity <- self$options$perplexity
@@ -296,11 +329,6 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 check_duplicates = FALSE
             )
 
-            # Perplexity validation
-            if (nrow(data) < 3 * self$options$perplexity) {
-                private$.accumulateMessage(paste0("t-SNE Perplexity (", self$options$perplexity, ") is too high for sample size (", nrow(data), "). Recommended perplexity < N/3."))
-            }
-
             list(
                 coords = tsne_result$Y,
                 method = "t-SNE",
@@ -310,7 +338,13 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         .runUMAP = function(data, n_dims) {
             if (!requireNamespace("umap", quietly = TRUE)) {
-                jmvcore::reject("Package 'umap' required for UMAP. Please install it.", code='')
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingUmap',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Package "umap" is required for UMAP analysis. Install with: install.packages("umap")')
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
@@ -383,20 +417,37 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     clusters <- cutree(hc, k = self$options$nClusters)
                 } else if (method == "dbscan") {
                     if (!requireNamespace("dbscan", quietly = TRUE)) {
-                        private$.accumulateMessage("Package 'dbscan' not available, using k-means instead for clustering.")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'missingDbscan',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent('Package "dbscan" not available. Using k-means clustering instead. Install dbscan with: install.packages("dbscan")')
+                        self$results$insert(21, notice)
                         clusters <- kmeans(coords, centers = self$options$nClusters)$cluster
                     } else {
                         clusters <- dbscan::dbscan(coords, eps = self$options$dbscan_eps, minPts = self$options$dbscan_minpts)$cluster
                         # Check if only noise/one cluster found
                         n_found <- length(unique(clusters[clusters != 0]))
                         if (n_found < 2) {
-                             private$.accumulateMessage(paste0("DBSCAN found ", n_found, " clusters. Try adjusting 'eps' or 'minPts'."))
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'dbscanFewClusters',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(sprintf('DBSCAN found only %d cluster(s). Try adjusting epsilon (eps) or minimum points (minPts) parameters to identify more clusters.', n_found))
+                            self$results$insert(21, notice)
                         }
                     }
                 }
 
                 # Add to projection data (this is now done in .run)
                 # projection$clusters <- clusters
+
+                # Populate cluster heading
+                self$results$clusterHeading$setContent(
+                    "<h3>Cluster Analysis Results</h3><p>Automatic clustering identified distinct patient subgroups based on projection coordinates.</p>"
+                )
 
                 # Summary table
                 cluster_counts <- table(clusters)
@@ -454,7 +505,13 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 }
 
             }, error = function(e) {
-                private$.accumulateMessage(paste("Error in clustering:", e$message))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'clusteringError',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(paste('Error in clustering:', e$message, 'Clustering skipped. Try different parameters or method.'))
+                self$results$insert(21, notice)
             })
 
             return(clusters)
@@ -524,8 +581,14 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             }
 
             if (is.null(self$options$survivalTime) || is.null(self$options$survivalEvent)) {
-                 private$.accumulateMessage("Survival analysis skipped: Missing time or event variable.")
-                 return()
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingSurvivalVariables',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Survival analysis requires both time and event variables. Please select survival time and event in the Survival Analysis panel.')
+                self$results$insert(1, notice)
+                return()
             }
 
             tryCatch({
@@ -542,10 +605,22 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
                 # Check for missing survival data
                 if (any(is.na(survtime)) || any(is.na(event))) {
-                     private$.accumulateMessage("Warning: Survival analysis includes missing values which were removed.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'survivalMissingValues',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    n_missing <- sum(is.na(survtime) | is.na(event))
+                    notice$setContent(sprintf('Survival analysis: %d observation(s) with missing time or event values were excluded from the analysis.', n_missing))
+                    self$results$insert(21, notice)
                 }
 
                 clusters <- projection$clusters
+
+                # Populate survival heading
+                self$results$survivalHeading$setContent(
+                    "<h3>Survival Analysis by Cluster</h3><p>Comparing survival outcomes across discovered patient subgroups.</p>"
+                )
 
                 # Survival summary
                 surv_table <- self$results$survivalTable
@@ -797,7 +872,6 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
         },
 
         .exportCoordinates = function(projection) {
-
             coords <- projection$coords
             n_dims <- ncol(coords)
 
@@ -805,43 +879,24 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             row_nums <- seq_len(self$data$rowCount)
             complete_idx <- complete.cases(self$data[, self$options$vars, drop = FALSE])
 
-            for (i in 1:n_dims) {
-                coord_export <- rep(NA, length(row_nums))
-                coord_export[complete_idx] <- coords[, i]
+            # Export first dimension only (jamovi Output supports single column)
+            # For multi-column export, use Output objects for each dimension separately in .a.yaml/.r.yaml
+            coord_export <- rep(NA, length(row_nums))
+            coord_export[complete_idx] <- coords[, 1]  # Dim 1 only
 
-                self$results$exportCoordinates$setRowNums(row_nums)
-                # Note: This loops over dimensions but jamovi currently only supports one output per analysis easily via this method
-                # This logic is imperfect for multi-column export without dynamic output handling
-                # Ideally we export all columns at once if the output object allows it, or use different output objects
-                # However, for now we will just fix the index alignment.
-                # Use a specific column if possible or flattening - but keeping as is for now as simpler fixes requested.
-                # Wait, the user complaint was that it overwrites.
-                # Jamovi `setValues` typically expects a single vector for a single output column.
-                # If `exportCoordinates` is a single variable output, we can't put 2 columns in it.
-                # It seems `exportCoordinates` is defined as ONE Output.
-                # Changing it to export just the first dimension or formatted string?
-                # Or maybe accumulation?
-                # Actually, standard Jamovi approach: multiple output objects or grouping.
-                # Given the constraints, we will export Dimension 1 and 2 as separate calls if we could, but we can't dynamically create outputs.
-                # User request: "Export coordinates: write all dimensions in one call (multiple columns) instead of overwriting"
-                # If we cannot create multiple columns, we can't satisfy this fully without changing .a.yaml to have output vars for Dim1, Dim2.
-                # BUT, we can try to pass a data.frame if supported, or just export the first 2 as a string? No, that's bad.
-                # Let's revert to a simpler fix: Just export Dim 1 for now or warn.
-                # Actually, check if setValues supports lists or data.frames. It usually expects a vector.
-                # Let's check `patientsimilarity.r.yaml`. keys: exportCoordinates.
-                # The user says "calls setValues repeatedly on the same Output, likely overwriting prior dimensions".
-                # Correct.
-                # Since we can't change the Output type easily to "Data" (outputting a new dataset), we are stuck with Variable output.
-                # We will just export the first dimension and add a message, OR we try to export a combined string?
-                # Let's try to fix the cluster export at least, which is a single vector.
-                # And for coordinates, we will just export Dim 1 and Dim 2 if we can add variables?
-                # We can't nicely fix coordinates export without changing the structure significantly (Output -> outputs).
-                # I'll focus on fixing the ROW ALIGNMENT first which was the critical bug.
-                # And maybe just export Dim 1 and 2 into the same column? No.
-                # I'll just fix the row alignment for now.
-                self$results$exportCoordinates$setValues(coord_export) # This will still overwrite.
+            self$results$exportCoordinates$setRowNums(row_nums)
+            self$results$exportCoordinates$setValues(coord_export)
+
+            # Inform user if >1 dimension
+            if (n_dims > 1) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'coordinatesExportLimited',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(sprintf('Note: Only Dimension 1 exported to dataset. Total dimensions available: %d. For all dimensions, use external tools or save the full projection results.', n_dims))
+                self$results$insert(999, notice)
             }
-            # Better fix for Cluster Export row alignment
         }
     )
 )

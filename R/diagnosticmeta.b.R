@@ -219,7 +219,7 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.pooled_specificity <- NULL
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'bivariateAnalysisError',
+                        name = '.bivariateAnalysisError',
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Bivariate analysis error: %s', e$message))
@@ -242,7 +242,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'hsrocAnalysisError',
+                        name = '.hsrocAnalysisError',
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('HSROC analysis error: %s', e$message))
@@ -259,7 +259,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'heterogeneityAnalysisError',
+                        name = '.heterogeneityAnalysisError',
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Heterogeneity analysis error: %s', e$message))
@@ -276,7 +276,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'metaRegressionError',
+                        name = '.metaRegressionError',
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Meta-regression error: %s', e$message))
@@ -293,7 +293,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'publicationBiasError',
+                        name = '.publicationBiasError',
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Publication bias analysis error: %s', e$message))
@@ -344,7 +344,7 @@ diagnosticmetaClass <- R6::R6Class(
             if (!is.null(meta_data) && nrow(meta_data) >= 3) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'analysisComplete',
+                    name = '.analysisComplete',
                     type = jmvcore::NoticeType$INFO
                 )
                 total_n <- sum(meta_data$tp + meta_data$fp + meta_data$fn + meta_data$tn, na.rm = TRUE)
@@ -384,7 +384,7 @@ diagnosticmetaClass <- R6::R6Class(
                 method_used <- "reml"
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'methodNotSupported',
+                    name = '.methodNotSupported',
                     type = jmvcore::NoticeType$WARNING
                 )
                 notice$setContent(sprintf(
@@ -489,7 +489,7 @@ diagnosticmetaClass <- R6::R6Class(
             # Add note about heterogeneity to table
             notice <- jmvcore::Notice$new(
                 options = self$options,
-                name = 'heterogeneityNote',
+                name = '.heterogeneityNote',
                 type = jmvcore::NoticeType$INFO
             )
             notice$setContent(

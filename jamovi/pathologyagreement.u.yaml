@@ -28,45 +28,83 @@ children:
           - type: VariablesListBox
             name: additional_methods
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Analysis Settings
+    collapsed: false
     children:
-      - type: ComboBox
-        name: clinical_preset
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clinical Context
+            children:
+              - type: ComboBox
+                name: clinical_preset
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Agreement Type
+            children:
+              - type: ComboBox
+                name: icc_type
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Correlation Assessment
+            children:
+              - type: ComboBox
+                name: correlation_method
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Missing Data Handling
+            children:
+              - type: ComboBox
+                name: missing_data
+
+  - type: CollapseBox
+    label: Statistical Options
+    collapsed: true
     children:
-      - type: TextBox
-        name: bootstrap_n
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: conf_level
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Bootstrap Replicates (for robust CIs)
+            children:
+              - type: TextBox
+                name: bootstrap_n
+                format: number
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Confidence Level (0.80-0.99)
+            children:
+              - type: TextBox
+                name: conf_level
+                format: number
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
     children:
       - type: CheckBox
         name: show_plots
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: icc_type
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: correlation_method
-  - type: LayoutBox
-    margin: large
-    children:
+
       - type: CheckBox
         name: show_interpretation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: missing_data
+
+      - type: CheckBox
+        name: show_summary
+
+      - type: CheckBox
+        name: show_explanations

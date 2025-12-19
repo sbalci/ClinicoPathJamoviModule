@@ -72,7 +72,7 @@ analyses:
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial Diagrams
     ribbon: analyses
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -766,7 +766,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -1096,7 +1096,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: SurvivalT1
+    menuGroup: SurvivalT
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
@@ -1224,7 +1224,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT1
+    menuGroup: SurvivalT
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1413,7 +1413,7 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
@@ -1476,7 +1476,7 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -1537,7 +1537,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideT1
+    menuGroup: meddecideT
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
@@ -1694,7 +1694,7 @@ analyses:
   - title: PCA Loading Heatmap & Barmap
     name: pcaloadingheatmap
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Heatmap & Barmap
     menuSubtitle: Heatmap and Barmap Visualizations
@@ -1849,7 +1849,7 @@ analyses:
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT1
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Lollipop Chart
     ribbon: analyses
@@ -2311,7 +2311,7 @@ analyses:
     name: patientsimilarity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Patient Similarity Clustering
     menuSubtitle: t-SNE, UMAP, PCA - Discover Patient Subgroups
@@ -2524,7 +2524,7 @@ analyses:
     name: pathologyagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuTitle: Pathology Agreement Analysis
     menuSubgroup: Agreement
     menuSubtitle: Agreement on Continuous Data
@@ -5154,7 +5154,7 @@ analyses:
     name: pathagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: Agreement
     menuTitle: Pathology Interrater Reliability
     description: >
@@ -5714,7 +5714,7 @@ analyses:
     name: recist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT1
+    menuGroup: OncoPathT
     menuSubgroup: Response Evaluation
     menuTitle: RECIST 1.1 Multi-Lesion Aggregation
     menuSubtitle: Automated Best Overall Response

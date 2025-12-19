@@ -110,6 +110,29 @@ children:
         name: nClusters
         format: number
         enable: (performClustering)
+      - type: Label
+        label: 'DBSCAN Parameters'
+        enable: (performClustering && clusterMethod:dbscan)
+      - type: LayoutBox
+        margin: small
+        children:
+          - type: Label
+            label: 'Epsilon (eps):'
+            fitToGrid: true
+          - type: TextBox
+            name: dbscan_eps
+            format: number
+            enable: (performClustering && clusterMethod:dbscan)
+      - type: LayoutBox
+        margin: small
+        children:
+          - type: Label
+            label: 'MinPts:'
+            fitToGrid: true
+          - type: TextBox
+            name: dbscan_minpts
+            format: number
+            enable: (performClustering && clusterMethod:dbscan)
       - type: CheckBox
         name: showClusterStats
         enable: (performClustering)
@@ -134,12 +157,6 @@ children:
       - type: ComboBox
         name: survivalEventLevel
         enable: (survivalEvent && survivalAnalysis)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: dbscan_eps
-        format: number
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -152,12 +169,6 @@ children:
         enable: (dimensions:3)
       - type: CheckBox
         name: removeOutliers
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: dbscan_minpts
-        format: number
   - type: LayoutBox
     margin: large
     children:

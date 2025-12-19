@@ -20,11 +20,11 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             consensus = FALSE,
             consensus_method = "majority",
             tie_breaking = "exclude",
-            show_consensus_table = TRUE,
+            show_consensus_table = FALSE,
             showClinicalSummary = TRUE,
             showAboutAnalysis = FALSE,
             showAssumptions = FALSE,
-            showWeightedKappaGuide = TRUE,
+            showWeightedKappaGuide = FALSE,
             showStatisticalGlossary = FALSE,
             diagnosticStyleAnalysis = FALSE,
             styleClusterMethod = "ward",
@@ -36,7 +36,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             institutionVar = NULL,
             specialtyVar = NULL,
             identifyDiscordantCases = FALSE,
-            styleHeatmap = TRUE,
+            styleHeatmap = FALSE,
             caseID = NULL,
             icc = FALSE,
             bootstrap = FALSE,
@@ -60,7 +60,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             autoSelectGroups = FALSE,
             showClusteringHeatmap = TRUE,
             heatmapColorScheme = "diagnostic",
-            identifyDiscordant = TRUE,
+            identifyDiscordant = FALSE,
             discordantThreshold = 0.5,
             raterExperience = NULL,
             raterSpecialty = NULL,
@@ -170,7 +170,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..show_consensus_table <- jmvcore::OptionBool$new(
                 "show_consensus_table",
                 show_consensus_table,
-                default=TRUE)
+                default=FALSE)
             private$..showClinicalSummary <- jmvcore::OptionBool$new(
                 "showClinicalSummary",
                 showClinicalSummary,
@@ -186,7 +186,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showWeightedKappaGuide <- jmvcore::OptionBool$new(
                 "showWeightedKappaGuide",
                 showWeightedKappaGuide,
-                default=TRUE)
+                default=FALSE)
             private$..showStatisticalGlossary <- jmvcore::OptionBool$new(
                 "showStatisticalGlossary",
                 showStatisticalGlossary,
@@ -252,7 +252,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..styleHeatmap <- jmvcore::OptionBool$new(
                 "styleHeatmap",
                 styleHeatmap,
-                default=TRUE)
+                default=FALSE)
             private$..caseID <- jmvcore::OptionVariable$new(
                 "caseID",
                 caseID,
@@ -367,7 +367,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..identifyDiscordant <- jmvcore::OptionBool$new(
                 "identifyDiscordant",
                 identifyDiscordant,
-                default=TRUE)
+                default=FALSE)
             private$..discordantThreshold <- jmvcore::OptionNumber$new(
                 "discordantThreshold",
                 discordantThreshold,
@@ -1997,11 +1997,11 @@ pathagreement <- function(
     consensus = FALSE,
     consensus_method = "majority",
     tie_breaking = "exclude",
-    show_consensus_table = TRUE,
+    show_consensus_table = FALSE,
     showClinicalSummary = TRUE,
     showAboutAnalysis = FALSE,
     showAssumptions = FALSE,
-    showWeightedKappaGuide = TRUE,
+    showWeightedKappaGuide = FALSE,
     showStatisticalGlossary = FALSE,
     diagnosticStyleAnalysis = FALSE,
     styleClusterMethod = "ward",
@@ -2013,7 +2013,7 @@ pathagreement <- function(
     institutionVar,
     specialtyVar,
     identifyDiscordantCases = FALSE,
-    styleHeatmap = TRUE,
+    styleHeatmap = FALSE,
     caseID,
     icc = FALSE,
     bootstrap = FALSE,
@@ -2037,7 +2037,7 @@ pathagreement <- function(
     autoSelectGroups = FALSE,
     showClusteringHeatmap = TRUE,
     heatmapColorScheme = "diagnostic",
-    identifyDiscordant = TRUE,
+    identifyDiscordant = FALSE,
     discordantThreshold = 0.5,
     raterExperience = NULL,
     raterSpecialty = NULL,

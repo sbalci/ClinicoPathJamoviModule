@@ -70,6 +70,46 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
         .nom_object = NULL,
+        .notices = list(),
+
+        # Notice management helpers ----
+        .addNotice = function(type, message, name = NULL) {
+            if (is.null(name)) {
+                name <- paste0('notice', length(private$.notices) + 1)
+            }
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = name,
+                type = type
+            )
+            notice$setContent(message)
+            priority <- switch(
+                as.character(type),
+                "1" = 1,  # ERROR
+                "2" = 2,  # STRONG_WARNING
+                "3" = 3,  # WARNING
+                "4" = 4,  # INFO
+                3         # Default to WARNING
+            )
+            private$.notices[[length(private$.notices) + 1]] <- list(
+                notice = notice,
+                priority = priority
+            )
+        },
+
+        .insertNotices = function() {
+            if (length(private$.notices) == 0) return()
+            notices_sorted <- private$.notices[order(sapply(private$.notices, function(x) x$priority))]
+            position <- 1
+            for (n in notices_sorted) {
+                self$results$insert(position, n$notice)
+                position <- position + 1
+            }
+        },
+
+        .resetNotices = function() {
+            private$.notices <- list()
+        },
 
         # Memory cleanup ----
         .finalize = function() {
@@ -83,29 +123,23 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$text$setVisible(FALSE)
             self$results$text2$setVisible(FALSE)
             self$results$plot$setVisible(FALSE)
-            
-            # Initialize summary outputs and headings
-            self$results$oddsRatioSummaryHeading$setVisible(FALSE)
+
+            # Initialize summary outputs
             self$results$oddsRatioSummary$setVisible(FALSE)
-            self$results$nomogramSummaryHeading$setVisible(FALSE)
             self$results$nomogramSummary$setVisible(FALSE)
-            
-            # Initialize explanation outputs and headings
-            self$results$oddsRatioExplanationHeading$setVisible(FALSE)
+
+            # Initialize explanation outputs
             self$results$oddsRatioExplanation$setVisible(FALSE)
             self$results$riskMeasuresExplanation$setVisible(FALSE)
             self$results$diagnosticTestExplanation$setVisible(FALSE)
-            self$results$nomogramExplanationHeading$setVisible(FALSE)
             self$results$nomogramAnalysisExplanation$setVisible(FALSE)
 
             # Handle showSummaries visibility
             if (self$options$showSummaries) {
-                self$results$oddsRatioSummaryHeading$setVisible(TRUE)
                 self$results$oddsRatioSummary$setVisible(TRUE)
-                
+
                 # Nomogram summary requires both showSummaries AND showNomogram
                 if (self$options$showNomogram) {
-                    self$results$nomogramSummaryHeading$setVisible(TRUE)
                     self$results$nomogramSummary$setVisible(TRUE)
                 }
             }
@@ -113,14 +147,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Handle showExplanations visibility
             if (self$options$showExplanations) {
                 # Odds ratio explanation section
-                self$results$oddsRatioExplanationHeading$setVisible(TRUE)
                 self$results$oddsRatioExplanation$setVisible(TRUE)
                 self$results$riskMeasuresExplanation$setVisible(TRUE)
                 self$results$diagnosticTestExplanation$setVisible(TRUE)
-                
+
                 # Nomogram explanation requires both showExplanations AND showNomogram
                 if (self$options$showNomogram) {
-                    self$results$nomogramExplanationHeading$setVisible(TRUE)
                     self$results$nomogramAnalysisExplanation$setVisible(TRUE)
                 }
             }
@@ -134,6 +166,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .validateInputs = function(mydata, dependent_var, explanatory_vars, user_outcome_level = NULL) {
             validation_results <- list(
                 errors = character(0),
+                strong_warnings = character(0),
                 warnings = character(0),
                 info = character(0),
                 should_stop = FALSE
@@ -175,10 +208,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         min_proportion <- min_count / total_count
                         
                         if (min_count < 5) {
-                            validation_results$warnings <- c(validation_results$warnings,
+                            validation_results$strong_warnings <- c(validation_results$strong_warnings,
                                 glue::glue("Outcome variable has very few observations in one category ({min_count} out of {total_count}). Results may be unreliable."))
                         } else if (min_proportion < 0.05) {
-                            validation_results$warnings <- c(validation_results$warnings,
+                            validation_results$strong_warnings <- c(validation_results$strong_warnings,
                                 glue::glue("Outcome variable is severely imbalanced ({sprintf('%.1f%%', min_proportion * 100)} in minority class). Consider using specialized methods for imbalanced data."))
                         }
                         
@@ -287,7 +320,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Handles data preprocessing, model fitting, and result generation
         .run = function() {
 
-
+            # Reset notices at start of each run
+            private$.resetNotices()
 
 
 
@@ -356,11 +390,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Empty message when all variables selected and set main outputs visible
                 todo <- ""
-                
+
                 # Set main analysis outputs visible after validation passes
                 self$results$text$setVisible(TRUE)
                 self$results$text2$setVisible(TRUE)
                 self$results$plot$setVisible(TRUE)
+
+                # Insert accumulated notices before main analysis outputs
+                private$.insertNotices()
 
                 # glue::glue("Analysis based on:
                 # <br>
@@ -414,33 +451,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                     )
                     stop(error_msg)
-                }
-                
-                # Create validation summary for display
-                validation_summary <- ""
-                # Build a concise validation summary panel for the UI
-                if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
-                    validation_summary <- paste0(
-                        "<div style='border:1px solid #dee2e6; padding:10px; margin:10px 0; border-radius:5px;'>",
-                        "<b>Data checks:</b><br>"
-                    )
-                    if (length(validation_results$warnings) > 0) {
-                        validation_summary <- paste0(
-                            validation_summary,
-                            "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
-                            paste(validation_results$warnings, collapse = "<br>"),
-                            "</div>"
-                        )
-                    }
-                    if (length(validation_results$info) > 0) {
-                        validation_summary <- paste0(
-                            validation_summary,
-                            "<div style='background-color:#d1ecf1; padding:8px; border-radius:4px; margin-top:6px;'>",
-                            paste(validation_results$info, collapse = "<br>"),
-                            "</div>"
-                        )
-                    }
-                    validation_summary <- paste0(validation_summary, "</div>")
                 }
 
                 mydata <- jmvcore::naOmit(mydata)
@@ -522,34 +532,21 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
-                if (length(extra_warnings) > 0) {
-                    validation_results$warnings <- c(validation_results$warnings, extra_warnings)
+                # Add validation strong warnings, warnings, and info as notices
+                if (length(validation_results$strong_warnings) > 0) {
+                    for (warn_msg in validation_results$strong_warnings) {
+                        private$.addNotice(jmvcore::NoticeType$STRONG_WARNING, warn_msg)
+                    }
                 }
-
-                # Rebuild validation summary with any new warnings/info
-                validation_summary <- ""
-                if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
-                    validation_summary <- paste0(
-                        "<div style='border:1px solid #dee2e6; padding:10px; margin:10px 0; border-radius:5px;'>",
-                        "<b>Data checks:</b><br>"
-                    )
-                    if (length(validation_results$warnings) > 0) {
-                        validation_summary <- paste0(
-                            validation_summary,
-                            "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
-                            paste(validation_results$warnings, collapse = "<br>"),
-                            "</div>"
-                        )
+                if (length(validation_results$warnings) > 0) {
+                    for (warn_msg in validation_results$warnings) {
+                        private$.addNotice(jmvcore::NoticeType$WARNING, warn_msg)
                     }
-                    if (length(validation_results$info) > 0) {
-                        validation_summary <- paste0(
-                            validation_summary,
-                            "<div style='background-color:#d1ecf1; padding:8px; border-radius:4px; margin-top:6px;'>",
-                            paste(validation_results$info, collapse = "<br>"),
-                            "</div>"
-                        )
+                }
+                if (length(validation_results$info) > 0) {
+                    for (info_msg in validation_results$info) {
+                        private$.addNotice(jmvcore::NoticeType$INFO, info_msg)
                     }
-                    validation_summary <- paste0(validation_summary, "</div>")
                 }
 
                 # Retrieve the variable names vector from the label vector
@@ -590,7 +587,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (df_predictors > 0) {
                         epv <- evt_count / df_predictors
                         if (epv < 5) {
-                            extra_warnings <- c(extra_warnings,
+                            # Use STRONG_WARNING for critically low EPV
+                            private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
                                 glue::glue("Low events-per-variable (EPV ≈ {round(epv,2)}). Odds ratios may be unstable; consider penalized/Firth logistic regression."))
                         } else if (epv < 10) {
                             extra_warnings <- c(extra_warnings,
@@ -610,6 +608,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
+                # Merge extra warnings into validation results now that they're populated
+                if (length(extra_warnings) > 0) {
+                    validation_results$warnings <- c(validation_results$warnings, extra_warnings)
+                }
 
                 formulaDependent <- jmvcore::constructFormula(
                     terms = dependent_variable_name_from_label)
@@ -679,9 +681,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 ")
 
 
-                # Include validation summary in text2 output
-                text2_with_validation <- paste0(validation_summary, text2)
-                self$results$text2$setContent(text2_with_validation)
+                # Set model metrics output
+                self$results$text2$setContent(text2)
 
                 results1 <-  knitr::kable(tOdds[[1]],
                              row.names = FALSE,
@@ -722,48 +723,23 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!is.null(self$options$diagnosticPredictor)) {
                         diagnostic_predictor <- names(all_labels)[match(self$options$diagnosticPredictor, all_labels)]
                         if (length(diagnostic_predictor) > 1) {
-                            validation_results$warnings <- c(validation_results$warnings,
-                                glue::glue("Diagnostic predictor label matches multiple variables; using '{diagnostic_predictor[1]}'."))
+                            warn_msg <- glue::glue("Diagnostic predictor label matches multiple variables; using '{diagnostic_predictor[1]}'.")
+                            private$.addNotice(jmvcore::NoticeType$WARNING, warn_msg)
                             diagnostic_predictor <- diagnostic_predictor[1]
                         }
                     }
                     if (is.null(diagnostic_predictor) && length(explanatory_variable_names) > 0) {
                         diagnostic_predictor <- explanatory_variable_names[1]
                         if (length(explanatory_variable_names) > 1) {
-                            validation_results$warnings <- c(validation_results$warnings,
+                            private$.addNotice(jmvcore::NoticeType$WARNING,
                                 "Multiple explanatory variables selected; diagnostic metrics use the first variable by default. Use 'Diagnostic Predictor' to choose a binary predictor.")
                         }
-                    }
-                    # Rebuild validation summary if new warnings added
-                    if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
-                        validation_summary <- paste0(
-                            "<div style='border:1px solid #dee2e6; padding:10px; margin:10px 0; border-radius:5px;'>",
-                            "<b>Data checks:</b><br>"
-                        )
-                        if (length(validation_results$warnings) > 0) {
-                            validation_summary <- paste0(
-                                validation_summary,
-                                "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
-                                paste(validation_results$warnings, collapse = "<br>"),
-                                "</div>"
-                            )
-                        }
-                        if (length(validation_results$info) > 0) {
-                            validation_summary <- paste0(
-                                validation_summary,
-                                "<div style='background-color:#d1ecf1; padding:8px; border-radius:4px; margin-top:6px;'>",
-                                paste(validation_results$info, collapse = "<br>"),
-                                "</div>"
-                            )
-                        }
-                        validation_summary <- paste0(validation_summary, "</div>")
                     }
 
                     # Ensure diagnostic predictor is binary
                     if (is.null(diagnostic_predictor) || !(diagnostic_predictor %in% names(mydata))) {
-                        validation_results$warnings <- c(validation_results$warnings,
+                        private$.addNotice(jmvcore::NoticeType$WARNING,
                             "No diagnostic predictor available; skipping likelihood ratios/nomogram.")
-                        self$results$text2$setContent(validation_summary)
                         return()
                     }
 
@@ -771,13 +747,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         mydata[[diagnostic_predictor]] <- factor(mydata[[diagnostic_predictor]])
                     }
                     if (nlevels(mydata[[diagnostic_predictor]]) != 2) {
-                        validation_results$warnings <- c(validation_results$warnings,
+                        private$.addNotice(jmvcore::NoticeType$WARNING,
                             glue::glue("Diagnostic predictor '{diagnostic_predictor}' is not binary; likelihood ratios require exactly two levels."))
-                        validation_summary <- paste0(validation_summary,
-                            "<div style='background-color:#fff3cd; padding:8px; border-radius:4px; margin-top:6px;'>",
-                            paste(validation_results$warnings, collapse = "<br>"),
-                            "</div>")
-                        self$results$text2$setContent(validation_summary)
                         return()
                     }
 
@@ -863,8 +834,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.createNomogram(nom_results$fit, nom_results$dd)
                     }
 
-                    # Update results with validation information
-                    self$results$text2$setContent(paste(text2_with_validation, metrics_text))
+                    # Update results with diagnostic metrics
+                    self$results$text2$setContent(paste(text2, metrics_text))
                 }
 
 
@@ -899,6 +870,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (self$options$showExplanations) {
             private$.addExplanations()
         }
+
+        # Add completion notice for successful analysis
+        private$.addNotice(jmvcore::NoticeType$INFO,
+            "Odds ratio analysis completed successfully.")
         }
 
 

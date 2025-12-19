@@ -23,6 +23,11 @@ items:
       type:  Preformatted
       visible: (showInterpretation)
 
+    - name:  interpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: (showInterpretation)
+
     # - name:  text3
     #   title: Venn Table
     #   type:  Preformatted

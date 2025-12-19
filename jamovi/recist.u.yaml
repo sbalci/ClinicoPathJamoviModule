@@ -105,22 +105,47 @@ children:
                 format: number
                 suffix: mm
   - type: CollapseBox
-    label: Response Confirmation
+    label: Response Criteria
     collapsed: false
     stretchFactor: 1
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: CheckBox
-            name: requireConfirmation
-          - type: TextBox
-            name: confirmationWindow
-            format: number
-            suffix: weeks
-            enable: (requireConfirmation)
-          - type: CheckBox
-            name: nadirReference
+          - type: Label
+            label: Confirmation Settings
+            children:
+              - type: CheckBox
+                name: requireConfirmation
+              - type: TextBox
+                name: confirmationWindow
+                format: number
+                suffix: weeks
+                enable: (requireConfirmation)
+              - type: CheckBox
+                name: nadirReference
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Stable Disease Criteria
+            children:
+              - type: TextBox
+                name: sdMinDuration
+                format: number
+                suffix: weeks
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Non-Target Lesion Status Mapping
+            children:
+              - type: TextBox
+                name: nonTargetCR
+                format: string
+              - type: TextBox
+                name: nonTargetPD
+                format: string
   - type: CollapseBox
     label: Output Tables
     collapsed: false
@@ -137,12 +162,6 @@ children:
             name: showResponseTable
           - type: CheckBox
             name: showBestResponse
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: sdMinDuration
-        format: number
   - type: CollapseBox
     label: Visualization Options
     collapsed: false
@@ -157,12 +176,6 @@ children:
             name: showSumPlot
           - type: CheckBox
             name: showWaterfallPlot
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: nonTargetCR
-        format: string
   - type: CollapseBox
     label: Stratified Analysis
     collapsed: true
@@ -174,12 +187,6 @@ children:
           - type: CheckBox
             name: stratifiedAnalysis
             enable: (groupVar)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: nonTargetPD
-        format: string
   - type: CollapseBox
     label: Advanced Options
     collapsed: true

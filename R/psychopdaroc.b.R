@@ -354,9 +354,26 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       
       stop(full_message, call. = FALSE)
     },
-    
+
+    # Safe variable name handling for data frame access
+    .escapeVar = function(x) {
+      if (is.null(x) || length(x) == 0) return(x)
+      vapply(x, function(v) {
+        if (is.character(v) && nzchar(v)) {
+          # Use backticks for spaces/special chars in formulas
+          if (grepl("[^A-Za-z0-9_.]", v)) {
+            paste0("`", v, "`")
+          } else {
+            v
+          }
+        } else {
+          as.character(v)
+        }
+      }, character(1), USE.NAMES = FALSE)
+    },
+
     # ============================================================================
-    # CLINICAL UTILITY METHODS  
+    # CLINICAL UTILITY METHODS
     # ============================================================================
     
     # Apply clinical mode settings
@@ -1110,15 +1127,21 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # Prepare data for a single variable with optional subgrouping
     .prepareVarData = function(data, var, subGroup) {
+      # Escape variable names for safe data frame access
+      classVarEscaped <- private$.escapeVar(self$options$classVar)
+
       if (is.null(subGroup)) {
-        dependentVar <- as.numeric(data[, var])
-        classVar <- data[, self$options$classVar]
+        # Use [[]] for column access with escaped names
+        varEscaped <- private$.escapeVar(var)
+        dependentVar <- as.numeric(data[[varEscaped]])
+        classVar <- data[[classVarEscaped]]
       } else {
         varParts <- strsplit(var, split = "_")[[1]]
         varName <- varParts[1]
+        varNameEscaped <- private$.escapeVar(varName)
         groupName <- paste(varParts[-1], collapse="_")
-        dependentVar <- as.numeric(data[subGroup == groupName, varName])
-        classVar <- data[subGroup == groupName, self$options$classVar]
+        dependentVar <- as.numeric(data[subGroup == groupName, varNameEscaped])
+        classVar <- data[subGroup == groupName, classVarEscaped]
       }
       
       # Data validation and cleaning
@@ -1932,12 +1955,15 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       data <- self$data
 
       # Determine positive class early for use throughout the analysis
+      # Escape class variable name for safe data access
+      classVarEscaped <- private$.escapeVar(self$options$classVar)
+
       if (!is.null(self$options$positiveClass) && self$options$positiveClass != "") {
         # Use the level selector value
         positiveClass <- self$options$positiveClass
 
         # Verify the selected level exists in the data
-        classVar <- data[, self$options$classVar]
+        classVar <- data[[classVarEscaped]]
         if (!positiveClass %in% levels(factor(classVar))) {
           warning(paste("Selected positive class", positiveClass,
                         "not found in data. Using first level instead."))
@@ -1945,7 +1971,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
       } else {
         # Default to first level if not specified
-        classVar <- data[, self$options$classVar]
+        classVar <- data[[classVarEscaped]]
         positiveClass <- levels(factor(classVar))[1]
       }
       
@@ -2138,8 +2164,13 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       # Handle subgroups if present
       if (!is.null(self$options$subGroup)) {
-        subGroup <- data[, self$options$subGroup]
-        classVar <- data[, self$options$classVar]
+        # Escape variable names for safe data frame access
+        subGroupEscaped <- private$.escapeVar(self$options$subGroup)
+        classVarEscaped <- private$.escapeVar(self$options$classVar)
+
+        # Use [[]] for safe column access with escaped names
+        subGroup <- data[[subGroupEscaped]]
+        classVar <- data[[classVarEscaped]]
         uniqueGroups <- unique(subGroup)
         # Create combined variable names (var_group)
         vars <- apply(expand.grid(vars, uniqueGroups), 1, function(x) paste(x, collapse="_"))
@@ -2453,11 +2484,19 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (!is.null(self$options$subGroup)) {
           stop(.("DeLong's test does not currently support the group variable. If you would like to contribute/provide guidance, please use the contact information provided in the documentation."))
         } else {
+          # Escape variable names for safe data access
+          depVarsEscaped <- private$.escapeVar(self$options$dependentVars)
+          classVarEscaped <- private$.escapeVar(self$options$classVar)
+
+          # Prepare data frames with escaped column names
+          depVarsData <- data.frame(lapply(depVarsEscaped, function(v) as.numeric(data[[v]])))
+          names(depVarsData) <- self$options$dependentVars  # Use original names for output
+
           # Run enhanced DeLong's test with better error handling
           delongResults <- tryCatch({
             private$.enhancedDelongTest(
-              data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
-              classVar = as.character(data[, self$options$classVar]),
+              data = depVarsData,
+              classVar = as.character(data[[classVarEscaped]]),
               pos_class = positiveClass,
               ref = NULL,
               conf.level = 0.95
@@ -2466,8 +2505,8 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Fallback to original implementation if enhanced version fails
             warning(paste("Enhanced DeLong test failed, using fallback:", e$message))
             private$.deLongTest(
-              data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
-              classVar = as.character(data[, self$options$classVar]),
+              data = depVarsData,
+              classVar = as.character(data[[classVarEscaped]]),
               ref = NULL,
               positiveClass = positiveClass,
               conf.level = 0.95
@@ -2526,13 +2565,16 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         auc_value <- aucList[[var]]
 
         # Get counts of positive and negative cases for this variable
+        # Escape class variable name for safe data access
+        classVarEscaped <- private$.escapeVar(self$options$classVar)
+
         if (is.null(subGroup)) {
-          classVar <- data[, self$options$classVar]
+          classVar <- data[[classVarEscaped]]
         } else {
           # For grouped variables, extract the group
           varParts <- strsplit(var, split = "_")[[1]]
           groupName <- paste(varParts[-1], collapse="_")
-          classVar <- data[subGroup == groupName, self$options$classVar]
+          classVar <- data[subGroup == groupName, classVarEscaped]
         }
 
         n_pos <- sum(classVar == positiveClass)
@@ -2587,13 +2629,16 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         auc_value <- aucList[[var]]
 
         # Get data needed for calculations
+        # Escape class variable name for safe data access
+        classVarEscaped <- private$.escapeVar(self$options$classVar)
+
         if (is.null(subGroup)) {
-          classVar <- data[, self$options$classVar]
+          classVar <- data[[classVarEscaped]]
         } else {
           # For grouped variables, extract the group
           varParts <- strsplit(var, split = "_")[[1]]
           groupName <- paste(varParts[-1], collapse="_")
-          classVar <- data[subGroup == groupName, self$options$classVar]
+          classVar <- data[subGroup == groupName, classVarEscaped]
         }
 
         # Calculate counts and statistics
@@ -2957,8 +3002,11 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           refVar <- self$options$refVar
         }
 
+        # Escape variable names for safe data access
+        classVarEscaped <- private$.escapeVar(self$options$classVar)
+
         # Get actual class values and convert to binary
-        classVar <- data[, self$options$classVar]
+        classVar <- data[[classVarEscaped]]
         actual_binary <- as.numeric(classVar == positiveClass)
 
         # Get direction
@@ -2969,13 +3017,15 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Calculate IDI if requested
         if (self$options$calculateIDI) {
-          # Get reference variable values
-          ref_values <- as.numeric(data[, refVar])
+          # Get reference variable values with escaped name
+          refVarEscaped <- private$.escapeVar(refVar)
+          ref_values <- as.numeric(data[[refVarEscaped]])
 
           # For each other variable
           for (var in self$options$dependentVars) {
             if (var != refVar) {
-              var_values <- as.numeric(data[, var])
+              varEscaped <- private$.escapeVar(var)
+              var_values <- as.numeric(data[[varEscaped]])
 
               # Calculate IDI
               idi_result <- bootstrapIDI(
@@ -3001,8 +3051,9 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Calculate NRI if requested
         if (self$options$calculateNRI) {
-          # Get reference variable values
-          ref_values <- as.numeric(data[, refVar])
+          # Get reference variable values with escaped name
+          refVarEscaped <- private$.escapeVar(refVar)
+          ref_values <- as.numeric(data[[refVarEscaped]])
 
           # Parse thresholds string if provided
           thresholds <- NULL
@@ -3015,7 +3066,8 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # For each other variable
           for (var in self$options$dependentVars) {
             if (var != refVar) {
-              var_values <- as.numeric(data[, var])
+              varEscaped <- private$.escapeVar(var)
+              var_values <- as.numeric(data[[varEscaped]])
 
               # Calculate NRI
               nri_result <- bootstrapNRI(
@@ -3068,10 +3120,16 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         private$.calculateBayesianROC(data, classVar, positiveClass)
       }
 
-      # Clinical utility analysis (currently disabled - clinicalUtilityAnalysis option not defined in YAML)
-      # if (self$options$clinicalUtilityAnalysis) {
-      #   private$.calculateClinicalUtility(data, classVar, positiveClass)
-      # }
+      # Clinical utility analysis
+      # TODO: Implementation in progress - method .calculateClinicalUtility() not yet implemented
+      if (self$options$clinicalUtilityAnalysis) {
+        # Notify user that this feature is not yet available
+        warning(paste(
+          "Clinical Utility Analysis is currently under development.",
+          "This feature will be available in a future release.",
+          "For now, you can perform decision curve analysis manually using the pROC package."
+        ))
+      }
 
       # Meta-analysis
       if (self$options$metaAnalysis && length(self$options$dependentVars) >= 3) {

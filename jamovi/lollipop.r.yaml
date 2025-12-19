@@ -23,8 +23,8 @@ items:
     - name: plot
       title: '`Lollipop Chart {dep} vs {group}`'
       type: Image
-      width: (width)
-      height: (height)
+      width: 800
+      height: 600
       renderFun: .plot
       requiresData: true
 

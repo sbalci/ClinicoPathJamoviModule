@@ -8,7 +8,13 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = tumorgrowthBase,
     private = list(
         growth_model = NULL,
-        
+
+        .escapeVar = function(x) {
+            # Safely escape variable names for data.frame access
+            if (is.null(x) || length(x) == 0) return(NULL)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         .init = function() {
             # Check for required packages
             required_packages <- c('nlme', 'ggplot2', 'dplyr', 'brms')
@@ -88,6 +94,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$treatmentAnalysis && !is.null(self$options$treatmentEffect)) {
                 private$.analyzeTreatmentEffects(clean_data)
             }
+
+            # Generate clinical interpretation
+            private$.generateClinicalInterpretation()
         },
         
         .fitGrowthModel = function(fit_data, time_var, size_var, patient_var, 
@@ -1365,6 +1374,115 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     upper = coef_val + z * se_val
                 ))
             })
+        },
+
+        .generateClinicalInterpretation = function() {
+
+            if (is.null(private$growth_model)) {
+                return()
+            }
+
+            growth_model <- self$options$growthModel %||% "gompertz"
+
+            html <- "<div style='background-color: #e8f5e9; padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0;'>"
+            html <- paste0(html, "<h4>Clinical Interpretation Guide</h4>")
+
+            # Model-specific interpretation
+            if (growth_model == "exponential") {
+                html <- paste0(html,
+                    "<p><b>Exponential Growth Model:</b> This model assumes the tumor grows at a constant percentage rate per time unit. ",
+                    "This pattern is typical of early-stage tumors with unrestricted access to nutrients and oxygen.</p>",
+                    "<p><b>Clinical Implications:</b></p><ul>",
+                    "<li>Growth rate parameter indicates tumor aggressiveness</li>",
+                    "<li>Doubling time can guide treatment scheduling</li>",
+                    "<li>Model may overestimate long-term growth due to lack of saturation</li>",
+                    "</ul>")
+            } else if (growth_model == "gompertz") {
+                html <- paste0(html,
+                    "<p><b>Gompertz Growth Model:</b> This model assumes tumor growth rate decreases exponentially over time, ",
+                    "approaching an asymptotic maximum size. This is one of the most commonly used models for solid tumor growth.</p>",
+                    "<p><b>Clinical Implications:</b></p><ul>",
+                    "<li>Asymptotic size reflects tumor carrying capacity (nutrient/oxygen limitations)</li>",
+                    "<li>Growth rate decline indicates microenvironmental constraints</li>",
+                    "<li>Well-suited for modeling untreated tumor progression</li>",
+                    "<li>Can predict time to reach clinically significant size</li>",
+                    "</ul>")
+            } else if (growth_model == "logistic") {
+                html <- paste0(html,
+                    "<p><b>Logistic Growth Model:</b> This model produces an S-shaped (sigmoid) growth curve with a carrying capacity. ",
+                    "Growth rate is highest at intermediate tumor size.</p>",
+                    "<p><b>Clinical Implications:</b></p><ul>",
+                    "<li>Carrying capacity (K) indicates maximum sustainable tumor size</li>",
+                    "<li>Inflection point marks transition from accelerating to decelerating growth</li>",
+                    "<li>Useful for modeling tumors in confined anatomical spaces</li>",
+                    "</ul>")
+            } else if (growth_model == "bertalanffy") {
+                html <- paste0(html,
+                    "<p><b>von Bertalanffy Model:</b> Originally developed for organismal growth, this model assumes growth rate is proportional to ",
+                    "the difference between current and asymptotic size.</p>",
+                    "<p><b>Clinical Implications:</b></p><ul>",
+                    "<li>Captures allometric scaling relationships</li>",
+                    "<li>Accounts for metabolic rate changes with tumor size</li>",
+                    "<li>Useful for vascularized tumors with complex metabolism</li>",
+                    "</ul>")
+            } else if (growth_model == "linear") {
+                html <- paste0(html,
+                    "<p><b>Linear Growth Model:</b> This simplified model assumes constant absolute growth rate (fixed volume/time).</p>",
+                    "<p><b>Clinical Implications:</b></p><ul>",
+                    "<li>Most appropriate for short time periods or slow-growing tumors</li>",
+                    "<li>Easy interpretation but may miss biological complexity</li>",
+                    "<li>Useful as baseline comparison for more complex models</li>",
+                    "</ul>")
+            } else if (growth_model == "power") {
+                html <- paste0(html,
+                    "<p><b>Power Law Model:</b> Growth follows a power relationship with time (V ∝ t^α).</p>",
+                    "<p><b>Clinical Implications:</b></p><ul>",
+                    "<li>Exponent (α) indicates growth pattern: α=1 is linear, α>1 is accelerating, α<1 is decelerating</li>",
+                    "<li>Can capture early rapid growth or plateau phases</li>",
+                    "<li>Useful for empirical fitting when biological mechanism is uncertain</li>",
+                    "</ul>")
+            }
+
+            # General interpretation guidance
+            html <- paste0(html,
+                "<p><b>Model Fit Assessment:</b></p><ul>",
+                "<li><b>R²:</b> Proportion of variance explained by the model. Values >0.8 suggest good fit.</li>",
+                "<li><b>AIC/BIC:</b> Lower values indicate better model fit accounting for complexity. Use to compare different models.</li>",
+                "<li><b>Residual plots:</b> Check for systematic patterns - random scatter indicates appropriate model.</li>",
+                "</ul>")
+
+            # Treatment implications
+            if (self$options$treatmentAnalysis && !is.null(self$options$treatmentEffect)) {
+                html <- paste0(html,
+                    "<p><b>Treatment Effect Interpretation:</b></p><ul>",
+                    "<li>Negative growth rate changes indicate treatment efficacy</li>",
+                    "<li>Changes in carrying capacity reflect maximum treatment impact</li>",
+                    "<li>Compare pre- and post-treatment doubling times for response assessment</li>",
+                    "</ul>")
+            }
+
+            # Clinical application notes
+            html <- paste0(html,
+                "<p><b>Clinical Applications:</b></p><ul>",
+                "<li><b>Treatment Planning:</b> Predict tumor size at future timepoints to schedule interventions</li>",
+                "<li><b>Response Monitoring:</b> Compare observed vs. predicted growth to detect treatment effects</li>",
+                "<li><b>Prognosis:</b> Growth kinetics correlate with tumor aggressiveness and patient outcomes</li>",
+                "<li><b>Patient Stratification:</b> Group patients by growth patterns for personalized treatment</li>",
+                "</ul>")
+
+            # Limitations and caveats
+            html <- paste0(html,
+                "<p><b>Important Caveats:</b></p><ul>",
+                "<li>Models are simplifications - biological reality is more complex</li>",
+                "<li>Extrapolation beyond observed data range should be done cautiously</li>",
+                "<li>Model validity depends on measurement accuracy and consistency</li>",
+                "<li>Individual patient heterogeneity may not be captured by population models</li>",
+                "<li>Always validate predictions against clinical observations</li>",
+                "</ul>")
+
+            html <- paste0(html, "</div>")
+
+            self$results$clinicalInterpretation$setContent(html)
         }
     )
 )

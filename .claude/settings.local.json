@@ -158,7 +158,13 @@
       "Bash(do echo -n \"$type: \")",
       "Bash(do echo -n \"$arg: \")",
       "Bash(if grep -q \"self$options$$arg\" R/decision.b.R)",
-      "Bash(if grep -q \"self$results$$out\" R/decision.b.R)"
+      "Bash(if grep -q \"self$results$$out\" R/decision.b.R)",
+      "Skill(check-function)",
+      "Skill(check-function:*)",
+      "Bash(if grep -q \"self$options$$opt\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pathagreement.b.R)",
+      "Bash(if grep -q \"self$options$$opt\" R/pathagreement.b.R)",
+      "Bash(if grep -q \"self$results$$out$set\" R/pathagreement.b.R)",
+      "Bash(if grep -q \"$results$$out\\\\|results\\\\[[''\"\"]$out\" R/pathagreement.b.R)"
     ],
     "deny": [],
     "ask": [],

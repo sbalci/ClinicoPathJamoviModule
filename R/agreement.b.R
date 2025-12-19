@@ -615,62 +615,62 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # Enhanced validation ----
             if (is.null(self$data) || nrow(self$data) == 0) {
-                error_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "emptyDataset",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                error_notice$setContent(
-                    "⛔ <b>Empty Dataset:</b> The dataset contains no rows. Please load data before running analysis."
-                )
-                self$results$insert(0, error_notice)
+                # error_notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = "emptyDataset",
+                #     type = jmvcore::NoticeType$ERROR
+                # )
+                # error_notice$setContent(
+                #     "⛔ <b>Empty Dataset:</b> The dataset contains no rows. Please load data before running analysis."
+                # )
+                # self$results$insert(0, error_notice)
                 return()
             }
 
             if (nrow(self$data) < 3) {
-                error_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "insufficientObservations",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                error_notice$setContent(paste0(
-                    "⛔ <b>Insufficient Observations:</b> At least 3 observations are required for reliability analysis. ",
-                    "Currently ", nrow(self$data), " observation(s) available. ",
-                    "Please use a dataset with more cases."
-                ))
-                self$results$insert(0, error_notice)
+                # error_notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = "insufficientObservations",
+                #     type = jmvcore::NoticeType$ERROR
+                # )
+                # error_notice$setContent(paste0(
+                #     "⛔ <b>Insufficient Observations:</b> At least 3 observations are required for reliability analysis. ",
+                #     "Currently ", nrow(self$data), " observation(s) available. ",
+                #     "Please use a dataset with more cases."
+                # ))
+                # self$results$insert(0, error_notice)
                 return()
             }
 
             # Validate variable types
             for (v in self$options$vars) {
                 if (!v %in% names(self$data)) {
-                    error_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "variableNotFound",
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    error_notice$setContent(paste0(
-                        "⛔ <b>Variable Not Found:</b> Variable '", v, "' does not exist in the dataset. ",
-                        "Available variables: ", paste(names(self$data), collapse = ", "), ". ",
-                        "Please select valid rater variables."
-                    ))
-                    self$results$insert(0, error_notice)
+                    # error_notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = "variableNotFound",
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # error_notice$setContent(paste0(
+                    #     "⛔ <b>Variable Not Found:</b> Variable '", v, "' does not exist in the dataset. ",
+                    #     "Available variables: ", paste(names(self$data), collapse = ", "), ". ",
+                    #     "Please select valid rater variables."
+                    # ))
+                    # self$results$insert(0, error_notice)
                     return()
                 }
                 var_data <- self$data[[v]]
                 if (!is.factor(var_data) && !is.numeric(var_data) && !is.ordered(var_data)) {
-                    error_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "invalidVariableType",
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    error_notice$setContent(paste0(
-                        "⛔ <b>Invalid Variable Type:</b> Variable '", v, "' must be categorical (factor), ordinal, or numeric. ",
-                        "Current type: ", class(var_data)[1], ". ",
-                        "Please convert to appropriate type in jamovi Data tab (Setup → Data Type)."
-                    ))
-                    self$results$insert(0, error_notice)
+                    # error_notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = "invalidVariableType",
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # error_notice$setContent(paste0(
+                    #     "⛔ <b>Invalid Variable Type:</b> Variable '", v, "' must be categorical (factor), ordinal, or numeric. ",
+                    #     "Current type: ", class(var_data)[1], ". ",
+                    #     "Please convert to appropriate type in jamovi Data tab (Setup → Data Type)."
+                    # ))
+                    # self$results$insert(0, error_notice)
                     return()
                 }
             }
@@ -746,19 +746,19 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     unique_level_sets <- unique(lapply(harmonized_levels, function(x) paste(x, collapse = "|")))
 
                     if (length(unique_level_sets) > 1) {
-                        warning_notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = "levelHarmonizationWarning",
-                            type = jmvcore::NoticeType$STRONG_WARNING
-                        )
-                        warning_notice$setContent(paste0(
-                            "⚠️ <b>Level Harmonization Issue:</b> Different raters had different category levels. ",
-                            "All raters have been harmonized to use the union of all levels: {",
-                            paste(all_levels, collapse = ", "), "}. ",
-                            "This ensures statistically valid kappa calculations. ",
-                            "Verify this matches your intended category structure."
-                        ))
-                        self$results$insert(1, warning_notice)
+                        # warning_notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = "levelHarmonizationWarning",
+                        #     type = jmvcore::NoticeType$STRONG_WARNING
+                        # )
+                        # warning_notice$setContent(paste0(
+                        #     "⚠️ <b>Level Harmonization Issue:</b> Different raters had different category levels. ",
+                        #     "All raters have been harmonized to use the union of all levels: {",
+                        #     paste(all_levels, collapse = ", "), "}. ",
+                        #     "This ensures statistically valid kappa calculations. ",
+                        #     "Verify this matches your intended category structure."
+                        # ))
+                        # self$results$insert(1, warning_notice)
                     }
 
                     # Store harmonized levels for later use (Krippendorff, cluster analyses)
@@ -808,35 +808,35 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         column <- ratings[[col_name]]
 
                         if (!is.ordered(column)) {
-                            error_notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = "weightedKappaRequiresOrdered",
-                                type = jmvcore::NoticeType$ERROR
-                            )
-                            error_notice$setContent(paste0(
-                                "⛔ <b>Weighted Kappa Requirement:</b> Weighted kappa requires ordinal (ordered factor) or numeric variables. ",
-                                "Variable '", col_name, "' is nominal (unordered factor). ",
-                                "Please either convert to ordinal in jamovi Data tab (Setup → Data Type → Ordinal) ",
-                                "or change weighting to 'Unweighted' for nominal categories."
-                            ))
-                            self$results$insert(0, error_notice)
+                            # error_notice <- jmvcore::Notice$new(
+                            #     options = self$options,
+                            #     name = "weightedKappaRequiresOrdered",
+                            #     type = jmvcore::NoticeType$ERROR
+                            # )
+                            # error_notice$setContent(paste0(
+                            #     "⛔ <b>Weighted Kappa Requirement:</b> Weighted kappa requires ordinal (ordered factor) or numeric variables. ",
+                            #     "Variable '", col_name, "' is nominal (unordered factor). ",
+                            #     "Please either convert to ordinal in jamovi Data tab (Setup → Data Type → Ordinal) ",
+                            #     "or change weighting to 'Unweighted' for nominal categories."
+                            # ))
+                            # self$results$insert(0, error_notice)
                             return()
                         }
                     }
                 }
 
                 if (exct == TRUE) {
-                    error_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "exactKappaRequiresThreeRaters",
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    error_notice$setContent(paste0(
-                        "⛔ <b>Exact Kappa Limitation:</b> Exact p-value calculation requires 3 or more raters. ",
-                        "Currently 2 raters selected. ",
-                        "Either select additional rater variables, or disable 'Exact Kappa' option to use normal approximation."
-                    ))
-                    self$results$insert(0, error_notice)
+                    # error_notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = "exactKappaRequiresThreeRaters",
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # error_notice$setContent(paste0(
+                    #     "⛔ <b>Exact Kappa Limitation:</b> Exact p-value calculation requires 3 or more raters. ",
+                    #     "Currently 2 raters selected. ",
+                    #     "Either select additional rater variables, or disable 'Exact Kappa' option to use normal approximation."
+                    # ))
+                    # self$results$insert(0, error_notice)
                     return()
                 }
 
@@ -1355,15 +1355,15 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     )
 
                     # Always warn when using fallback method
-                    kripp_warning_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "krippEncodingWarning",
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    kripp_warning_notice$setContent(
-                        "Krippendorff's alpha: Categorical data converted to numeric codes. Results may not be interpretable if original categories had specific meaning or spacing."
-                    )
-                    self$results$insert(999, kripp_warning_notice)
+                    # kripp_warning_notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = "krippEncodingWarning",
+                    #     type = jmvcore::NoticeType$WARNING
+                    # )
+                    # kripp_warning_notice$setContent(
+                    #     "Krippendorff's alpha: Categorical data converted to numeric codes. Results may not be interpretable if original categories had specific meaning or spacing."
+                    # )
+                    # self$results$insert(999, kripp_warning_notice)
                 }
             }
 
@@ -1618,24 +1618,24 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             if (is_categorical) {
                 # Block ICC analysis and show error notice
-                icc_error_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "iccCategoricalError",
-                    type = jmvcore::NoticeType$ERROR
-                )
+                # icc_error_notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = "iccCategoricalError",
+                #     type = jmvcore::NoticeType$ERROR
+                # )
+                
+                # error_msg <- paste0(
+                #     "⛔ Hierarchical ICC CANNOT be computed for categorical/ordinal data. ",
+                #     "ICC from linear mixed models on categorical data (factors or numeric codes 1,2,3,...) is STATISTICALLY INVALID and produces uninterpretable results. ",
+                #     "\n\nFor categorical agreement across clusters, use:\n",
+                #     "• Stratified kappa (compute kappa within each cluster)\n",
+                #     "• Cluster-specific kappa table (see results below)\n",
+                #     "• Multilevel categorical models (not implemented in this module)\n\n",
+                #     "ICC is ONLY valid for true continuous interval/ratio scale data (e.g., blood pressure, temperature, tumor size in mm)."
+                # )
 
-                error_msg <- paste0(
-                    "⛔ Hierarchical ICC CANNOT be computed for categorical/ordinal data. ",
-                    "ICC from linear mixed models on categorical data (factors or numeric codes 1,2,3,...) is STATISTICALLY INVALID and produces uninterpretable results. ",
-                    "\n\nFor categorical agreement across clusters, use:\n",
-                    "• Stratified kappa (compute kappa within each cluster)\n",
-                    "• Cluster-specific kappa table (see results below)\n",
-                    "• Multilevel categorical models (not implemented in this module)\n\n",
-                    "ICC is ONLY valid for true continuous interval/ratio scale data (e.g., blood pressure, temperature, tumor size in mm)."
-                )
-
-                icc_error_notice$setContent(error_msg)
-                self$results$insert(0, icc_error_notice)
+                # icc_error_notice$setContent(error_msg)
+                # self$results$insert(0, icc_error_notice)
 
                 # Populate table with error message
                 table$setRow(rowNo=1, values=list(
@@ -1830,18 +1830,18 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             if (is_categorical) {
                 # Block variance components and show error notice
-                vc_error_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "varianceComponentsCategoricalError",
-                    type = jmvcore::NoticeType$ERROR
-                )
+                # vc_error_notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = "varianceComponentsCategoricalError",
+                #     type = jmvcore::NoticeType$ERROR
+                # )
 
-                vc_error_notice$setContent(
-                    paste0("⛔ Variance components CANNOT be computed for categorical/ordinal data. ",
-                          "Variance decomposition requires continuous numeric measurements. ",
-                          "For categorical data, use kappa-based agreement measures instead.")
-                )
-                self$results$insert(0, vc_error_notice)
+                # vc_error_notice$setContent(
+                #     paste0("⛔ Variance components CANNOT be computed for categorical/ordinal data. ",
+                #           "Variance decomposition requires continuous numeric measurements. ",
+                #           "For categorical data, use kappa-based agreement measures instead.")
+                # )
+                # self$results$insert(0, vc_error_notice)
 
                 # Populate table with error message
                 table$setRow(rowNo=1, values=list(
@@ -2022,17 +2022,17 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # CRITICAL FIX #6: Notify users shrinkage not implemented
             if (self$options$shrinkageEstimates) {
-                shrinkage_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "shrinkageNotImplemented",
-                    type = jmvcore::NoticeType$WARNING
-                )
-                shrinkage_notice$setContent(
-                    paste0("Shrinkage estimates are not yet implemented. The shrinkage_kappa column will show NA values. ",
-                          "Empirical Bayes shrinkage toward overall kappa requires pooled estimation across all clusters, ",
-                          "which is planned for a future release. Use raw cluster-specific kappa values for now.")
-                )
-                self$results$insert(999, shrinkage_notice)
+                # shrinkage_notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = "shrinkageNotImplemented",
+                #     type = jmvcore::NoticeType$WARNING
+                # )
+                # shrinkage_notice$setContent(
+                #     paste0("Shrinkage estimates are not yet implemented. The shrinkage_kappa column will show NA values. ",
+                #           "Empirical Bayes shrinkage toward overall kappa requires pooled estimation across all clusters, ",
+                #           "which is planned for a future release. Use raw cluster-specific kappa values for now.")
+                # )
+                # self$results$insert(999, shrinkage_notice)
             }
 
             # Get data

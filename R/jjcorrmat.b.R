@@ -140,7 +140,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'noCompleteRows',
+                    name = '.noCompleteRows',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Data contains no complete rows. Please check for missing values in selected variables.')
@@ -164,7 +164,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!(varname %in% names(mydata))) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'variableNotFound',
+                        name = '.variableNotFound',
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Variable "%s" not found in data. Please select valid variables and re-run.', var))
@@ -201,7 +201,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(factor_warnings) > 0) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'categoricalVariables',
+                    name = '.categoricalVariables',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('Correlation analysis requires numeric variables. The following are categorical: %s. Please select continuous numeric variables.', paste(factor_warnings, collapse = ', ')))
@@ -212,7 +212,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (numeric_vars < 2) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'insufficientNumericVars',
+                    name = '.insufficientNumericVars',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('Correlation analysis requires at least 2 numeric variables with sufficient variation. Found %d valid variable(s). Please select additional variables.', numeric_vars))
@@ -342,7 +342,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) < 20) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'smallSampleSize',
+                    name = '.smallSampleSize',
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent(sprintf('Small sample size (N = %d). Correlations with N < 20 may be unreliable. Consider collecting more data or interpreting results cautiously.', nrow(self$data)))
@@ -353,7 +353,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$dep) > 10) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'manyVariables',
+                    name = '.manyVariables',
                     type = jmvcore::NoticeType$WARNING
                 )
                 notice$setContent(sprintf('Correlation matrix with %d variables may be complex to interpret. Consider focusing on key variables of interest.', length(self$options$dep)))
@@ -364,7 +364,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$partial && length(self$options$dep) < 3) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'partialNeedsThreeVars',
+                    name = '.partialNeedsThreeVars',
                     type = jmvcore::NoticeType$WARNING
                 )
                 notice$setContent(sprintf('Partial correlations require at least 3 variables to control for confounding. Found %d variable(s). Computing zero-order correlations instead.', length(self$options$dep)))
@@ -450,7 +450,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # so we note that they were computed
                         notice <- jmvcore::Notice$new(
                             options = self$options,
-                            name = 'partialComputed',
+                            name = '.partialComputed',
                             type = jmvcore::NoticeType$INFO
                         )
                         notice$setContent('Partial correlations were computed by ggstatsplot. Summary statistics show correlation count only.')
@@ -482,7 +482,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # We cannot easily recalculate these, so just report method used
                     notice <- jmvcore::Notice$new(
                         options = self$options,
-                        name = 'robustBayesNote',
+                        name = '.robustBayesNote',
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(sprintf('%s correlations computed by ggstatsplot. Detailed statistics shown in plot only.', method_display))
@@ -658,7 +658,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (nrow(self$data) == 0) {
             notice <- jmvcore::Notice$new(
                 options = self$options,
-                name = 'noCompleteRowsRun',
+                name = '.noCompleteRowsRun',
                 type = jmvcore::NoticeType$ERROR
             )
             notice$setContent('Data contains no complete rows after filtering. Please check for missing values.')

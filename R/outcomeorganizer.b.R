@@ -7,6 +7,48 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "outcomeorganizerClass",
     inherit = outcomeorganizerBase,
     private = list(
+
+        .notices = list(),
+
+        # Notice management helpers ----
+        .addNotice = function(type, message, name = NULL) {
+            if (is.null(name)) {
+                name <- paste0('notice', length(private$.notices) + 1)
+            }
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = name,
+                type = type
+            )
+            notice$setContent(message)
+            priority <- switch(
+                as.character(type),
+                "1" = 1,  # ERROR
+                "2" = 2,  # STRONG_WARNING
+                "3" = 3,  # WARNING
+                "4" = 4,  # INFO
+                3         # Default to WARNING
+            )
+            private$.notices[[length(private$.notices) + 1]] <- list(
+                notice = notice,
+                priority = priority
+            )
+        },
+
+        .insertNotices = function() {
+            if (length(private$.notices) == 0) return()
+            notices_sorted <- private$.notices[order(sapply(private$.notices, function(x) x$priority))]
+            position <- 1
+            for (n in notices_sorted) {
+                self$results$insert(position, n$notice)
+                position <- position + 1
+            }
+        },
+
+        .resetNotices = function() {
+            private$.notices <- list()
+        },
+
         .init = function() {
             # Initialize table structures
             if (self$options$outputTable) {
@@ -688,6 +730,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            # Reset notices at start of each run
+            private$.resetNotices()
+
             # Initial validation
             if (is.null(self$options$outcome)) {
                 private$.todo()
@@ -711,22 +756,31 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata, outcome_var, recurrence_var, id_var, self$options$analysistype, self$options$multievent
             )
             
-            # Handle validation errors - stop execution if critical errors found
+            # Handle validation errors - add as notices
             if (validation_results$should_stop) {
-                error_msg <- paste(
-                    "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                    "<b>❌ Critical Error(s) Detected:</b><br>",
-                    paste(validation_results$errors, collapse = "<br>"),
-                    "<br><br><b>💡 Suggestions:</b><br>",
-                    "• Verify that selected variables exist in your dataset<br>",
-                    "• Ensure outcome variable contains multiple different values<br>",
-                    "• Check that analysis type is appropriate for your data<br>",
-                    "• For RFS/PFS/DFS/TTP analyses, consider adding recurrence variable",
-                    "</div>",
-                    collapse = ""
-                )
-                stop(error_msg)
+                for (error_msg in validation_results$errors) {
+                    private$.addNotice(jmvcore::NoticeType$ERROR, error_msg)
+                }
+                private$.insertNotices()
+                return()
             }
+
+            # Add validation warnings
+            if (length(validation_results$warnings) > 0) {
+                for (warn_msg in validation_results$warnings) {
+                    private$.addNotice(jmvcore::NoticeType$WARNING, warn_msg)
+                }
+            }
+
+            # Add validation info
+            if (length(validation_results$info) > 0) {
+                for (info_msg in validation_results$info) {
+                    private$.addNotice(jmvcore::NoticeType$INFO, info_msg)
+                }
+            }
+
+            # Insert notices before main processing
+            private$.insertNotices()
 
             # Organize outcomes
             results <- private$.organizeOutcomes()
@@ -875,26 +929,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summary_text <- paste(summary_text, "- Standard survival analysis with death as censoring<br>- Consider sensitivity analysis treating death as competing risk<br>")
             }
 
-            # Add validation summary to output
-            validation_summary <- ""
-            if (length(validation_results$warnings) > 0) {
-                validation_summary <- paste0(validation_summary, 
-                    "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
-                    "<b>⚠️ Warnings:</b><br>", 
-                    paste(validation_results$warnings, collapse = "<br>"),
-                    "</div>")
-            }
-            if (length(validation_results$info) > 0) {
-                validation_summary <- paste0(validation_summary,
-                    "<div style='background-color: #d1ecf1; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
-                    "<b>ℹ️ Information:</b><br>", 
-                    paste(validation_results$info, collapse = "<br>"),
-                    "</div>")
-            }
-            
-            # Combine summary text with validation results
-            final_summary <- paste0(summary_text, validation_summary)
-            self$results$summary$setContent(final_summary)
+            # Summary now only contains analysis description (validation moved to Notices)
+            self$results$summary$setContent(summary_text)
 
             # Add data table if requested
             if (self$options$outputTable) {
@@ -1005,6 +1041,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$showGlossary) {
                 private$.showGlossary()
             }
+
+            # Add completion notice
+            private$.addNotice(jmvcore::NoticeType$INFO,
+                "Outcome recoding completed successfully. New variable 'myoutcome' is ready for survival analysis.")
         },
 
         # Plot function for outcome distribution visualization

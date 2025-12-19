@@ -183,7 +183,7 @@ options:
     - name: show_ggvenn
       title: 'Show ggvenn Plot'
       type: Bool
-      default: false
+      default: true
 
     - name: show_ggVennDiagram
       title: 'Show ggVennDiagram Plot'

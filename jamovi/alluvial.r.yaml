@@ -14,7 +14,7 @@ items:
     - name: dataWarning
       title: Data Validation
       type: Html
-      visible: true
+      visible: false
       clearWith:
           - vars
           - maxvars

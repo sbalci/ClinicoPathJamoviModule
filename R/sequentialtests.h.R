@@ -18,7 +18,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             strategy = "serial_positive",
             prevalence = 0.1,
             population_size = 1000,
-            show_explanation = TRUE,
+            show_explanation = FALSE,
             show_formulas = FALSE,
             show_cost_analysis = FALSE,
             show_nomogram = FALSE, ...) {
@@ -107,7 +107,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..show_explanation <- jmvcore::OptionBool$new(
                 "show_explanation",
                 show_explanation,
-                default=TRUE)
+                default=FALSE)
             private$..show_formulas <- jmvcore::OptionBool$new(
                 "show_formulas",
                 show_formulas,
@@ -178,6 +178,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "sequentialtestsResults",
     inherit = jmvcore::Group,
     active = list(
+        plain_summary = function() private$.items[["plain_summary"]],
         summary_table = function() private$.items[["summary_table"]],
         individual_tests_table = function() private$.items[["individual_tests_table"]],
         population_flow_table = function() private$.items[["population_flow_table"]],
@@ -188,6 +189,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         plot_performance = function() private$.items[["plot_performance"]],
         plot_probability = function() private$.items[["plot_probability"]],
         plot_population_flow = function() private$.items[["plot_population_flow"]],
+        plot_sensitivity_analysis = function() private$.items[["plot_sensitivity_analysis"]],
         clinical_guidance = function() private$.items[["clinical_guidance"]]),
     private = list(),
     public=list(
@@ -202,6 +204,11 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "Fagan2",
                     "sensspecwiki",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="plain_summary",
+                title="Summary (Plain Language)",
+                visible="(show_explanation)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary_table",
@@ -244,7 +251,11 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="combined_npv", 
                         `title`="Combined NPV", 
                         `type`="number", 
-                        `format`="pc"))))
+                        `format`="pc"),
+                    list(
+                        `name`="nnt", 
+                        `title`="Number Needed to Screen", 
+                        `type`="integer"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="individual_tests_table",
@@ -394,6 +405,14 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 height=400,
                 renderFun=".plot_population_flow",
                 visible="(show_nomogram)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_sensitivity_analysis",
+                title="Sensitivity Analysis: PPV/NPV vs Prevalence",
+                width=600,
+                height=400,
+                renderFun=".plot_sensitivity_analysis",
+                visible="(show_nomogram)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_guidance",
@@ -489,6 +508,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param show_nomogram .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$plain_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$individual_tests_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$population_flow_table} \tab \tab \tab \tab \tab a table \cr
@@ -499,6 +519,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$plot_performance} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot_probability} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot_population_flow} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot_sensitivity_analysis} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$clinical_guidance} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -522,7 +543,7 @@ sequentialtests <- function(
     strategy = "serial_positive",
     prevalence = 0.1,
     population_size = 1000,
-    show_explanation = TRUE,
+    show_explanation = FALSE,
     show_formulas = FALSE,
     show_cost_analysis = FALSE,
     show_nomogram = FALSE) {

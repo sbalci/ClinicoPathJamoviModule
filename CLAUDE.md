@@ -362,3 +362,53 @@ critically evaluate functions. is it mathematically and statistically accurate? 
   were dynamically inserted with self$results$insert(). These Notice objects contain function references that
   cannot be serialized by jamovi's protobuf system.
 - jmvtools::check() only locates jamovi program bin file location. it does not check anything regarding module structure or code.
+
+
+
+
+Always use available 'skills' when possible. Keep the output organized. 
+Use these skills to update text and analysis in the project: 
+  pubmed-database
+  biopython
+  biorxiv-database
+  openalex-database
+  citation-management
+  scholar-evaluation
+  clinical-decision-support
+  clinical-reports
+  exploratory-data-analysis
+  hypogenic
+  hypothesis-generation
+  literature-review
+  peer-review
+  scientific-brainstorming
+  scientific-critical-thinking
+  scientific-visualization
+  scientific-schematics
+  generate-image
+  scientific-slides
+  scientific-writing
+  research-grants
+  statistical-analysis
+  statsmodels
+  paper-2-web
+  matplotlib
+  scikit-learn
+  scikit-survival
+  plotly
+  seaborn
+  aeon
+  docx
+  xlsx
+  pptx
+  latex-posters
+  pdf
+  markitdown
+  histolab
+  pathml
+  shap
+  omero-integration
+  pydicom
+  pytorch-lightning
+
+

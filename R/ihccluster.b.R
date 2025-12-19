@@ -1148,7 +1148,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(allVars) < 2) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'insufficient_markers',
+                    name = '.insufficient_markers',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('At least 2 IHC markers required. Select categorical or continuous markers from the variable list to perform clustering analysis.')
@@ -1250,7 +1250,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'missing_data_transparency',
+                    name = '.missing_data_transparency',
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent(notice_text)
@@ -1268,7 +1268,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'missing_data_error',
+                    name = '.missing_data_error',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf(
@@ -1889,7 +1889,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (nrow(df) < 30) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'small_sample_warning',
+                    name = '.small_sample_warning',
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent(sprintf(
@@ -1904,7 +1904,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.na(avg_silhouette) && avg_silhouette < 0.3) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
-                    name = 'poor_cluster_quality',
+                    name = '.poor_cluster_quality',
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent(sprintf(
@@ -1992,7 +1992,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add completion info notice at bottom
             info <- jmvcore::Notice$new(
                 options = self$options,
-                name = 'analysis_complete',
+                name = '.analysis_complete',
                 type = jmvcore::NoticeType$INFO
             )
             sil_text <- if (!is.na(avg_silhouette)) sprintf(", avg silhouette=%.2f", avg_silhouette) else ""

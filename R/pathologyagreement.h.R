@@ -16,7 +16,9 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             icc_type = "consistency",
             correlation_method = "both",
             missing_data = "listwise",
-            show_interpretation = TRUE, ...) {
+            show_interpretation = TRUE,
+            show_summary = FALSE,
+            show_explanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -96,6 +98,14 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 "show_interpretation",
                 show_interpretation,
                 default=TRUE)
+            private$..show_summary <- jmvcore::OptionBool$new(
+                "show_summary",
+                show_summary,
+                default=FALSE)
+            private$..show_explanations <- jmvcore::OptionBool$new(
+                "show_explanations",
+                show_explanations,
+                default=FALSE)
 
             self$.addOption(private$..dep1)
             self$.addOption(private$..dep2)
@@ -108,6 +118,8 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..correlation_method)
             self$.addOption(private$..missing_data)
             self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..show_summary)
+            self$.addOption(private$..show_explanations)
         }),
     active = list(
         dep1 = function() private$..dep1$value,
@@ -120,7 +132,9 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         icc_type = function() private$..icc_type$value,
         correlation_method = function() private$..correlation_method$value,
         missing_data = function() private$..missing_data$value,
-        show_interpretation = function() private$..show_interpretation$value),
+        show_interpretation = function() private$..show_interpretation$value,
+        show_summary = function() private$..show_summary$value,
+        show_explanations = function() private$..show_explanations$value),
     private = list(
         ..dep1 = NA,
         ..dep2 = NA,
@@ -132,15 +146,18 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..icc_type = NA,
         ..correlation_method = NA,
         ..missing_data = NA,
-        ..show_interpretation = NA)
+        ..show_interpretation = NA,
+        ..show_summary = NA,
+        ..show_explanations = NA)
 )
 
 pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathologyagreementResults",
     inherit = jmvcore::Group,
     active = list(
-        warnings = function() private$.items[["warnings"]],
         interpretation = function() private$.items[["interpretation"]],
+        summary = function() private$.items[["summary"]],
+        explanations = function() private$.items[["explanations"]],
         agreementtable = function() private$.items[["agreementtable"]],
         correlationtable = function() private$.items[["correlationtable"]],
         scatterplot = function() private$.items[["scatterplot"]],
@@ -164,21 +181,19 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "epiR"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="warnings",
-                title="Analysis Messages",
-                visible=TRUE,
-                clearWith=list(
-                    "dep1",
-                    "dep2",
-                    "additional_methods",
-                    "bootstrap_n",
-                    "conf_level",
-                    "missing_data")))
-            self$add(jmvcore::Html$new(
-                options=options,
                 name="interpretation",
                 title="Clinical Interpretation and Analysis Summary",
                 visible="(show_interpretation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Plain Language Summary",
+                visible="(show_summary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="About This Analysis",
+                visible="(show_explanations)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="agreementtable",
@@ -370,10 +385,15 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param missing_data method for handling missing values
 #' @param show_interpretation provide clinical interpretation of agreement
 #'   statistics
+#' @param show_summary generate a plain-language summary paragraph suitable
+#'   for copy-pasting into reports
+#' @param show_explanations display educational content explaining when to use
+#'   this analysis, assumptions, and interpretation
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab One-paragraph summary of results in plain language \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab Educational guide on agreement analysis \cr
 #'   \code{results$agreementtable} \tab \tab \tab \tab \tab ICC, CCC, and Bland-Altman metrics \cr
 #'   \code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr
 #'   \code{results$scatterplot} \tab \tab \tab \tab \tab Scatter plot with line of perfect agreement \cr
@@ -405,7 +425,9 @@ pathologyagreement <- function(
     icc_type = "consistency",
     correlation_method = "both",
     missing_data = "listwise",
-    show_interpretation = TRUE) {
+    show_interpretation = TRUE,
+    show_summary = FALSE,
+    show_explanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pathologyagreement requires jmvcore to be installed (restart may be required)")
@@ -432,7 +454,9 @@ pathologyagreement <- function(
         icc_type = icc_type,
         correlation_method = correlation_method,
         missing_data = missing_data,
-        show_interpretation = show_interpretation)
+        show_interpretation = show_interpretation,
+        show_summary = show_summary,
+        show_explanations = show_explanations)
 
     analysis <- pathologyagreementClass$new(
         options = options,

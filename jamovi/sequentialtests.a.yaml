@@ -1,7 +1,7 @@
 ---
 name: sequentialtests
 title: Sequential Testing Analysis
-menuGroup: meddecideT1
+menuGroup: meddecideT
 menuSubgroup: Decision Calculators
 menuSubtitle: Sequential Test Analysis
 version: '0.0.32'
@@ -169,7 +169,7 @@ options:
     - name: show_explanation
       title: Show Explanations
       type: Bool
-      default: true
+      default: false
       
     - name: show_formulas
       title: Show Calculation Formulas

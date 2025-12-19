@@ -1,9 +1,9 @@
 ---
 name:  alluvial
 title: Alluvial Diagrams
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 options:
     - name: data
@@ -111,7 +111,7 @@ options:
           jamovi: >
             Display labels for bin categories (e.g., 'LL' for low-low, 'HH' for high-high).
             Note: This controls label text only, not the actual binning method.
-            For custom categorization, use Data → Compute to create binned variables.
+            For custom categorization, use the categorize function to create binned variables.
 
 
     - name: orient

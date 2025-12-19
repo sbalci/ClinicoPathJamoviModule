@@ -120,13 +120,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             if (length(ratio_warnings) > 0 && isTRUE(self$options$messages)) {
                 ratio_warnings <- unique(ratio_warnings)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'ratioParseNotice',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(paste(ratio_warnings, collapse = "<br>"))
-                self$results$insert(999, notice)
+                # notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'ratioParseNotice',
+                #     type = jmvcore::NoticeType$INFO
+                # )
+                # notice$setContent(paste(ratio_warnings, collapse = "<br>"))
+                # self$results$insert(999, notice)
             }
 
             private$.effectiveOptions <- opts
@@ -399,13 +399,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(counts_var) && counts_var != "") {
                 counts_validation <- private$.validateCounts(self$data, counts_var)
                 if (!counts_validation$valid) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'countsValidationError',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(counts_validation$message)
-                    self$results$insert(1, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'countsValidationError',
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # notice$setContent(counts_validation$message)
+                    # self$results$insert(1, notice)
                     stop(counts_validation$message)
                 }
             }
@@ -422,16 +422,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     small_groups <- names(group_sizes[group_sizes < 5])
                     group_details <- paste(paste(small_groups, ':', group_sizes[small_groups]), collapse = ', ')
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'smallGroupSizes',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
-                        'Small group sizes detected: %s. Chi-square tests require minimum 5 observations per group for reliable results.',
-                        group_details
-                    ))
-                    self$results$insert(999, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'smallGroupSizes',
+                    #     type = jmvcore::NoticeType$WARNING
+                    # )
+                    # notice$setContent(sprintf(
+                    #     'Small group sizes detected: %s. Chi-square tests require minimum 5 observations per group for reliable results.',
+                    #     group_details
+                    # ))
+                    # self$results$insert(999, notice)
                 }
 
                 if (length(group_sizes) < 2) {
@@ -674,20 +674,20 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Warn if prevalence is extreme (<10% or >90%)
             if (prevalence < 0.10 || prevalence > 0.90) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'extremePrevalence',
-                    type = jmvcore::NoticeType$INFO
-                )
+                # notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'extremePrevalence',
+                #     type = jmvcore::NoticeType$INFO
+                # )
 
-                direction <- if (prevalence < 0.10) "low" else "high"
-                notice$setContent(sprintf(
-                    'Disease prevalence (level "%s") in this dataset is %.1f%% (%s prevalence setting). Positive Predictive Value (PPV) and Negative Predictive Value (NPV) are highly dependent on prevalence and may not generalize to populations with substantially different disease rates. Consider reporting sensitivity, specificity, and likelihood ratios which are less affected by prevalence.',
-                    diseased_level,
-                    prevalence * 100,
-                    direction
-                ))
-                self$results$insert(999, notice)
+                # direction <- if (prevalence < 0.10) "low" else "high"
+                # notice$setContent(sprintf(
+                #     'Disease prevalence (level "%s") in this dataset is %.1f%% (%s prevalence setting). Positive Predictive Value (PPV) and Negative Predictive Value (NPV) are highly dependent on prevalence and may not generalize to populations with substantially different disease rates. Consider reporting sensitivity, specificity, and likelihood ratios which are less affected by prevalence.',
+                #     diseased_level,
+                #     prevalence * 100,
+                #     direction
+                # ))
+                # self$results$insert(999, notice)
             }
         },
 
@@ -830,55 +830,55 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # ERROR: Non-numeric values
                 if (any(is.na(ratios))) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'ratioNonNumeric',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(.('Ratio specification contains non-numeric values. Expected format: "0.5,0.5" for two equal groups or "0.25,0.5,0.25" for three groups. Using equal proportions as fallback.'))
-                    self$results$insert(1, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'ratioNonNumeric',
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # notice$setContent(.('Ratio specification contains non-numeric values. Expected format: "0.5,0.5" for two equal groups or "0.25,0.5,0.25" for three groups. Using equal proportions as fallback.'))
+                    # self$results$insert(1, notice)
                     return(NULL)
                 }
 
                 # ERROR: Ratios don't sum to 1
                 if (abs(sum(ratios) - 1) > 0.001) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'ratioSumError',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
-                        .('Ratios must sum to 1.0 but your values sum to %s. Example valid input: "0.3,0.7" (sums to 1.0). Using equal proportions as fallback.'),
-                        round(sum(ratios), 3)
-                    ))
-                    self$results$insert(1, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'ratioSumError',
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # notice$setContent(sprintf(
+                    #     .('Ratios must sum to 1.0 but your values sum to %s. Example valid input: "0.3,0.7" (sums to 1.0). Using equal proportions as fallback.'),
+                    #     round(sum(ratios), 3)
+                    # ))
+                    # self$results$insert(1, notice)
                     return(NULL)
                 }
 
                 # ERROR: Non-positive ratios
                 if (any(ratios <= 0)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'ratioNegative',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(.('All ratio values must be positive (> 0). Negative or zero values are not allowed in proportion specifications. Using equal proportions as fallback.'))
-                    self$results$insert(1, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'ratioNegative',
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # notice$setContent(.('All ratio values must be positive (> 0). Negative or zero values are not allowed in proportion specifications. Using equal proportions as fallback.'))
+                    # self$results$insert(1, notice)
                     return(NULL)
                 }
 
                 return(ratios)
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'ratioParseError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
-                    .('Error parsing ratio specification: %s. Please use comma-separated decimal values (e.g., "0.5,0.5"). Using equal proportions as fallback.'),
-                    e$message
-                ))
-                self$results$insert(1, notice)
+                # notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'ratioParseError',
+                #     type = jmvcore::NoticeType$ERROR
+                # )
+                # notice$setContent(sprintf(
+                #     .('Error parsing ratio specification: %s. Please use comma-separated decimal values (e.g., "0.5,0.5"). Using equal proportions as fallback.'),
+                #     e$message
+                # ))
+                # self$results$insert(1, notice)
                 return(NULL)
             })
         },
@@ -997,17 +997,17 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$todo$setContent(todo)
 
                     # Add analysis completion Notice
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'analysisComplete',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf(
-                        'Pie chart analysis completed successfully using %d observations with %s statistical method.',
-                        nrow(prepared_data),
-                        tools::toTitleCase(self$options$typestatistics)
-                    ))
-                    self$results$insert(999, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'analysisComplete',
+                    #     type = jmvcore::NoticeType$INFO
+                    # )
+                    # notice$setContent(sprintf(
+                    #     'Pie chart analysis completed successfully using %d observations with %s statistical method.',
+                    #     nrow(prepared_data),
+                    #     tools::toTitleCase(self$options$typestatistics)
+                    # ))
+                    # self$results$insert(999, notice)
 
                 }, error = function(e) {
                     # Reset cache on error
@@ -1094,15 +1094,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CRITICAL FIX #3: Validate paired data before McNemar test
             if (options_data$paired) {
                 # plot1 has no grouping variable (y=NULL), so paired doesn't apply
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'pairedWithoutGroup',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(
-                    .('Paired/repeated measures analysis requires a grouping variable (e.g., Pre vs Post). Single variable pie charts cannot use paired option. Please add a grouping variable or disable the paired option.')
-                )
-                self$results$insert(1, notice)
+                # notice <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'pairedWithoutGroup',
+                #     type = jmvcore::NoticeType$ERROR
+                # )
+                # notice$setContent(
+                #     .('Paired/repeated measures analysis requires a grouping variable (e.g., Pre vs Post). Single variable pie charts cannot use paired option. Please add a grouping variable or disable the paired option.')
+                # )
+                # self$results$insert(1, notice)
                 return()
             }
 
@@ -1194,13 +1194,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (options_data$paired) {
                 validation <- private$.validatePairedData(mydata, dep, group)
                 if (!validation$valid) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'pairedValidationError',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(validation$message)
-                    self$results$insert(1, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'pairedValidationError',
+                    #     type = jmvcore::NoticeType$ERROR
+                    # )
+                    # notice$setContent(validation$message)
+                    # self$results$insert(1, notice)
                     return()
                 }
             }
@@ -1211,18 +1211,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 fisher_check <- private$.checkFisherNeeded(mydata, dep, group, counts_var)
                 if (fisher_check$use_fisher) {
                     override_type <- "nonparametric"  # Fisher's exact for 2x2
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'fisherAutoSwitch',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf(
-                        .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
-                        fisher_check$low_count_cells,
-                        fisher_check$total_cells,
-                        fisher_check$pct_low
-                    ))
-                    self$results$insert(999, notice)
+                    # notice <- jmvcore::Notice$new(
+                    #     options = self$options,
+                    #     name = 'fisherAutoSwitch',
+                    #     type = jmvcore::NoticeType$INFO
+                    # )
+                    # notice$setContent(sprintf(
+                    #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
+                    #     fisher_check$low_count_cells,
+                    #     fisher_check$total_cells,
+                    #     fisher_check$pct_low
+                    # ))
+                    # self$results$insert(999, notice)
                 }
             }
 
@@ -1340,13 +1340,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (options_data$paired) {
                     validation <- private$.validatePairedData(mydata, dep, group)
                     if (!validation$valid) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'pairedValidationError',
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent(validation$message)
-                        self$results$insert(1, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'pairedValidationError',
+                        #     type = jmvcore::NoticeType$ERROR
+                        # )
+                        # notice$setContent(validation$message)
+                        # self$results$insert(1, notice)
                         return()
                     }
                 }
@@ -1357,18 +1357,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     fisher_check <- private$.checkFisherNeeded(mydata, dep, group, counts_var)
                     if (fisher_check$use_fisher) {
                         override_type <- "nonparametric"  # Fisher's exact for 2x2
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'fisherAutoSwitch',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent(sprintf(
-                            .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
-                            fisher_check$low_count_cells,
-                            fisher_check$total_cells,
-                            fisher_check$pct_low
-                        ))
-                        self$results$insert(999, notice)
+                        # notice <- jmvcore::Notice$new(
+                        #     options = self$options,
+                        #     name = 'fisherAutoSwitch',
+                        #     type = jmvcore::NoticeType$INFO
+                        # )
+                        # notice$setContent(sprintf(
+                        #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
+                        #     fisher_check$low_count_cells,
+                        #     fisher_check$total_cells,
+                        #     fisher_check$pct_low
+                        # ))
+                        # self$results$insert(999, notice)
                     }
                 }
 

@@ -18,7 +18,13 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             BIOMARKER_MAX_RANGE = 100,
             BOOTSTRAP_RECOMMENDED = 2000    # FDA guidance for high-stakes validation
         ),
-        .messages = NULL,
+
+        .escapeVar = function(x) {
+            # Safely escape variable names for data.frame access
+            # Handles variables with spaces, special characters, etc.
+            if (is.null(x) || length(x) == 0) return(NULL)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
         
         .init = function() {
             if (is.null(self$data) || is.null(self$options$dep1) || is.null(self$options$dep2)) {
@@ -68,51 +74,164 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # Set plots visible based on user option
             self$results$blandaltmanplot$setVisible(self$options$show_plots)
             self$results$scatterplot$setVisible(self$options$show_plots)
-            
-            # Reset messages
-            private$.resetMessages()
         },
         
         .run = function() {
-            private$.resetMessages()
-            
-            if (is.null(self$options$dep1) || is.null(self$options$dep2)) 
+            # Track notice insertion position
+            notice_position <- 1
+
+            # ====================================================================
+            # CRITICAL ERRORS (Position 1-5)
+            # ====================================================================
+
+            # ERROR: Missing required variables
+            if (is.null(self$options$dep1) || is.null(self$options$dep2)) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingVariables',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Method 1 and Method 2 variables are required. Please select both variables to begin analysis.')
+                self$results$insert(notice_position, notice)
                 return()
-                
+            }
+
             data <- self$data
-            if (nrow(data) == 0) return()
-            
-            # Get variables
-            method1 <- data[[self$options$dep1]]
-            method2 <- data[[self$options$dep2]]
-            
+
+            # ERROR: Empty dataset
+            if (nrow(data) == 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'emptyDataset',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Dataset is empty. Please provide data with observations.')
+                self$results$insert(notice_position, notice)
+                return()
+            }
+
+            # ERROR: Check package availability EARLY
+            if (!requireNamespace('psych', quietly = TRUE)) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'psychPackageMissing',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Required R package "psych" not installed. Install via: install.packages("psych")')
+                self$results$insert(notice_position, notice)
+                return()
+            }
+
+            if (!requireNamespace('epiR', quietly = TRUE)) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'epiRPackageMissing',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('Required R package "epiR" not installed. Install via: install.packages("epiR")')
+                self$results$insert(notice_position, notice)
+                return()
+            }
+
+            # Get variables with safe conversion (handles factors/labelled data)
+            method1 <- jmvcore::toNumeric(data[[self$options$dep1]])
+            method2 <- jmvcore::toNumeric(data[[self$options$dep2]])
+
             # Handle missing values based on option
+            n_removed <- 0
             if (self$options$missing_data == "listwise") {
                 complete_cases <- complete.cases(method1, method2)
+                n_total <- length(method1)
                 method1 <- method1[complete_cases]
                 method2 <- method2[complete_cases]
-                n_removed <- sum(!complete_cases)
-                if (n_removed > 0) {
-                     private$.accumulateMessage(paste0("Listwise deletion: ", n_removed, " cases removed due to missing values."))
-                }
+                n_removed <- n_total - length(method1)
             }
-            # For pairwise, we handle inside individual functions or leave as is if functions handle it
-            # But standardized approach suggests filtering NAs for core 2-method agreement anyway.
-            # Agreement metrics usually require paired complete data. 
-            # So "pairwise" mainly affects Correlation if they use `use="pairwise"`.
-            # For Agreement (ICC, CCC, BA), we effectively need complete pairs.
-            
+
+            # ERROR: Insufficient data after cleaning
             if (length(method1) < 3) {
-                self$results$interpretation$setContent(
-                    "<p style='color: red;'><strong>Error:</strong> Insufficient data for analysis.
-                    At least 3 complete paired observations are required.</p>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficientData',
+                    type = jmvcore::NoticeType$ERROR
                 )
+                notice$setContent(sprintf('Insufficient complete observations (n=%d). At least 3 paired observations required for agreement analysis.', length(method1)))
+                self$results$insert(notice_position, notice)
                 return()
             }
- 
-            # Enhanced validation based on clinical preset
-            private$.performClinicalValidation(method1, method2)
-            
+
+            # ====================================================================
+            # STRONG WARNINGS (Position 6-20)
+            # ====================================================================
+
+            notice_position <- 6  # Start STRONG_WARNING section
+            n <- length(method1)
+
+            # STRONG_WARNING: Very small sample (clinical threshold)
+            if (n < 10) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'verySmallSample',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('Very small sample (n=%d). Results may be unreliable. Minimum n=30 recommended for pathology validation studies.', n))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+
+            # ====================================================================
+            # WARNINGS (Position 21-100)
+            # ====================================================================
+
+            notice_position <- 21  # Start WARNING section
+
+            # WARNING: Sample size below recommended minimum
+            if (n >= 10 && n < private$.CLINICAL_CONSTANTS$MIN_SAMPLE_PATHOLOGY) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'sampleSizeWarning',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Sample size (n=%d) below recommended minimum (n=30) for pathology validation studies. Consider increasing sample size for robust estimates.', n))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+
+            # WARNING: Biomarker range validation
+            if (self$options$clinical_preset == "biomarker_platforms") {
+                range_check1 <- any(method1 < private$.CLINICAL_CONSTANTS$BIOMARKER_MIN_RANGE |
+                                   method1 > private$.CLINICAL_CONSTANTS$BIOMARKER_MAX_RANGE, na.rm = TRUE)
+                range_check2 <- any(method2 < private$.CLINICAL_CONSTANTS$BIOMARKER_MIN_RANGE |
+                                   method2 > private$.CLINICAL_CONSTANTS$BIOMARKER_MAX_RANGE, na.rm = TRUE)
+
+                if (range_check1 || range_check2) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'biomarkerRangeWarning',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent('Some biomarker values outside typical 0-100% range. Please verify data scaling (e.g., ensure percentages not decimals).')
+                    self$results$insert(notice_position, notice)
+                    notice_position <- notice_position + 1
+                }
+            }
+
+            # WARNING: Bootstrap recommendation for high-stakes studies
+            if (self$options$bootstrap_n < private$.CLINICAL_CONSTANTS$BOOTSTRAP_RECOMMENDED &&
+                self$options$clinical_preset %in% c("multisite_validation", "ai_pathologist")) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'bootstrapRecommendation',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Bootstrap replicates (n=%d) below FDA-recommended threshold (n=2000) for high-stakes validation studies. Consider increasing for regulatory submissions.', self$options$bootstrap_n))
+                self$results$insert(notice_position, notice)
+                notice_position <- notice_position + 1
+            }
+
+            # ====================================================================
+            # PERFORM ANALYSIS
+            # ====================================================================
+
             # Perform standard 2-method analysis
             private$.performAgreementAnalysis(method1, method2)
             private$.performCorrelationAnalysis(method1, method2)
@@ -120,8 +239,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             # Perform multi-method analysis if additional methods provided
             if (!is.null(self$options$additional_methods) && length(self$options$additional_methods) > 0) {
-                if (length(self$options$additional_methods) >= 1) { # At least 1 additional = 3 total
-                     # Get all methods including additional ones
+                if (length(self$options$additional_methods) >= 1) {
                     all_methods <- private$.extractAllMethods(data)
                     if (ncol(all_methods) >= 3) {
                         private$.performMultiMethodAnalysis(all_methods)
@@ -137,33 +255,43 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 private$.generateStatisticalGlossary()
                 private$.generateICCSelectionGuide()
             }
-            
-            # Populate warnings
-            if (!is.null(private$.messages) && length(private$.messages) > 0) {
-                 self$results$warnings$setContent(paste(
-                    "<div class='alert alert-warning'>",
-                    "<h6>Analysis Messages</h6>",
-                    "<ul>",
-                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
-                    "</ul></div>",
-                    sep = ""
-                ))
-            } else {
-                self$results$warnings$setVisible(FALSE)
+
+            # Generate plain-language summary (if enabled)
+            if (self$options$show_summary) {
+                private$.generatePlainLanguageSummary(method1, method2)
             }
+
+            # Generate educational explanations (if enabled)
+            if (self$options$show_explanations) {
+                private$.generateEducationalExplanations()
+            }
+
+            # ====================================================================
+            # INFO NOTICES (Position 999)
+            # ====================================================================
+
+            # INFO: Missing data summary (if any removed)
+            if (n_removed > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingDataInfo',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(sprintf('Listwise deletion removed %d cases (%.1f%%) with missing values. Analysis based on %d complete observations.', n_removed, 100*n_removed/(n+n_removed), n))
+                self$results$insert(999, notice)
+            }
+
+            # INFO: Analysis completion summary
+            n_methods <- if (!is.null(self$options$additional_methods)) length(self$options$additional_methods) + 2 else 2
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            notice$setContent(sprintf('Agreement analysis completed: %d methods compared, %d complete observations analyzed.', n_methods, n))
+            self$results$insert(999, notice)
         },
         
-        .accumulateMessage = function(msg) {
-            private$.messages <- c(private$.messages, msg)
-        },
-        
-        .resetMessages = function() {
-            private$.messages <- NULL
-            if (!is.null(self$results$warnings)) {
-                 self$results$warnings$setContent("")
-                 self$results$warnings$setVisible(TRUE)
-            }
-        },
         
         .populateAgreementTable = function() {
             table <- self$results$agreementtable
@@ -205,10 +333,16 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 icc_value <- icc_result$results$ICC[icc_index]
                 icc_lower <- icc_result$results$`lower bound`[icc_index]
                 icc_upper <- icc_result$results$`upper bound`[icc_index]
-                
-                # Check for negative ICC which indicates severe reliability issues
+
+                # STRONG_WARNING: Negative ICC indicates severe reliability issues
                 if (!is.na(icc_value) && icc_value < 0) {
-                     private$.accumulateMessage(paste0("Negative ICC (", round(icc_value, 3), ") detected. This often indicates model assumption definition errors or greater within-subject variance than between-subject variance."))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'negativeICC',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(sprintf('Negative ICC (%.3f) indicates severe reliability issues, often due to model assumption errors or greater within-subject than between-subject variance.', icc_value))
+                    self$results$insert(6, notice)  # STRONG_WARNING position
                 }
 
                 icc_interp <- ifelse(icc_value >= private$.CLINICAL_CONSTANTS$ICC_EXCELLENT, "Excellent reliability",
@@ -218,14 +352,14 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 icc_value <- icc_lower <- icc_upper <- NA
                 icc_interp <- "psych package required"
             }
-            
+
             # Calculate Concordance Correlation Coefficient (CCC)
             if (requireNamespace('epiR', quietly = TRUE)) {
                 ccc_result <- epiR::epi.ccc(method1, method2, ci = "z-transform", conf.level = self$options$conf_level)
                 ccc_value <- ccc_result$rho.c$est
                 ccc_lower <- ccc_result$rho.c$lower
                 ccc_upper <- ccc_result$rho.c$upper
-                
+
                 # McBride 2005 interpretation
                 ccc_interp <- ifelse(ccc_value >= 0.99, "Almost perfect",
                              ifelse(ccc_value >= 0.95, "Substantial",
@@ -234,25 +368,52 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 ccc_value <- ccc_lower <- ccc_upper <- NA
                 ccc_interp <- "epiR package required"
             }
-            
+
             # Bland-Altman statistics
             differences <- method1 - method2
+            means <- (method1 + method2) / 2
             mean_diff <- mean(differences)
             sd_diff <- sd(differences)
             n_obs <- length(differences)
             se_diff <- sd_diff / sqrt(n_obs)
             ci_factor <- qt(1 - (1 - self$options$conf_level)/2, df = n_obs - 1)
-            
+
             mean_diff_lower <- mean_diff - ci_factor * se_diff
             mean_diff_upper <- mean_diff + ci_factor * se_diff
-            
+
+            # FIX 1: Limits of Agreement with 95% Confidence Intervals (Bland & Altman 1999)
             loa_lower <- mean_diff - 1.96 * sd_diff
             loa_upper <- mean_diff + 1.96 * sd_diff
-            
+
+            # Calculate CIs for LoA: SE(LoA) = SD × sqrt(3/n)
+            se_loa <- sd_diff * sqrt(3 / n_obs)
+            ci_factor_loa <- qt(1 - (1 - self$options$conf_level)/2, df = n_obs - 1)
+
+            loa_lower_ci_low <- loa_lower - ci_factor_loa * se_loa
+            loa_lower_ci_high <- loa_lower + ci_factor_loa * se_loa
+
+            loa_upper_ci_low <- loa_upper - ci_factor_loa * se_loa
+            loa_upper_ci_high <- loa_upper + ci_factor_loa * se_loa
+
+            # FIX 2: Check for proportional bias (Bland-Altman regression)
+            ba_regression <- lm(differences ~ means)
+            prop_bias_slope <- coef(ba_regression)[2]
+            prop_bias_p <- summary(ba_regression)$coefficients[2, 4]
+
+            if (prop_bias_p < 0.05) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'proportionalBias',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Proportional bias detected (slope=%.3f, p=%.3f). Disagreement increases at higher values. Consider non-linear transformation or stratified analysis.', prop_bias_slope, prop_bias_p))
+                self$results$insert(21, notice)
+            }
+
             # Bias significance check
             bias_present <- (mean_diff_lower > 0) || (mean_diff_upper < 0)
             bias_msg <- if(bias_present) "Systematic bias present (CI excludes 0)" else "No significant bias"
-            
+
             # Populate agreement table
             table <- self$results$agreementtable
 
@@ -263,7 +424,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 ci_upper = icc_upper,
                 interpretation = icc_interp
             ))
-            
+
             table$addRow(rowKey = 2, values = list(
                 metric = "Concordance Correlation Coefficient",
                 value = ccc_value,
@@ -271,7 +432,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 ci_upper = ccc_upper,
                 interpretation = ccc_interp
             ))
-            
+
             table$addRow(rowKey = 3, values = list(
                 metric = "Bland-Altman Mean Difference (Bias)",
                 value = mean_diff,
@@ -279,20 +440,20 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 ci_upper = mean_diff_upper,
                 interpretation = bias_msg
             ))
-            
+
             table$addRow(rowKey = 4, values = list(
                 metric = "Limits of Agreement (Lower)",
                 value = loa_lower,
-                ci_lower = NA,
-                ci_upper = NA,
+                ci_lower = loa_lower_ci_low,
+                ci_upper = loa_lower_ci_high,
                 interpretation = "95% of differences fall within limits"
             ))
-            
+
             table$addRow(rowKey = 5, values = list(
                 metric = "Limits of Agreement (Upper)",
                 value = loa_upper,
-                ci_lower = NA,
-                ci_upper = NA,
+                ci_lower = loa_upper_ci_low,
+                ci_upper = loa_upper_ci_high,
                 interpretation = "95% of differences fall within limits"
             ))
         },
@@ -329,15 +490,21 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             # Pearson correlation (if requested)
             if (method_option %in% c("both", "pearson")) {
-                # Normality check (Shapiro-Wilk)
+                # WARNING: Normality check (Shapiro-Wilk)
                 if (length(method1) >= 3 && length(method1) <= 5000) {
                      sw1 <- shapiro.test(method1)
                      sw2 <- shapiro.test(method2)
                      if (sw1$p.value < 0.05 || sw2$p.value < 0.05) {
-                          private$.accumulateMessage("Pearson correlation assumes normality, but data appears non-normal (Shapiro-Wilk p<0.05). Spearman rank correlation is recommended.")
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'normalityViolation',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent('Normality assumption violated (Shapiro-Wilk p<0.05). Spearman rank correlation recommended over Pearson for non-normal data.')
+                        self$results$insert(21, notice)  # WARNING position
                      }
                 }
-                
+
                 pearson_test <- cor.test(method1, method2, method = "pearson", conf.level = self$options$conf_level)
                 pearson_r <- pearson_test$estimate
                 pearson_p <- pearson_test$p.value
@@ -554,8 +721,9 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
         .extractAllMethods = function(data) {
             # Extract all methods data (dep1, dep2, and additional_methods)
-            method1 <- data[[self$options$dep1]]
-            method2 <- data[[self$options$dep2]]
+            # Use jmvcore::toNumeric() for safe conversion
+            method1 <- jmvcore::toNumeric(data[[self$options$dep1]])
+            method2 <- jmvcore::toNumeric(data[[self$options$dep2]])
 
             # Combine with additional methods
             all_data <- data.frame(Method1 = method1, Method2 = method2)
@@ -563,7 +731,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             if (!is.null(self$options$additional_methods) && length(self$options$additional_methods) > 0) {
                 for (i in seq_along(self$options$additional_methods)) {
                     method_name <- paste0("Method", i + 2)
-                    all_data[[method_name]] <- data[[self$options$additional_methods[i]]]
+                    all_data[[method_name]] <- jmvcore::toNumeric(data[[self$options$additional_methods[i]]])
                 }
             }
 
@@ -708,35 +876,143 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             self$results$multimethod_summary$setContent(summary_html)
         },
 
-        # Clinical validation based on preset
-        .performClinicalValidation = function(method1, method2) {
+
+        .generatePlainLanguageSummary = function(method1, method2) {
+            # FIX 3: Generate plain-language summary suitable for copy-pasting into reports
             n <- length(method1)
-            # No Html return, just messages
+            spearman_r <- cor(method1, method2, method = "spearman")
 
-            # Sample size warning for pathology studies
-            if (n < private$.CLINICAL_CONSTANTS$MIN_SAMPLE_PATHOLOGY) {
-                private$.accumulateMessage(paste0("Sample size (n=", n, ") is below recommended minimum for pathology validation studies (n>=30). Consider increasing sample size."))
+            # Get ICC if available
+            icc_value <- NA
+            if (requireNamespace('psych', quietly = TRUE)) {
+                data_for_icc <- data.frame(Method1 = method1, Method2 = method2)
+                icc_result <- psych::ICC(data_for_icc)
+                icc_index <- if (self$options$icc_type == "consistency") 6 else 4
+                icc_value <- icc_result$results$ICC[icc_index]
             }
 
-            # Biomarker range validation for relevant presets
-            if (self$options$clinical_preset == "biomarker_platforms") {
-                range_check1 <- any(method1 < private$.CLINICAL_CONSTANTS$BIOMARKER_MIN_RANGE |
-                                   method1 > private$.CLINICAL_CONSTANTS$BIOMARKER_MAX_RANGE, na.rm = TRUE)
-                range_check2 <- any(method2 < private$.CLINICAL_CONSTANTS$BIOMARKER_MIN_RANGE |
-                                   method2 > private$.CLINICAL_CONSTANTS$BIOMARKER_MAX_RANGE, na.rm = TRUE)
+            # Bland-Altman
+            differences <- method1 - method2
+            mean_diff <- mean(differences)
 
-                if (range_check1 || range_check2) {
-                    private$.accumulateMessage("Data Check: Some biomarker values are outside the typical 0-100% range. Please verify data scaling.")
-                }
+            # Generate plain-language summary paragraph
+            agreement_level <- if (!is.na(icc_value) && icc_value >= 0.90 && abs(spearman_r) >= 0.94) {
+                "excellent agreement"
+            } else if (!is.na(icc_value) && icc_value >= 0.75 && abs(spearman_r) >= 0.85) {
+                "good agreement"
+            } else if (!is.na(icc_value) && icc_value >= 0.50) {
+                "moderate agreement"
+            } else {
+                "limited agreement"
             }
 
-            # Bootstrap recommendation for high-stakes studies
-            if (self$options$bootstrap_n < private$.CLINICAL_CONSTANTS$BOOTSTRAP_RECOMMENDED &&
-                self$options$clinical_preset %in% c("multisite_validation", "ai_pathologist")) {
-                private$.accumulateMessage(paste0(
-                    "Recommendation: For high-stakes studies, consider increasing bootstrap samples to ",
-                    private$.CLINICAL_CONSTANTS$BOOTSTRAP_RECOMMENDED, "+."))
+            bias_description <- if (abs(mean_diff) < 0.1 * mean(c(method1, method2))) {
+                "minimal systematic bias"
+            } else {
+                sprintf("systematic bias of %.2f units", mean_diff)
             }
+
+            summary_text <- sprintf(
+                "Agreement analysis between %s and %s was performed using %d paired observations. The methods showed %s (ICC = %.2f, Spearman r = %.2f) with %s. These results suggest that the methods are %s for clinical use in this context.",
+                self$options$dep1, self$options$dep2, n,
+                agreement_level,
+                if (!is.na(icc_value)) icc_value else 0,
+                spearman_r,
+                bias_description,
+                if (agreement_level == "excellent agreement") "highly suitable for interchangeable"
+                else if (agreement_level == "good agreement") "generally suitable for interchangeable"
+                else if (agreement_level == "moderate agreement") "potentially suitable with caution for"
+                else "not recommended for interchangeable"
+            )
+
+            summary_html <- paste0(
+                "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
+                "<h4>📝 Plain Language Summary</h4>",
+                "<p style='font-size: 14px; line-height: 1.6;'>", summary_text, "</p>",
+                "<p style='font-size: 12px; color: #666; margin-top: 15px;'><em>This summary is suitable for copying into pathology reports, research manuscripts, or presentations. It provides key findings in accessible language without technical jargon.</em></p>",
+                "</div>"
+            )
+
+            self$results$summary$setContent(summary_html)
+        },
+
+        .generateEducationalExplanations = function() {
+            # FIX 4: Generate educational content explaining the analysis
+            explanations_html <- paste0(
+                "<div style='background-color: #f0f4ff; padding: 20px; border-radius: 8px; border-left: 5px solid #2196f3;'>",
+                "<h3>📚 About This Analysis: Agreement Analysis for Digital Pathology</h3>",
+
+                "<h4>What This Analysis Does:</h4>",
+                "<p>Agreement analysis evaluates whether two (or more) measurement methods produce consistent results on the same samples. ",
+                "Unlike correlation, which only measures linear association, agreement analysis determines if methods can be used <strong>interchangeably</strong> in clinical practice.</p>",
+
+                "<h4>When to Use This Analysis:</h4>",
+                "<ul>",
+                "<li><strong>Platform Comparison:</strong> Comparing digital pathology platforms (HALO vs Aiforia vs ImageJ) for biomarker quantification</li>",
+                "<li><strong>Algorithm Validation:</strong> Validating AI algorithms against pathologist assessments</li>",
+                "<li><strong>Multi-site Studies:</strong> Assessing reproducibility across institutions or laboratories</li>",
+                "<li><strong>Method Substitution:</strong> Determining if a new method can replace an established reference method</li>",
+                "<li><strong>Quality Control:</strong> Evaluating inter-observer or intra-observer reliability in diagnostic scoring</li>",
+                "</ul>",
+
+                "<h4>Key Assumptions:</h4>",
+                "<ol>",
+                "<li><strong>Paired Measurements:</strong> Each sample must be measured by both methods</li>",
+                "<li><strong>Representative Sample:</strong> Data should represent the full range of values expected in practice</li>",
+                "<li><strong>Independent Errors:</strong> Measurement errors should be independent (e.g., avoid pseudo-replication)</li>",
+                "<li><strong>Appropriate Sample Size:</strong> Minimum n=30 recommended for reliable agreement estimates in pathology validation studies</li>",
+                "</ol>",
+
+                "<h4>How to Interpret Results:</h4>",
+
+                "<p><strong>🔵 ICC (Intraclass Correlation Coefficient):</strong></p>",
+                "<ul>",
+                "<li><strong>Excellent (≥0.90):</strong> Methods can be used interchangeably without concern</li>",
+                "<li><strong>Good (0.75-0.89):</strong> Methods are suitable for most clinical applications</li>",
+                "<li><strong>Moderate (0.50-0.74):</strong> Use with caution; investigate sources of disagreement</li>",
+                "<li><strong>Poor (<0.50):</strong> Methods should not be used interchangeably</li>",
+                "</ul>",
+
+                "<p><strong>🟢 Bland-Altman Plot:</strong></p>",
+                "<ul>",
+                "<li><strong>Mean Difference (Bias):</strong> Average difference between methods. Zero indicates no systematic bias.</li>",
+                "<li><strong>Limits of Agreement (LoA):</strong> 95% of differences fall within these limits. Narrow limits indicate good agreement.</li>",
+                "<li><strong>Proportional Bias:</strong> If differences increase with magnitude (sloped pattern), disagreement varies across measurement range</li>",
+                "</ul>",
+
+                "<p><strong>🟣 Correlation vs Agreement:</strong></p>",
+                "<ul>",
+                "<li><strong>Correlation (Spearman/Pearson):</strong> Measures strength of linear relationship. Can be high even if methods systematically differ by a constant.</li>",
+                "<li><strong>Agreement (ICC/CCC):</strong> Measures actual concordance. Requires methods to give similar <em>absolute</em> values, not just similar ranking.</li>",
+                "<li><strong>Clinical Relevance:</strong> For method substitution, agreement matters more than correlation.</li>",
+                "</ul>",
+
+                "<h4>Common Pitfalls to Avoid:</h4>",
+                "<ul>",
+                "<li>❌ Using correlation alone to assess agreement (correlation ≠ agreement)</li>",
+                "<li>❌ Ignoring Bland-Altman plots (visual inspection reveals patterns missed by statistics)</li>",
+                "<li>❌ Relying on small samples (n<30) for validation studies</li>",
+                "<li>❌ Comparing methods across different ranges (e.g., one method only in high values)</li>",
+                "<li>❌ Assuming statistical significance equals clinical significance (always consider clinical context)</li>",
+                "</ul>",
+
+                "<h4>Recommended Reading:</h4>",
+                "<ul style='font-size: 13px;'>",
+                "<li>Bland JM, Altman DG (1999). <em>Measuring agreement in method comparison studies.</em> Stat Methods Med Res 8(2):135-60.</li>",
+                "<li>Koo TK, Li MY (2016). <em>A guideline of selecting and reporting intraclass correlation coefficients for reliability research.</em> J Chiropr Med 15(2):155-63.</li>",
+                "<li>Landis JR, Koch GG (1977). <em>The measurement of observer agreement for categorical data.</em> Biometrics 33(1):159-74.</li>",
+                "<li>Cicchetti DV (1994). <em>Guidelines, criteria, and rules of thumb for evaluating normed and standardized assessment instruments in psychology.</em> Psychol Assess 6(4):284-90.</li>",
+                "</ul>",
+
+                "<p style='margin-top: 20px; padding: 15px; background-color: white; border-radius: 5px;'>",
+                "<strong>💡 Pro Tip:</strong> When reporting agreement analysis, always include: (1) ICC with 95% CI, (2) Bland-Altman mean difference and LoA, ",
+                "(3) visual Bland-Altman plot, and (4) clinical interpretation of agreement magnitude in context of your application.",
+                "</p>",
+
+                "</div>"
+            )
+
+            self$results$explanations$setContent(explanations_html)
         },
 
         .generateReportSentences = function(method1, method2) {
