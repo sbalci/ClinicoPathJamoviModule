@@ -6,7 +6,7 @@
 \usage{
 studydiagram(
   data,
-  data_format = "participant_step",
+  data_format = "step_summary",
   diagram_type = "consort_standard",
   participant_id,
   step_excluded,
@@ -16,11 +16,11 @@ studydiagram(
   exclusion_reason_summary,
   participant_id_mapping,
   exclusion_reason_mapping,
-  step1_exclusions,
-  step2_exclusions,
-  step3_exclusions,
-  step4_exclusions,
-  step5_exclusions,
+  exclusions_after_step1,
+  exclusions_after_step2,
+  exclusions_after_step3,
+  exclusions_after_step4,
+  exclusions_after_step5,
   step1_label = "Screening",
   step2_label = "Enrollment",
   step3_label = "Treatment",
@@ -36,9 +36,9 @@ studydiagram(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{data_format}{How your data is structured. Participant tracking: each
-row is a participant with step excluded. Step summary: each row is a study
-step with counts. Exclusion mapping: map exclusion reasons to steps.}
+\item{data_format}{How your data is structured. Step summary: one row per
+study step with participant counts. Exclusion mapping: map exclusion
+reasons to specific study steps.}
 
 \item{diagram_type}{Rendering engine and diagram style. CONSORT for
 clinical trials, Flowchart for general study flows. Standard uses
@@ -68,15 +68,24 @@ descriptions (for step summary format)}
 \item{exclusion_reason_mapping}{Variable containing all exclusion reasons
 (for exclusion mapping format)}
 
-\item{step1_exclusions}{Select exclusion reason levels that occur at step 1}
+\item{exclusions_after_step1}{Select exclusion reasons that occur AFTER
+step 1 (reducing participants from step 1 to step 2). These exclusions will
+be shown on the transition from step 1 to step 2.}
 
-\item{step2_exclusions}{Select exclusion reason levels that occur at step 2}
+\item{exclusions_after_step2}{Select exclusion reasons that occur AFTER
+step 2 (reducing participants from step 2 to step 3). These exclusions will
+be shown on the transition from step 2 to step 3.}
 
-\item{step3_exclusions}{Select exclusion reason levels that occur at step 3}
+\item{exclusions_after_step3}{Select exclusion reasons that occur AFTER
+step 3 (reducing participants from step 3 to step 4). These exclusions will
+be shown on the transition from step 3 to step 4.}
 
-\item{step4_exclusions}{Select exclusion reason levels that occur at step 4}
+\item{exclusions_after_step4}{Select exclusion reasons that occur AFTER
+step 4 (reducing participants from step 4 to step 5). These exclusions will
+be shown on the transition from step 4 to step 5.}
 
-\item{step5_exclusions}{Select exclusion reason levels that occur at step 5}
+\item{exclusions_after_step5}{Select exclusion reasons that occur AFTER
+step 5 (if applicable)}
 
 \item{step1_label}{Label for step 1 in the diagram}
 
@@ -108,9 +117,9 @@ A results object containing:
 \code{results$summary} \tab \tab \tab \tab \tab Summary of participant flow through study steps \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$diagram} \tab \tab \tab \tab \tab Interactive study flow diagram \cr
-\code{results$diagramPlot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab Explanatory text about the diagram and results \cr
 \code{results$warnings} \tab \tab \tab \tab \tab Alerts about potential data quality issues \cr
+\code{results$notices} \tab \tab \tab \tab \tab a notification \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab Plain-language summary for clinical interpretation \cr
 \code{results$reportSentence} \tab \tab \tab \tab \tab Copy-ready sentence for manuscripts \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab Explanation of analysis type and usage \cr

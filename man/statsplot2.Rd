@@ -13,7 +13,7 @@ statsplot2(
   distribution = "p",
   alluvsty = "t1",
   excl = FALSE,
-  sampleLarge = TRUE
+  sampleLarge = FALSE
 )
 }
 \arguments{

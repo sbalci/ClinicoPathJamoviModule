@@ -836,9 +836,10 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             ref_strategy <- self$options$reference_strategy
             plot_by_tp <- self$options$plot_by_timepoint
 
-            # Determine y-axis range
+            # Determine y-axis range (include CIs if present)
             all_nb <- unlist(lapply(private$.results_by_time, function(r) {
-                c(r$nb_model, r$nb_treat_all, r$nb_treat_none)
+                c(r$nb_model, r$nb_treat_all, r$nb_treat_none,
+                  r$nb_model_lower, r$nb_model_upper)
             }))
             y_min <- min(all_nb, -0.05, na.rm = TRUE)
             y_max <- max(all_nb, 0.05, na.rm = TRUE)
@@ -851,7 +852,7 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                      ylim = c(y_min, y_max),
                      xlab = "Threshold Probability",
                      ylab = "Net Benefit",
-                     main = "Time-Dependent Decision Curves")
+                     main = "Time-Dependent Decision Curves (All Time Points)")
 
                 abline(h = 0, lty = 2, col = "gray")
                 grid()
@@ -862,8 +863,18 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 for (tp_name in names(private$.results_by_time)) {
                     result <- private$.results_by_time[[tp_name]]
 
+                    # Add CI band if bootstrap enabled
+                    if (!is.null(result$nb_model_lower) && !is.null(result$nb_model_upper)) {
+                        polygon(c(result$thresholds, rev(result$thresholds)),
+                                c(result$nb_model_lower, rev(result$nb_model_upper)),
+                                col = adjustcolor(colors[i], alpha.f = 0.2),
+                                border = NA)
+                    }
+
+                    # Main model line
                     lines(result$thresholds, result$nb_model, col = colors[i], lwd = 2)
 
+                    # Reference strategies
                     if (ref_strategy %in% c("treat_all", "both")) {
                         lines(result$thresholds, result$nb_treat_all,
                               col = colors[i], lty = 3, lwd = 1)
@@ -875,6 +886,75 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 legend("topright",
                        legend = paste("t =", names(private$.results_by_time)),
                        col = colors, lwd = 2, cex = 0.8)
+
+            } else {
+                # Separate plot for each time point (FACETED LAYOUT)
+                n_timepoints <- length(private$.results_by_time)
+
+                # Setup multi-panel layout
+                n_cols <- ceiling(sqrt(n_timepoints))
+                n_rows <- ceiling(n_timepoints / n_cols)
+                old_par <- par(no.readonly = TRUE)
+                on.exit(par(old_par))
+                par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 2, 1))
+
+                for (tp_name in names(private$.results_by_time)) {
+                    result <- private$.results_by_time[[tp_name]]
+
+                    # Individual plot for this time point
+                    plot(result$thresholds, result$nb_model,
+                         type = "n",
+                         xlim = c(min(thresholds), max(thresholds)),
+                         ylim = c(y_min, y_max),
+                         xlab = "Threshold Probability",
+                         ylab = "Net Benefit",
+                         main = paste("t =", result$time_point))
+
+                    abline(h = 0, lty = 2, col = "gray")
+                    grid()
+
+                    # Add CI band if bootstrap enabled
+                    if (!is.null(result$nb_model_lower) && !is.null(result$nb_model_upper)) {
+                        polygon(c(result$thresholds, rev(result$thresholds)),
+                                c(result$nb_model_lower, rev(result$nb_model_upper)),
+                                col = adjustcolor("blue", alpha.f = 0.2),
+                                border = NA)
+                    }
+
+                    # Main model line
+                    lines(result$thresholds, result$nb_model, col = "blue", lwd = 2)
+
+                    # Reference strategies
+                    if (ref_strategy %in% c("treat_all", "both")) {
+                        lines(result$thresholds, result$nb_treat_all,
+                              col = "red", lty = 2, lwd = 1)
+                    }
+                    if (ref_strategy %in% c("treat_none", "both")) {
+                        lines(result$thresholds, result$nb_treat_none,
+                              col = "gray", lty = 2, lwd = 1)
+                    }
+
+                    # Add minimal legend
+                    legend_items <- c("Model")
+                    legend_col <- c("blue")
+                    legend_lty <- c(1)
+
+                    if (ref_strategy %in% c("treat_all", "both")) {
+                        legend_items <- c(legend_items, "Treat All")
+                        legend_col <- c(legend_col, "red")
+                        legend_lty <- c(legend_lty, 2)
+                    }
+                    if (ref_strategy %in% c("treat_none", "both")) {
+                        legend_items <- c(legend_items, "Treat None")
+                        legend_col <- c(legend_col, "gray")
+                        legend_lty <- c(legend_lty, 2)
+                    }
+
+                    legend("topright", legend = legend_items,
+                           col = legend_col, lty = legend_lty,
+                           lwd = c(2, rep(1, length(legend_items)-1)),
+                           cex = 0.7)
+                }
             }
 
             TRUE

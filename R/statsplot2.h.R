@@ -13,7 +13,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             distribution = "p",
             alluvsty = "t1",
             excl = FALSE,
-            sampleLarge = TRUE, ...) {
+            sampleLarge = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -61,7 +61,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..sampleLarge <- jmvcore::OptionBool$new(
                 "sampleLarge",
                 sampleLarge,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -244,7 +244,7 @@ statsplot2 <- function(
     distribution = "p",
     alluvsty = "t1",
     excl = FALSE,
-    sampleLarge = TRUE) {
+    sampleLarge = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("statsplot2 requires jmvcore to be installed (restart may be required)")

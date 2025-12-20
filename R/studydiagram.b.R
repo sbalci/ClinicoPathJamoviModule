@@ -58,6 +58,19 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, character(1), USE.NAMES = FALSE)
         },
 
+        # Notice helper ----
+        .addNotice = function(msg, type = "INFO") {
+            if (!is.null(self$results$notices)) {
+                notice <- jmvcore::Notice$new(
+                    self$results$notices,
+                    name = paste0("notice_", as.integer(Sys.time() * 1000)),
+                    title = msg,
+                    type = type
+                )
+                self$results$notices$addNotice(notice)
+            }
+        },
+
         # Get style parameters based on diagram type ----
         .getStyleParams = function(diagram_type) {
             is_consort <- grepl("consort", diagram_type)
@@ -79,11 +92,19 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # 1. Validation
-            if (is.null(self$options$data_format)) return()
+            if (is.null(self$options$data_format)) {
+                private$.addNotice("Please select a data format.", type = "ERROR")
+                return()
+            }
+
+            # Validate variables based on format
+            if (!private$.validateVariables()) {
+                return()  # Validation failed, messages already shown
+            }
 
             data <- self$data
             format <- self$options$data_format
-            
+
             # Helper to add warning
             add_warning <- function(msg) {
                  self$results$diagram$setContent(paste0(self$results$diagram$content, "<div style='color:orange;'>Warning: ", msg, "</div>"))
@@ -91,13 +112,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Data Preparation & Attrition Logic
             flow_data <- NULL # Structure: step, n, excluded, retention_pct
-            
-            if (format == "participant_step") {
-                 # Not fully implemented in this pass - focus on the other two common ones
-                 self$results$diagram$setContent("Participant Tracking format is under construction.")
-                 return()
-                 
-            } else if (format == "step_summary") {
+
+            if (format == "step_summary") {
                  # Check vars
                  if (is.null(self$options$step_name) || is.null(self$options$participant_count)) return()
 
@@ -106,24 +122,72 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                  # Ensure proper types
                  if (!is.numeric(data[[count_col]])) {
+                      private$.addNotice("Participant count must be numeric.", type = "ERROR")
                       add_warning("Participant count must be numeric.")
+                      return()
+                 }
+
+                 # Validate count values
+                 count_values <- data[[count_col]]
+
+                 # Check for negative counts
+                 if (any(count_values < 0, na.rm = TRUE)) {
+                      private$.addNotice(
+                          "Participant counts cannot be negative. Please check your data.",
+                          type = "ERROR"
+                      )
+                      return()
+                 }
+
+                 # Check for NA values in counts
+                 if (any(is.na(count_values))) {
+                      n_missing <- sum(is.na(count_values))
+                      private$.addNotice(
+                          paste0("Missing values detected in participant counts (", n_missing, " row", if(n_missing > 1) "s" else "", "). Complete data required for flow diagrams."),
+                          type = "ERROR"
+                      )
+                      return()
+                 }
+
+                 # Check for NA in step names
+                 if (any(is.na(data[[step_col]]))) {
+                      n_missing <- sum(is.na(data[[step_col]]))
+                      private$.addNotice(
+                          paste0("Missing values detected in step names (", n_missing, " row", if(n_missing > 1) "s" else "", "). All steps must be labeled."),
+                          type = "ERROR"
+                      )
                       return()
                  }
 
                  # Extract standard flow
                  flow_data <- data.frame(
                       step = as.character(data[[step_col]]),
-                      n = as.numeric(data[[count_col]]),
+                      n = as.numeric(count_values),
                       stringsAsFactors = FALSE
                  )
+
+                 # Validate initial count is not zero
+                 if (flow_data$n[1] == 0) {
+                      private$.addNotice(
+                          "Initial participant count is zero. Cannot generate flow diagram with no participants.",
+                          type = "ERROR"
+                      )
+                      return()
+                 }
 
                  # Calc exclusions sequentially
                  flow_data$excluded <- c(0, -diff(flow_data$n))
 
-                 # Check logic
+                 # Check logic - increasing counts violate flow diagram assumptions
                  if (any(flow_data$excluded < 0)) {
-                      add_warning("Participant counts increase between steps. Exclusions clamped to 0.")
-                      flow_data$excluded[flow_data$excluded < 0] <- 0
+                      private$.addNotice(
+                          "Participant counts increase between steps - this violates flow diagram logic. Please verify your participant count variable shows decreasing or constant values (e.g., 1000 → 850 → 720).",
+                          type = "ERROR"
+                      )
+                      self$results$diagram$setContent(
+                          "<div style='background:#ffebee; padding:15px; border-left:4px solid #f44336;'><h4>⚠️ Data Error Detected</h4><p>Participant counts must decrease or stay constant between sequential steps. Your data shows increases, which is illogical for a study flow diagram.</p><p><b>Action:</b> Check that your count variable is cumulative and in the correct order.</p></div>"
+                      )
+                      return()
                  }
 
                  # Reasons?
@@ -142,6 +206,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  
                  # Unique IDs check
                  if (any(duplicated(data[[pid_col]]))) {
+                      private$.addNotice("Duplicate Participant IDs found. Analysis assumes one row per participant.", type = "STRONG_WARNING")
                       add_warning("Duplicate Participant IDs found. Analysis assumes one row per participant.")
                  }
                  
@@ -165,25 +230,28 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                       return(list(n=nrow(kept_df), excluded=n_excl, kept_df=kept_df))
                  }
                  
-                 # Step 2
-                 res2 <- verify_step(self$options$step2_label, self$options$step1_exclusions, current_data) # Exclusions happen BETWEEN 1 and 2 usually, or AT step 1 leading to 2.
-                 # Convention: Step 1 is "Assessed". Step 1 Exclusions remove people from Step 2 "Enrolled".
-                 steps[[2]] <- list(name=self$options$step2_label, n=res2$n, excluded=res2$excluded, reason=paste(self$options$step1_exclusions, collapse=", "))
+                 # Step 2: Apply exclusions that occurred AFTER step 1
+                 # exclusions_after_step1 reduces participants from step 1 → step 2
+                 res2 <- verify_step(self$options$step2_label, self$options$exclusions_after_step1, current_data)
+                 steps[[2]] <- list(name=self$options$step2_label, n=res2$n, excluded=res2$excluded, reason=paste(self$options$exclusions_after_step1, collapse=", "))
                  current_data <- res2$kept_df
-                 
-                 # Step 3
-                 res3 <- verify_step(self$options$step3_label, self$options$step2_exclusions, current_data)
-                 steps[[3]] <- list(name=self$options$step3_label, n=res3$n, excluded=res3$excluded, reason=paste(self$options$step2_exclusions, collapse=", "))
+
+                 # Step 3: Apply exclusions that occurred AFTER step 2
+                 # exclusions_after_step2 reduces participants from step 2 → step 3
+                 res3 <- verify_step(self$options$step3_label, self$options$exclusions_after_step2, current_data)
+                 steps[[3]] <- list(name=self$options$step3_label, n=res3$n, excluded=res3$excluded, reason=paste(self$options$exclusions_after_step2, collapse=", "))
                  current_data <- res3$kept_df
-                 
-                 # Step 4
-                 res4 <- verify_step(self$options$step4_label, self$options$step3_exclusions, current_data)
-                 steps[[4]] <- list(name=self$options$step4_label, n=res4$n, excluded=res4$excluded, reason=paste(self$options$step3_exclusions, collapse=", "))
+
+                 # Step 4: Apply exclusions that occurred AFTER step 3
+                 # exclusions_after_step3 reduces participants from step 3 → step 4
+                 res4 <- verify_step(self$options$step4_label, self$options$exclusions_after_step3, current_data)
+                 steps[[4]] <- list(name=self$options$step4_label, n=res4$n, excluded=res4$excluded, reason=paste(self$options$exclusions_after_step3, collapse=", "))
                  current_data <- res4$kept_df
-                 
-                 # Step 5
-                 res5 <- verify_step(self$options$step5_label, self$options$step4_exclusions, current_data)
-                 steps[[5]] <- list(name=self$options$step5_label, n=res5$n, excluded=res5$excluded, reason=paste(self$options$step4_exclusions, collapse=", "))
+
+                 # Step 5: Apply exclusions that occurred AFTER step 4
+                 # exclusions_after_step4 reduces participants from step 4 → step 5
+                 res5 <- verify_step(self$options$step5_label, self$options$exclusions_after_step4, current_data)
+                 steps[[5]] <- list(name=self$options$step5_label, n=res5$n, excluded=res5$excluded, reason=paste(self$options$exclusions_after_step4, collapse=", "))
                  current_data <- res5$kept_df
 
                  # Convert to DF
@@ -232,25 +300,27 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateClinicalOutputs()
             private$.generateInterpretation()
 
+            # Add success notice
+            if (!is.null(flow_data) && nrow(flow_data) > 0) {
+                n_start <- flow_data$n[1]
+                n_end <- tail(flow_data$n, 1)
+                retention <- round(n_end/n_start * 100, 1)
+                private$.addNotice(
+                    paste0("Study diagram generated successfully. ", n_start, " initial participants, ",
+                           n_end, " in final analysis (", retention, "% retention)."),
+                    type = "INFO"
+                )
+            }
+
         },
 
 
 
         .validateVariables = function() {
             data_format <- self$options$data_format
+            missing_vars <- c()
 
-            if (data_format == "participant_step") {
-                required_vars <- c("participant_id", "step_excluded")
-                missing_vars <- c()
-
-                if (is.null(self$options$participant_id) || length(self$options$participant_id) == 0) {
-                    missing_vars <- c(missing_vars, "Participant ID")
-                }
-                if (is.null(self$options$step_excluded) || length(self$options$step_excluded) == 0) {
-                    missing_vars <- c(missing_vars, "Step Excluded")
-                }
-
-            } else if (data_format == "step_summary") {
+            if (data_format == "step_summary") {
                 missing_vars <- c()
 
                 if (is.null(self$options$step_name) || length(self$options$step_name) == 0) {
@@ -272,6 +342,12 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (length(missing_vars) > 0) {
+                # Add ERROR notice
+                private$.addNotice(
+                    paste("Missing required variables for", data_format, "format:", paste(missing_vars, collapse = ", ")),
+                    type = "ERROR"
+                )
+
                 message <- paste0(
                     "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
                     "<h4>Missing Required Variables</h4>",
@@ -288,33 +364,24 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Warn if variables from other formats are selected
             warnings <- character(0)
 
-            if (data_format == "participant_step") {
-                # Check if user selected step_summary or exclusion_mapping variables
-                if (!is.null(self$options$step_name) || !is.null(self$options$participant_count)) {
-                    warnings <- c(warnings, "Note: 'Step Name' and 'Participant Count' are for 'Step summary' format, not 'Participant tracking' format.")
-                }
-                if (!is.null(self$options$participant_id_mapping) || !is.null(self$options$exclusion_reason_mapping)) {
-                    warnings <- c(warnings, "Note: Mapping variables are for 'Exclusion mapping' format, not 'Participant tracking' format.")
-                }
-            } else if (data_format == "step_summary") {
-                # Check if user selected participant_step or exclusion_mapping variables
-                if (!is.null(self$options$participant_id) || !is.null(self$options$step_excluded)) {
-                    warnings <- c(warnings, "Note: 'Participant ID' and 'Step Excluded' are for 'Participant tracking' format, not 'Step summary' format.")
-                }
+            if (data_format == "step_summary") {
+                # Check if user selected exclusion_mapping variables
                 if (!is.null(self$options$participant_id_mapping) || !is.null(self$options$exclusion_reason_mapping)) {
                     warnings <- c(warnings, "Note: Mapping variables are for 'Exclusion mapping' format, not 'Step summary' format.")
                 }
             } else if (data_format == "exclusion_mapping") {
-                # Check if user selected other format variables
-                if (!is.null(self$options$participant_id) || !is.null(self$options$step_excluded)) {
-                    warnings <- c(warnings, "Note: 'Participant ID' and 'Step Excluded' are for 'Participant tracking' format, not 'Exclusion mapping' format.")
-                }
+                # Check if user selected step_summary variables
                 if (!is.null(self$options$step_name) || !is.null(self$options$participant_count)) {
                     warnings <- c(warnings, "Note: 'Step Name' and 'Participant Count' are for 'Step summary' format, not 'Exclusion mapping' format.")
                 }
             }
 
             if (length(warnings) > 0) {
+                # Add INFO notice about variable format mismatches
+                for (w in warnings) {
+                    private$.addNotice(w, type = "INFO")
+                }
+
                 warning_msg <- paste0(
                     "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
                     "<h4>⚠️ Variable Selection Warning</h4>",
@@ -466,11 +533,11 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Get step exclusion mappings
             step_mappings <- list(
-                step1 = self$options$step1_exclusions,
-                step2 = self$options$step2_exclusions,
-                step3 = self$options$step3_exclusions,
-                step4 = self$options$step4_exclusions,
-                step5 = self$options$step5_exclusions
+                step1 = self$options$exclusions_after_step1,
+                step2 = self$options$exclusions_after_step2,
+                step3 = self$options$exclusions_after_step3,
+                step4 = self$options$exclusions_after_step4,
+                step5 = self$options$exclusions_after_step5
             )
 
             # Get step labels

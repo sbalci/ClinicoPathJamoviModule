@@ -32,11 +32,11 @@ items:
         - exclusion_reason_summary
         - participant_id_mapping
         - exclusion_reason_mapping
-        - step1_exclusions
-        - step2_exclusions
-        - step3_exclusions
-        - step4_exclusions
-        - step5_exclusions
+        - exclusions_after_step1
+        - exclusions_after_step2
+        - exclusions_after_step3
+        - exclusions_after_step4
+        - exclusions_after_step5
       columns:
         - name: step
           title: Study Step
@@ -79,11 +79,11 @@ items:
         - exclusion_reason_summary
         - participant_id_mapping
         - exclusion_reason_mapping
-        - step1_exclusions
-        - step2_exclusions
-        - step3_exclusions
-        - step4_exclusions
-        - step5_exclusions
+        - exclusions_after_step1
+        - exclusions_after_step2
+        - exclusions_after_step3
+        - exclusions_after_step4
+        - exclusions_after_step5
         - step1_label
         - step2_label
         - step3_label
@@ -113,6 +113,11 @@ items:
         - participant_id
         - step_excluded
         - participant_count
+
+    - name: notices
+      title: ''
+      type: Notification
+      visible: false
 
     - name: clinicalSummary
       title: Clinical Summary

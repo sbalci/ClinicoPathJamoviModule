@@ -137,18 +137,22 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 is.null(self$options$startDate) ||
                 is.null(self$options$lastFollowup)) {
 
-                html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Required Variables Missing</h4>",
-                    "<p style='color: #856404;'>Please select the following required variables to derive survival endpoints:</p>",
-                    "<ul style='margin-left: 20px;'>",
-                    if (is.null(self$options$patientId)) "<li><strong>Patient ID</strong> - Unique identifier for each patient</li>" else "",
-                    if (is.null(self$options$startDate)) "<li><strong>Treatment Start Date/Time</strong> - Baseline timepoint</li>" else "",
-                    if (is.null(self$options$lastFollowup)) "<li><strong>Last Follow-up Date/Time</strong> - Last known contact</li>" else "",
-                    "</ul>",
-                    "</div>"
+                # Build list of missing variables for single-line notice
+                missingVars <- c()
+                if (is.null(self$options$patientId)) missingVars <- c(missingVars, 'Patient ID')
+                if (is.null(self$options$startDate)) missingVars <- c(missingVars, 'Treatment Start Date')
+                if (is.null(self$options$lastFollowup)) missingVars <- c(missingVars, 'Last Follow-up Date')
+
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingRequiredVars',
+                    type = jmvcore::NoticeType$ERROR
                 )
-                self$results$dataWarning$setContent(html)
+                notice$setContent(
+                    sprintf('Required variables missing: %s • Please select all required variables to derive survival endpoints.',
+                            paste(missingVars, collapse=', '))
+                )
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -157,14 +161,13 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             # Check for empty dataset
             if (nrow(data) == 0) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
-                    "<p style='color: #721c24;'>Dataset contains no rows.</p>",
-                    "<p>Please load data to derive survival endpoints.</p>",
-                    "</div>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'emptyDataset',
+                    type = jmvcore::NoticeType$ERROR
                 )
-                self$results$dataWarning$setContent(html)
+                notice$setContent('No data available • Dataset contains no rows • Please load data to derive survival endpoints.')
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -178,25 +181,15 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 !self$options$calculateTTP && !self$options$calculateDOR &&
                 !self$options$calculateTOT) {
 
-                html <- paste0(
-                    "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #0c5460;'>ℹ️ No Endpoints Selected</h4>",
-                    "<p style='color: #0c5460;'>Please select at least one survival endpoint to calculate:</p>",
-                    "<ul style='margin-left: 20px;'>",
-                    "<li><strong>PFS</strong> (Progression-Free Survival) - Time to progression or death</li>",
-                    "<li><strong>OS</strong> (Overall Survival) - Time to death</li>",
-                    "<li><strong>TTP</strong> (Time to Progression) - Time to progression only</li>",
-                    "<li><strong>DOR</strong> (Duration of Response) - Time from response to progression</li>",
-                    "<li><strong>Time on Treatment</strong> - Treatment duration</li>",
-                    "</ul>",
-                    "</div>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noEndpointsSelected',
+                    type = jmvcore::NoticeType$INFO
                 )
-                self$results$dataWarning$setContent(html)
+                notice$setContent('No survival endpoints selected • Please select at least one endpoint to calculate: PFS (Progression-Free Survival), OS (Overall Survival), TTP (Time to Progression), DOR (Duration of Response), or Time on Treatment.')
+                self$results$insert(1, notice)
                 return()
             }
-
-            # Clear warnings if validation passed
-            self$results$dataWarning$setContent("")
 
             # Convert dates if needed
             if (self$options$inputType == 'dates') {
@@ -286,13 +279,13 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
 
             # Store derived data for use in other functions
-            
+
             # -----------------------------------------------------------
-            # QUALITY CHECKS AND WARNINGS
+            # QUALITY CHECKS AND WARNINGS - Using Notices
             # -----------------------------------------------------------
-            warnings <- c()
-            
-            # 1. Check for negative times
+            noticePosition <- 500  # Mid-range position for warnings
+
+            # 1. Check for negative times (DATA ERROR - must stop analysis)
             time_cols <- grep("_time", names(derivedData), value = TRUE)
             if (length(time_cols) > 0) {
                 total_neg <- 0
@@ -300,73 +293,82 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     neg_count <- sum(derivedData[[col]] < 0, na.rm = TRUE)
                     if (neg_count > 0) {
                         total_neg <- total_neg + neg_count
-                        # Set negative times to NA to avoid analysis errors
-                        derivedData[[col]][derivedData[[col]] < 0] <- NA
                     }
                 }
-                
+
                 if (total_neg > 0) {
-                    warnings <- c(warnings, paste0(
-                        "<strong>Negative Times Detected:</strong> ", total_neg, 
-                        " value(s) resulted in negative times (Event Date < Start Date). ",
-                        "These have been set to missing (NA). Please check your dates."
-                    ))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'negativeTimesDetected',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(
+                        sprintf('Data error: %d observations have event dates BEFORE start dates • This indicates incorrect date entry • Please fix your data before proceeding with analysis.', total_neg)
+                    )
+                    self$results$insert(1, notice)
+                    return()  # STOP analysis - data must be corrected
                 }
             }
-            
+
             # 2. Check for Imputed Events (Event = 1 but Date is Missing)
             # PFS / TTP Imputation
-            if ((self$options$calculatePFS || self$options$calculateTTP) && 
+            if ((self$options$calculatePFS || self$options$calculateTTP) &&
                 !is.null(progressionEvent)) {
-                
+
                 if (is.null(progressionDate)) {
-                    warnings <- c(warnings,
-                        "<strong>Progression Date Not Provided:</strong> Progression events without dates were timed to Last Follow-up. Provide progression dates for accurate PFS/TTP.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'progressionDateNotProvided',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent('Progression Date not provided • Progression events without dates were timed to Last Follow-up • Provide progression dates for accurate PFS/TTP.')
+                    self$results$insert(noticePosition, notice)
+                    noticePosition <- noticePosition + 1
                 } else {
                     imputed_prog <- sum(progressionEvent == 1 & is.na(progressionDate), na.rm = TRUE)
                     if (imputed_prog > 0) {
-                        warnings <- c(warnings, paste0(
-                            "<strong>Progression Date Missing:</strong> ", imputed_prog, 
-                            " patient(s) have a progression event but no date. ",
-                            "Time was imputed using the Last Follow-up Date. This may overestimate time-to-event."
-                        ))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'progressionDateMissing',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(
+                            sprintf('Progression Date missing for %d patient(s) with progression event • Time imputed using Last Follow-up Date • This may overestimate time-to-event.', imputed_prog)
+                        )
+                        self$results$insert(noticePosition, notice)
+                        noticePosition <- noticePosition + 1
                     }
                 }
             }
-            
+
             # OS Imputation
-            if ((self$options$calculateOS || self$options$calculatePFS) && 
+            if ((self$options$calculateOS || self$options$calculatePFS) &&
                 !is.null(deathEvent)) {
-                
+
                 if (is.null(deathDate)) {
-                    warnings <- c(warnings,
-                        "<strong>Death Date Not Provided:</strong> Death events without dates were timed to Last Follow-up. Provide death dates for accurate OS/PFS.")
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'deathDateNotProvided',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent('Death Date not provided • Death events without dates were timed to Last Follow-up • Provide death dates for accurate OS/PFS.')
+                    self$results$insert(noticePosition, notice)
+                    noticePosition <- noticePosition + 1
                 } else {
                     imputed_death <- sum(deathEvent == 1 & is.na(deathDate), na.rm = TRUE)
                     if (imputed_death > 0) {
-                        warnings <- c(warnings, paste0(
-                            "<strong>Death Date Missing:</strong> ", imputed_death, 
-                            " patient(s) have a death event but no date. ",
-                            "Time was imputed using the Last Follow-up Date."
-                        ))
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'deathDateMissing',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        notice$setContent(
+                            sprintf('Death Date missing for %d patient(s) with death event • Time imputed using Last Follow-up Date.', imputed_death)
+                        )
+                        self$results$insert(noticePosition, notice)
+                        noticePosition <- noticePosition + 1
                     }
                 }
-            }
-            
-            # Display warnings if any
-            if (length(warnings) > 0) {
-                warning_html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Data Quality Warnings</h4>",
-                    "<ul style='margin-left: 20px; color: #856404;'>",
-                    paste0("<li>", warnings, "</li>", collapse = ""),
-                    "</ul>",
-                    "</div>"
-                )
-                # Append to existing warning content or replace
-                current_content <- self$results$dataWarning$content
-                if (is.null(current_content)) current_content <- ""
-                self$results$dataWarning$setContent(paste0(current_content, warning_html))
             }
             
             private$.derivedData <- derivedData
@@ -397,6 +399,27 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             # Export if requested
             if (self$options$exportEndpoints) {
                 private$.exportEndpoints(derivedData)
+            }
+
+            # Add success notice summarizing derived endpoints
+            endpointsList <- c()
+            if (self$options$calculatePFS) endpointsList <- c(endpointsList, 'PFS')
+            if (self$options$calculateOS) endpointsList <- c(endpointsList, 'OS')
+            if (self$options$calculateTTP) endpointsList <- c(endpointsList, 'TTP')
+            if (self$options$calculateDOR) endpointsList <- c(endpointsList, 'DOR')
+            if (self$options$calculateTOT) endpointsList <- c(endpointsList, 'Time on Treatment')
+
+            if (length(endpointsList) > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+                notice$setContent(
+                    sprintf('Analysis complete: Successfully derived %s for %d patients • Variables created and ready for survival analysis.',
+                            paste(endpointsList, collapse=', '), nrow(derivedData))
+                )
+                self$results$insert(999, notice)
             }
 
         },
@@ -439,15 +462,15 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 # PFS = time to FIRST event (progression or death)
                 if (!is.na(prog_time) && !is.na(death_time)) {
                     # Both events occurred - take earliest
-                    time[i] <- min(prog_time, death_time, followup_time, na.rm = TRUE)
+                    time[i] <- min(prog_time, death_time, na.rm = TRUE)
                     event[i] <- 1
                 } else if (!is.na(prog_time)) {
                     # Only progression occurred
-                    time[i] <- min(prog_time, followup_time, na.rm = TRUE)
+                    time[i] <- prog_time
                     event[i] <- 1
                 } else if (!is.na(death_time)) {
                     # Only death occurred
-                    time[i] <- min(death_time, followup_time, na.rm = TRUE)
+                    time[i] <- death_time
                     event[i] <- 1
                 } else {
                     # No event - censored at last followup
@@ -502,13 +525,9 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     time[i] <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
                     event[i] <- 1
                 } else {
-                    # No progression - censored
-                    # If patient died, censor at death; otherwise censor at last followup
-                    if (!is.null(deathDate) && !is.na(deathDate[i])) {
-                        time[i] <- private$.calculateTimeDiff(startDate[i], deathDate[i])
-                    } else {
-                        time[i] <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
-                    }
+                    # No progression - censored at last follow-up (TTP standard)
+                    # Per FDA/EMA guidance: death without progression is censored at last follow-up
+                    time[i] <- private$.calculateTimeDiff(startDate[i], lastFollowup[i])
                     event[i] <- 0
                 }
             }
@@ -590,40 +609,34 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 tryCatch({
                     as.Date(as.numeric(x), origin = "1970-01-01")
                 }, error = function(e2) {
-                    # Conversion failed - warn user
+                    # Conversion failed - warn user with Notice
                     na_count <- sum(is.na(x))
                     total_count <- length(x)
 
-                    html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Date Conversion Failed</h4>",
-                        "<p style='color: #721c24;'>Could not convert date/time variables to Date format.</p>",
-                        "<p><strong>Data status:</strong> ", na_count, " of ", total_count, " values could not be parsed.</p>",
-                        "<p><strong>Solutions:</strong></p>",
-                        "<ol style='margin-left: 20px;'>",
-                        "<li>Ensure dates are in standard format (YYYY-MM-DD or YYYY/MM/DD)</li>",
-                        "<li>Check for text values or inconsistent date formats</li>",
-                        "<li>Use 'Numeric (time values)' input type if already calculated</li>",
-                        "<li>Preprocess dates in jamovi Data → Transform</li>",
-                        "</ol>",
-                        "</div>"
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'dateConversionFailed',
+                        type = jmvcore::NoticeType$ERROR
                     )
-                    self$results$dataWarning$setContent(html)
+                    notice$setContent(
+                        sprintf('Date conversion failed: Could not convert %d of %d date values to Date format • Ensure dates are in standard format (YYYY-MM-DD or YYYY/MM/DD) or use Numeric input type.', na_count, total_count)
+                    )
+                    self$results$insert(1, notice)
                     rep(NA, length(x))
                 })
             })
 
             # Check if conversion resulted in many NAs
             if (sum(is.na(result)) > length(result) * 0.5 && sum(!is.na(x)) > 0) {
-                html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Partial Date Conversion Issues</h4>",
-                    "<p style='color: #856404;'>More than 50% of date values could not be converted.</p>",
-                    "<p><strong>Converted:</strong> ", sum(!is.na(result)), " / ", length(result), " values</p>",
-                    "<p>Please check your date format and consider using numeric time values instead.</p>",
-                    "</div>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'partialDateConversion',
+                    type = jmvcore::NoticeType$WARNING
                 )
-                self$results$dataWarning$setContent(html)
+                notice$setContent(
+                    sprintf('Partial date conversion issues: More than 50%% of date values could not be converted • Converted: %d / %d values • Please check your date format or use Numeric input type.', sum(!is.na(result)), length(result))
+                )
+                self$results$insert(500, notice)
             }
 
             return(result)
@@ -739,6 +752,58 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 n_events <- sum(event == 1)
                 n_censored <- sum(event == 0)
 
+                # Check for all-censored scenario (no events observed)
+                if (n_events == 0) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = sprintf('allCensored_%s', name),
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(
+                        sprintf('%s: All %d observations are censored (no events observed) • Survival analysis cannot be performed without observed events • Check event definitions or extend follow-up time.',
+                                name, n)
+                    )
+                    self$results$insert(100, notice)
+                    next  # Skip this endpoint - no events to analyze
+                }
+
+                # Event count validation - ensure reliable statistical estimates
+                if (n_events < 3) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = sprintf('insufficientEvents_%s', name),
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(
+                        sprintf('%s: Only %d event(s) observed • Minimum 3 events required for reliable survival analysis • Cannot estimate median or confidence intervals with fewer than 3 events.',
+                                name, n_events)
+                    )
+                    self$results$insert(100, notice)
+                    next  # Skip this endpoint - cannot analyze reliably
+                } else if (n_events < 10) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = sprintf('fewEvents_%s', name),
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(
+                        sprintf('%s: Only %d events observed • Median and confidence intervals are UNRELIABLE with <10 events • Results should be interpreted with extreme caution and confirmed with larger sample.',
+                                name, n_events)
+                    )
+                    self$results$insert(100, notice)
+                } else if (n_events < 20) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = sprintf('limitedEvents_%s', name),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(
+                        sprintf('%s: %d events observed • Statistical power is limited with <20 events • Confidence intervals may be wide and median estimate less precise.',
+                                name, n_events)
+                    )
+                    self$results$insert(100, notice)
+                }
+
                 # Calculate median and CI using survival package
                 surv_obj <- tryCatch({
                     survival::Surv(time, event)
@@ -758,11 +823,13 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                             list(lower = NA, upper = NA)
                         })
                     } else {
-                        median_time <- median(time[event == 1], na.rm = TRUE)
+                        # Cannot estimate median without KM fit - report as not estimable
+                        median_time <- NA
                         ci <- list(lower = NA, upper = NA)
                     }
                 } else {
-                    median_time <- median(time[event == 1], na.rm = TRUE)
+                    # Cannot create survival object - median not estimable
+                    median_time <- NA
                     ci <- list(lower = NA, upper = NA)
                 }
 
@@ -809,6 +876,21 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
                 total <- length(event)
                 n_events <- sum(event == 1)
+
+                # Validate minimum sample size for meaningful event rate
+                if (total < 10) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = sprintf('eventRateSmallSample_%s', name),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(
+                        sprintf('%s event rates: Only %d observations • Event rates and censoring percentages are unreliable with <10 observations • Interpret with caution.',
+                                name, total)
+                    )
+                    self$results$insert(100, notice)
+                }
+
                 event_rate <- (n_events / total) * 100
                 censoring_rate <- 100 - event_rate
 
@@ -863,6 +945,22 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 event <- ep$event[valid]
 
                 if (length(time) == 0) next
+
+                # Validate event count for reliable milestone estimates
+                n_events <- sum(event == 1)
+                if (n_events < 3) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = sprintf('milestoneInsufficientEvents_%s', name),
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(
+                        sprintf('%s milestone analysis: Only %d event(s) observed • Minimum 3 events required for reliable survival probability estimates at specific time points • Skipping milestone analysis for this endpoint.',
+                                name, n_events)
+                    )
+                    self$results$insert(100, notice)
+                    next  # Skip milestone calculation for this endpoint
+                }
 
                 # Fit KM curve
                 surv_obj <- tryCatch({
@@ -952,6 +1050,30 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             if (nrow(plot_data) == 0) {
                 return()
+            }
+
+            # Validate event counts per endpoint before plotting
+            endpoint_summary <- table(plot_data$endpoint[plot_data$event == 1])
+            insufficient_endpoints <- names(endpoint_summary[endpoint_summary < 3])
+
+            if (length(insufficient_endpoints) > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'kmPlotInsufficientEvents',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(
+                    sprintf('KM plot warning: Endpoint(s) %s have <3 events • Survival curves may be unreliable • Consider using only endpoints with adequate event counts.',
+                            paste(insufficient_endpoints, collapse=', '))
+                )
+                self$results$insert(100, notice)
+
+                # Remove endpoints with <3 events from plot
+                plot_data <- plot_data[!plot_data$endpoint %in% insufficient_endpoints, ]
+
+                if (nrow(plot_data) == 0) {
+                    return()  # No valid endpoints to plot
+                }
             }
 
             # Fit survival models

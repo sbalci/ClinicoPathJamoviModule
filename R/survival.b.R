@@ -783,18 +783,46 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             mydata[["start"]] <- date_parser(mydata[[dxdate]])
                             mydata[["end"]] <- date_parser(mydata[[fudate]])
                         } else {
-                            stop(sprintf(.("Unknown date format: %s. Supported formats are: %s"),
-                                       timetypedata,
-                                       paste(names(lubridate_functions), collapse = ", ")))
+                            # ERROR Notice for invalid date format
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'invalidDateFormat',
+                                type = jmvcore::NoticeType$ERROR
+                            )
+                            notice$setContent(sprintf(
+                                'Unknown date format: %s • Supported formats: %s • Please select correct format in Date Type options',
+                                self$options$timetypedata,
+                                paste(names(lubridate_functions), collapse = ", ")
+                            ))
+                            self$results$insert(1, notice)
+                            return()
                         }
                     } else {
-                        # Mixed types error
-                        stop(.("Diagnosis date and follow-up date must be in the same format (both numeric or both text)"))
+                        # ERROR Notice for mixed date types
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'mixedDateTypes',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Diagnosis date and follow-up date must be in the same format (both numeric or both text) • Please check your date variables and ensure consistent formatting')
+                        self$results$insert(1, notice)
+                        return()
                     }
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
-                        stop(sprintf(.("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: %s"), self$options$timetypedata))
+                        # ERROR Notice for time calculation failure
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'timeCalculationFailed',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent(sprintf(
+                            'Time difference cannot be calculated • Date parsing produced no valid dates • Current date type setting: %s • Please verify date format matches your data',
+                            self$options$timetypedata
+                        ))
+                        self$results$insert(1, notice)
+                        return()
                     }
 
                     timetypeoutput <-
@@ -1005,8 +1033,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::mutate(mytime = mytime - landmark)
                   n_after <- nrow(cleanData)
                   if (n_after < n_before) {
-                    jmvcore::note(self$results$medianTable,
-                                  glue::glue("Landmark analysis removed {n_before - n_after} subject(s) with time < {landmark}."))
+                    # WARNING Notice for landmark exclusions
+                    landmark_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'landmarkExclusions',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    landmark_notice$setContent(sprintf(
+                        'Landmark analysis excluded %d subjects with time < %d %s • Analysis is conditional on surviving to landmark time • Results apply only to subjects alive at landmark',
+                        n_before - n_after,
+                        landmark,
+                        self$options$timetypeoutput
+                    ))
+                    self$results$insert(2, landmark_notice)
                   }
                 }
 
@@ -1254,6 +1293,54 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
+                # Clinical Safety: Event Count Checking ----
+                mydata <- results$cleanData
+                n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
+                n_total <- nrow(mydata)
+
+                # CRITICAL: < 10 events - ERROR (block analysis)
+                if (n_events < 10) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientEvents',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf(
+                        'CRITICAL: Only %d events detected • Minimum 10 events required for reliable survival analysis • Results cannot be computed • Please collect more data before proceeding',
+                        n_events
+                    ))
+                    self$results$insert(1, notice)
+                    return()
+                }
+
+                # STRONG WARNING: 10-19 events
+                if (n_events >= 10 && n_events < 20) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'limitedEvents',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Limited events (n=%d of %d observations) • Unstable estimates likely • Confidence intervals may be very wide • Interpret results with extreme caution • Consider collecting additional data',
+                        n_events, n_total
+                    ))
+                    self$results$insert(1, notice)
+                }
+
+                # WARNING: 20-49 events
+                if (n_events >= 20 && n_events < 50) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'moderateEvents',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf(
+                        'Moderate event count (n=%d) • Statistical power may be limited for detecting smaller effects • Confidence intervals may be wider than ideal',
+                        n_events
+                    ))
+                    self$results$insert(1, notice)
+                }
+
                 # Run Analysis ----
                 ## Median Survival ----
                     private$.medianSurv(results)
@@ -1293,7 +1380,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!(self$options$multievent && self$options$analysistype == "compete")) {
                     private$.cox(results)
                 } else {
-                    jmvcore::note(self$results$coxTable, "Cox model is not run for competing risk analyses in this module.")
+                    # INFO Notice for competing risk analysis limitations
+                    competing_risk_notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'competingRiskLimitations',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    competing_risk_notice$setContent('Competing risk analysis selected • Some analyses (Cox regression, pairwise tests, person-time rates) are not applicable for multi-state competing risk outcomes in this module • Use cumulative incidence functions instead')
+                    self$results$insert(2, competing_risk_notice)
                 }
                 private$.checkpoint()  # Add checkpoint here
 
@@ -1315,9 +1409,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$pw) {
                     if (!(self$options$multievent && self$options$analysistype == "compete")) {
                         private$.pairwise(results)
-                    } else {
-                        jmvcore::note(self$results$pairwiseTable, "Pairwise group tests are skipped for competing risk analyses.")
                     }
+                    # Notice already added above for competing risk limitations
                 }
 
 
@@ -1328,9 +1421,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$person_time) {
                     if (!(self$options$multievent && self$options$analysistype == "compete")) {
                         private$.personTimeAnalysis(results)
-                    } else {
-                        jmvcore::note(self$results$personTimeTable, "Person-time incidence rates are not computed for competing risk (multi-state) outcomes.")
                     }
+                    # Notice already added above for competing risk limitations
                 }
                 
                 ## Additional Model Diagnostics ----
@@ -1354,12 +1446,26 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$outcomeredefined$setRowNums(results$cleanData$row_names)
                     self$results$outcomeredefined$setValues(results$cleanData$CalculatedOutcome)
                 }
-                
+
                 # Populate explanations if enabled
                 private$.populateExplanations()
-                
+
                 # Populate enhanced clinical content
                 private$.populateEnhancedClinicalContent()
+
+                # Analysis completion INFO Notice
+                completion_notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+                completion_notice$setContent(sprintf(
+                    'Analysis completed successfully • %d observations analyzed • %d events observed (%.1f%% event rate) • See detailed results below',
+                    n_total,
+                    n_events,
+                    (n_events / n_total) * 100
+                ))
+                self$results$insert(999, completion_notice)
             }
 
             # RMST Analysis Function ----
@@ -1885,6 +1991,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     zph <- survival::cox.zph(cox_model)
 
                     self$results$cox_ph$setContent(print(zph))
+
+                    # Check for PH assumption violation and create Notice banner
+                    p_value <- zph$table[nrow(zph$table), "p"]  # Global test p-value
+                    if (p_value < 0.05) {
+                        ph_notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'phViolation',
+                            type = jmvcore::NoticeType$STRONG_WARNING
+                        )
+                        ph_notice$setContent(sprintf(
+                            'Proportional Hazards Assumption Violated (p=%.4f) • Cox model may be inappropriate for this data • Consider stratified analysis or time-varying covariates • See detailed recommendations below',
+                            p_value
+                        ))
+                        self$results$insert(1, ph_notice)
+                    }
 
                     # Generate enhanced PH interpretation
                     ph_interpretation <- private$.generatePHInterpretation(zph, myfactor)

@@ -80,7 +80,7 @@ children:
     margin: large
     children:
       - type: LevelSelector
-        name: step1_exclusions
+        name: exclusions_after_step1
   - type: LayoutBox
     margin: large
     children:
@@ -91,7 +91,7 @@ children:
     margin: large
     children:
       - type: LevelSelector
-        name: step2_exclusions
+        name: exclusions_after_step2
   - type: LayoutBox
     margin: large
     children:
@@ -102,7 +102,7 @@ children:
     margin: large
     children:
       - type: LevelSelector
-        name: step3_exclusions
+        name: exclusions_after_step3
   - type: LayoutBox
     margin: large
     children:
@@ -113,7 +113,7 @@ children:
     margin: large
     children:
       - type: LevelSelector
-        name: step4_exclusions
+        name: exclusions_after_step4
   - type: LayoutBox
     margin: large
     children:
@@ -124,7 +124,7 @@ children:
     margin: large
     children:
       - type: LevelSelector
-        name: step5_exclusions
+        name: exclusions_after_step5
   - type: CollapseBox
     label: Display Options
     collapsed: true

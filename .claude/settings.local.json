@@ -179,7 +179,11 @@
       "Bash(do echo \"=== Line $line ===\")",
       "Bash(wc:*)",
       "Skill(fix-function)",
-      "Skill(fix-function:*)"
+      "Skill(fix-function:*)",
+      "Bash(test:*)",
+      "Bash(while read file)",
+      "Bash(do mv \"$file\" quality-reports/)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": [],

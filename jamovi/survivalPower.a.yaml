@@ -1,7 +1,7 @@
 ---
 name: survivalPower
 title: Survival Power Analysis
-menuGroup: SurvivalT1
+menuGroup: SurvivalT
 menuSubgroup: Design and Power Analysis
 menuTitle: Power Analysis
 menuSubtitle: Power analysis

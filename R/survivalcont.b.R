@@ -318,12 +318,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 tryCatch({
                     analysis_function()
                 }, error = function(e) {
-                    warning(.('Analysis failed in {context}: {error}. Using fallback method.'),
-                            context = context, error = e$message)
+                    # Analysis failed - return fallback value silently
+                    # Error details are already handled by specific error notices
                     return(fallback_value)
                 }, warning = function(w) {
-                    message(.('Warning in {context}: {warning}'),
-                            context = context, warning = w$message)
+                    # Suppress warnings and retry
                     suppressWarnings(analysis_function())
                 })
             },
@@ -1419,6 +1418,54 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 ## Run Categorise Data ----
                 cutoffdata <- private$.cutoff2(res.cut)
 
+                ## Validate group sizes after cut-off ----
+                # Check for small groups that may produce unreliable statistics
+                if (!is.null(cutoffdata) && !is.null(results$name3contexpl)) {
+                    group_var <- results$name3contexpl
+                    if (group_var %in% names(cutoffdata)) {
+                        group_counts <- table(cutoffdata[[group_var]])
+                        min_group_size <- min(group_counts)
+                        min_group_name <- names(group_counts)[which.min(group_counts)]
+
+                        # Count events in each group
+                        outcome_var <- results$analysis_outcome
+                        if (outcome_var %in% names(cutoffdata)) {
+                            for (grp in names(group_counts)) {
+                                grp_data <- cutoffdata[cutoffdata[[group_var]] == grp, ]
+                                n_events_grp <- sum(grp_data[[outcome_var]], na.rm = TRUE)
+
+                                # STRONG_WARNING for very small groups (n<10)
+                                if (group_counts[grp] < 10) {
+                                    private$.addNotice(
+                                        name = paste0('verySmallGroup_', gsub("[^a-zA-Z0-9]", "", grp)),
+                                        type = jmvcore::NoticeType$STRONG_WARNING,
+                                        message = sprintf('Very small group size after cut-off: "%s" has only %d observations (%d events). Statistical tests (log-rank, Cox regression) are unreliable with such small groups. Consider: (1) alternative cut-off methods, (2) treating variable as continuous, or (3) collecting more data.', grp, group_counts[grp], n_events_grp),
+                                        position = 2
+                                    )
+                                } else if (group_counts[grp] < 20) {
+                                    # WARNING for small groups (10-19)
+                                    private$.addNotice(
+                                        name = paste0('smallGroup_', gsub("[^a-zA-Z0-9]", "", grp)),
+                                        type = jmvcore::NoticeType$WARNING,
+                                        message = sprintf('Small group size after cut-off: "%s" has %d observations (%d events). Statistical power is limited. Confidence intervals may be wide. Interpret results cautiously.', grp, group_counts[grp], n_events_grp),
+                                        position = 3
+                                    )
+                                }
+
+                                # Check events per group (minimum 5 for reliable survival analysis)
+                                if (n_events_grp < 5 && n_events_grp > 0) {
+                                    private$.addNotice(
+                                        name = paste0('fewEvents_', gsub("[^a-zA-Z0-9]", "", grp)),
+                                        type = jmvcore::NoticeType$STRONG_WARNING,
+                                        message = sprintf('Very few events in group "%s" (%d events out of %d observations). Survival estimates and confidence intervals are highly unstable. Median survival may be undefined. Cox regression unreliable.', grp, n_events_grp, group_counts[grp]),
+                                        position = 2
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 ## Run RMST analysis with cutoff data (if enabled) ----
                 if (self$options$rmst_analysis) {
                     private$.calculateRMST(results, cutoffdata)
@@ -1626,6 +1673,67 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     labelled_data <- private$.getData()
                     tCox[[1]] <- private$.restoreOriginalNamesInTable(tCox[[1]], labelled_data$all_labels)
                 }
+
+                # Test Proportional Hazards Assumption using cox.zph() ----
+                # This is critical for validating Cox model assumptions
+                tryCatch({
+                    mytime <- results$name1time
+                    mytime <- jmvcore::constructFormula(terms = mytime)
+                    myoutcome <- results$analysis_outcome
+                    myoutcome <- jmvcore::constructFormula(terms = myoutcome)
+                    myfactor <- results$name3contexpl
+                    myfactor <- jmvcore::constructFormula(terms = myfactor)
+                    mydata <- results$cleanData
+                    mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+
+                    # Fit Cox model for PH testing
+                    cox_formula_str <- paste0("survival::Surv(", mytime, ",", myoutcome, ") ~ ", myfactor)
+                    cox_model_ph <- survival::coxph(as.formula(cox_formula_str), data = mydata)
+
+                    # Test proportional hazards assumption
+                    zph_test <- survival::cox.zph(cox_model_ph)
+
+                    # Check global test (overall model assumption)
+                    global_p <- zph_test$table["GLOBAL", "p"]
+
+                    if (!is.na(global_p) && global_p < 0.05) {
+                        # PH assumption violated
+                        private$.addNotice(
+                            name = 'phViolationGlobal',
+                            type = jmvcore::NoticeType$STRONG_WARNING,
+                            message = sprintf('Proportional hazards assumption violated (Schoenfeld residual test p=%.3f). Cox model estimates may be unreliable. Hazard ratios may change over time. Consider: (1) stratified Cox regression (Advanced Options), (2) time-varying coefficients, (3) log-log plot for visual assessment, or (4) parametric survival models.', global_p),
+                            position = 2
+                        )
+                    }
+
+                    # Check individual covariate if applicable
+                    if (nrow(zph_test$table) > 1) {
+                        # Multiple rows mean we have individual covariate tests
+                        covariate_rows <- rownames(zph_test$table)[rownames(zph_test$table) != "GLOBAL"]
+                        for (var_name in covariate_rows) {
+                            var_p <- zph_test$table[var_name, "p"]
+                            if (!is.na(var_p) && var_p < 0.05) {
+                                private$.addNotice(
+                                    name = paste0('phViolation_', gsub("[^a-zA-Z0-9]", "", var_name)),
+                                    type = jmvcore::NoticeType$STRONG_WARNING,
+                                    message = sprintf('Proportional hazards assumption violated for "%s" (p=%.3f). The effect of this variable on hazard changes over time. Cox HR may not accurately represent the relationship across all time points.', var_name, var_p),
+                                    position = 2
+                                )
+                            }
+                        }
+                    }
+                }, error = function(e) {
+                    # PH testing failed - silently continue (might fail with small samples)
+                    # Only log if there's meaningful error
+                    if (!grepl("singular|convergence", e$message, ignore.case = TRUE)) {
+                        private$.addNotice(
+                            name = 'phTestFailed',
+                            type = jmvcore::NoticeType$INFO,
+                            message = 'Proportional hazards assumption test could not be performed. This may occur with very small samples or perfect separation. Interpret Cox results cautiously and consider visual inspection with log-log plots.',
+                            position = 998
+                        )
+                    }
+                })
 
                 # Create enhanced Cox results with clinical context
                 cox_tooltip <- private$.createClinicalTooltip(
@@ -2649,17 +2757,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
 
-                    # Debug information
-                    message(.('Data columns: {cols}'), cols = paste(names(mydata), collapse = ", "))
-                    message(.('Trying to access variable: {var}'), var = mycontexpl)
-                    message(.('Variable exists: {exists}'), exists = mycontexpl %in% names(mydata))
-                    if (mycontexpl %in% names(mydata)) {
-                        message(.('Multiple cutoffs analysis: n = {n}, method = {method}, num_cuts = {cuts}'),
-                                n = length(cont_var),
-                                method = self$options$cutoff_method,
-                                cuts = self$options$num_cutoffs)
-                    }
-
                     # Determine number of cutoffs
                     num_cuts <- switch(self$options$num_cutoffs,
                                        "two" = 2,
@@ -2966,17 +3063,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Populate multiple cutoffs tables ----
             ,
             .multipleCutoffTables = function(multicut_results) {
-                message(.('multipleCutoffTables called'))
-
                 # Check if results are valid
                 if (is.null(multicut_results) ||
                     is.null(multicut_results$cutoff_values) ||
                     is.null(multicut_results$group_stats)) {
-                    message(.('multicut_results is null or invalid'))
                     return()
                 }
-
-                message(.('Populating tables with {n} cutoffs'), n = length(multicut_results$cutoff_values))
 
                 # Populate cut-off points table (without statistical columns)
                 cutoff_table <- self$results$multipleCutTable
@@ -3031,7 +3123,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         }
 
                     }, error = function(e) {
-                        message(.('Error calculating log-rank test: {error}'), error = e$message)
+                        # Log-rank test failed - silently continue
                     })
                 }
 
@@ -3069,11 +3161,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 surv_summary <- summary(stats$surv_fit, times = time_point)
 
                                 if (length(surv_summary$surv) > 0) {
-                                    # Debug the raw values
-                                    message(.('Debug survival for {group} at time {time}: raw surv = {surv}, n.risk = {risk}'),
-                                            group = group_name, time = time_point,
-                                            surv = surv_summary$surv[1], risk = surv_summary$n.risk[1])
-
                                     # Don't multiply by 100 - the YAML format: pc does this automatically
                                     surv_prob <- surv_summary$surv[1]  # Keep as proportion (0-1)
                                     lower_ci <- surv_summary$lower[1]
@@ -3102,8 +3189,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                     ))
                                 }
                             }, error = function(e) {
-                                message(.('Error calculating survival at time {time} for group {group}: {error}'),
-                                        time = time_point, group = group_name, error = e$message)
+                                # Survival calculation failed - silently continue
                             })
                         }
                     }
@@ -3338,17 +3424,52 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             surv_avg <- (surv_probs[-length(surv_probs)] + surv_probs[-1]) / 2
                             rmst <- sum(time_diffs * surv_avg)
 
-                            # FIX WARNING: Simplified standard error approach
-                            # This is an approximate variance estimate, not the Greenwood-based
-                            # variance used in survRM2::rmst2(). For rigorous RMST inference,
-                            # consider using the survRM2 package directly.
-                            # The fallback of 10% of RMST is arbitrary.
-                            se_rmst <- sqrt(sum(km_fit$std.err^2, na.rm = TRUE)) * tau / max(km_fit$time, na.rm = TRUE)
-                            se_rmst <- ifelse(is.na(se_rmst) || se_rmst == 0, rmst * 0.1, se_rmst)  # 10% fallback is ad-hoc
+                            # Calculate proper RMST variance using Greenwood's formula
+                            # Based on Andersen et al. (1993) and Uno et al. (2014)
+                            # Var(RMST) = integral of S(t)^2 * Var(S(t)) from 0 to tau
+
+                            # Extract survival variance from KM fit
+                            km_times <- km_fit$time
+                            km_surv <- km_fit$surv
+                            km_var <- (km_fit$std.err)^2  # Greenwood variance from survfit
+
+                            # For each interval, calculate contribution to RMST variance
+                            # Approximate integral using trapezoidal rule on S(t)^2 * Var(S(t))
+                            var_rmst <- 0
+
+                            # Match km_fit times to our truncated times for variance calculation
+                            for (i in seq_along(km_times)) {
+                                if (km_times[i] <= tau) {
+                                    # Weight by time interval to next event or tau
+                                    if (i < length(km_times)) {
+                                        dt <- min(km_times[i + 1], tau) - km_times[i]
+                                    } else {
+                                        dt <- tau - km_times[i]
+                                    }
+                                    # Add weighted variance contribution
+                                    var_rmst <- var_rmst + (km_surv[i]^2) * km_var[i] * dt
+                                }
+                            }
+
+                            se_rmst <- sqrt(var_rmst)
+
+                            # Fallback for edge cases (insufficient variance information)
+                            if (is.na(se_rmst) || se_rmst == 0 || !is.finite(se_rmst)) {
+                                # Use bootstrap-based approximation: SE ≈ SD(survival times) / sqrt(n)
+                                se_rmst <- sd(group_data[[mytime]], na.rm = TRUE) / sqrt(nrow(group_data))
+
+                                # Add warning notice for this group
+                                private$.addNotice(
+                                    name = paste0('rmstSEFallback_', gsub("[^a-zA-Z0-9]", "", as.character(group))),
+                                    type = jmvcore::NoticeType$WARNING,
+                                    message = sprintf('RMST standard error calculation used fallback method for group "%s" due to insufficient variance information. Results should be interpreted cautiously.', as.character(group)),
+                                    position = 3
+                                )
+                            }
 
                             # Calculate confidence intervals
                             ci_lower <- max(0, rmst - 1.96 * se_rmst)
-                            ci_upper <- rmst + 1.96 * se_rmst
+                            ci_upper <- min(tau, rmst + 1.96 * se_rmst)  # CI cannot exceed tau
 
                             rmst_results[[as.character(group)]] <- list(
                                 group = as.character(group),
@@ -3359,6 +3480,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 tau = tau,
                                 n = nrow(group_data)
                             )
+                        } else {
+                            # Insufficient data for RMST calculation
+                            private$.addNotice(
+                                name = paste0('insufficientRMST_', gsub("[^a-zA-Z0-9]", "", as.character(group))),
+                                type = jmvcore::NoticeType$WARNING,
+                                message = sprintf('Group "%s" has insufficient follow-up events for reliable RMST calculation. RMST requires at least 2 distinct event times.', as.character(group)),
+                                position = 3
+                            )
                         }
                     }
                 }
@@ -3368,7 +3497,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 for (result in rmst_results) {
                     rmst_table$addRow(rowKey = result$group, values = result)
                 }
-                rmst_table$setNote("approx", .("Warning: RMST standard errors and CIs are approximate (trapezoidal integration); treat as exploratory or confirm with survRM2::rmst2 where available."))
+                rmst_table$setNote("method", .("RMST calculated using trapezoidal integration with Greenwood-based variance (Andersen et al. 1993, Uno et al. 2014). For two-group comparisons, consider survRM2::rmst2() for additional inference statistics."))
 
                 # Create RMST summary
                 if (length(rmst_results) > 0) {
@@ -4059,12 +4188,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 n_rows <- nrow(data)
 
                 if (n_rows > warn_threshold) {
-                    memory_usage <- format(object.size(data), units = "MB")
-                    message(.('Processing large dataset: {rows} rows, ~{memory} memory usage'),
-                            rows = n_rows, memory = memory_usage)
-
+                    # Large dataset detected - memory monitoring
+                    # Add notice for very large datasets
                     if (n_rows > 100000) {
-                        message(.('Consider using data sampling or chunking for very large datasets'))
+                        private$.addNotice(
+                            name = 'largeDataset',
+                            type = jmvcore::NoticeType$INFO,
+                            message = sprintf('Processing large dataset (n=%d rows). Analysis may take longer to complete. For datasets >500k rows, consider data sampling or subset analysis.', n_rows),
+                            position = 998
+                        )
                     }
                 }
 

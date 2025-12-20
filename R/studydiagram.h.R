@@ -6,7 +6,7 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            data_format = "participant_step",
+            data_format = "step_summary",
             diagram_type = "consort_standard",
             participant_id = NULL,
             step_excluded = NULL,
@@ -16,11 +16,11 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             exclusion_reason_summary = NULL,
             participant_id_mapping = NULL,
             exclusion_reason_mapping = NULL,
-            step1_exclusions = NULL,
-            step2_exclusions = NULL,
-            step3_exclusions = NULL,
-            step4_exclusions = NULL,
-            step5_exclusions = NULL,
+            exclusions_after_step1 = NULL,
+            exclusions_after_step2 = NULL,
+            exclusions_after_step3 = NULL,
+            exclusions_after_step4 = NULL,
+            exclusions_after_step5 = NULL,
             step1_label = "Screening",
             step2_label = "Enrollment",
             step3_label = "Treatment",
@@ -42,10 +42,9 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "data_format",
                 data_format,
                 options=list(
-                    "participant_step",
                     "step_summary",
                     "exclusion_mapping"),
-                default="participant_step")
+                default="step_summary")
             private$..diagram_type <- jmvcore::OptionList$new(
                 "diagram_type",
                 diagram_type,
@@ -114,25 +113,25 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..step1_exclusions <- jmvcore::OptionLevel$new(
-                "step1_exclusions",
-                step1_exclusions,
+            private$..exclusions_after_step1 <- jmvcore::OptionLevel$new(
+                "exclusions_after_step1",
+                exclusions_after_step1,
                 variable="(exclusion_reason_mapping)")
-            private$..step2_exclusions <- jmvcore::OptionLevel$new(
-                "step2_exclusions",
-                step2_exclusions,
+            private$..exclusions_after_step2 <- jmvcore::OptionLevel$new(
+                "exclusions_after_step2",
+                exclusions_after_step2,
                 variable="(exclusion_reason_mapping)")
-            private$..step3_exclusions <- jmvcore::OptionLevel$new(
-                "step3_exclusions",
-                step3_exclusions,
+            private$..exclusions_after_step3 <- jmvcore::OptionLevel$new(
+                "exclusions_after_step3",
+                exclusions_after_step3,
                 variable="(exclusion_reason_mapping)")
-            private$..step4_exclusions <- jmvcore::OptionLevel$new(
-                "step4_exclusions",
-                step4_exclusions,
+            private$..exclusions_after_step4 <- jmvcore::OptionLevel$new(
+                "exclusions_after_step4",
+                exclusions_after_step4,
                 variable="(exclusion_reason_mapping)")
-            private$..step5_exclusions <- jmvcore::OptionLevel$new(
-                "step5_exclusions",
-                step5_exclusions,
+            private$..exclusions_after_step5 <- jmvcore::OptionLevel$new(
+                "exclusions_after_step5",
+                exclusions_after_step5,
                 variable="(exclusion_reason_mapping)")
             private$..step1_label <- jmvcore::OptionString$new(
                 "step1_label",
@@ -192,11 +191,11 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..exclusion_reason_summary)
             self$.addOption(private$..participant_id_mapping)
             self$.addOption(private$..exclusion_reason_mapping)
-            self$.addOption(private$..step1_exclusions)
-            self$.addOption(private$..step2_exclusions)
-            self$.addOption(private$..step3_exclusions)
-            self$.addOption(private$..step4_exclusions)
-            self$.addOption(private$..step5_exclusions)
+            self$.addOption(private$..exclusions_after_step1)
+            self$.addOption(private$..exclusions_after_step2)
+            self$.addOption(private$..exclusions_after_step3)
+            self$.addOption(private$..exclusions_after_step4)
+            self$.addOption(private$..exclusions_after_step5)
             self$.addOption(private$..step1_label)
             self$.addOption(private$..step2_label)
             self$.addOption(private$..step3_label)
@@ -219,11 +218,11 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         exclusion_reason_summary = function() private$..exclusion_reason_summary$value,
         participant_id_mapping = function() private$..participant_id_mapping$value,
         exclusion_reason_mapping = function() private$..exclusion_reason_mapping$value,
-        step1_exclusions = function() private$..step1_exclusions$value,
-        step2_exclusions = function() private$..step2_exclusions$value,
-        step3_exclusions = function() private$..step3_exclusions$value,
-        step4_exclusions = function() private$..step4_exclusions$value,
-        step5_exclusions = function() private$..step5_exclusions$value,
+        exclusions_after_step1 = function() private$..exclusions_after_step1$value,
+        exclusions_after_step2 = function() private$..exclusions_after_step2$value,
+        exclusions_after_step3 = function() private$..exclusions_after_step3$value,
+        exclusions_after_step4 = function() private$..exclusions_after_step4$value,
+        exclusions_after_step5 = function() private$..exclusions_after_step5$value,
         step1_label = function() private$..step1_label$value,
         step2_label = function() private$..step2_label$value,
         step3_label = function() private$..step3_label$value,
@@ -245,11 +244,11 @@ studydiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..exclusion_reason_summary = NA,
         ..participant_id_mapping = NA,
         ..exclusion_reason_mapping = NA,
-        ..step1_exclusions = NA,
-        ..step2_exclusions = NA,
-        ..step3_exclusions = NA,
-        ..step4_exclusions = NA,
-        ..step5_exclusions = NA,
+        ..exclusions_after_step1 = NA,
+        ..exclusions_after_step2 = NA,
+        ..exclusions_after_step3 = NA,
+        ..exclusions_after_step4 = NA,
+        ..exclusions_after_step5 = NA,
         ..step1_label = NA,
         ..step2_label = NA,
         ..step3_label = NA,
@@ -270,9 +269,9 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         summary = function() private$.items[["summary"]],
         plot = function() private$.items[["plot"]],
         diagram = function() private$.items[["diagram"]],
-        diagramPlot = function() private$.items[["diagramPlot"]],
         interpretation = function() private$.items[["interpretation"]],
         warnings = function() private$.items[["warnings"]],
+        notices = function() private$.items[["notices"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
         reportSentence = function() private$.items[["reportSentence"]],
         aboutAnalysis = function() private$.items[["aboutAnalysis"]],
@@ -312,11 +311,11 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "exclusion_reason_summary",
                     "participant_id_mapping",
                     "exclusion_reason_mapping",
-                    "step1_exclusions",
-                    "step2_exclusions",
-                    "step3_exclusions",
-                    "step4_exclusions",
-                    "step5_exclusions"),
+                    "exclusions_after_step1",
+                    "exclusions_after_step2",
+                    "exclusions_after_step3",
+                    "exclusions_after_step4",
+                    "exclusions_after_step5"),
                 columns=list(
                     list(
                         `name`="step", 
@@ -342,7 +341,7 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Consistency Diagram",
+                title="Study Flow Diagram",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -363,43 +362,11 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "exclusion_reason_summary",
                     "participant_id_mapping",
                     "exclusion_reason_mapping",
-                    "step1_exclusions",
-                    "step2_exclusions",
-                    "step3_exclusions",
-                    "step4_exclusions",
-                    "step5_exclusions",
-                    "step1_label",
-                    "step2_label",
-                    "step3_label",
-                    "step4_label",
-                    "step5_label",
-                    "show_percentages",
-                    "show_exclusion_boxes",
-                    "direction",
-                    "color_scheme")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="diagramPlot",
-                title="Diagram Plot",
-                width=800,
-                height=600,
-                requiresData=TRUE,
-                clearWith=list(
-                    "data_format",
-                    "diagram_type",
-                    "participant_id",
-                    "step_excluded",
-                    "exclusion_reason_participant",
-                    "step_name",
-                    "participant_count",
-                    "exclusion_reason_summary",
-                    "participant_id_mapping",
-                    "exclusion_reason_mapping",
-                    "step1_exclusions",
-                    "step2_exclusions",
-                    "step3_exclusions",
-                    "step4_exclusions",
-                    "step5_exclusions",
+                    "exclusions_after_step1",
+                    "exclusions_after_step2",
+                    "exclusions_after_step3",
+                    "exclusions_after_step4",
+                    "exclusions_after_step5",
                     "step1_label",
                     "step2_label",
                     "step3_label",
@@ -427,6 +394,11 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "participant_id",
                     "step_excluded",
                     "participant_count")))
+            self$add(list(
+                `name`="notices", 
+                `title`="", 
+                `type`="Notification", 
+                `visible`=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalSummary",
@@ -486,9 +458,9 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Creates professional study flow diagrams including CONSORT diagrams and 
 #' flowcharts using multiple rendering engines
 #' @param data The data as a data frame.
-#' @param data_format How your data is structured. Participant tracking: each
-#'   row is a participant with step excluded. Step summary: each row is a study
-#'   step with counts. Exclusion mapping: map exclusion reasons to steps.
+#' @param data_format How your data is structured. Step summary: one row per
+#'   study step with participant counts. Exclusion mapping: map exclusion
+#'   reasons to specific study steps.
 #' @param diagram_type Rendering engine and diagram style. CONSORT for
 #'   clinical trials, Flowchart for general study flows. Standard uses
 #'   DiagrammeR, ggplot2 uses modern styling.
@@ -508,11 +480,20 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (for exclusion mapping format)
 #' @param exclusion_reason_mapping Variable containing all exclusion reasons
 #'   (for exclusion mapping format)
-#' @param step1_exclusions Select exclusion reason levels that occur at step 1
-#' @param step2_exclusions Select exclusion reason levels that occur at step 2
-#' @param step3_exclusions Select exclusion reason levels that occur at step 3
-#' @param step4_exclusions Select exclusion reason levels that occur at step 4
-#' @param step5_exclusions Select exclusion reason levels that occur at step 5
+#' @param exclusions_after_step1 Select exclusion reasons that occur AFTER
+#'   step 1 (reducing participants from step 1 to step 2). These exclusions will
+#'   be shown on the transition from step 1 to step 2.
+#' @param exclusions_after_step2 Select exclusion reasons that occur AFTER
+#'   step 2 (reducing participants from step 2 to step 3). These exclusions will
+#'   be shown on the transition from step 2 to step 3.
+#' @param exclusions_after_step3 Select exclusion reasons that occur AFTER
+#'   step 3 (reducing participants from step 3 to step 4). These exclusions will
+#'   be shown on the transition from step 3 to step 4.
+#' @param exclusions_after_step4 Select exclusion reasons that occur AFTER
+#'   step 4 (reducing participants from step 4 to step 5). These exclusions will
+#'   be shown on the transition from step 4 to step 5.
+#' @param exclusions_after_step5 Select exclusion reasons that occur AFTER
+#'   step 5 (if applicable)
 #' @param step1_label Label for step 1 in the diagram
 #' @param step2_label Label for step 2 in the diagram
 #' @param step3_label Label for step 3 in the diagram
@@ -532,9 +513,9 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$summary} \tab \tab \tab \tab \tab Summary of participant flow through study steps \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$diagram} \tab \tab \tab \tab \tab Interactive study flow diagram \cr
-#'   \code{results$diagramPlot} \tab \tab \tab \tab \tab Publication-ready diagram plot \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab Explanatory text about the diagram and results \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab Alerts about potential data quality issues \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a notification \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab Plain-language summary for clinical interpretation \cr
 #'   \code{results$reportSentence} \tab \tab \tab \tab \tab Copy-ready sentence for manuscripts \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab Explanation of analysis type and usage \cr
@@ -550,7 +531,7 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 studydiagram <- function(
     data,
-    data_format = "participant_step",
+    data_format = "step_summary",
     diagram_type = "consort_standard",
     participant_id,
     step_excluded,
@@ -560,11 +541,11 @@ studydiagram <- function(
     exclusion_reason_summary,
     participant_id_mapping,
     exclusion_reason_mapping,
-    step1_exclusions,
-    step2_exclusions,
-    step3_exclusions,
-    step4_exclusions,
-    step5_exclusions,
+    exclusions_after_step1,
+    exclusions_after_step2,
+    exclusions_after_step3,
+    exclusions_after_step4,
+    exclusions_after_step5,
     step1_label = "Screening",
     step2_label = "Enrollment",
     step3_label = "Treatment",
@@ -615,11 +596,11 @@ studydiagram <- function(
         exclusion_reason_summary = exclusion_reason_summary,
         participant_id_mapping = participant_id_mapping,
         exclusion_reason_mapping = exclusion_reason_mapping,
-        step1_exclusions = step1_exclusions,
-        step2_exclusions = step2_exclusions,
-        step3_exclusions = step3_exclusions,
-        step4_exclusions = step4_exclusions,
-        step5_exclusions = step5_exclusions,
+        exclusions_after_step1 = exclusions_after_step1,
+        exclusions_after_step2 = exclusions_after_step2,
+        exclusions_after_step3 = exclusions_after_step3,
+        exclusions_after_step4 = exclusions_after_step4,
+        exclusions_after_step5 = exclusions_after_step5,
         step1_label = step1_label,
         step2_label = step2_label,
         step3_label = step3_label,

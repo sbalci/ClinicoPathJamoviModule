@@ -1,7 +1,7 @@
 ---
 name: studydiagram
 title: Study Diagram
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: Study Design
 version: '1.0.0'
 jas: '1.2'
@@ -20,17 +20,15 @@ options:
       title: Data Format
       type: List
       options:
-        - title: Participant tracking with step numbers
-          name: participant_step
-        - title: Step summary with counts
+        - title: Step summary with counts (recommended)
           name: step_summary
         - title: Exclusion reasons with step mapping
           name: exclusion_mapping
-      default: participant_step
+      default: step_summary
       description:
           R: >
-            How your data is structured. Participant tracking: each row is a participant with step excluded.
-            Step summary: each row is a study step with counts. Exclusion mapping: map exclusion reasons to steps.
+            How your data is structured. Step summary: one row per study step with participant counts.
+            Exclusion mapping: map exclusion reasons to specific study steps.
 
     # Diagram Type Selection
     - name: diagram_type
@@ -119,40 +117,48 @@ options:
           R: Variable containing all exclusion reasons (for exclusion mapping format)
 
     # Step Level Selectors for Format 3
-    - name: step1_exclusions
-      title: Step 1 Exclusions
+    - name: exclusions_after_step1
+      title: Exclusions After Step 1
       type: Level
       variable: (exclusion_reason_mapping)
       description:
-          R: Select exclusion reason levels that occur at step 1
+          R: >
+            Select exclusion reasons that occur AFTER step 1 (reducing participants from step 1 to step 2).
+            These exclusions will be shown on the transition from step 1 to step 2.
 
-    - name: step2_exclusions
-      title: Step 2 Exclusions
+    - name: exclusions_after_step2
+      title: Exclusions After Step 2
       type: Level
       variable: (exclusion_reason_mapping)
       description:
-          R: Select exclusion reason levels that occur at step 2
+          R: >
+            Select exclusion reasons that occur AFTER step 2 (reducing participants from step 2 to step 3).
+            These exclusions will be shown on the transition from step 2 to step 3.
 
-    - name: step3_exclusions
-      title: Step 3 Exclusions
+    - name: exclusions_after_step3
+      title: Exclusions After Step 3
       type: Level
       variable: (exclusion_reason_mapping)
       description:
-          R: Select exclusion reason levels that occur at step 3
+          R: >
+            Select exclusion reasons that occur AFTER step 3 (reducing participants from step 3 to step 4).
+            These exclusions will be shown on the transition from step 3 to step 4.
 
-    - name: step4_exclusions
-      title: Step 4 Exclusions
+    - name: exclusions_after_step4
+      title: Exclusions After Step 4
       type: Level
       variable: (exclusion_reason_mapping)
       description:
-          R: Select exclusion reason levels that occur at step 4
+          R: >
+            Select exclusion reasons that occur AFTER step 4 (reducing participants from step 4 to step 5).
+            These exclusions will be shown on the transition from step 4 to step 5.
 
-    - name: step5_exclusions
-      title: Step 5 Exclusions
+    - name: exclusions_after_step5
+      title: Exclusions After Step 5
       type: Level
       variable: (exclusion_reason_mapping)
       description:
-          R: Select exclusion reason levels that occur at step 5
+          R: Select exclusion reasons that occur AFTER step 5 (if applicable)
 
     # Step Labels for Format 3
     - name: step1_label

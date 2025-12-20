@@ -25,13 +25,66 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 private$.cached_analysis <- NULL
             },
 
-            # Variable name sanitization for special characters
-            .escapeVar = function(x) {
-                # Convert to syntactically valid R names
-                # Handles spaces, special chars, Unicode
-                gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+            # Validate that design (independent/repeated) matches data structure
+            .validateDesignDataMatch = function(analysis_info, data) {
+                # Only validate for repeated measures
+                if (analysis_info$direction != "repeated") {
+                    return(list(valid = TRUE, warnings = character(0)))
+                }
+
+                warnings_html <- character(0)
+                dep_var <- analysis_info$dep_var
+                group_var <- analysis_info$group_var
+
+                # For repeated measures with factor grouping variable
+                if (analysis_info$group_type == "factor") {
+                    group_levels <- levels(data[[group_var]])
+                    if (is.null(group_levels)) {
+                        group_levels <- unique(data[[group_var]])
+                    }
+                    n_levels <- length(group_levels)
+
+                    # Check if number of observations is divisible by number of groups
+                    n_obs <- nrow(data)
+                    if (n_obs %% n_levels != 0) {
+                        warning_msg <- glue::glue(
+                            "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
+                            "<strong>⚠ Design-Data Mismatch Warning</strong><br/>",
+                            "You selected <strong>Repeated Measures</strong> design, but the data structure may not match:<br/>",
+                            "• Total observations: {n_obs}<br/>",
+                            "• Groups in '{group_var}': {n_levels} ({paste(group_levels, collapse=', ')})<br/>",
+                            "• Expected for balanced repeated measures: {n_obs} should be divisible by {n_levels}<br/><br/>",
+                            "<strong>Possible issues:</strong><br/>",
+                            "1. This might be <em>independent groups</em> data, not repeated measures<br/>",
+                            "2. Missing observations for some subjects<br/>",
+                            "3. Data needs restructuring (wide format to long format)<br/><br/>",
+                            "<strong>Action:</strong> Verify your study design matches the data structure.",
+                            "</div>"
+                        )
+                        warnings_html <- c(warnings_html, warning_msg)
+                    }
+
+                    # Check for suspiciously even distribution (suggests independent groups)
+                    group_counts <- table(data[[group_var]])
+                    if (length(unique(group_counts)) == 1 && n_levels >= 2) {
+                        # Perfectly balanced groups often indicate independent samples
+                        obs_per_group <- unique(group_counts)[1]
+                        warning_msg <- glue::glue(
+                            "<div style='background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0;'>",
+                            "<strong>ℹ Design Check</strong><br/>",
+                            "Perfectly balanced groups detected ({obs_per_group} observations per group).<br/>",
+                            "• This pattern is common in <strong>independent groups</strong> designs<br/>",
+                            "• For repeated measures, each <em>subject</em> should appear in multiple groups<br/>",
+                            "• Verify: Does each row represent a different subject, or the same subject at different times?",
+                            "</div>"
+                        )
+                        warnings_html <- c(warnings_html, warning_msg)
+                    }
+                }
+
+                return(list(valid = TRUE, warnings = warnings_html))
             },
-            
+
             # Standardized validation method for plot data
             .validatePlotData = function(prepared_data, plot_type) {
                 data <- prepared_data$data
@@ -151,16 +204,35 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Helper: treat integer-coded small-cardinality variables as categorical
                 .infer_type <- function(v) {
                     contin <- c("integer", "numeric", "double")
-                    if (inherits(v, "factor")) return("factor")
-                    if (inherits(v, "ordered")) return("factor")
+
+                    if (inherits(v, "factor") || inherits(v, "ordered")) return("factor")
+
+                    # Handle character variables (common in clinical data)
+                    if (is.character(v)) {
+                        unique_vals <- length(unique(v[!is.na(v)]))
+                        # Character columns with ≤20 unique values treated as categorical
+                        if (unique_vals > 0 && unique_vals <= 20) return("factor")
+                        return("unknown")
+                    }
+
+                    # Handle numeric variables with enhanced threshold
                     if (inherits(v, contin)) {
                         unique_vals <- length(unique(v[!is.na(v)]))
-                        # Heuristic: <=10 unique whole-number values => likely categorical
-                        if (unique_vals > 0 && unique_vals <= 10 && all(abs(v[!is.na(v)] - round(v[!is.na(v)])) < .Machine$double.eps^0.5)) {
+                        # Increased threshold to 15 for clinical scales (11-15 point scales)
+                        if (unique_vals > 0 && unique_vals <= 15 &&
+                            all(abs(v[!is.na(v)] - round(v[!is.na(v)])) < .Machine$double.eps^0.5)) {
+                            # Warning for borderline cases
+                            if (unique_vals > 10) {
+                                warning(sprintf(
+                                    "Variable has %d unique integer values (borderline categorical/continuous). Treating as categorical. To force continuous, convert to numeric with decimals.",
+                                    unique_vals
+                                ))
+                            }
                             return("factor")
                         }
                         return("continuous")
                     }
+
                     return("unknown")
                 }
                 
@@ -489,6 +561,55 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
+                # Sample size validation with HTML warnings
+                dep_data <- self$data[[analysis_info$dep_var]]
+                group_data <- self$data[[analysis_info$group_var]]
+                n_complete <- sum(complete.cases(dep_data, group_data))
+                n_total <- nrow(self$data)
+
+                validation_warnings <- ""
+
+                # Critical: n < 10
+                if (n_complete < 10) {
+                    validation_warnings <- paste0(validation_warnings, glue::glue(
+                        "<div style='background: #ffebee; border-left: 4px solid #d32f2f; padding: 12px; margin: 10px 0;'>",
+                        "<strong>⚠ CRITICAL: Very Small Sample (n={n_complete})</strong><br/>",
+                        "Your analysis has only <strong>{n_complete} complete observations</strong>.<br/><br/>",
+                        "<strong>Statistical concerns:</strong><br/>",
+                        "• Results are <em>highly unreliable</em> with n&lt;10<br/>",
+                        "• Statistical tests may fail or produce meaningless p-values<br/>",
+                        "• Effect sizes and confidence intervals will be very imprecise<br/>",
+                        "• Normality assumptions cannot be verified<br/><br/>",
+                        "<strong>Clinical recommendations:</strong><br/>",
+                        "1. <strong>Collect more data</strong> before drawing conclusions<br/>",
+                        "2. Use descriptive statistics only (no hypothesis testing)<br/>",
+                        "3. Consider exact tests if n≥5 (Fisher's exact test)<br/>",
+                        "4. Clearly report sample size limitations in any publication",
+                        "</div>"
+                    ))
+                } else if (n_complete < 30) {
+                    # Warning: 10 ≤ n < 30
+                    validation_warnings <- paste0(validation_warnings, glue::glue(
+                        "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
+                        "<strong>⚠ Small Sample Warning (n={n_complete})</strong><br/>",
+                        "You have <strong>{n_complete} complete observations</strong> (below the conventional n≥30 guideline).<br/><br/>",
+                        "<strong>Recommendations:</strong><br/>",
+                        "• Consider <strong>nonparametric</strong> statistical approach (less sensitive to small samples)<br/>",
+                        "• Avoid parametric tests unless normality is well-established<br/>",
+                        "• Use <strong>robust methods</strong> to reduce outlier influence<br/>",
+                        "• Report confidence intervals (more informative than p-values alone)<br/>",
+                        "• Consider exact tests when applicable<br/><br/>",
+                        "<strong>Clinical note:</strong> Statistical power is limited. Negative findings may reflect insufficient sample size rather than true absence of effect.",
+                        "</div>"
+                    ))
+                }
+
+                # Design validation warnings
+                design_validation <- private$.validateDesignDataMatch(analysis_info, self$data)
+                if (length(design_validation$warnings) > 0) {
+                    validation_warnings <- paste0(validation_warnings, paste(design_validation$warnings, collapse = "\n"))
+                }
+
                 # Check assumptions and insert notices
                 assumption_notices <- private$.checkAssumptions(analysis_info, self$data)
                 if (length(assumption_notices) > 0) {
@@ -519,6 +640,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                 # Combine explanations (without warnings - those are now separate Notices)
                 combined_explanation <- paste(stat_exp, "\n\n", clinical_interpretation, sep = "")
+
+                # Prepend validation warnings if any
+                if (nchar(validation_warnings) > 0) {
+                    combined_explanation <- paste(validation_warnings, "\n\n", combined_explanation, sep = "")
+                }
 
                 # Set the explanation message in results
                 self$results$ExplanationMessage$setContent(combined_explanation)

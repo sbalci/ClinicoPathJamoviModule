@@ -12,11 +12,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             event = NULL,
             eventLevel = NULL,
             clinicalPreset = "routine_clinical",
-            enableGuidedMode = TRUE,
-            generateCopyReadyReport = TRUE,
+            enableGuidedMode = FALSE,
+            generateCopyReadyReport = FALSE,
             enableAccessibilityFeatures = FALSE,
             preferredLanguage = "en",
-            enableProgressIndicators = TRUE,
+            enableProgressIndicators = FALSE,
             optimizeForLargeDatasets = FALSE,
             analysisType = "comprehensive",
             confidenceLevel = 0.95,
@@ -37,13 +37,13 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             performHomogeneityTests = FALSE,
             performTrendTests = FALSE,
             performLikelihoodTests = FALSE,
-            calculatePseudoR2 = TRUE,
+            calculatePseudoR2 = FALSE,
             showMigrationOverview = TRUE,
-            showMigrationSummary = TRUE,
-            showStageDistribution = TRUE,
+            showMigrationSummary = FALSE,
+            showStageDistribution = FALSE,
             showMigrationMatrix = TRUE,
-            showStatisticalComparison = TRUE,
-            showConcordanceComparison = TRUE,
+            showStatisticalComparison = FALSE,
+            showConcordanceComparison = FALSE,
             showMigrationHeatmap = FALSE,
             showSankeyDiagram = FALSE,
             showROCComparison = FALSE,
@@ -99,7 +99,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             shapSampleSize = 100,
             shapBackgroundSamples = 50,
             shapExplanationType = "auto",
-            generateSHAPPlots = TRUE,
+            generateSHAPPlots = FALSE,
             shapPatientProfiles = "representative",
             shapInteractionAnalysis = FALSE,
             shapClinicalThresholds = "0.25, 0.50, 0.75",
@@ -108,13 +108,13 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             cifTimePoints = "12, 24, 36, 60",
             competingEventLevels = "cancer_death, other_death, censored",
             primaryEventLevel = "cancer_death",
-            generateCIFPlots = TRUE,
-            performGrayTest = TRUE,
+            generateCIFPlots = FALSE,
+            performGrayTest = FALSE,
             cifConfidenceLevel = 0.95,
             competingRisksCovariates = NULL,
-            stratifyByStaging = TRUE,
-            calculateCRCIndex = TRUE,
-            generateCRSummary = TRUE,
+            stratifyByStaging = FALSE,
+            calculateCRCIndex = FALSE,
+            generateCRSummary = FALSE,
             performMultiStateAnalysis = FALSE,
             multiStateModel = "illness_death",
             stateVariable = NULL,
@@ -122,55 +122,55 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             multiStateStates = "healthy, disease, death",
             absorptionStates = "death",
             multiStateCovariates = NULL,
-            calculateTransitionProbabilities = TRUE,
+            calculateTransitionProbabilities = FALSE,
             multiStateTimePoints = "6, 12, 24, 36, 60",
-            generateTransitionMatrix = TRUE,
-            multiStateGraphics = TRUE,
-            msStratifyByStaging = TRUE,
+            generateTransitionMatrix = FALSE,
+            multiStateGraphics = FALSE,
+            msStratifyByStaging = FALSE,
             multiStateValidation = FALSE,
-            generateMSMSummary = TRUE,
+            generateMSMSummary = FALSE,
             performRandomForestAnalysis = FALSE,
             forestModelType = "rsf",
             forestNTrees = 500,
             forestMTry = "auto",
             forestMinNodeSize = 3,
             forestCovariates = NULL,
-            calculateVariableImportance = TRUE,
+            calculateVariableImportance = FALSE,
             forestImportanceType = "permutation",
             performForestValidation = FALSE,
             forestPredictionTimePoints = "12, 24, 36, 60",
-            generateSurvivalPredictions = TRUE,
-            forestDiscriminationMetrics = TRUE,
-            forestStagingComparison = TRUE,
+            generateSurvivalPredictions = FALSE,
+            forestDiscriminationMetrics = FALSE,
+            forestStagingComparison = FALSE,
             forestBootstrap = FALSE,
             forestBootstrapSamples = 100,
-            generateForestSummary = TRUE,
+            generateForestSummary = FALSE,
             performCureModelAnalysis = FALSE,
             cureModelType = "mixture",
             cureDistribution = "weibull",
-            cureAnalyzeOldStage = TRUE,
-            cureAnalyzeNewStage = TRUE,
+            cureAnalyzeOldStage = FALSE,
+            cureAnalyzeNewStage = FALSE,
             cureFractionEstimation = "parametric",
             cureConfidenceLevel = 0.95,
-            cureBootstrapCI = TRUE,
+            cureBootstrapCI = FALSE,
             cureBootstrapReps = 500,
             cureTimeHorizon = 120,
             curePlateauThreshold = 0.05,
             cureCovariates = NULL,
-            cureModelComparison = TRUE,
-            cureStageSpecificAnalysis = TRUE,
-            cureGoodnessOfFit = TRUE,
-            generateCureSummary = TRUE,
+            cureModelComparison = FALSE,
+            cureStageSpecificAnalysis = FALSE,
+            cureGoodnessOfFit = FALSE,
+            generateCureSummary = FALSE,
             performIntervalCensoringAnalysis = FALSE,
             intervalCensoringLeftTime = NULL,
             intervalCensoringRightTime = NULL,
             intervalCensoringDistribution = "weibull",
             intervalCensoringModel = "both",
-            intervalCensoringBootstrap = TRUE,
+            intervalCensoringBootstrap = FALSE,
             intervalCensoringBootstrapSamples = 1000,
-            intervalCensoringCompareStages = TRUE,
-            intervalCensoringPlots = TRUE,
-            intervalCensoringDiagnostics = TRUE,
+            intervalCensoringCompareStages = FALSE,
+            intervalCensoringPlots = FALSE,
+            intervalCensoringDiagnostics = FALSE,
             intervalCensoringPredictionTime = "12, 24, 36, 60",
             intervalCensoringConfidenceLevel = 0.95,
             intervalCensoringAdjustVariables = NULL,
@@ -181,23 +181,23 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             informativeCensoringAdjustmentMethod = "sensitivity_analysis",
             informativeCensoringIPWVariables = NULL,
             informativeCensoringSensitivityRange = "0.8, 0.9, 1.0, 1.1, 1.2",
-            informativeCensoringBootstrap = TRUE,
+            informativeCensoringBootstrap = FALSE,
             informativeCensoringBootstrapSamples = 1000,
             informativeCensoringAlpha = 0.05,
-            informativeCensoringPlots = TRUE,
-            informativeCensoringCompareStages = TRUE,
+            informativeCensoringPlots = FALSE,
+            informativeCensoringCompareStages = FALSE,
             performConcordanceProbabilityAnalysis = FALSE,
             concordanceProbabilityMethods = "all_methods",
             concordanceProbabilityTimePoints = "12, 24, 36, 60, 120",
             concordanceProbabilityWeighting = "uniform",
-            concordanceProbabilityBootstrap = TRUE,
+            concordanceProbabilityBootstrap = FALSE,
             concordanceProbabilityBootstrapSamples = 1000,
             concordanceProbabilityConfidenceLevel = 0.95,
-            concordanceProbabilityCompareStages = TRUE,
+            concordanceProbabilityCompareStages = FALSE,
             concordanceProbabilityAdjustVariables = NULL,
-            concordanceProbabilityRobustnessAnalysis = TRUE,
+            concordanceProbabilityRobustnessAnalysis = FALSE,
             concordanceProbabilityAlpha = 0.05,
-            concordanceProbabilityDiagnostics = TRUE,
+            concordanceProbabilityDiagnostics = FALSE,
             performWinRatioAnalysis = FALSE,
             winRatioEndpoints = "death_progression_response",
             winRatioDeathVariable = NULL,
@@ -209,30 +209,30 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             winRatioBootstrapSamples = 1000,
             winRatioConfidenceLevel = 0.95,
             winRatioHandleTies = "next_endpoint",
-            winRatioSensitivityAnalysis = TRUE,
+            winRatioSensitivityAnalysis = FALSE,
             winRatioGeneralizedPairwise = FALSE,
             performFrailtyModelsAnalysis = FALSE,
             frailtyClusterVariable = NULL,
             frailtyDistribution = "gamma",
-            frailtyBootstrap = TRUE,
+            frailtyBootstrap = FALSE,
             frailtyBootstrapSamples = 500,
-            frailtyVarianceComponents = TRUE,
-            frailtyHeterogeneityTest = TRUE,
+            frailtyVarianceComponents = FALSE,
+            frailtyHeterogeneityTest = FALSE,
             frailtyClusterComparison = FALSE,
-            frailtyModelSelection = TRUE,
+            frailtyModelSelection = FALSE,
             frailtyPredictiveAccuracy = FALSE,
-            frailtyDiagnostics = TRUE,
+            frailtyDiagnostics = FALSE,
             frailtyAdvancedInference = FALSE,
             performClinicalUtilityAnalysis = FALSE,
             clinicalUtilityPrevalence = 0.2,
             clinicalUtilityTimePoint = 60,
             clinicalUtilityThresholds = "standard",
-            clinicalUtilityNNT = TRUE,
+            clinicalUtilityNNT = FALSE,
             clinicalUtilityTreatmentEffect = 0.7,
-            clinicalUtilityComparison = TRUE,
+            clinicalUtilityComparison = FALSE,
             clinicalUtilityCostEffectiveness = FALSE,
             clinicalUtilityCostPerIntervention = 5000,
-            clinicalUtilityBootstrap = TRUE,
+            clinicalUtilityBootstrap = FALSE,
             clinicalUtilityBootstrapSamples = 500,
             clinicalUtilityTimeVarying = FALSE, ...) {
 
@@ -295,11 +295,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..enableGuidedMode <- jmvcore::OptionBool$new(
                 "enableGuidedMode",
                 enableGuidedMode,
-                default=TRUE)
+                default=FALSE)
             private$..generateCopyReadyReport <- jmvcore::OptionBool$new(
                 "generateCopyReadyReport",
                 generateCopyReadyReport,
-                default=TRUE)
+                default=FALSE)
             private$..enableAccessibilityFeatures <- jmvcore::OptionBool$new(
                 "enableAccessibilityFeatures",
                 enableAccessibilityFeatures,
@@ -314,7 +314,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..enableProgressIndicators <- jmvcore::OptionBool$new(
                 "enableProgressIndicators",
                 enableProgressIndicators,
-                default=TRUE)
+                default=FALSE)
             private$..optimizeForLargeDatasets <- jmvcore::OptionBool$new(
                 "optimizeForLargeDatasets",
                 optimizeForLargeDatasets,
@@ -419,7 +419,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..calculatePseudoR2 <- jmvcore::OptionBool$new(
                 "calculatePseudoR2",
                 calculatePseudoR2,
-                default=TRUE)
+                default=FALSE)
             private$..showMigrationOverview <- jmvcore::OptionBool$new(
                 "showMigrationOverview",
                 showMigrationOverview,
@@ -427,11 +427,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..showMigrationSummary <- jmvcore::OptionBool$new(
                 "showMigrationSummary",
                 showMigrationSummary,
-                default=TRUE)
+                default=FALSE)
             private$..showStageDistribution <- jmvcore::OptionBool$new(
                 "showStageDistribution",
                 showStageDistribution,
-                default=TRUE)
+                default=FALSE)
             private$..showMigrationMatrix <- jmvcore::OptionBool$new(
                 "showMigrationMatrix",
                 showMigrationMatrix,
@@ -439,11 +439,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..showStatisticalComparison <- jmvcore::OptionBool$new(
                 "showStatisticalComparison",
                 showStatisticalComparison,
-                default=TRUE)
+                default=FALSE)
             private$..showConcordanceComparison <- jmvcore::OptionBool$new(
                 "showConcordanceComparison",
                 showConcordanceComparison,
-                default=TRUE)
+                default=FALSE)
             private$..showMigrationHeatmap <- jmvcore::OptionBool$new(
                 "showMigrationHeatmap",
                 showMigrationHeatmap,
@@ -742,7 +742,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..generateSHAPPlots <- jmvcore::OptionBool$new(
                 "generateSHAPPlots",
                 generateSHAPPlots,
-                default=TRUE)
+                default=FALSE)
             private$..shapPatientProfiles <- jmvcore::OptionList$new(
                 "shapPatientProfiles",
                 shapPatientProfiles,
@@ -787,11 +787,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..generateCIFPlots <- jmvcore::OptionBool$new(
                 "generateCIFPlots",
                 generateCIFPlots,
-                default=TRUE)
+                default=FALSE)
             private$..performGrayTest <- jmvcore::OptionBool$new(
                 "performGrayTest",
                 performGrayTest,
-                default=TRUE)
+                default=FALSE)
             private$..cifConfidenceLevel <- jmvcore::OptionNumber$new(
                 "cifConfidenceLevel",
                 cifConfidenceLevel,
@@ -812,15 +812,15 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..stratifyByStaging <- jmvcore::OptionBool$new(
                 "stratifyByStaging",
                 stratifyByStaging,
-                default=TRUE)
+                default=FALSE)
             private$..calculateCRCIndex <- jmvcore::OptionBool$new(
                 "calculateCRCIndex",
                 calculateCRCIndex,
-                default=TRUE)
+                default=FALSE)
             private$..generateCRSummary <- jmvcore::OptionBool$new(
                 "generateCRSummary",
                 generateCRSummary,
-                default=TRUE)
+                default=FALSE)
             private$..performMultiStateAnalysis <- jmvcore::OptionBool$new(
                 "performMultiStateAnalysis",
                 performMultiStateAnalysis,
@@ -875,7 +875,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..calculateTransitionProbabilities <- jmvcore::OptionBool$new(
                 "calculateTransitionProbabilities",
                 calculateTransitionProbabilities,
-                default=TRUE)
+                default=FALSE)
             private$..multiStateTimePoints <- jmvcore::OptionString$new(
                 "multiStateTimePoints",
                 multiStateTimePoints,
@@ -883,15 +883,15 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..generateTransitionMatrix <- jmvcore::OptionBool$new(
                 "generateTransitionMatrix",
                 generateTransitionMatrix,
-                default=TRUE)
+                default=FALSE)
             private$..multiStateGraphics <- jmvcore::OptionBool$new(
                 "multiStateGraphics",
                 multiStateGraphics,
-                default=TRUE)
+                default=FALSE)
             private$..msStratifyByStaging <- jmvcore::OptionBool$new(
                 "msStratifyByStaging",
                 msStratifyByStaging,
-                default=TRUE)
+                default=FALSE)
             private$..multiStateValidation <- jmvcore::OptionBool$new(
                 "multiStateValidation",
                 multiStateValidation,
@@ -899,7 +899,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..generateMSMSummary <- jmvcore::OptionBool$new(
                 "generateMSMSummary",
                 generateMSMSummary,
-                default=TRUE)
+                default=FALSE)
             private$..performRandomForestAnalysis <- jmvcore::OptionBool$new(
                 "performRandomForestAnalysis",
                 performRandomForestAnalysis,
@@ -943,7 +943,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..calculateVariableImportance <- jmvcore::OptionBool$new(
                 "calculateVariableImportance",
                 calculateVariableImportance,
-                default=TRUE)
+                default=FALSE)
             private$..forestImportanceType <- jmvcore::OptionList$new(
                 "forestImportanceType",
                 forestImportanceType,
@@ -964,15 +964,15 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..generateSurvivalPredictions <- jmvcore::OptionBool$new(
                 "generateSurvivalPredictions",
                 generateSurvivalPredictions,
-                default=TRUE)
+                default=FALSE)
             private$..forestDiscriminationMetrics <- jmvcore::OptionBool$new(
                 "forestDiscriminationMetrics",
                 forestDiscriminationMetrics,
-                default=TRUE)
+                default=FALSE)
             private$..forestStagingComparison <- jmvcore::OptionBool$new(
                 "forestStagingComparison",
                 forestStagingComparison,
-                default=TRUE)
+                default=FALSE)
             private$..forestBootstrap <- jmvcore::OptionBool$new(
                 "forestBootstrap",
                 forestBootstrap,
@@ -986,7 +986,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..generateForestSummary <- jmvcore::OptionBool$new(
                 "generateForestSummary",
                 generateForestSummary,
-                default=TRUE)
+                default=FALSE)
             private$..performCureModelAnalysis <- jmvcore::OptionBool$new(
                 "performCureModelAnalysis",
                 performCureModelAnalysis,
@@ -1011,11 +1011,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..cureAnalyzeOldStage <- jmvcore::OptionBool$new(
                 "cureAnalyzeOldStage",
                 cureAnalyzeOldStage,
-                default=TRUE)
+                default=FALSE)
             private$..cureAnalyzeNewStage <- jmvcore::OptionBool$new(
                 "cureAnalyzeNewStage",
                 cureAnalyzeNewStage,
-                default=TRUE)
+                default=FALSE)
             private$..cureFractionEstimation <- jmvcore::OptionList$new(
                 "cureFractionEstimation",
                 cureFractionEstimation,
@@ -1033,7 +1033,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..cureBootstrapCI <- jmvcore::OptionBool$new(
                 "cureBootstrapCI",
                 cureBootstrapCI,
-                default=TRUE)
+                default=FALSE)
             private$..cureBootstrapReps <- jmvcore::OptionNumber$new(
                 "cureBootstrapReps",
                 cureBootstrapReps,
@@ -1066,19 +1066,19 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..cureModelComparison <- jmvcore::OptionBool$new(
                 "cureModelComparison",
                 cureModelComparison,
-                default=TRUE)
+                default=FALSE)
             private$..cureStageSpecificAnalysis <- jmvcore::OptionBool$new(
                 "cureStageSpecificAnalysis",
                 cureStageSpecificAnalysis,
-                default=TRUE)
+                default=FALSE)
             private$..cureGoodnessOfFit <- jmvcore::OptionBool$new(
                 "cureGoodnessOfFit",
                 cureGoodnessOfFit,
-                default=TRUE)
+                default=FALSE)
             private$..generateCureSummary <- jmvcore::OptionBool$new(
                 "generateCureSummary",
                 generateCureSummary,
-                default=TRUE)
+                default=FALSE)
             private$..performIntervalCensoringAnalysis <- jmvcore::OptionBool$new(
                 "performIntervalCensoringAnalysis",
                 performIntervalCensoringAnalysis,
@@ -1120,7 +1120,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..intervalCensoringBootstrap <- jmvcore::OptionBool$new(
                 "intervalCensoringBootstrap",
                 intervalCensoringBootstrap,
-                default=TRUE)
+                default=FALSE)
             private$..intervalCensoringBootstrapSamples <- jmvcore::OptionInteger$new(
                 "intervalCensoringBootstrapSamples",
                 intervalCensoringBootstrapSamples,
@@ -1130,15 +1130,15 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..intervalCensoringCompareStages <- jmvcore::OptionBool$new(
                 "intervalCensoringCompareStages",
                 intervalCensoringCompareStages,
-                default=TRUE)
+                default=FALSE)
             private$..intervalCensoringPlots <- jmvcore::OptionBool$new(
                 "intervalCensoringPlots",
                 intervalCensoringPlots,
-                default=TRUE)
+                default=FALSE)
             private$..intervalCensoringDiagnostics <- jmvcore::OptionBool$new(
                 "intervalCensoringDiagnostics",
                 intervalCensoringDiagnostics,
-                default=TRUE)
+                default=FALSE)
             private$..intervalCensoringPredictionTime <- jmvcore::OptionString$new(
                 "intervalCensoringPredictionTime",
                 intervalCensoringPredictionTime,
@@ -1216,7 +1216,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..informativeCensoringBootstrap <- jmvcore::OptionBool$new(
                 "informativeCensoringBootstrap",
                 informativeCensoringBootstrap,
-                default=TRUE)
+                default=FALSE)
             private$..informativeCensoringBootstrapSamples <- jmvcore::OptionInteger$new(
                 "informativeCensoringBootstrapSamples",
                 informativeCensoringBootstrapSamples,
@@ -1232,11 +1232,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..informativeCensoringPlots <- jmvcore::OptionBool$new(
                 "informativeCensoringPlots",
                 informativeCensoringPlots,
-                default=TRUE)
+                default=FALSE)
             private$..informativeCensoringCompareStages <- jmvcore::OptionBool$new(
                 "informativeCensoringCompareStages",
                 informativeCensoringCompareStages,
-                default=TRUE)
+                default=FALSE)
             private$..performConcordanceProbabilityAnalysis <- jmvcore::OptionBool$new(
                 "performConcordanceProbabilityAnalysis",
                 performConcordanceProbabilityAnalysis,
@@ -1269,7 +1269,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..concordanceProbabilityBootstrap <- jmvcore::OptionBool$new(
                 "concordanceProbabilityBootstrap",
                 concordanceProbabilityBootstrap,
-                default=TRUE)
+                default=FALSE)
             private$..concordanceProbabilityBootstrapSamples <- jmvcore::OptionInteger$new(
                 "concordanceProbabilityBootstrapSamples",
                 concordanceProbabilityBootstrapSamples,
@@ -1285,7 +1285,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..concordanceProbabilityCompareStages <- jmvcore::OptionBool$new(
                 "concordanceProbabilityCompareStages",
                 concordanceProbabilityCompareStages,
-                default=TRUE)
+                default=FALSE)
             private$..concordanceProbabilityAdjustVariables <- jmvcore::OptionVariables$new(
                 "concordanceProbabilityAdjustVariables",
                 concordanceProbabilityAdjustVariables,
@@ -1300,7 +1300,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..concordanceProbabilityRobustnessAnalysis <- jmvcore::OptionBool$new(
                 "concordanceProbabilityRobustnessAnalysis",
                 concordanceProbabilityRobustnessAnalysis,
-                default=TRUE)
+                default=FALSE)
             private$..concordanceProbabilityAlpha <- jmvcore::OptionNumber$new(
                 "concordanceProbabilityAlpha",
                 concordanceProbabilityAlpha,
@@ -1310,7 +1310,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..concordanceProbabilityDiagnostics <- jmvcore::OptionBool$new(
                 "concordanceProbabilityDiagnostics",
                 concordanceProbabilityDiagnostics,
-                default=TRUE)
+                default=FALSE)
             private$..performWinRatioAnalysis <- jmvcore::OptionBool$new(
                 "performWinRatioAnalysis",
                 performWinRatioAnalysis,
@@ -1401,7 +1401,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..winRatioSensitivityAnalysis <- jmvcore::OptionBool$new(
                 "winRatioSensitivityAnalysis",
                 winRatioSensitivityAnalysis,
-                default=TRUE)
+                default=FALSE)
             private$..winRatioGeneralizedPairwise <- jmvcore::OptionBool$new(
                 "winRatioGeneralizedPairwise",
                 winRatioGeneralizedPairwise,
@@ -1428,7 +1428,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..frailtyBootstrap <- jmvcore::OptionBool$new(
                 "frailtyBootstrap",
                 frailtyBootstrap,
-                default=TRUE)
+                default=FALSE)
             private$..frailtyBootstrapSamples <- jmvcore::OptionInteger$new(
                 "frailtyBootstrapSamples",
                 frailtyBootstrapSamples,
@@ -1438,11 +1438,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..frailtyVarianceComponents <- jmvcore::OptionBool$new(
                 "frailtyVarianceComponents",
                 frailtyVarianceComponents,
-                default=TRUE)
+                default=FALSE)
             private$..frailtyHeterogeneityTest <- jmvcore::OptionBool$new(
                 "frailtyHeterogeneityTest",
                 frailtyHeterogeneityTest,
-                default=TRUE)
+                default=FALSE)
             private$..frailtyClusterComparison <- jmvcore::OptionBool$new(
                 "frailtyClusterComparison",
                 frailtyClusterComparison,
@@ -1450,7 +1450,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..frailtyModelSelection <- jmvcore::OptionBool$new(
                 "frailtyModelSelection",
                 frailtyModelSelection,
-                default=TRUE)
+                default=FALSE)
             private$..frailtyPredictiveAccuracy <- jmvcore::OptionBool$new(
                 "frailtyPredictiveAccuracy",
                 frailtyPredictiveAccuracy,
@@ -1458,7 +1458,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..frailtyDiagnostics <- jmvcore::OptionBool$new(
                 "frailtyDiagnostics",
                 frailtyDiagnostics,
-                default=TRUE)
+                default=FALSE)
             private$..frailtyAdvancedInference <- jmvcore::OptionBool$new(
                 "frailtyAdvancedInference",
                 frailtyAdvancedInference,
@@ -1491,7 +1491,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..clinicalUtilityNNT <- jmvcore::OptionBool$new(
                 "clinicalUtilityNNT",
                 clinicalUtilityNNT,
-                default=TRUE)
+                default=FALSE)
             private$..clinicalUtilityTreatmentEffect <- jmvcore::OptionNumber$new(
                 "clinicalUtilityTreatmentEffect",
                 clinicalUtilityTreatmentEffect,
@@ -1501,7 +1501,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..clinicalUtilityComparison <- jmvcore::OptionBool$new(
                 "clinicalUtilityComparison",
                 clinicalUtilityComparison,
-                default=TRUE)
+                default=FALSE)
             private$..clinicalUtilityCostEffectiveness <- jmvcore::OptionBool$new(
                 "clinicalUtilityCostEffectiveness",
                 clinicalUtilityCostEffectiveness,
@@ -1515,7 +1515,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..clinicalUtilityBootstrap <- jmvcore::OptionBool$new(
                 "clinicalUtilityBootstrap",
                 clinicalUtilityBootstrap,
-                default=TRUE)
+                default=FALSE)
             private$..clinicalUtilityBootstrapSamples <- jmvcore::OptionInteger$new(
                 "clinicalUtilityBootstrapSamples",
                 clinicalUtilityBootstrapSamples,
@@ -8919,11 +8919,11 @@ stagemigration <- function(
     event = NULL,
     eventLevel,
     clinicalPreset = "routine_clinical",
-    enableGuidedMode = TRUE,
-    generateCopyReadyReport = TRUE,
+    enableGuidedMode = FALSE,
+    generateCopyReadyReport = FALSE,
     enableAccessibilityFeatures = FALSE,
     preferredLanguage = "en",
-    enableProgressIndicators = TRUE,
+    enableProgressIndicators = FALSE,
     optimizeForLargeDatasets = FALSE,
     analysisType = "comprehensive",
     confidenceLevel = 0.95,
@@ -8944,13 +8944,13 @@ stagemigration <- function(
     performHomogeneityTests = FALSE,
     performTrendTests = FALSE,
     performLikelihoodTests = FALSE,
-    calculatePseudoR2 = TRUE,
+    calculatePseudoR2 = FALSE,
     showMigrationOverview = TRUE,
-    showMigrationSummary = TRUE,
-    showStageDistribution = TRUE,
+    showMigrationSummary = FALSE,
+    showStageDistribution = FALSE,
     showMigrationMatrix = TRUE,
-    showStatisticalComparison = TRUE,
-    showConcordanceComparison = TRUE,
+    showStatisticalComparison = FALSE,
+    showConcordanceComparison = FALSE,
     showMigrationHeatmap = FALSE,
     showSankeyDiagram = FALSE,
     showROCComparison = FALSE,
@@ -9006,7 +9006,7 @@ stagemigration <- function(
     shapSampleSize = 100,
     shapBackgroundSamples = 50,
     shapExplanationType = "auto",
-    generateSHAPPlots = TRUE,
+    generateSHAPPlots = FALSE,
     shapPatientProfiles = "representative",
     shapInteractionAnalysis = FALSE,
     shapClinicalThresholds = "0.25, 0.50, 0.75",
@@ -9015,13 +9015,13 @@ stagemigration <- function(
     cifTimePoints = "12, 24, 36, 60",
     competingEventLevels = "cancer_death, other_death, censored",
     primaryEventLevel = "cancer_death",
-    generateCIFPlots = TRUE,
-    performGrayTest = TRUE,
+    generateCIFPlots = FALSE,
+    performGrayTest = FALSE,
     cifConfidenceLevel = 0.95,
     competingRisksCovariates = NULL,
-    stratifyByStaging = TRUE,
-    calculateCRCIndex = TRUE,
-    generateCRSummary = TRUE,
+    stratifyByStaging = FALSE,
+    calculateCRCIndex = FALSE,
+    generateCRSummary = FALSE,
     performMultiStateAnalysis = FALSE,
     multiStateModel = "illness_death",
     stateVariable = NULL,
@@ -9029,55 +9029,55 @@ stagemigration <- function(
     multiStateStates = "healthy, disease, death",
     absorptionStates = "death",
     multiStateCovariates = NULL,
-    calculateTransitionProbabilities = TRUE,
+    calculateTransitionProbabilities = FALSE,
     multiStateTimePoints = "6, 12, 24, 36, 60",
-    generateTransitionMatrix = TRUE,
-    multiStateGraphics = TRUE,
-    msStratifyByStaging = TRUE,
+    generateTransitionMatrix = FALSE,
+    multiStateGraphics = FALSE,
+    msStratifyByStaging = FALSE,
     multiStateValidation = FALSE,
-    generateMSMSummary = TRUE,
+    generateMSMSummary = FALSE,
     performRandomForestAnalysis = FALSE,
     forestModelType = "rsf",
     forestNTrees = 500,
     forestMTry = "auto",
     forestMinNodeSize = 3,
     forestCovariates = NULL,
-    calculateVariableImportance = TRUE,
+    calculateVariableImportance = FALSE,
     forestImportanceType = "permutation",
     performForestValidation = FALSE,
     forestPredictionTimePoints = "12, 24, 36, 60",
-    generateSurvivalPredictions = TRUE,
-    forestDiscriminationMetrics = TRUE,
-    forestStagingComparison = TRUE,
+    generateSurvivalPredictions = FALSE,
+    forestDiscriminationMetrics = FALSE,
+    forestStagingComparison = FALSE,
     forestBootstrap = FALSE,
     forestBootstrapSamples = 100,
-    generateForestSummary = TRUE,
+    generateForestSummary = FALSE,
     performCureModelAnalysis = FALSE,
     cureModelType = "mixture",
     cureDistribution = "weibull",
-    cureAnalyzeOldStage = TRUE,
-    cureAnalyzeNewStage = TRUE,
+    cureAnalyzeOldStage = FALSE,
+    cureAnalyzeNewStage = FALSE,
     cureFractionEstimation = "parametric",
     cureConfidenceLevel = 0.95,
-    cureBootstrapCI = TRUE,
+    cureBootstrapCI = FALSE,
     cureBootstrapReps = 500,
     cureTimeHorizon = 120,
     curePlateauThreshold = 0.05,
     cureCovariates = NULL,
-    cureModelComparison = TRUE,
-    cureStageSpecificAnalysis = TRUE,
-    cureGoodnessOfFit = TRUE,
-    generateCureSummary = TRUE,
+    cureModelComparison = FALSE,
+    cureStageSpecificAnalysis = FALSE,
+    cureGoodnessOfFit = FALSE,
+    generateCureSummary = FALSE,
     performIntervalCensoringAnalysis = FALSE,
     intervalCensoringLeftTime = NULL,
     intervalCensoringRightTime = NULL,
     intervalCensoringDistribution = "weibull",
     intervalCensoringModel = "both",
-    intervalCensoringBootstrap = TRUE,
+    intervalCensoringBootstrap = FALSE,
     intervalCensoringBootstrapSamples = 1000,
-    intervalCensoringCompareStages = TRUE,
-    intervalCensoringPlots = TRUE,
-    intervalCensoringDiagnostics = TRUE,
+    intervalCensoringCompareStages = FALSE,
+    intervalCensoringPlots = FALSE,
+    intervalCensoringDiagnostics = FALSE,
     intervalCensoringPredictionTime = "12, 24, 36, 60",
     intervalCensoringConfidenceLevel = 0.95,
     intervalCensoringAdjustVariables = NULL,
@@ -9088,23 +9088,23 @@ stagemigration <- function(
     informativeCensoringAdjustmentMethod = "sensitivity_analysis",
     informativeCensoringIPWVariables = NULL,
     informativeCensoringSensitivityRange = "0.8, 0.9, 1.0, 1.1, 1.2",
-    informativeCensoringBootstrap = TRUE,
+    informativeCensoringBootstrap = FALSE,
     informativeCensoringBootstrapSamples = 1000,
     informativeCensoringAlpha = 0.05,
-    informativeCensoringPlots = TRUE,
-    informativeCensoringCompareStages = TRUE,
+    informativeCensoringPlots = FALSE,
+    informativeCensoringCompareStages = FALSE,
     performConcordanceProbabilityAnalysis = FALSE,
     concordanceProbabilityMethods = "all_methods",
     concordanceProbabilityTimePoints = "12, 24, 36, 60, 120",
     concordanceProbabilityWeighting = "uniform",
-    concordanceProbabilityBootstrap = TRUE,
+    concordanceProbabilityBootstrap = FALSE,
     concordanceProbabilityBootstrapSamples = 1000,
     concordanceProbabilityConfidenceLevel = 0.95,
-    concordanceProbabilityCompareStages = TRUE,
+    concordanceProbabilityCompareStages = FALSE,
     concordanceProbabilityAdjustVariables = NULL,
-    concordanceProbabilityRobustnessAnalysis = TRUE,
+    concordanceProbabilityRobustnessAnalysis = FALSE,
     concordanceProbabilityAlpha = 0.05,
-    concordanceProbabilityDiagnostics = TRUE,
+    concordanceProbabilityDiagnostics = FALSE,
     performWinRatioAnalysis = FALSE,
     winRatioEndpoints = "death_progression_response",
     winRatioDeathVariable = NULL,
@@ -9116,30 +9116,30 @@ stagemigration <- function(
     winRatioBootstrapSamples = 1000,
     winRatioConfidenceLevel = 0.95,
     winRatioHandleTies = "next_endpoint",
-    winRatioSensitivityAnalysis = TRUE,
+    winRatioSensitivityAnalysis = FALSE,
     winRatioGeneralizedPairwise = FALSE,
     performFrailtyModelsAnalysis = FALSE,
     frailtyClusterVariable = NULL,
     frailtyDistribution = "gamma",
-    frailtyBootstrap = TRUE,
+    frailtyBootstrap = FALSE,
     frailtyBootstrapSamples = 500,
-    frailtyVarianceComponents = TRUE,
-    frailtyHeterogeneityTest = TRUE,
+    frailtyVarianceComponents = FALSE,
+    frailtyHeterogeneityTest = FALSE,
     frailtyClusterComparison = FALSE,
-    frailtyModelSelection = TRUE,
+    frailtyModelSelection = FALSE,
     frailtyPredictiveAccuracy = FALSE,
-    frailtyDiagnostics = TRUE,
+    frailtyDiagnostics = FALSE,
     frailtyAdvancedInference = FALSE,
     performClinicalUtilityAnalysis = FALSE,
     clinicalUtilityPrevalence = 0.2,
     clinicalUtilityTimePoint = 60,
     clinicalUtilityThresholds = "standard",
-    clinicalUtilityNNT = TRUE,
+    clinicalUtilityNNT = FALSE,
     clinicalUtilityTreatmentEffect = 0.7,
-    clinicalUtilityComparison = TRUE,
+    clinicalUtilityComparison = FALSE,
     clinicalUtilityCostEffectiveness = FALSE,
     clinicalUtilityCostPerIntervention = 5000,
-    clinicalUtilityBootstrap = TRUE,
+    clinicalUtilityBootstrap = FALSE,
     clinicalUtilityBootstrapSamples = 500,
     clinicalUtilityTimeVarying = FALSE) {
 

@@ -123,6 +123,11 @@ items:
         - predictor
         - time_points
         - reference_strategy
+        - use_bootstrap
+        - bootstrap_iterations
+        - ci_level
+        - smoothing
+        - plot_by_timepoint
 
     - name: interventionsPlot
       title: Interventions Avoided
@@ -136,6 +141,10 @@ items:
         - event
         - predictor
         - time_points
+        - smoothing
+        - use_bootstrap
+        - bootstrap_iterations
+        - ci_level
 
     - name: interpretationText
       title: Interpretation Guide

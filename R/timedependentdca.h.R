@@ -16,6 +16,9 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             reference_strategy = "both",
             estimate_survival = "kaplan_meier",
             smoothing = FALSE,
+            use_bootstrap = FALSE,
+            bootstrap_iterations = 500,
+            ci_level = 0.95,
             plot_net_benefit = FALSE,
             plot_by_timepoint = FALSE,
             plot_interventions_avoided = FALSE,
@@ -91,6 +94,22 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "smoothing",
                 smoothing,
                 default=FALSE)
+            private$..use_bootstrap <- jmvcore::OptionBool$new(
+                "use_bootstrap",
+                use_bootstrap,
+                default=FALSE)
+            private$..bootstrap_iterations <- jmvcore::OptionNumber$new(
+                "bootstrap_iterations",
+                bootstrap_iterations,
+                min=100,
+                max=10000,
+                default=500)
+            private$..ci_level <- jmvcore::OptionNumber$new(
+                "ci_level",
+                ci_level,
+                min=0.8,
+                max=0.99,
+                default=0.95)
             private$..plot_net_benefit <- jmvcore::OptionBool$new(
                 "plot_net_benefit",
                 plot_net_benefit,
@@ -120,6 +139,9 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..reference_strategy)
             self$.addOption(private$..estimate_survival)
             self$.addOption(private$..smoothing)
+            self$.addOption(private$..use_bootstrap)
+            self$.addOption(private$..bootstrap_iterations)
+            self$.addOption(private$..ci_level)
             self$.addOption(private$..plot_net_benefit)
             self$.addOption(private$..plot_by_timepoint)
             self$.addOption(private$..plot_interventions_avoided)
@@ -136,6 +158,9 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         reference_strategy = function() private$..reference_strategy$value,
         estimate_survival = function() private$..estimate_survival$value,
         smoothing = function() private$..smoothing$value,
+        use_bootstrap = function() private$..use_bootstrap$value,
+        bootstrap_iterations = function() private$..bootstrap_iterations$value,
+        ci_level = function() private$..ci_level$value,
         plot_net_benefit = function() private$..plot_net_benefit$value,
         plot_by_timepoint = function() private$..plot_by_timepoint$value,
         plot_interventions_avoided = function() private$..plot_interventions_avoided$value,
@@ -151,6 +176,9 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..reference_strategy = NA,
         ..estimate_survival = NA,
         ..smoothing = NA,
+        ..use_bootstrap = NA,
+        ..bootstrap_iterations = NA,
+        ..ci_level = NA,
         ..plot_net_benefit = NA,
         ..plot_by_timepoint = NA,
         ..plot_interventions_avoided = NA,
@@ -189,7 +217,10 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "time",
                     "event",
                     "predictor",
-                    "time_points"),
+                    "time_points",
+                    "use_bootstrap",
+                    "bootstrap_iterations",
+                    "ci_level"),
                 columns=list(
                     list(
                         `name`="time_point", 
@@ -205,6 +236,16 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `name`="net_benefit", 
                         `title`="Net Benefit", 
                         `type`="number"),
+                    list(
+                        `name`="nb_lower", 
+                        `title`="NB Lower CI", 
+                        `type`="number", 
+                        `visible`="(use_bootstrap)"),
+                    list(
+                        `name`="nb_upper", 
+                        `title`="NB Upper CI", 
+                        `type`="number", 
+                        `visible`="(use_bootstrap)"),
                     list(
                         `name`="nb_treat_all", 
                         `title`="NB (Treat All)", 
@@ -299,7 +340,12 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "event",
                     "predictor",
                     "time_points",
-                    "reference_strategy")))
+                    "reference_strategy",
+                    "use_bootstrap",
+                    "bootstrap_iterations",
+                    "ci_level",
+                    "smoothing",
+                    "plot_by_timepoint")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="interventionsPlot",
@@ -312,7 +358,11 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "time",
                     "event",
                     "predictor",
-                    "time_points")))
+                    "time_points",
+                    "smoothing",
+                    "use_bootstrap",
+                    "bootstrap_iterations",
+                    "ci_level")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretationText",
@@ -383,6 +433,12 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param estimate_survival method for estimating event probabilities from
 #'   predictor
 #' @param smoothing apply LOESS smoothing to decision curves for visualization
+#' @param use_bootstrap calculate 95\% confidence intervals for net benefit
+#'   using bootstrap resampling (computationally intensive)
+#' @param bootstrap_iterations number of bootstrap iterations for confidence
+#'   interval calculation
+#' @param ci_level confidence level for bootstrap intervals (e.g., 0.95 for
+#'   95\% CI)
 #' @param plot_net_benefit plot net benefit curves across threshold
 #'   probabilities
 #' @param plot_by_timepoint create separate plots for each time point (vs.
@@ -420,6 +476,9 @@ timedependentdca <- function(
     reference_strategy = "both",
     estimate_survival = "kaplan_meier",
     smoothing = FALSE,
+    use_bootstrap = FALSE,
+    bootstrap_iterations = 500,
+    ci_level = 0.95,
     plot_net_benefit = FALSE,
     plot_by_timepoint = FALSE,
     plot_interventions_avoided = FALSE,
@@ -450,6 +509,9 @@ timedependentdca <- function(
         reference_strategy = reference_strategy,
         estimate_survival = estimate_survival,
         smoothing = smoothing,
+        use_bootstrap = use_bootstrap,
+        bootstrap_iterations = bootstrap_iterations,
+        ci_level = ci_level,
         plot_net_benefit = plot_net_benefit,
         plot_by_timepoint = plot_by_timepoint,
         plot_interventions_avoided = plot_interventions_avoided,

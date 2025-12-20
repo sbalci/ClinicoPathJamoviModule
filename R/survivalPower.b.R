@@ -1038,6 +1038,18 @@ survivalPowerClass <- R6::R6Class(
                     avg_follow_up_needed <- events_needed / (n_total * event_rate_monthly)
                     total_duration <- accrual_period + avg_follow_up_needed
 
+                    # Warn user about approximation method
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'durationApproximation',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(sprintf(
+                        'Duration calculation uses simplified event rate model (%.3f events/month/subject) • For precise estimates, consider simulation-based methods',
+                        event_rate_monthly
+                    ))
+                    self$results$insert(900, notice)
+
                     return(paste("Required Study Duration:", round(total_duration, 1), "months"))
                 }
 
@@ -3619,6 +3631,20 @@ survivalPowerClass <- R6::R6Class(
                 " months recruitment + ", self$options$follow_up_period,
                 " months follow-up = ", self$options$accrual_period + self$options$follow_up_period,
                 " months total.</p>",
+
+                "<div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'>",
+                "<p><strong>Methods:</strong> Sample size calculations based on ",
+                if (test_type == "log_rank") {
+                    "Schoenfeld (1983) log-rank test formula"
+                } else if (test_type == "cox_regression") {
+                    "gsDesign package (Anderson 2022) for Cox proportional hazards"
+                } else if (test_type == "non_inferiority") {
+                    "non-inferiority margin approach (Rothmann et al. 2003)"
+                } else {
+                    "standard survival analysis methods"
+                },
+                ". Exponential survival distribution assumed with uniform accrual pattern.</p>",
+                "</div>",
                 "</div>"
             )
 
