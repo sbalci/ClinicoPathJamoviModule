@@ -2952,69 +2952,6 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             self$results$weightedKappaGuide$setVisible(TRUE)
         },
 
-        .generateClusteringInterpretation = function(clustering_result = NULL) {
-            interp_html <- paste0(
-                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>",
-                "<h3 style='color: #2E5984; border-bottom: 2px solid #2E5984; padding-bottom: 8px;'>",
-                "Understanding Diagnostic Style Clustering Results</h3>",
-
-                "<div style='background: #F0F7FF; border-left: 4px solid #4A90E2; padding: 12px; margin: 15px 0;'>",
-                "<p><strong>What is Diagnostic Style Clustering?</strong></p>",
-                "<p>This analysis identifies distinct 'diagnostic schools' or patterns among pathologists based on ",
-                "how they categorize cases. It uses hierarchical clustering (Usubutun et al., 2012) to group ",
-                "raters with similar diagnostic tendencies.</p>",
-                "</div>",
-
-                "<h4 style='color: #2E5984;'>Interpreting Your Results:</h4>",
-                "<ul style='line-height: 1.8;'>",
-                "<li><strong>Style Groups:</strong> Raters clustered together tend to make similar diagnostic decisions. ",
-                "This doesn't mean one group is 'correct' - it reveals systematic differences in thresholds or criteria.</li>",
-                "<li><strong>Dendrogram:</strong> Shows hierarchical relationships. Raters closer together in the tree ",
-                "have more similar diagnostic patterns.</li>",
-                "<li><strong>Heatmap:</strong> Displays case-by-case diagnoses with color coding. Look for vertical bands ",
-                "(cases that split groups) - these are diagnostically challenging cases worth reviewing.</li>",
-                "<li><strong>Discordant Cases:</strong> Cases with high disagreement between style groups. These represent ",
-                "the most educationally valuable cases for consensus discussions and training.</li>",
-                "</ul>",
-
-                "<h4 style='color: #2E5984;'>Clinical Applications:</h4>",
-                "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;' border='1'>",
-                "<tr style='background: #E8F4F8;'><th style='padding: 8px;'>Finding</th><th style='padding: 8px;'>Action</th></tr>",
-                "<tr><td style='padding: 6px;'>Multiple style groups identified</td>",
-                "<td style='padding: 6px;'>Convene consensus conference to align diagnostic criteria</td></tr>",
-                "<tr><td style='padding: 6px;'>One group aligns with expert</td>",
-                "<td style='padding: 6px;'>Use this group's cases for training examples</td></tr>",
-                "<tr><td style='padding: 6px;'>Specific discordant cases</td>",
-                "<td style='padding: 6px;'>Add to teaching file; discuss at tumor board</td></tr>",
-                "<tr><td style='padding: 6px;'>Experience/training association</td>",
-                "<td style='padding: 6px;'>Tailor education to specific career stages</td></tr>",
-                "</table>",
-
-                "<div style='background: #FFF8DC; border: 1px solid #DAA520; padding: 10px; margin: 15px 0;'>",
-                "<p><strong>Key Insight from Usubutun (2012):</strong></p>",
-                "<p>Diagnostic style was found to be <em>personal</em> rather than institutional - even pathologists ",
-                "trained at the same institution may belong to different style groups. This emphasizes the importance ",
-                "of ongoing calibration exercises and consensus conferences.</p>",
-                "</div>",
-
-                "<h4 style='color: #2E5984;'>Quality Assurance Recommendations:</h4>",
-                "<ol style='line-height: 1.8;'>",
-                "<li><strong>Document findings:</strong> Record which style groups exist and their characteristics</li>",
-                "<li><strong>Identify outliers:</strong> Review discordant cases as a team</li>",
-                "<li><strong>Establish consensus:</strong> Use cases with perfect agreement as gold standard examples</li>",
-                "<li><strong>Monitor over time:</strong> Repeat analysis after training to measure convergence</li>",
-                "<li><strong>Consider context:</strong> Some diagnostic variation may be clinically acceptable</li>",
-                "</ol>",
-
-                "<p style='margin-top: 15px; font-size: 0.9em; color: #666;'>",
-                "<em>Reference:</em> Usubutun A, Messing-Jünger M, Lopes MB, et al. World Health Organization ",
-                "grade I meningioma histopathology: a reproducibility study validating the diagnostic criteria. ",
-                "Modern Pathology. 2012;25(4):565-573.</p>",
-                "</div>"
-            )
-            self$results$clusteringInterpretation$setContent(interp_html)
-        },
-
         .generateStatisticalGlossary = function() {
             glossary_html <- paste0(
                 "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.5;'>",

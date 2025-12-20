@@ -20,12 +20,12 @@ patientsimilarity(
   nClusters = 3,
   dbscan_eps = 0.5,
   dbscan_minpts = 5,
-  showClusterStats = TRUE,
+  showClusterStats = FALSE,
   survivalAnalysis = FALSE,
   survivalTime = NULL,
   survivalEvent = NULL,
   survivalEventLevel,
-  scaleVars = TRUE,
+  scaleVars = FALSE,
   removeOutliers = FALSE,
   showLoadings = FALSE,
   show3DPlot = FALSE
@@ -112,7 +112,6 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$projectionPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$projection3D} \tab \tab \tab \tab \tab an image \cr
 \code{results$varianceTable} \tab \tab \tab \tab \tab a table \cr

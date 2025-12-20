@@ -134,7 +134,7 @@ options:
     - name: sampleLarge
       title: Sample Large Datasets
       type: Bool
-      default: true
+      default: false
       description:
           ui: For datasets >10,000 rows, randomly sample 5,000 rows for faster visualization while maintaining statistical validity
           R: >-

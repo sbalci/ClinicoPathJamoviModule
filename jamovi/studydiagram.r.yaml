@@ -56,7 +56,7 @@ items:
           type: text
 
     - name: plot
-      title: Consistency Diagram
+      title: Study Flow Diagram
       type: Image
       width: 800
       height: 600
@@ -68,39 +68,6 @@ items:
       type: Html
       description: Interactive study flow diagram
       visible: true
-      clearWith:
-        - data_format
-        - diagram_type
-        - participant_id
-        - step_excluded
-        - exclusion_reason_participant
-        - step_name
-        - participant_count
-        - exclusion_reason_summary
-        - participant_id_mapping
-        - exclusion_reason_mapping
-        - step1_exclusions
-        - step2_exclusions
-        - step3_exclusions
-        - step4_exclusions
-        - step5_exclusions
-        - step1_label
-        - step2_label
-        - step3_label
-        - step4_label
-        - step5_label
-        - show_percentages
-        - show_exclusion_boxes
-        - direction
-        - color_scheme
-
-    - name: diagramPlot
-      title: Diagram Plot
-      type: Image
-      description: Publication-ready diagram plot
-      width: 800
-      height: 600
-      requiresData: true
       clearWith:
         - data_format
         - diagram_type

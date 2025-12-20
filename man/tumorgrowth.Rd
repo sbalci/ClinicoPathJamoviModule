@@ -17,6 +17,7 @@ tumorgrowth(
   confidenceLevel = 95,
   modelSummary = TRUE,
   growthParameters = TRUE,
+  showSummary = TRUE,
   growthCurves = TRUE,
   residualAnalysis = FALSE,
   treatmentAnalysis = FALSE,
@@ -55,6 +56,8 @@ tumorgrowth(
 
 \item{growthParameters}{Show biological interpretation of growth parameters}
 
+\item{showSummary}{Display plain-English summary of growth model results}
+
 \item{growthCurves}{Display individual and population growth curves}
 
 \item{residualAnalysis}{Perform residual diagnostics}
@@ -73,15 +76,22 @@ tumorgrowth(
 
 \item{mcmcSamples}{Number of MCMC samples for Bayesian estimation}
 
-\item{plotWidth}{Width of the growth plots in pixels}
+\item{plotWidth}{Width of the growth plots in pixels. Note: Due to jamovi
+framework limitations, plot dimensions are currently fixed in the output
+schema and this option does not affect rendering. Future versions may
+support dynamic plot sizing.}
 
-\item{plotHeight}{Height of the growth plots in pixels}
+\item{plotHeight}{Height of the growth plots in pixels. Note: Due to jamovi
+framework limitations, plot dimensions are currently fixed in the output
+schema and this option does not affect rendering. Future versions may
+support dynamic plot sizing.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$growthParametersTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$doublingTimeTable} \tab \tab \tab \tab \tab a table \cr
@@ -91,6 +101,7 @@ A results object containing:
 \code{results$predictionPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$fitStatistics} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

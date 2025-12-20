@@ -133,8 +133,6 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     time_var[beyond_max] <- max_time
                     event_var[beyond_max] <- 0  # Administratively censor
 
-                    event_var[beyond_max] <- 0  # Administratively censor
-
                     notice <- jmvcore::Notice$new(
                         options = self$options,
                         name = ".restrictedTime",
@@ -145,7 +143,6 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         max_time, sum(beyond_max)
                     ))
                     self$results$insert(999, notice)
-                }
                 }
             }
 

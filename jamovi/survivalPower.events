@@ -1,0 +1,79 @@
+onChange_clinicalPreset <- function(ui, context) {
+    # Auto-populate parameters based on clinical study preset selection
+    preset <- ui$clinical_preset$value()
+
+    if (is.null(preset) || preset == "custom") {
+        return()  # Don't override custom settings
+    }
+
+    # Define preset configurations
+    presets <- list(
+        oncology_phase3 = list(
+            effect_size = 0.75,
+            power_level = 0.80,
+            alpha_level = 0.05,
+            allocation_ratio = 1.0,
+            control_median_survival = 12.0,
+            accrual_period = 24.0,
+            follow_up_period = 24.0,
+            test_type = "log_rank",
+            primary_endpoint = "overall_survival"
+        ),
+        cardio_prevention = list(
+            effect_size = 0.85,
+            power_level = 0.90,
+            alpha_level = 0.05,
+            allocation_ratio = 1.0,
+            control_median_survival = 36.0,
+            accrual_period = 36.0,
+            follow_up_period = 48.0,
+            test_type = "cox_regression",
+            primary_endpoint = "overall_survival"
+        ),
+        biomarker_study = list(
+            effect_size = 0.67,
+            power_level = 0.80,
+            alpha_level = 0.05,
+            allocation_ratio = 2.0,
+            control_median_survival = 18.0,
+            accrual_period = 18.0,
+            follow_up_period = 12.0,
+            test_type = "log_rank",
+            primary_endpoint = "progression_free_survival"
+        ),
+        non_inferiority = list(
+            effect_size = 1.0,
+            power_level = 0.80,
+            alpha_level = 0.05,
+            allocation_ratio = 1.0,
+            control_median_survival = 24.0,
+            accrual_period = 24.0,
+            follow_up_period = 24.0,
+            test_type = "non_inferiority",
+            ni_margin = 1.25,
+            primary_endpoint = "overall_survival"
+        ),
+        pilot_study = list(
+            effect_size = 0.70,
+            power_level = 0.70,
+            alpha_level = 0.10,
+            allocation_ratio = 1.0,
+            control_median_survival = 12.0,
+            accrual_period = 12.0,
+            follow_up_period = 12.0,
+            test_type = "log_rank",
+            primary_endpoint = "overall_survival"
+        )
+    )
+
+    # Apply preset if it exists
+    if (preset %in% names(presets)) {
+        config <- presets[[preset]]
+
+        for (param_name in names(config)) {
+            if (!is.null(ui[[param_name]])) {
+                ui[[param_name]]$setValue(config[[param_name]])
+            }
+        }
+    }
+}

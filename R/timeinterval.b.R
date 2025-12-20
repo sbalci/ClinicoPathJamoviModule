@@ -72,44 +72,58 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # ===================================================================
         
         .validateInputData = function(data, dx_date, fu_date) {
-            # Comprehensive input validation
+            # Comprehensive input validation - returns status instead of throwing errors
             if (!is.data.frame(data)) {
-                stop("Input must be a data frame")
+                return(list(
+                    valid = FALSE,
+                    error = "Input must be a data frame; check your data source."
+                ))
             }
-            
+
             if (nrow(data) == 0) {
-                stop("Data frame is empty")
+                return(list(
+                    valid = FALSE,
+                    error = "Data frame is empty; ensure your dataset has at least one row."
+                ))
             }
-            
+
             # Validate date columns exist
             if (!dx_date %in% names(data)) {
                 available <- paste(head(names(data), 8), collapse = ", ")
                 suffix <- if(ncol(data) > 8) "..." else ""
-                stop(glue::glue(
-                    "Start date column '{dx_date}' not found.\n",
-                    "Available columns: {available}{suffix}"
+                return(list(
+                    valid = FALSE,
+                    error = sprintf("Start date column '%s' not found. Available columns: %s%s",
+                                  dx_date, available, suffix)
                 ))
             }
 
             if (!fu_date %in% names(data)) {
                 available <- paste(head(names(data), 8), collapse = ", ")
                 suffix <- if(ncol(data) > 8) "..." else ""
-                stop(glue::glue(
-                    "End date column '{fu_date}' not found.\n",
-                    "Available columns: {available}{suffix}"
+                return(list(
+                    valid = FALSE,
+                    error = sprintf("End date column '%s' not found. Available columns: %s%s",
+                                  fu_date, available, suffix)
                 ))
             }
-            
+
             # Check for completely missing date columns
             if (all(is.na(data[[dx_date]]))) {
-                stop("Start date column contains only missing values")
+                return(list(
+                    valid = FALSE,
+                    error = "Start date column contains only missing values; cannot calculate time intervals."
+                ))
             }
-            
+
             if (all(is.na(data[[fu_date]]))) {
-                stop("End date column contains only missing values")
+                return(list(
+                    valid = FALSE,
+                    error = "End date column contains only missing values; cannot calculate time intervals."
+                ))
             }
-            
-            return(TRUE)
+
+            return(list(valid = TRUE))
         },
         
         .detectDateFormat = function(start_vector,
@@ -408,8 +422,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                             landmark_time = NULL,
                                             timezone_setting = "system") {
 
-            # Comprehensive input validation
-            private$.validateInputData(data, dx_date, fu_date)
+            # Note: Input validation already performed in .run() before calling this method
+            # Redundant validation call removed to avoid duplicate checks
 
             # Detect date format if needed
             detected_format <- private$.detectDateFormat(
@@ -549,17 +563,53 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Calculate time intervals
-            calculated_times <- private$.calculate_survival_time(
-                data = self$data,
-                dx_date = self$options$dx_date,
-                fu_date = self$options$fu_date,
-                time_format = self$options$time_format,
-                output_unit = self$options$output_unit,
-                time_basis = self$options$time_basis,
-                landmark_time = if(self$options$use_landmark) self$options$landmark_time else NULL,
-                timezone_setting = self$options$timezone
+            # Validate input data structure
+            validation <- private$.validateInputData(
+                self$data,
+                self$options$dx_date,
+                self$options$fu_date
             )
+
+            if (!validation$valid) {
+                # Create ERROR notice (single line)
+                errorNotice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'validationError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                errorNotice$setContent(validation$error)
+                self$results$insert(1, errorNotice)
+                return()
+            }
+
+            # Try to calculate time intervals with error handling
+            calculated_times <- NULL
+            tryCatch({
+                calculated_times <- private$.calculate_survival_time(
+                    data = self$data,
+                    dx_date = self$options$dx_date,
+                    fu_date = self$options$fu_date,
+                    time_format = self$options$time_format,
+                    output_unit = self$options$output_unit,
+                    time_basis = self$options$time_basis,
+                    landmark_time = if(self$options$use_landmark) self$options$landmark_time else NULL,
+                    timezone_setting = self$options$timezone
+                )
+            }, error = function(e) {
+                # Create ERROR notice for calculation failures (single line)
+                calcErrorNotice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'calculationError',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                calcErrorNotice$setContent(as.character(e$message))
+                self$results$insert(1, calcErrorNotice)
+            })
+
+            # If calculation failed, stop here
+            if (is.null(calculated_times)) {
+                return()
+            }
 
             # Add calculated times to results if requested
             if (self$options$add_times && !is.null(calculated_times)) {
@@ -781,6 +831,45 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 ")
 
                 self$results$summary$setContent(summary_text)
+
+                # Small sample size guards (added before completion notice)
+                if (summary_stats$n < 10 && summary_stats$n > 1) {
+                    smallNNotice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'criticallySmallSample',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    smallNNotice$setContent(
+                        sprintf('Critically small sample (n=%d). Statistical summaries are unreliable with fewer than 10 observations. Results should be considered exploratory only. Minimum n=20 recommended for basic descriptive analysis.',
+                                summary_stats$n)
+                    )
+                    self$results$insert(1, smallNNotice)
+                } else if (summary_stats$n < 20 && summary_stats$n >= 10) {
+                    smallNNotice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'smallSample',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    smallNNotice$setContent(
+                        sprintf('Small sample size (n=%d). Confidence intervals may be very wide and unreliable with fewer than 20 observations. Consider collecting more data or interpreting results cautiously.',
+                                summary_stats$n)
+                    )
+                    self$results$insert(1, smallNNotice)
+                }
+
+                # Add completion INFO notice (single line) at bottom
+                completionNotice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'analysisComplete',
+                    type = jmvcore::NoticeType$INFO
+                )
+                completionNotice$setContent(
+                    sprintf('Analysis completed using %d observations with mean follow-up %.1f %s (total person-time: %.1f person-%s).',
+                            summary_stats$n, summary_stats$mean, self$options$output_unit,
+                            summary_stats$total_person_time, self$options$output_unit)
+                )
+                self$results$insert(999, completionNotice)
+
             } else {
                 # Handle case with no valid calculated times
                 error_summary <- "
@@ -795,7 +884,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             <li>Data contains non-missing values</li>
                         </ul>
                     </div>"
-                
+
                 self$results$summary$setContent(error_summary)
             }
 
@@ -888,58 +977,48 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$glossaryPanel$setContent(glossary_html)
             }
 
-            # Generate contextual warnings for data quality issues
+            # Generate contextual warnings for data quality issues using Notices (single-line content)
             if (!is.null(calculated_times) && is.list(calculated_times) &&
                 !is.null(calculated_times$quality)) {
                 quality <- calculated_times$quality
-                warnings_html <- ""
 
-                # Negative intervals warning
-                if (quality$negative_intervals > 0 && !self$options$remove_negative) {
-                    pct <- round(100 * quality$negative_intervals / quality$total_observations, 1)
-                    warnings_html <- paste0(warnings_html, sprintf("
-                        <div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>
-                            <strong>⚠️ Warning: Negative Intervals Detected</strong><br>
-                            %d observations (%.1f%%) have end dates before start dates.<br>
-                            <strong>Recommendation:</strong> Enable 'Remove Negative Intervals' or review your date columns for errors.
-                        </div>
-                    ", quality$negative_intervals, pct))
-                }
+                # Insert position counter for multiple notices
+                notice_position <- 1
 
-                # High missing data warning
+                # Note: Negative intervals with remove_negative=FALSE are handled as ERROR
+                # (stop at line 491, caught by tryCatch above). No warning needed here.
+
+                # High missing data WARNING (single line)
                 if (quality$missing_values > 0) {
                     pct <- round(100 * quality$missing_values / quality$total_observations, 1)
                     if (pct > 10) {
-                        warnings_html <- paste0(warnings_html, sprintf("
-                            <div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>
-                                <strong>⚠️ Warning: High Missing Data</strong><br>
-                                %d observations (%.1f%%) have missing time intervals.<br>
-                                <strong>Recommendation:</strong> Investigate missing date values. This may affect study conclusions.
-                            </div>
-                        ", quality$missing_values, pct))
+                        missingNotice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'missingData',
+                            type = jmvcore::NoticeType$WARNING
+                        )
+                        missingNotice$setContent(
+                            sprintf('%d observations (%.1f%%) have missing time intervals. Investigate missing date values as this may affect study conclusions.',
+                                    quality$missing_values, pct)
+                        )
+                        self$results$insert(notice_position, missingNotice)
+                        notice_position <- notice_position + 1
                     }
                 }
 
-                # Future dates warning
+                # Future dates STRONG_WARNING (single line)
                 if (quality$future_dates > 0) {
-                    warnings_html <- paste0(warnings_html, sprintf("
-                        <div style='background-color: #f8d7da; padding: 15px; margin: 10px 0; border-left: 4px solid #dc3545;'>
-                            <strong>🚨 Data Quality Issue: Future Dates</strong><br>
-                            %d date values are in the future.<br>
-                            <strong>Action Required:</strong> Review date columns for data entry errors or incorrect date formats.
-                        </div>
-                    ", quality$future_dates))
-                }
-
-                # Display warnings if any exist
-                if (warnings_html != "") {
-                    current_todo <- self$results$todo$content
-                    if (!is.null(current_todo) && current_todo != "") {
-                        # Append to existing content
-                        self$results$todo$setContent(paste0(current_todo, warnings_html))
-                    } else {
-                        self$results$todo$setContent(warnings_html)
-                    }
+                    futureDatesNotice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'futureDates',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    futureDatesNotice$setContent(
+                        sprintf('%d date values are in the future. Review date columns for data entry errors or incorrect date formats.',
+                                quality$future_dates)
+                    )
+                    self$results$insert(notice_position, futureDatesNotice)
+                    notice_position <- notice_position + 1
                 }
             }
 

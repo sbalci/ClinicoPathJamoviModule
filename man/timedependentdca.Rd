@@ -16,7 +16,7 @@ timedependentdca(
   reference_strategy = "both",
   estimate_survival = "kaplan_meier",
   smoothing = FALSE,
-  plot_net_benefit = TRUE,
+  plot_net_benefit = FALSE,
   plot_by_timepoint = FALSE,
   plot_interventions_avoided = FALSE,
   random_seed = 42

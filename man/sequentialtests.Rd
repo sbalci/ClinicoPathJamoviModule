@@ -17,7 +17,7 @@ sequentialtests(
   strategy = "serial_positive",
   prevalence = 0.1,
   population_size = 1000,
-  show_explanation = TRUE,
+  show_explanation = FALSE,
   show_formulas = FALSE,
   show_cost_analysis = FALSE,
   show_nomogram = FALSE
@@ -62,6 +62,7 @@ counts. Does not affect probabilities.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$plain_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$individual_tests_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$population_flow_table} \tab \tab \tab \tab \tab a table \cr
@@ -72,6 +73,7 @@ A results object containing:
 \code{results$plot_performance} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot_probability} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot_population_flow} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot_sensitivity_analysis} \tab \tab \tab \tab \tab an image \cr
 \code{results$clinical_guidance} \tab \tab \tab \tab \tab a html \cr
 }
 

@@ -15,16 +15,6 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
     private = list(
 
         #---------------------------------------------
-        # UTILITY FUNCTIONS
-        #---------------------------------------------
-
-        # Escape variable names with spaces/special characters
-        .escapeVar = function(x) {
-            if (is.null(x) || length(x) == 0) return(x)
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-        },
-
-        #---------------------------------------------
         # INITIALIZATION
         #---------------------------------------------
 
@@ -916,6 +906,16 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
 
             derivedData <- private$.derivedData
+
+            # State management - ensures plot updates when options change
+            plotState <- list(
+                data = as.data.frame(derivedData),  # Ensure base data.frame for serialization
+                calculatePFS = self$options$calculatePFS,
+                calculateOS = self$options$calculateOS,
+                calculateTTP = self$options$calculateTTP,
+                timeUnit = self$options$timeUnit
+            )
+            image$setState(plotState)
 
             # Prepare data for plotting
             plot_data <- data.frame()

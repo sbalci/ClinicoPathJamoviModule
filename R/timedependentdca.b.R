@@ -71,20 +71,167 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
 
         #---------------------------------------------
+        # NOTICE HELPER
+        #---------------------------------------------
+        .addNotice = function(type, content, name = NULL, position = NULL) {
+            if (is.null(name)) {
+                name <- paste0('notice_', gsub('[^a-zA-Z0-9]', '_', substr(content, 1, 20)))
+            }
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = name,
+                type = type
+            )
+            notice$setContent(content)
+
+            if (is.null(position)) {
+                # Auto-position: ERROR/STRONG_WARNING at top, WARNING mid, INFO bottom
+                position <- switch(
+                    as.character(type),
+                    "1" = 1,    # ERROR
+                    "2" = 1,    # STRONG_WARNING
+                    "3" = 50,   # WARNING
+                    "4" = 999,  # INFO
+                    1
+                )
+            }
+
+            self$results$insert(position, notice)
+        },
+
+        #---------------------------------------------
+        # BOOTSTRAP HELPER
+        #---------------------------------------------
+        .calculateBootstrapNB = function(time, event, predictor, t_eval, thresholds, estimate_method, cox_fit_global = NULL) {
+            # Perform one bootstrap iteration
+            n <- length(time)
+            boot_idx <- sample(1:n, n, replace = TRUE)
+
+            time_boot <- time[boot_idx]
+            event_boot <- event[boot_idx]
+            predictor_boot <- predictor[boot_idx]
+
+            # Calculate risk probabilities using same method as main analysis
+            if (estimate_method == "direct") {
+                prob_event <- predictor_boot
+            } else if (estimate_method == "kaplan_meier") {
+                n_groups <- if (n < 100) 3 else if (n < 300) 5 else 10
+                predictor_breaks <- quantile(predictor_boot, probs = seq(0, 1, length = n_groups + 1), na.rm = TRUE)
+
+                if (length(unique(predictor_breaks)) < length(predictor_breaks)) {
+                    predictor_groups <- as.numeric(cut(predictor_boot, breaks = unique(predictor_breaks), include.lowest = TRUE))
+                } else {
+                    predictor_groups <- as.numeric(cut(predictor_boot, breaks = predictor_breaks, include.lowest = TRUE, labels = FALSE))
+                }
+
+                surv_obj <- Surv(time_boot, event_boot)
+                prob_event <- numeric(n)
+
+                tryCatch({
+                    surv_by_group <- survfit(surv_obj ~ predictor_groups)
+                    group_summary <- summary(surv_by_group, times = t_eval, extend = TRUE)
+
+                    for (g in unique(predictor_groups)) {
+                        if (is.na(g)) next
+                        group_mask <- predictor_groups == g
+
+                        if (!is.null(group_summary$strata)) {
+                            stratum_name <- paste0("predictor_groups=", g)
+                            stratum_idx <- which(group_summary$strata == stratum_name)
+                            if (length(stratum_idx) > 0) {
+                                surv_g <- group_summary$surv[stratum_idx[1]]
+                                prob_event[group_mask] <- 1 - surv_g
+                            } else {
+                                prob_event[group_mask] <- mean(event_boot[group_mask], na.rm = TRUE)
+                            }
+                        } else {
+                            prob_event[group_mask] <- 1 - group_summary$surv[1]
+                        }
+                    }
+                }, error = function(e) {
+                    km_overall <- survfit(surv_obj ~ 1)
+                    surv_t <- summary(km_overall, times = t_eval, extend = TRUE)$surv[1]
+                    prob_event <<- rep(1 - surv_t, n)
+                })
+
+            } else {
+                # Cox method - refit on bootstrap sample
+                tryCatch({
+                    surv_obj <- Surv(time_boot, event_boot)
+                    cox_boot <- coxph(surv_obj ~ predictor_boot)
+                    newdata <- data.frame(predictor_boot = predictor_boot)
+                    surv_fit <- survfit(cox_boot, newdata = newdata)
+
+                    surv_times <- surv_fit$time
+                    surv_probs <- surv_fit$surv
+
+                    prob_event <- numeric(n)
+                    time_idx <- which(surv_times <= t_eval)
+                    last_time_idx <- if(length(time_idx) > 0) max(time_idx) else 0
+
+                    if (last_time_idx == 0) {
+                        prob_event <- rep(0, n)
+                    } else {
+                        if (is.matrix(surv_probs)) {
+                            prob_event <- 1 - surv_probs[last_time_idx, ]
+                        } else {
+                            prob_event <- rep(1 - surv_probs[last_time_idx], n)
+                        }
+                    }
+                }, error = function(e) {
+                    prob_event <- numeric(n)
+                })
+            }
+
+            prob_event <- pmin(pmax(prob_event, 0), 1)
+
+            # Calculate net benefit for all thresholds
+            km_overall <- survfit(Surv(time_boot, event_boot) ~ 1)
+            surv_overall <- summary(km_overall, times = t_eval, extend = TRUE)$surv[1]
+            event_rate <- 1 - surv_overall
+
+            nb_model <- numeric(length(thresholds))
+
+            for (i in seq_along(thresholds)) {
+                pt <- thresholds[i]
+                is_high_risk <- prob_event >= pt
+                n_high_risk <- sum(is_high_risk)
+
+                if (n_high_risk == 0) {
+                    tp_rate <- 0
+                    fp_rate <- 0
+                } else if (n_high_risk == n) {
+                    tp_rate <- event_rate
+                    fp_rate <- 1 - event_rate
+                } else {
+                    surv_high_risk <- survfit(Surv(time_boot[is_high_risk], event_boot[is_high_risk]) ~ 1)
+                    s_high_risk <- summary(surv_high_risk, times = t_eval, extend = TRUE)$surv[1]
+                    tp_rate <- (1 - s_high_risk) * (n_high_risk / n)
+                    fp_rate <- s_high_risk * (n_high_risk / n)
+                }
+
+                nb_model[i] <- tp_rate - fp_rate * (pt / (1 - pt))
+            }
+
+            return(nb_model)
+        },
+
+        #---------------------------------------------
         # RUN
         #---------------------------------------------
         .run = function() {
 
             # Check requirements
-            if (is.null(self$options$time) || self$options$time == "") {
-                return()
-            }
+            if (is.null(self$options$time) || self$options$time == "" ||
+                is.null(self$options$event) || self$options$event == "" ||
+                is.null(self$options$predictor) || self$options$predictor == "") {
 
-            if (is.null(self$options$event) || self$options$event == "") {
-                return()
-            }
-
-            if (is.null(self$options$predictor) || self$options$predictor == "") {
+                private$.addNotice(
+                    type = jmvcore::NoticeType$ERROR,
+                    content = 'Time, Event, and Predictor variables are required. Please select all three variables to begin time-dependent decision curve analysis.',
+                    name = 'missingVariables',
+                    position = 1
+                )
                 return()
             }
 
@@ -92,7 +239,13 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             tryCatch({
                 private$.prepareData()
             }, error = function(e) {
-                stop(paste("Data preparation error:", e$message))
+                private$.addNotice(
+                    type = jmvcore::NoticeType$ERROR,
+                    content = sprintf('Data preparation failed: %s. Check variable types and data integrity.', e$message),
+                    name = 'dataPrepError',
+                    position = 1
+                )
+                return()
             })
 
             if (is.null(private$.data_prepared)) {
@@ -103,17 +256,39 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             tryCatch({
                 private$.calculateTimeDependentNB()
             }, error = function(e) {
-                stop(paste("Net benefit calculation error:", e$message))
+                private$.addNotice(
+                    type = jmvcore::NoticeType$ERROR,
+                    content = sprintf('Net benefit calculation failed: %s. This may indicate numerical issues or extreme data values.', e$message),
+                    name = 'calcError',
+                    position = 1
+                )
+                return()
             })
 
             # Populate results
             private$.populateNetBenefitTable()
             private$.populateSummaryTable()
             private$.populateInterventionsTable()
-            
-            # Add method note on approximations
-            jmvcore::note(self$results$netBenefitTable,
-                          "Net benefit uses KM-based group survival at each threshold; IPCW/time-dependent censoring adjustments are not implemented. Interpret with caution when censoring is heavy.")
+
+            # Methodological transparency notice
+            private$.addNotice(
+                type = jmvcore::NoticeType$INFO,
+                content = 'Net benefit estimates use Kaplan-Meier survival within risk groups at each threshold. Inverse probability of censoring weighting (IPCW) and time-dependent censoring adjustments are not implemented. Interpret with caution when censoring is heavy or informative.',
+                name = 'methodNote',
+                position = 999
+            )
+
+            # Success notice
+            n_timepoints <- length(private$.time_points)
+            n_obs <- private$.data_prepared$n
+            n_events <- sum(private$.data_prepared$event)
+            private$.addNotice(
+                type = jmvcore::NoticeType$INFO,
+                content = sprintf('Time-dependent DCA completed successfully. Analyzed %d observations (%d events, %.1f%% event rate) across %d time points using %s estimation method.',
+                                  n_obs, n_events, 100 * n_events / n_obs, n_timepoints, self$options$estimate_survival),
+                name = 'analysisComplete',
+                position = 999
+            )
         },
 
         #---------------------------------------------
@@ -127,25 +302,49 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             predictor_var <- self$options$predictor
 
             # Extract data
-            time <- as.numeric(data[[time_var]])
-            event <- as.numeric(data[[event_var]])
-            predictor <- as.numeric(data[[predictor_var]])
+            time <- jmvcore::toNumeric(data[[time_var]])
+            event <- jmvcore::toNumeric(data[[event_var]])
+            predictor <- jmvcore::toNumeric(data[[predictor_var]])
 
+            # Validate time variable
             if (any(time <= 0, na.rm = TRUE)) {
-                stop("Time variable must be positive.")
+                n_invalid <- sum(time <= 0, na.rm = TRUE)
+                private$.addNotice(
+                    type = jmvcore::NoticeType$ERROR,
+                    content = sprintf('Time variable contains %d non-positive values. All time values must be greater than zero for survival analysis.', n_invalid),
+                    name = 'invalidTime',
+                    position = 1
+                )
+                return(NULL)
             }
+
+            # Validate event indicator
             event_unique <- unique(event[!is.na(event)])
             if (!all(event_unique %in% c(0, 1))) {
-                stop("Event indicator must be coded 0=censored, 1=event.")
+                private$.addNotice(
+                    type = jmvcore::NoticeType$ERROR,
+                    content = 'Event indicator must be binary (0 = censored, 1 = event). Please recode your event variable or check for data entry errors.',
+                    name = 'invalidEvent',
+                    position = 1
+                )
+                return(NULL)
             }
 
-            # Check for missing values
+            # Handle missing values
             if (any(is.na(time)) || any(is.na(event)) || any(is.na(predictor))) {
+                n_missing <- sum(!complete.cases(data.frame(time, event, predictor)))
                 complete_cases <- !is.na(time) & !is.na(event) & !is.na(predictor)
                 time <- time[complete_cases]
                 event <- event[complete_cases]
                 predictor <- predictor[complete_cases]
-                warning(paste("Removed", sum(!complete_cases), "cases with missing values"))
+
+                private$.addNotice(
+                    type = jmvcore::NoticeType$WARNING,
+                    content = sprintf('Removed %d observations with missing values (%.1f%% of data). Analysis uses %d complete cases.',
+                                      n_missing, 100 * n_missing / (n_missing + length(time)), length(time)),
+                    name = 'missingData',
+                    position = 50
+                )
             }
 
             # Parse time points
@@ -154,11 +353,74 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             time_points <- time_points[!is.na(time_points)]
 
             if (length(time_points) == 0) {
-                stop("No valid time points specified")
+                private$.addNotice(
+                    type = jmvcore::NoticeType$ERROR,
+                    content = 'No valid time points specified. Please enter comma-separated numeric values (e.g., "365, 730, 1095" for 1, 2, 3 years).',
+                    name = 'invalidTimePoints',
+                    position = 1
+                )
+                return(NULL)
             }
+
             max_time <- max(time, na.rm = TRUE)
             if (any(time_points > max_time)) {
-                warning("Some time points exceed observed follow-up; estimates will be extrapolated using KM extension.")
+                n_exceed <- sum(time_points > max_time)
+                private$.addNotice(
+                    type = jmvcore::NoticeType$WARNING,
+                    content = sprintf('%d time point(s) exceed maximum observed follow-up (%.1f). Estimates will be extrapolated using Kaplan-Meier extension; interpret with caution.',
+                                      n_exceed, max_time),
+                    name = 'extrapolatedTimePoints',
+                    position = 50
+                )
+            }
+
+            # Statistical validation checks
+            n <- length(time)
+            n_events <- sum(event)
+            censoring_pct <- 100 * (1 - n_events / n)
+
+            # CRITICAL: Very few events
+            if (n_events < 10) {
+                private$.addNotice(
+                    type = jmvcore::NoticeType$STRONG_WARNING,
+                    content = sprintf('Only %d events observed. Time-dependent decision curve analysis requires at least 10 events for stable estimates. Results may be unreliable; consider collecting more data or extending follow-up.', n_events),
+                    name = 'fewEvents',
+                    position = 1
+                )
+            } else if (n_events < 20) {
+                private$.addNotice(
+                    type = jmvcore::NoticeType$WARNING,
+                    content = sprintf('%d events observed. Time-dependent DCA is more reliable with at least 20 events. Interpret net benefit estimates cautiously.', n_events),
+                    name = 'moderateEvents',
+                    position = 50
+                )
+            }
+
+            # Small sample size
+            if (n < 50) {
+                private$.addNotice(
+                    type = jmvcore::NoticeType$WARNING,
+                    content = sprintf('Sample size is %d. Decision curve analysis is more stable with at least 50 observations. Results may have wide confidence intervals.', n),
+                    name = 'smallSample',
+                    position = 50
+                )
+            }
+
+            # Heavy censoring
+            if (censoring_pct > 80) {
+                private$.addNotice(
+                    type = jmvcore::NoticeType$STRONG_WARNING,
+                    content = sprintf('Heavy censoring detected (%.1f%% censored). Net benefit estimates may be unreliable when censoring exceeds 80%%. Consider sensitivity analyses or alternative methods.', censoring_pct),
+                    name = 'heavyCensoring',
+                    position = 1
+                )
+            } else if (censoring_pct > 60) {
+                private$.addNotice(
+                    type = jmvcore::NoticeType$WARNING,
+                    content = sprintf('Moderate censoring detected (%.1f%% censored). Net benefit estimates depend on censoring assumptions; verify censoring is non-informative.', censoring_pct),
+                    name = 'moderateCensoring',
+                    position = 50
+                )
             }
 
             # Generate threshold sequence
@@ -203,7 +465,12 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 tryCatch({
                     cox_fit_global <- coxph(surv_obj ~ predictor)
                 }, error = function(e) {
-                    warning("Cox model fitting failed: ", e$message)
+                    private$.addNotice(
+                        type = jmvcore::NoticeType$WARNING,
+                        content = sprintf('Cox proportional hazards model fitting failed (%s). Falling back to Kaplan-Meier estimation. Check predictor variable for collinearity or zero variance.', e$message),
+                        name = 'coxFitFailed',
+                        position = 50
+                    )
                 })
             }
 
@@ -213,7 +480,16 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 # --- Step A: Calculate Risk Scores (Probabilities) ---
                 if (estimate_method == "direct") {
-                    # Ensure predictor is numeric and in [0,1] range if possible, or just use as is
+                    # CRITICAL SAFETY CHECK: Validate predictor is in [0,1] range
+                    if (any(predictor < 0 | predictor > 1, na.rm = TRUE)) {
+                        private$.addNotice(
+                            type = jmvcore::NoticeType$ERROR,
+                            content = sprintf('Direct probability method requires predictor values in [0,1] range. Found values outside this range (min=%.3f, max=%.3f). Either transform predictor to probabilities or use Kaplan-Meier or Cox estimation method.', min(predictor, na.rm = TRUE), max(predictor, na.rm = TRUE)),
+                            name = 'directProbOutOfRange',
+                            position = 1
+                        )
+                        return()
+                    }
                     prob_event <- predictor
                 } else if (estimate_method == "kaplan_meier") {
                     # Stratified KM
@@ -254,7 +530,12 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             }
                         }
                     }, error = function(e) {
-                        warning("KM stratification failed: ", e$message)
+                        private$.addNotice(
+                            type = jmvcore::NoticeType$WARNING,
+                            content = sprintf('Kaplan-Meier stratification failed for time point %.1f (%s). Using overall survival estimate. Check predictor distribution for outliers or insufficient variation.', t_eval, e$message),
+                            name = paste0('kmStratFailed_', t_eval),
+                            position = 50
+                        )
                         km_overall <- survfit(surv_obj ~ 1)
                         surv_t <- summary(km_overall, times = t_eval, extend = TRUE)$surv[1]
                         prob_event <<- rep(1 - surv_t, n)
@@ -287,7 +568,12 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             }
                             
                         }, error = function(e) {
-                            warning("Cox prediction failed: ", e$message)
+                            private$.addNotice(
+                                type = jmvcore::NoticeType$WARNING,
+                                content = sprintf('Cox prediction failed for time point %.1f (%s). Using overall survival estimate. Verify model convergence and predictor coding.', t_eval, e$message),
+                                name = paste0('coxPredFailed_', t_eval),
+                                position = 50
+                            )
                             prob_event <- numeric(n) # Will default to 0 or fallback below
                         })
                     } else {
@@ -390,6 +676,42 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 optimal_threshold <- thresholds[max_idx]
                 max_net_benefit <- nb_model[max_idx]
 
+                # Bootstrap confidence intervals if requested
+                nb_model_lower <- NULL
+                nb_model_upper <- NULL
+
+                if (self$options$use_bootstrap) {
+                    n_boot <- self$options$bootstrap_iterations
+                    ci_level <- self$options$ci_level
+                    alpha <- 1 - ci_level
+
+                    # Matrix to store bootstrap results (rows = iterations, cols = thresholds)
+                    boot_results <- matrix(NA, nrow = n_boot, ncol = length(thresholds))
+
+                    for (b in 1:n_boot) {
+                        boot_results[b, ] <- private$.calculateBootstrapNB(
+                            time = time,
+                            event = event,
+                            predictor = predictor,
+                            t_eval = t_eval,
+                            thresholds = thresholds,
+                            estimate_method = estimate_method,
+                            cox_fit_global = cox_fit_global
+                        )
+                    }
+
+                    # Calculate percentile-based confidence intervals
+                    nb_model_lower <- apply(boot_results, 2, quantile, probs = alpha / 2, na.rm = TRUE)
+                    nb_model_upper <- apply(boot_results, 2, quantile, probs = 1 - alpha / 2, na.rm = TRUE)
+
+                    # Apply smoothing to CIs if main curves were smoothed
+                    if (self$options$smoothing) {
+                        smooth_span <- 0.2
+                        nb_model_lower <- suppressWarnings(predict(loess(nb_model_lower ~ thresholds, span = smooth_span)))
+                        nb_model_upper <- suppressWarnings(predict(loess(nb_model_upper ~ thresholds, span = smooth_span)))
+                    }
+                }
+
                 results_by_time[[as.character(t_eval)]] <- list(
                     time_point = t_eval,
                     n_at_risk = n, # Total N is the denominator for rates
@@ -397,6 +719,8 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     event_rate = event_rate,
                     thresholds = thresholds,
                     nb_model = nb_model,
+                    nb_model_lower = nb_model_lower,
+                    nb_model_upper = nb_model_upper,
                     nb_treat_all = nb_treat_all,
                     nb_treat_none = nb_treat_none,
                     interventions_avoided = interventions_avoided,
@@ -433,6 +757,8 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         time_point = result$time_point,
                         threshold = result$thresholds[idx],
                         net_benefit = result$nb_model[idx],
+                        nb_lower = if (!is.null(result$nb_model_lower)) result$nb_model_lower[idx] else NULL,
+                        nb_upper = if (!is.null(result$nb_model_upper)) result$nb_model_upper[idx] else NULL,
                         nb_treat_all = result$nb_treat_all[idx],
                         nb_treat_none = result$nb_treat_none[idx],
                         improvement = improvement

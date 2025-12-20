@@ -154,10 +154,38 @@ options:
           R: >
             apply LOESS smoothing to decision curves for visualization
 
+    - name: use_bootstrap
+      title: Calculate Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate 95% confidence intervals for net benefit using bootstrap resampling (computationally intensive)
+
+    - name: bootstrap_iterations
+      title: Bootstrap Iterations
+      type: Number
+      min: 100
+      max: 10000
+      default: 500
+      description:
+          R: >
+            number of bootstrap iterations for confidence interval calculation
+
+    - name: ci_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            confidence level for bootstrap intervals (e.g., 0.95 for 95% CI)
+
     - name: plot_net_benefit
       title: Plot Net Benefit Curves
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             plot net benefit curves across threshold probabilities

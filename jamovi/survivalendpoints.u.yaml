@@ -87,25 +87,6 @@ children:
           - type: ComboBox
             name: timeUnit
             label: Time Unit
-            enable: (inputType:numeric)
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Progression Date/Time
-        children:
-          - type: VariablesListBox
-            name: progressionDate
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Death Date/Time
-        children:
-          - type: VariablesListBox
-            name: deathDate
-            maxItemCount: 1
-            isTarget: true
   - type: CollapseBox
     label: Survival Endpoints
     collapsed: false

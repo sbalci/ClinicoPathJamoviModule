@@ -108,6 +108,7 @@ A results object containing:
 \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$reportSentence} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

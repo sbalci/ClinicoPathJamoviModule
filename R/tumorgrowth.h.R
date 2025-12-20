@@ -17,6 +17,7 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             confidenceLevel = 95,
             modelSummary = TRUE,
             growthParameters = TRUE,
+            showSummary = TRUE,
             growthCurves = TRUE,
             residualAnalysis = FALSE,
             treatmentAnalysis = FALSE,
@@ -116,6 +117,10 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "growthParameters",
                 growthParameters,
                 default=TRUE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=TRUE)
             private$..growthCurves <- jmvcore::OptionBool$new(
                 "growthCurves",
                 growthCurves,
@@ -177,6 +182,7 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..confidenceLevel)
             self$.addOption(private$..modelSummary)
             self$.addOption(private$..growthParameters)
+            self$.addOption(private$..showSummary)
             self$.addOption(private$..growthCurves)
             self$.addOption(private$..residualAnalysis)
             self$.addOption(private$..treatmentAnalysis)
@@ -201,6 +207,7 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         confidenceLevel = function() private$..confidenceLevel$value,
         modelSummary = function() private$..modelSummary$value,
         growthParameters = function() private$..growthParameters$value,
+        showSummary = function() private$..showSummary$value,
         growthCurves = function() private$..growthCurves$value,
         residualAnalysis = function() private$..residualAnalysis$value,
         treatmentAnalysis = function() private$..treatmentAnalysis$value,
@@ -224,6 +231,7 @@ tumorgrowthOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..confidenceLevel = NA,
         ..modelSummary = NA,
         ..growthParameters = NA,
+        ..showSummary = NA,
         ..growthCurves = NA,
         ..residualAnalysis = NA,
         ..treatmentAnalysis = NA,
@@ -243,6 +251,7 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
+        naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
         modelTable = function() private$.items[["modelTable"]],
         growthParametersTable = function() private$.items[["growthParametersTable"]],
         doublingTimeTable = function() private$.items[["doublingTimeTable"]],
@@ -251,7 +260,8 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         residualPlot = function() private$.items[["residualPlot"]],
         predictionPlot = function() private$.items[["predictionPlot"]],
         fitStatistics = function() private$.items[["fitStatistics"]],
-        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]]),
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
+        glossary = function() private$.items[["glossary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -277,6 +287,11 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="summary",
                 title="Analysis Summary",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalLanguageSummary",
+                title="Plain-English Summary",
+                visible="(showSummary)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelTable",
@@ -462,6 +477,11 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="clinicalInterpretation",
                 title="Clinical Interpretation",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossary",
+                title="Technical Terms Glossary",
                 visible=TRUE))}))
 
 tumorgrowthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -500,6 +520,7 @@ tumorgrowthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param confidenceLevel Confidence level for parameter intervals
 #' @param modelSummary Display model parameter estimates and fit statistics
 #' @param growthParameters Show biological interpretation of growth parameters
+#' @param showSummary Display plain-English summary of growth model results
 #' @param growthCurves Display individual and population growth curves
 #' @param residualAnalysis Perform residual diagnostics
 #' @param treatmentAnalysis Analyze treatment effects on growth parameters
@@ -509,12 +530,19 @@ tumorgrowthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param maxSize Theoretical maximum size for logistic models
 #' @param predictionTime Time units ahead for growth predictions
 #' @param mcmcSamples Number of MCMC samples for Bayesian estimation
-#' @param plotWidth Width of the growth plots in pixels
-#' @param plotHeight Height of the growth plots in pixels
+#' @param plotWidth Width of the growth plots in pixels. Note: Due to jamovi
+#'   framework limitations, plot dimensions are currently fixed in the output
+#'   schema and this option does not affect rendering. Future versions may
+#'   support dynamic plot sizing.
+#' @param plotHeight Height of the growth plots in pixels. Note: Due to jamovi
+#'   framework limitations, plot dimensions are currently fixed in the output
+#'   schema and this option does not affect rendering. Future versions may
+#'   support dynamic plot sizing.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$growthParametersTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$doublingTimeTable} \tab \tab \tab \tab \tab a table \cr
@@ -524,6 +552,7 @@ tumorgrowthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$predictionPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$fitStatistics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -546,6 +575,7 @@ tumorgrowth <- function(
     confidenceLevel = 95,
     modelSummary = TRUE,
     growthParameters = TRUE,
+    showSummary = TRUE,
     growthCurves = TRUE,
     residualAnalysis = FALSE,
     treatmentAnalysis = FALSE,
@@ -591,6 +621,7 @@ tumorgrowth <- function(
         confidenceLevel = confidenceLevel,
         modelSummary = modelSummary,
         growthParameters = growthParameters,
+        showSummary = showSummary,
         growthCurves = growthCurves,
         residualAnalysis = residualAnalysis,
         treatmentAnalysis = treatmentAnalysis,

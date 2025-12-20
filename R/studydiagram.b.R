@@ -100,35 +100,35 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (format == "step_summary") {
                  # Check vars
                  if (is.null(self$options$step_name) || is.null(self$options$participant_count)) return()
-                 
-                 step_col <- self$options$step_name
-                 count_col <- self$options$participant_count
-                 
+
+                 step_col <- jmvcore::toB64(self$options$step_name)
+                 count_col <- jmvcore::toB64(self$options$participant_count)
+
                  # Ensure proper types
                  if (!is.numeric(data[[count_col]])) {
                       add_warning("Participant count must be numeric.")
                       return()
                  }
-                 
+
                  # Extract standard flow
                  flow_data <- data.frame(
                       step = as.character(data[[step_col]]),
                       n = as.numeric(data[[count_col]]),
                       stringsAsFactors = FALSE
                  )
-                 
+
                  # Calc exclusions sequentially
                  flow_data$excluded <- c(0, -diff(flow_data$n))
-                 
+
                  # Check logic
                  if (any(flow_data$excluded < 0)) {
                       add_warning("Participant counts increase between steps. Exclusions clamped to 0.")
                       flow_data$excluded[flow_data$excluded < 0] <- 0
                  }
-                 
+
                  # Reasons?
                  if (!is.null(self$options$exclusion_reason_summary)) {
-                      flow_data$reason <- as.character(data[[self$options$exclusion_reason_summary]])
+                      flow_data$reason <- as.character(data[[jmvcore::toB64(self$options$exclusion_reason_summary)]])
                  } else {
                       flow_data$reason <- ""
                  }
@@ -136,9 +136,9 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (format == "exclusion_mapping") {
                  # Sequential Exclusion Logic
                  if (is.null(self$options$participant_id_mapping) || is.null(self$options$exclusion_reason_mapping)) return()
-                 
-                 pid_col <- self$options$participant_id_mapping
-                 reason_col <- self$options$exclusion_reason_mapping
+
+                 pid_col <- jmvcore::toB64(self$options$participant_id_mapping)
+                 reason_col <- jmvcore::toB64(self$options$exclusion_reason_mapping)
                  
                  # Unique IDs check
                  if (any(duplicated(data[[pid_col]]))) {
@@ -226,6 +226,11 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Trigger plot
             self$results$plot$setState(flow_data)
+
+            # Generate all clinical outputs
+            private$.checkDataQuality()
+            private$.generateClinicalOutputs()
+            private$.generateInterpretation()
 
         },
 

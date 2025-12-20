@@ -17,6 +17,11 @@ items:
       type:  Html
       visible: true
 
+    - name:  naturalLanguageSummary
+      title: Plain-English Summary
+      type:  Html
+      visible: (showSummary)
+
     - name:  modelTable
       title: Growth Model Parameters
       type:  Table
@@ -174,6 +179,11 @@ items:
 
     - name:  clinicalInterpretation
       title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+    - name:  glossary
+      title: Technical Terms Glossary
       type:  Html
       visible: true
 

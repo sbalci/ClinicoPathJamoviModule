@@ -22,7 +22,7 @@ venn(
   var7true,
   show_upsetR = FALSE,
   show_complexUpset = FALSE,
-  show_ggvenn = FALSE,
+  show_ggvenn = TRUE,
   show_ggVennDiagram = FALSE,
   sortBy = "freq",
   minSize = 0,

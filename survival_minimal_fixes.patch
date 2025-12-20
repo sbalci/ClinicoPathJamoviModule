@@ -1,0 +1,25 @@
+--- R/survival.b.R	(original)
++++ R/survival.b.R	(fixed)
+@@ -1236,6 +1236,12 @@
+                 # Return early if validation failed
+                 if (validation_result != TRUE) {
+                     return()
+                 }
+
++                # Populate subtitle with explanatory variable
++                if (!is.null(self$options$explanatory)) {
++                    subtitle_text <- paste0("Survival Analysis - ", self$options$explanatory)
++                    self$results$subtitle$setContent(subtitle_text)
++                }
++
+                 # Get Clean Data ----
+                 results <- private$.cleandata()
+
+@@ -1307,7 +1313,6 @@
+
+                 ## Pairwise ----
+                 if (self$options$pw
+-                    # && !self$options$sas
+                     ) {
+                     if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                         private$.pairwise(results)

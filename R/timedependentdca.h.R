@@ -16,7 +16,7 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             reference_strategy = "both",
             estimate_survival = "kaplan_meier",
             smoothing = FALSE,
-            plot_net_benefit = TRUE,
+            plot_net_benefit = FALSE,
             plot_by_timepoint = FALSE,
             plot_interventions_avoided = FALSE,
             random_seed = 42, ...) {
@@ -94,7 +94,7 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..plot_net_benefit <- jmvcore::OptionBool$new(
                 "plot_net_benefit",
                 plot_net_benefit,
-                default=TRUE)
+                default=FALSE)
             private$..plot_by_timepoint <- jmvcore::OptionBool$new(
                 "plot_by_timepoint",
                 plot_by_timepoint,
@@ -420,7 +420,7 @@ timedependentdca <- function(
     reference_strategy = "both",
     estimate_survival = "kaplan_meier",
     smoothing = FALSE,
-    plot_net_benefit = TRUE,
+    plot_net_benefit = FALSE,
     plot_by_timepoint = FALSE,
     plot_interventions_avoided = FALSE,
     random_seed = 42) {

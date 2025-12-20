@@ -2,7 +2,7 @@
 
 name: tumorgrowth
 title: Tumor Growth Models
-menuGroup: OncoPathT1
+menuGroup: OncoPathT
 menuSubgroup: Survival Analysis
 menuTitle: Tumor Growth Models
 
@@ -150,6 +150,14 @@ options:
           R: >
             Show biological interpretation of growth parameters
 
+    - name: showSummary
+      title: Natural Language Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display plain-English summary of growth model results
+
     - name: growthCurves
       title: Growth Curves Plot
       type: Bool
@@ -232,7 +240,10 @@ options:
       max: 2000
       description:
           R: >
-            Width of the growth plots in pixels
+            Width of the growth plots in pixels. Note: Due to jamovi framework
+            limitations, plot dimensions are currently fixed in the output schema
+            and this option does not affect rendering. Future versions may support
+            dynamic plot sizing.
 
     - name: plotHeight
       title: Plot Height
@@ -242,4 +253,7 @@ options:
       max: 2000
       description:
           R: >
-            Height of the growth plots in pixels
+            Height of the growth plots in pixels. Note: Due to jamovi framework
+            limitations, plot dimensions are currently fixed in the output schema
+            and this option does not affect rendering. Future versions may support
+            dynamic plot sizing.

@@ -69,6 +69,19 @@ children:
       - type: CheckBox
         name: smoothing
       - type: CheckBox
+        name: use_bootstrap
+      - type: TextBox
+        name: bootstrap_iterations
+        format: number
+        enable: (use_bootstrap)
+      - type: TextBox
+        name: ci_level
+        format: number
+        enable: (use_bootstrap)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
         name: plot_net_benefit
       - type: CheckBox
         name: plot_by_timepoint

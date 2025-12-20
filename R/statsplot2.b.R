@@ -24,6 +24,13 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             .invalidateCache = function() {
                 private$.cached_analysis <- NULL
             },
+
+            # Variable name sanitization for special characters
+            .escapeVar = function(x) {
+                # Convert to syntactically valid R names
+                # Handles spaces, special chars, Unicode
+                gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+            },
             
             # Standardized validation method for plot data
             .validatePlotData = function(prepared_data, plot_type) {
@@ -440,13 +447,17 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (is.null(analysis_info)) {
 
                     todo <- glue::glue(
-                "
-                <br>Welcome to ClinicoPath
-                <br><br>
-                This tool will help you generate plots based on variable types.
-                <br><br>
-                This function uses ggstatsplot and ggalluvial packages. Please cite jamovi and the packages as given below.
-                "
+                "<div style='padding: 20px; background: #f5f5f5; border-radius: 8px;'>",
+                "<h3 style='color: #1976d2; margin-top: 0;'>📊 Welcome to Automatic Plot Selection</h3>",
+                "<p style='font-size: 14px;'>This tool automatically selects the most appropriate statistical visualization based on your variable types.</p>",
+                "<h4 style='color: #424242;'>Getting Started:</h4>",
+                "<ol style='font-size: 13px;'>",
+                "<li>Select a <strong>Dependent Variable</strong> (y-axis, outcome)</li>",
+                "<li>Select a <strong>Grouping Variable</strong> (x-axis, comparison groups)</li>",
+                "<li>Configure <strong>Study Design</strong> and <strong>Statistical Approach</strong></li>",
+                "</ol>",
+                "<p style='font-size: 12px; color: #757575;'><em>Powered by ggstatsplot and ggalluvial packages. Please cite jamovi and these packages.</em></p>",
+                "</div>"
                     )
 
                     self$results$todo$setVisible(TRUE)
@@ -461,20 +472,20 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                 # Enhanced data validation with context
                 if (nrow(self$data) == 0) {
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'emptyDataset',
-                    #     type = jmvcore::NoticeType$ERROR
-                    # )
-                    # dep_name <- self$options$dep %||% "not selected"
-                    # group_name <- self$options$group %||% "not selected"
-                    # notice$setContent(glue::glue(
-                    #     "No data available for analysis.\n",
-                    #     "• Variables selected: dependent='{dep_name}', grouping='{group_name}'\n",
-                    #     "• Check data loading and variable selection\n",
-                    #     "• Verify dataset is not empty"
-                    # ))
-                    # self$results$insert(1, notice)
+                    dep_name <- self$options$dep %||% "not selected"
+                    group_name <- self$options$group %||% "not selected"
+                    error_html <- glue::glue(
+                        "<div style='color: #d32f2f; padding: 15px; border-left: 4px solid #d32f2f; background: #ffebee;'>",
+                        "<h4 style='margin-top: 0;'>⚠ No Data Available</h4>",
+                        "<p><strong>Variables selected:</strong></p>",
+                        "<ul style='margin: 5px 0;'>",
+                        "<li>Dependent: <code>{dep_name}</code></li>",
+                        "<li>Grouping: <code>{group_name}</code></li>",
+                        "</ul>",
+                        "<p style='margin-top: 10px;'><strong>Action:</strong> Check data loading and variable selection. Verify dataset is not empty.</p>",
+                        "</div>"
+                    )
+                    self$results$ExplanationMessage$setContent(error_html)
                     return()
                 }
 
@@ -537,19 +548,17 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 required_packages <- c("ggstatsplot", "ggalluvial", "dplyr", "easyalluvial", "patchwork", "cowplot")
                 missing_packages <- required_packages[!sapply(required_packages, function(pkg) requireNamespace(pkg, quietly = TRUE))]
                 if (length(missing_packages) > 0) {
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'missingPackages',
-                    #     type = jmvcore::NoticeType$WARNING
-                    # )
-                    # notice$setContent(glue::glue(
-                    #     "Optional packages missing for full functionality.\n",
-                    #     "• Missing: {paste(missing_packages, collapse = ', ')}\n",
-                    #     "• Install with: install.packages(c({paste(shQuote(missing_packages), collapse = ', ')}))\n",
-                    #     "• Basic functionality will still work\n",
-                    #     "• Some plot types may fall back to simpler visualizations"
-                    # ))
-                    # self$results$insert(1, notice)
+                    install_cmd <- paste0("install.packages(c('", paste(missing_packages, collapse = "', '"), "'))")
+                    warning_html <- glue::glue(
+                        "<div style='color: #f57c00; padding: 15px; border-left: 4px solid #f57c00; background: #fff3e0;'>",
+                        "<h4 style='margin-top: 0;'>⚠ Optional Packages Missing</h4>",
+                        "<p><strong>Missing:</strong> {paste(missing_packages, collapse = ', ')}</p>",
+                        "<p><strong>Install with:</strong></p>",
+                        "<pre style='background: #f5f5f5; padding: 8px; border-radius: 4px; overflow-x: auto;'>{install_cmd}</pre>",
+                        "<p style='margin-bottom: 0;'><em>Basic functionality will still work. Some plot types may use simpler visualizations.</em></p>",
+                        "</div>"
+                    )
+                    self$results$ExplanationMessage$setContent(warning_html)
                 }
                 
                 # Initialize and set option visibility based on selected variables

@@ -16,7 +16,9 @@ pathologyagreement(
   icc_type = "consistency",
   correlation_method = "both",
   missing_data = "listwise",
-  show_interpretation = TRUE
+  show_interpretation = TRUE,
+  show_summary = FALSE,
+  show_explanations = FALSE
 )
 }
 \arguments{
@@ -46,12 +48,19 @@ pathology scenarios}
 
 \item{show_interpretation}{provide clinical interpretation of agreement
 statistics}
+
+\item{show_summary}{generate a plain-language summary paragraph suitable
+for copy-pasting into reports}
+
+\item{show_explanations}{display educational content explaining when to use
+this analysis, assumptions, and interpretation}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab One-paragraph summary of results in plain language \cr
+\code{results$explanations} \tab \tab \tab \tab \tab Educational guide on agreement analysis \cr
 \code{results$agreementtable} \tab \tab \tab \tab \tab ICC, CCC, and Bland-Altman metrics \cr
 \code{results$correlationtable} \tab \tab \tab \tab \tab Pearson and Spearman correlation coefficients \cr
 \code{results$scatterplot} \tab \tab \tab \tab \tab Scatter plot with line of perfect agreement \cr

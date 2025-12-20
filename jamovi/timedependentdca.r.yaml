@@ -18,6 +18,9 @@ items:
         - event
         - predictor
         - time_points
+        - use_bootstrap
+        - bootstrap_iterations
+        - ci_level
       columns:
         - name: time_point
           title: "Time Point"
@@ -30,6 +33,14 @@ items:
         - name: net_benefit
           title: "Net Benefit"
           type: number
+        - name: nb_lower
+          title: "NB Lower CI"
+          type: number
+          visible: (use_bootstrap)
+        - name: nb_upper
+          title: "NB Upper CI"
+          type: number
+          visible: (use_bootstrap)
         - name: nb_treat_all
           title: "NB (Treat All)"
           type: number

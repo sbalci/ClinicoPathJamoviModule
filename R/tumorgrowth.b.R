@@ -18,44 +18,42 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() {
             # Check for required packages
             required_packages <- c('nlme', 'ggplot2', 'dplyr', 'brms')
-            
+
+            missing_pkgs <- c()
             for (pkg in required_packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
-                    self$results$todo$setContent(
-                        paste("The", pkg, "package is required but not installed.
-                        Please install it using: install.packages('", pkg, "')")
-                    )
+                    missing_pkgs <- c(missing_pkgs, pkg)
                 }
             }
+
+            if (length(missing_pkgs) > 0) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingPackages',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Required R package(s) not installed: %s. Install using: install.packages(c(%s))',
+                    paste(missing_pkgs, collapse = ', '),
+                    paste(sprintf('"%s"', missing_pkgs), collapse = ', ')
+                ))
+                self$results$insert(1, notice)
+            }
+
+            # Populate glossary (always visible)
+            private$.populateGlossary()
         },
-        
+
         .run = function() {
-            
+
             # Check if required variables are selected
             if (is.null(self$options$time) || is.null(self$options$tumorSize)) {
-                self$results$todo$setContent(
-                    "<h3>Welcome to Tumor Growth Models</h3>
-                    <p>This analysis fits mathematical models to tumor growth data to understand growth kinetics and treatment effects.</p>
-                    
-                    <h4>Available Growth Models:</h4>
-                    <ul>
-                    <li><b>Exponential:</b> V(t) = V₀ × e^(kt) - Unrestricted exponential growth</li>
-                    <li><b>Gompertz:</b> V(t) = V₀ × e^(α/β × (1-e^(-βt))) - Growth rate decreases over time</li>
-                    <li><b>Logistic:</b> V(t) = K/(1 + e^(-r(t-t₀))) - S-shaped growth with carrying capacity</li>
-                    <li><b>von Bertalanffy:</b> V(t) = (V∞^(1/3) - (V∞^(1/3) - V₀^(1/3)) × e^(-kt))³ - Allometric growth</li>
-                    <li><b>Linear:</b> V(t) = V₀ + kt - Constant growth rate</li>
-                    <li><b>Power Law:</b> V(t) = V₀ × t^α - Power relationship with time</li>
-                    </ul>
-                    
-                    <h4>Required Data:</h4>
-                    <ul>
-                    <li>Time variable (days, weeks, months from baseline)</li>
-                    <li>Tumor size measurements (volume, diameter, area)</li>
-                    <li>Patient ID for longitudinal data</li>
-                    </ul>
-                    
-                    <p>Please select the time variable and tumor size measurement to begin analysis.</p>"
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'missingVariables',
+                    type = jmvcore::NoticeType$ERROR
                 )
+                notice$setContent('Time and Tumor Size variables are required. Please select both to begin tumor growth modeling.')
+                self$results$insert(1, notice)
                 return()
             }
             
@@ -78,18 +76,45 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
             
             if (nrow(clean_data) < 10) {
-                stop("Insufficient data for tumor growth modeling (minimum 10 complete observations required)")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'insufficientData',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Insufficient data for tumor growth modeling: %d observations after removing missing values. Minimum 10 complete observations required (time, tumor size%s).',
+                    nrow(clean_data),
+                    if (!is.null(self$options$patientId)) ', patient ID' else ''
+                ))
+                self$results$insert(1, notice)
+                return()
             }
             
+            # Add NLME minimum sample size guard
+            if (model_approach == "nlme" && !is.null(patient_var)) {
+                n_patients <- length(unique(clean_data[[patient_var]]))
+                avg_obs <- nrow(clean_data) / n_patients
+
+                if (n_patients < 5 || avg_obs < 2.5) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'insufficientLongitudinalStructure',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf('Insufficient longitudinal structure for NLME: %d patients, avg %.1f obs/patient. Minimum 5 patients with avg 2.5 obs/patient required. Switch to NLS approach or collect more data.', n_patients, avg_obs))
+                    self$results$insert(1, notice)
+                    return()
+                }
+            }
+
             # Fit growth model
-            private$.fitGrowthModel(clean_data, time_var, size_var, patient_var, 
+            private$.fitGrowthModel(clean_data, time_var, size_var, patient_var,
                                    covariates, growth_model, model_approach)
-            
+
             # Calculate doubling time if requested
             if (self$options$doubleTime) {
                 private$.calculateDoublingTime()
             }
-            
+
             # Analyze treatment effects if requested
             if (self$options$treatmentAnalysis && !is.null(self$options$treatmentEffect)) {
                 private$.analyzeTreatmentEffects(clean_data)
@@ -97,6 +122,25 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Generate clinical interpretation
             private$.generateClinicalInterpretation()
+
+            # Generate natural language summary if requested
+            if (self$options$showSummary) {
+                private$.generateNaturalLanguageSummary(clean_data)
+            }
+
+            # Add completion info notice
+            notice <- jmvcore::Notice$new(
+                options = self$options,
+                name = 'analysisComplete',
+                type = jmvcore::NoticeType$INFO
+            )
+            notice$setContent(sprintf('Tumor growth modeling completed successfully: %d observations analyzed using %s %s model%s.',
+                nrow(clean_data),
+                stringr::str_to_title(self$options$modelApproach %||% 'nlme'),
+                stringr::str_to_title(self$options$growthModel %||% 'gompertz'),
+                if (!is.null(self$options$patientId)) sprintf(' with %d patients', length(unique(clean_data[[self$options$patientId]]))) else ''
+            ))
+            self$results$insert(999, notice)
         },
         
         .fitGrowthModel = function(fit_data, time_var, size_var, patient_var, 
@@ -115,9 +159,16 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$data)) {
                     removed <- nrow(self$data) - nrow(fit_data)
                     if (removed > 0) {
-                        self$results$summary$setContent(glue::glue(
-                            "<p><strong>Data note:</strong> {removed} row(s) removed due to missing required fields.</p>"
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'dataFiltered',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(sprintf('Data note: %d row(s) removed due to missing values in required variables (%.1f%% of original data retained).',
+                            removed,
+                            (nrow(fit_data) / nrow(self$data)) * 100
                         ))
+                        self$results$insert(998, notice)
                     }
                 }
                 
@@ -136,13 +187,16 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Store model for plotting
                 private$growth_model <- model_fit
-                
+
+                # Check model convergence
+                private$.checkConvergence(model_fit, model_approach)
+
                 # Format results
                 private$.formatGrowthResults(model_fit, growth_model)
-                
+
                 # Calculate model fit statistics
                 private$.calculateFitStatistics(model_fit, fit_data)
-                
+
                 # Populate growth parameters table if requested
                 if (self$options$growthParameters) {
                     private$.populateGrowthParameters()
@@ -239,23 +293,25 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             V0 + k ~ 1 + (1 | patient),
                             nl = TRUE)
                 
-                model <- brm(bform, 
-                             data = data, 
+                model <- brm(bform,
+                             data = data,
                              prior = priors,
-                             iter = 2000, chains = 2, cores = 2,
-                             control = list(adapt_delta = 0.95))
+                             iter = iter_val, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95),
+                             prob = conf_level)
             } else {
                 # Default to exponential
                 bform <- bf(size ~ V0 * exp(k * time),
                             V0 ~ 1 + (1 | patient),
                             k ~ 1,
                             nl = TRUE)
-                
-                model <- brm(bform, 
-                             data = data, 
+
+                model <- brm(bform,
+                             data = data,
                              prior = priors,
-                             iter = 2000, chains = 2, cores = 2,
-                             control = list(adapt_delta = 0.95))
+                             iter = iter_val, chains = 2, cores = 2,
+                             control = list(adapt_delta = 0.95),
+                             prob = conf_level)
             }
             
             return(model)
@@ -582,7 +638,13 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                message("Doubling time calculation failed: ", e$message)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'doublingTimeCalculationFailed',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Doubling time calculation failed: %s. Check model convergence and parameter estimates.', e$message))
+                self$results$insert(10, notice)
             })
         },
         
@@ -663,7 +725,13 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
                 
             }, error = function(e) {
-                message("Fit statistics calculation failed: ", e$message)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'fitStatisticsFailed',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Model fit statistics calculation failed: %s. Model parameters are still available but goodness-of-fit metrics cannot be computed.', e$message))
+                self$results$insert(10, notice)
             })
         },
         
@@ -935,26 +1003,46 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .analyzeTreatmentEffects = function(data) {
-            
+
             tryCatch({
-                
+
                 treatment_var <- self$options$treatmentEffect
                 if (is.null(treatment_var)) return()
-                
+
                 if (!"patient" %in% names(data)) {
-                    treatment_table <- self$results$treatmentEffectTable
-                    treatment_table$addRow(rowKey = "warning", values = list(
-                        parameter = "Treatment analysis skipped",
-                        treatment_effect = NA,
-                        percent_change = NA,
-                        p_value = NA,
-                        clinical_significance = "Provide patient IDs for mixed-effects treatment comparisons."
-                    ))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'treatmentNeedsPatientID',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent('Treatment effect analysis requires Patient ID variable for mixed-effects comparisons. Please select a Patient ID or switch modeling approach to NLS for pooled treatment comparison.')
+                    self$results$insert(10, notice)
                     return()
                 }
-                
+
                 # Add treatment variable to data
                 data$treatment <- data[[treatment_var]]
+
+                # Implement treatment time functionality
+                treatment_time_var <- self$options$treatmentTime
+                if (!is.null(treatment_time_var) && treatment_time_var %in% names(self$data)) {
+                    # Create time-varying treatment indicator
+                    # post_treatment = 1 if time >= treatment_time, 0 otherwise
+                    treatment_time_data <- self$data[[treatment_time_var]]
+                    data$post_treatment <- as.numeric(data$time >= treatment_time_data[match(data$patient, self$data[[self$options$patientId]])])
+
+                    # Use post_treatment as the treatment indicator instead of treatment group
+                    data$treatment <- data$post_treatment
+
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'treatmentTimeInfo',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent('Treatment time analysis: modeling growth parameter changes after treatment initiation. Treatment indicator is 1 for observations at or after treatment start time, 0 before.')
+                    self$results$insert(5, notice)
+                }
+
                 growth_model <- self$options$growthModel %||% "gompertz"
                 
                 # Fit models with treatment as covariate
@@ -1173,20 +1261,107 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                message("Treatment analysis failed: ", e$message)
-                
-                # Add fallback result
-                treatment_table <- self$results$treatmentEffectTable
-                treatment_table$addRow(rowKey = "error", values = list(
-                    parameter = "Analysis Error",
-                    treatment_effect = NA,
-                    percent_change = NA,
-                    p_value = NA,
-                    clinical_significance = paste("Error:", e$message)
-                ))
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'treatmentAnalysisFailed',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Treatment effect analysis failed: %s. Possible causes: insufficient data, model convergence issues, or treatment variable coding. Try simpler growth model or check data quality.', e$message))
+                self$results$insert(10, notice)
             })
         },
-        
+
+        .checkConvergence = function(model, model_approach) {
+            # Check convergence for NLME and Bayesian models
+            tryCatch({
+
+                if (model_approach == "nlme") {
+                    # Check NLME convergence
+                    if (inherits(model, "nlme")) {
+                        # Check if model converged based on convergence code
+                        conv_code <- model$convInfo$isConv
+
+                        if (is.null(conv_code) || !conv_code) {
+                            # Convergence failed
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'nlmeConvergenceFailed',
+                                type = jmvcore::NoticeType$STRONG_WARNING
+                            )
+                            notice$setContent('NLME model convergence warning: optimization did not converge. Results may be unreliable. Consider: (1) simplifying growth model, (2) using more data, (3) adjusting starting values, or (4) switching to Bayesian approach.')
+                            self$results$insert(2, notice)
+                        }
+
+                        # Check for singular convergence (random effects variance near zero)
+                        if (!is.null(model$sigma) && model$sigma < 1e-6) {
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'nlmeSingularFit',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent('NLME singular fit detected: random effects variance near zero. This may indicate overfitting or insufficient between-patient variability. Consider switching to NLS approach.')
+                            self$results$insert(3, notice)
+                        }
+                    }
+                } else if (model_approach == "bayesian") {
+                    # Check Bayesian convergence via Rhat
+                    if (inherits(model, "brmsfit")) {
+                        library(brms)
+
+                        # Get Rhat summary
+                        rhat_summary <- rhat(model)
+                        max_rhat <- max(rhat_summary, na.rm = TRUE)
+
+                        if (max_rhat > 1.1) {
+                            # Poor convergence (Rhat > 1.1)
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'bayesianConvergenceFailed',
+                                type = jmvcore::NoticeType$STRONG_WARNING
+                            )
+                            notice$setContent(sprintf('Bayesian model convergence failure: max Rhat = %.3f (should be < 1.01). Chains have not converged. Increase MCMC samples to at least %d iterations or simplify growth model.',
+                                max_rhat,
+                                (self$options$mcmcSamples %||% 2000) * 4
+                            ))
+                            self$results$insert(2, notice)
+                        } else if (max_rhat > 1.01) {
+                            # Marginal convergence (1.01 < Rhat < 1.1)
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'bayesianConvergenceWarning',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(sprintf('Bayesian model marginal convergence: max Rhat = %.3f (should be < 1.01). Consider increasing MCMC samples to %d iterations for more reliable inference.',
+                                max_rhat,
+                                (self$options$mcmcSamples %||% 2000) * 2
+                            ))
+                            self$results$insert(3, notice)
+                        }
+
+                        # Check effective sample size
+                        ess_bulk <- neff_ratio(model)
+                        min_ess <- min(ess_bulk, na.rm = TRUE)
+
+                        if (min_ess < 0.1) {
+                            notice <- jmvcore::Notice$new(
+                                options = self$options,
+                                name = 'bayesianLowESS',
+                                type = jmvcore::NoticeType$WARNING
+                            )
+                            notice$setContent(sprintf('Bayesian model low effective sample size: min ESS ratio = %.3f (should be > 0.1). Increase MCMC samples for more precise posterior estimates.',
+                                min_ess
+                            ))
+                            self$results$insert(4, notice)
+                        }
+                    }
+                }
+
+            }, error = function(e) {
+                # Convergence check failed - non-critical, don't block analysis
+                # Silently continue
+            })
+        },
+
         .populateGrowthParameters = function() {
             
             if (is.null(private$growth_model)) return()
@@ -1296,7 +1471,13 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                message("Growth parameters population failed: ", e$message)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'growthParametersFailed',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(sprintf('Growth characteristics table population failed: %s. Model parameters are available in main table.', e$message))
+                self$results$insert(10, notice)
             })
         },
         
@@ -1304,38 +1485,83 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check for negative or zero tumor sizes
             if (any(data[[size_var]] <= 0, na.rm = TRUE)) {
-                stop("Tumor size measurements must be positive values. Found zero or negative sizes.")
+                n_invalid <- sum(data[[size_var]] <= 0, na.rm = TRUE)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'invalidTumorSize',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Invalid tumor size data: %d measurement(s) are zero or negative. Tumor size must be positive. Check data quality and remove invalid entries.', n_invalid))
+                self$results$insert(1, notice)
+                return()
             }
             
             # Check for negative time values
             if (any(data[[time_var]] < 0, na.rm = TRUE)) {
-                stop("Time values must be non-negative. Found negative time values.")
+                n_invalid <- sum(data[[time_var]] < 0, na.rm = TRUE)
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'invalidTimeValues',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(sprintf('Invalid time data: %d value(s) are negative. Time must be non-negative (days/weeks/months from baseline). Check data entry.', n_invalid))
+                self$results$insert(1, notice)
+                return()
             }
             
             # Check for reasonable time range
             time_range <- diff(range(data[[time_var]], na.rm = TRUE))
             if (time_range == 0) {
-                stop("All time measurements are identical. Growth modeling requires variation in time.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'noTimeVariation',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent('All time measurements are identical. Tumor growth modeling requires variation in time. Ensure longitudinal data with multiple timepoints per patient.')
+                self$results$insert(1, notice)
+                return()
             }
             
             # Check for reasonable size variation
             size_cv <- sd(data[[size_var]], na.rm = TRUE) / mean(data[[size_var]], na.rm = TRUE)
             if (size_cv < 0.05) {
-                warning("Very low variation in tumor sizes (CV < 5%). Model fitting may be unstable.")
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'lowSizeVariation',
+                    type = jmvcore::NoticeType$STRONG_WARNING
+                )
+                notice$setContent(sprintf('Very low variation in tumor sizes (CV = %.1f%%, threshold 5%%). Model parameter estimates may be unstable. Confidence intervals will be wide. Consider data quality or measurement precision issues.', size_cv * 100))
+                self$results$insert(2, notice)
             }
             
             # Check for sufficient longitudinal data if patient ID provided
             if ("patient" %in% names(data)) {
                 obs_per_patient <- table(data$patient)
                 if (any(obs_per_patient < 3)) {
-                    warning("Some patients have fewer than 3 measurements. Consider using NLS instead of NLME approach.")
+                    n_sparse <- sum(obs_per_patient < 3)
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'sparsePatientData',
+                        type = jmvcore::NoticeType$WARNING
+                    )
+                    notice$setContent(sprintf('%d patient(s) have fewer than 3 measurements. Mixed-effects modeling (NLME/Bayesian) may be unreliable. Consider switching to Nonlinear Least Squares (NLS) approach or collecting more data.', n_sparse))
+                    self$results$insert(3, notice)
                 }
                 
                 # Monotonic time check per patient
                 bad_patients <- names(Filter(function(v) any(diff(v) < 0, na.rm = TRUE),
                                              split(data[[time_var]], data$patient)))
                 if (length(bad_patients) > 0) {
-                    warning(glue::glue("Time is not monotonically increasing for patient(s): {paste(head(bad_patients, 5), collapse = ', ')}"))
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'nonMonotonicTime',
+                        type = jmvcore::NoticeType$STRONG_WARNING
+                    )
+                    notice$setContent(sprintf('Time values decrease for %d patient(s) (e.g., %s). Check data entry - time should be monotonically increasing (sequential measurements). Model results may be invalid.',
+                        length(bad_patients),
+                        paste(head(bad_patients, 3), collapse = ', ')
+                    ))
+                    self$results$insert(2, notice)
                 }
             }
         },
@@ -1483,6 +1709,211 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             html <- paste0(html, "</div>")
 
             self$results$clinicalInterpretation$setContent(html)
+        },
+
+        .generateNaturalLanguageSummary = function(data) {
+            # Generate plain-English summary of growth model results
+
+            if (is.null(private$growth_model)) return()
+
+            tryCatch({
+
+                growth_model <- self$options$growthModel %||% "gompertz"
+                model_approach <- self$options$modelApproach %||% "nlme"
+                n_obs <- nrow(data)
+                n_patients <- if (!is.null(self$options$patientId)) length(unique(data[[self$options$patientId]])) else 1
+
+                html <- "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>"
+                html <- paste0(html, "<h4>Growth Model Summary</h4>")
+
+                # Dataset description
+                if (n_patients > 1) {
+                    html <- paste0(html, sprintf("<p>This analysis modeled tumor growth for <b>%d patients</b> using <b>%d total observations</b> (average %.1f measurements per patient).</p>",
+                        n_patients,
+                        n_obs,
+                        n_obs / n_patients))
+                } else {
+                    html <- paste0(html, sprintf("<p>This analysis modeled tumor growth using <b>%d observations</b>.</p>", n_obs))
+                }
+
+                # Model description
+                model_desc <- switch(growth_model,
+                    "exponential" = "an exponential growth model, which assumes the tumor grows at a constant percentage rate over time",
+                    "gompertz" = "a Gompertz growth model, which describes tumor growth that slows as the tumor increases in size - the most common pattern in solid tumors",
+                    "logistic" = "a logistic growth model, which assumes growth slows as the tumor approaches a maximum carrying capacity",
+                    "bertalanffy" = "a von Bertalanffy growth model, which is commonly used for organisms with slower growth rates over time",
+                    "linear" = "a linear growth model, which assumes the tumor grows by a constant absolute amount per time unit",
+                    "power" = "a power law growth model, which describes growth that accelerates or decelerates following a power function",
+                    "a growth model"
+                )
+
+                approach_desc <- switch(model_approach,
+                    "nlme" = "using mixed-effects modeling to account for patient-specific variation",
+                    "bayesian" = "using Bayesian methods to quantify uncertainty in growth parameters",
+                    "nls" = "using nonlinear regression on pooled data",
+                    "using statistical modeling"
+                )
+
+                html <- paste0(html, sprintf("<p>We used <b>%s</b> %s.</p>",
+                    model_desc,
+                    approach_desc))
+
+                # Key findings from model fit
+                model <- private$growth_model
+
+                if (growth_model == "gompertz" && inherits(model, c("nlme", "nls"))) {
+                    # Extract parameters for Gompertz
+                    if (inherits(model, "nlme")) {
+                        coefs <- fixef(model)
+                    } else {
+                        coefs <- coef(model)
+                    }
+
+                    if ("beta" %in% names(coefs)) {
+                        decel_rate <- coefs["beta"]
+                        html <- paste0(html, sprintf("<p><b>Key Finding:</b> The tumor growth deceleration rate is %.3f, indicating %s growth slowdown over time.</p>",
+                            decel_rate,
+                            if (decel_rate > 0.2) "rapid" else if (decel_rate > 0.1) "moderate" else "slow"))
+                    }
+                } else if (growth_model == "exponential" && inherits(model, c("nlme", "nls"))) {
+                    # Extract growth rate for exponential
+                    if (inherits(model, "nlme")) {
+                        coefs <- fixef(model)
+                    } else {
+                        coefs <- coef(model)
+                    }
+
+                    if ("k" %in% names(coefs)) {
+                        growth_rate <- coefs["k"]
+                        doubling_time <- log(2) / growth_rate
+
+                        html <- paste0(html, sprintf("<p><b>Key Finding:</b> The tumor growth rate is %.3f per time unit, corresponding to a doubling time of approximately <b>%.1f time units</b>.</p>",
+                            growth_rate,
+                            doubling_time))
+                    }
+                }
+
+                # Treatment effect summary
+                if (self$options$treatmentAnalysis && !is.null(self$options$treatmentEffect)) {
+                    if (!is.null(self$options$treatmentTime)) {
+                        html <- paste0(html, "<p><b>Treatment Effect:</b> The analysis modeled changes in growth dynamics after treatment initiation. See the Treatment Effects table for detailed parameter estimates.</p>")
+                    } else {
+                        html <- paste0(html, "<p><b>Treatment Effect:</b> The analysis compared growth parameters between treatment groups. See the Treatment Effects table for detailed comparisons.</p>")
+                    }
+                }
+
+                # Model fit quality
+                html <- paste0(html, "<p><b>Model Fit:</b> Review the Model Fit Statistics table and Residual Analysis plot to assess how well the model fits the observed data. Higher R² values and randomly scattered residuals indicate better fit.</p>")
+
+                # Clinical implications
+                html <- paste0(html, "<h5>Clinical Implications</h5>")
+                html <- paste0(html, "<p>")
+
+                if (growth_model == "gompertz") {
+                    html <- paste0(html, "The Gompertz model suggests that this tumor exhibits decelerating growth, typical of solid tumors with limited nutrient supply or increasing cell death rates. This pattern can inform treatment timing and response assessment.")
+                } else if (growth_model == "exponential") {
+                    html <- paste0(html, "The exponential model suggests unrestricted early-stage growth. This may indicate aggressive tumor behavior and could guide early intervention strategies. Note that exponential growth typically cannot be sustained indefinitely.")
+                } else if (growth_model == "logistic") {
+                    html <- paste0(html, "The logistic model suggests the tumor is approaching or has reached a maximum sustainable size. This may reflect environmental constraints on further growth.")
+                }
+
+                html <- paste0(html, "</p>")
+
+                # Recommendations
+                html <- paste0(html, "<h5>Recommendations</h5>")
+                html <- paste0(html, "<ul>")
+                html <- paste0(html, "<li>Compare observed vs. predicted growth curves to validate model assumptions</li>")
+                html <- paste0(html, "<li>Use doubling time estimates to guide treatment scheduling and follow-up intervals</li>")
+                html <- paste0(html, "<li>Consider individual patient variation when making clinical decisions</li>")
+                html <- paste0(html, "<li>Validate model predictions with continued monitoring</li>")
+                html <- paste0(html, "</ul>")
+
+                html <- paste0(html, "</div>")
+
+                self$results$naturalLanguageSummary$setContent(html)
+
+            }, error = function(e) {
+                # If summary generation fails, set generic content
+                self$results$naturalLanguageSummary$setContent(
+                    "<div style='padding: 10px;'><p>Natural language summary could not be generated. See other output sections for detailed results.</p></div>"
+                )
+            })
+        },
+
+        .populateGlossary = function() {
+            # Populate technical terms glossary
+
+            html <- "<div style='background-color: #fff9e6; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>"
+            html <- paste0(html, "<h4>Technical Terms Glossary</h4>")
+
+            html <- paste0(html, "<dl style='margin-left: 10px;'>")
+
+            # Growth models
+            html <- paste0(html, "<dt><b>Exponential Growth Model</b></dt>")
+            html <- paste0(html, "<dd>V(t) = V₀ × e<sup>kt</sup> - Assumes constant percentage growth rate; typical of early-stage unrestricted tumor growth</dd>")
+
+            html <- paste0(html, "<dt><b>Gompertz Growth Model</b></dt>")
+            html <- paste0(html, "<dd>V(t) = V₀ × e<sup>(α/β)(1-e<sup>-βt</sup>)</sup> - Most common solid tumor pattern with decelerating growth due to nutrient limitations</dd>")
+
+            html <- paste0(html, "<dt><b>Logistic Growth Model</b></dt>")
+            html <- paste0(html, "<dd>V(t) = K / (1 + e<sup>-r(t-t₀)</sup>) - Growth approaches maximum carrying capacity K; describes tumors with environmental constraints</dd>")
+
+            html <- paste0(html, "<dt><b>von Bertalanffy Growth Model</b></dt>")
+            html <- paste0(html, "<dd>V(t) = (V∞<sup>1/3</sup> - (V∞<sup>1/3</sup> - V₀<sup>1/3</sup>)e<sup>-kt</sup>)<sup>3</sup> - Used for organisms with metabolic scaling; slower deceleration than Gompertz</dd>")
+
+            html <- paste0(html, "<dt><b>Power Law Growth Model</b></dt>")
+            html <- paste0(html, "<dd>V(t) = V₀ × t<sup>α</sup> - Describes accelerating (α > 1) or decelerating (α < 1) growth following a power function</dd>")
+
+            html <- paste0(html, "<dt><b>Linear Growth Model</b></dt>")
+            html <- paste0(html, "<dd>V(t) = V₀ + kt - Constant absolute growth rate per time unit; less common in biological systems</dd>")
+
+            # Key parameters
+            html <- paste0(html, "<dt><b>Growth Rate (k)</b></dt>")
+            html <- paste0(html, "<dd>Rate parameter controlling speed of growth; higher values = faster growth</dd>")
+
+            html <- paste0(html, "<dt><b>Deceleration Parameter (β)</b></dt>")
+            html <- paste0(html, "<dd>In Gompertz model, controls how quickly growth rate decreases over time</dd>")
+
+            html <- paste0(html, "<dt><b>Doubling Time</b></dt>")
+            html <- paste0(html, "<dd>Time required for tumor volume to double; calculated as ln(2)/k for exponential growth</dd>")
+
+            # Statistical metrics
+            html <- paste0(html, "<dt><b>R² (Coefficient of Determination)</b></dt>")
+            html <- paste0(html, "<dd>Proportion of variance explained by the model (0-1 scale); higher values indicate better fit</dd>")
+
+            html <- paste0(html, "<dt><b>AIC (Akaike Information Criterion)</b></dt>")
+            html <- paste0(html, "<dd>Model comparison metric balancing fit and complexity; lower values indicate better models</dd>")
+
+            html <- paste0(html, "<dt><b>BIC (Bayesian Information Criterion)</b></dt>")
+            html <- paste0(html, "<dd>Similar to AIC but penalizes model complexity more heavily; lower values indicate better models</dd>")
+
+            # Modeling approaches
+            html <- paste0(html, "<dt><b>NLME (Nonlinear Mixed-Effects Models)</b></dt>")
+            html <- paste0(html, "<dd>Accounts for patient-specific random effects; appropriate for longitudinal data with multiple patients</dd>")
+
+            html <- paste0(html, "<dt><b>NLS (Nonlinear Least Squares)</b></dt>")
+            html <- paste0(html, "<dd>Pooled regression without patient-specific effects; faster but ignores within-patient correlation</dd>")
+
+            html <- paste0(html, "<dt><b>Bayesian Modeling</b></dt>")
+            html <- paste0(html, "<dd>Probabilistic framework quantifying uncertainty in parameters via posterior distributions; uses MCMC sampling</dd>")
+
+            html <- paste0(html, "<dt><b>Rhat (Gelman-Rubin Diagnostic)</b></dt>")
+            html <- paste0(html, "<dd>Bayesian convergence metric; values < 1.01 indicate good convergence, > 1.1 indicates poor convergence</dd>")
+
+            html <- paste0(html, "<dt><b>ESS (Effective Sample Size)</b></dt>")
+            html <- paste0(html, "<dd>Number of independent MCMC samples; higher values provide more precise posterior estimates</dd>")
+
+            # Clinical terms
+            html <- paste0(html, "<dt><b>Treatment Effect</b></dt>")
+            html <- paste0(html, "<dd>Change in growth parameters attributable to treatment intervention; negative values indicate growth inhibition</dd>")
+
+            html <- paste0(html, "<dt><b>Residuals</b></dt>")
+            html <- paste0(html, "<dd>Difference between observed and predicted values; random scatter indicates good fit, patterns suggest poor fit</dd>")
+
+            html <- paste0(html, "</dl>")
+            html <- paste0(html, "</div>")
+
+            self$results$glossary$setContent(html)
         }
     )
 )

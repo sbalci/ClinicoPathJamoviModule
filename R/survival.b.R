@@ -1238,6 +1238,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
+                # Populate subtitle with explanatory variable
+                if (!is.null(self$options$explanatory)) {
+                    subtitle_text <- paste0("Survival Analysis - ", self$options$explanatory)
+                    self$results$subtitle$setContent(subtitle_text)
+                }
+
                 # Get Clean Data ----
                 results <- private$.cleandata()
 
@@ -1306,9 +1312,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Pairwise ----
-                if (self$options$pw
-                    # && !self$options$sas
-                    ) {
+                if (self$options$pw) {
                     if (!(self$options$multievent && self$options$analysistype == "compete")) {
                         private$.pairwise(results)
                     } else {
