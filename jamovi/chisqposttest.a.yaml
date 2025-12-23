@@ -1,7 +1,7 @@
 ---
 name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.31'
 jas: '1.2'
@@ -163,13 +163,6 @@ options:
       description: >
                   Display natural-language summary of results for clinical interpretation
 
-    - name: showExampleInterpretations
-      title: Show Example Interpretations
-      type: Bool
-      default: false
-      description: >
-                  Display example interpretations for significant findings
-
     - name: copyReadySentences
       title: Generate Report Sentences
       type: Bool
@@ -190,11 +183,4 @@ options:
       default: false
       description: >
                   Display glossary of statistical terms with clinical interpretations
-
-    - name: colorBlindSafe
-      title: Use Color-Blind Safe Palette
-      type: Bool
-      default: false
-      description: >
-                  Use color-blind friendly visualization options
 ...

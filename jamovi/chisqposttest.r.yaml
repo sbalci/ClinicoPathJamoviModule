@@ -167,15 +167,6 @@ items:
           - cols
           - exportResults
 
-    - name:  exampleInterpretations
-      title: 'Example Interpretations'
-      type:  Html
-      visible: (showExampleInterpretations)
-      clearWith:
-          - rows
-          - cols
-          - showExampleInterpretations
-          
     - name:  reportSentences
       title: 'Report-Ready Sentences'
       type:  Html

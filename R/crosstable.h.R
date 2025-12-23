@@ -12,9 +12,6 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             excl = FALSE,
             cont = "mean",
             pcat = "chisq",
-            stratify = NULL,
-            mantel_haenszel = FALSE,
-            breslow_day = FALSE,
             p_adjust = "none", ...) {
 
             super$initialize(
@@ -63,23 +60,6 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "chisq",
                     "fisher"),
                 default="chisq")
-            private$..stratify <- jmvcore::OptionVariable$new(
-                "stratify",
-                stratify,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"),
-                default=NULL)
-            private$..mantel_haenszel <- jmvcore::OptionBool$new(
-                "mantel_haenszel",
-                mantel_haenszel,
-                default=FALSE)
-            private$..breslow_day <- jmvcore::OptionBool$new(
-                "breslow_day",
-                breslow_day,
-                default=FALSE)
             private$..p_adjust <- jmvcore::OptionList$new(
                 "p_adjust",
                 p_adjust,
@@ -97,9 +77,6 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..excl)
             self$.addOption(private$..cont)
             self$.addOption(private$..pcat)
-            self$.addOption(private$..stratify)
-            self$.addOption(private$..mantel_haenszel)
-            self$.addOption(private$..breslow_day)
             self$.addOption(private$..p_adjust)
         }),
     active = list(
@@ -109,9 +86,6 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         excl = function() private$..excl$value,
         cont = function() private$..cont$value,
         pcat = function() private$..pcat$value,
-        stratify = function() private$..stratify$value,
-        mantel_haenszel = function() private$..mantel_haenszel$value,
-        breslow_day = function() private$..breslow_day$value,
         p_adjust = function() private$..p_adjust$value),
     private = list(
         ..vars = NA,
@@ -120,9 +94,6 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..excl = NA,
         ..cont = NA,
         ..pcat = NA,
-        ..stratify = NA,
-        ..mantel_haenszel = NA,
-        ..breslow_day = NA,
         ..p_adjust = NA)
 )
 
@@ -130,6 +101,9 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableResults",
     inherit = jmvcore::Group,
     active = list(
+        errorNotice = function() private$.items[["errorNotice"]],
+        dataQualityNotice = function() private$.items[["dataQualityNotice"]],
+        analysisInfo = function() private$.items[["analysisInfo"]],
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
         todo2 = function() private$.items[["todo2"]],
@@ -138,8 +112,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tablestyle3 = function() private$.items[["tablestyle3"]],
         tablestyle4 = function() private$.items[["tablestyle4"]],
         qvalueExplanation = function() private$.items[["qvalueExplanation"]],
-        testInformation = function() private$.items[["testInformation"]],
-        mantelHaenszelResults = function() private$.items[["mantelHaenszelResults"]]),
+        testInformation = function() private$.items[["testInformation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -154,6 +127,31 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "finalfit",
                     "gtsummary",
                     "tangram"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errorNotice",
+                title="Error",
+                visible=FALSE,
+                clearWith=list(
+                    "vars",
+                    "group")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataQualityNotice",
+                title="Data Quality Warnings",
+                visible=FALSE,
+                clearWith=list(
+                    "vars",
+                    "group")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="analysisInfo",
+                title="Analysis Information",
+                visible=FALSE,
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "sty")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",
@@ -162,6 +160,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do",
+                visible=TRUE,
                 clearWith=list(
                     "vars",
                     "group",
@@ -220,31 +219,22 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="qvalueExplanation",
                 title="Q-value Explanation",
+                visible=FALSE,
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
-                visible="(sty:gtsummary)"))
+                    "sty",
+                    "p_adjust")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="testInformation",
                 title="Q-value Information",
+                visible=FALSE,
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
-                visible="(sty:gtsummary)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="mantelHaenszelResults",
-                title="Stratified Analysis Results",
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "stratify",
-                    "mantel_haenszel",
-                    "breslow_day"),
-                visible="(mantel_haenszel)"))}))
+                    "sty",
+                    "p_adjust")))}))
 
 crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableBase",
@@ -274,7 +264,6 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Currently implemented features:
 #' - Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
 #' - Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
-#' - Stratified analysis (Mantel-Haenszel, Breslow-Day)
 #' - Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg, 
 #' Benjamini-Yekutieli)
 #' - Variable name safety (special characters, spaces)
@@ -307,18 +296,13 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param excl Exclude rows with missing values.
 #' @param cont .
 #' @param pcat .
-#' @param stratify Variable for stratified analysis (Mantel-Haenszel test).
-#'   Controls for confounding when comparing groups across strata.
-#' @param mantel_haenszel Perform Mantel-Haenszel chi-square test for
-#'   stratified 2x2 tables. Tests association between row and column variables
-#'   controlling for stratification. Provides common odds ratio estimate across
-#'   strata.
-#' @param breslow_day Test whether odds ratios are homogeneous across strata.
-#'   Only applicable when Mantel-Haenszel test is enabled.
 #' @param p_adjust Method for adjusting p-values for multiple comparisons
-#'   across variables
+#'   across variables. Only available with gtsummary table style.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataQualityNotice} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
@@ -328,7 +312,6 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$mantelHaenszelResults} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -340,9 +323,6 @@ crosstable <- function(
     excl = FALSE,
     cont = "mean",
     pcat = "chisq",
-    stratify = NULL,
-    mantel_haenszel = FALSE,
-    breslow_day = FALSE,
     p_adjust = "none") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -350,16 +330,13 @@ crosstable <- function(
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
-    if ( ! missing(stratify)) stratify <- jmvcore::resolveQuo(jmvcore::enquo(stratify))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
-            `if`( ! missing(group), group, NULL),
-            `if`( ! missing(stratify), stratify, NULL))
+            `if`( ! missing(group), group, NULL))
 
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in stratify) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- crosstableOptions$new(
         vars = vars,
@@ -368,9 +345,6 @@ crosstable <- function(
         excl = excl,
         cont = cont,
         pcat = pcat,
-        stratify = stratify,
-        mantel_haenszel = mantel_haenszel,
-        breslow_day = breslow_day,
         p_adjust = p_adjust)
 
     analysis <- crosstableClass$new(

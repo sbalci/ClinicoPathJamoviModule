@@ -1,0 +1,25 @@
+"PathologyType","TreatmentArm","Count"
+"Adenocarcinoma","Surgery Only",45
+"Adenocarcinoma","Surgery + Chemo",62
+"Adenocarcinoma","Surgery + Radio",38
+"Adenocarcinoma","Chemo Only",28
+"Adenocarcinoma","Radio Only",22
+"Adenocarcinoma","Best Supportive",15
+"Squamous Cell","Surgery Only",38
+"Squamous Cell","Surgery + Chemo",51
+"Squamous Cell","Surgery + Radio",44
+"Squamous Cell","Chemo Only",33
+"Squamous Cell","Radio Only",29
+"Squamous Cell","Best Supportive",18
+"Small Cell","Surgery Only",12
+"Small Cell","Surgery + Chemo",28
+"Small Cell","Surgery + Radio",15
+"Small Cell","Chemo Only",35
+"Small Cell","Radio Only",22
+"Small Cell","Best Supportive",8
+"Large Cell","Surgery Only",18
+"Large Cell","Surgery + Chemo",24
+"Large Cell","Surgery + Radio",20
+"Large Cell","Chemo Only",19
+"Large Cell","Radio Only",16
+"Large Cell","Best Supportive",11

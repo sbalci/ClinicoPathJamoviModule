@@ -911,47 +911,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 significant = chiSqTest$p.value < 0.05
             ))
         },
-        
-        # Generate example interpretations
-        .generateExampleInterpretations = function(chiSqTest, contTable, residuals_analysis = NULL) {
-            examples <- list()
-            
-            # Find the cell with the largest residual
-            if (!is.null(residuals_analysis)) {
-                adj_res <- residuals_analysis$adjusted_residuals
-                max_idx <- which.max(abs(adj_res))
-                max_row <- ((max_idx - 1) %% nrow(adj_res)) + 1
-                max_col <- ((max_idx - 1) %/% nrow(adj_res)) + 1
-                
-                observed <- contTable[max_row, max_col]
-                expected <- round(chiSqTest$expected[max_row, max_col], 1)
-                residual <- adj_res[max_row, max_col]
-                
-                row_name <- rownames(contTable)[max_row]
-                col_name <- colnames(contTable)[max_col]
-                
-                if (residual > 0) {
-                    ratio <- round(observed / expected, 1)
-                    examples[[1]] <- sprintf(
-                        .("The combination of '%s' and '%s' occurred %.1f times more often than expected by chance (observed: %d, expected: %.1f)."),
-                        row_name, col_name, ratio, observed, expected
-                    )
-                } else {
-                    ratio <- round(expected / observed, 1)
-                    examples[[1]] <- sprintf(
-                        .("The combination of '%s' and '%s' occurred %.1f times less often than expected by chance (observed: %d, expected: %.1f)."),
-                        row_name, col_name, ratio, observed, expected
-                    )
-                }
-            }
-            
-            # Add general interpretation guidance
-            examples[[2]] <- .("Positive residuals (red cells) indicate combinations that occur more frequently than expected under independence.")
-            examples[[3]] <- .("Negative residuals (blue cells) indicate combinations that occur less frequently than expected under independence.")
-            
-            return(examples)
-        },
-        
+
         # Generate copy-ready report sentences
         .generateReportSentences = function(chiSqTest, contTable, clinical_summary, assumptions) {
             sentences <- list()
@@ -993,34 +953,34 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             glossary <- htmltools::div(
                 style = "padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d; margin: 10px 0;",
                 htmltools::h4(.("Statistical Terms Glossary"), style = "color: #495057; margin-top: 0;"),
-                
-                htmltools::dl(
-                    htmltools::dt(htmltools::strong(.("Chi-square test (χ²)"))),
-                    htmltools::dd(.("Tests whether two categorical variables are independent. Used when you want to know if categories of one variable are associated with categories of another.")),
-                    
-                    htmltools::dt(htmltools::strong(.("p-value"))),
-                    htmltools::dd(.("The probability of observing results at least as extreme as what was found, assuming no real association exists. p < 0.05 typically indicates statistical significance.")),
-                    
-                    htmltools::dt(htmltools::strong(.("Cramér's V"))),
-                    htmltools::dd(.("Effect size measure for chi-square tests. Ranges from 0 (no association) to 1 (perfect association). Values: 0.1=small, 0.3=medium, 0.5=large effect.")),
-                    
-                    htmltools::dt(htmltools::strong(.("Standardized Residuals"))),
-                    htmltools::dd(.("Show which specific cell combinations contribute to significance. Values > 2 or < -2 indicate cells that differ significantly from expected.")),
-                    
-                    htmltools::dt(htmltools::strong(.("Expected Counts"))),
-                    htmltools::dd(.("The number of observations expected in each cell if the variables were independent. Chi-square test requires most cells to have expected counts ≥ 5.")),
-                    
-                    htmltools::dt(htmltools::strong(.("Fisher's Exact Test"))),
-                    htmltools::dd(.("Alternative to chi-square when expected counts are low. Provides exact p-values rather than approximations.")),
-                    
-                    htmltools::dt(htmltools::strong(.("Bonferroni Correction"))),
-                    htmltools::dd(.("Adjusts p-values when multiple comparisons are made to control false positive rate. Divides significance level by number of tests.")),
-                    
-                    htmltools::dt(htmltools::strong(.("Post-hoc Tests"))),
-                    htmltools::dd(.("Follow-up tests performed after a significant overall result to identify which specific group pairs differ significantly."))
+
+                htmltools::tags$dl(
+                    htmltools::tags$dt(htmltools::strong(.("Chi-square test (χ²)"))),
+                    htmltools::tags$dd(.("Tests whether two categorical variables are independent. Used when you want to know if categories of one variable are associated with categories of another.")),
+
+                    htmltools::tags$dt(htmltools::strong(.("p-value"))),
+                    htmltools::tags$dd(.("The probability of observing results at least as extreme as what was found, assuming no real association exists. p < 0.05 typically indicates statistical significance.")),
+
+                    htmltools::tags$dt(htmltools::strong(.("Cramér's V"))),
+                    htmltools::tags$dd(.("Effect size measure for chi-square tests. Ranges from 0 (no association) to 1 (perfect association). Values: 0.1=small, 0.3=medium, 0.5=large effect.")),
+
+                    htmltools::tags$dt(htmltools::strong(.("Standardized Residuals"))),
+                    htmltools::tags$dd(.("Show which specific cell combinations contribute to significance. Values > 2 or < -2 indicate cells that differ significantly from expected.")),
+
+                    htmltools::tags$dt(htmltools::strong(.("Expected Counts"))),
+                    htmltools::tags$dd(.("The number of observations expected in each cell if the variables were independent. Chi-square test requires most cells to have expected counts ≥ 5.")),
+
+                    htmltools::tags$dt(htmltools::strong(.("Fisher's Exact Test"))),
+                    htmltools::tags$dd(.("Alternative to chi-square when expected counts are low. Provides exact p-values rather than approximations.")),
+
+                    htmltools::tags$dt(htmltools::strong(.("Bonferroni Correction"))),
+                    htmltools::tags$dd(.("Adjusts p-values when multiple comparisons are made to control false positive rate. Divides significance level by number of tests.")),
+
+                    htmltools::tags$dt(htmltools::strong(.("Post-hoc Tests"))),
+                    htmltools::tags$dd(.("Follow-up tests performed after a significant overall result to identify which specific group pairs differ significantly."))
                 )
             )
-            
+
             return(as.character(glossary))
         },
         
@@ -1102,13 +1062,11 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .prepareAndValidateData = function() {
             # Error Message ----
             if (nrow(self$data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'emptyDataset',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Data contains no (complete) rows. Please check your dataset and variable selections.')
-                self$results$insert(1, notice)
+                # Use HTML message in todo element instead of Notice object
+                self$results$todo$setContent(
+                    paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                          "<strong>Error:</strong> Data contains no (complete) rows. Please check your dataset and variable selections.",
+                          "</div>"))
                 return(NULL)
             }
 
@@ -1120,13 +1078,11 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if counts variable exists when specified
             if (!is.null(counts) && !(counts %in% names(data))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'countsVariableNotFound',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf("The counts variable '%s' does not exist in the data. Please select a valid numeric variable for counts.", counts))
-                self$results$insert(1, notice)
+                # Use HTML message in todo element instead of Notice object
+                self$results$todo$setContent(
+                    paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                          "<strong>Error:</strong> The counts variable '", counts, "' does not exist in the data. Please select a valid numeric variable for counts.",
+                          "</div>"))
                 return(NULL)
             }
 
@@ -1164,25 +1120,25 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Handle errors
             if (inherits(contTable, "try-error")) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'contingencyTableError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Error creating contingency table. Please check your data format and variable selections. Ensure rows and columns variables are categorical.')
-                self$results$insert(1, notice)
+                # Use HTML message in todo element instead of Notice object
+                if (show_warnings) {
+                    self$results$todo$setContent(
+                        paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                              "<strong>Error:</strong> Error creating contingency table. Please check your data format and variable selections. Ensure rows and columns variables are categorical.",
+                              "</div>"))
+                }
                 return(NULL)
             }
 
             # Validate table dimensions
             if (any(dim(contTable) < 2)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'invalidTableDimensions',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Contingency table must have at least 2 rows and 2 columns. Please check that your variables have at least 2 categories each.')
-                self$results$insert(1, notice)
+                # Use HTML message in todo element instead of Notice object
+                if (show_warnings) {
+                    self$results$todo$setContent(
+                        paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
+                              "<strong>Error:</strong> Contingency table must have at least 2 rows and 2 columns. Please check that your variables have at least 2 categories each.",
+                              "</div>"))
+                }
                 return(NULL)
             }
             
@@ -1317,20 +1273,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     is_significant <- residuals_analysis$significant_cells[i, j]
                     interpretation <- residuals_analysis$interpretation[i, j]
                     
-                    # Determine cell styling based on significance and accessibility
+                    # Determine cell styling based on significance
                     cell_style <- if (is_significant) {
-                        if (self$options$colorBlindSafe) {
-                            if (residual_val > 0) {
-                                "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #FFF2CC; color: #DE8F05; font-weight: bold;"
-                            } else {
-                                "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #E8F4FD; color: #0173B2; font-weight: bold;"
-                            }
+                        if (residual_val > 0) {
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #ffebee; color: #c62828; font-weight: bold;"
                         } else {
-                            if (residual_val > 0) {
-                                "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #ffebee; color: #c62828; font-weight: bold;"
-                            } else {
-                                "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e3f2fd; color: #1565c0; font-weight: bold;"
-                            }
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e3f2fd; color: #1565c0; font-weight: bold;"
                         }
                     } else {
                         "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f9f9f9;"
@@ -1419,20 +1367,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to handle post-hoc testing
         .handlePostHocTesting = function(chiSqTest, contTable, rows = NULL, cols = NULL) {
-            notice_position <- 1
-
             # CRITICAL FIX: Check if user wants to disable post-hoc tests entirely
             # When posthoc = "none", skip all pairwise testing
             if (self$options$posthoc == "none") {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'posthocDisabled',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent('Post-hoc testing disabled. Select Bonferroni, Holm, or FDR to enable pairwise comparisons with appropriate multiple testing correction.')
-                self$results$insert(notice_position, notice)
-
-                # Keep detailed HTML message for full explanation
+                # Use HTML message only (no Notice object to avoid serialization errors)
                 message_text <- paste0(
                     "You selected 'None' for post-hoc method. No pairwise comparisons will be performed. ",
                     "If you want pairwise comparisons with no p-value adjustment, this feature is not currently available. ",
@@ -1443,6 +1381,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           "<strong>", .("Post-hoc Testing Disabled:"), "</strong> ",
                           message_text,
                           "</div>"))
+                # Hide the posthoc table when no post-hoc testing is performed
+                self$results$posthocTable$setVisible(FALSE)
                 return(invisible(NULL))
             }
 
@@ -1451,15 +1391,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             overall_significant <- chiSqTest$p.value < self$options$sig
 
             if (!overall_significant) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'omnibusNotSignificant',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Overall chi-square test not significant (p = %.3f). Post-hoc pairwise comparisons not performed to avoid inflating Type I error.', chiSqTest$p.value))
-                self$results$insert(notice_position, notice)
-
-                # Keep detailed HTML message for full explanation
+                # Use HTML message only (no Notice object to avoid serialization errors)
                 message_text <- paste0(
                     "Overall chi-square test is not significant (p = ",
                     format.pval(chiSqTest$p.value, digits = 3),
@@ -1473,6 +1405,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           "<strong>", .("Post-hoc Testing Not Performed:"), "</strong> ",
                           message_text,
                           "</div>"))
+                # Hide the posthoc table when omnibus test is not significant
+                self$results$posthocTable$setVisible(FALSE)
                 return(invisible(NULL))
             }
 
@@ -1482,21 +1416,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             pairwise_results <- private$.robustPairwiseTests(contTable, adjustMethod, self$options$testSelection)
             
             if (length(pairwise_results) > 0) {
+                # Show the posthoc table since we have results to display
+                self$results$posthocTable$setVisible(TRUE)
+
                 fisher_used <- any(sapply(pairwise_results, function(x) identical(x$test_used, "Fisher's exact")))
 
-                # Add INFO notice if Fisher's test was used
-                if (fisher_used) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'fisherTestUsed',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent('Fisher\'s exact test automatically used for pairwise comparisons with expected cell counts < 5. Exact p-values reported.')
-                    self$results$insert(notice_position, notice)
-                    notice_position <- notice_position + 1
-                }
-
-                # Keep detailed HTML notice for educational panel
+                # Use HTML notice for educational panel (no Notice object to avoid serialization errors)
                 fisher_notice <- NULL
                 if (fisher_used) {
                     fisher_notice <- htmltools::div(
@@ -1508,8 +1433,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Create multiple testing correction panel (conditional)
                 if (self$options$showEducational) {
-                    correction_panel <- private$.createEducationalPanel("multiple_testing", 
-                                                                        length(pairwise_results), 
+                    correction_panel <- private$.createEducationalPanel("multiple_testing",
+                                                                        length(pairwise_results),
                                                                         self$options$sig)
                     if (!is.null(fisher_notice)) {
                         combined <- htmltools::div(correction_panel, fisher_notice)
@@ -1520,14 +1445,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (!is.null(fisher_notice)) {
                     self$results$multipleTestingInfo$setContent(as.character(fisher_notice))
                 }
-                
+
                 # Populate pairwise results table
                 for (i in seq_along(pairwise_results)) {
                     result <- pairwise_results[[i]]
                     test_used <- result$test_used
                     p_raw <- result$actual_pvalue
                     p_adj <- result$actual_pvalue_adjusted
-                    
+
                     self$results$posthocTable$addRow(
                         rowKey = i,
                         values = list(
@@ -1541,7 +1466,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                     )
                 }
-                
+
                 # Create detailed comparison tables (conditional)
                 if (self$options$showDetailedTables) {
                     detailed_html <- private$.createDetailedComparisonHTML(pairwise_results, rows, cols)
@@ -1549,6 +1474,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             } else {
                 # No valid pairwise comparisons possible
+                # Hide the posthoc table when no valid pairwise comparisons
+                self$results$posthocTable$setVisible(FALSE)
                 self$results$multipleTestingInfo$setContent(
                     paste0("<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7;'>", .("No valid pairwise comparisons could be performed. This may be due to insufficient data in subtables or table structure."), "</div>"))
             }
@@ -1731,31 +1658,30 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.displayAssumptionsCheck(assumptions, chiSqTest)
             }
 
-            # Add STRONG_WARNING notices for critical assumption violations
-            notice_position <- 1
+            # Add HTML warnings for critical assumption violations (no Notice objects to avoid serialization errors)
+            warning_messages <- c()
 
             # Small sample size warning
             if (assumptions$total_n < 20) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSample',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Very small sample size (n=%d). Chi-square approximation may be unreliable. Consider using Fisher\'s exact test and interpreting results with caution.', assumptions$total_n))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
+                warning_msg <- sprintf('Very small sample size (n=%d). Chi-square approximation may be unreliable. Consider using Fisher\'s exact test and interpreting results with caution.', assumptions$total_n)
+                warning_messages <- c(warning_messages, warning_msg)
             }
 
             # Low expected counts warning
             if (assumptions$prop_low_5 > 0.2) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'lowExpectedCounts',
-                    type = jmvcore::NoticeType$STRONG_WARNING
+                warning_msg <- sprintf('%.0f%% of cells have expected counts < 5. Chi-square test assumptions violated. Use Fisher\'s exact test for more reliable results.', assumptions$prop_low_5 * 100)
+                warning_messages <- c(warning_messages, warning_msg)
+            }
+
+            # Display combined warnings in todo element if any exist
+            if (length(warning_messages) > 0) {
+                combined_warnings <- paste0(
+                    "<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffc107; color: #856404;'>",
+                    "<strong>Warning:</strong><ul>",
+                    paste0("<li>", warning_messages, "</li>", collapse = ""),
+                    "</ul></div>"
                 )
-                notice$setContent(sprintf('%.0f%% of cells have expected counts < 5. Chi-square test assumptions violated. Use Fisher\'s exact test for more reliable results.', assumptions$prop_low_5 * 100))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
+                self$results$todo$setContent(combined_warnings)
             }
 
             # Show educational overview if requested
@@ -1788,12 +1714,6 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Detailed comparison tables are handled within post-hoc testing
             # No separate call needed as it's integrated into .handlePostHocTesting()
             
-            # Generate example interpretations if requested
-            if (self$options$showExampleInterpretations) {
-                examples <- private$.generateExampleInterpretations(chiSqTest, contTable, residuals_analysis)
-                private$.displayExampleInterpretations(examples)
-            }
-            
             # Generate report-ready sentences if requested
             if (self$options$copyReadySentences) {
                 assumptions <- private$.validateAssumptions(contTable, chiSqTest)
@@ -1813,26 +1733,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.generateExportTable(chiSqTest, contTable)
             }
 
-            # Add INFO notice at completion
-            info <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            pairwise_count <- if (chiSqTest$p.value < self$options$sig && self$options$posthoc != "none") {
-                pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
-                length(pairwise_results)
-            } else {
-                0
-            }
-            info$setContent(sprintf(
-                'Chi-square analysis completed: χ²(%d) = %.2f, p %s. %s',
-                chiSqTest$parameter,
-                chiSqTest$statistic,
-                if (chiSqTest$p.value < 0.001) '< 0.001' else sprintf('= %.3f', chiSqTest$p.value),
-                if (pairwise_count > 0) sprintf('%d pairwise comparisons with %s correction.', pairwise_count, self$options$posthoc) else 'No post-hoc tests performed.'
-            ))
-            self$results$insert(999, info)
+            # Note: INFO notice at completion removed to avoid serialization errors
+            # The analysis results are already visible in the results tables
         },
         
         # Display clinical summary
@@ -1891,16 +1793,18 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 htmltools::h4(title_text, style = "margin-top: 0;"),
                 if (length(assumptions$warning_msg) > 0) {
                     htmltools::div(
-                        htmltools::p(htmltools::strong(.("Issues identified:"))),
+                        htmltools::div(htmltools::strong(.("Issues identified:")), style = "margin-bottom: 5px;"),
                         htmltools::tags$ul(
+                            style = "margin-top: 0;",
                             lapply(assumptions$warning_msg, function(msg) htmltools::tags$li(msg))
                         )
                     )
                 },
                 if (length(assumptions$recommendation) > 0) {
                     htmltools::div(
-                        htmltools::p(htmltools::strong(.("Recommendations:"))),
+                        htmltools::div(htmltools::strong(.("Recommendations:")), style = "margin-bottom: 5px;"),
                         htmltools::tags$ul(
+                            style = "margin-top: 0;",
                             lapply(assumptions$recommendation, function(rec) htmltools::tags$li(rec))
                         )
                     )
@@ -1914,68 +1818,38 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             self$results$assumptionsCheck$setContent(as.character(assumptions_content))
         },
-        
-        # Display example interpretations
-        .displayExampleInterpretations = function(examples) {
-            examples_content <- htmltools::div(
-                style = "padding: 15px; background-color: #e3f2fd; border-left: 4px solid #1976d2; margin: 10px 0;",
-                htmltools::h4(.("Example Interpretations"), style = "color: #1976d2; margin-top: 0;"),
-                htmltools::tags$ul(
-                    lapply(examples, function(example) {
-                        htmltools::tags$li(style = "margin-bottom: 8px;", example)
-                    })
-                )
-            )
-            
-            self$results$exampleInterpretations$setContent(as.character(examples_content))
-        },
-        
+
         # Display report sentences
         .displayReportSentences = function(sentences) {
             sentences_content <- htmltools::div(
                 style = "padding: 15px; background-color: #f3e5f5; border-left: 4px solid #9c27b0; margin: 10px 0;",
                 htmltools::h4(.("Report-Ready Sentences"), style = "color: #7b1fa2; margin-top: 0;"),
-                
+
                 htmltools::div(
                     htmltools::h5(.("Methods:")),
                     htmltools::div(
                         style = "background: white; padding: 10px; border-radius: 4px; margin: 5px 0; border: 1px solid #ddd;",
-                        htmltools::p(sentences$methods),
-                        htmltools::button(
-                            .("Copy"),
-                            onclick = sprintf("navigator.clipboard.writeText('%s')", gsub("'", "\\\\'", sentences$methods)),
-                            style = "float: right; padding: 4px 8px; font-size: 10px;"
-                        )
+                        htmltools::p(sentences$methods)
                     )
                 ),
-                
+
                 htmltools::div(
                     htmltools::h5(.("Results:")),
                     htmltools::div(
                         style = "background: white; padding: 10px; border-radius: 4px; margin: 5px 0; border: 1px solid #ddd;",
-                        htmltools::p(sentences$results),
-                        htmltools::button(
-                            .("Copy"),
-                            onclick = sprintf("navigator.clipboard.writeText('%s')", gsub("'", "\\\\'", sentences$results)),
-                            style = "float: right; padding: 4px 8px; font-size: 10px;"
-                        )
+                        htmltools::p(sentences$results)
                     )
                 ),
-                
+
                 htmltools::div(
                     htmltools::h5(.("Conclusion:")),
                     htmltools::div(
                         style = "background: white; padding: 10px; border-radius: 4px; margin: 5px 0; border: 1px solid #ddd;",
-                        htmltools::p(sentences$conclusion),
-                        htmltools::button(
-                            .("Copy"),
-                            onclick = sprintf("navigator.clipboard.writeText('%s')", gsub("'", "\\\\'", sentences$conclusion)),
-                            style = "float: right; padding: 4px 8px; font-size: 10px;"
-                        )
+                        htmltools::p(sentences$conclusion)
                     )
                 )
             )
-            
+
             self$results$reportSentences$setContent(as.character(sentences_content))
         },
 
@@ -2014,15 +1888,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # Choose color palette based on accessibility settings
-            if (self$options$colorBlindSafe) {
-                low_color <- "#0173B2"    # Blue
-                high_color <- "#DE8F05"   # Orange
-            } else {
-                low_color <- "blue"
-                high_color <- "red"
-            }
-            
+            # Set color palette for heatmap
+            low_color <- "blue"
+            high_color <- "red"
+
             # Build ggplot
             p <- ggplot2::ggplot(df, ggplot2::aes(x = Col, y = Row, fill = Residual)) +
                 ggplot2::geom_tile(color = "grey80") +

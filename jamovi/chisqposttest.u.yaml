@@ -62,15 +62,11 @@ children:
           - type: CheckBox
             name: showClinicalSummary
           - type: CheckBox
-            name: showExampleInterpretations
-          - type: CheckBox
             name: copyReadySentences
           - type: CheckBox
             name: showAssumptionsCheck
           - type: CheckBox
             name: showGlossary
-          - type: CheckBox
-            name: colorBlindSafe
   - type: CollapseBox
     label: Display Options
     collapsed: false

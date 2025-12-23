@@ -12,9 +12,6 @@ crosstable(
   excl = FALSE,
   cont = "mean",
   pcat = "chisq",
-  stratify = NULL,
-  mantel_haenszel = FALSE,
-  breslow_day = FALSE,
   p_adjust = "none"
 )
 }
@@ -34,23 +31,15 @@ table.}
 
 \item{pcat}{.}
 
-\item{stratify}{Variable for stratified analysis (Mantel-Haenszel test).
-Controls for confounding when comparing groups across strata.}
-
-\item{mantel_haenszel}{Perform Mantel-Haenszel chi-square test for
-stratified 2x2 tables. Tests association between row and column variables
-controlling for stratification. Provides common odds ratio estimate across
-strata.}
-
-\item{breslow_day}{Test whether odds ratios are homogeneous across strata.
-Only applicable when Mantel-Haenszel test is enabled.}
-
 \item{p_adjust}{Method for adjusting p-values for multiple comparisons
-across variables}
+across variables. Only available with gtsummary table style.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataQualityNotice} \tab \tab \tab \tab \tab a html \cr
+\code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
@@ -60,7 +49,6 @@ A results object containing:
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
-\code{results$mantelHaenszelResults} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
@@ -71,7 +59,6 @@ Currently implemented features:
 \itemize{
 \item Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
 \item Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
-\item Stratified analysis (Mantel-Haenszel, Breslow-Day)
 \item Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg,
 Benjamini-Yekutieli)
 \item Variable name safety (special characters, spaces)
