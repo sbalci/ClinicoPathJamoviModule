@@ -183,7 +183,8 @@
       "Bash(test:*)",
       "Bash(while read file)",
       "Bash(do mv \"$file\" quality-reports/)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Skill(pubmed-database)"
     ],
     "deny": [],
     "ask": [],

@@ -17,7 +17,6 @@
 #' \itemize{
 #'   \item Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
 #'   \item Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
-#'   \item Stratified analysis (Mantel-Haenszel, Breslow-Day for 2x2 tables)
 #'   \item Multiple testing correction (Bonferroni, Holm, BH, BY)
 #'   \item Variable name safety (handles spaces and special characters)
 #'   \item Data quality validation warnings
@@ -44,6 +43,54 @@
 #' @importFrom gt md
 #' @importFrom purrr partial
 #' @import magrittr
+
+# Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
+.createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
+    type <- match.arg(type)
+
+    # Define styles for each notice type
+    styles <- list(
+        ERROR = list(
+            bg = "#f8d7da",
+            border = "#dc3545",
+            icon = "❌",
+            title_color = "#721c24"
+        ),
+        STRONG_WARNING = list(
+            bg = "#fff3cd",
+            border = "#ff9800",
+            icon = "⚠️",
+            title_color = "#856404"
+        ),
+        WARNING = list(
+            bg = "#fff3cd",
+            border = "#ffc107",
+            icon = "⚠️",
+            title_color = "#856404"
+        ),
+        INFO = list(
+            bg = "#d1ecf1",
+            border = "#17a2b8",
+            icon = "ℹ️",
+            title_color = "#0c5460"
+        )
+    )
+
+    style <- styles[[type]]
+
+    html <- paste0(
+        "<div style='background-color: ", style$bg, "; ",
+        "padding: 15px; margin: 10px 0; border-radius: 5px; ",
+        "border-left: 4px solid ", style$border, ";'>",
+        "<p style='margin: 0; color: ", style$title_color, ";'>",
+        "<strong>", style$icon, " ", type, ":</strong> ",
+        message,
+        "</p>",
+        "</div>"
+    )
+
+    return(html)
+}
 
 # Helper function to escape variable names with special characters
 .escapeVariableNames <- function(var_names) {
@@ -205,12 +252,20 @@
             warnings <- append(warnings, paste0("Small group detected (n = ", min_group_size, "). Consider combining categories or using exact tests."))
         }
         
-        # Check for empty cells in cross-tabulations
+        # Check for empty cells in cross-tabulations (categorical variables only)
         for (var in myvars) {
             if (var %in% names(mydata)) {
-                cont_table <- table(mydata[[var]], mydata[[mygroup]])
-                if (any(cont_table == 0)) {
-                    warnings <- append(warnings, paste0("Empty cells detected in ", var, " × ", mygroup, " table. Results may be unstable."))
+                # Only check categorical variables for empty cells
+                # Continuous variables naturally have many unique values that won't appear in all groups
+                is_categorical <- is.factor(mydata[[var]]) ||
+                                 is.character(mydata[[var]]) ||
+                                 (is.numeric(mydata[[var]]) && length(unique(na.omit(mydata[[var]]))) <= 6)
+
+                if (is_categorical) {
+                    cont_table <- table(mydata[[var]], mydata[[mygroup]])
+                    if (any(cont_table == 0)) {
+                        warnings <- append(warnings, paste0("Empty cells detected in ", var, " × ", mygroup, " table. Results may be unstable."))
+                    }
                 }
             }
         }
@@ -361,30 +416,68 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
 
             # .showTestInformation ----
-            .showTestInformation = function() {
-                test_info <- paste0(
-                    "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
-                    "<h4 style='margin-top: 0; color: #1976D2;'>Q-values and Multiple Testing Correction</h4>",
-                    
-                    "<p><strong>What are Q-values?</strong><br>",
-                    "Q-values represent the False Discovery Rate (FDR) - the expected proportion of false positives among rejected hypotheses when testing multiple variables simultaneously.</p>",
-                    
-                    "<p><strong>Why use Q-values in this table?</strong><br>",
-                    "When comparing multiple variables across groups (as in this cross-table), the chance of false positives increases. Q-values (FDR control) limit the expected false discovery proportion, whereas Bonferroni/Holm control the family-wise error rate.</p>",
-                    
-                    "<p><strong>Interpretation Guidelines:</strong></p>",
-                    "<ul>",
-                    "<li><strong>Q < 0.05:</strong> Strong evidence against null hypothesis (5% FDR)</li>",
-                    "<li><strong>Q < 0.10:</strong> Moderate evidence (10% FDR) - often acceptable in exploratory research</li>",
-                    "<li><strong>Q < 0.20:</strong> Suggestive evidence - warrants further investigation</li>",
-                    "</ul>",
-                    
-                    "<p><strong>Method:</strong> Benjamini-Hochberg FDR correction applied to p-values from gtsummary's automatic test selection (chi-square/Fisher for categorical, Welch/Wilcoxon/Kruskal or Welch ANOVA for continuous).</p>",
-                    
-                    "<p><em>💡 Focus on q-values when interpreting results from tables with multiple comparisons to reduce false discoveries.</em></p>",
-                    "</div>"
-                )
-                
+            .showTestInformation = function(method_type = "FDR") {
+                # Generate method-specific test information
+                if (method_type == "FWER") {
+                    # Family-Wise Error Rate control (Bonferroni, Holm)
+                    test_info <- paste0(
+                        "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                        "<h4 style='margin-top: 0; color: #1976D2;'>Adjusted P-values and FWER Control</h4>",
+
+                        "<p><strong>What are Adjusted P-values?</strong><br>",
+                        "Adjusted p-values control the Family-Wise Error Rate (FWER) - the probability of making <strong>at least one</strong> false positive across all tests in the table.</p>",
+
+                        "<p><strong>Why use FWER control?</strong><br>",
+                        "When comparing multiple variables across groups, the chance of finding at least one false positive increases. FWER methods (Bonferroni/Holm) provide <strong>strong control</strong> - ensuring the probability of ANY false positive stays below α (typically 0.05).</p>",
+
+                        "<p><strong>Interpretation Guidelines:</strong></p>",
+                        "<ul>",
+                        "<li><strong>Adjusted p < 0.05:</strong> Statistically significant - strong evidence against null hypothesis</li>",
+                        "<li><strong>Adjusted p ≥ 0.05:</strong> Not significant after correction for multiple testing</li>",
+                        "<li><strong>Note:</strong> Adjusted p-values are typically <em>larger</em> than raw p-values (more conservative)</li>",
+                        "</ul>",
+
+                        "<p><strong>When to use FWER control:</strong></p>",
+                        "<ul>",
+                        "<li>✅ Confirmatory studies where even one false positive is unacceptable</li>",
+                        "<li>✅ Clinical trials with regulatory requirements</li>",
+                        "<li>✅ When you have strong prior hypotheses to test</li>",
+                        "</ul>",
+
+                        "<p><em>💡 FWER methods are conservative - you may miss true effects to avoid false positives. Consider FDR methods (BH/BY) for exploratory research.</em></p>",
+                        "</div>"
+                    )
+                } else {
+                    # False Discovery Rate control (BH, BY)
+                    test_info <- paste0(
+                        "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                        "<h4 style='margin-top: 0; color: #1976D2;'>Q-values and FDR Control</h4>",
+
+                        "<p><strong>What are Q-values?</strong><br>",
+                        "Q-values represent the False Discovery Rate (FDR) - the expected <strong>proportion</strong> of false positives among discoveries when testing multiple variables simultaneously.</p>",
+
+                        "<p><strong>Why use FDR control?</strong><br>",
+                        "When comparing multiple variables across groups (as in this cross-table), the chance of false positives increases. Q-values (FDR control) limit the expected false discovery <em>proportion</em>, which is less conservative than FWER control (Bonferroni/Holm) that controls for ANY false positive.</p>",
+
+                        "<p><strong>Interpretation Guidelines:</strong></p>",
+                        "<ul>",
+                        "<li><strong>Q < 0.05:</strong> Strong evidence - expect 5% of discoveries at this threshold to be false positives</li>",
+                        "<li><strong>Q < 0.10:</strong> Moderate evidence - 10% FDR, often acceptable in exploratory research</li>",
+                        "<li><strong>Q < 0.20:</strong> Suggestive evidence - warrants further investigation in hypothesis-generating studies</li>",
+                        "</ul>",
+
+                        "<p><strong>When to use FDR control:</strong></p>",
+                        "<ul>",
+                        "<li>✅ Exploratory analyses with many comparisons</li>",
+                        "<li>✅ Genomic/proteomic studies with thousands of tests</li>",
+                        "<li>✅ Hypothesis-generating research where you can tolerate some false positives</li>",
+                        "</ul>",
+
+                        "<p><em>💡 FDR methods are less conservative than FWER - you'll discover more effects but accept a small proportion of false positives.</em></p>",
+                        "</div>"
+                    )
+                }
+
                 self$results$testInformation$setContent(test_info)
             },
 
@@ -393,14 +486,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {
-                    # Add ERROR notice for missing required variables
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingRequiredVars',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Please select dependent variables (rows) and a grouping variable (columns) to generate the cross table.')
-                    self$results$insert(1, notice)
+                    # Initial state - no error, just show welcome message
+                    self$results$errorNotice$setVisible(FALSE)
 
                     todo <- paste0(
                         "<div style='background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #007bff;'>",
@@ -413,7 +500,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "<li>Select <strong>dependent variables</strong> (rows) - continuous or categorical measures</li>",
                         "<li>Select <strong>grouping variable</strong> (columns) - treatment groups, disease stages, etc.</li>",
                         "<li>Choose <strong>table style</strong> from Options (NEJM, Lancet, gtsummary, etc.)</li>",
-                        "<li>Enable <strong>stratified analysis</strong> (Mantel-Haenszel) if controlling for confounders</li>",
                         "</ol>",
 
                         "<h4 style='margin-top: 15px;'>Automatic Test Selection:</h4>",
@@ -435,9 +521,13 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "</div>"
                     )
                     self$results$todo$setContent(todo)
+                    self$results$todo$setVisible(TRUE)
                     return()
                 } else {
+                    # Hide welcome message when analysis is running
                     self$results$todo$setContent("")
+                    self$results$todo$setVisible(FALSE)
+                    self$results$errorNotice$setVisible(FALSE)
                 }
 
                 # Set subtitle with grouping variable
@@ -464,13 +554,13 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Check if data has complete rows.
                 if (nrow(self$data) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'emptyDataset',
-                        type = jmvcore::NoticeType$ERROR
+                    # Use HTML error notice instead of dynamic Notice to avoid serialization errors
+                    error_html <- .createNoticeHTML(
+                        'Dataset contains no complete rows. Please check your data and filters.',
+                        type = "ERROR"
                     )
-                    notice$setContent('Dataset contains no complete rows. Please check your data and filters.')
-                    self$results$insert(1, notice)
+                    self$results$errorNotice$setContent(error_html)
+                    self$results$errorNotice$setVisible(TRUE)
                     return()
                 }
 
@@ -508,35 +598,40 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Validate analysis assumptions and data quality
                 validation_results <- .validateAnalysisAssumptions(mydata, myvars, mygroup)
                 if (length(validation_results$warnings) > 0) {
-                    pos <- 2  # Start after any ERROR notices
-                    for (warn in validation_results$warnings) {
+                    # Accumulate all warnings into HTML (avoid serialization errors from dynamic Notice inserts)
+                    warning_html_parts <- character(length(validation_results$warnings))
+
+                    for (i in seq_along(validation_results$warnings)) {
+                        warn <- validation_results$warnings[[i]]
+
                         # Determine severity based on content
-                        type <- if (grepl("Very small|n = [0-9]+\\)", warn)) {
+                        notice_type <- if (grepl("Very small|n = [0-9]+\\)", warn)) {
                             # Extract sample size if present
                             n_match <- regmatches(warn, regexec("n = ([0-9]+)", warn))
                             if (length(n_match[[1]]) > 1) {
                                 n_val <- as.numeric(n_match[[1]][2])
                                 if (n_val < 10) {
-                                    jmvcore::NoticeType$STRONG_WARNING
+                                    "STRONG_WARNING"
                                 } else {
-                                    jmvcore::NoticeType$WARNING
+                                    "WARNING"
                                 }
                             } else {
-                                jmvcore::NoticeType$WARNING
+                                "WARNING"
                             }
                         } else {
-                            jmvcore::NoticeType$WARNING
+                            "WARNING"
                         }
 
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('dataQualityWarn', pos),
-                            type = type
-                        )
-                        notice$setContent(warn)
-                        self$results$insert(pos, notice)
-                        pos <- pos + 1
+                        # Create HTML for this warning
+                        warning_html_parts[i] <- .createNoticeHTML(warn, type = notice_type)
                     }
+
+                    # Combine all warnings into single HTML output
+                    combined_warnings <- paste(warning_html_parts, collapse = "\n")
+                    self$results$dataQualityNotice$setContent(combined_warnings)
+                    self$results$dataQualityNotice$setVisible(TRUE)
+                } else {
+                    self$results$dataQualityNotice$setVisible(FALSE)
                 }
 
                 # Generate table based on selected style.
@@ -629,10 +724,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Heuristic: treat numeric variables with few unique values as categorical to avoid t/ANOVA on encoded factors
-                cat_vars <- names(mydata_subset)[vapply(mydata_subset, function(v) {
+                # Exclude grouping variable from type specification (it's used in 'by' argument)
+                all_cat_vars <- names(mydata_subset)[vapply(mydata_subset, function(v) {
                     is.factor(v) || is.character(v) || (is.numeric(v) && length(unique(na.omit(v))) <= 6)
                 }, logical(1))]
-                cont_vars <- setdiff(myvars, cat_vars)
+                cat_vars <- setdiff(all_cat_vars, mygroup)  # Remove grouping variable
+                cont_vars <- setdiff(myvars, all_cat_vars)  # Continuous = myvars minus all categoricals
 
                 mydata_subset[cat_vars] <- lapply(mydata_subset[cat_vars], function(v) {
                     if (is.factor(v)) return(v)
@@ -658,10 +755,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Map user options to gtsummary syntax
                 stats_cont <- if (self$options$cont == "mean") "{mean} ({sd})" else "{median} ({p25}, {p75})"
-                
-                # Automatic tests with sparse-table guard for categorical and Welch/Wilcoxon for continuous
-                test_cat <- function(data, variable, by, ...) .cat_test_auto(data, variable, by, test_preference = self$options$pcat, min_expected = 5)
-                test_cont <- function(data, variable, by, ...) .cont_test_auto(data, variable, by, method = self$options$cont)
+
+                # Note: gtsummary has excellent default test selection:
+                # - Categorical: chi-square (automatically switches to Fisher when expected counts < 5)
+                # - Continuous 2 groups: Welch t-test (robust to unequal variances)
+                # - Continuous 3+ groups: ANOVA (oneway.test)
+                # User preferences for cont/pcat are still respected in arsenal and finalfit styles
 
                 tablegtsummary <-
                   mydata_subset %>%
@@ -680,16 +779,30 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                   ) %>%
                   add_n() %>%
                   add_overall() %>%
-                  add_p(
-                    test = list(
-                      all_continuous() ~ test_cont,
-                      all_categorical() ~ test_cat
-                    ),
-                    pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
-                  )
+                  add_p(pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3))
 
-                # Add q-values only if adjustment method is not "none"
+                # Add adjusted p-values/q-values only if adjustment method is not "none"
                 if (p_adjust_method != "none") {
+                    # Warn if adjusting with only 1 variable (pointless)
+                    if (n_vars == 1) {
+                        single_var_warning <- .createNoticeHTML(
+                            paste0("P-value adjustment with only 1 variable has no effect. ",
+                                   "Adjusted p-value will equal the original p-value. ",
+                                   "Multiple testing correction is only meaningful when testing multiple variables simultaneously."),
+                            type = "INFO"
+                        )
+                        self$results$dataQualityNotice$setContent(
+                            paste(self$results$dataQualityNotice$state, single_var_warning, sep = "\n")
+                        )
+                        self$results$dataQualityNotice$setVisible(TRUE)
+                    }
+
+                    # Determine if this is FWER or FDR method
+                    is_fdr <- p_adjust_method %in% c("BH", "BY")
+
+                    # Set column header based on method type
+                    adjusted_col_header <- if (is_fdr) "**q-value**" else "**adjusted p**"
+
                     tablegtsummary <- tablegtsummary %>%
                       add_q(
                         method = gtsummary_method,
@@ -698,7 +811,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                       modify_header(
                         all_stat_cols() ~ "**{level}**\nN = {n} ({style_percent(p)})",
                         p.value      ~ "**p-value**",
-                        q.value      ~ "**adjusted p**"
+                        q.value      ~ adjusted_col_header
                       )
                 } else {
                     tablegtsummary <- tablegtsummary %>%
@@ -718,62 +831,112 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Add adjustment explanation (only if adjustment is applied)
                 if (p_adjust_method != "none") {
+                    # Determine method type
+                    is_fdr <- p_adjust_method %in% c("BH", "BY")
+                    method_type <- if (is_fdr) "FDR" else "FWER"
+
                     method_names <- list(
                         "bonferroni" = "Bonferroni",
                         "holm" = "Holm",
                         "BH" = "Benjamini-Hochberg (FDR)",
-                        "BY" = "Benjamini-Yekutieli"
+                        "BY" = "Benjamini-Yekutieli (FDR)"
                     )
 
                     method_descriptions <- list(
-                        "bonferroni" = "Conservative family-wise error rate (FWER) control. Multiplies each p-value by the number of tests.",
-                        "holm" = "Step-down FWER control. Less conservative than Bonferroni while maintaining strong FWER control.",
-                        "BH" = "False Discovery Rate (FDR) control. Estimates the proportion of false positives among significant results.",
-                        "BY" = "FDR control with additional correction for dependent tests. More conservative than Benjamini-Hochberg."
+                        "bonferroni" = "Conservative Family-Wise Error Rate (FWER) control. Multiplies each p-value by the number of tests. Controls probability of ANY false positive.",
+                        "holm" = "Step-down Family-Wise Error Rate (FWER) control. Less conservative than Bonferroni while maintaining strong control against ANY false positive.",
+                        "BH" = "False Discovery Rate (FDR) control. Controls the expected PROPORTION of false positives among discoveries. Less conservative than FWER methods.",
+                        "BY" = "False Discovery Rate (FDR) control with additional correction for dependent tests. More conservative than Benjamini-Hochberg but still controls FDR not FWER."
                     )
 
-                    qvalue_explanation <- paste0(
-                        "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
-                        "<h4 style='margin-top: 0;'>Multiple Testing Correction: ", method_names[[p_adjust_method]], "</h4>",
-                        "<p><strong>Method:</strong> ", method_descriptions[[p_adjust_method]], "</p>",
-                        "<p><strong>What is an adjusted p-value?</strong><br>",
-                        "When testing multiple hypotheses simultaneously, the chance of finding at least one false positive increases. ",
-                        "Adjusted p-values control for this inflation by accounting for the number of tests performed.</p>",
-                    
-                    "<p><strong>How to interpret:</strong></p>",
-                    "<ul>",
-                    "<li>For FDR methods (BH/BY): a q-value of 0.05 means that, on average, 5% of declared discoveries are expected to be false positives.</li>",
-                    "<li>For FWER methods (Bonferroni/Holm): adjusted p-values control the probability of any false positive across all tests.</li>",
-                    "<li>Q-values are typically larger than raw p-values.</li>",
-                    "</ul>",
-                    
-                    "<p><strong>When to use q-values:</strong></p>",
-                    "<ul>",
-                    "<li>✅ When testing multiple variables simultaneously (like in this table)</li>",
-                    "<li>✅ In exploratory analyses with many comparisons</li>",
-                    "<li>✅ In genomic/proteomic studies with thousands of tests</li>",
-                    "</ul>",
-                    
-                    "<p><strong>Important limitations:</strong></p>",
-                    "<ul>",
-                    "<li>⚠️ FDR control (BH/BY) assumes independence or positive dependence; violations may yield conservative or liberal control.</li>",
-                    "<li>⚠️ With few tests (<10), corrections may be overly conservative.</li>",
-                    "<li>⚠️ Should not replace careful hypothesis planning and clinical judgment</li>",
-                    "</ul>",
+                    # Generate method-specific explanation
+                    if (is_fdr) {
+                        # FDR methods - use "q-values"
+                        qvalue_explanation <- paste0(
+                            "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
+                            "<h4 style='margin-top: 0;'>Multiple Testing Correction: ", method_names[[p_adjust_method]], "</h4>",
+                            "<p><strong>Method:</strong> ", method_descriptions[[p_adjust_method]], "</p>",
 
-                    "<p><small><em>Correction applied using ", method_names[[p_adjust_method]], " method via gtsummary::add_q()</em></small></p>",
-                    "</div>"
-                    )
+                            "<p><strong>What are Q-values?</strong><br>",
+                            "Q-values represent the False Discovery Rate (FDR) - the expected <strong>proportion</strong> of false positives among your discoveries. ",
+                            "Unlike FWER methods that control the probability of ANY false positive, FDR methods allow a controlled proportion of false discoveries.</p>",
+
+                            "<p><strong>How to interpret:</strong></p>",
+                            "<ul>",
+                            "<li><strong>Q-value = 0.05:</strong> Among all variables with q ≤ 0.05, expect ~5% to be false positives</li>",
+                            "<li><strong>Q-value = 0.10:</strong> Expect ~10% false positives (acceptable in exploratory research)</li>",
+                            "<li><strong>Q-values are larger than raw p-values</strong> but smaller than FWER-adjusted p-values</li>",
+                            "</ul>",
+
+                            "<p><strong>When to use FDR control:</strong></p>",
+                            "<ul>",
+                            "<li>✅ Exploratory analyses where discovering patterns is the goal</li>",
+                            "<li>✅ Genomic/proteomic studies with hundreds or thousands of tests</li>",
+                            "<li>✅ Screening studies to generate hypotheses for follow-up</li>",
+                            "<li>✅ When you can tolerate a small proportion of false positives</li>",
+                            "</ul>",
+
+                            "<p><strong>Important considerations:</strong></p>",
+                            "<ul>",
+                            "<li>⚠️ FDR methods assume independence or positive dependence between tests</li>",
+                            "<li>⚠️ Less conservative than Bonferroni/Holm - you'll find more discoveries but accept some false positives</li>",
+                            "<li>⚠️ Should not replace careful hypothesis planning and validation</li>",
+                            "</ul>",
+
+                            "<p><small><em>Correction applied using ", method_names[[p_adjust_method]], " method via gtsummary::add_q()</em></small></p>",
+                            "</div>"
+                        )
+                    } else {
+                        # FWER methods - use "adjusted p-values"
+                        qvalue_explanation <- paste0(
+                            "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
+                            "<h4 style='margin-top: 0;'>Multiple Testing Correction: ", method_names[[p_adjust_method]], "</h4>",
+                            "<p><strong>Method:</strong> ", method_descriptions[[p_adjust_method]], "</p>",
+
+                            "<p><strong>What are Adjusted P-values?</strong><br>",
+                            "Adjusted p-values control the Family-Wise Error Rate (FWER) - the probability of making <strong>at least one</strong> false positive across all tests. ",
+                            "This is the most conservative approach to multiple testing correction.</p>",
+
+                            "<p><strong>How to interpret:</strong></p>",
+                            "<ul>",
+                            "<li><strong>Adjusted p < 0.05:</strong> Statistically significant - strong evidence even after accounting for all tests</li>",
+                            "<li><strong>Adjusted p ≥ 0.05:</strong> Not significant after correction</li>",
+                            "<li><strong>Adjusted p-values are much larger than raw p-values</strong> (very conservative correction)</li>",
+                            "</ul>",
+
+                            "<p><strong>When to use FWER control:</strong></p>",
+                            "<ul>",
+                            "<li>✅ Confirmatory studies where false positives are costly</li>",
+                            "<li>✅ Clinical trials with regulatory requirements</li>",
+                            "<li>✅ When testing pre-specified hypotheses</li>",
+                            "<li>✅ When even a single false positive is unacceptable</li>",
+                            "</ul>",
+
+                            "<p><strong>Important considerations:</strong></p>",
+                            "<ul>",
+                            "<li>⚠️ Very conservative - may miss true effects (reduced power)</li>",
+                            "<li>⚠️ With many tests (>10), corrections can be extremely stringent</li>",
+                            "<li>⚠️ Consider FDR methods (BH/BY) for exploratory research with many tests</li>",
+                            "</ul>",
+
+                            "<p><small><em>Correction applied using ", method_names[[p_adjust_method]], " method via gtsummary::add_q()</em></small></p>",
+                            "</div>"
+                        )
+                    }
 
                     self$results$qvalueExplanation$setContent(qvalue_explanation)
+                    self$results$qvalueExplanation$setVisible(TRUE)
+
+                    # Show method-specific test information
+                    private$.showTestInformation(method_type)
+                    self$results$testInformation$setVisible(TRUE)
                 } else {
-                    # No adjustment - clear the explanation
+                    # No adjustment - hide both explanations
                     self$results$qvalueExplanation$setContent("")
+                    self$results$qvalueExplanation$setVisible(FALSE)
+                    self$results$testInformation$setContent("")
+                    self$results$testInformation$setVisible(FALSE)
                 }
-                
-                # Show q-value focused test information automatically
-                private$.showTestInformation()
-                
 
                 } else if (sty %in% c("nejm", "lancet", "hmisc")) {
                     sty_term <- jmvcore::composeTerm(components = self$options$sty)
@@ -795,9 +958,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$tablestyle4$setContent(tabletangram)
                 }
 
-                # ===== Stratified Analysis (Mantel-Haenszel) =====
-                # Non-breaking enhancement - only runs if options are enabled
-                if (self$options$mantel_haenszel && !is.null(self$options$stratify) && self$options$stratify != "") {
+                # ===== DISABLED: Stratified Analysis (Mantel-Haenszel) =====
+                # Feature temporarily disabled - options not available in .a.yaml
+                # if (self$options$mantel_haenszel && !is.null(self$options$stratify) && self$options$stratify != "") {
+                if (FALSE) {  # DISABLED
                     # Match stratification variable to cleaned name
                     strata_var <- NULL
                     all_labels <- labelled::var_label(mydata)
@@ -884,13 +1048,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     }
                 }
 
-                # Add INFO notice for successful analysis completion
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-
+                # Add INFO notice for successful analysis completion (using HTML to avoid serialization errors)
                 n_vars <- length(self$options$vars)
                 group_display <- self$options$group
                 style_display <- switch(self$options$sty,
@@ -903,11 +1061,14 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$options$sty
                 )
 
-                notice$setContent(sprintf(
+                info_message <- sprintf(
                     'Cross table analysis completed successfully. Analyzed %d variable(s) across %s groups using %s style.',
                     n_vars, group_display, style_display
-                ))
-                self$results$insert(999, notice)
+                )
+
+                info_html <- .createNoticeHTML(info_message, type = "INFO")
+                self$results$analysisInfo$setContent(info_html)
+                self$results$analysisInfo$setVisible(TRUE)
 
                 # ========================================================================
                 # STUBBED FEATURES - NOT IMPLEMENTED

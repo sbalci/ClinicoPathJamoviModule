@@ -5,6 +5,31 @@ jrs:   '1.1'
 
 items:
 
+    - name: errorNotice
+      title: Error
+      type: Html
+      visible: false
+      clearWith:
+          - vars
+          - group
+
+    - name: dataQualityNotice
+      title: Data Quality Warnings
+      type: Html
+      visible: false
+      clearWith:
+          - vars
+          - group
+
+    - name: analysisInfo
+      title: Analysis Information
+      type: Html
+      visible: false
+      clearWith:
+          - vars
+          - group
+          - sty
+
     - name: subtitle
       title: '`Cross Table - ${group}`'
       type:  Preformatted
@@ -12,6 +37,7 @@ items:
     - name: todo
       title: To Do
       type: Html
+      visible: true
       clearWith:
           - vars
           - group
@@ -70,31 +96,34 @@ items:
     - name: qvalueExplanation
       title: "Q-value Explanation"
       type: Html
+      visible: false
       clearWith:
           - vars
           - group
           - sty
-      visible: (sty:gtsummary)
+          - p_adjust
 
     - name: testInformation
       title: "Q-value Information"
       type: Html
+      visible: false
       clearWith:
           - vars
           - group
           - sty
-      visible: (sty:gtsummary)
+          - p_adjust
 
-    - name: mantelHaenszelResults
-      title: "Stratified Analysis Results"
-      type: Html
-      clearWith:
-          - vars
-          - group
-          - stratify
-          - mantel_haenszel
-          - breslow_day
-      visible: (mantel_haenszel)
+    # DISABLED - Stratified analysis feature not available
+    # - name: mantelHaenszelResults
+    #   title: "Stratified Analysis Results"
+    #   type: Html
+    #   clearWith:
+    #       - vars
+    #       - group
+    #       - stratify
+    #       - mantel_haenszel
+    #       - breslow_day
+    #   visible: (mantel_haenszel)
 
     # TEMPORARILY DISABLED - pairwise option not available in .a.yaml
     # - name: pairwiseTable

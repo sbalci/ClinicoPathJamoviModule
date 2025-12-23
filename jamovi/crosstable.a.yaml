@@ -1,7 +1,7 @@
 ---
 name:  crosstable
 title: Cross Tables
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.32'
 jas: '1.2'
@@ -13,7 +13,6 @@ description:
         Currently implemented features:
         - Multiple table styles (arsenal, finalfit, gtsummary, NEJM, Lancet, hmisc)
         - Automatic test selection (chi-square, Fisher's exact, t-test, ANOVA)
-        - Stratified analysis (Mantel-Haenszel, Breslow-Day)
         - Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg, Benjamini-Yekutieli)
         - Variable name safety (special characters, spaces)
         - Data quality validation warnings
@@ -97,32 +96,32 @@ options:
       default: chisq
 
     # Stratified Analysis Options (non-breaking additions)
-    - name: stratify
-      title: Stratification Variable (Optional)
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor ]
-      default: NULL
-      description: >
-            Variable for stratified analysis (Mantel-Haenszel test).
-            Controls for confounding when comparing groups across strata.
+    # - name: stratify
+    #   title: Stratification Variable (Optional)
+    #   type: Variable
+    #   suggested: [ ordinal, nominal ]
+    #   permitted: [ factor ]
+    #   default: NULL
+    #   description: >
+    #         Variable for stratified analysis (Mantel-Haenszel test).
+    #         Controls for confounding when comparing groups across strata.
 
-    - name: mantel_haenszel
-      title: Mantel-Haenszel Test
-      type: Bool
-      default: false
-      description: >
-            Perform Mantel-Haenszel chi-square test for stratified 2x2 tables.
-            Tests association between row and column variables controlling for stratification.
-            Provides common odds ratio estimate across strata.
+    # - name: mantel_haenszel
+    #   title: Mantel-Haenszel Test
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Perform Mantel-Haenszel chi-square test for stratified 2x2 tables.
+    #         Tests association between row and column variables controlling for stratification.
+    #         Provides common odds ratio estimate across strata.
 
-    - name: breslow_day
-      title: Breslow-Day Homogeneity Test
-      type: Bool
-      default: false
-      description: >
-            Test whether odds ratios are homogeneous across strata.
-            Only applicable when Mantel-Haenszel test is enabled.
+    # - name: breslow_day
+    #   title: Breslow-Day Homogeneity Test
+    #   type: Bool
+    #   default: false
+    #   description: >
+    #         Test whether odds ratios are homogeneous across strata.
+    #         Only applicable when Mantel-Haenszel test is enabled.
 
     # - name: pairwise
     #   title: Pairwise comparisons
@@ -130,6 +129,8 @@ options:
     #   default: false
     #   description: >
     #         Perform all pairwise comparisons between groups when there are more than 2 groups.
+
+
     - name: p_adjust
       title: P-value adjustment method
       type: List
@@ -146,7 +147,8 @@ options:
           name: BY
       default: none
       description: >
-            Method for adjusting p-values for multiple comparisons across variables
+            Method for adjusting p-values for multiple comparisons across variables.
+            Only available with gtsummary table style.
 
     # Advanced Post-hoc Testing Options
     # - name: posthoc_method

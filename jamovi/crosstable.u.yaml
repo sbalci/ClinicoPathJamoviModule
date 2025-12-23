@@ -23,7 +23,7 @@ children:
             isTarget: true
   - type: CollapseBox
     label: Options
-    collapsed: true
+    collapsed: false
     children:
       - type: LayoutBox
         margin: large
@@ -52,38 +52,39 @@ children:
         children:
           - type: ComboBox
             name: p_adjust
-  - type: CollapseBox
-    label: Stratified Analysis
-    collapsed: true
-    children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Stratification Variable (Optional)
-            children:
-              - type: VariablesListBox
-                name: stratify
-                maxItemCount: 1
-                isTarget: true
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: >-
-              Mantel-Haenszel test controls for confounding when comparing
-              binary variables across strata.
-            margin: large
-            children: []
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: mantel_haenszel
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: breslow_day
-            enable: (mantel_haenszel)
+            enable: (sty:gtsummary)
+  # - type: CollapseBox
+  #   label: Stratified Analysis
+  #   collapsed: true
+  #   children:
+  #     - type: VariableSupplier
+  #       persistentItems: false
+  #       stretchFactor: 1
+  #       children:
+  #         - type: TargetLayoutBox
+  #           label: Stratification Variable (Optional)
+  #           children:
+  #             - type: VariablesListBox
+  #               name: stratify
+  #               maxItemCount: 1
+  #               isTarget: true
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: Label
+  #           label: >-
+  #             Mantel-Haenszel test controls for confounding when comparing
+  #             binary variables across strata.
+  #           margin: large
+  #           children: []
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: CheckBox
+  #           name: mantel_haenszel
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: CheckBox
+  #           name: breslow_day
+  #           enable: (mantel_haenszel)
