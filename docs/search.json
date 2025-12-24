@@ -32259,7 +32259,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Usage",
-        "title": "Advanced Outlier Detection — outlierdetection",
+        "title": "Outlier Detection — outlierdetection",
         "text": "",
         "code": "outlierdetection(   data,   vars,   method_category = \"composite\",   univariate_methods = \"zscore_robust\",   multivariate_methods = \"mahalanobis\",   composite_threshold = 0.5,   zscore_threshold = 3.29,   iqr_multiplier = 1.7,   confidence_level = 0.999,   show_outlier_table = TRUE,   show_method_comparison = TRUE,   show_exclusion_summary = TRUE,   show_visualization = TRUE,   show_interpretation = TRUE )"
     },
@@ -32269,7 +32269,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Arguments",
-        "title": "Advanced Outlier Detection — outlierdetection",
+        "title": "Outlier Detection — outlierdetection",
         "text": "data data data frame. vars Continuous variables analyze outliers. module detect outliers based selected variables using chosen detection methods. method_category Category outlier detection methods use. CLINICAL GUIDANCE: Univariate methods analyze variable separately (ideal lab values, vital signs). Multivariate methods consider relationships variables (useful correlated biomarkers). Composite combines multiple approaches robust detection (recommended clinical data). Examples: Use univariate hemoglobin levels, multivariate complete blood count panels. univariate_methods Specific univariate method outlier detection univariate category selected. multivariate_methods Specific multivariate method outlier detection multivariate category selected. composite_threshold Threshold composite outlier score (0.1-1.0). Default 0.5 means observations  classified outliers least half methods considered outliers. zscore_threshold Threshold Z-score based methods. CLINICAL EXAMPLES: 3.0 = 99.7\\ 3.29 = 99.9\\ enzymes), 2.5 = 98.8\\ Recommended: 3.29 clinical quality control. iqr_multiplier Multiplier IQR-based outlier detection. CLINICAL EXAMPLES: 1.5 = Tukey's standard (sensitive, may flag ~0.7\\ data), 1.7 = conservative (recommended clinical screening), 2.0 = conservative (critical biomarkers). Useful non-normal distributions common clinical data. confidence_level Confidence level interval-based methods (ETI, HDI). Default 99.9\\ show_outlier_tableDisplay comprehensive table outlier detection results including outlier scores, distances, classification observation. show_method_comparisonCompare results across different detection methods using composite approach. show_exclusion_summaryProvide summary observations recommended exclusion impact analysis. show_visualizationGenerate plots showing outlier detection results distribution outlier scores. show_interpretationDisplay detailed interpretation outlier detection results methodological notes. results object containing:",
         "code": ""
     },
@@ -32278,8 +32278,8 @@
         "id": null,
         "dir": "Reference",
         "previous_headings": "",
-        "what": "Advanced Outlier Detection with easystats — outlierdetectionClass",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "what": "Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "Advanced outlier detection using multiple statistical methods easystats performance package. function provides comprehensive outlier detection univariate methods (Z-scores, IQR, confidence intervals), multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), composite scoring across multiple algorithms. Complements existing data quality assessment modules state---art outlier detection capabilities. Perfect clinical research data quality control preprocessing.",
         "code": ""
     },
@@ -32289,7 +32289,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Value",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "jamovi analysis object containing outlier detection results tables, plots, interpretation based selected options",
         "code": ""
     },
@@ -32299,7 +32299,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Details",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "outlier detection module supports four main categories methods: Univariate Methods: Robust Z-Score (MAD-based): Uses median absolute deviation robust standardization Standard Z-Score: Classical z-score based mean standard deviation Interquartile Range (IQR): Tukey's method using quartiles IQR multiplier Equal-Tailed Interval (ETI): Symmetric confidence interval approach Highest Density Interval (HDI): Bayesian credible interval method Multivariate Methods: Mahalanobis Distance: Classical multivariate distance accounting covariance Robust Mahalanobis Distance: Robust version using minimum covariance determinant Minimum Covariance Determinant (MCD): Robust covariance estimation OPTICS Clustering: Density-based clustering approach Local Outlier Factor (LOF): Local density deviation method Composite Methods: Combine multiple algorithms robust detection adjustable thresholds Methods: Comprehensive analysis using available techniques",
         "code": ""
     },
@@ -32309,7 +32309,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Method Selection Guidelines",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "Univariate: analyzing variables independently, simple interpretation needed Multivariate: variable relationships matter, detecting complex outlier patterns Composite: robust detection across different data patterns needed : comprehensive analysis method comparison",
         "code": ""
     },
@@ -32319,7 +32319,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Threshold Recommendations",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "Z-Score: 3.29 (99.9% confidence, ~0.1% outliers) IQR Multiplier: 1.7 (conservative Tukey's 1.5) Confidence Level: 0.999 (99.9% interval methods) Composite Threshold: 0.5 (outliers detected ≥50% methods)",
         "code": ""
     },
@@ -32329,7 +32329,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Clinical Applications",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "Laboratory Data: CBC, chemistry panels, liver function tests Anthropometric Data: Height, weight, BMI measurements Physiological Data: Blood pressure, heart rate, temperature Biomarker Data: Protein levels, genetic markers, metabolites Quality Control: Data entry errors, instrument malfunctions",
         "code": ""
     },
@@ -32339,7 +32339,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Output Components",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "Outlier Table: Detailed results outlier scores classifications Method Comparison: Performance across different detection algorithms Exclusion Summary: Recommendations data cleaning procedures Visualization: Plots showing outlier patterns distributions Interpretation: Detailed guidance results methodology",
         "code": ""
     },
@@ -32349,7 +32349,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Statistical Considerations",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "Sample Size: Minimum 30 observations recommended robust results Distribution: Robust methods handle non-normal distributions better Missing Data: Complete cases analysis performed automatically Correlations: Multivariate methods account variable relationships False Positives: Conservative thresholds reduce -detection",
         "code": ""
     },
@@ -32359,7 +32359,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "References",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "Lüdecke, D., Ben-Shachar, M., Patil, ., Waggoner, P., & Makowski, D. (2021). performance: R Package Assessment, Comparison Testing Statistical Models. Journal Open Source Software, 6(60), 3139. https://doi.org/10.21105/joss.03139 Rousseeuw, P. J., & Hubert, M. (2018). Anomaly detection robust statistics. Wiley Interdisciplinary Reviews: Data Mining Knowledge Discovery, 8(2), e1236. Breunig, M. M., Kriegel, H. P., Ng, R. T., & Sander, J. (2000). LOF: identifying density-based local outliers. ACM sigmod record, 29(2), 93-104.",
         "code": ""
     },
@@ -32372,7 +32372,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Super classes",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "jmvcore::Analysis -> ClinicoPath::outlierdetectionBase -> outlierdetectionClass",
         "code": ""
     },
@@ -32382,7 +32382,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Methods",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "jmvcore::Analysis$.createImage() jmvcore::Analysis$.createImages() jmvcore::Analysis$.createPlotObject() jmvcore::Analysis$.load() jmvcore::Analysis$.render() jmvcore::Analysis$.save() jmvcore::Analysis$.savePart() jmvcore::Analysis$.setCheckpoint() jmvcore::Analysis$.setParent() jmvcore::Analysis$.setReadDatasetHeaderSource() jmvcore::Analysis$.setReadDatasetSource() jmvcore::Analysis$.setResourcesPathSource() jmvcore::Analysis$.setStatePathSource() jmvcore::Analysis$addAddon() jmvcore::Analysis$asProtoBuf() jmvcore::Analysis$asSource() jmvcore::Analysis$check() jmvcore::Analysis$init() jmvcore::Analysis$optionsChangedHandler() jmvcore::Analysis$postInit() jmvcore::Analysis$print() jmvcore::Analysis$readDataset() jmvcore::Analysis$run() jmvcore::Analysis$serialize() jmvcore::Analysis$setError() jmvcore::Analysis$setStatus() jmvcore::Analysis$translate() ClinicoPath::outlierdetectionBase$initialize()",
         "code": ""
     },
@@ -32392,7 +32392,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Public methods",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "outlierdetectionClass$clone()",
         "code": ""
     },
@@ -32402,7 +32402,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Method clone()",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "objects class cloneable method.",
         "code": ""
     },
@@ -32412,7 +32412,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Usage",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "",
         "code": "outlierdetectionClass$clone(deep = FALSE)"
     },
@@ -32422,7 +32422,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Arguments",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "deep Whether make deep clone.",
         "code": ""
     },
@@ -32432,7 +32432,7 @@
         "dir": "Reference",
         "previous_headings": "",
         "what": "Examples",
-        "title": "Advanced Outlier Detection with easystats — outlierdetectionClass",
+        "title": "Outlier Detection with easystats — outlierdetectionClass",
         "text": "",
         "code": "if (FALSE) { # \\dontrun{ # Example 1: Basic univariate outlier detection # Load clinical data data(clinical_data)  # Detect outliers using robust z-score outlierdetection(   data = clinical_data,   vars = c(\"hemoglobin\", \"glucose\", \"creatinine\"),   method_category = \"univariate\",   univariate_methods = \"zscore_robust\",   zscore_threshold = 3.29,   show_outlier_table = TRUE,   show_visualization = TRUE )  # Example 2: Multivariate outlier detection # Detect multivariate outliers in biomarker data outlierdetection(   data = biomarker_data,   vars = c(\"protein_1\", \"protein_2\", \"protein_3\"),   method_category = \"multivariate\",   multivariate_methods = \"mahalanobis\",   show_method_comparison = TRUE,   show_exclusion_summary = TRUE )  # Example 3: Composite outlier detection # Robust detection using multiple methods outlierdetection(   data = patient_data,   vars = c(\"age\", \"weight\", \"height\", \"bmi\"),   method_category = \"composite\",   composite_threshold = 0.6,   show_outlier_table = TRUE,   show_interpretation = TRUE )  # Example 4: Comprehensive analysis # Compare all available methods outlierdetection(   data = lab_data,   vars = c(\"alt\", \"ast\", \"bilirubin\", \"albumin\"),   method_category = \"all\",   show_method_comparison = TRUE,   show_exclusion_summary = TRUE,   show_visualization = TRUE ) } # }"
     },

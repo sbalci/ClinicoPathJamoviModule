@@ -381,12 +381,12 @@ analyses:
       dup() function).
     ribbon: analyses
     category: analyses
-  - title: Advanced Outlier Detection
+  - title: Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
     menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
-    menuTitle: Advanced Outlier Detection
+    menuTitle: Outlier Detection
     menuSubtitle: easystats Performance Package
     description: >
       Advanced outlier detection using multiple statistical methods from the

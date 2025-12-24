@@ -1,6 +1,6 @@
 ---
 name: outlierdetection
-title: Advanced Outlier Detection
+title: Outlier Detection
 jrs: '1.1'
 
 items:
@@ -24,7 +24,7 @@ items:
         - confidence_level
 
     - name: plot
-      title: Advanced Outlier Detection Plot
+      title: Outlier Detection Plot
       type: Image
       width: 800
       height: 600

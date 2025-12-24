@@ -2,7 +2,7 @@
 % Please edit documentation in R/outlierdetection.h.R
 \name{outlierdetection}
 \alias{outlierdetection}
-\title{Advanced Outlier Detection}
+\title{Outlier Detection}
 \usage{
 outlierdetection(
   data,

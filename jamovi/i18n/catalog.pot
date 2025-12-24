@@ -5395,7 +5395,7 @@ msgstr ""
 #: outlierdetection/options.title
 #: outlierdetection/ui.title
 #: outlierdetection/results.title
-msgid "Advanced Outlier Detection"
+msgid "Outlier Detection"
 msgstr ""
 
 #: package/analyses/outlierdetection.description

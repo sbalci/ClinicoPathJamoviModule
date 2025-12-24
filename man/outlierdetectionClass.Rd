@@ -2,7 +2,7 @@
 % Please edit documentation in R/outlierdetection.b.R
 \name{outlierdetectionClass}
 \alias{outlierdetectionClass}
-\title{Advanced Outlier Detection with easystats}
+\title{Outlier Detection with easystats}
 \value{
 A jamovi analysis object containing outlier detection results with tables,
 plots, and interpretation based on selected options

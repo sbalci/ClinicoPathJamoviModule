@@ -168,7 +168,7 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="Advanced Outlier Detection",
+                title="Outlier Detection",
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "performance",
@@ -196,7 +196,7 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Advanced Outlier Detection Plot",
+                title="Outlier Detection Plot",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -283,7 +283,7 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 weightsSupport = 'auto')
         }))
 
-#' Advanced Outlier Detection
+#' Outlier Detection
 #'
 #' Advanced outlier detection using multiple statistical methods from the 
 #' easystats performance package.

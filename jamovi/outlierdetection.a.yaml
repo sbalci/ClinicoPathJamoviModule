@@ -1,14 +1,14 @@
 ---
 name: outlierdetection
-title: Advanced Outlier Detection
-menuGroup: ExplorationT
+title: Outlier Detection
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
 version: '0.0.31'
 jas: '1.2'
 
 description:
   main: |
-    Advanced outlier detection using multiple statistical methods from the easystats performance package.
+    Outlier detection using multiple statistical methods from the easystats performance package.
     This module provides comprehensive outlier detection through univariate methods (Z-scores, IQR, confidence intervals),
     multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), and composite scoring across multiple algorithms.
     Complements existing data quality assessment modules with state-of-the-art outlier detection capabilities.
@@ -153,7 +153,7 @@ options:
     - name: show_outlier_table
       title: Show Outlier Summary Table
       type: Bool
-      default: false
+      default: true
       description:
           R: >
             Display a comprehensive table of outlier detection results including
