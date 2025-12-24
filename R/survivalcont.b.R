@@ -2616,13 +2616,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         dependent = myformula,
                         explanatory = mycontexpl,
                         xlab = paste0("Time (", self$options$timetypeoutput, ")"),
+                        ylab = "Cumulative Hazard",
                         # pval = TRUE,
                         legend = "none",
                         break.time.by = self$options$byplot,
                         xlim = c(0, self$options$endplot),
-                        ylim = c(
-                            self$options$ybegin_plot,
-                            self$options$yend_plot),
+                        # For cumulative hazard, use NULL to allow auto-scaling beyond 1.0
+                        ylim = NULL,
                         title = paste0("Cumulative Hazard ", title2),
                         fun = "cumhaz",
                         risk.table = self$options$risktable,

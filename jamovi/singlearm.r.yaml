@@ -17,6 +17,48 @@ items:
           - tint
           - multievent
 
+    - name:  errors
+      title: Errors
+      type:  Html
+      visible: false
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: false
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+
+    - name:  info
+      title: Information
+      type:  Html
+      visible: false
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+
 
     # - name:  mydataview
     #   title: mydataview
@@ -77,13 +119,10 @@ items:
       title: 'Clinical Summary (Copy-Ready for Reports)'
       type:  Html
       visible: (showSummaries)
-      # visible: (guided_mode || showSummaries)
       clearWith:
           - outcome
           - outcomeLevel
           - elapsedtime
-          - clinical_preset
-          - guided_mode
 
     - name:  medianSummary
       title: Median Survival Analysis Natural Language Summary
@@ -327,6 +366,30 @@ items:
           - medianline
 
 
+    - name: plot6
+      title: 'KMunicate-Style Plot'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot6
+      visible: (kmunicate)
+      requiresData: true
+      clearWith:
+          - kmunicate
+          - endplot
+          - byplot
+          - sas
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+      refs:
+          - KMunicate
+          - KMunicate2
+
 
     - name: plot2
       title: Cumulative Events
@@ -378,31 +441,6 @@ items:
           - tint
           - multievent
 
-
-
-    - name: plot6
-      title: 'KMunicate-Style Plot'
-      type: Image
-      width:  600
-      height: 450
-      renderFun: .plot6
-      visible: (kmunicate)
-      requiresData: true
-      clearWith:
-          - kmunicate
-          - endplot
-          - byplot
-          - sas
-          - outcome
-          - outcomeLevel
-          - elapsedtime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-      refs:
-          - KMunicate
-          - KMunicate2
 
 
     - name:  survivalPlotsHeading3

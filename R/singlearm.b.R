@@ -15,6 +15,53 @@
 #' @note Ensure the input data contains the required variables (elapsed time,
 #' outcome) and meets specified formatting criteria.
 
+# Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
+.createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
+    type <- match.arg(type)
+
+    # Define styles for each notice type
+    styles <- list(
+        ERROR = list(
+            bg = "#f8d7da",
+            border = "#dc3545",
+            icon = "❌",
+            title_color = "#721c24"
+        ),
+        STRONG_WARNING = list(
+            bg = "#fff3cd",
+            border = "#ff9800",
+            icon = "⚠️",
+            title_color = "#856404"
+        ),
+        WARNING = list(
+            bg = "#fff3cd",
+            border = "#ffc107",
+            icon = "⚠️",
+            title_color = "#856404"
+        ),
+        INFO = list(
+            bg = "#d1ecf1",
+            border = "#17a2b8",
+            icon = "ℹ️",
+            title_color = "#0c5460"
+        )
+    )
+
+    style <- styles[[type]]
+
+    html <- paste0(
+        "<div style='background-color: ", style$bg, "; ",
+        "padding: 15px; margin: 10px 0; border-radius: 5px; ",
+        "border-left: 4px solid ", style$border, ";'>",
+        "<p style='margin: 0; color: ", style$title_color, ";'>",
+        "<strong>", style$icon, " ", type, ":</strong> ",
+        message,
+        "</p>",
+        "</div>"
+    )
+
+    return(html)
+}
 
 singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "singlearmClass",
@@ -22,11 +69,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     # Constants and cache
     private = list(
         .cache = new.env(parent = emptyenv()),
+        .errorMessages = character(0),
+        .warningMessages = character(0),
+        .infoMessages = character(0),
 
       .init = function() {
-          # Apply clinical presets if selected
-          private$.applyClinicalPresets()
-          
           # Initialize all outputs to FALSE first
           self$results$medianSummary$setVisible(FALSE)
           self$results$survTableSummary$setVisible(FALSE)
@@ -139,61 +186,60 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       },
 
-      # Clinical Presets Application ----
-      .applyClinicalPresets = function() {
-        if (self$options$clinical_preset == "custom") {
-          return()  # No preset changes for custom
+      # Message Accumulation Methods (to avoid serialization errors from dynamic Notices) ----
+      .addError = function(message) {
+        private$.errorMessages <- c(private$.errorMessages, message)
+      },
+
+      .addWarning = function(message) {
+        private$.warningMessages <- c(private$.warningMessages, message)
+      },
+
+      .addInfo = function(message) {
+        private$.infoMessages <- c(private$.infoMessages, message)
+      },
+
+      .clearMessages = function() {
+        private$.errorMessages <- character(0)
+        private$.warningMessages <- character(0)
+        private$.infoMessages <- character(0)
+      },
+
+      .displayMessages = function() {
+        # Display accumulated error messages
+        if (length(private$.errorMessages) > 0) {
+          html_content <- paste(sapply(private$.errorMessages, function(msg) {
+            .createNoticeHTML(msg, "ERROR")
+          }), collapse = "")
+          self$results$errors$setContent(html_content)
+          self$results$errors$setVisible(TRUE)
+        } else {
+          self$results$errors$setVisible(FALSE)
         }
 
-        preset <- self$options$clinical_preset
-
-        # Advisory notice: presets are informational only for now
-        if (preset != "custom") {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'presetInfo',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent(sprintf('Clinical preset "%s" selected. Verify time units, cutpoints, and plot settings match your study scenario.', preset))
-          self$results$insert(999, notice)
+        # Display accumulated warning messages
+        if (length(private$.warningMessages) > 0) {
+          html_content <- paste(sapply(private$.warningMessages, function(msg) {
+            # Determine if it's a STRONG_WARNING or regular WARNING based on keywords
+            type <- if (grepl("Very few events|critically", msg, ignore.case = TRUE)) "STRONG_WARNING" else "WARNING"
+            .createNoticeHTML(msg, type)
+          }), collapse = "")
+          self$results$warnings$setContent(html_content)
+          self$results$warnings$setVisible(TRUE)
+        } else {
+          self$results$warnings$setVisible(FALSE)
         }
 
-        # FIX: Implement functional presets that actually modify options
-        # Note: In jamovi, we can't directly modify self$options after initialization,
-        # but we can set intelligent defaults based on the preset.
-        # The preset should be used to guide default values in the .a.yaml file
-        # or provide recommendations in the UI.
-
-        # For now, we provide preset-specific recommendations via messages
-        # This is a limitation of the jamovi framework - options are set before .init()
-
-        # Preset-specific documentation (for future UI implementation)
-        preset_info <- switch(preset,
-          "overall_survival" = list(
-            time_unit = "months",
-            cutpoints = "12, 36, 60",
-            description = "Standard overall survival analysis for oncology studies"
-          ),
-          "disease_free" = list(
-            time_unit = "months",
-            cutpoints = "6, 12, 24, 36",
-            description = "Disease-free survival with focus on early recurrence"
-          ),
-          "treatment_effect" = list(
-            time_unit = "months",
-            cutpoints = "3, 6, 12",
-            description = "Treatment effectiveness with quality diagnostics"
-          ),
-          "post_surgical" = list(
-            time_unit = "days",
-            cutpoints = "30, 90, 180",
-            description = "Post-surgical outcomes with short-term follow-up"
-          ),
-          NULL
-        )
-
-        # Store preset info for potential future use
-        private$.preset_info <- preset_info
+        # Display accumulated info messages
+        if (length(private$.infoMessages) > 0) {
+          html_content <- paste(sapply(private$.infoMessages, function(msg) {
+            .createNoticeHTML(msg, "INFO")
+          }), collapse = "")
+          self$results$info$setContent(html_content)
+          self$results$info$setVisible(TRUE)
+        } else {
+          self$results$info$setVisible(FALSE)
+        }
       },
 
       # Utility Helper Functions ----
@@ -236,25 +282,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       .validatePlotParameters = function() {
         # Validate plot end time
         if (self$options$endplot <= 0) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'plotEndTimeError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Plot end time must be positive. Please enter a valid positive number for the maximum time to display on plots.')
-          self$results$insert(1, notice)
+          private$.addError('Plot end time must be positive. Please enter a valid positive number for the maximum time to display on plots.')
           return(FALSE)
         }
 
         # Validate Y-axis range
         if (self$options$ybegin_plot >= self$options$yend_plot) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'plotAxisError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Y-axis range invalid: start value must be less than end value. Please adjust plot axis settings.')
-          self$results$insert(1, notice)
+          private$.addError('Y-axis range invalid: start value must be less than end value. Please adjust plot axis settings.')
           return(FALSE)
         }
 
@@ -541,13 +575,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!tint) {
           ## Precalculated Time ----
 
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'precalculatedTimeInfo',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent('Using pre-calculated elapsed time. Time unit labels follow selected display unit but values are used as provided in data.')
-          self$results$insert(999, notice)
+          private$.addInfo('Using pre-calculated elapsed time. Time unit labels follow selected display unit but values are used as provided in data.')
 
           mydata[["mytime"]] <-
             jmvcore::toNumeric(mydata[[mytime_labelled]])
@@ -586,24 +614,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   mydata[["start"]] <- func(mydata[[dxdate]])
                   mydata[["end"]] <- func(mydata[[fudate]])
               } else {
-                  notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'dateFormatError',
-                    type = jmvcore::NoticeType$ERROR
-                  )
-                  notice$setContent(sprintf('Unsupported date format: %s. Supported formats are: %s. Please select the correct format from Time Type options.', timetypedata, paste(names(lubridate_functions), collapse = ', ')))
-                  self$results$insert(1, notice)
+                  private$.addError(sprintf('Unsupported date format: %s. Supported formats are: %s. Please select the correct format from Time Type options.', timetypedata, paste(names(lubridate_functions), collapse = ', ')))
                   return(NULL)
               }
           } else {
               # Mixed types error
-              notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'mixedDateTypesError',
-                type = jmvcore::NoticeType$ERROR
-              )
-              notice$setContent('Diagnosis date and follow-up date must be in the same format (both numeric or both text). Please ensure date columns are consistently formatted.')
-              self$results$insert(1, notice)
+              private$.addError('Diagnosis date and follow-up date must be in the same format (both numeric or both text). Please ensure date columns are consistently formatted.')
               return(NULL)
           }
 
@@ -612,13 +628,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
             start_valid <- sum(!is.na(mydata[["start"]]))
             end_valid <- sum(!is.na(mydata[["end"]]))
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'dateParsingError',
-              type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent(sprintf('Date parsing failed. Start date valid: %d, End date valid: %d. Please verify date format matches selected type (%s) and check for missing/invalid date values.', start_valid, end_valid, self$options$timetypedata))
-            self$results$insert(1, notice)
+            private$.addError(sprintf('Date parsing failed. Start date valid: %d, End date valid: %d. Please verify date format matches selected type (%s) and check for missing/invalid date values.', start_valid, end_valid, self$options$timetypedata))
             return(NULL)
           }
 
@@ -641,24 +651,19 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         df_time <- mydata %>% jmvcore::select(c("row_names", "mytime"))
 
+        # Check for missing values in time and warn user
         if (any(is.na(df_time$mytime))) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'missingTimeError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Calculated time contains missing values. Please verify date parsing (check date format selection) or review elapsed time variable for missing data.')
-          self$results$insert(1, notice)
-          return(NULL)
+          n_missing <- sum(is.na(df_time$mytime))
+          if (self$options$tint) {
+            private$.addWarning(sprintf('Calculated time from dates contains %d missing value%s. These observations will be excluded from the analysis. Please verify date format matches selected type and check for missing or invalid dates.',
+                                       n_missing, ifelse(n_missing == 1, '', 's')))
+          } else {
+            private$.addWarning(sprintf('Time variable contains %d missing value%s. These observations will be excluded from the analysis.',
+                                       n_missing, ifelse(n_missing == 1, '', 's')))
+          }
         }
         if (any(df_time$mytime <= 0, na.rm = TRUE)) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'negativeTimeError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Time values must be strictly positive. Please verify dates are in correct order (diagnosis before follow-up) and check landmark time settings.')
-          self$results$insert(1, notice)
+          private$.addError('Time values must be strictly positive. Please verify dates are in correct order (diagnosis before follow-up) and check landmark time settings.')
           return(NULL)
         }
 
@@ -689,13 +694,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (inherits(outcome1, contin)) {
             unique_vals <- unique(outcome1[!is.na(outcome1)])
             if (!((length(unique_vals) == 2) && (sum(unique_vals) == 1))) {
-              notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'outcomeValuesError',
-                type = jmvcore::NoticeType$ERROR
-              )
-              notice$setContent(sprintf('Outcome variable must contain only 0 (censored) and 1 (event). Found: %s. Please recode your outcome or convert to factor and select event level.', paste(sort(unique_vals), collapse = ', ')))
-              self$results$insert(1, notice)
+              private$.addError(sprintf('Outcome variable must contain only 0 (censored) and 1 (event). Found: %s. Please recode your outcome or convert to factor and select event level.', paste(sort(unique_vals), collapse = ', ')))
               return(NULL)
             }
 
@@ -705,13 +704,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           } else if (inherits(outcome1, "factor")) {
 
             if (is.null(outcomeLevel)) {
-                notice <- jmvcore::Notice$new(
-                  options = self$options,
-                  name = 'missingEventLevel',
-                  type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Event Level not selected. Please select the level representing the event (e.g., "Dead", "Recurrence") from the Event Level dropdown.')
-                self$results$insert(1, notice)
+                private$.addError('Event Level not selected. Please select the level representing the event (e.g., "Dead", "Recurrence") from the Event Level dropdown.')
                 return(NULL)
             }
             
@@ -723,13 +716,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               )
 
           } else {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'outcomeTypeError',
-              type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent('Invalid outcome variable type. Outcome must be either: (1) numeric with values 0/1, or (2) factor with event level selected. Please verify outcome variable format.')
-            self$results$insert(1, notice)
+            private$.addError('Invalid outcome variable type. Outcome must be either: (1) numeric with values 0/1, or (2) factor with event level selected. Please verify outcome variable format.')
             return(NULL)
           }
 
@@ -786,28 +773,28 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           unmatched_levels <- setdiff(unique(outcome1[!is.na(outcome1)]),
                                       c(awd, awod, dod, dooc))
           if (length(unmatched_levels) > 0) {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'unmappedLevels',
-              type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent(sprintf('Outcome contains unmapped levels: %s. For multi-event analysis, all levels must be assigned to one category: Dead of Disease, Dead of Other, Alive with Disease, or Alive without Disease.', paste(unmatched_levels, collapse = ', ')))
-            self$results$insert(1, notice)
+            private$.addError(sprintf('Outcome contains unmapped levels: %s. For multi-event analysis, all levels must be assigned to one category: Dead of Disease, Dead of Other, Alive with Disease, or Alive without Disease.', paste(unmatched_levels, collapse = ', ')))
             return(NULL)
           }
 
         }
 
         # Validate recoded outcome values
-        if (any(!mydata[["myoutcome"]] %in% c(0, 1, 2), na.rm = TRUE)) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'outcomeRecodeError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Outcome recoding failed. Values must be 0 (censored), 1 (event), or 2 (competing event). Please verify level selections match your data.')
-          self$results$insert(1, notice)
+        outcome_values <- mydata[["myoutcome"]]
+        invalid_values <- outcome_values[!is.na(outcome_values) & !outcome_values %in% c(0, 1, 2)]
+
+        if (length(invalid_values) > 0) {
+          unique_invalid <- unique(invalid_values)
+          private$.addError(sprintf('Outcome variable contains unexpected values: %s. Expected values are 0 (censored), 1 (event), or 2 (competing event). Please verify your outcome variable is correctly coded or select the appropriate event level.',
+                                   paste(unique_invalid, collapse = ', ')))
           return(NULL)
+        }
+
+        # Check for missing values in outcome
+        if (any(is.na(outcome_values))) {
+          n_missing <- sum(is.na(outcome_values))
+          private$.addWarning(sprintf('Outcome variable contains %d missing value%s. These observations will be excluded from the analysis.',
+                                     n_missing, ifelse(n_missing == 1, '', 's')))
         }
 
         df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
@@ -854,8 +841,34 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         outcome <- private$.definemyoutcome()
         factor <- private$.definemyfactor()
 
+        # Check if any returned NULL (validation failed)
+        if (is.null(time) || is.null(outcome) || is.null(factor)) {
+          private$.displayMessages()
+          return(NULL)
+        }
+
         cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>%
           dplyr::left_join(factor, by = "row_names")
+
+        # Remove rows with missing time or outcome (complete case analysis)
+        n_before <- nrow(cleanData)
+        cleanData <- cleanData %>%
+          dplyr::filter(!is.na(mytime) & !is.na(myoutcome))
+        n_after <- nrow(cleanData)
+
+        # Report if rows were removed
+        if (n_before > n_after) {
+          n_removed <- n_before - n_after
+          private$.addInfo(sprintf('Excluded %d observation%s with missing time or outcome values. Analysis based on %d complete cases.',
+                                  n_removed, ifelse(n_removed == 1, '', 's'), n_after))
+        }
+
+        # Check if any data remains after removing missing values
+        if (n_after == 0) {
+          private$.addError('No complete cases available for analysis. All observations have missing time or outcome values.')
+          private$.displayMessages()
+          return(NULL)
+        }
 
         # Landmark ----
         # https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#landmark_method
@@ -869,14 +882,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             dplyr::mutate(mytime = mytime - landmark)
           n_after <- nrow(cleanData)
           if (n_after < n_before) {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'landmarkInfo',
-              type = jmvcore::NoticeType$INFO
-            )
-            notice$setContent(sprintf('Landmark analysis removed %d subjects with follow-up time < %s %s. Analysis includes only subjects surviving past landmark.',
+            private$.addInfo(sprintf('Landmark analysis removed %d subjects with follow-up time < %s %s. Analysis includes only subjects surviving past landmark.',
                                      n_before - n_after, landmark, self$options$timetypeoutput))
-            self$results$insert(999, notice)
           }
         }
 
@@ -967,18 +974,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # Run Analysis ----
       ,
       .run = function() {
+        # Clear any previous messages
+        private$.clearMessages()
 
         # Input Validation ----
         validation_result <- private$.validateInputs()
 
         if (!validation_result$continue_analysis) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'validationError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Time and event variables are required. Please select both variables and configure multi-event levels if using competing risk analysis.')
-          self$results$insert(1, notice)
+          # Configuration incomplete - show todo guidance without error message
+          # The todo will guide users on what variables to select
           private$.todo()
           self$results$todo$setVisible(TRUE)
           return()
@@ -989,13 +993,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         ## Empty data ----
 
         if (nrow(self$data) == 0) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'emptyDataError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Dataset contains no complete rows. Please ensure your data is properly loaded and contains observations.')
-          self$results$insert(1, notice)
+          private$.addError('Dataset contains no complete rows. Please ensure your data is properly loaded and contains observations.')
+          private$.displayMessages()
           return()
         }
 
@@ -1003,6 +1002,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## Get Clean Data ----
         results <- private$.cleandata()
+
+        # Check if cleandata failed (returned NULL due to validation errors)
+        if (is.null(results)) {
+          return()
+        }
 
         ## Data Quality Assessment ----
         private$.checkpoint()
@@ -1014,59 +1018,28 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         ## Minimum Event Count Guard ----
         # Prevent analysis with critically low event counts (< 3 events = unreliable)
         if (data_quality$n_events < 3) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'insufficientEventsError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent(sprintf('Insufficient events (%d) for survival analysis. At least 3 events are required for reliable estimates. Current data: %d events, %d censored. Recommendations: (1) Extend follow-up period; (2) Combine with additional datasets; (3) Use descriptive statistics instead of formal survival analysis.',
-                                   data_quality$n_events, data_quality$n_events, data_quality$n_censored))
-          self$results$insert(1, notice)
+          private$.addError(sprintf('Insufficient events (%d) for survival analysis. At least 3 events are required for reliable estimates. Current data: %d events, %d censored. Recommendations: (1) Extend follow-up period; (2) Combine with additional datasets; (3) Use descriptive statistics instead of formal survival analysis.', data_quality$n_events, data_quality$n_events, data_quality$n_censored))
           return()
         }
 
         ## Data Quality Notices ----
         # STRONG_WARNING for very low events (< 10)
         if (data_quality$n_events < 10) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'lowEventsWarning',
-            type = jmvcore::NoticeType$STRONG_WARNING
-          )
-          notice$setContent(sprintf('Very few events observed (%d). Results may be unreliable. Recommendations: (1) extend follow-up; (2) combine datasets; (3) interpret with extreme caution; (4) report confidence intervals prominently.', data_quality$n_events))
-          self$results$insert(11, notice)
+          private$.addWarning(sprintf('Very few events observed (%d). Results may be unreliable. Recommendations: (1) extend follow-up; (2) combine datasets; (3) interpret with extreme caution; (4) report confidence intervals prominently.', data_quality$n_events))
         } else if (data_quality$n_events < 20) {
           # WARNING for limited events (10-19)
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'moderateEventsWarning',
-            type = jmvcore::NoticeType$WARNING
-          )
-          notice$setContent(sprintf('Limited events (%d). Median survival estimates and confidence intervals may be wide. Report results with appropriate uncertainty.', data_quality$n_events))
-          self$results$insert(21, notice)
+          private$.addWarning(sprintf('Limited events (%d). Median survival estimates and confidence intervals may be wide. Report results with appropriate uncertainty.', data_quality$n_events))
         }
 
         # WARNING for low event rate (< 10%)
         if (data_quality$event_rate < 10) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'lowEventRate',
-            type = jmvcore::NoticeType$WARNING
-          )
-          notice$setContent(sprintf('Low event rate: %.1f%% (%d events / %d total). Consider longer follow-up if median survival is not reached.', data_quality$event_rate, data_quality$n_events, data_quality$n_total))
-          self$results$insert(22, notice)
+          private$.addWarning(sprintf('Low event rate: %.1f%% (%d events / %d total). Consider longer follow-up if median survival is not reached.', data_quality$event_rate, data_quality$n_events, data_quality$n_total))
         }
 
         # WARNING for data quality issues from assessment
         if (length(data_quality$warnings) > 0) {
           for (i in seq_along(data_quality$warnings)) {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = sprintf('dataQualityWarning%d', i),
-              type = jmvcore::NoticeType$WARNING
-            )
-            notice$setContent(data_quality$warnings[i])
-            self$results$insert(23 + i, notice)
+            private$.addWarning(data_quality$warnings[i])
           }
         }
 
@@ -1102,7 +1075,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ### Clinical Summary ----
         private$.checkpoint()
-        if (self$options$guided_mode || self$options$showSummaries) {
+        if (self$options$showSummaries) {
           private$.generateClinicalSummary(results)
         }
 
@@ -1125,14 +1098,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         ## Analysis Completion Notice ----
-        notice <- jmvcore::Notice$new(
-          options = self$options,
-          name = 'analysisComplete',
-          type = jmvcore::NoticeType$INFO
-        )
         analysis_type <- if(private$.isCompetingRisk()) 'Competing risk' else 'Standard'
         method_used <- if(private$.isCompetingRisk()) 'cumulative incidence (cmprsk)' else 'Kaplan-Meier'
-        notice$setContent(sprintf('Analysis completed: %d observations (%d events, %d censored). Median follow-up: %.1f %s. %s survival analysis using %s method.',
+        private$.addInfo(sprintf('Analysis completed: %d observations (%d events, %d censored). Median follow-up: %.1f %s. %s survival analysis using %s method.',
                                  data_quality$n_total,
                                  data_quality$n_events,
                                  data_quality$n_censored,
@@ -1140,7 +1108,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                  self$options$timetypeoutput,
                                  analysis_type,
                                  method_used))
-        self$results$insert(999, notice)
+
+        # Display all accumulated messages
+        private$.displayMessages()
       }
 
       # Competing Risk Analysis Function ----
@@ -1170,13 +1140,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return(cuminc_fit)
 
         }, error = function(e) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'competingRiskError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent(sprintf('Competing risk analysis failed: %s. Please verify outcome is coded as 0 (censored), 1 (event of interest), 2 (competing event).', e$message))
-          self$results$insert(1, notice)
+          private$.addError(sprintf('Competing risk analysis failed: %s. Please verify outcome is coded as 0 (censored), 1 (event of interest), 2 (competing event).', e$message))
           return(NULL)
         })
       }
@@ -1206,14 +1170,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           cif_1 <- cuminc_fit$`1 1`  # Event type 1, group 1 (no stratification)
 
           if (is.null(cif_1)) {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'noCIFError',
-              type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent('No cumulative incidence found for event of interest. Please verify event is coded as 1 in your outcome variable for competing risk analysis.')
-            self$results$insert(1, notice)
-            return()
+            private$.addError('No cumulative incidence found for event of interest. Please verify event is coded as 1 in your outcome variable for competing risk analysis.')
+          private$.displayMessages()
+          return()
           }
 
           # Calculate median time to event (time when CIF reaches 0.5)
@@ -1288,13 +1247,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             x0_95ucl = median_upper   # Approximate
           )
           if (is.na(median_time)) {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'cifMedianNotReached',
-              type = jmvcore::NoticeType$INFO
-            )
-            notice$setContent('Cumulative incidence did not reach 50%. Median time to event not estimable. This is common in competing risk analyses with frequent competing events.')
-            self$results$insert(999, notice)
+            private$.addInfo('Cumulative incidence did not reach 50%. Median time to event not estimable. This is common in competing risk analyses with frequent competing events.')
           }
 
         } else {
@@ -1314,13 +1267,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }, context = "survival_calculation")
 
           if (is.null(km_fit)) {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'survivalFitError',
-              type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent('Unable to perform survival analysis. Please check for: (1) sufficient events, (2) valid time values, (3) properly coded outcome variable.')
-            self$results$insert(1, notice)
+            private$.addError('Unable to perform survival analysis. Please check for: (1) sufficient events, (2) valid time values, (3) properly coded outcome variable.')
             return()
           }
 
@@ -1339,13 +1286,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         medianTable <- self$results$medianTable
         if (private$.isCompetingRisk()) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'competingRiskMethodInfo',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent('Competing risk analysis: Median time represents cumulative incidence of event of interest, properly accounting for competing events.')
-          self$results$insert(999, notice)
+          private$.addInfo('Competing risk analysis: Median time represents cumulative incidence of event of interest, properly accounting for competing events.')
         }
         data_frame <- results1table
 
@@ -1569,13 +1510,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }, context = "survival_calculation")
 
           if (is.null(fit_mstate)) {
-            notice <- jmvcore::Notice$new(
-              options = self$options,
-              name = 'competingRiskFitError',
-              type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent('Unable to perform competing risk analysis. Verify outcome is coded as 0 (censored), 1 (event of interest), 2 (competing event) and sufficient events exist.')
-            self$results$insert(1, notice)
+            private$.addError('Unable to perform competing risk analysis. Verify outcome is coded as 0 (censored), 1 (event of interest), 2 (competing event) and sufficient events exist.')
             return()
           }
           
@@ -1649,13 +1584,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }, context = "survival_calculation")
 
         if (is.null(km_fit)) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'survTableFitError',
-            type = jmvcore::NoticeType$ERROR
-          )
-          notice$setContent('Unable to perform survival analysis for time-specific estimates. Check for sufficient events at requested time points and valid survival data.')
-          self$results$insert(1, notice)
+          private$.addError('Unable to perform survival analysis for time-specific estimates. Check for sufficient events at requested time points and valid survival data.')
+          private$.displayMessages()
           return()
         }
 
@@ -1843,13 +1773,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         mydata <- results$cleanData
 
         if (private$.isCompetingRisk()) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'personTimeCompetingRiskInfo',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent('Person-time rates calculated for event of interest only (code 1). Competing events (code 2) are not counted as events in rate calculation.')
-          self$results$insert(999, notice)
+          private$.addInfo('Person-time rates calculated for event of interest only (code 1). Competing events (code 2) are not counted as events in rate calculation.')
         }
 
         # Ensure time is numeric
@@ -2077,13 +2001,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Baseline hazard not appropriate for competing risk multi-state coding
         if (private$.isCompetingRisk()) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'baselineHazardCompetingRiskInfo',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent('Baseline hazard not computed for competing risk analyses. Hazard estimation requires standard survival analysis without competing events.')
-          self$results$insert(999, notice)
+          private$.addInfo('Baseline hazard not computed for competing risk analyses. Hazard estimation requires standard survival analysis without competing events.')
+          private$.displayMessages()
           return()
         }
 
@@ -2096,13 +2015,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
 
         if (sum(mydata[[myoutcome]] >= 1, na.rm = TRUE) == 0) {
-          notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'baselineHazardNoEventsInfo',
-            type = jmvcore::NoticeType$INFO
-          )
-          notice$setContent('Baseline hazard not estimated: no events observed in dataset. At least one event is required for hazard estimation.')
-          self$results$insert(999, notice)
+          private$.addInfo('Baseline hazard not estimated: no events observed in dataset. At least one event is required for hazard estimation.')
+          private$.displayMessages()
           return()
         }
 
@@ -2399,9 +2313,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         } else {
             # Standard KM Plot
-            myformula_original <- paste("survival::Surv(`", formula_time, "`, `", formula_outcome, "`)")
+            myformula_original <- paste0("survival::Surv(`", formula_time, "`, `", formula_outcome, "`)")
 
-            plot_obj <- plotDataWithOriginalNames$data %>%
+            plot_result <- plotDataWithOriginalNames$data %>%
               finalfit::surv_plot(
                 .data = .,
                 dependent = myformula_original,
@@ -2420,6 +2334,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 censor = self$options$censored,
                 surv.median.line = self$options$medianline
               )
+
+            # Extract plot object (surv_plot returns a list or ggsurvplot object)
+            if (inherits(plot_result, "ggsurvplot")) {
+              plot_obj <- plot_result$plot
+            } else if (inherits(plot_result, "gg")) {
+              plot_obj <- plot_result
+            } else {
+              stop("Unexpected plot result type from surv_plot")
+            }
 
             # Apply colorblind-safe theme and colors
             plot_obj <- plot_obj + 
@@ -2548,14 +2471,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             dependent = myformula,
             explanatory = myfactor,
             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
+            ylab = "Cumulative Hazard",
             # pval = self$options$pplot,
             # pval.method	= self$options$pplot,
             legend = 'none',
             break.time.by = self$options$byplot,
             xlim = c(0, self$options$endplot),
-            ylim = c(
-              self$options$ybegin_plot,
-              self$options$yend_plot),
+            # For cumulative hazard, use NULL to allow auto-scaling beyond 1.0
+            ylim = NULL,
             title = .("Cumulative Hazard of the Whole Group"),
             fun = "cumhaz",
             risk.table = self$options$risktable,
@@ -2973,14 +2896,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             .("favorable (median not reached)")
           }
           
-          # Get preset-specific context
-          preset_context <- switch(self$options$clinical_preset,
-            "overall_survival" = .("This overall survival analysis"),
-            "disease_free" = .("This disease-free survival analysis"),
-            "treatment_effect" = .("This treatment effectiveness study"),
-            "post_surgical" = .("This post-surgical outcome analysis"),
-            .("This survival analysis")
-          )
+          # General context
+          preset_context <- .("This survival analysis")
           
           # Build clinical summary
           summary_parts <- c()
@@ -3017,14 +2934,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
           
           if (n_events < 10) {
-            recommendations <- c(recommendations, 
+            recommendations <- c(recommendations,
               .("Results should be interpreted cautiously due to the small number of events."))
           }
-          
-          if (self$options$clinical_preset != "custom") {
-            recommendations <- c(recommendations, 
-              .("These findings can inform treatment planning and patient counseling discussions."))
-          }
+
+          recommendations <- c(recommendations,
+            .("These findings can inform treatment planning and patient counseling discussions."))
           
           # Format the complete summary
           summary_html <- paste0(

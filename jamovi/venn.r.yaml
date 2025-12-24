@@ -51,6 +51,21 @@ items:
           type: number
           format: pc
 
+    - name: validationErrors
+      title: "Validation Errors"
+      type: Html
+      visible: false
+
+    - name: validationWarnings
+      title: "Important Warnings"
+      type: Html
+      visible: false
+
+    - name: analysisInfo
+      title: "Analysis Information"
+      type: Html
+      visible: false
+
     - title: ggvenn Plot
       name: plotGgvenn
       type: Image
