@@ -5,6 +5,12 @@ jrs:   '1.1'
 
 items:
 
+  # Warnings and Messages - HTML-based for stability
+  - name: warnings
+    title: Warnings
+    type: Html
+    visible: false
+
   - name: modelSettings
     title: Model parameters
     type: Html
@@ -167,7 +173,8 @@ items:
 
   - name:  text
     title: ''
-    type:  Preformatted
+    type:  Html
+
 
   - name: naturalSummary
     title: Natural-Language Summary

@@ -21,11 +21,9 @@ chisqposttest(
   testSelection = "auto",
   exportResults = FALSE,
   showClinicalSummary = FALSE,
-  showExampleInterpretations = FALSE,
   copyReadySentences = FALSE,
   showAssumptionsCheck = FALSE,
-  showGlossary = FALSE,
-  colorBlindSafe = FALSE
+  showGlossary = FALSE
 )
 }
 \arguments{
@@ -74,9 +72,6 @@ format for further analysis}
 \item{showClinicalSummary}{Display natural-language summary of results for
 clinical interpretation}
 
-\item{showExampleInterpretations}{Display example interpretations for
-significant findings}
-
 \item{copyReadySentences}{Generate copy-ready sentences for clinical
 reports}
 
@@ -85,8 +80,6 @@ assumptions}
 
 \item{showGlossary}{Display glossary of statistical terms with clinical
 interpretations}
-
-\item{colorBlindSafe}{Use color-blind friendly visualization options}
 }
 \value{
 A results object containing:
@@ -103,7 +96,6 @@ A results object containing:
 \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
 \code{results$exportTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$exampleInterpretations} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr

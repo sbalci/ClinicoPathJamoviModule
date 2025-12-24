@@ -23,6 +23,30 @@ classificationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 "classificationClass",
 inherit = classificationBase,
 private = list(
+    .warnings = character(),
+
+    # Add warning/notice to the warnings panel
+    .addWarning = function(message, type = "INFO") {
+        icon <- switch(type,
+            "ERROR" = "🚫",
+            "WARNING" = "⚠️",
+            "INFO" = "ℹ️",
+            "ℹ️"
+        )
+        private$.warnings <- c(private$.warnings, paste0("<p>", icon, " <strong>", type, ":</strong> ", message, "</p>"))
+    },
+
+    # Display accumulated warnings
+    .showWarnings = function() {
+        if (length(private$.warnings) > 0) {
+            html <- paste("<div style='padding: 10px; background-color: #f8f9fa; border-left: 4px solid #ffc107;'>",
+                         paste(private$.warnings, collapse = ""),
+                         "</div>", sep = "")
+            self$results$warnings$setContent(html)
+            self$results$warnings$setVisible(TRUE)
+        }
+    },
+
     # Utility to handle variables with spaces/special characters
     .escapeVar = function(x) {
         if (is.null(x) || length(x) == 0) return(x)
@@ -32,6 +56,9 @@ private = list(
     .init = function() {
         # Preformatted result 'text' is already defined in classification.r.yaml
         # No manual initialization needed
+
+        # Initialize warnings accumulator
+        private$.warnings <- character()
     },
 
     .resolvePositiveClass = function(truth_factor) {
@@ -74,13 +101,8 @@ private = list(
         }
 
         if (nrow(self$data) == 0) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'emptyDataset',
-                type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent('Data contains no (complete) rows. Please check your dataset and variable selections.')
-            self$results$insert(1, notice)
+            private$.addWarning('Data contains no (complete) rows. Please check your dataset and variable selections.', "ERROR")
+            private$.showWarnings()
             return()
         }
 
@@ -147,13 +169,7 @@ private = list(
         } else if (self$options$balancingMethod == "smote") {
             # SMOTE requires mlr3smote package (not smotefamily)
             if (!requireNamespace("smotefamily", quietly = TRUE)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smoteFallback',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent("SMOTE option selected, but the 'smotefamily' package is not installed. Using classbalancing oversampling instead (no synthetic examples generated). To enable SMOTE, install the package with: install.packages('smotefamily')")
-                self$results$insert(2, notice)
+                private$.addWarning("SMOTE option selected, but the 'smotefamily' package is not installed. Using classbalancing oversampling instead (no synthetic examples generated). To enable SMOTE, install the package with: install.packages('smotefamily')", "WARNING")
 
                 # Fall back to oversampling
                 po_balance <- po("classbalancing",
@@ -200,29 +216,16 @@ private = list(
         return(balanced_learner)
     },
 
-    .checkpoint = function() {
-        # Allow jamovi to check for user cancellation
-        if (self$isFresh) return()
-    },
-
     .checkDataQuality = function(task) {
         # Check for quality issues and add appropriate warnings
         n <- task$nrow
-        notice_position <- 2  # Start after ERROR notices (if any)
 
         # 1. Small sample warning (n < 30)
         if (n < 30) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'smallSample',
-                type = jmvcore::NoticeType$STRONG_WARNING
-            )
-            notice$setContent(sprintf(
+            private$.addWarning(sprintf(
                 'Very small sample size (n=%d). Classification models may be unstable and results may not generalize. Consider collecting more data or using simpler models. Recommended minimum: n=30 per class.',
                 n
-            ))
-            self$results$insert(notice_position, notice)
-            notice_position <- notice_position + 1
+            ), "WARNING")
         }
 
         # 2. Check for severe class imbalance (minority < 5% of total)
@@ -230,30 +233,16 @@ private = list(
         minority_prop <- min(class_counts) / sum(class_counts)
 
         if (minority_prop < 0.05) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'severeImbalance',
-                type = jmvcore::NoticeType$STRONG_WARNING
-            )
-            notice$setContent(sprintf(
+            private$.addWarning(sprintf(
                 'Severe class imbalance detected: minority class represents only %.1f%% of samples. Consider using class balancing methods (SMOTE, upsampling, or downsampling) and focusing on balanced metrics like MCC, F-score, or AUC rather than accuracy.',
                 minority_prop * 100
-            ))
-            self$results$insert(notice_position, notice)
-            notice_position <- notice_position + 1
+            ), "WARNING")
         } else if (minority_prop < 0.20) {
             # Moderate imbalance warning
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'moderateImbalance',
-                type = jmvcore::NoticeType$WARNING
-            )
-            notice$setContent(sprintf(
+            private$.addWarning(sprintf(
                 'Moderate class imbalance: minority class represents %.1f%% of samples. Consider using balanced performance metrics (MCC, F-score, AUC) in addition to accuracy.',
                 minority_prop * 100
-            ))
-            self$results$insert(notice_position, notice)
-            notice_position <- notice_position + 1
+            ), "WARNING")
         }
 
         # 3. Cross-validation fold size warning
@@ -262,34 +251,20 @@ private = list(
             samples_per_fold <- n / folds
 
             if (samples_per_fold < 10) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallFolds',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf(
+                private$.addWarning(sprintf(
                     'Very small cross-validation fold size (avg. %.1f samples per fold with %d folds). This may lead to unstable performance estimates. Consider reducing the number of folds or using holdout validation instead.',
                     samples_per_fold, folds
-                ))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
+                ), "WARNING")
             }
         }
 
         # 4. Feature-to-sample ratio warning
         n_features <- length(self$options$indep)
         if (n_features > 0 && n / n_features < 10) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'highDimensionality',
-                type = jmvcore::NoticeType$WARNING
-            )
-            notice$setContent(sprintf(
+            private$.addWarning(sprintf(
                 'High feature-to-sample ratio: %d features with %d samples (ratio: %.1f). Risk of overfitting. Consider feature selection, regularization, or collecting more data. Recommended: n ≥ 10 × features.',
                 n_features, n, n / n_features
-            ))
-            self$results$insert(notice_position, notice)
-            notice_position <- notice_position + 1
+            ), "WARNING")
         }
     },
 
@@ -556,13 +531,7 @@ private = list(
             learner$param_set$values <- options
             return(learner)
         }, error = function(e) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'learnerFallback',
-                type = jmvcore::NoticeType$WARNING
-            )
-            notice$setContent(sprintf("Learner %s not available, using decision tree instead. Error: %s", classifier_type, e$message))
-            self$results$insert(2, notice)
+            private$.addWarning(sprintf("Learner %s not available, using decision tree instead. Error: %s", classifier_type, e$message), "WARNING")
 
             learner <- lrn('classif.rpart', predict_type = 'prob')
             learner$param_set$values <- list(
@@ -822,16 +791,13 @@ private = list(
             ""
         }
 
-        info <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'analysisComplete',
-            type = jmvcore::NoticeType$INFO
-        )
-        info$setContent(sprintf(
+        private$.addWarning(sprintf(
             'Classification analysis complete: %s classifier%s using %s. Overall accuracy: %.1f%% across %d classes.',
             classifier_name, balancing_text, validation_name, accuracy * 100, n_classes
-        ))
-        self$results$insert(999, info)
+        ), "INFO")
+
+        # Show all accumulated warnings/messages
+        private$.showWarnings()
 
         # Populate educational panels if requested
         if (self$options$showSummary) {

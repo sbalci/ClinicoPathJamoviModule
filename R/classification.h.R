@@ -386,6 +386,7 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     "classificationResults",
     inherit = jmvcore::Group,
     active = list(
+        warnings = function() private$.items[["warnings"]],
         modelSettings = function() private$.items[["modelSettings"]],
         confusion = function() private$.items[["confusion"]],
         classificationMetrics = function() private$.items[["classificationMetrics"]],
@@ -411,6 +412,11 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "rpart.plot",
                     "caret",
                     "boot"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelSettings",
