@@ -1,0 +1,47 @@
+test_file,row_num,column_name,input_value,expected_result,expected_status,expected_year,expected_month,expected_day,expected_hour,expected_minute,expected_second,notes
+test_datevalidator.csv,1,date_iso,2023-03-15,2023-03-15,Success,2023,3,15,,,,"ISO standard - should parse perfectly"
+test_datevalidator.csv,2,date_us,03/15/2023,2023-03-15,Success,2023,3,15,,,,"US format - MDY"
+test_datevalidator.csv,3,date_eu,15/03/2023,2023-03-15,Success,2023,3,15,,,,"European format - DMY"
+test_datevalidator.csv,8,date_excel,44927,2023-01-01,Success,2023,1,1,,,,Excel serial with handle_excel=TRUE
+test_datevalidator.csv,9,date_excel,45000,2023-03-15,Success,2023,3,15,,,,Excel serial with handle_excel=TRUE
+test_datevalidator.csv,10,date_ambiguous,03/04/2023,2023-03-04 or 2023-04-03,Warning,,,,,,,Ambiguous - could be Mar 4 or Apr 3
+test_datevalidator.csv,11,date_missing_day,2023-03,2023-03-01,Success,2023,3,1,,,,"Missing day - imputed as 1st"
+test_datevalidator.csv,13,date_invalid,2023-02-30,NA,Failed,,,,,,,Feb doesn't have 30 days
+test_datevalidator.csv,14,date_invalid,not-a-date,NA,Failed,,,,,,,"Invalid format - not a date"
+test_datevalidator.csv,15,date_invalid,NA,NA,Failed,,,,,,,"Missing value"
+test_datevalidator.csv,16,date_edge_case,2024-02-29,2024-02-29,Success,2024,2,29,,,,Valid leap year
+test_datevalidator.csv,17,date_edge_case,2023-02-29,NA,Failed,,,,,,,2023 is not a leap year
+test_datevalidator.csv,19,date_edge_case,2025-12-25,2025-12-25,Warning,2025,12,25,,,,"Future date - plausibility flag"
+test_datevalidator.csv,20,date_edge_case,1899-12-31,1899-12-31,Warning,1899,12,31,,,,"Pre-1900 - plausibility flag"
+test_datetimeconverter.csv,1,datetime_iso,2023-03-15 14:30:45,2023-03-15 14:30:45,Success,2023,3,15,14,30,45,"ISO standard datetime"
+test_datetimeconverter.csv,2,datetime_us,03/15/2023 14:30:45,2023-03-15 14:30:45,Success,2023,3,15,14,30,45,"US format datetime"
+test_datetimeconverter.csv,3,datetime_eu,15/03/2023 14:30:45,2023-03-15 14:30:45,Success,2023,3,15,14,30,45,"EU format datetime"
+test_datetimeconverter.csv,5,datetime_12h_am,2023-03-15 02:30:45 AM,2023-03-15 02:30:45,Success,2023,3,15,2,30,45,"12h AM format"
+test_datetimeconverter.csv,6,datetime_12h_pm,2023-03-15 02:30:45 PM,2023-03-15 14:30:45,Success,2023,3,15,14,30,45,"12h PM - converts to 14h"
+test_datetimeconverter.csv,9,datetime_excel,44927.604688,2023-01-01 14:30:15,Success,2023,1,1,14,30,15,"Excel serial with time (approx)"
+test_datetimeconverter.csv,10,datetime_unix,1678889445,2023-03-15 14:30:45,Success,2023,3,15,14,30,45,"Unix timestamp"
+test_datetimeconverter.csv,11,datetime_millisec,1678889445000,2023-03-15 14:30:45,Success,2023,3,15,14,30,45,"Millisecond timestamp"
+test_datetimeconverter.csv,14,datetime_iso,2023-03-15 00:00:00,2023-03-15 00:00:00,Success,2023,3,15,0,0,0,"Midnight"
+test_datetimeconverter.csv,15,datetime_iso,2023-03-15 23:59:59,2023-03-15 23:59:59,Success,2023,3,15,23,59,59,"Last second of day"
+test_datetimeconverter.csv,16,datetime_iso,2023-03-15 12:00:00,2023-03-15 12:00:00,Success,2023,3,15,12,0,0,"Noon"
+test_datetimeconverter.csv,18,datetime_iso,2023-03-15 14:30:45.123456,2023-03-15 14:30:45.123456,Success,2023,3,15,14,30,45.123456,"Microsecond precision"
+test_datetimeconverter.csv,20,datetime_timezone,2023-03-15 14:30:45+00:00,2023-03-15 14:30:45 UTC,Success,2023,3,15,14,30,45,"UTC timezone"
+test_datetimeconverter.csv,21,datetime_timezone,2023-03-15 14:30:45-05:00,2023-03-15 14:30:45 EST,Success,2023,3,15,14,30,45,"EST timezone (or 19:30:45 UTC)"
+test_datetimeconverter.csv,25,datetime_iso,2023-03-15T14:30:45,2023-03-15 14:30:45,Success,2023,3,15,14,30,45,"ISO with T separator"
+test_datetimeconverter.csv,26,datetime_iso,2023-03-15T14:30:45Z,2023-03-15 14:30:45 UTC,Success,2023,3,15,14,30,45,"ISO with Z (UTC) indicator"
+test_datetimeconverter.csv,37,datetime_24h,2023-03-15 24:00:00,NA,Failed,,,,,,,Hour 24 is invalid
+test_datetimeconverter.csv,38,datetime_12h_pm,2023-03-15 13:30:45 PM,NA,Failed,,,,,,,Hour 13 in 12h format invalid
+test_datetimeconverter.csv,39,datetime_iso,2023-06-30 23:59:60,2023-06-30 23:59:60 or NA,Warning/Failed,2023,6,30,23,59,60,"Leap second - parser dependent"
+test_datetimeconverter.csv,40,datetime_iso,2023-03-15 14:30:61,NA,Failed,,,,,,,Second 61 is invalid
+test_datetimeconverter.csv,41,datetime_iso,2023-03-15 14:60:45,NA,Failed,,,,,,,Minute 60 is invalid
+test_datetimeconverter.csv,57,datetime_iso,2024-02-29 12:00:00,2024-02-29 12:00:00,Success,2024,2,29,12,0,0,"Leap year - valid"
+test_datetimeconverter.csv,58,datetime_iso,2023-02-29 12:00:00,NA,Failed,,,,,,,2023 not leap year
+test_datetimeconverter.csv,63,datetime_unix,0,1970-01-01 00:00:00,Success,1970,1,1,0,0,0,"Unix epoch start"
+test_datetimeconverter.csv,64,datetime_unix,2147483647,2038-01-19 03:14:07,Success,2038,1,19,3,14,7,"Y2038 problem boundary"
+test_datetimeconverter.csv,70,datetime_iso,2023-03-15,2023-03-15,Success,2023,3,15,0,0,0,"Date only - time defaults to 00:00:00"
+test_datetimeconverter.csv,73,datetime_12h_am,2023-03-15 12:00:00 AM,2023-03-15 00:00:00,Success,2023,3,15,0,0,0,"12:00 AM is midnight (hour 0)"
+test_datetimeconverter.csv,74,datetime_12h_pm,2023-03-15 12:00:00 PM,2023-03-15 12:00:00,Success,2023,3,15,12,0,0,"12:00 PM is noon (hour 12)"
+test_datetimeconverter.csv,75,datetime_iso,NA,NA,Failed,,,,,,,"Missing value"
+test_datetimeconverter.csv,78,datetime_iso,not-a-datetime,NA,Failed,,,,,,,"Invalid format"
+test_datetimeconverter.csv,79,datetime_iso,2023-03-15 25:30:45,NA,Failed,,,,,,,Hour 25 is invalid
+test_datetimeconverter.csv,80,datetime_iso,2023-03-15 14:61:45,NA,Failed,,,,,,,Minute 61 is invalid

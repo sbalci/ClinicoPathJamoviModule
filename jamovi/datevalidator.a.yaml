@@ -1,26 +1,28 @@
 ---
-name: datecorrection
-title: Date Field Correction
-menuGroup: SurvivalT
+name: datevalidator
+title: Date/DateTime Validator
+menuGroup: Survival
 menuSubgroup: Data Preparation
-version: '0.0.3'
+menuSubtitle: Validate and diagnose messy date/datetime formats
+version: '0.0.32'
 jas: '1.2'
 
 description:
   main: |
-    Comprehensive date field correction and standardization using multiple R packages (datefixR, anytime, lubridate).
-    This module handles messy date formats commonly found in clinical databases: different separators, 
-    month representations, missing components, and ambiguous formats. Provides standardized date outputs
-    with detailed correction reports and quality assessment. Perfect for clinical research data preprocessing
-    and database standardization workflows.
+    Comprehensive date and datetime field validation and quality assessment using multiple R packages (datefixR, anytime, lubridate).
+    This module validates and diagnoses messy date/datetime formats commonly found in clinical databases: different separators,
+    month representations, missing components, and ambiguous formats. Provides detailed validation reports and quality assessment.
+    Perfect for clinical research data quality control and database audit workflows.
+
+    For datetime conversion with component extraction (year, month, day, hour, minute, second), see the DateTime Converter module.
   R:
     dontrun: true
     usage: |
       # Example:
-      # 1. Select variables containing date information that need correction.
-      # 2. Choose correction method (automatic detection or specific format).
+      # 1. Select variables containing date/datetime information that need validation.
+      # 2. Choose validation method (automatic detection or specific format).
       # 3. Configure missing value imputation settings.
-      # 4. Review correction results and quality assessment.
+      # 4. Review validation results and quality assessment.
 
 options:
 
@@ -31,21 +33,15 @@ options:
             The data as a data frame.
 
     - name: date_vars
-      title: Date Variables to Correct
+      title: Date/DateTime Variables to Validate
       type: Variables
-      # suggested:
-      #   - nominal
-      #   - ordinal
-      # permitted:
-      #   - numeric
-      #   - id
       description:
           R: >
-            Variables containing date information in various formats that need correction and standardization.
-            Can handle character strings, numeric values, factors with date representations.
+            Variables containing date or datetime information in various formats that need validation and quality assessment.
+            Can handle character strings, numeric values, factors with date/datetime representations.
 
     - name: correction_method
-      title: Correction Method
+      title: Validation Method
       type: List
       options:
         - title: "Automatic Detection (datefixR)"
@@ -59,12 +55,12 @@ options:
       default: datefixr
       description:
           R: >
-            Method for date correction. datefixR provides robust format detection,
+            Method for date/datetime validation. datefixR provides robust format detection,
             anytime offers flexible parsing, lubridate allows format specification,
             and consensus combines methods for maximum reliability.
 
     - name: date_format
-      title: Expected Date Format
+      title: Expected Date/DateTime Format
       type: List
       options:
         - title: "Day-Month-Year (DMY)"
@@ -73,13 +69,19 @@ options:
           name: mdy
         - title: "Year-Month-Day (YMD)"
           name: ymd
+        - title: "Day-Month-Year Hour:Min:Sec (DMY HMS)"
+          name: dmy_hms
+        - title: "Month-Day-Year Hour:Min:Sec (MDY HMS)"
+          name: mdy_hms
+        - title: "Year-Month-Day Hour:Min:Sec (YMD HMS)"
+          name: ymd_hms
         - title: "Auto-detect"
           name: auto
       default: auto
       description:
           R: >
-            Expected date format for ambiguous cases. Auto-detect tries to determine
-            the most likely format based on the data patterns.
+            Expected date or datetime format for ambiguous cases. Auto-detect tries to determine
+            the most likely format based on the data patterns. HMS formats include time components (hours, minutes, seconds).
 
     - name: day_impute
       title: Missing Day Imputation
@@ -118,17 +120,17 @@ options:
       default: "UTC"
       description:
           R: >
-            Timezone for output dates. Use UTC for standardization, or local timezone
+            Timezone for output dates/datetimes. Use UTC for standardization, or local timezone
             if time-of-day information is critical. Only applies to anytime and consensus methods.
 
     - name: show_correction_table
-      title: Show Correction Results Table
+      title: Show Validation Results Table
       type: Bool
       default: false
       description:
           R: >
-            Display detailed table showing original values, corrected values, and
-            correction status for each observation.
+            Display detailed table showing original values, validated values, and
+            validation status for each observation.
 
     - name: show_quality_assessment
       title: Show Quality Assessment
@@ -137,7 +139,7 @@ options:
       description:
           R: >
             Provide quality assessment including success rates, common problems,
-            and recommendations for further correction.
+            and recommendations for further validation.
 
     - name: show_format_analysis
       title: Show Format Analysis
@@ -145,15 +147,15 @@ options:
       default: false
       description:
           R: >
-            Analyze detected date formats and patterns in the original data.
+            Analyze detected date/datetime formats and patterns in the original data.
 
     - name: show_correction_summary
-      title: Show Correction Summary
+      title: Show Validation Summary
       type: Bool
       default: false
       description:
           R: >
-            Summary statistics of the correction process including before/after
+            Summary statistics of the validation process including before/after
             comparison and data quality metrics.
 
     - name: show_interpretation
@@ -162,7 +164,7 @@ options:
       default: false
       description:
           R: >
-            Display guidance on date correction methods, best practices, and
-            recommendations for clinical research data.
+            Display guidance on date/datetime validation methods, best practices, and
+            recommendations for clinical research data. Includes information about the DateTime Converter module.
 
 ...

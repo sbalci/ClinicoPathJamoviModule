@@ -1,0 +1,11 @@
+"test_num","method","format","handle_excel","total_tests","successful","failed","success_rate","has_errors"
+1,"datefixr","auto",FALSE,76,7,0,9.21,FALSE
+2,"datefixr","dmy",FALSE,31,7,0,22.58,FALSE
+3,"datefixr","mdy",FALSE,2,2,0,100,FALSE
+4,"anytime","auto",FALSE,76,38,0,50,FALSE
+5,"lubridate","auto",FALSE,76,46,0,60.53,FALSE
+6,"lubridate","ymd",FALSE,23,5,0,21.74,FALSE
+7,"datefixr","dmy",TRUE,4,4,0,100,FALSE
+8,"anytime","auto",FALSE,4,4,0,100,FALSE
+9,"lubridate","ymd",FALSE,2,0,0,0,FALSE
+10,"datefixr","auto",FALSE,1,0,0,0,FALSE

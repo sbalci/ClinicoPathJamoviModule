@@ -4,7 +4,7 @@ title: Single Arm Survival
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Survival for whole group, no explanatory factor'
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:

@@ -1910,11 +1910,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Create summary text with interpretation
         summary_html <- glue::glue(
           "
-    In this study, {nrow(mydata)} subjects were followed for a total of {round(total_time, 1)} {time_unit}, 
-    with an average follow-up duration of {mean_follow_up} {time_unit} per person. During this observation period, 
+    In this study, {nrow(mydata)} subjects were followed for a total of {round(total_time, 1)} {time_unit},
+    with an average follow-up duration of {mean_follow_up} {time_unit} per person. During this observation period,
     {total_events} events occurred, resulting in an incidence rate of {round(overall_rate, 2)} events per {rate_multiplier} {time_unit}.
-    This means that for every {rate_multiplier} {time_unit} of observation, approximately {round(overall_rate, 1)} events are expected to occur.
-    The 95% confidence interval for this rate is {round(ci_lower, 2)} to {round(ci_upper, 2)} per {rate_multiplier} {time_unit}, 
+
+    <p><b>Understanding the Rate Multiplier:</b> The rate multiplier of {rate_multiplier} is used to express incidence rates in
+    clinically meaningful terms. Instead of reporting small decimal numbers (e.g., 0.05 events per {time_unit}), we scale the rate
+    to show events per {rate_multiplier} {time_unit}. This means that if we followed {rate_multiplier} patients for one {time_unit} each
+    (or equivalently, one patient for {rate_multiplier} {time_unit}), we would expect approximately {round(overall_rate, 1)} events to occur.
+    This standardized expression makes it easier to understand and compare rates across different studies.</p>
+
+    The 95% confidence interval for this rate is {round(ci_lower, 2)} to {round(ci_upper, 2)} per {rate_multiplier} {time_unit},
     indicating the precision of our estimate based on the observed data.
 
 

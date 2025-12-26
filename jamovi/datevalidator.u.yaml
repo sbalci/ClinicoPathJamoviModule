@@ -1,5 +1,5 @@
-title: Date Field Correction
-name: datecorrection
+title: Date/DateTime Validator
+name: datevalidator
 jus: '3.0'
 stage: 0
 compilerMode: aggresive
@@ -9,18 +9,18 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Date Variables to Correct
+        label: Date/DateTime Variables to Validate
         children:
           - type: VariablesListBox
             name: date_vars
             isTarget: true
 
   - type: CollapseBox
-    label: Correction Settings
+    label: Validation Settings
     collapsed: false
     children:
       - type: Label
-        label: Choose correction method and date format
+        label: Choose validation method and date/datetime format
         children:
           - type: ComboBox
             name: correction_method

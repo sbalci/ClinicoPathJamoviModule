@@ -1,19 +1,20 @@
-#' @title Date Field Correction and Standardization
-#' @return Corrected and standardized date fields using multiple packages
+#' @title Date/DateTime Validation and Quality Assessment
+#' @return Validated and quality-checked date/datetime fields using multiple packages
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom datefixR fix_date_char fix_date_df
 #' @importFrom anytime anytime anydate
-#' @importFrom lubridate dmy mdy ymd parse_date_time
+#' @importFrom lubridate dmy mdy ymd dmy_hms mdy_hms ymd_hms parse_date_time
 #' @importFrom dplyr mutate select bind_cols case_when
 #' @importFrom htmltools HTML
 
-datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrectionClass",
-    inherit = datecorrectionBase,
+datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidatorClass",
+    inherit = datevalidatorBase,
     private = list(
         .correction_results = NULL,
+        .notices = list(),  # Track notices to avoid serialization issues
 
         #' @keywords internal
         .escapeVar = function(x) {
@@ -21,61 +22,86 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
+        #' @keywords internal
+        .addNotice = function(name, type, content) {
+            # Helper to safely add notices without serialization issues
+            # Only create notice if it doesn't already exist for this run
+            if (!(name %in% names(private$.notices))) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = name,
+                    type = type
+                )
+                notice$setContent(content)
+                self$results$insert(1, notice)
+                private$.notices[[name]] <- TRUE  # Track that we added it
+            }
+        },
+
         .run = function() {
+            # Clear notice tracking at start of each run
+            private$.notices <- list()
 
             # Check if required variables have been selected
             if (is.null(self$options$date_vars) || length(self$options$date_vars) == 0) {
                 intro_msg <- "
                 <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #2e7d32; margin-top: 0;'>📅 Welcome to Date Field Correction!</h3>
-                <p><strong>Comprehensive date standardization for clinical research databases</strong></p>
-                <p>Handles messy date formats using multiple R packages (datefixR, anytime, lubridate)</p>
-                
+                <h3 style='color: #2e7d32; margin-top: 0;'>🔍 Welcome to Date/DateTime Validator!</h3>
+                <p><strong>Comprehensive date and datetime validation for clinical research databases</strong></p>
+                <p>Validates and diagnoses messy date/datetime formats using multiple R packages (datefixR, anytime, lubridate)</p>
+
+                <div style='background-color: #fff9c4; padding: 10px; border-radius: 5px; margin: 15px 0;'>
+                <p style='margin: 0;'><strong>ℹ️ For datetime conversion with component extraction:</strong></p>
+                <p style='margin: 5px 0 0 0;'>Use the <strong>DateTime Converter</strong> module to extract year, month, day, hour, minute, second components into separate columns.</p>
+                </div>
+
                 <h4 style='color: #2e7d32;'>Required Variables:</h4>
                 <ol>
-                <li><strong>Date Variables:</strong> Select columns containing date information that need correction</li>
+                <li><strong>Date/DateTime Variables:</strong> Select columns containing date or datetime information for validation</li>
                 </ol>
-                
-                <h4 style='color: #2e7d32;'>Correction Methods Available:</h4>
+
+                <h4 style='color: #2e7d32;'>Validation Methods Available:</h4>
                 <ul>
-                <li><strong>Automatic Detection (datefixR):</strong> Robust format detection and correction</li>
+                <li><strong>Automatic Detection (datefixR):</strong> Robust format detection and validation</li>
                 <li><strong>Flexible Parsing (anytime):</strong> Minimal assumptions, maximum compatibility</li>
                 <li><strong>Format-Specific (lubridate):</strong> When you know the expected format</li>
                 <li><strong>Multi-Method Consensus:</strong> Combines methods for maximum reliability</li>
                 </ul>
-                
-                <h4 style='color: #2e7d32;'>Common Date Format Problems:</h4>
+
+                <h4 style='color: #2e7d32;'>Common Date/DateTime Format Problems:</h4>
                 <ul>
                 <li><strong>Mixed Separators:</strong> 2021/03/15, 2021-03-15, 2021.03.15</li>
                 <li><strong>Month Variations:</strong> March, Mar, 03, 3</li>
                 <li><strong>Year Formats:</strong> 2021, 21</li>
-                <li><strong>Missing Components:</strong> Missing day or month values</li>
+                <li><strong>Time Components:</strong> With or without HMS (hours:minutes:seconds)</li>
+                <li><strong>Missing Components:</strong> Missing day, month, or time values</li>
                 <li><strong>Ambiguous Formats:</strong> 03/04/21 (could be Mar 4 or Apr 3)</li>
                 <li><strong>Excel Dates:</strong> Numeric values representing days since 1900</li>
                 </ul>
-                
+
                 <h4 style='color: #2e7d32;'>Perfect For:</h4>
                 <ul>
-                <li><strong>Database Cleanup:</strong> Standardize dates before analysis</li>
-                <li><strong>Multi-Source Data:</strong> Harmonize dates from different systems</li>
-                <li><strong>Legacy Data:</strong> Fix dates from older clinical databases</li>
-                <li><strong>Excel Imports:</strong> Handle Excel date formatting issues</li>
+                <li><strong>Data Quality Control:</strong> Validate dates/datetimes before analysis</li>
+                <li><strong>Database Auditing:</strong> Identify problematic date entries</li>
+                <li><strong>Multi-Source Data:</strong> Check consistency across different systems</li>
+                <li><strong>Legacy Data Assessment:</strong> Evaluate dates from older clinical databases</li>
+                <li><strong>Excel Imports:</strong> Diagnose Excel date formatting issues</li>
                 <li><strong>International Data:</strong> Different regional date conventions</li>
                 </ul>
-                
+
                 <h4 style='color: #2e7d32;'>Output Options:</h4>
                 <ul>
-                <li><strong>Corrected Data Table:</strong> Auditable table with all corrections and errors</li>
+                <li><strong>Validated Data Table:</strong> Auditable table with all validation results and errors</li>
                 <li><strong>Quality Assessment:</strong> Success rates and problem identification</li>
                 <li><strong>Format Analysis:</strong> Understand patterns in your data</li>
-                <li><strong>Detailed Reports:</strong> Document correction procedures</li>
+                <li><strong>Detailed Reports:</strong> Document validation procedures</li>
                 </ul>
-                
+
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Professional date correction for clinical research data quality and standardization</em>
+                💡 <em>Professional date/datetime validation for clinical research data quality and standardization</em>
                 </p>
                 </div>"
-                
+
                 self$results$todo$setContent(intro_msg)
                 return()
             } else {
@@ -84,32 +110,33 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'emptyDataset',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    'emptyDataset',
+                    jmvcore::NoticeType$ERROR,
+                    'Dataset contains no complete rows. • Please check your data for missing values. • Ensure at least one row has complete data before running date validation.'
                 )
-                notice$setContent('Dataset contains no complete rows. • Please check your data for missing values. • Ensure at least one row has complete data before running date correction.')
-                self$results$insert(1, notice)
                 return()
             }
 
             # Safely require packages
             required_packages <- c("datefixR", "anytime")
+            missing_pkgs <- c()
             for (pkg in required_packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('missing_', pkg),
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
-                        'Required package "%s" is not installed. • Install it using: install.packages("%s") • Restart jamovi after installation. • This package is required for date correction functionality.',
-                        pkg, pkg
-                    ))
-                    self$results$insert(1, notice)
-                    return()
+                    missing_pkgs <- c(missing_pkgs, pkg)
                 }
+            }
+
+            if (length(missing_pkgs) > 0) {
+                pkg_list <- paste(missing_pkgs, collapse = ", ")
+                install_cmds <- paste0("install.packages(c(", paste0("'", missing_pkgs, "'", collapse = ", "), "))")
+                private$.addNotice(
+                    'missingPackages',
+                    jmvcore::NoticeType$ERROR,
+                    sprintf('Required package(s) not installed: %s • Install using: %s • Restart jamovi after installation. • These packages are required for date/datetime validation functionality.',
+                            pkg_list, install_cmds)
+                )
+                return()
             }
 
             # Get data and variables
@@ -117,13 +144,11 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             date_vars <- self$options$date_vars
 
             if (length(date_vars) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingDateVars',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    'missingDateVars',
+                    jmvcore::NoticeType$ERROR,
+                    'Date/DateTime variables are required. • Please select at least one variable containing date or datetime information. • Use the "Date/DateTime Variables to Validate" box in the left panel to add variables.'
                 )
-                notice$setContent('Date variables are required. • Please select at least one variable containing date information. • Use the "Date Variables to Correct" box in the left panel to add variables.')
-                self$results$insert(1, notice)
                 return()
             }
 
@@ -132,29 +157,25 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             missing_vars <- setdiff(date_vars, available_vars)
 
             if (length(missing_vars) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'variablesNotFound',
-                    type = jmvcore::NoticeType$ERROR
-                )
                 available_preview <- if (length(available_vars) > 10) {
                     paste(c(head(available_vars, 10), "..."), collapse = ", ")
                 } else {
                     paste(available_vars, collapse = ", ")
                 }
-                notice$setContent(sprintf(
-                    'Selected variables not found in dataset: %s • Available variables: %s • Check variable names for typos. • Ensure variables are present in the active dataset.',
-                    paste(missing_vars, collapse = ', '),
-                    available_preview
-                ))
-                self$results$insert(1, notice)
+                private$.addNotice(
+                    'variablesNotFound',
+                    jmvcore::NoticeType$ERROR,
+                    sprintf('Selected variables not found in dataset: %s • Available variables: %s • Check variable names for typos. • Ensure variables are present in the active dataset.',
+                            paste(missing_vars, collapse = ', '),
+                            available_preview)
+                )
                 return()
             }
 
-            # Perform date correction
+            # Perform date/datetime validation
             correction_results <- private$.perform_date_correction(dataset, date_vars)
 
-            # Populate corrected data table (ALWAYS shown for auditability)
+            # Populate validated data table (ALWAYS shown for auditability)
             private$.populate_corrected_data_table(correction_results)
 
             # Calculate overall success rate for quality notices
@@ -179,24 +200,15 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     jmvcore::NoticeType$WARNING
                 }
 
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'lowSuccessRate',
-                    type = severity
-                )
-
-                if (success_rate < 70) {
-                    notice$setContent(sprintf(
-                        'Low date correction success rate: %.1f%% • Only %d of %d dates were successfully parsed. • Clinical analysis may be unreliable with <70%% success rate. • Consider: Using a different correction method (try "consensus"), Reviewing data source for systematic formatting issues, Manual review of failed corrections in the audit table, Consulting with data management team.',
-                        success_rate, successful_corrections, total_observations
-                    ))
+                content <- if (success_rate < 70) {
+                    sprintf('Low date/datetime validation success rate: %.1f%% • Only %d of %d dates/datetimes were successfully parsed. • Clinical analysis may be unreliable with <70%% success rate. • Consider: Using a different validation method (try "consensus"), Reviewing data source for systematic formatting issues, Manual review of failed validations in the audit table, Consulting with data management team.',
+                            success_rate, successful_corrections, total_observations)
                 } else {
-                    notice$setContent(sprintf(
-                        'Moderate date correction success rate: %.1f%% • %d of %d dates were successfully parsed. • Review failed corrections in the "Corrected Date Data" table. • Consider: Trying the "consensus" method for better results, Checking common error patterns in quality assessment, Manual verification of critical dates.',
-                        success_rate, successful_corrections, total_observations
-                    ))
+                    sprintf('Moderate date/datetime validation success rate: %.1f%% • %d of %d dates/datetimes were successfully parsed. • Review failed validations in the "Validated Date/DateTime Data" table. • Consider: Trying the "consensus" method for better results, Checking common error patterns in quality assessment, Manual verification of critical dates/datetimes.',
+                            success_rate, successful_corrections, total_observations)
                 }
-                self$results$insert(2, notice)
+
+                private$.addNotice('lowSuccessRate', severity, content)
             }
 
             # Generate outputs
@@ -204,22 +216,22 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 table_html <- private$.generate_correction_table(correction_results)
                 self$results$correction_table$setContent(table_html)
             }
-            
+
             if (self$options$show_quality_assessment) {
                 quality_html <- private$.generate_quality_assessment(correction_results)
                 self$results$quality_assessment$setContent(quality_html)
             }
-            
+
             if (self$options$show_format_analysis) {
                 format_html <- private$.generate_format_analysis(correction_results)
                 self$results$format_analysis$setContent(format_html)
             }
-            
+
             if (self$options$show_correction_summary) {
                 summary_html <- private$.generate_correction_summary(correction_results)
                 self$results$correction_summary$setContent(summary_html)
             }
-            
+
             if (self$options$show_interpretation) {
                 interpretation_html <- private$.generate_interpretation_guide()
                 self$results$interpretation$setContent(interpretation_html)
@@ -227,19 +239,15 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
 
             # Add completion summary INFO notice
             if (total_observations > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
+                private$.addNotice(
+                    'analysisComplete',
+                    jmvcore::NoticeType$INFO,
+                    sprintf('Date/datetime validation completed successfully. • Processed %d observations across %d variable(s). • Successfully validated %d dates/datetimes (%.1f%%). • Full audit trail available in "Validated Date/DateTime Data" table. • Export table to CSV for documentation or downstream use.',
+                            total_observations,
+                            length(correction_results),
+                            successful_corrections,
+                            success_rate)
                 )
-                notice$setContent(sprintf(
-                    'Date correction completed successfully. • Processed %d observations across %d variable(s). • Successfully corrected %d dates (%.1f%%). • Full audit trail available in "Corrected Date Data" table. • Export table to CSV for documentation or downstream use.',
-                    total_observations,
-                    length(correction_results),
-                    successful_corrections,
-                    success_rate
-                ))
-                self$results$insert(999, notice)
             }
 
             # Store results for potential data export (future enhancement)
@@ -293,7 +301,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
         },
 
         .perform_date_correction = function(data, date_vars) {
-            
+
             # Defensive options access
             correction_method <- if (!is.null(self$options$correction_method)) {
                 self$options$correction_method
@@ -301,23 +309,19 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 "datefixr"  # Default fallback
             }
             results <- list()
-            
+
             for (var in date_vars) {
                 var_data <- data[[var]]
 
                 # Skip if all NA
                 if (all(is.na(var_data))) {
                     # Add warning notice for all-NA variable
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('allNA_', gsub("[^A-Za-z0-9]", "_", var)),
-                        type = jmvcore::NoticeType$WARNING
+                    private$.addNotice(
+                        paste0('allNA_', var),
+                        jmvcore::NoticeType$WARNING,
+                        sprintf('Variable "%s" contains only missing values (NA). • No date/datetime validation possible for this variable. • %d row(s) affected. • Consider removing this variable or checking your data source.',
+                                var, length(var_data))
                     )
-                    notice$setContent(sprintf(
-                        'Variable "%s" contains only missing values (NA). • No date corrections possible for this variable. • %d row(s) affected. • Consider removing this variable or checking your data source.',
-                        var, length(var_data)
-                    ))
-                    self$results$insert(2, notice)
 
                     results[[var]] <- list(
                         original = var_data,
@@ -328,10 +332,10 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     )
                     next
                 }
-                
+
                 # Convert to character for processing
                 var_char <- as.character(var_data)
-                
+
                 if (correction_method == "datefixr") {
                     correction_result <- private$.correct_with_datefixr(var_char)
                 } else if (correction_method == "anytime") {
@@ -341,20 +345,29 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 } else if (correction_method == "consensus") {
                     correction_result <- private$.correct_with_consensus(var_char)
                 }
-                
+
                 correction_result$original <- var_data
                 # Plausibility flags appended to errors
                 correction_result <- private$.apply_plausibility_checks(correction_result, var)
                 results[[var]] <- correction_result
             }
-            
+
             return(results)
         },
 
         .correct_with_datefixr = function(date_char) {
-            
+
             tryCatch({
                 fmt <- self$options$date_format
+
+                # datefixR only supports date formats (dmy/mdy), not HMS
+                # If HMS format requested, fall back to lubridate
+                if (fmt %in% c("dmy_hms", "mdy_hms", "ymd_hms")) {
+                    lres <- private$.correct_with_lubridate(date_char, force_format = fmt)
+                    lres$method_used <- paste0("lubridate (", fmt, " - HMS not supported by datefixR)")
+                    return(lres)
+                }
+
                 # datefixR supports dmy/mdy; handle auto/ymd explicitly
                 if (fmt == "auto") {
                     res_dmy <- private$.attempt_datefixr(date_char, "dmy")
@@ -373,16 +386,16 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     }
                     return(chosen)
                 }
-                
+
                 if (fmt == "ymd") {
                     # datefixR can't do ymd; fall back to lubridate ymd with imputation fallback
                     lres <- private$.correct_with_lubridate(date_char, force_format = "ymd")
                     lres$method_used <- "lubridate (ymd)"
                     return(lres)
                 }
-                
+
                 return(private$.attempt_datefixr(date_char, fmt))
-                
+
             }, error = function(e) {
                 return(list(
                     corrected = rep(as.Date(NA), length(date_char)),
@@ -403,10 +416,10 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 format = fmt,
                 excel = self$options$handle_excel
             )
-            
+
             success <- !is.na(corrected_dates)
             errors <- ifelse(success, "", "Could not parse date")
-            
+
             list(
                 corrected = corrected_dates,
                 success = success,
@@ -418,13 +431,13 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
         },
 
         .correct_with_anytime = function(date_char) {
-            
+
             tryCatch({
                 corrected_dates <- anytime::anytime(date_char, tz = self$options$timezone)
-                
+
                 success <- !is.na(corrected_dates)
-                errors <- ifelse(success, "", "Could not parse date")
-                
+                errors <- ifelse(success, "", "Could not parse date/datetime")
+
                 return(list(
                     corrected = corrected_dates,
                     success = success,
@@ -433,7 +446,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     ambiguous = rep(FALSE, length(date_char)),
                     plausibility_flag = rep(FALSE, length(date_char))
                 ))
-                
+
             }, error = function(e) {
                 return(list(
                     corrected = rep(as.Date(NA), length(date_char)),
@@ -447,34 +460,37 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
         },
 
         .correct_with_lubridate = function(date_char, force_format = NULL) {
-            
+
             tryCatch({
                 date_format <- if (!is.null(force_format)) force_format else self$options$date_format
                 tz <- self$options$timezone
-                
+
                 corrected_dates <- switch(date_format,
                     "dmy" = lubridate::dmy(date_char, tz = tz),
                     "mdy" = lubridate::mdy(date_char, tz = tz),
                     "ymd" = lubridate::ymd(date_char, tz = tz),
+                    "dmy_hms" = lubridate::dmy_hms(date_char, tz = tz),
+                    "mdy_hms" = lubridate::mdy_hms(date_char, tz = tz),
+                    "ymd_hms" = lubridate::ymd_hms(date_char, tz = tz),
                     "auto" = {
-                        # Try multiple formats
+                        # Try multiple formats including HMS
                         formats <- c("dmy", "mdy", "ymd", "dmy HMS", "mdy HMS", "ymd HMS")
                         lubridate::parse_date_time(date_char, formats, tz = tz)
                     }
                 )
-                
+
                 success <- !is.na(corrected_dates)
-                errors <- ifelse(success, "", "Could not parse date")
-                
+                errors <- ifelse(success, "", "Could not parse date/datetime")
+
                 return(list(
                     corrected = corrected_dates,
                     success = success,
-                    method_used = "lubridate",
+                    method_used = paste0("lubridate (", date_format, ")"),
                     errors = errors,
                     ambiguous = rep(FALSE, length(date_char)),
                     plausibility_flag = rep(FALSE, length(date_char))
                 ))
-                
+
             }, error = function(e) {
                 return(list(
                     corrected = rep(as.Date(NA), length(date_char)),
@@ -496,26 +512,26 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
 
             # Track conflicts for notice
             conflict_count <- 0
-            
+
             n <- length(date_char)
             consensus_dates <- rep(as.Date(NA), n)
             consensus_success <- rep(FALSE, n)
             consensus_errors <- rep("", n)
             method_used <- rep("", n)
             ambiguous_vec <- rep(FALSE, n)
-            
+
             for (i in 1:n) {
                 results <- list(
                     datefixr = if(datefixr_result$success[i]) datefixr_result$corrected[i] else NA,
                     anytime = if(anytime_result$success[i]) anytime_result$corrected[i] else NA,
                     lubridate = if(lubridate_result$success[i]) lubridate_result$corrected[i] else NA
                 )
-                
+
                 # Remove NA results
                 valid_results <- results[!is.na(results)]
-                
+
                 if (length(valid_results) == 0) {
-                    consensus_errors[i] <- "No method could parse this date"
+                    consensus_errors[i] <- "No method could parse this date/datetime"
                     method_used[i] <- "none"
                 } else if (length(valid_results) == 1) {
                     consensus_dates[i] <- valid_results[[1]]
@@ -549,18 +565,14 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
 
             # Add notice if there were conflicts
             if (conflict_count > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'consensusConflicts',
-                    type = jmvcore::NoticeType$INFO
+                private$.addNotice(
+                    'consensusConflicts',
+                    jmvcore::NoticeType$INFO,
+                    sprintf('Consensus method detected %d conflict(s) where date/datetime parsers disagreed. • Using datefixR as primary resolver when conflicts occur. • Review "Method" column in audit table to see affected rows. • Consider specifying exact date/datetime format if conflicts are widespread. • Conflicts often indicate ambiguous date formats (e.g., 03/04/2020 could be March 4 or April 3).',
+                            conflict_count)
                 )
-                notice$setContent(sprintf(
-                    'Consensus method detected %d conflict(s) where date parsers disagreed. • Using datefixR as primary resolver when conflicts occur. • Review "Method" column in audit table to see affected rows. • Consider specifying exact date format if conflicts are widespread. • Conflicts often indicate ambiguous date formats (e.g., 03/04/2020 could be March 4 or April 3).',
-                    conflict_count
-                ))
-                self$results$insert(3, notice)
             }
-            
+
             return(list(
                 corrected = consensus_dates,
                 success = consensus_success,
@@ -572,18 +584,18 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
         },
 
         .generate_correction_table = function(results) {
-            
+
             # Limit display to first 100 rows for performance
             max_display <- 100
             total_vars <- length(results)
-            
+
             table_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #495057; margin-top: 0;'>📅 Date Correction Results</h3>",
+                "<h3 style='color: #495057; margin-top: 0;'>🔍 Date/DateTime Validation Results</h3>",
                 "<p><strong>Method:</strong> ", private$.get_method_description(), "</p>",
                 "<p><strong>Variables Processed:</strong> ", total_vars, "</p>"
             )
-            
+
             # Summary statistics
             total_success <- 0
             total_count <- 0
@@ -592,25 +604,25 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 total_success <- total_success + sum(result$success, na.rm = TRUE)
                 total_count <- total_count + length(result$success)
             }
-            
+
             success_rate <- round(total_success / total_count * 100, 2)
             table_html <- paste0(table_html,
                 "<p><strong>Overall Success Rate:</strong> ", total_success, "/", total_count, " (", success_rate, "%)</p>",
                 "</div>"
             )
-            
+
             # Detailed results for each variable
             for (var_name in names(results)) {
                 result <- results[[var_name]]
                 var_success <- sum(result$success, na.rm = TRUE)
                 var_total <- length(result$success)
                 var_rate <- round(var_success / var_total * 100, 2)
-                
+
                 table_html <- paste0(table_html,
                     "<div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-top: 20px;'>",
                     "<h4>", var_name, " - Success Rate: ", var_success, "/", var_total, " (", var_rate, "%)</h4>"
                 )
-                
+
                 # Show first few examples
                 n_show <- min(max_display, length(result$original))
                 if (n_show > 0) {
@@ -619,21 +631,21 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                         "<thead><tr style='background-color: #6c757d; color: white;'>",
                         "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>",
                         "<th style='padding: 6px; border: 1px solid #dee2e6;'>Original</th>",
-                        "<th style='padding: 6px; border: 1px solid #dee2e6;'>Corrected</th>",
+                        "<th style='padding: 6px; border: 1px solid #dee2e6;'>Validated</th>",
                         "<th style='padding: 6px; border: 1px solid #dee2e6;'>Status</th>",
                         "<th style='padding: 6px; border: 1px solid #dee2e6;'>Method</th>",
                         "</tr></thead><tbody>"
                     )
-                    
+
                     for (i in 1:n_show) {
                         row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                         if (!result$success[i]) row_bg <- "#ffebee"
-                        
+
                         original_val <- if (is.na(result$original[i])) "NA" else as.character(result$original[i])
                         corrected_val <- if (is.na(result$corrected[i])) "NA" else as.character(result$corrected[i])
                         status <- if (result$success[i]) "✓" else "✗"
                         method <- result$method_used[i] %||% "unknown"
-                        
+
                         table_html <- paste0(table_html,
                             "<tr style='background-color: ", row_bg, ";'>",
                             "<td style='padding: 6px; border: 1px solid #dee2e6;'>", i, "</td>",
@@ -644,9 +656,9 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                             "</tr>"
                         )
                     }
-                    
+
                     table_html <- paste0(table_html, "</tbody></table>")
-                    
+
                     if (length(result$original) > max_display) {
                         table_html <- paste0(table_html,
                             "<p style='font-size: 11px; color: #666; margin-top: 10px;'>",
@@ -654,15 +666,15 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                         )
                     }
                 }
-                
+
                 table_html <- paste0(table_html, "</div>")
             }
-            
+
             return(table_html)
         },
 
         .generate_quality_assessment = function(results) {
-            
+
             # Calculate quality metrics
             total_observations <- 0
             successful_corrections <- 0
@@ -670,13 +682,13 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
             originally_na <- 0
             plausibility_flags <- 0
             ambiguous_flags <- 0
-            
+
             common_errors <- list()
             method_performance <- list()
-            
+
             for (var_name in names(results)) {
                 result <- results[[var_name]]
-                
+
                 total_observations <- total_observations + length(result$original)
                 successful_corrections <- successful_corrections + sum(result$success, na.rm = TRUE)
                 failed_corrections <- failed_corrections + sum(!result$success, na.rm = TRUE)
@@ -687,7 +699,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 if (!is.null(result$ambiguous)) {
                     ambiguous_flags <- ambiguous_flags + sum(result$ambiguous, na.rm = TRUE)
                 }
-                
+
                 # Collect error patterns
                 error_msgs <- result$errors[result$errors != ""]
                 for (err in unique(error_msgs)) {
@@ -695,7 +707,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                         common_errors[[err]] <- (common_errors[[err]] %||% 0) + sum(error_msgs == err)
                     }
                 }
-                
+
                 # Method usage
                 methods <- result$method_used
                 for (method in unique(methods)) {
@@ -704,7 +716,7 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     }
                 }
             }
-            
+
             success_rate <- round(successful_corrections / total_observations * 100, 2)
 
             quality_html <- paste0(
@@ -714,8 +726,8 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 "<h4 style='color: #1976d2;'>Overall Performance:</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Total Observations:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", total_observations, "</td></tr>",
-                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Successful Corrections:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", successful_corrections, " (", success_rate, "%)</td></tr>",
-                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Failed Corrections:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", failed_corrections, "</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Successful Validations:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", successful_corrections, " (", success_rate, "%)</td></tr>",
+                "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Failed Validations:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", failed_corrections, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Originally Missing:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", originally_na, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Plausibility Flags (out of range/future):</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", plausibility_flags, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Ambiguous Formats (d/m swap):</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", ambiguous_flags, "</td></tr>",
@@ -756,35 +768,35 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                 }
                 quality_html <- paste0(quality_html, "</table>")
             }
-            
+
             # Quality recommendations
             quality_html <- paste0(quality_html,
                 "<h4 style='color: #1976d2;'>Quality Recommendations:</h4>",
                 "<ul>"
             )
-            
+
             if (success_rate >= 95) {
                 quality_html <- paste0(quality_html,
-                    "<li>✅ Excellent correction rate (≥95%) - data is ready for analysis</li>"
+                    "<li>✅ Excellent validation rate (≥95%) - data is ready for analysis</li>"
                 )
             } else if (success_rate >= 85) {
                 quality_html <- paste0(quality_html,
-                    "<li>⚠️ Good correction rate (85-94%) - review failed cases</li>"
+                    "<li>⚠️ Good validation rate (85-94%) - review failed cases</li>"
                 )
             } else {
                 quality_html <- paste0(quality_html,
-                    "<li>❌ Low correction rate (<85%) - consider different method or manual review</li>"
+                    "<li>❌ Low validation rate (<85%) - consider different method or manual review</li>"
                 )
             }
-            
+
             if (failed_corrections > 0) {
                 quality_html <- paste0(quality_html,
-                    "<li>Consider manual review of ", failed_corrections, " failed corrections</li>"
+                    "<li>Consider manual review of ", failed_corrections, " failed validations</li>"
                 )
             }
-            
+
             quality_html <- paste0(quality_html, "</ul></div>")
-            
+
             return(quality_html)
         },
 
@@ -807,40 +819,44 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
                     }
                 }
             }
-            
+
             format_html <- paste0(
                 "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
                 "<h3 style='color: #ef6c00; margin-top: 0;'>🔍 Format Analysis</h3>",
-                
+
                 "<h4 style='color: #ef6c00;'>Detected Patterns:</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>"
             )
-            
+
             for (pattern in names(format_patterns)) {
                 count <- format_patterns[[pattern]]
                 format_html <- paste0(format_html,
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", pattern, ":</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", count, " occurrences</td></tr>"
                 )
             }
-            
+
             format_html <- paste0(format_html,
                 "</table>",
-                
+
                 "<h4 style='color: #ef6c00;'>Format Recommendations:</h4>",
                 "<ul>",
-                "<li>Standardize to ISO format (YYYY-MM-DD) for consistency</li>",
-                "<li>Document date formats used in your study protocol</li>",
+                "<li>Standardize to ISO format (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS) for consistency</li>",
+                "<li>Document date/datetime formats used in your study protocol</li>",
                 "<li>Consider validation rules for future data entry</li>",
+                "<li>Use DateTime Converter module for component extraction if needed</li>",
                 "</ul></div>"
             )
-            
+
             return(format_html)
         },
 
         .classify_date_pattern = function(date_str) {
-            # Simple pattern classification
-            if (grepl("^\\d{4}-\\d{2}-\\d{2}$", date_str)) return("ISO (YYYY-MM-DD)")
+            # Simple pattern classification with datetime support
+            if (grepl("^\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}", date_str)) return("ISO datetime (YYYY-MM-DD HH:MM:SS)")
+            if (grepl("^\\d{4}-\\d{2}-\\d{2}$", date_str)) return("ISO date (YYYY-MM-DD)")
+            if (grepl("^\\d{1,2}/\\d{1,2}/\\d{4}\\s+\\d{1,2}:\\d{2}", date_str)) return("US datetime (MM/DD/YYYY HH:MM)")
             if (grepl("^\\d{1,2}/\\d{1,2}/\\d{4}$", date_str)) return("US format (MM/DD/YYYY)")
+            if (grepl("^\\d{1,2}/\\d{1,2}/\\d{2}\\s+\\d{1,2}:\\d{2}", date_str)) return("Short US datetime (MM/DD/YY HH:MM)")
             if (grepl("^\\d{1,2}/\\d{1,2}/\\d{2}$", date_str)) return("Short US (MM/DD/YY)")
             if (grepl("^\\d{1,2}-\\d{1,2}-\\d{4}$", date_str)) return("Dash separated (DD-MM-YYYY)")
             if (grepl("^\\d{4}/\\d{1,2}/\\d{1,2}$", date_str)) return("ISO with slash (YYYY/MM/DD)")
@@ -850,93 +866,105 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
         },
 
         .generate_correction_summary = function(results) {
-            
+
             summary_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>📋 Correction Summary</h3>",
-                
+                "<h3 style='color: #2e7d32; margin-top: 0;'>📋 Validation Summary</h3>",
+
                 "<h4 style='color: #2e7d32;'>Processing Settings:</h4>",
                 "<ul>",
                 "<li><strong>Method:</strong> ", private$.get_method_description(), "</li>",
-                "<li><strong>Date Format:</strong> ", self$options$date_format, "</li>",
+                "<li><strong>Date/DateTime Format:</strong> ", self$options$date_format, "</li>",
                 "<li><strong>Missing Day Imputation:</strong> ", self$options$day_impute, "</li>",
                 "<li><strong>Missing Month Imputation:</strong> ", self$options$month_impute, "</li>",
                 "<li><strong>Excel Date Handling:</strong> ", if(self$options$handle_excel) "Enabled" else "Disabled", "</li>",
                 "<li><strong>Output Timezone:</strong> ", self$options$timezone, "</li>",
                 "</ul>",
-                
+
                 "<h4 style='color: #2e7d32;'>Next Steps:</h4>",
                 "<ul>",
-                "<li>Review correction results and quality assessment</li>",
-                "<li>Manually verify failed corrections if needed</li>",
-                "<li>Document date handling procedures in your study protocol</li>",
-                "<li>Consider using corrected dates for subsequent analyses</li>",
+                "<li>Review validation results and quality assessment</li>",
+                "<li>Manually verify failed validations if needed</li>",
+                "<li>Use DateTime Converter module if you need to extract date/time components</li>",
+                "<li>Document date/datetime handling procedures in your study protocol</li>",
                 "</ul></div>"
             )
-            
+
             return(summary_html)
         },
 
         .generate_interpretation_guide = function() {
-            
+
             method <- self$options$correction_method
-            
+
             interpretation_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📚 Date Correction Guide</h3>",
-                
+                "<h3 style='color: #7b1fa2; margin-top: 0;'>📚 Date/DateTime Validation Guide</h3>",
+
+                "<div style='background-color: #fff9c4; padding: 12px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<p style='margin: 0;'><strong>ℹ️ Related Module:</strong></p>",
+                "<p style='margin: 5px 0 0 0;'>For datetime conversion with component extraction (year, month, day, hour, minute, second), ",
+                "use the <strong>DateTime Converter</strong> module. This validator focuses on quality assessment and format validation.</p>",
+                "</div>",
+
                 "<h4 style='color: #7b1fa2;'>Current Method: ", private$.get_method_description(), "</h4>"
             )
-            
+
             if (method == "datefixr") {
                 interpretation_html <- paste0(interpretation_html,
-                    "<p><strong>datefixR</strong> uses intelligent format detection to handle messy date data.</p>",
+                    "<p><strong>datefixR</strong> uses intelligent format detection to handle messy date data. ",
+                    "Note: datefixR only supports date formats (not datetime with HMS).</p>",
                     "<p><strong>Strengths:</strong> Robust format detection, handles missing components, good for mixed formats</p>",
-                    "<p><strong>Best for:</strong> Database cleanup, legacy data, unknown formats</p>"
+                    "<p><strong>Best for:</strong> Database cleanup, legacy data, unknown date formats</p>",
+                    "<p><strong>Limitation:</strong> Does not support HMS time components - use lubridate method for datetime</p>"
                 )
             } else if (method == "anytime") {
                 interpretation_html <- paste0(interpretation_html,
                     "<p><strong>anytime</strong> provides flexible parsing with minimal assumptions.</p>",
-                    "<p><strong>Strengths:</strong> Fast processing, handles numeric dates, minimal configuration</p>",
-                    "<p><strong>Best for:</strong> Standard formats, performance-critical applications</p>"
+                    "<p><strong>Strengths:</strong> Fast processing, handles numeric dates, handles datetime formats, minimal configuration</p>",
+                    "<p><strong>Best for:</strong> Standard formats, datetime with time components, performance-critical applications</p>"
                 )
             } else if (method == "lubridate") {
                 interpretation_html <- paste0(interpretation_html,
                     "<p><strong>lubridate</strong> allows format-specific parsing when you know the expected format.</p>",
-                    "<p><strong>Strengths:</strong> Precise control, handles time zones, extensive format support</p>",
-                    "<p><strong>Best for:</strong> Consistent formats, time-sensitive data</p>"
+                    "<p><strong>Strengths:</strong> Precise control, handles time zones, extensive format support including HMS</p>",
+                    "<p><strong>Best for:</strong> Consistent formats, time-sensitive data, datetime with time components</p>",
+                    "<p><strong>Datetime Support:</strong> Supports dmy_hms, mdy_hms, ymd_hms formats for validation</p>"
                 )
             } else if (method == "consensus") {
                 interpretation_html <- paste0(interpretation_html,
                     "<p><strong>Multi-Method Consensus</strong> combines all approaches for maximum reliability.</p>",
                     "<p><strong>Strengths:</strong> Highest success rate, identifies conflicts, robust across formats</p>",
-                    "<p><strong>Best for:</strong> Critical data, final cleanup, quality control</p>"
+                    "<p><strong>Best for:</strong> Critical data, final cleanup, quality control</p>",
+                    "<p><strong>Note:</strong> Consensus uses lubridate for datetime HMS formats when needed</p>"
                 )
             }
-            
+
             interpretation_html <- paste0(interpretation_html,
                 "<h4 style='color: #7b1fa2;'>Clinical Research Best Practices:</h4>",
                 "<ul>",
-                "<li><strong>Documentation:</strong> Record all date correction procedures</li>",
-                "<li><strong>Validation:</strong> Sample check corrected dates against source data</li>",
-                "<li><strong>Standardization:</strong> Use ISO format (YYYY-MM-DD) for analysis</li>",
+                "<li><strong>Documentation:</strong> Record all date/datetime validation procedures</li>",
+                "<li><strong>Validation:</strong> Sample check validated dates against source data</li>",
+                "<li><strong>Standardization:</strong> Use ISO format (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS) for analysis</li>",
                 "<li><strong>Missing Data:</strong> Be transparent about imputation methods</li>",
                 "<li><strong>Quality Control:</strong> Review low success rates carefully</li>",
+                "<li><strong>Component Extraction:</strong> Use DateTime Converter module for extracting date/time components</li>",
                 "</ul>",
-                
+
                 "<h4 style='color: #7b1fa2;'>Common Issues and Solutions:</h4>",
                 "<ul>",
                 "<li><strong>Ambiguous formats (03/04/21):</strong> Specify expected format or use regional settings</li>",
                 "<li><strong>Missing components:</strong> Configure appropriate imputation values</li>",
                 "<li><strong>Excel dates:</strong> Enable Excel date number handling</li>",
                 "<li><strong>Multiple formats:</strong> Use consensus method or preprocess by format type</li>",
+                "<li><strong>Datetime with time components:</strong> Use lubridate method with HMS formats or anytime method</li>",
                 "</ul>",
-                
+
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
-                "<em>📅 Professional date correction for clinical research data quality assurance</em>",
+                "<em>🔍 Professional date/datetime validation for clinical research data quality assurance</em>",
                 "</p></div>"
             )
-            
+
             return(interpretation_html)
         },
 
@@ -969,14 +997,14 @@ datecorrectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("datecorrect
 
         .get_method_description = function() {
             method <- self$options$correction_method
-            
+
             descriptions <- list(
                 "datefixr" = "Automatic Detection (datefixR)",
                 "anytime" = "Flexible Parsing (anytime)",
                 "lubridate" = "Format-Specific (lubridate)",
                 "consensus" = "Multi-Method Consensus"
             )
-            
+
             return(descriptions[[method]] %||% method)
         }
 

@@ -1,6 +1,6 @@
 ---
-name: datecorrection
-title: Date Field Correction
+name: datevalidator
+title: Date/DateTime Validator
 jrs: '1.1'
 
 items:
@@ -9,7 +9,7 @@ items:
       type: Html
 
     - name: corrected_data
-      title: Corrected Date Data
+      title: Validated Date/DateTime Data
       type: Table
       visible: true
       rows: 0
@@ -24,7 +24,7 @@ items:
           title: Original Value
           type: text
         - name: corrected
-          title: Corrected Date
+          title: Validated Date/DateTime
           type: text
         - name: status
           title: Status
@@ -45,7 +45,7 @@ items:
         - timezone
 
     - name: correction_table
-      title: Date Correction Results Summary
+      title: Date/DateTime Validation Results Summary
       type: Html
       visible: (show_correction_table)
       clearWith:
@@ -79,7 +79,7 @@ items:
         - date_format
 
     - name: correction_summary
-      title: Correction Summary
+      title: Validation Summary
       type: Html
       visible: (show_correction_summary)
       clearWith:
@@ -96,7 +96,6 @@ items:
       visible: (show_interpretation)
       clearWith:
         - correction_method
-
 
 refs:
     - ClinicoPathJamoviModule
