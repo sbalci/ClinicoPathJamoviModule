@@ -186,6 +186,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     "timeintervalResults",
     inherit = jmvcore::Group,
     active = list(
+        messages = function() private$.items[["messages"]],
         todo = function() private$.items[["todo"]],
         aboutPanel = function() private$.items[["aboutPanel"]],
         personTimeInfo = function() private$.items[["personTimeInfo"]],
@@ -206,6 +207,9 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ClinicoPathJamoviModule",
                     "lubridate",
                     "glue"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="messages"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

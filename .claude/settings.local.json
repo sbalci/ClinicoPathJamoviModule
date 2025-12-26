@@ -184,7 +184,9 @@
       "Bash(while read file)",
       "Bash(do mv \"$file\" quality-reports/)",
       "Bash(mv:*)",
-      "Skill(pubmed-database)"
+      "Skill(pubmed-database)",
+      "Bash(mdfind:*)",
+      "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" Rscript:*)"
     ],
     "deny": [],
     "ask": [],

@@ -125,8 +125,8 @@ test_that("survivalendpoints calculates TTP correctly (censors death without pro
         expect_equal(derived_table$ttp_event[1], 1)
 
         # P002: Died without progression
-        # TTP should be censored at death (~6.5 months), event=0 (death is NOT progression)
-        expect_true(derived_table$ttp_time[2] >= 6.0 && derived_table$ttp_time[2] <= 7.0)
+        # TTP should be censored at last follow-up (~10 months per FDA/EMA guidance), event=0 (death is NOT progression)
+        expect_true(derived_table$ttp_time[2] >= 9.5 && derived_table$ttp_time[2] <= 10.5)
         expect_equal(derived_table$ttp_event[2], 0)
 
         # P003: Progressed at 6 months

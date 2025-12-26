@@ -449,20 +449,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 awd <- self$options$awd
                 awod <- self$options$awod
 
-                # FIX: Validate that all required level selections are provided
-                # This prevents the critical bug where NULL comparisons create all-NA outcomes
-                missing_levels <- character(0)
-                if (is.null(dod)) missing_levels <- c(missing_levels, "Dead of Disease (dod)")
-                if (is.null(dooc)) missing_levels <- c(missing_levels, "Dead of Other Causes (dooc)")
-                if (is.null(awd)) missing_levels <- c(missing_levels, "Alive with Disease (awd)")
-                if (is.null(awod)) missing_levels <- c(missing_levels, "Alive without Disease (awod)")
-
-                if (length(missing_levels) > 0) {
-                    stop('Multiple Event Types analysis requires all outcome level selections. Missing: ',
-                         paste(missing_levels, collapse = ", "),
-                         '. Please select all four outcome levels from the "Dead of Disease", "Dead of Other Causes", ',
-                         '"Alive with Disease", and "Alive without Disease" dropdowns.')
-                }
+                # Note: Validation of required level selections is now handled in .run()
+                # with helpful notices instead of hard errors
 
                 # Validate that selected levels actually exist in the data
                 outcome_levels_in_data <- unique(outcome1[!is.na(outcome1)])
@@ -751,11 +739,44 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             outcome_var <- labelled_data$outcome_var
             recurrence_var <- labelled_data$recurrence_var
             id_var <- labelled_data$id_var
-            
+
             validation_results <- private$.validateInputs(
                 mydata, outcome_var, recurrence_var, id_var, self$options$analysistype, self$options$multievent
             )
-            
+
+            # Check multievent level selections if multievent is enabled
+            if (self$options$multievent) {
+                outcome1 <- mydata[[outcome_var]]
+                unique_outcomes <- unique(outcome1[!is.na(outcome1)])
+
+                # Check which level selections are missing
+                missing_levels <- character(0)
+                if (is.null(self$options$dod)) missing_levels <- c(missing_levels, "Dead of Disease")
+                if (is.null(self$options$dooc)) missing_levels <- c(missing_levels, "Dead of Other Causes")
+                if (is.null(self$options$awd)) missing_levels <- c(missing_levels, "Alive with Disease")
+                if (is.null(self$options$awod)) missing_levels <- c(missing_levels, "Alive without Disease")
+
+                if (length(missing_levels) > 0) {
+                    # Add informative notice about available levels
+                    private$.addNotice(jmvcore::NoticeType$INFO,
+                        paste0("Outcome variable has ", length(unique_outcomes), " unique values: ",
+                               paste(unique_outcomes, collapse = ", ")))
+
+                    # Add strong warning about missing selections
+                    private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
+                        paste0("Multiple Event Types analysis requires all four outcome level selections. ",
+                               "Missing: ", paste(missing_levels, collapse = ", "), ". ",
+                               "Please select the appropriate level from your outcome values for each category."))
+
+                    # Add guidance notice
+                    private$.addNotice(jmvcore::NoticeType$INFO,
+                        "Guide: Use the dropdown menus to map your outcome values to the four standard categories: Dead of Disease, Dead of Other Causes, Alive with Disease, and Alive without Disease.")
+
+                    private$.insertNotices()
+                    return()
+                }
+            }
+
             # Handle validation errors - add as notices
             if (validation_results$should_stop) {
                 for (error_msg in validation_results$errors) {

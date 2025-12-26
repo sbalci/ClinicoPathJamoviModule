@@ -4,6 +4,11 @@ title: Comprehensive Time Interval Calculator
 jrs:   '1.1'
 
 items:
+    # === MESSAGES HTML (for errors, warnings, info) ===
+    - name: messages
+      type: Html
+
+    # === HTML PANELS ===
     - name: todo
       title: 'Getting Started'
       type: Html

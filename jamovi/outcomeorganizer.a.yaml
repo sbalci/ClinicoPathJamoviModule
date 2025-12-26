@@ -1,10 +1,10 @@
 ---
 name:  outcomeorganizer
 title: Outcome Organizer for Survival Analysis
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
-version: '0.0.3'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -92,7 +92,7 @@ options:
             Variable indicating disease recurrence or progression (for RFS/PFS/DFS analyses).
 
     - name: recurrenceLevel
-      title: Recurrence Event Level
+      title: Event Level
       type: Level
       variable: (recurrence)
       description:

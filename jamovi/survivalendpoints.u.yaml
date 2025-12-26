@@ -29,50 +29,50 @@ children:
         children:
           - type: Label
             label: Timeline Variables
-            children:
-              - type: VariablesListBox
-                name: startDate
-                maxItemCount: 1
-                isTarget: true
-                label: Treatment Start Date/Time
-              - type: VariablesListBox
-                name: lastFollowup
-                maxItemCount: 1
-                isTarget: true
-                label: Last Follow-up Date/Time
-              - type: VariablesListBox
-                name: progressionDate
-                maxItemCount: 1
-                isTarget: true
-                label: Progression Date/Time (Optional)
-              - type: VariablesListBox
-                name: deathDate
-                maxItemCount: 1
-                isTarget: true
-                label: Death Date/Time (Optional)
-              - type: VariablesListBox
-                name: treatmentEnd
-                maxItemCount: 1
-                isTarget: true
-                label: Treatment End Date/Time (Optional)
-              - type: VariablesListBox
-                name: responseDate
-                maxItemCount: 1
-                isTarget: true
-                label: Response Date/Time (Optional)
+            margin: small
+          - type: VariablesListBox
+            name: startDate
+            maxItemCount: 1
+            isTarget: true
+            label: Treatment Start Date/Time
+          - type: VariablesListBox
+            name: lastFollowup
+            maxItemCount: 1
+            isTarget: true
+            label: Last Follow-up Date/Time
+          - type: VariablesListBox
+            name: progressionDate
+            maxItemCount: 1
+            isTarget: true
+            label: Progression Date/Time (Optional)
+          - type: VariablesListBox
+            name: deathDate
+            maxItemCount: 1
+            isTarget: true
+            label: Death Date/Time (Optional)
+          - type: VariablesListBox
+            name: treatmentEnd
+            maxItemCount: 1
+            isTarget: true
+            label: Treatment End Date/Time (Optional)
+          - type: VariablesListBox
+            name: responseDate
+            maxItemCount: 1
+            isTarget: true
+            label: Response Date/Time (Optional)
           - type: Label
             label: Event Indicators
-            children:
-              - type: VariablesListBox
-                name: deathEvent
-                maxItemCount: 1
-                isTarget: true
-                label: Death Event (0=alive, 1=dead)
-              - type: VariablesListBox
-                name: progressionEvent
-                maxItemCount: 1
-                isTarget: true
-                label: Progression Event (0=no, 1=yes)
+            margin: small
+          - type: VariablesListBox
+            name: deathEvent
+            maxItemCount: 1
+            isTarget: true
+            label: Death Event (0=alive, 1=dead)
+          - type: VariablesListBox
+            name: progressionEvent
+            maxItemCount: 1
+            isTarget: true
+            label: Progression Event (0=no, 1=yes)
   - type: CollapseBox
     label: Time Configuration
     collapsed: false
@@ -97,24 +97,24 @@ children:
         children:
           - type: Label
             label: Select Endpoints to Derive
-            children:
-              - type: CheckBox
-                name: calculatePFS
-                label: Progression-Free Survival (PFS)
-              - type: CheckBox
-                name: calculateOS
-                label: Overall Survival (OS)
-              - type: CheckBox
-                name: calculateTTP
-                label: Time to Progression (TTP)
-              - type: CheckBox
-                name: calculateDOR
-                label: Duration of Response (DOR)
-                enable: (responseDate)
-              - type: CheckBox
-                name: calculateTOT
-                label: Time on Treatment
-                enable: (treatmentEnd)
+            margin: small
+          - type: CheckBox
+            name: calculatePFS
+            label: Progression-Free Survival (PFS)
+          - type: CheckBox
+            name: calculateOS
+            label: Overall Survival (OS)
+          - type: CheckBox
+            name: calculateTTP
+            label: Time to Progression (TTP)
+          - type: CheckBox
+            name: calculateDOR
+            label: Duration of Response (DOR)
+            enable: (responseDate)
+          - type: CheckBox
+            name: calculateTOT
+            label: Time on Treatment
+            enable: (treatmentEnd)
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -125,33 +125,33 @@ children:
         children:
           - type: Label
             label: Tables
-            children:
-              - type: CheckBox
-                name: showDerivedData
-                label: Derived Endpoints Table
-              - type: CheckBox
-                name: showSummaryStats
-                label: Summary Statistics
-              - type: CheckBox
-                name: showEventRates
-                label: Event Rates and Censoring
+            margin: small
+          - type: CheckBox
+            name: showDerivedData
+            label: Derived Endpoints Table
+          - type: CheckBox
+            name: showSummaryStats
+            label: Summary Statistics
+          - type: CheckBox
+            name: showEventRates
+            label: Event Rates and Censoring
           - type: Label
             label: Visualization
-            children:
-              - type: CheckBox
-                name: showKMPlot
-                label: Simple Kaplan-Meier Curves
+            margin: small
+          - type: CheckBox
+            name: showKMPlot
+            label: Simple Kaplan-Meier Curves
           - type: Label
             label: Milestone Analysis
-            children:
-              - type: CheckBox
-                name: showMilestones
-                label: Calculate Survival at Milestones
-              - type: TextBox
-                name: milestones
-                label: Milestone Times (comma-separated)
-                format: string
-                enable: (showMilestones)
+            margin: small
+          - type: CheckBox
+            name: showMilestones
+            label: Calculate Survival at Milestones
+          - type: TextBox
+            name: milestones
+            label: Milestone Times (comma-separated)
+            format: string
+            enable: (showMilestones)
   - type: CollapseBox
     label: Export and Documentation
     collapsed: true

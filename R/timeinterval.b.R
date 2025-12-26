@@ -546,6 +546,27 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Run analysis ----
         .run = function() {
+            # Initialize messages list for errors, warnings, and info
+            messages <- list()
+
+            # Helper function to add messages
+            add_message <- function(type, content) {
+                color <- switch(type,
+                    "error" = list(bg = "#f8d7da", border = "#dc3545", text = "#721c24", icon = "❌"),
+                    "strong_warning" = list(bg = "#fff3cd", border = "#ff8800", text = "#856404", icon = "⚠️"),
+                    "warning" = list(bg = "#fff3cd", border = "#ffc107", text = "#856404", icon = "⚠️"),
+                    "info" = list(bg = "#d1ecf1", border = "#17a2b8", text = "#0c5460", icon = "ℹ️"),
+                    list(bg = "#e2e3e5", border = "#6c757d", text = "#383d41", icon = "•")
+                )
+                messages <<- c(messages, list(sprintf(
+                    "<div style='background-color: %s; padding: 12px; border-left: 4px solid %s; margin: 10px 0; color: %s;'>
+                        <strong>%s %s:</strong> %s
+                    </div>",
+                    color$bg, color$border, color$text, color$icon,
+                    tools::toTitleCase(gsub("_", " ", type)), content
+                )))
+            }
+
             # Validate required inputs
             if (is.null(self$options$dx_date) || is.null(self$options$fu_date)) {
                 # Show initial message
@@ -571,14 +592,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             if (!validation$valid) {
-                # Create ERROR notice (single line)
-                errorNotice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'validationError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                errorNotice$setContent(validation$error)
-                self$results$insert(1, errorNotice)
+                # Add validation error message
+                add_message("error", validation$error)
+                self$results$messages$setContent(paste(messages, collapse = "\n"))
                 return()
             }
 
@@ -596,14 +612,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     timezone_setting = self$options$timezone
                 )
             }, error = function(e) {
-                # Create ERROR notice for calculation failures (single line)
-                calcErrorNotice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'calculationError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                calcErrorNotice$setContent(as.character(e$message))
-                self$results$insert(1, calcErrorNotice)
+                # Add calculation error message
+                add_message("error", as.character(e$message))
+                self$results$messages$setContent(paste(messages, collapse = "\n"))
             })
 
             # If calculation failed, stop here
@@ -832,43 +843,19 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 self$results$summary$setContent(summary_text)
 
-                # Small sample size guards (added before completion notice)
+                # Small sample size guards
                 if (summary_stats$n < 10 && summary_stats$n > 1) {
-                    smallNNotice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'criticallySmallSample',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    smallNNotice$setContent(
-                        sprintf('Critically small sample (n=%d). Statistical summaries are unreliable with fewer than 10 observations. Results should be considered exploratory only. Minimum n=20 recommended for basic descriptive analysis.',
-                                summary_stats$n)
-                    )
-                    self$results$insert(1, smallNNotice)
+                    add_message('strong_warning', sprintf('Critically small sample (n=%d). Statistical summaries are unreliable with fewer than 10 observations. Results should be considered exploratory only. Minimum n=20 recommended for basic descriptive analysis.',
+                                summary_stats$n))
                 } else if (summary_stats$n < 20 && summary_stats$n >= 10) {
-                    smallNNotice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'smallSample',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    smallNNotice$setContent(
-                        sprintf('Small sample size (n=%d). Confidence intervals may be very wide and unreliable with fewer than 20 observations. Consider collecting more data or interpreting results cautiously.',
-                                summary_stats$n)
-                    )
-                    self$results$insert(1, smallNNotice)
+                    add_message('warning', sprintf('Small sample size (n=%d). Confidence intervals may be very wide and unreliable with fewer than 20 observations. Consider collecting more data or interpreting results cautiously.',
+                                summary_stats$n))
                 }
 
-                # Add completion INFO notice (single line) at bottom
-                completionNotice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-                completionNotice$setContent(
-                    sprintf('Analysis completed using %d observations with mean follow-up %.1f %s (total person-time: %.1f person-%s).',
+                # Add completion info message
+                add_message('info', sprintf('Analysis completed using %d observations with mean follow-up %.1f %s (total person-time: %.1f person-%s).',
                             summary_stats$n, summary_stats$mean, self$options$output_unit,
-                            summary_stats$total_person_time, self$options$output_unit)
-                )
-                self$results$insert(999, completionNotice)
+                            summary_stats$total_person_time, self$options$output_unit))
 
             } else {
                 # Handle case with no valid calculated times
@@ -977,48 +964,27 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$glossaryPanel$setContent(glossary_html)
             }
 
-            # Generate contextual warnings for data quality issues using Notices (single-line content)
+            # Generate contextual warnings for data quality issues using static Notices
             if (!is.null(calculated_times) && is.list(calculated_times) &&
                 !is.null(calculated_times$quality)) {
                 quality <- calculated_times$quality
 
-                # Insert position counter for multiple notices
-                notice_position <- 1
-
                 # Note: Negative intervals with remove_negative=FALSE are handled as ERROR
                 # (stop at line 491, caught by tryCatch above). No warning needed here.
 
-                # High missing data WARNING (single line)
+                # High missing data WARNING
                 if (quality$missing_values > 0) {
                     pct <- round(100 * quality$missing_values / quality$total_observations, 1)
                     if (pct > 10) {
-                        missingNotice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'missingData',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        missingNotice$setContent(
-                            sprintf('%d observations (%.1f%%) have missing time intervals. Investigate missing date values as this may affect study conclusions.',
-                                    quality$missing_values, pct)
-                        )
-                        self$results$insert(notice_position, missingNotice)
-                        notice_position <- notice_position + 1
+                        add_message('warning', sprintf('%d observations (%.1f%%) have missing time intervals. Investigate missing date values as this may affect study conclusions.',
+                                    quality$missing_values, pct))
                     }
                 }
 
-                # Future dates STRONG_WARNING (single line)
+                # Future dates STRONG_WARNING
                 if (quality$future_dates > 0) {
-                    futureDatesNotice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'futureDates',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    futureDatesNotice$setContent(
-                        sprintf('%d date values are in the future. Review date columns for data entry errors or incorrect date formats.',
-                                quality$future_dates)
-                    )
-                    self$results$insert(notice_position, futureDatesNotice)
-                    notice_position <- notice_position + 1
+                    add_message('strong_warning', sprintf('%d date values are in the future. Review date columns for data entry errors or incorrect date formats.',
+                                quality$future_dates))
                 }
             }
 
@@ -1104,6 +1070,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </div>
                 "
                 self$results$caveatsPanel$setContent(caveats_html)
+            }
+
+            # Output all collected messages
+            if (length(messages) > 0) {
+                self$results$messages$setContent(paste(messages, collapse = "\n"))
             }
         }
     )
