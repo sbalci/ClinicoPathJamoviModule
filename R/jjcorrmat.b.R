@@ -15,7 +15,54 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .processedData = NULL,
         .processedOptions = NULL,
         .options_hash = NULL,
-        .preset_recommendations = NULL,
+        # .preset_recommendations = NULL,  # Commented out - clinical preset feature disabled
+        .warnings = list(),  # Collect warnings for HTML display (avoids Notice serialization errors)
+
+        # Helper function to add warnings without Notice objects
+        .addWarning = function(type, message) {
+            private$.warnings[[length(private$.warnings) + 1]] <- list(
+                type = type,
+                message = message
+            )
+        },
+
+        # Display all collected warnings as HTML
+        .displayWarnings = function() {
+            if (length(private$.warnings) == 0) {
+                self$results$warnings$setVisible(FALSE)
+                return()
+            }
+
+            warning_html <- "<div style='margin: 10px 0;'>"
+
+            for (warning in private$.warnings) {
+                if (warning$type == "ERROR") {
+                    warning_html <- paste0(warning_html,
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<strong style='color: #721c24;'>❌ ERROR:</strong> <span style='color: #721c24;'>", warning$message, "</span>",
+                        "</div>")
+                } else if (warning$type == "STRONG_WARNING") {
+                    warning_html <- paste0(warning_html,
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<strong style='color: #856404;'>⚠️ STRONG WARNING:</strong> <span style='color: #856404;'>", warning$message, "</span>",
+                        "</div>")
+                } else if (warning$type == "WARNING") {
+                    warning_html <- paste0(warning_html,
+                        "<div style='background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<strong style='color: #664d03;'>⚠️ WARNING:</strong> <span style='color: #664d03;'>", warning$message, "</span>",
+                        "</div>")
+                } else if (warning$type == "INFO") {
+                    warning_html <- paste0(warning_html,
+                        "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
+                        "<strong style='color: #0c5460;'>ℹ️ INFO:</strong> <span style='color: #0c5460;'>", warning$message, "</span>",
+                        "</div>")
+                }
+            }
+
+            warning_html <- paste0(warning_html, "</div>")
+            self$results$warnings$setContent(warning_html)
+            self$results$warnings$setVisible(TRUE)
+        },
 
         # init ----
         .init = function() {
@@ -138,13 +185,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$dep) < 2)
                 return(FALSE)
             if (nrow(self$data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.noCompleteRows',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Data contains no complete rows. Please check for missing values in selected variables.')
-                self$results$insert(1, notice)
+                private$.addWarning("ERROR", 'Data contains no complete rows. Please check for missing values in selected variables.')
                 return(FALSE)
             }
 
@@ -162,13 +203,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (var in self$options$dep) {
                 varname <- resolve_name(var)
                 if (!(varname %in% names(mydata))) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = '.variableNotFound',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf('Variable "%s" not found in data. Please select valid variables and re-run.', var))
-                    self$results$insert(1, notice)
+                    private$.addWarning("ERROR", sprintf('Variable "%s" not found in data. Please select valid variables and re-run.', var))
                     return(FALSE)
                 }
             }
@@ -199,24 +234,12 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Stop if correlating category codes
             if (length(factor_warnings) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.categoricalVariables',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Correlation analysis requires numeric variables. The following are categorical: %s. Please select continuous numeric variables.', paste(factor_warnings, collapse = ', ')))
-                self$results$insert(1, notice)
+                private$.addWarning("ERROR", sprintf('Correlation analysis requires numeric variables. The following are categorical: %s. Please select continuous numeric variables.', paste(factor_warnings, collapse = ', ')))
                 return(FALSE)
             }
 
             if (numeric_vars < 2) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.insufficientNumericVars',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Correlation analysis requires at least 2 numeric variables with sufficient variation. Found %d valid variable(s). Please select additional variables.', numeric_vars))
-                self$results$insert(1, notice)
+                private$.addWarning("ERROR", sprintf('Correlation analysis requires at least 2 numeric variables with sufficient variation. Found %d valid variable(s). Please select additional variables.', numeric_vars))
                 return(FALSE)
             }
 
@@ -230,7 +253,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste(self$options$dep, collapse = ","),
                 self$options$typestatistics, self$options$matrixtype, self$options$matrixmethod,
                 self$options$siglevel, self$options$conflevel, self$options$padjustmethod, self$options$naHandling,
-                self$options$k, self$options$partial, self$options$clinicalpreset, self$options$lowcolor, self$options$midcolor, self$options$highcolor,
+                self$options$k, self$options$partial, # self$options$clinicalpreset,  # Commented out - clinical preset disabled
+                self$options$lowcolor, self$options$midcolor, self$options$highcolor,
                 self$options$title, self$options$subtitle, self$options$caption,
                 self$options$plotwidth, self$options$plotheight,
                 collapse = "_"
@@ -246,7 +270,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Apply clinical preset configurations
-            private$.applyClinicalPreset()
+            # private$.applyClinicalPreset()  # Commented out - clinical preset feature disabled
 
             # Process type of statistics
             typestatistics <- self$options$typestatistics
@@ -286,7 +310,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 k = self$options$k,
                 partial = partial_flag,
                 naHandling = self$options$naHandling,
-                clinicalpreset = self$options$clinicalpreset,
+                # clinicalpreset = self$options$clinicalpreset,  # Commented out - clinical preset disabled
                 colors = colors,
                 title = title,
                 subtitle = subtitle,
@@ -340,61 +364,44 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .validateClinicalInputs = function() {
             # Check minimum sample size for reliable correlations
             if (nrow(self$data) < 20) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.smallSampleSize',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Small sample size (N = %d). Correlations with N < 20 may be unreliable. Consider collecting more data or interpreting results cautiously.', nrow(self$data)))
-                self$results$insert(1, notice)
+                private$.addWarning("STRONG_WARNING", sprintf('Small sample size (N = %d). Correlations with N < 20 may be unreliable. Consider collecting more data or interpreting results cautiously.', nrow(self$data)))
             }
 
             # Check for too many variables (interpretation complexity)
             if (length(self$options$dep) > 10) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.manyVariables',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Correlation matrix with %d variables may be complex to interpret. Consider focusing on key variables of interest.', length(self$options$dep)))
-                self$results$insert(1, notice)
+                private$.addWarning("WARNING", sprintf('Correlation matrix with %d variables may be complex to interpret. Consider focusing on key variables of interest.', length(self$options$dep)))
             }
 
             # Check partial correlations requirements
             if (self$options$partial && length(self$options$dep) < 3) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.partialNeedsThreeVars',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Partial correlations require at least 3 variables to control for confounding. Found %d variable(s). Computing zero-order correlations instead.', length(self$options$dep)))
-                self$results$insert(1, notice)
+                private$.addWarning("WARNING", sprintf('Partial correlations require at least 3 variables to control for confounding. Found %d variable(s). Computing zero-order correlations instead.', length(self$options$dep)))
             }
 
             return(TRUE)
         },
 
         # Apply clinical preset configurations
-        .applyClinicalPreset = function() {
-            preset <- self$options$clinicalpreset
-
-            if (is.null(preset) || preset == "custom") {
-                return()  # No preset modifications for custom analysis
-            }
-
-            if (preset == "biomarker") {
-                self$options$typestatistics <- "robust"
-                private$.preset_recommendations <- .("For biomarker correlations, robust correlation methods are recommended to handle outliers.")
-
-            } else if (preset == "labvalues") {
-                self$options$typestatistics <- "parametric"
-                private$.preset_recommendations <- .("For lab values, parametric correlations are often appropriate if distributions are normal.")
-
-            } else if (preset == "imaging") {
-                self$options$typestatistics <- "nonparametric"
-                private$.preset_recommendations <- .("For imaging metrics, consider nonparametric correlations due to potentially skewed distributions.")
-            }
-        },
+        # COMMENTED OUT - Clinical preset feature disabled
+        # .applyClinicalPreset = function() {
+        #     preset <- self$options$clinicalpreset
+        #
+        #     if (is.null(preset) || preset == "custom") {
+        #         return()  # No preset modifications for custom analysis
+        #     }
+        #
+        #     if (preset == "biomarker") {
+        #         self$options$typestatistics <- "robust"
+        #         private$.preset_recommendations <- .("For biomarker correlations, robust correlation methods are recommended to handle outliers.")
+        #
+        #     } else if (preset == "labvalues") {
+        #         self$options$typestatistics <- "parametric"
+        #         private$.preset_recommendations <- .("For lab values, parametric correlations are often appropriate if distributions are normal.")
+        #
+        #     } else if (preset == "imaging") {
+        #         self$options$typestatistics <- "nonparametric"
+        #         private$.preset_recommendations <- .("For imaging metrics, consider nonparametric correlations due to potentially skewed distributions.")
+        #     }
+        # },
 
         # Generate clinical interpretation of correlation results
         .generateInterpretation = function(mydata, options_data) {
@@ -448,13 +455,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Use ggstatsplot's approach for partial correlations
                         # Note: We cannot easily recalculate partial correlations here,
                         # so we note that they were computed
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = '.partialComputed',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent('Partial correlations were computed by ggstatsplot. Summary statistics show correlation count only.')
-                        self$results$insert(999, notice)
+                        private$.addWarning("INFO", 'Partial correlations were computed by ggstatsplot. Summary statistics show correlation count only.')
                     } else {
                         # Zero-order correlations
                         for (i in 1:(ncol(cor_data)-1)) {
@@ -480,13 +481,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     # Robust and Bayesian methods computed by ggstatsplot
                     # We cannot easily recalculate these, so just report method used
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = '.robustBayesNote',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf('%s correlations computed by ggstatsplot. Detailed statistics shown in plot only.', method_display))
-                    self$results$insert(999, notice)
+                    private$.addWarning("INFO", sprintf('%s correlations computed by ggstatsplot. Detailed statistics shown in plot only.', method_display))
                 }
 
                 cor_test_results
@@ -600,13 +595,14 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
 
                 # Add clinical preset recommendations if available
-                if (!is.null(private$.preset_recommendations)) {
-                    interpretation <- paste0(
-                        interpretation,
-                        "<br><br><strong>", .("Clinical Preset Guidance:"), "</strong><br>",
-                        "• ", private$.preset_recommendations
-                    )
-                }
+                # COMMENTED OUT - Clinical preset feature disabled
+                # if (!is.null(private$.preset_recommendations)) {
+                #     interpretation <- paste0(
+                #         interpretation,
+                #         "<br><br><strong>", .("Clinical Preset Guidance:"), "</strong><br>",
+                #         "• ", private$.preset_recommendations
+                #     )
+                # }
 
                 interpretation <- paste0(interpretation, "</p>")
             }
@@ -617,6 +613,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # run ----
         
 .run = function() {
+
+    # Initialize warnings list (avoid Notice serialization errors)
+    private$.warnings <- list()
 
     # Initial Message ----
     if ( is.null(self$options$dep) || length(self$options$dep) < 2 ) {
@@ -656,19 +655,16 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         self$results$todo$setContent(todo)
 
         if (nrow(self$data) == 0) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = '.noCompleteRowsRun',
-                type = jmvcore::NoticeType$ERROR
-            )
-            notice$setContent('Data contains no complete rows after filtering. Please check for missing values.')
-            self$results$insert(1, notice)
+            private$.addWarning("ERROR", 'Data contains no complete rows after filtering. Please check for missing values.')
+            private$.displayWarnings()
             return()
         }
 
         # Validate inputs before processing
-        if (!private$.validateInputs())
+        if (!private$.validateInputs()) {
+            private$.displayWarnings()
             return()
+        }
         private$.validateClinicalInputs()
 
         # Pre-process data and options for performance
@@ -682,6 +678,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateInterpretation(mydata, options_data)
 
         }
+
+        # Display all collected warnings at the end
+        private$.displayWarnings()
 
     }
 },
@@ -737,7 +736,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 .populateTable = function(mydata, options_data, group = NULL) {
     table <- self$results$table
-    table$clear()
+    # Clear existing rows - jamovi tables use deleteRows(), not clear()
+    table$deleteRows()
 
     resolve_name <- function(var) {
         if (is.null(var)) return(NULL)
@@ -889,12 +889,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_obs <- nrow(mydata)
                 n_corr <- (n_vars * (n_vars - 1)) / 2
 
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-
                 method_name <- switch(self$options$typestatistics,
                     "parametric" = "Pearson",
                     "nonparametric" = "Spearman",
@@ -904,9 +898,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 corr_type <- if (self$options$partial && n_vars >= 3) "partial" else "zero-order"
 
-                notice$setContent(sprintf('Analysis completed successfully. Computed %d %s %s correlations from %d variables (N = %d observations).',
+                private$.addWarning("INFO", sprintf('Analysis completed successfully. Computed %d %s %s correlations from %d variables (N = %d observations).',
                     as.integer(n_corr), corr_type, method_name, n_vars, n_obs))
-                self$results$insert(999, notice)
             }
 
             # Print Plot ----

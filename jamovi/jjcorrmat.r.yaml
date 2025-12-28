@@ -16,7 +16,7 @@ clearWith:
     - padjustmethod
     - k
     - partial
-    - clinicalpreset
+    # - clinicalpreset
     - lowcolor
     - midcolor
     - highcolor
@@ -32,6 +32,11 @@ items:
     - name:  todo
       title: Analysis Guide
       type:  Html
+
+    - name: warnings
+      title: Warnings and Notices
+      type: Html
+      visible: true
 
     - name: interpretation
       title: Clinical Interpretation

@@ -260,3 +260,88 @@ options:
       description:
         R: Maximum value for y-axis (when custom limits enabled).
         jamovi: Set maximum value for y-axis.
+
+    - name: line_type
+      title: "Line Type"
+      type: List
+      options:
+        - title: "Solid"
+          name: "1"
+        - title: "Dashed"
+          name: "2"
+        - title: "Dotted"
+          name: "3"
+        - title: "Dot-Dash"
+          name: "4"
+      default: "1"
+      description:
+        R: Line type for line plots (lty parameter).
+        jamovi: Choose line style for line plots.
+
+    - name: line_width
+      title: "Line Width"
+      type: Number
+      min: 0.5
+      max: 5.0
+      default: 1.0
+      description:
+        R: Width of lines in line plots (lwd parameter).
+        jamovi: Adjust line width for line plots.
+
+    - name: bar_width
+      title: "Bar Width"
+      type: Number
+      min: 0.5
+      max: 2.0
+      default: 1.0
+      description:
+        R: Width of bars in bar plots.
+        jamovi: Adjust width of bars in bar plots.
+
+    - name: grid_style
+      title: "Grid Style"
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Light"
+          name: light
+        - title: "Bold"
+          name: bold
+      default: default
+      description:
+        R: Style of grid lines.
+        jamovi: Choose grid line appearance.
+
+    - name: show_regression_line
+      title: "Show Regression Line"
+      type: Bool
+      default: false
+      description:
+        R: Whether to add a regression line to scatter plots.
+        jamovi: Add linear regression line to scatter plots.
+
+    - name: regression_line_color
+      title: "Regression Line Color"
+      type: List
+      options:
+        - title: "Red"
+          name: red
+        - title: "Blue"
+          name: blue
+        - title: "Green"
+          name: green
+        - title: "Black"
+          name: black
+      default: red
+      description:
+        R: Color of the regression line.
+        jamovi: Choose color for the regression line.
+
+    - name: show_confidence_interval
+      title: "Show Confidence Interval"
+      type: Bool
+      default: false
+      description:
+        R: Whether to display confidence interval for regression line.
+        jamovi: Display 95% confidence interval around regression line.

@@ -1,7 +1,7 @@
 ---
 name:  jjcorrmat
 title: Correlation Matrix
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
 version: '0.0.32'
@@ -204,25 +204,25 @@ options:
             Choose how missing values are handled. Listwise drops rows with missing
             values in selected variables; pairwise uses available data for each pair.
 
-    - name: clinicalpreset
-      title: Clinical Preset
-      type: List
-      options:
-        - title: Custom Analysis
-          name: custom
-        - title: Biomarker Correlations
-          name: biomarker
-        - title: Lab Value Relationships  
-          name: labvalues
-        - title: Imaging Metric Associations
-          name: imaging
-      default: custom
-      description:
-          R: >
-            Pre-configured settings optimized for common clinical correlation scenarios.
-            Biomarker: Focus on molecular correlations with robust methods.
-            Lab Values: Emphasize clinical laboratory parameter relationships.
-            Imaging: Specialized for radiological and pathological imaging metrics.
+    # - name: clinicalpreset
+    #   title: Clinical Preset
+    #   type: List
+    #   options:
+    #     - title: Custom Analysis
+    #       name: custom
+    #     - title: Biomarker Correlations
+    #       name: biomarker
+    #     - title: Lab Value Relationships
+    #       name: labvalues
+    #     - title: Imaging Metric Associations
+    #       name: imaging
+    #   default: custom
+    #   description:
+    #       R: >
+    #         Pre-configured settings optimized for common clinical correlation scenarios.
+    #         Biomarker: Focus on molecular correlations with robust methods.
+    #         Lab Values: Emphasize clinical laboratory parameter relationships.
+    #         Imaging: Specialized for radiological and pathological imaging metrics.
 
     - name: lowcolor
       title: Low Correlation Color

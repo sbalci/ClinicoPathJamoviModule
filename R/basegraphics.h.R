@@ -26,7 +26,14 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             x_min = "",
             x_max = "",
             y_min = "",
-            y_max = "", ...) {
+            y_max = "",
+            line_type = "1",
+            line_width = 1,
+            bar_width = 1,
+            grid_style = "default",
+            show_regression_line = FALSE,
+            regression_line_color = "red",
+            show_confidence_interval = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -168,6 +175,52 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "y_max",
                 y_max,
                 default="")
+            private$..line_type <- jmvcore::OptionList$new(
+                "line_type",
+                line_type,
+                options=list(
+                    "1",
+                    "2",
+                    "3",
+                    "4"),
+                default="1")
+            private$..line_width <- jmvcore::OptionNumber$new(
+                "line_width",
+                line_width,
+                min=0.5,
+                max=5,
+                default=1)
+            private$..bar_width <- jmvcore::OptionNumber$new(
+                "bar_width",
+                bar_width,
+                min=0.5,
+                max=2,
+                default=1)
+            private$..grid_style <- jmvcore::OptionList$new(
+                "grid_style",
+                grid_style,
+                options=list(
+                    "default",
+                    "light",
+                    "bold"),
+                default="default")
+            private$..show_regression_line <- jmvcore::OptionBool$new(
+                "show_regression_line",
+                show_regression_line,
+                default=FALSE)
+            private$..regression_line_color <- jmvcore::OptionList$new(
+                "regression_line_color",
+                regression_line_color,
+                options=list(
+                    "red",
+                    "blue",
+                    "green",
+                    "black"),
+                default="red")
+            private$..show_confidence_interval <- jmvcore::OptionBool$new(
+                "show_confidence_interval",
+                show_confidence_interval,
+                default=FALSE)
 
             self$.addOption(private$..plot_type)
             self$.addOption(private$..x_var)
@@ -190,6 +243,13 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..x_max)
             self$.addOption(private$..y_min)
             self$.addOption(private$..y_max)
+            self$.addOption(private$..line_type)
+            self$.addOption(private$..line_width)
+            self$.addOption(private$..bar_width)
+            self$.addOption(private$..grid_style)
+            self$.addOption(private$..show_regression_line)
+            self$.addOption(private$..regression_line_color)
+            self$.addOption(private$..show_confidence_interval)
         }),
     active = list(
         plot_type = function() private$..plot_type$value,
@@ -212,7 +272,14 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         x_min = function() private$..x_min$value,
         x_max = function() private$..x_max$value,
         y_min = function() private$..y_min$value,
-        y_max = function() private$..y_max$value),
+        y_max = function() private$..y_max$value,
+        line_type = function() private$..line_type$value,
+        line_width = function() private$..line_width$value,
+        bar_width = function() private$..bar_width$value,
+        grid_style = function() private$..grid_style$value,
+        show_regression_line = function() private$..show_regression_line$value,
+        regression_line_color = function() private$..regression_line_color$value,
+        show_confidence_interval = function() private$..show_confidence_interval$value),
     private = list(
         ..plot_type = NA,
         ..x_var = NA,
@@ -234,7 +301,14 @@ basegraphicsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..x_min = NA,
         ..x_max = NA,
         ..y_min = NA,
-        ..y_max = NA)
+        ..y_max = NA,
+        ..line_type = NA,
+        ..line_width = NA,
+        ..bar_width = NA,
+        ..grid_style = NA,
+        ..show_regression_line = NA,
+        ..regression_line_color = NA,
+        ..show_confidence_interval = NA)
 )
 
 basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -319,7 +393,14 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "x_min",
                     "x_max",
                     "y_min",
-                    "y_max")))}))
+                    "y_max",
+                    "line_type",
+                    "line_width",
+                    "bar_width",
+                    "grid_style",
+                    "show_regression_line",
+                    "regression_line_color",
+                    "show_confidence_interval")))}))
 
 basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "basegraphicsBase",
@@ -412,7 +493,14 @@ basegraphics <- function(
     x_min = "",
     x_max = "",
     y_min = "",
-    y_max = "") {
+    y_max = "",
+    line_type = "1",
+    line_width = 1,
+    bar_width = 1,
+    grid_style = "default",
+    show_regression_line = FALSE,
+    regression_line_color = "red",
+    show_confidence_interval = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("basegraphics requires jmvcore to be installed (restart may be required)")
@@ -450,7 +538,14 @@ basegraphics <- function(
         x_min = x_min,
         x_max = x_max,
         y_min = y_min,
-        y_max = y_max)
+        y_max = y_max,
+        line_type = line_type,
+        line_width = line_width,
+        bar_width = bar_width,
+        grid_style = grid_style,
+        show_regression_line = show_regression_line,
+        regression_line_color = regression_line_color,
+        show_confidence_interval = show_confidence_interval)
 
     analysis <- basegraphicsClass$new(
         options = options,

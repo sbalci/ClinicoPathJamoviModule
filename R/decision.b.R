@@ -1034,7 +1034,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Populate raw contingency jamovi table (using user's selected levels, not lexicographic order)
                 raw_contingency <- self$results$rawContingency
-                try(raw_contingency$clear(), silent = TRUE)
+                # Clear existing rows - jamovi tables use deleteRows(), not clear()
+                try(raw_contingency$deleteRows(), silent = TRUE)
 
                 # Get actual levels from the ORIGINAL variables (before recoding)
                 test_levels <- if (is.factor(mydata[[testVariable]])) {
@@ -1176,7 +1177,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Populate raw combination count jamovi table
                 raw_counts_table <- self$results$rawCounts
-                try(raw_counts_table$clear(), silent = TRUE)
+                # Clear existing rows - jamovi tables use deleteRows(), not clear()
+                try(raw_counts_table$deleteRows(), silent = TRUE)
 
                 if (!is.null(raw_counts_table$getColumn("test_level"))) {
                     raw_counts_table$getColumn("test_level")$setTitle(testVariable)

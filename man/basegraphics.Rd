@@ -26,7 +26,14 @@ basegraphics(
   x_min = "",
   x_max = "",
   y_min = "",
-  y_max = ""
+  y_max = "",
+  line_type = "1",
+  line_width = 1,
+  bar_width = 1,
+  grid_style = "default",
+  show_regression_line = FALSE,
+  regression_line_color = "red",
+  show_confidence_interval = FALSE
 )
 }
 \arguments{
