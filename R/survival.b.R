@@ -3949,569 +3949,571 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.setExplanationContent("copyReadySentencesExplanation", copy_html)
                 }
             }
-            
+
             # Parametric Survival Analysis Methods ----
-            
-            ,
-            .parametricSurvival = function(results) {
+            # COMMENTED OUT: Parametric options are disabled in .a.yaml
+            # Uncomment these methods when parametric options are enabled
+
+            # ,
+            # .parametricSurvival = function(results) {
                 
-                # Check if flexsurv package is available
-                if (!requireNamespace("flexsurv", quietly = TRUE)) {
-                    warning(.("flexsurv package is required for parametric survival models. Please install it: install.packages('flexsurv')"))
-                    return()
-                }
-                
-                library(flexsurv)
-                
-                cleanData <- results$cleanData
-                
-                # Prepare formula for parametric models
-                time_var <- .escapeVariableNames(results$name1time)
-                outcome_var <- .escapeVariableNames(results$name2outcome)
-                
-                if (self$options$parametric_covariates && !is.null(self$options$explanatory)) {
-                    explanatory_names <- self$options$explanatory
-                    # Escape variable names for safe formula construction
-                    escaped_explanatory_names <- .escapeVariableNames(explanatory_names)
-                    # Build covariate formula
-                    covariate_formula <- paste(escaped_explanatory_names, collapse = " + ")
-                    formula_str <- paste0("Surv(", time_var, ", ", outcome_var, ") ~ ", covariate_formula)
-                } else {
-                    # Intercept-only model
-                    formula_str <- paste0("Surv(", time_var, ", ", outcome_var, ") ~ 1")
-                }
-                
-                survival_formula <- as.formula(formula_str)
-                
-                # List of distributions to compare if enabled
-                if (self$options$compare_distributions) {
-                    distributions <- c("exp", "weibull", "lnorm", "llogis", "gamma", "gengamma")
-                } else {
-                    distributions <- self$options$parametric_distribution
-                }
-                
-                # Fit parametric models
-                model_results <- list()
-                comparison_data <- data.frame()
-                
-                for (dist in distributions) {
-                    tryCatch({
-                        if (dist == "survspline") {
-                            # Fit spline model
-                            model <- flexsurvspline(
-                                formula = survival_formula,
-                                data = cleanData,
-                                k = self$options$spline_knots,
-                                scale = self$options$spline_scale
-                            )
-                        } else {
-                            # Fit standard parametric model
-                            model <- flexsurvreg(
-                                formula = survival_formula,
-                                data = cleanData,
-                                dist = dist
-                            )
-                        }
-                        
-                        model_results[[dist]] <- model
-                        
-                        # Extract model comparison metrics
-                        comparison_data <- rbind(comparison_data, data.frame(
-                            distribution = dist,
-                            aic = model$AIC,
-                            bic = model$AIC + (log(nrow(cleanData)) - 2) * model$npars,
-                            loglik = model$loglik,
-                            df = model$npars
-                        ))
-                        
-                    }, error = function(e) {
-                        message(paste(.("Failed to fit"), dist, .("distribution:"), e$message))
-                    })
-                }
-                
-                # Select best model if comparing multiple distributions
-                if (self$options$compare_distributions && nrow(comparison_data) > 1) {
-                    best_model_name <- comparison_data$distribution[which.min(comparison_data$aic)]
-                    best_model <- model_results[[best_model_name]]
-                    
-                    # Populate comparison table
-                    comparison_table <- self$results$parametricModelComparison
-                    for (i in 1:nrow(comparison_data)) {
-                        comparison_table$addRow(rowKey = i, values = list(
-                            distribution = comparison_data$distribution[i],
-                            aic = comparison_data$aic[i],
-                            bic = comparison_data$bic[i],
-                            loglik = comparison_data$loglik[i],
-                            df = comparison_data$df[i]
-                        ))
-                    }
-                } else {
-                    # Use single specified model
-                    best_model_name <- distributions[1]
-                    best_model <- model_results[[best_model_name]]
-                }
-                
-                # Populate model summary table
-                if (!is.null(best_model)) {
-                    # summary_data <- summary(best_model)
-                    coef_table <- best_model$res
-                    
-                    model_table <- self$results$parametricModelSummary
-                    for (i in 1:nrow(coef_table)) {
-                        # Calculate p-value if missing
-                        p_val <- if ("p" %in% colnames(coef_table)) {
-                            coef_table[i, "p"]
-                        } else {
-                            est <- coef_table[i, "est"]
-                            se <- coef_table[i, "se"]
-                            if (!is.na(se) && se > 0) 2 * (1 - pnorm(abs(est / se))) else NA
-                        }
-                        
-                        model_table$addRow(rowKey = i, values = list(
-                            parameter = rownames(coef_table)[i],
-                            estimate = coef_table[i, "est"],
-                            se = coef_table[i, "se"],
-                            ci_lower = coef_table[i, "L95%"],
-                            ci_upper = coef_table[i, "U95%"],
-                            pvalue = p_val
-                        ))
-                    }
-                    
-                    # Generate diagnostics
-                    if (self$options$parametric_diagnostics) {
-                        diagnostics_html <- private$.generateParametricDiagnostics(best_model, best_model_name)
-                        self$results$parametricDiagnostics$setContent(diagnostics_html)
-                    }
-                    
-                    # Store model for plotting functions
-                    private$.parametric_model <- best_model
-                    private$.parametric_model_name <- best_model_name
-                    private$.parametric_results <- results
-                }
-            }
-            
-            ,
-            .generateParametricDiagnostics = function(model, model_name) {
-                
-                diagnostics <- ""
-                
-                tryCatch({
-                    # Model fit statistics
-                    aic_val <- model$AIC
-                    loglik_val <- model$loglik
-                    npars <- model$npars
-                    n_obs <- model$N
-                    
-                    diagnostics <- paste0(
-                        '<div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6;">',
-                        '<h4>Parametric Model Diagnostics: ', toupper(model_name), '</h4>',
-                        '<table class="table table-striped" style="margin-bottom: 15px;">',
-                        '<tr><td><strong>Distribution:</strong></td><td>', model_name, '</td></tr>',
-                        '<tr><td><strong>Sample Size:</strong></td><td>', n_obs, '</td></tr>',
-                        '<tr><td><strong>Parameters:</strong></td><td>', npars, '</td></tr>',
-                        '<tr><td><strong>Log-likelihood:</strong></td><td>', round(loglik_val, 3), '</td></tr>',
-                        '<tr><td><strong>AIC:</strong></td><td>', round(aic_val, 3), '</td></tr>',
-                        '</table>'
-                    )
-                    
-                    # Add interpretation
-                    if (model_name == "weibull") {
-                        shape_param <- model$res[["shape", "est"]]
-                        if (shape_param < 1) {
-                            hazard_trend <- "decreasing over time (shape < 1)"
-                        } else if (shape_param > 1) {
-                            hazard_trend <- "increasing over time (shape > 1)"  
-                        } else {
-                            hazard_trend <- "constant over time (shape = 1, equivalent to exponential)"
-                        }
-                        diagnostics <- paste0(diagnostics,
-                            '<p><strong>Hazard Pattern:</strong> ', hazard_trend, '</p>'
-                        )
-                    }
-                    
-                    diagnostics <- paste0(diagnostics, '</div>')
-                    
-                }, error = function(e) {
-                    diagnostics <- paste0('<p>Error generating diagnostics: ', e$message, '</p>')
-                })
-                
-                return(diagnostics)
-            }
-            
-            # Parametric survival plot functions ----
-            
-            ,
-            .plotParametricSurvival = function(image, ...) {
-                
-                if (is.null(private$.parametric_model)) {
-                    return()
-                }
-                
-                model <- private$.parametric_model
-                results <- private$.parametric_results
-                cleanData <- results$cleanData
-                
-                library(ggplot2)
-                library(survival)
-                
-                # Generate survival curves from parametric model
-                max_time <- max(cleanData$CalculatedTime, na.rm = TRUE)
-                time_points <- seq(0, max_time, length.out = 100)
-                
-                # Get survival predictions
-                if (!is.null(self$options$explanatory) && self$options$parametric_covariates) {
-                    # Create prediction data for each group
-                    groups <- levels(cleanData[[self$options$explanatory]])
-                    plot_data <- data.frame()
-                    
-                    for (group in groups) {
-                        pred_data <- data.frame(
-                            time = time_points
-                        )
-                        pred_data[[self$options$explanatory]] <- group
-                        
-                        surv_pred <- summary(model, newdata = pred_data, t = time_points, ci = TRUE)
-                        
-                        group_data <- data.frame(
-                            time = time_points,
-                            survival = surv_pred$surv,
-                            lower = surv_pred$lcl,
-                            upper = surv_pred$ucl,
-                            group = group,
-                            type = "Parametric"
-                        )
-                        plot_data <- rbind(plot_data, group_data)
-                    }
-                    
-                    # Add Kaplan-Meier for comparison
-                    km_fit <- survfit(Surv(CalculatedTime, CalculatedOutcome) ~ get(self$options$explanatory), 
-                                     data = cleanData)
-                    km_summary <- summary(km_fit, times = time_points)
-                    
-                    if (length(groups) > 1) {
-                        for (i in 1:length(groups)) {
-                            group_indices <- km_summary$strata == paste0("get(self$options$explanatory)=", groups[i])
-                            if (any(group_indices)) {
-                                km_data <- data.frame(
-                                    time = km_summary$time[group_indices],
-                                    survival = km_summary$surv[group_indices],
-                                    lower = km_summary$lower[group_indices],
-                                    upper = km_summary$upper[group_indices],
-                                    group = groups[i],
-                                    type = "Kaplan-Meier"
-                                )
-                                plot_data <- rbind(plot_data, km_data)
-                            }
-                        }
-                    }
-                    
-                    # Create plot
-                    p <- ggplot(plot_data, aes(x = time, y = survival, color = group, linetype = type)) +
-                        geom_line(size = 1) +
-                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
-                        labs(
-                            title = paste(.("Parametric Survival Curves:"), private$.parametric_model_name),
-                            x = .("Time"),
-                            y = .("Survival Probability"),
-                            color = self$options$explanatory,
-                            linetype = .("Method")
-                        ) +
-                        theme_minimal() +
-                        scale_y_continuous(limits = c(0, 1))
-                        
-                } else {
-                    # Single survival curve
-                    surv_pred <- summary(model, t = time_points, ci = TRUE)
-                    
-                    plot_data <- data.frame(
-                        time = time_points,
-                        survival = surv_pred$surv,
-                        lower = surv_pred$lcl,
-                        upper = surv_pred$ucl,
-                        type = "Parametric"
-                    )
-                    
-                    # Add Kaplan-Meier
-                    km_fit <- survfit(Surv(CalculatedTime, CalculatedOutcome) ~ 1, data = cleanData)
-                    km_summary <- summary(km_fit, times = time_points)
-                    
-                    km_data <- data.frame(
-                        time = km_summary$time,
-                        survival = km_summary$surv,
-                        lower = km_summary$lower,
-                        upper = km_summary$upper,
-                        type = "Kaplan-Meier"
-                    )
-                    
-                    plot_data <- rbind(plot_data, km_data)
-                    
-                    p <- ggplot(plot_data, aes(x = time, y = survival, linetype = type)) +
-                        geom_line(size = 1, color = "blue") +
-                        geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "blue") +
-                        labs(
-                            title = paste(.("Parametric vs Kaplan-Meier Survival:"), private$.parametric_model_name),
-                            x = .("Time"), 
-                            y = .("Survival Probability"),
-                            linetype = .("Method")
-                        ) +
-                        theme_minimal() +
-                        scale_y_continuous(limits = c(0, 1))
-                }
-                
-                print(p)
-                TRUE
-            }
-            
-            ,
-            .plotHazardFunction = function(image, ...) {
-                
-                if (is.null(private$.parametric_model)) {
-                    return()
-                }
-                
-                model <- private$.parametric_model
-                results <- private$.parametric_results
-                cleanData <- results$cleanData
-                
-                library(ggplot2)
-                
-                max_time <- max(cleanData$CalculatedTime, na.rm = TRUE)
-                time_points <- seq(0.1, max_time, length.out = 100)  # Start from 0.1 to avoid issues at t=0
-                
-                tryCatch({
-                    # Get hazard predictions
-                    if (!is.null(self$options$explanatory) && self$options$parametric_covariates) {
-                        groups <- levels(cleanData[[self$options$explanatory]])
-                        plot_data <- data.frame()
-                        
-                        for (group in groups) {
-                            pred_data <- data.frame(
-                                time = time_points
-                            )
-                            pred_data[[self$options$explanatory]] <- group
-                            
-                            hazard_pred <- summary(model, newdata = pred_data, t = time_points, 
-                                                  type = "hazard", ci = TRUE)
-                            
-                            group_data <- data.frame(
-                                time = time_points,
-                                hazard = hazard_pred$est,
-                                lower = hazard_pred$lcl,
-                                upper = hazard_pred$ucl,
-                                group = group
-                            )
-                            plot_data <- rbind(plot_data, group_data)
-                        }
-                        
-                        p <- ggplot(plot_data, aes(x = time, y = hazard, color = group)) +
-                            geom_line(size = 1) +
-                            geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
-                            labs(
-                                title = paste(.("Hazard Function:"), private$.parametric_model_name),
-                                x = .("Time"),
-                                y = .("Hazard Rate"),
-                                color = self$options$explanatory
-                            ) +
-                            theme_minimal()
-                            
-                    } else {
-                        hazard_pred <- summary(model, t = time_points, type = "hazard", ci = TRUE)
-                        
-                        plot_data <- data.frame(
-                            time = time_points,
-                            hazard = hazard_pred$est,
-                            lower = hazard_pred$lcl,
-                            upper = hazard_pred$ucl
-                        )
-                        
-                        p <- ggplot(plot_data, aes(x = time, y = hazard)) +
-                            geom_line(size = 1, color = "red") +
-                            geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "red") +
-                            labs(
-                                title = paste(.("Hazard Function:"), private$.parametric_model_name),
-                                x = .("Time"),
-                                y = .("Hazard Rate")
-                            ) +
-                            theme_minimal()
-                    }
-                    
-                    print(p)
-                    
-                }, error = function(e) {
-                    # Fallback simple plot if hazard estimation fails
-                    p <- ggplot() +
-                        annotate("text", x = 0.5, y = 0.5, 
-                                label = paste(.("Hazard plot unavailable for"), private$.parametric_model_name),
-                                size = 4) +
-                        theme_void()
-                    print(p)
-                })
-                
-                TRUE
-            }
-            
-            ,
-            .plotExtrapolation = function(image, ...) {
-                
-                if (is.null(private$.parametric_model)) {
-                    return()
-                }
-                
-                model <- private$.parametric_model
-                results <- private$.parametric_results
-                cleanData <- results$cleanData
-                
-                library(ggplot2)
-                library(survival)
-                
-                max_observed_time <- max(cleanData$CalculatedTime, na.rm = TRUE)
-                
-                # Set extrapolation time horizon
-                if (self$options$extrapolation_time > 0) {
-                    max_extrap_time <- self$options$extrapolation_time
-                } else {
-                    max_extrap_time <- 2 * max_observed_time  # Default: 2x observed time
-                }
-                
-                # Time points for observed period
-                observed_times <- seq(0, max_observed_time, length.out = 50)
-                # Time points for extrapolation period
-                extrap_times <- seq(max_observed_time, max_extrap_time, length.out = 50)
-                all_times <- c(observed_times, extrap_times)
-                
-                if (!is.null(self$options$explanatory) && self$options$parametric_covariates) {
-                    groups <- levels(cleanData[[self$options$explanatory]])
-                    plot_data <- data.frame()
-                    extrap_data <- data.frame()
-                    
-                    for (group in groups) {
-                        # Observed period predictions
-                        pred_data_obs <- data.frame(time = observed_times)
-                        pred_data_obs[[self$options$explanatory]] <- group
-                        surv_pred_obs <- summary(model, newdata = pred_data_obs, t = observed_times, ci = TRUE)
-                        
-                        obs_data <- data.frame(
-                            time = observed_times,
-                            survival = surv_pred_obs$surv,
-                            lower = surv_pred_obs$lcl,
-                            upper = surv_pred_obs$ucl,
-                            group = group,
-                            period = "Observed"
-                        )
-                        
-                        # Extrapolation period predictions
-                        pred_data_ext <- data.frame(time = extrap_times)
-                        pred_data_ext[[self$options$explanatory]] <- group
-                        surv_pred_ext <- summary(model, newdata = pred_data_ext, t = extrap_times, ci = TRUE)
-                        
-                        ext_data <- data.frame(
-                            time = extrap_times,
-                            survival = surv_pred_ext$surv,
-                            lower = surv_pred_ext$lcl,
-                            upper = surv_pred_ext$ucl,
-                            group = group,
-                            period = "Extrapolated"
-                        )
-                        
-                        plot_data <- rbind(plot_data, obs_data, ext_data)
-                        
-                        # Store extrapolation table data
-                        extrap_table_times <- seq(max_observed_time, max_extrap_time, length.out = 10)
-                        pred_data_table <- data.frame(time = extrap_table_times)
-                        pred_data_table[[self$options$explanatory]] <- group
-                        surv_pred_table <- summary(model, newdata = pred_data_table, t = extrap_table_times, ci = TRUE)
-                        
-                        group_extrap <- data.frame(
-                            time = extrap_table_times,
-                            survival = surv_pred_table$surv,
-                            ci_lower = surv_pred_table$lcl,
-                            ci_upper = surv_pred_table$ucl,
-                            group = group
-                        )
-                        extrap_data <- rbind(extrap_data, group_extrap)
-                    }
-                    
-                    p <- ggplot(plot_data, aes(x = time, y = survival, color = group)) +
-                        geom_line(aes(linetype = period), size = 1) +
-                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
-                        geom_vline(xintercept = max_observed_time, linetype = "dashed", color = "gray") +
-                        annotate("text", x = max_observed_time, y = 0.9, 
-                                label = .("End of observed data"), angle = 90, vjust = -0.5) +
-                        labs(
-                            title = paste(.("Survival Extrapolation:"), private$.parametric_model_name),
-                            x = .("Time"),
-                            y = .("Survival Probability"),
-                            color = self$options$explanatory,
-                            linetype = .("Period")
-                        ) +
-                        theme_minimal() +
-                        scale_y_continuous(limits = c(0, 1))
-                        
-                } else {
-                    # Single curve extrapolation
-                    surv_pred_obs <- summary(model, t = observed_times, ci = TRUE)
-                    surv_pred_ext <- summary(model, t = extrap_times, ci = TRUE)
-                    
-                    obs_data <- data.frame(
-                        time = observed_times,
-                        survival = surv_pred_obs$surv,
-                        lower = surv_pred_obs$lcl,
-                        upper = surv_pred_obs$ucl,
-                        period = "Observed"
-                    )
-                    
-                    ext_data <- data.frame(
-                        time = extrap_times,
-                        survival = surv_pred_ext$surv,
-                        lower = surv_pred_ext$lcl,
-                        upper = surv_pred_ext$ucl,
-                        period = "Extrapolated"
-                    )
-                    
-                    plot_data <- rbind(obs_data, ext_data)
-                    
-                    p <- ggplot(plot_data, aes(x = time, y = survival, linetype = period)) +
-                        geom_line(size = 1, color = "blue") +
-                        geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "blue") +
-                        geom_vline(xintercept = max_observed_time, linetype = "dashed", color = "gray") +
-                        annotate("text", x = max_observed_time, y = 0.9, 
-                                label = .("End of observed data"), angle = 90, vjust = -0.5) +
-                        labs(
-                            title = paste(.("Survival Extrapolation:"), private$.parametric_model_name),
-                            x = .("Time"),
-                            y = .("Survival Probability"),
-                            linetype = .("Period")
-                        ) +
-                        theme_minimal() +
-                        scale_y_continuous(limits = c(0, 1))
-                        
-                    # Store extrapolation table data for single curve
-                    extrap_table_times <- seq(max_observed_time, max_extrap_time, length.out = 10)
-                    surv_pred_table <- summary(model, t = extrap_table_times, ci = TRUE)
-                    
-                    extrap_data <- data.frame(
-                        time = extrap_table_times,
-                        survival = surv_pred_table$surv,
-                        ci_lower = surv_pred_table$lcl,
-                        ci_upper = surv_pred_table$ucl
-                    )
-                }
-                
-                # Populate extrapolation table
-                extrap_table <- self$results$extrapolationTable
-                for (i in 1:nrow(extrap_data)) {
-                    row_data <- list(
-                        time = extrap_data$time[i],
-                        survival = extrap_data$survival[i],
-                        ci_lower = extrap_data$ci_lower[i],
-                        ci_upper = extrap_data$ci_upper[i]
-                    )
-                    extrap_table$addRow(rowKey = i, values = row_data)
-                }
-                
-                print(p)
-                TRUE
-            }
+#                 # Check if flexsurv package is available
+#                 if (!requireNamespace("flexsurv", quietly = TRUE)) {
+#                     warning(.("flexsurv package is required for parametric survival models. Please install it: install.packages('flexsurv')"))
+#                     return()
+#                 }
+#                 
+#                 library(flexsurv)
+#                 
+#                 cleanData <- results$cleanData
+#                 
+#                 # Prepare formula for parametric models
+#                 time_var <- .escapeVariableNames(results$name1time)
+#                 outcome_var <- .escapeVariableNames(results$name2outcome)
+#                 
+#                 if (self$options$parametric_covariates && !is.null(self$options$explanatory)) {
+#                     explanatory_names <- self$options$explanatory
+#                     # Escape variable names for safe formula construction
+#                     escaped_explanatory_names <- .escapeVariableNames(explanatory_names)
+#                     # Build covariate formula
+#                     covariate_formula <- paste(escaped_explanatory_names, collapse = " + ")
+#                     formula_str <- paste0("Surv(", time_var, ", ", outcome_var, ") ~ ", covariate_formula)
+#                 } else {
+#                     # Intercept-only model
+#                     formula_str <- paste0("Surv(", time_var, ", ", outcome_var, ") ~ 1")
+#                 }
+#                 
+#                 survival_formula <- as.formula(formula_str)
+#                 
+#                 # List of distributions to compare if enabled
+#                 if (self$options$compare_distributions) {
+#                     distributions <- c("exp", "weibull", "lnorm", "llogis", "gamma", "gengamma")
+#                 } else {
+#                     distributions <- self$options$parametric_distribution
+#                 }
+#                 
+#                 # Fit parametric models
+#                 model_results <- list()
+#                 comparison_data <- data.frame()
+#                 
+#                 for (dist in distributions) {
+#                     tryCatch({
+#                         if (dist == "survspline") {
+#                             # Fit spline model
+#                             model <- flexsurvspline(
+#                                 formula = survival_formula,
+#                                 data = cleanData,
+#                                 k = self$options$spline_knots,
+#                                 scale = self$options$spline_scale
+#                             )
+#                         } else {
+#                             # Fit standard parametric model
+#                             model <- flexsurvreg(
+#                                 formula = survival_formula,
+#                                 data = cleanData,
+#                                 dist = dist
+#                             )
+#                         }
+#                         
+#                         model_results[[dist]] <- model
+#                         
+#                         # Extract model comparison metrics
+#                         comparison_data <- rbind(comparison_data, data.frame(
+#                             distribution = dist,
+#                             aic = model$AIC,
+#                             bic = model$AIC + (log(nrow(cleanData)) - 2) * model$npars,
+#                             loglik = model$loglik,
+#                             df = model$npars
+#                         ))
+#                         
+#                     }, error = function(e) {
+#                         message(paste(.("Failed to fit"), dist, .("distribution:"), e$message))
+#                     })
+#                 }
+#                 
+#                 # Select best model if comparing multiple distributions
+#                 if (self$options$compare_distributions && nrow(comparison_data) > 1) {
+#                     best_model_name <- comparison_data$distribution[which.min(comparison_data$aic)]
+#                     best_model <- model_results[[best_model_name]]
+#                     
+#                     # Populate comparison table
+#                     comparison_table <- self$results$parametricModelComparison
+#                     for (i in 1:nrow(comparison_data)) {
+#                         comparison_table$addRow(rowKey = i, values = list(
+#                             distribution = comparison_data$distribution[i],
+#                             aic = comparison_data$aic[i],
+#                             bic = comparison_data$bic[i],
+#                             loglik = comparison_data$loglik[i],
+#                             df = comparison_data$df[i]
+#                         ))
+#                     }
+#                 } else {
+#                     # Use single specified model
+#                     best_model_name <- distributions[1]
+#                     best_model <- model_results[[best_model_name]]
+#                 }
+#                 
+#                 # Populate model summary table
+#                 if (!is.null(best_model)) {
+#                     # summary_data <- summary(best_model)
+#                     coef_table <- best_model$res
+#                     
+#                     model_table <- self$results$parametricModelSummary
+#                     for (i in 1:nrow(coef_table)) {
+#                         # Calculate p-value if missing
+#                         p_val <- if ("p" %in% colnames(coef_table)) {
+#                             coef_table[i, "p"]
+#                         } else {
+#                             est <- coef_table[i, "est"]
+#                             se <- coef_table[i, "se"]
+#                             if (!is.na(se) && se > 0) 2 * (1 - pnorm(abs(est / se))) else NA
+#                         }
+#                         
+#                         model_table$addRow(rowKey = i, values = list(
+#                             parameter = rownames(coef_table)[i],
+#                             estimate = coef_table[i, "est"],
+#                             se = coef_table[i, "se"],
+#                             ci_lower = coef_table[i, "L95%"],
+#                             ci_upper = coef_table[i, "U95%"],
+#                             pvalue = p_val
+#                         ))
+#                     }
+#                     
+#                     # Generate diagnostics
+#                     if (self$options$parametric_diagnostics) {
+#                         diagnostics_html <- private$.generateParametricDiagnostics(best_model, best_model_name)
+#                         self$results$parametricDiagnostics$setContent(diagnostics_html)
+#                     }
+#                     
+#                     # Store model for plotting functions
+#                     private$.parametric_model <- best_model
+#                     private$.parametric_model_name <- best_model_name
+#                     private$.parametric_results <- results
+#                 }
+#             }
+#             
+#             ,
+#             .generateParametricDiagnostics = function(model, model_name) {
+#                 
+#                 diagnostics <- ""
+#                 
+#                 tryCatch({
+#                     # Model fit statistics
+#                     aic_val <- model$AIC
+#                     loglik_val <- model$loglik
+#                     npars <- model$npars
+#                     n_obs <- model$N
+#                     
+#                     diagnostics <- paste0(
+#                         '<div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6;">',
+#                         '<h4>Parametric Model Diagnostics: ', toupper(model_name), '</h4>',
+#                         '<table class="table table-striped" style="margin-bottom: 15px;">',
+#                         '<tr><td><strong>Distribution:</strong></td><td>', model_name, '</td></tr>',
+#                         '<tr><td><strong>Sample Size:</strong></td><td>', n_obs, '</td></tr>',
+#                         '<tr><td><strong>Parameters:</strong></td><td>', npars, '</td></tr>',
+#                         '<tr><td><strong>Log-likelihood:</strong></td><td>', round(loglik_val, 3), '</td></tr>',
+#                         '<tr><td><strong>AIC:</strong></td><td>', round(aic_val, 3), '</td></tr>',
+#                         '</table>'
+#                     )
+#                     
+#                     # Add interpretation
+#                     if (model_name == "weibull") {
+#                         shape_param <- model$res[["shape", "est"]]
+#                         if (shape_param < 1) {
+#                             hazard_trend <- "decreasing over time (shape < 1)"
+#                         } else if (shape_param > 1) {
+#                             hazard_trend <- "increasing over time (shape > 1)"  
+#                         } else {
+#                             hazard_trend <- "constant over time (shape = 1, equivalent to exponential)"
+#                         }
+#                         diagnostics <- paste0(diagnostics,
+#                             '<p><strong>Hazard Pattern:</strong> ', hazard_trend, '</p>'
+#                         )
+#                     }
+#                     
+#                     diagnostics <- paste0(diagnostics, '</div>')
+#                     
+#                 }, error = function(e) {
+#                     diagnostics <- paste0('<p>Error generating diagnostics: ', e$message, '</p>')
+#                 })
+#                 
+#                 return(diagnostics)
+#             }
+#             
+#             # Parametric survival plot functions ----
+#             
+#             ,
+#             .plotParametricSurvival = function(image, ...) {
+#                 
+#                 if (is.null(private$.parametric_model)) {
+#                     return()
+#                 }
+#                 
+#                 model <- private$.parametric_model
+#                 results <- private$.parametric_results
+#                 cleanData <- results$cleanData
+#                 
+#                 library(ggplot2)
+#                 library(survival)
+#                 
+#                 # Generate survival curves from parametric model
+#                 max_time <- max(cleanData$CalculatedTime, na.rm = TRUE)
+#                 time_points <- seq(0, max_time, length.out = 100)
+#                 
+#                 # Get survival predictions
+#                 if (!is.null(self$options$explanatory) && self$options$parametric_covariates) {
+#                     # Create prediction data for each group
+#                     groups <- levels(cleanData[[self$options$explanatory]])
+#                     plot_data <- data.frame()
+#                     
+#                     for (group in groups) {
+#                         pred_data <- data.frame(
+#                             time = time_points
+#                         )
+#                         pred_data[[self$options$explanatory]] <- group
+#                         
+#                         surv_pred <- summary(model, newdata = pred_data, t = time_points, ci = TRUE)
+#                         
+#                         group_data <- data.frame(
+#                             time = time_points,
+#                             survival = surv_pred$surv,
+#                             lower = surv_pred$lcl,
+#                             upper = surv_pred$ucl,
+#                             group = group,
+#                             type = "Parametric"
+#                         )
+#                         plot_data <- rbind(plot_data, group_data)
+#                     }
+#                     
+#                     # Add Kaplan-Meier for comparison
+#                     km_fit <- survfit(Surv(CalculatedTime, CalculatedOutcome) ~ get(self$options$explanatory), 
+#                                      data = cleanData)
+#                     km_summary <- summary(km_fit, times = time_points)
+#                     
+#                     if (length(groups) > 1) {
+#                         for (i in 1:length(groups)) {
+#                             group_indices <- km_summary$strata == paste0("get(self$options$explanatory)=", groups[i])
+#                             if (any(group_indices)) {
+#                                 km_data <- data.frame(
+#                                     time = km_summary$time[group_indices],
+#                                     survival = km_summary$surv[group_indices],
+#                                     lower = km_summary$lower[group_indices],
+#                                     upper = km_summary$upper[group_indices],
+#                                     group = groups[i],
+#                                     type = "Kaplan-Meier"
+#                                 )
+#                                 plot_data <- rbind(plot_data, km_data)
+#                             }
+#                         }
+#                     }
+#                     
+#                     # Create plot
+#                     p <- ggplot(plot_data, aes(x = time, y = survival, color = group, linetype = type)) +
+#                         geom_line(size = 1) +
+#                         geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
+#                         labs(
+#                             title = paste(.("Parametric Survival Curves:"), private$.parametric_model_name),
+#                             x = .("Time"),
+#                             y = .("Survival Probability"),
+#                             color = self$options$explanatory,
+#                             linetype = .("Method")
+#                         ) +
+#                         theme_minimal() +
+#                         scale_y_continuous(limits = c(0, 1))
+#                         
+#                 } else {
+#                     # Single survival curve
+#                     surv_pred <- summary(model, t = time_points, ci = TRUE)
+#                     
+#                     plot_data <- data.frame(
+#                         time = time_points,
+#                         survival = surv_pred$surv,
+#                         lower = surv_pred$lcl,
+#                         upper = surv_pred$ucl,
+#                         type = "Parametric"
+#                     )
+#                     
+#                     # Add Kaplan-Meier
+#                     km_fit <- survfit(Surv(CalculatedTime, CalculatedOutcome) ~ 1, data = cleanData)
+#                     km_summary <- summary(km_fit, times = time_points)
+#                     
+#                     km_data <- data.frame(
+#                         time = km_summary$time,
+#                         survival = km_summary$surv,
+#                         lower = km_summary$lower,
+#                         upper = km_summary$upper,
+#                         type = "Kaplan-Meier"
+#                     )
+#                     
+#                     plot_data <- rbind(plot_data, km_data)
+#                     
+#                     p <- ggplot(plot_data, aes(x = time, y = survival, linetype = type)) +
+#                         geom_line(size = 1, color = "blue") +
+#                         geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "blue") +
+#                         labs(
+#                             title = paste(.("Parametric vs Kaplan-Meier Survival:"), private$.parametric_model_name),
+#                             x = .("Time"), 
+#                             y = .("Survival Probability"),
+#                             linetype = .("Method")
+#                         ) +
+#                         theme_minimal() +
+#                         scale_y_continuous(limits = c(0, 1))
+#                 }
+#                 
+#                 print(p)
+#                 TRUE
+#             }
+#             
+#             ,
+#             .plotHazardFunction = function(image, ...) {
+#                 
+#                 if (is.null(private$.parametric_model)) {
+#                     return()
+#                 }
+#                 
+#                 model <- private$.parametric_model
+#                 results <- private$.parametric_results
+#                 cleanData <- results$cleanData
+#                 
+#                 library(ggplot2)
+#                 
+#                 max_time <- max(cleanData$CalculatedTime, na.rm = TRUE)
+#                 time_points <- seq(0.1, max_time, length.out = 100)  # Start from 0.1 to avoid issues at t=0
+#                 
+#                 tryCatch({
+#                     # Get hazard predictions
+#                     if (!is.null(self$options$explanatory) && self$options$parametric_covariates) {
+#                         groups <- levels(cleanData[[self$options$explanatory]])
+#                         plot_data <- data.frame()
+#                         
+#                         for (group in groups) {
+#                             pred_data <- data.frame(
+#                                 time = time_points
+#                             )
+#                             pred_data[[self$options$explanatory]] <- group
+#                             
+#                             hazard_pred <- summary(model, newdata = pred_data, t = time_points, 
+#                                                   type = "hazard", ci = TRUE)
+#                             
+#                             group_data <- data.frame(
+#                                 time = time_points,
+#                                 hazard = hazard_pred$est,
+#                                 lower = hazard_pred$lcl,
+#                                 upper = hazard_pred$ucl,
+#                                 group = group
+#                             )
+#                             plot_data <- rbind(plot_data, group_data)
+#                         }
+#                         
+#                         p <- ggplot(plot_data, aes(x = time, y = hazard, color = group)) +
+#                             geom_line(size = 1) +
+#                             geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
+#                             labs(
+#                                 title = paste(.("Hazard Function:"), private$.parametric_model_name),
+#                                 x = .("Time"),
+#                                 y = .("Hazard Rate"),
+#                                 color = self$options$explanatory
+#                             ) +
+#                             theme_minimal()
+#                             
+#                     } else {
+#                         hazard_pred <- summary(model, t = time_points, type = "hazard", ci = TRUE)
+#                         
+#                         plot_data <- data.frame(
+#                             time = time_points,
+#                             hazard = hazard_pred$est,
+#                             lower = hazard_pred$lcl,
+#                             upper = hazard_pred$ucl
+#                         )
+#                         
+#                         p <- ggplot(plot_data, aes(x = time, y = hazard)) +
+#                             geom_line(size = 1, color = "red") +
+#                             geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "red") +
+#                             labs(
+#                                 title = paste(.("Hazard Function:"), private$.parametric_model_name),
+#                                 x = .("Time"),
+#                                 y = .("Hazard Rate")
+#                             ) +
+#                             theme_minimal()
+#                     }
+#                     
+#                     print(p)
+#                     
+#                 }, error = function(e) {
+#                     # Fallback simple plot if hazard estimation fails
+#                     p <- ggplot() +
+#                         annotate("text", x = 0.5, y = 0.5, 
+#                                 label = paste(.("Hazard plot unavailable for"), private$.parametric_model_name),
+#                                 size = 4) +
+#                         theme_void()
+#                     print(p)
+#                 })
+#                 
+#                 TRUE
+#             }
+#             
+#             ,
+#             .plotExtrapolation = function(image, ...) {
+#                 
+#                 if (is.null(private$.parametric_model)) {
+#                     return()
+#                 }
+#                 
+#                 model <- private$.parametric_model
+#                 results <- private$.parametric_results
+#                 cleanData <- results$cleanData
+#                 
+#                 library(ggplot2)
+#                 library(survival)
+#                 
+#                 max_observed_time <- max(cleanData$CalculatedTime, na.rm = TRUE)
+#                 
+#                 # Set extrapolation time horizon
+#                 if (self$options$extrapolation_time > 0) {
+#                     max_extrap_time <- self$options$extrapolation_time
+#                 } else {
+#                     max_extrap_time <- 2 * max_observed_time  # Default: 2x observed time
+#                 }
+#                 
+#                 # Time points for observed period
+#                 observed_times <- seq(0, max_observed_time, length.out = 50)
+#                 # Time points for extrapolation period
+#                 extrap_times <- seq(max_observed_time, max_extrap_time, length.out = 50)
+#                 all_times <- c(observed_times, extrap_times)
+#                 
+#                 if (!is.null(self$options$explanatory) && self$options$parametric_covariates) {
+#                     groups <- levels(cleanData[[self$options$explanatory]])
+#                     plot_data <- data.frame()
+#                     extrap_data <- data.frame()
+#                     
+#                     for (group in groups) {
+#                         # Observed period predictions
+#                         pred_data_obs <- data.frame(time = observed_times)
+#                         pred_data_obs[[self$options$explanatory]] <- group
+#                         surv_pred_obs <- summary(model, newdata = pred_data_obs, t = observed_times, ci = TRUE)
+#                         
+#                         obs_data <- data.frame(
+#                             time = observed_times,
+#                             survival = surv_pred_obs$surv,
+#                             lower = surv_pred_obs$lcl,
+#                             upper = surv_pred_obs$ucl,
+#                             group = group,
+#                             period = "Observed"
+#                         )
+#                         
+#                         # Extrapolation period predictions
+#                         pred_data_ext <- data.frame(time = extrap_times)
+#                         pred_data_ext[[self$options$explanatory]] <- group
+#                         surv_pred_ext <- summary(model, newdata = pred_data_ext, t = extrap_times, ci = TRUE)
+#                         
+#                         ext_data <- data.frame(
+#                             time = extrap_times,
+#                             survival = surv_pred_ext$surv,
+#                             lower = surv_pred_ext$lcl,
+#                             upper = surv_pred_ext$ucl,
+#                             group = group,
+#                             period = "Extrapolated"
+#                         )
+#                         
+#                         plot_data <- rbind(plot_data, obs_data, ext_data)
+#                         
+#                         # Store extrapolation table data
+#                         extrap_table_times <- seq(max_observed_time, max_extrap_time, length.out = 10)
+#                         pred_data_table <- data.frame(time = extrap_table_times)
+#                         pred_data_table[[self$options$explanatory]] <- group
+#                         surv_pred_table <- summary(model, newdata = pred_data_table, t = extrap_table_times, ci = TRUE)
+#                         
+#                         group_extrap <- data.frame(
+#                             time = extrap_table_times,
+#                             survival = surv_pred_table$surv,
+#                             ci_lower = surv_pred_table$lcl,
+#                             ci_upper = surv_pred_table$ucl,
+#                             group = group
+#                         )
+#                         extrap_data <- rbind(extrap_data, group_extrap)
+#                     }
+#                     
+#                     p <- ggplot(plot_data, aes(x = time, y = survival, color = group)) +
+#                         geom_line(aes(linetype = period), size = 1) +
+#                         geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), alpha = 0.2, color = NA) +
+#                         geom_vline(xintercept = max_observed_time, linetype = "dashed", color = "gray") +
+#                         annotate("text", x = max_observed_time, y = 0.9, 
+#                                 label = .("End of observed data"), angle = 90, vjust = -0.5) +
+#                         labs(
+#                             title = paste(.("Survival Extrapolation:"), private$.parametric_model_name),
+#                             x = .("Time"),
+#                             y = .("Survival Probability"),
+#                             color = self$options$explanatory,
+#                             linetype = .("Period")
+#                         ) +
+#                         theme_minimal() +
+#                         scale_y_continuous(limits = c(0, 1))
+#                         
+#                 } else {
+#                     # Single curve extrapolation
+#                     surv_pred_obs <- summary(model, t = observed_times, ci = TRUE)
+#                     surv_pred_ext <- summary(model, t = extrap_times, ci = TRUE)
+#                     
+#                     obs_data <- data.frame(
+#                         time = observed_times,
+#                         survival = surv_pred_obs$surv,
+#                         lower = surv_pred_obs$lcl,
+#                         upper = surv_pred_obs$ucl,
+#                         period = "Observed"
+#                     )
+#                     
+#                     ext_data <- data.frame(
+#                         time = extrap_times,
+#                         survival = surv_pred_ext$surv,
+#                         lower = surv_pred_ext$lcl,
+#                         upper = surv_pred_ext$ucl,
+#                         period = "Extrapolated"
+#                     )
+#                     
+#                     plot_data <- rbind(obs_data, ext_data)
+#                     
+#                     p <- ggplot(plot_data, aes(x = time, y = survival, linetype = period)) +
+#                         geom_line(size = 1, color = "blue") +
+#                         geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA, fill = "blue") +
+#                         geom_vline(xintercept = max_observed_time, linetype = "dashed", color = "gray") +
+#                         annotate("text", x = max_observed_time, y = 0.9, 
+#                                 label = .("End of observed data"), angle = 90, vjust = -0.5) +
+#                         labs(
+#                             title = paste(.("Survival Extrapolation:"), private$.parametric_model_name),
+#                             x = .("Time"),
+#                             y = .("Survival Probability"),
+#                             linetype = .("Period")
+#                         ) +
+#                         theme_minimal() +
+#                         scale_y_continuous(limits = c(0, 1))
+#                         
+#                     # Store extrapolation table data for single curve
+#                     extrap_table_times <- seq(max_observed_time, max_extrap_time, length.out = 10)
+#                     surv_pred_table <- summary(model, t = extrap_table_times, ci = TRUE)
+#                     
+#                     extrap_data <- data.frame(
+#                         time = extrap_table_times,
+#                         survival = surv_pred_table$surv,
+#                         ci_lower = surv_pred_table$lcl,
+#                         ci_upper = surv_pred_table$ucl
+#                     )
+#                 }
+#                 
+#                 # Populate extrapolation table
+#                 extrap_table <- self$results$extrapolationTable
+#                 for (i in 1:nrow(extrap_data)) {
+#                     row_data <- list(
+#                         time = extrap_data$time[i],
+#                         survival = extrap_data$survival[i],
+#                         ci_lower = extrap_data$ci_lower[i],
+#                         ci_upper = extrap_data$ci_upper[i]
+#                     )
+#                     extrap_table$addRow(rowKey = i, values = row_data)
+#                 }
+#                 
+#                 print(p)
+#                 TRUE
+#             }
 
         )
     )

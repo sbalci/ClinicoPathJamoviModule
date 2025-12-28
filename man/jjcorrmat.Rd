@@ -17,7 +17,6 @@ jjcorrmat(
   k = 2,
   partial = FALSE,
   naHandling = "listwise",
-  clinicalpreset = "custom",
   lowcolor = "#E69F00",
   midcolor = "white",
   highcolor = "#009E73",
@@ -63,13 +62,7 @@ analysis.}
 
 \item{naHandling}{Choose how missing values are handled. Listwise drops
 rows with missing values in selected variables; pairwise uses available
-data for each pair.}
-
-\item{clinicalpreset}{Pre-configured settings optimized for common clinical
-correlation scenarios. Biomarker: Focus on molecular correlations with
-robust methods. Lab Values: Emphasize clinical laboratory parameter
-relationships. Imaging: Specialized for radiological and pathological
-imaging metrics.}
+data for each pair.@param clinicalpreset Pre-configured settings optimized for common clinicalcorrelation scenarios. Biomarker: Focus on molecular correlations withrobust methods. Lab Values: Emphasize clinical laboratory parameterrelationships. Imaging: Specialized for radiological and pathologicalimaging metrics.}
 
 \item{lowcolor}{Color for low (negative) correlation values.}
 
