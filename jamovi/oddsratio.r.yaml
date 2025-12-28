@@ -24,14 +24,6 @@ items:
       title: Model Performance Metrics
       type:  Html
 
-    # Natural Language Summary (right after main analysis)
-    - name: oddsRatioSummary
-      title: ''
-      type: Html
-      visible: (showSummaries)
-      clearWith:
-          - explanatory
-          - outcome
 
     # Plot Section
     - name: plot
@@ -80,19 +72,19 @@ items:
       renderFun: .plot_nomogram
       visible: (showNomogram)
 
+    - name: diagnosticMetrics
+      title: Diagnostic Test Performance
+      type: Html
+      visible: (showNomogram)
+      clearWith:
+          - explanatory
+          - outcome
+          - diagnosticPredictor
+
     - name: nomogram
       title: "Nomogram Details"
       type: Html
       visible: (showNomogram)
-
-    # Nomogram Summary (right after nomogram analysis)
-    - name: nomogramSummary
-      title: ''
-      type: Html
-      visible: (showNomogram && showSummaries)
-      clearWith:
-          - explanatory
-          - outcome
 
     # Nomogram Explanations (right after nomogram analysis)
     - name: nomogramAnalysisExplanation

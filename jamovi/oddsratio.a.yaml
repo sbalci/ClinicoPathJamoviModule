@@ -1,10 +1,10 @@
 ---
 name:  oddsratio
 title: Odds Ratio Table and Plot
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: General Statistics
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -108,17 +108,8 @@ options:
       default: false
       description:
           R: >
-            Display an interactive nomogram for converting pre-test to post-test 
+            Display an interactive nomogram for converting pre-test to post-test
             probabilities using likelihood ratios calculated from the data.
-
-    - name: showSummaries
-      title: "Show Natural Language Summaries"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display natural language interpretations of the results to help understand
-            the clinical significance of odds ratios, confidence intervals, and diagnostic metrics.
 
     - name: showExplanations
       title: "Show Educational Explanations"

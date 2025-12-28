@@ -15,6 +15,26 @@ items:
       type:  Html
       visible: false
 
+    - name:  errors
+      title: Critical Errors
+      type:  Html
+      visible: false
+
+    - name:  strongWarnings
+      title: Strong Warnings
+      type:  Html
+      visible: false
+
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: false
+
+    - name:  infoMessages
+      title: Information
+      type:  Html
+      visible: false
+
     # - name:  mydataview2
     #   title: mydataview2
     #   type:  Preformatted

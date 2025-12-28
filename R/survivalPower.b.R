@@ -52,13 +52,12 @@ survivalPowerClass <- R6::R6Class(
                 priority_map <- c(ERROR = 1, STRONG_WARNING = 2, WARNING = 3, INFO = 4)
 
                 sorted_notices <- validation_result$notices[order(sapply(validation_result$notices, function(n) {
-                    type_str <- as.character(n$type)
-                    priority_map[type_str]
+                    priority_map[n$type]
                 }))]
 
-                # Insert at top positions
+                # Insert at top positions (extract notice object from list)
                 for (i in seq_along(sorted_notices)) {
-                    self$results$insert(i, sorted_notices[[i]])
+                    self$results$insert(i, sorted_notices[[i]]$notice)
                 }
             }
 
@@ -100,6 +99,7 @@ survivalPowerClass <- R6::R6Class(
         
         .validate_inputs = function() {
             # Comprehensive input validation - returns list(valid, notices)
+            # Store notices as list(notice = notice_obj, type = type_name) for sorting
             notices <- list()
             valid <- TRUE
 
@@ -116,7 +116,7 @@ survivalPowerClass <- R6::R6Class(
                         'Hazard ratio must be between 0 and 5 (current: %.2f) • Common values: 0.5-0.8 (treatment benefit), 1.2-2.0 (increased risk)',
                         hr
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (hr < 0.3 || hr > 3) {
                     notice <- jmvcore::Notice$new(
@@ -128,7 +128,7 @@ survivalPowerClass <- R6::R6Class(
                         'Extreme hazard ratio detected (%.2f) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible',
                         hr
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "STRONG_WARNING")))
                 }
             }
 
@@ -145,7 +145,7 @@ survivalPowerClass <- R6::R6Class(
                         'Power must be between 0 and 1 (current: %.2f) • Standard values: 0.80 (80%%) or 0.90 (90%%)',
                         power
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (power < 0.7) {
                     notice <- jmvcore::Notice$new(
@@ -157,7 +157,7 @@ survivalPowerClass <- R6::R6Class(
                         'Power below 70%% (current: %.0f%%) may result in underpowered study • Consider increasing to 80%% or 90%%',
                         power * 100
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
@@ -174,7 +174,7 @@ survivalPowerClass <- R6::R6Class(
                         'Alpha level must be between 0 and 1 (current: %.3f) • Standard value: 0.05 (5%%)',
                         alpha
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (alpha > 0.1) {
                     notice <- jmvcore::Notice$new(
@@ -186,7 +186,7 @@ survivalPowerClass <- R6::R6Class(
                         'Alpha level above 0.10 (current: %.3f) is unusual for confirmatory trials',
                         alpha
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
@@ -200,7 +200,7 @@ survivalPowerClass <- R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Median survival must be positive (in months)')
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (median_survival > 240) {
                     notice <- jmvcore::Notice$new(
@@ -212,7 +212,7 @@ survivalPowerClass <- R6::R6Class(
                         'Median survival > 20 years (current: %.0f months = %.1f years) may require very long follow-up',
                         median_survival, median_survival / 12
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "INFO")))
                 }
             }
 
@@ -228,7 +228,7 @@ survivalPowerClass <- R6::R6Class(
                     'Current version supports exponential survival only (selected: %s) • Please set to "exponential" for validated calculations',
                     distribution
                 ))
-                notices <- append(notices, list(notice))
+                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                 valid <- FALSE
             }
 
@@ -245,7 +245,7 @@ survivalPowerClass <- R6::R6Class(
                         'Allocation ratio must be positive and typically between 0.5 and 3 (current: %.2f)',
                         ratio
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 }
             }
@@ -260,7 +260,7 @@ survivalPowerClass <- R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Dropout rate must be between 0 and 1 (current: %.2f)', dropout))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (dropout > 0.3) {
                     notice <- jmvcore::Notice$new(
@@ -272,7 +272,7 @@ survivalPowerClass <- R6::R6Class(
                         'Dropout rate > 30%% (current: %.0f%%) may significantly impact study power • Review retention strategies',
                         dropout * 100
                     ))
-                    notices <- append(notices, list(notice))
+                    notices <- append(notices, list(list(notice = notice, type = "STRONG_WARNING")))
                 }
             }
 
@@ -290,7 +290,7 @@ survivalPowerClass <- R6::R6Class(
                     'Multiplicity adjustment "%s" not yet supported • Please select "none" or "bonferroni"',
                     self$options$multiple_comparisons
                 ))
-                notices <- append(notices, list(notice))
+                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                 valid <- FALSE
             }
 
@@ -305,7 +305,7 @@ survivalPowerClass <- R6::R6Class(
                     'Stratification factors (%d) not currently used to adjust variance • Plan stratified analyses separately',
                     self$options$stratification_factors
                 ))
-                notices <- append(notices, list(notice))
+                notices <- append(notices, list(list(notice = notice, type = "INFO")))
             }
 
             # Unsupported tests
@@ -320,7 +320,7 @@ survivalPowerClass <- R6::R6Class(
                     'Test "%s" temporarily unavailable pending validation • Choose log-rank, Cox regression, or non-inferiority',
                     self$options$test_type
                 ))
-                notices <- append(notices, list(notice))
+                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                 valid <- FALSE
             }
 
@@ -349,7 +349,7 @@ survivalPowerClass <- R6::R6Class(
                         'Study duration (%.1f mo) may be too short for median survival %.1f mo • Consider extending follow-up to at least %.1f mo',
                         total_duration, median_survival, median_survival * 1.5
                     ))
-                    notices_list <- append(notices_list, list(notice))
+                    notices_list <- append(notices_list, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
@@ -365,7 +365,7 @@ survivalPowerClass <- R6::R6Class(
                         'Detecting very small effect (HR=%.2f near 1.0) with %.0f%% power requires very large sample • Consider clinical meaningfulness',
                         hr, power * 100
                     ))
-                    notices_list <- append(notices_list, list(notice))
+                    notices_list <- append(notices_list, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
@@ -381,7 +381,7 @@ survivalPowerClass <- R6::R6Class(
                         'Assumes large effect (HR=%.2f) with high power (%.0f%%) • Ensure assumptions justified by prior data',
                         hr, power * 100
                     ))
-                    notices_list <- append(notices_list, list(notice))
+                    notices_list <- append(notices_list, list(list(notice = notice, type = "STRONG_WARNING")))
                 }
             }
 
@@ -399,7 +399,7 @@ survivalPowerClass <- R6::R6Class(
                         'Allocation ratio %.2f:1 reduces efficiency by %.1f%% vs 1:1 randomization • Consider balancing if feasible',
                         ratio, (efficiency_loss - 1) * 100
                     ))
-                    notices_list <- append(notices_list, list(notice))
+                    notices_list <- append(notices_list, list(list(notice = notice, type = "WARNING")))
                 }
             }
 

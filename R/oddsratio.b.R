@@ -124,25 +124,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$text2$setVisible(FALSE)
             self$results$plot$setVisible(FALSE)
 
-            # Initialize summary outputs
-            self$results$oddsRatioSummary$setVisible(FALSE)
-            self$results$nomogramSummary$setVisible(FALSE)
-
             # Initialize explanation outputs
             self$results$oddsRatioExplanation$setVisible(FALSE)
             self$results$riskMeasuresExplanation$setVisible(FALSE)
             self$results$diagnosticTestExplanation$setVisible(FALSE)
             self$results$nomogramAnalysisExplanation$setVisible(FALSE)
-
-            # Handle showSummaries visibility
-            if (self$options$showSummaries) {
-                self$results$oddsRatioSummary$setVisible(TRUE)
-
-                # Nomogram summary requires both showSummaries AND showNomogram
-                if (self$options$showNomogram) {
-                    self$results$nomogramSummary$setVisible(TRUE)
-                }
-            }
 
             # Handle showExplanations visibility
             if (self$options$showExplanations) {
@@ -681,7 +667,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 ")
 
 
-                # Set model metrics output
+                # Note: text2 will be updated with diagnostic metrics if nomogram is enabled
+                # Set model metrics output initially (may be updated later in nomogram block)
                 self$results$text2$setContent(text2)
 
                 results1 <-  knitr::kable(tOdds[[1]],
@@ -689,24 +676,29 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              align = c("l", "l", "r", "r", "r", "r"),
                              format = "html")
                 self$results$text$setContent(results1)
-                
-                # Generate natural language summary if requested
-                if (self$options$showSummaries) {
-                    oddsRatioSummary <- private$.generateOddsRatioSummary(tOdds, formulaDependent, formulaExplanatory)
-                    self$results$oddsRatioSummary$setContent(oddsRatioSummary)
-                }
 
 
 
 
                 ## plot Data ----
+                # Filter out dependent variable rows from the finalfit table for plotting
+                # The dependent variable shouldn't appear in an odds ratio plot
+                tOdds_for_plot <- tOdds[[1]]
+                if (!is.null(tOdds_for_plot) && nrow(tOdds_for_plot) > 0) {
+                    # Remove rows where the first column matches the outcome variable name
+                    # finalfit includes the dependent variable levels in the output
+                    outcome_var_name <- self$options$outcome
+                    tOdds_for_plot <- tOdds_for_plot[tOdds_for_plot[[1]] != outcome_var_name, , drop = FALSE]
+                }
+
                 plotData <- list(
                     "plotData" = mydata,
                     "formulaDependent" = formulaDependent,
                     "formulaExplanatory" = formulaExplanatory,
                     "originalNames" = all_labels,
                     "originalOutcomeName" = self$options$outcome,
-                    "originalExplanatoryNames" = self$options$explanatory
+                    "originalExplanatoryNames" = self$options$explanatory,
+                    "filteredTable" = tOdds_for_plot
                 )
 
                 image <- self$results$plot
@@ -720,35 +712,61 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Select predictor for diagnostic metrics
                     diagnostic_predictor <- NULL
+                    diagnostic_predictor_original_name <- NULL
+                    user_selected_predictor <- FALSE
+
+                    # Check if user explicitly selected a diagnostic predictor
                     if (!is.null(self$options$diagnosticPredictor)) {
                         diagnostic_predictor <- names(all_labels)[match(self$options$diagnosticPredictor, all_labels)]
+                        diagnostic_predictor_original_name <- self$options$diagnosticPredictor
+                        user_selected_predictor <- TRUE
+
                         if (length(diagnostic_predictor) > 1) {
-                            warn_msg <- glue::glue("Diagnostic predictor label matches multiple variables; using '{diagnostic_predictor[1]}'.")
+                            warn_msg <- glue::glue("Diagnostic predictor label matches multiple variables; using '{diagnostic_predictor_original_name}'.")
                             private$.addNotice(jmvcore::NoticeType$WARNING, warn_msg)
                             diagnostic_predictor <- diagnostic_predictor[1]
                         }
-                    }
-                    if (is.null(diagnostic_predictor) && length(explanatory_variable_names) > 0) {
-                        diagnostic_predictor <- explanatory_variable_names[1]
-                        if (length(explanatory_variable_names) > 1) {
-                            private$.addNotice(jmvcore::NoticeType$WARNING,
-                                "Multiple explanatory variables selected; diagnostic metrics use the first variable by default. Use 'Diagnostic Predictor' to choose a binary predictor.")
+
+                        # Check if selected predictor is in explanatory variables
+                        if (diagnostic_predictor_original_name %in% self$options$explanatory) {
+                            private$.addNotice(jmvcore::NoticeType$INFO,
+                                glue::glue("Using '{diagnostic_predictor_original_name}' (from model) for diagnostic metrics (sensitivity, specificity, likelihood ratios)."))
+                        } else {
+                            private$.addNotice(jmvcore::NoticeType$INFO,
+                                glue::glue("Using '{diagnostic_predictor_original_name}' for diagnostic metrics. Note: This variable is NOT in the logistic regression model. Diagnostic metrics are calculated independently of the odds ratio model."))
                         }
                     }
 
-                    # Ensure diagnostic predictor is binary
+                    # Default to first explanatory variable if not specified
+                    if (is.null(diagnostic_predictor) && length(explanatory_variable_names) > 0) {
+                        diagnostic_predictor <- explanatory_variable_names[1]
+                        diagnostic_predictor_original_name <- self$options$explanatory[1]
+
+                        if (length(explanatory_variable_names) > 1) {
+                            private$.addNotice(jmvcore::NoticeType$INFO,
+                                glue::glue("Using '{diagnostic_predictor_original_name}' (first explanatory variable) for diagnostic metrics. To use a different variable, specify it in the 'Diagnostic Predictor' box."))
+                        } else {
+                            private$.addNotice(jmvcore::NoticeType$INFO,
+                                glue::glue("Using '{diagnostic_predictor_original_name}' for diagnostic metrics (sensitivity, specificity, likelihood ratios)."))
+                        }
+                    }
+
+                    # Ensure diagnostic predictor is available
                     if (is.null(diagnostic_predictor) || !(diagnostic_predictor %in% names(mydata))) {
                         private$.addNotice(jmvcore::NoticeType$WARNING,
-                            "No diagnostic predictor available; skipping likelihood ratios/nomogram.")
+                            "No diagnostic predictor available; skipping likelihood ratios/nomogram. Please select a binary variable for diagnostic metrics.")
                         return()
                     }
 
+                    # Convert to factor if needed
                     if (!is.factor(mydata[[diagnostic_predictor]])) {
                         mydata[[diagnostic_predictor]] <- factor(mydata[[diagnostic_predictor]])
                     }
+
+                    # Ensure diagnostic predictor is binary
                     if (nlevels(mydata[[diagnostic_predictor]]) != 2) {
                         private$.addNotice(jmvcore::NoticeType$WARNING,
-                            glue::glue("Diagnostic predictor '{diagnostic_predictor}' is not binary; likelihood ratios require exactly two levels."))
+                            glue::glue("Diagnostic predictor '{diagnostic_predictor_original_name}' has {nlevels(mydata[[diagnostic_predictor]])} levels but must be binary (exactly 2 levels) for likelihood ratio calculations. Please select a different variable or recode this variable to binary."))
                         return()
                     }
 
@@ -766,60 +784,69 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     # Create diagnostic metrics text with explanatory information
-                    # Include statistical warnings and recommendations if present
+                    # Using paste0() for reliability (glue had template issues)
+
+                    # Get predictor level warning if present
+                    predictor_warning <- if (!is.null(lr_results$predictor_level_warning)) lr_results$predictor_level_warning else ""
+
+                    # Get statistical warnings and recommendations if present
                     statistical_warnings <- if (!is.null(lr_results$statistical_warnings) && lr_results$statistical_warnings != "") lr_results$statistical_warnings else ""
                     statistical_recommendations <- if (!is.null(lr_results$statistical_recommendations) && lr_results$statistical_recommendations != "") lr_results$statistical_recommendations else ""
 
-                    # FIX: Include predictor level warning in display
-                    predictor_warning <- if (!is.null(lr_results$predictor_level_warning)) lr_results$predictor_level_warning else ""
+                    # Get contingency table details
+                    cont_table <- lr_results$contingency_table
+                    predictor_levels <- rownames(cont_table)
+                    outcome_levels <- colnames(cont_table)
 
-                    metrics_text <- glue::glue("
-                    <br>
-                    {predictor_warning}
+                    # Build full metrics text with all features
+                    metrics_text <- paste0(
+                        "<br>",
+                        predictor_warning,
 
-                    <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                        <b>Diagnostic Metrics:</b><br>
-                        Sensitivity: {format(lr_results$sensitivity * 100, digits=2)}%<br>
-                        Specificity: {format(lr_results$specificity * 100, digits=2)}%<br>
-                        Positive LR: {format(lr_results$positive_lr, digits=2)}<br>
-                        Negative LR: {format(lr_results$negative_lr, digits=2)}<br>
-                    </div>
+                        "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                        "<b>Diagnostic Metrics:</b><br>",
+                        "Sensitivity: ", round(lr_results$sensitivity * 100, 1), "%<br>",
+                        "Specificity: ", round(lr_results$specificity * 100, 1), "%<br>",
+                        "Positive LR: ", round(lr_results$positive_lr, 2), "<br>",
+                        "Negative LR: ", round(lr_results$negative_lr, 2), "<br>",
+                        "</div>",
 
-                    {statistical_warnings}
-                    {statistical_recommendations}
-                    
-                    <div style='background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                        <b>⚠️ Important: Please Verify These Interpretations</b><br>
-                        <small>
-                        <b>Positive outcome level:</b> '{lr_results$positive_outcome_used}' 
-                        <span style='color: #666;'>({lr_results$outcome_determination_method})</span><br>
-                        <b>Positive predictor level:</b> '{lr_results$positive_predictor_used}' 
-                        <span style='color: #666;'>({lr_results$predictor_determination_method})</span><br><br>
-                        
-                        <b>📊 Contingency Table:</b><br>
-                        <table style='border-collapse: collapse; margin: 5px 0;'>
-                            <tr><th style='border: 1px solid #ddd; padding: 5px;'></th>
-                                <th style='border: 1px solid #ddd; padding: 5px;'>{names(lr_results$contingency_table)[1]}</th>
-                                <th style='border: 1px solid #ddd; padding: 5px;'>{names(lr_results$contingency_table)[2]}</th></tr>
-                            <tr><td style='border: 1px solid #ddd; padding: 5px;'><b>{rownames(lr_results$contingency_table)[1]}</b></td>
-                                <td style='border: 1px solid #ddd; padding: 5px;'>{lr_results$contingency_table[1,1]}</td>
-                                <td style='border: 1px solid #ddd; padding: 5px;'>{lr_results$contingency_table[1,2]}</td></tr>
-                            <tr><td style='border: 1px solid #ddd; padding: 5px;'><b>{rownames(lr_results$contingency_table)[2]}</b></td>
-                                <td style='border: 1px solid #ddd; padding: 5px;'>{lr_results$contingency_table[2,1]}</td>
-                                <td style='border: 1px solid #ddd; padding: 5px;'>{lr_results$contingency_table[2,2]}</td></tr>
-                        </table>
-                        TP: {lr_results$tp}, FP: {lr_results$fp}, FN: {lr_results$fn}, TN: {lr_results$tn}<br><br>
-                        
-                        <b>📝 How to Use:</b><br>
-                        1. Check that the positive outcome level is correct for your study<br>
-                        2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>
-                        3. The nomogram calculations depend on these interpretations being correct<br>
-                        4. Different languages/coding may require manual specification
-                        </small>
-                    </div>
-                    <br>
-                ")
+                        statistical_warnings,
+                        statistical_recommendations,
 
+                        "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                        "<b>⚠️ Important: Please Verify These Interpretations</b><br>",
+                        "<small>",
+                        "<b>Positive outcome level:</b> '", lr_results$positive_outcome_used, "' ",
+                        "<span style='color: #666;'>(", lr_results$outcome_determination_method, ")</span><br>",
+                        "<b>Positive predictor level:</b> '", lr_results$positive_predictor_used, "' ",
+                        "<span style='color: #666;'>(", lr_results$predictor_determination_method, ")</span><br><br>",
+
+                        "<b>📊 Contingency Table:</b><br>",
+                        "<table style='border-collapse: collapse; margin: 5px 0;'>",
+                        "<tr><th style='border: 1px solid #ddd; padding: 5px;'></th>",
+                        "<th style='border: 1px solid #ddd; padding: 5px;'>", outcome_levels[1], "</th>",
+                        "<th style='border: 1px solid #ddd; padding: 5px;'>", outcome_levels[2], "</th></tr>",
+                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", predictor_levels[1], "</b></td>",
+                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,1], "</td>",
+                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,2], "</td></tr>",
+                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", predictor_levels[2], "</b></td>",
+                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,1], "</td>",
+                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,2], "</td></tr>",
+                        "</table>",
+                        "TP: ", lr_results$tp, ", FP: ", lr_results$fp, ", FN: ", lr_results$fn, ", TN: ", lr_results$tn, "<br><br>",
+
+                        "<b>📝 How to Use:</b><br>",
+                        "1. Check that the positive outcome level is correct for your study<br>",
+                        "2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>",
+                        "3. The nomogram calculations depend on these interpretations being correct<br>",
+                        "4. Different languages/coding may require manual specification",
+                        "</small>",
+                        "</div>",
+                        "<br>"
+                    )
+
+                    # metrics_text now complete with all features
                     private$.checkpoint()
 
                     # Prepare data for nomogram
@@ -832,48 +859,27 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Create nomogram if preparation was successful
                     if (!is.null(nom_results$fit)) {
                         private$.createNomogram(nom_results$fit, nom_results$dd)
+                    } else {
+                        # Nomogram preparation failed - add user-friendly notice
+                        private$.addNotice(jmvcore::NoticeType$WARNING,
+                            "Nomogram could not be generated due to model fitting issues. The odds ratio analysis completed successfully, but the nomogram visualization is not available. This may occur with: (1) perfect separation in the data, (2) convergence issues, or (3) insufficient sample size. The main analysis results are still valid.")
                     }
 
                     # Update results with diagnostic metrics
-                    self$results$text2$setContent(paste(text2, metrics_text))
+                    # Set the separate diagnosticMetrics output
+                    self$results$diagnosticMetrics$setContent(metrics_text)
+                }
+                # Educational Explanations ----
+                if (self$options$showExplanations) {
+                    private$.addExplanations()
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                # Add completion notice for successful analysis
+                private$.addNotice(jmvcore::NoticeType$INFO,
+                    "Odds ratio analysis completed successfully.")
 
             }
 
-        # Educational Explanations ----
-        if (self$options$showExplanations) {
-            private$.addExplanations()
-        }
-
-        # Add completion notice for successful analysis
-        private$.addNotice(jmvcore::NoticeType$INFO,
-            "Odds ratio analysis completed successfully.")
         }
 
 
@@ -1038,6 +1044,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 specificity = specificity,
                 diagnostic_info = diagnostic_info,
                 predictor_level_warning = predictor_level_warning,  # Add warning to return value
+                statistical_warnings = diagnostic_warnings,  # Add statistical warnings
+                statistical_recommendations = recommendation_text,  # Add recommendations
                 positive_outcome_used = positive_outcome_level,
                 positive_predictor_used = positive_predictor_level,
                 outcome_determination_method = outcome_determination_method,
@@ -1114,12 +1122,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create HTML content for display
                 html_content <- private$.createNomogramDisplay(nom)
                 self$results$nomogram$setContent(html_content)
-                
-                # Generate natural language summary if requested
-                if (self$options$showSummaries) {
-                    nomogramSummary <- private$.generateNomogramSummary(nom, fit, dd)
-                    self$results$nomogramSummary$setContent(nomogramSummary)
-                }
             }
         },
 
@@ -1175,38 +1177,39 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     formulaDependent <- plotList$formulaDependent
                     formulaExplanatory <- plotList$formulaExplanatory
                     originalNames <- plotList$originalNames
-                    
+                    filteredTable <- plotList$filteredTable
+
                     # Create a temporary dataset with restored variable names for plotting
-                    plotDataWithOriginalNames <- private$.createPlotDataWithOriginalNames(mydata, originalNames)
+                    plotDataWithOriginalNames <- private$.createPlotDataWithOriginalNames(
+                        mydata,
+                        originalNames,
+                        formulaDependent,
+                        formulaExplanatory
+                    )
 
                     private$.checkpoint()
 
-                    plot <-
-                        # finalfit::or_plot(
-                        finalfit::ff_plot(
-                            .data = plotDataWithOriginalNames$data,
-                            dependent = plotDataWithOriginalNames$formulaDependent,
-                            explanatory = plotDataWithOriginalNames$formulaExplanatory,
-                            remove_ref = FALSE,
-                            table_text_size = 4,
-                            title_text_size = 14,
-                            random_effect = NULL,
-                            factorlist = NULL,
-                            glmfit = NULL,
-                            confint_type = NULL,
-                            breaks = NULL,
-                            column_space = c(-0.5, 0, 0.5),
-                            dependent_label = plotList$originalOutcomeName,
-                            prefix = "",
-                            suffix = ": OR (95% CI, p-value)",
-                            table_opts = NULL,
-                            plot_opts = list(
-                                ggplot2::xlab("OR, 95% CI"),
-                                ggplot2::theme(
-                                    axis.title = ggplot2::element_text(size = 12)
-                                )
+                    # Use or_plot with original names
+                    # The function returns formulas with original variable names that match the restored data
+                    plot <- finalfit::or_plot(
+                        .data = plotDataWithOriginalNames$data,
+                        dependent = plotDataWithOriginalNames$formulaDependent,
+                        explanatory = plotDataWithOriginalNames$formulaExplanatory,
+                        remove_ref = FALSE,
+                        table_text_size = 4,
+                        title_text_size = 14,
+                        breaks = NULL,
+                        column_space = c(-0.5, 0, 0.5),
+                        dependent_label = plotList$originalOutcomeName,
+                        prefix = "",
+                        suffix = ": OR (95% CI, p-value)",
+                        plot_opts = list(
+                            ggplot2::xlab("OR, 95% CI"),
+                            ggplot2::theme(
+                                axis.title = ggplot2::element_text(size = 12)
                             )
                         )
+                    )
 
 
                     print(plot)
@@ -1216,358 +1219,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-        # Natural Language Summary Generation ----
-        ,
-        # Helper function to extract significant predictors from odds ratio table
-        .extractSignificantPredictors = function(or_table) {
-            if (is.null(or_table) || length(or_table) == 0 || is.null(or_table[[1]])) {
-                return(list(significant_count = 0, total_predictors = 0, strongest = NULL))
-            }
-            
-            significant_predictors <- list()
-            strongest_or <- 1
-            strongest_predictor <- ""
-            
-            for (i in 2:nrow(or_table)) {  # Skip header row
-                if (!is.na(or_table[i, "p"]) && or_table[i, "p"] != "") {
-                    p_value <- as.numeric(or_table[i, "p"])
-                    if (!is.na(p_value) && p_value < 0.05) {
-                        or_value <- or_table[i, "OR"]
-                        if (!is.na(or_value) && or_value != "" && or_value != "-") {
-                            or_numeric <- as.numeric(or_value)
-                            if (!is.na(or_numeric)) {
-                                # Track strongest association (furthest from 1)
-                                if (abs(log(or_numeric)) > abs(log(strongest_or))) {
-                                    strongest_or <- or_numeric
-                                    strongest_predictor <- or_table[i, 1]  # First column is predictor name
-                                }
-                                significant_predictors[[length(significant_predictors) + 1]] <- list(
-                                    name = or_table[i, 1],
-                                    or = or_numeric,
-                                    p_value = p_value
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            
-            return(list(
-                significant_count = length(significant_predictors),
-                total_predictors = nrow(or_table) - 1,  # Exclude header
-                significant_predictors = significant_predictors,
-                strongest_or = strongest_or,
-                strongest_predictor = strongest_predictor
-            ))
-        }
-
-        # Standardized error message formatter
-        ,
-        .formatErrorMessage = function(error_type, message, details = NULL, suggestions = NULL) {
-            icons <- list(
-                "data_error" = "❌",
-                "validation_error" = "⚠️", 
-                "calculation_error" = "🔢",
-                "memory_error" = "💾",
-                "statistical_error" = "📊"
-            )
-            
-            icon <- if (error_type %in% names(icons)) {
-                icons[[error_type]]
-            } else {
-                "⚠️"
-            }
-            
-            # Base error HTML with consistent styling
-            error_html <- paste0(
-                '<div style="background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 12px; margin: 10px 0; border-radius: 6px;">',
-                '<p style="margin: 0; color: #721c24; font-weight: bold;">', 
-                icon, ' ', stringr::str_to_title(gsub("_", " ", error_type)), '</p>',
-                '<p style="margin: 8px 0 0 0; color: #2d3748;">', message, '</p>'
-            )
-            
-            # Add details if provided
-            if (!is.null(details)) {
-                error_html <- paste0(error_html,
-                    '<p style="margin: 8px 0 0 0; color: #4a5568; font-size: 0.9em;"><em>', details, '</em></p>'
-                )
-            }
-            
-            # Add suggestions if provided
-            if (!is.null(suggestions) && length(suggestions) > 0) {
-                error_html <- paste0(error_html,
-                    '<div style="margin-top: 10px; padding: 8px; background-color: #f0fff4; border-radius: 4px;">',
-                    '<p style="margin: 0; color: #276749; font-weight: bold;">💡 Suggestions:</p>',
-                    '<ul style="margin: 4px 0 0 0; color: #2f855a; font-size: 0.9em;">'
-                )
-                
-                for (suggestion in suggestions) {
-                    error_html <- paste0(error_html, '<li>', suggestion, '</li>')
-                }
-                
-                error_html <- paste0(error_html, '</ul></div>')
-            }
-            
-            error_html <- paste0(error_html, '</div>')
-            return(error_html)
-        }
-
-        # Helper function to format odds ratio interpretation text
-        ,
-        .formatOddsRatioText = function(or_value, predictor_name) {
-            if (or_value > 1) {
-                return(paste0('increased odds (OR = ', round(or_value, 2), ')'))
-            } else if (or_value < 1) {
-                return(paste0('decreased odds (OR = ', round(or_value, 2), ')'))
-            } else {
-                return('no significant association')
-            }
-        }
-
-        # Clinical preset configurations for common scenarios
-        ,
-        .applyClinicalPreset = function(preset_name, data_info) {
-            presets <- list(
-                "diagnostic_test" = list(
-                    focus = "sensitivity_specificity",
-                    interpretation = "diagnostic",
-                    recommendations = c("Consider ROC analysis", "Evaluate predictive values", "Check diagnostic accuracy"),
-                    terminology = list(positive = "Disease Present", negative = "Disease Absent")
-                ),
-                "risk_factor" = list(
-                    focus = "odds_ratios",
-                    interpretation = "epidemiological", 
-                    recommendations = c("Examine dose-response", "Consider confounders", "Evaluate effect modification"),
-                    terminology = list(positive = "Exposed", negative = "Not Exposed")
-                ),
-                "treatment_response" = list(
-                    focus = "efficacy",
-                    interpretation = "therapeutic",
-                    recommendations = c("Calculate NNT", "Assess clinical significance", "Consider adverse effects"),
-                    terminology = list(positive = "Response", negative = "No Response")
-                ),
-                "biomarker" = list(
-                    focus = "prediction",
-                    interpretation = "prognostic",
-                    recommendations = c("Validate biomarker", "Assess clinical utility", "Consider cost-effectiveness"),
-                    terminology = list(positive = "High Expression", negative = "Low Expression")
-                ),
-                "screening" = list(
-                    focus = "detection",
-                    interpretation = "population_health",
-                    recommendations = c("Evaluate screening performance", "Consider false positive rate", "Assess population benefit"),
-                    terminology = list(positive = "Screen Positive", negative = "Screen Negative")
-                )
-            )
-            
-            if (preset_name %in% names(presets)) {
-                return(presets[[preset_name]])
-            }
-            return(NULL)
-        }
-
-        # Helper function to detect likely clinical scenario based on variable names
-        ,
-        .detectClinicalScenario = function(outcome_var, explanatory_vars) {
-            outcome_lower <- tolower(outcome_var)
-            explanatory_lower <- tolower(paste(explanatory_vars, collapse = " "))
-            
-            # Diagnostic test scenario
-            if (any(grepl("(diagnos|test|positive|negative|disease|pathology)", outcome_lower)) ||
-                any(grepl("(test|assay|marker|score)", explanatory_lower))) {
-                return("diagnostic_test")
-            }
-            
-            # Treatment response scenario
-            if (any(grepl("(response|treatment|therapy|outcome|recovery|improvement)", outcome_lower)) ||
-                any(grepl("(drug|treatment|therapy|dose|intervention)", explanatory_lower))) {
-                return("treatment_response") 
-            }
-            
-            # Biomarker scenario
-            if (any(grepl("(biomarker|marker|expression|level|concentration)", explanatory_lower)) ||
-                any(grepl("(gene|protein|metabolite|cytokine)", explanatory_lower))) {
-                return("biomarker")
-            }
-            
-            # Screening scenario
-            if (any(grepl("(screen|detect|early|prevention)", outcome_lower))) {
-                return("screening")
-            }
-            
-            # Risk factor scenario (default for epidemiological studies)
-            if (any(grepl("(risk|factor|exposure|smoking|diet|lifestyle)", explanatory_lower))) {
-                return("risk_factor")
-            }
-            
-            # Default to risk factor if unclear
-            return("risk_factor")
-        }
-
-        # Helper function to build summary HTML content with clinical context
-        ,
-        .buildSummaryHTML = function(findings, metrics = NULL, outcome_var = NULL, explanatory_vars = NULL) {
-            # Detect clinical scenario and apply appropriate preset
-            clinical_scenario <- if (!is.null(outcome_var) && !is.null(explanatory_vars)) {
-                private$.detectClinicalScenario(outcome_var, explanatory_vars)
-            } else {
-                "risk_factor" # Default
-            }
-            
-            preset <- private$.applyClinicalPreset(clinical_scenario, NULL)
-            
-            # Context-aware summary title and description
-            context_descriptions <- list(
-                "diagnostic_test" = "diagnostic test evaluation",
-                "treatment_response" = "treatment efficacy assessment", 
-                "biomarker" = "biomarker analysis",
-                "screening" = "screening performance evaluation",
-                "risk_factor" = "risk factor analysis"
-            )
-            
-            analysis_context <- if (clinical_scenario %in% names(context_descriptions)) {
-                context_descriptions[[clinical_scenario]]
-            } else {
-                "statistical analysis"
-            }
-            
-            summary_html <- paste0(
-                '<div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
-                '<h4 style="color: #2c5282; margin-top: 0;">📊 ', stringr::str_to_title(analysis_context), ' Summary</h4>',
-                '<p style="margin: 10px 0;"><strong>Analysis Overview:</strong> Logistic regression was performed for ',
-                analysis_context, ' examining ', findings$total_predictors, ' explanatory variable(s) and their relationship to the outcome.</p>'
-            )
-            
-            # Add key findings section
-            if (findings$significant_count > 0) {
-                interpretation <- private$.formatOddsRatioText(findings$strongest_or, findings$strongest_predictor)
-                
-                summary_html <- paste0(summary_html,
-                    '<p style="margin: 10px 0;"><strong>Key Findings:</strong></p>',
-                    '<ul style="margin: 5px 0; padding-left: 20px;">',
-                    '<li>', findings$significant_count, ' out of ', findings$total_predictors, ' predictor(s) showed statistically significant associations (p < 0.05)</li>'
-                )
-                
-                if (findings$strongest_predictor != "") {
-                    summary_html <- paste0(summary_html,
-                        '<li>Strongest association: <em>', findings$strongest_predictor, '</em> with ', interpretation, '</li>'
-                    )
-                }
-                
-                summary_html <- paste0(summary_html, '</ul>')
-            } else {
-                summary_html <- paste0(summary_html,
-                    '<p style="margin: 10px 0;"><strong>Key Findings:</strong> None of the ', findings$total_predictors, 
-                    ' predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05).</p>'
-                )
-            }
-            
-            # Add model performance if available
-            if (!is.null(metrics) && metrics != "") {
-                summary_html <- paste0(summary_html,
-                    '<p style="margin: 10px 0;"><strong>Model Performance:</strong> ', metrics, '</p>'
-                )
-            }
-            
-            # Add clinical recommendations based on detected scenario
-            if (!is.null(preset) && !is.null(preset$recommendations)) {
-                summary_html <- paste0(summary_html,
-                    '<div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;">',
-                    '<strong>🩺 Clinical Recommendations:</strong>',
-                    '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">'
-                )
-                
-                for (rec in preset$recommendations) {
-                    summary_html <- paste0(summary_html, '<li>', rec, '</li>')
-                }
-                
-                summary_html <- paste0(summary_html, '</ul></div>')
-            }
-            
-            # Add interpretation guide
-            summary_html <- paste0(summary_html,
-                '<div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-top: 10px;">',
-                '<strong>💡 Interpretation Guide:</strong>',
-                '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
-                '<li>OR > 1: Factor increases the odds of the outcome</li>',
-                '<li>OR < 1: Factor decreases the odds of the outcome</li>',
-                '<li>OR = 1: No association between factor and outcome</li>',
-                '<li>95% CI not crossing 1.0 indicates statistical significance</li>',
-                '</ul>',
-                '</div>',
-                '</div>'
-            )
-            
-            return(summary_html)
-        }
-
-        # Main function now simplified and focused
-        ,
-        .generateOddsRatioSummary = function(tOdds, formulaDependent, formulaExplanatory) {
-            tryCatch({
-                # Use helper functions for cleaner, maintainable code
-                findings <- private$.extractSignificantPredictors(tOdds[[1]])
-                metrics <- if (!is.null(tOdds[[2]])) tOdds[[2]] else NULL
-                
-                # Extract variable names for clinical scenario detection
-                explanatory_vars <- if (!is.null(formulaExplanatory)) {
-                    strsplit(formulaExplanatory, " \\+ ")[[1]]
-                } else {
-                    character(0)
-                }
-                
-                return(private$.buildSummaryHTML(findings, metrics, formulaDependent, explanatory_vars))
-                
-            }, error = function(e) {
-                return(private$.formatErrorMessage(
-                    "calculation_error",
-                    "Unable to generate analysis summary",
-                    "There was an error processing the odds ratio results",
-                    c("Check that your data meets analysis requirements", "Verify variable types and completeness")
-                ))
-            })
-        }
-        ,
-        .generateNomogramSummary = function(nom, fit, mydata) {
-            tryCatch({
-                # Extract model information
-                n_subjects <- nrow(mydata)
-                n_predictors <- length(fit$coefficients) - 1  # Exclude intercept
-                
-                # Generate summary
-                summary_html <- paste0(
-                    '<div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;">',
-                    '<h4 style="color: #856404; margin-top: 0;">📈 Nomogram Analysis Summary</h4>',
-                    '<p style="margin: 10px 0;">A diagnostic nomogram has been generated based on the logistic regression model with ',
-                    n_predictors, ' predictor(s) and ', n_subjects, ' subjects.</p>',
-                    
-                    '<p style="margin: 10px 0;"><strong>How to Use the Nomogram:</strong></p>',
-                    '<ol style="margin: 5px 0; padding-left: 25px;">',
-                    '<li>Find your patient\'s value for each predictor variable on its scale</li>',
-                    '<li>Draw a vertical line up to the "Points" axis to get the points for that predictor</li>',
-                    '<li>Sum all points from all predictors to get the "Total Points"</li>',
-                    '<li>Draw a vertical line down from the Total Points to find the predicted probability</li>',
-                    '</ol>',
-                    
-                    '<div style="background-color: #ffeaa7; padding: 10px; border-radius: 5px; margin-top: 10px;">',
-                    '<strong>⚠️ Clinical Note:</strong> This nomogram provides probability estimates based on the current dataset. ',
-                    'External validation is recommended before clinical implementation. Consider local prevalence rates and ',
-                    'clinical context when interpreting results.',
-                    '</div>',
-                    '</div>'
-                )
-                
-                return(summary_html)
-                
-            }, error = function(e) {
-                return(private$.formatErrorMessage(
-                    "calculation_error", 
-                    "Unable to generate nomogram summary",
-                    "There was an error processing the nomogram results",
-                    c("Ensure sufficient data for nomogram creation", "Verify model convergence", "Check variable completeness")
-                ))
-            })
-        }
+        # Nomogram Display ----
         ,
         .createNomogramDisplay = function(nom) {
             # Create HTML display for the nomogram information
@@ -1609,22 +1261,28 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Silently ignore if result doesn't exist
             })
             
-            # Risk Measures Explanation
+            # Odds Ratio vs Risk Ratio Explanation
             tryCatch({
                 self$results$riskMeasuresExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
-                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Risk Measures</h4>
-                <p><strong>Risk Measures:</strong> Different ways to quantify the relationship between risk factors and outcomes.</p>
+                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Odds Ratio vs Risk Ratio</h4>
+                <p><strong>Odds Ratio (OR):</strong> The measure calculated by this analysis.</p>
                 <ul>
-                    <li><strong>Risk Ratio (RR):</strong> Ratio of risks between exposed and unexposed groups</li>
-                    <li><strong>Risk Difference (RD):</strong> Absolute difference in risk between groups</li>
-                    <li><strong>Number Needed to Treat (NNT):</strong> Inverse of risk difference (1/RD)</li>
-                    <li><strong>Attributable Risk:</strong> Proportion of disease attributable to the exposure</li>
+                    <li><strong>Definition:</strong> Ratio of the odds of outcome in exposed vs unexposed groups</li>
+                    <li><strong>Formula:</strong> OR = (a/b) / (c/d) where a,b,c,d are from 2×2 contingency table</li>
+                    <li><strong>Interpretation:</strong> OR = 2.0 means the odds of outcome are twice as high in exposed group</li>
+                    <li><strong>Use case:</strong> Logistic regression, case-control studies, cross-sectional studies</li>
                 </ul>
-                <p><em>Clinical utility:</em> Each measure provides different insights for clinical decision-making and public health planning.</p>
+                <p><strong>Risk Ratio (RR) - NOT calculated by this function:</strong></p>
+                <ul>
+                    <li><strong>Definition:</strong> Ratio of risks (proportions) between exposed and unexposed groups</li>
+                    <li><strong>Use case:</strong> Cohort studies, randomized trials with follow-up data</li>
+                    <li><strong>Note:</strong> When outcome is rare (<10%), OR approximates RR</li>
+                </ul>
+                <p><em>Clinical note:</em> This analysis provides Odds Ratios from logistic regression. For Risk Ratios, use cohort analysis tools.</p>
             </div>
             ')
-            
+
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
             })
@@ -1634,18 +1292,42 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$diagnosticTestExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Diagnostic Test Performance</h4>
-                <p><strong>Diagnostic Metrics:</strong> Evaluate how well a test distinguishes between disease and non-disease states.</p>
+                <p><strong>Diagnostic Metrics Calculated:</strong> This analysis evaluates how well a binary predictor distinguishes between outcome states.</p>
                 <ul>
-                    <li><strong>Sensitivity:</strong> Proportion of true positives correctly identified (true positive rate)</li>
-                    <li><strong>Specificity:</strong> Proportion of true negatives correctly identified (true negative rate)</li>
-                    <li><strong>Positive Predictive Value (PPV):</strong> Probability of disease given a positive test</li>
-                    <li><strong>Negative Predictive Value (NPV):</strong> Probability of no disease given a negative test</li>
-                    <li><strong>Likelihood Ratios:</strong> How much a test result changes the probability of disease</li>
+                    <li><strong>Sensitivity (True Positive Rate):</strong> Proportion of actual positives correctly identified
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: TP / (TP + FN)</li>
+                            <li>Example: If sensitivity = 80%, the test detects 80% of cases with the outcome</li>
+                        </ul>
+                    </li>
+                    <li><strong>Specificity (True Negative Rate):</strong> Proportion of actual negatives correctly identified
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: TN / (TN + FP)</li>
+                            <li>Example: If specificity = 90%, the test correctly identifies 90% of cases without the outcome</li>
+                        </ul>
+                    </li>
+                    <li><strong>Positive Likelihood Ratio (LR+):</strong> How much a positive test increases the odds
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: Sensitivity / (1 - Specificity)</li>
+                            <li>LR+ > 10: Strong evidence for diagnosis</li>
+                            <li>LR+ = 5-10: Moderate evidence</li>
+                            <li>LR+ = 2-5: Weak evidence</li>
+                        </ul>
+                    </li>
+                    <li><strong>Negative Likelihood Ratio (LR-):</strong> How much a negative test decreases the odds
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: (1 - Sensitivity) / Specificity</li>
+                            <li>LR- < 0.1: Strong evidence against diagnosis</li>
+                            <li>LR- = 0.1-0.2: Moderate evidence</li>
+                            <li>LR- = 0.2-0.5: Weak evidence</li>
+                        </ul>
+                    </li>
                 </ul>
-                <p><em>Clinical application:</em> These metrics help determine the clinical utility of diagnostic tests and biomarkers.</p>
+                <p><strong>Note:</strong> PPV and NPV are NOT calculated by this function as they depend on disease prevalence in your specific population.</p>
+                <p><em>Clinical application:</em> These metrics help evaluate diagnostic tests and biomarkers. Use the nomogram to convert likelihood ratios into post-test probabilities.</p>
             </div>
             ')
-            
+
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
             })
@@ -1654,18 +1336,81 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 self$results$nomogramAnalysisExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
-                <h4 style="margin-top: 0; color: #721c24;">Understanding Nomogram Analysis</h4>
-                <p><strong>Diagnostic Nomogram:</strong> Visual tool for converting likelihood ratios to post-test probabilities.</p>
+                <h4 style="margin-top: 0; color: #721c24;">Understanding Diagnostic Nomogram</h4>
+
+                <p><strong>What is a Diagnostic Nomogram?</strong></p>
+                <p>A Fagan nomogram is a visual tool for converting pre-test probability to post-test probability using likelihood ratios from a diagnostic test. Unlike the risk prediction nomogram (which uses all variables), the diagnostic nomogram evaluates how well a SINGLE binary predictor performs as a diagnostic test.</p>
+
+                <h5 style="color: #721c24;">Key Components:</h5>
                 <ul>
-                    <li><strong>Pre-test Probability:</strong> Prior probability of disease before testing</li>
-                    <li><strong>Likelihood Ratio:</strong> How much the test result changes the odds</li>
+                    <li><strong>Pre-test Probability:</strong> Baseline probability of the outcome before testing (e.g., population prevalence)</li>
+                    <li><strong>Likelihood Ratio (LR):</strong> How much the test result changes the odds
+                        <ul style="margin-top: 5px;">
+                            <li>LR+ > 1: Positive test increases probability</li>
+                            <li>LR- < 1: Negative test decreases probability</li>
+                        </ul>
+                    </li>
                     <li><strong>Post-test Probability:</strong> Updated probability after incorporating test results</li>
-                    <li><strong>Clinical Decision Making:</strong> Helps determine if further testing or treatment is warranted</li>
                 </ul>
-                <p><em>Usage:</em> Draw a line from pre-test probability through likelihood ratio to find post-test probability.</p>
+
+                <h5 style="color: #721c24;">How to Use the Nomogram:</h5>
+                <ol>
+                    <li>Start with pre-test probability (left axis)</li>
+                    <li>Draw a straight line through the likelihood ratio (middle axis)</li>
+                    <li>Read the post-test probability (right axis)</li>
+                    <li>Determine if this information is sufficient for clinical decision-making</li>
+                </ol>
+
+                <hr style="margin: 15px 0; border: none; border-top: 1px solid #f5c6cb;">
+
+                <h5 style="color: #721c24; margin-top: 15px;">What is a Diagnostic Predictor?</h5>
+
+                <p><strong>The diagnostic predictor is the single binary variable you want to evaluate as a diagnostic test.</strong></p>
+
+                <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>Example:</strong> If you select "LVI" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor,
+                    the nomogram answers: <em>"How good is LVI at predicting my outcome?"</em>
+                </div>
+
+                <p><strong>Requirements:</strong></p>
+                <ul>
+                    <li>✅ Must be <strong>binary</strong> (exactly 2 levels): Yes/No, Present/Absent, Positive/Negative</li>
+                    <li>✅ Examples: Sex (Male/Female), LVI (Absent/Present), Treatment (Control/Treated)</li>
+                    <li>❌ Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li>
+                    <li>❌ Cannot use multi-category: Grade 1/2/3, Stage I/II/III/IV</li>
+                </ul>
+
+                <p><strong>Why Binary Only?</strong></p>
+                <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2×2 contingency table:</p>
+
+                <table style="border-collapse: collapse; margin: 10px 0; font-size: 0.9em;">
+                    <tr><th style="border: 1px solid #ddd; padding: 5px;"></th>
+                        <th style="border: 1px solid #ddd; padding: 5px;">Outcome +</th>
+                        <th style="border: 1px solid #ddd; padding: 5px;">Outcome -</th></tr>
+                    <tr><td style="border: 1px solid #ddd; padding: 5px;">Test +</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">True Positive</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">False Positive</td></tr>
+                    <tr><td style="border: 1px solid #ddd; padding: 5px;">Test -</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">False Negative</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">True Negative</td></tr>
+                </table>
+
+                <p><small><em>Sensitivity = TP/(TP+FN), Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)</em></small></p>
+
+                <p><strong>Selection Guidelines:</strong></p>
+                <ul>
+                    <li><strong>Not specified:</strong> Uses first explanatory variable automatically</li>
+                    <li><strong>In your regression model:</strong> Evaluates its performance while controlling for other variables</li>
+                    <li><strong>Not in your model:</strong> Evaluates it independently (useful for comparing tests)</li>
+                </ul>
+
+                <div style="background-color: #d1ecf1; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>💡 Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select
+                    a binary variable for the diagnostic predictor, or the nomogram will not be generated.
+                </div>
             </div>
             ')
-            
+
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
             })
@@ -1861,20 +1606,20 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Helper function to create plot data with original variable names
         ,
-        .createPlotDataWithOriginalNames = function(mydata, all_labels) {
+        .createPlotDataWithOriginalNames = function(mydata, all_labels, dep_clean, exp_clean) {
             if (is.null(all_labels) || length(all_labels) == 0) {
                 # Fallback: return data as-is if no labels available
                 return(list(
                     data = mydata,
-                    formulaDependent = names(mydata)[1],  # Fallback
-                    formulaExplanatory = names(mydata)[-1]  # Fallback
+                    formulaDependent = dep_clean,
+                    formulaExplanatory = exp_clean
                 ))
             }
-            
+
             # Create a copy of the data with original column names
             plotData <- mydata
             name_mapping <- setNames(unlist(all_labels), names(all_labels))
-            
+
             # Restore original column names
             original_names <- character(ncol(plotData))
             for (i in seq_along(names(plotData))) {
@@ -1885,22 +1630,25 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     original_names[i] <- clean_name  # Keep as-is if not found
                 }
             }
-            
+
             names(plotData) <- original_names
-            
-            # Create formulas with original names
-            original_dependent <- original_names[1]  # Assuming first column is dependent
-            original_explanatory <- original_names[-1]  # Rest are explanatory
-            
-            # Find the correct dependent and explanatory variables
-            # Match with the labels to find the right variables
-            for (clean_name in names(name_mapping)) {
-                original_name <- name_mapping[clean_name]
-                if (original_name %in% original_names) {
-                    # This helps maintain the correct variable identification
-                }
+
+            # Map dependent and explanatory from cleaned names to original names
+            # Use unname() to avoid named vectors which cause "Can't rename variables" error
+            original_dependent <- if (!is.null(dep_clean) && dep_clean %in% names(name_mapping)) {
+                unname(name_mapping[dep_clean])
+            } else {
+                dep_clean
             }
-            
+
+            original_explanatory <- unname(sapply(exp_clean, function(clean_name) {
+                if (!is.null(clean_name) && clean_name %in% names(name_mapping)) {
+                    name_mapping[clean_name]
+                } else {
+                    clean_name
+                }
+            }, USE.NAMES = FALSE))
+
             return(list(
                 data = plotData,
                 formulaDependent = original_dependent,

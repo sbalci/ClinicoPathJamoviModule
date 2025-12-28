@@ -186,7 +186,8 @@
       "Bash(mv:*)",
       "Skill(pubmed-database)",
       "Bash(mdfind:*)",
-      "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" Rscript:*)"
+      "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" Rscript:*)",
+      "Bash(perl:*)"
     ],
     "deny": [],
     "ask": [],

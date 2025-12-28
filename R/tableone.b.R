@@ -65,6 +65,11 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             data <- jmvcore::select(self$data, selected_vars)
 
+            # CRITICAL FIX: Get actual column names after jmvcore::select
+            # jmvcore::select may rename variables (e.g., clean special characters)
+            # Store mapping: actual column names to use in processing
+            actual_vars <- names(data)
+
             # CRITICAL FIX: Capture original data stats BEFORE naOmit
             # This ensures we report actual missingness, not post-exclusion stats
             original_data <- data
@@ -88,8 +93,9 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             # Generate clinical summaries and data quality checks
             # Only populate if visible (saves computation)
+            # CRITICAL FIX: Pass both actual_vars (for data access) and selected_vars (for display)
             if (isTRUE(self$options$showSummary)) {
-                private$.generateSummary(data, selected_vars, original_data, excluded_n)
+                private$.generateSummary(data, actual_vars, original_data, excluded_n, selected_vars)
             }
 
             if (isTRUE(self$options$showAbout)) {
@@ -100,7 +106,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 private$.setReportSentence(data, selected_vars, original_data, excluded_n)
             }
 
-            private$.checkDataQuality(data, selected_vars, original_data)
+            # CRITICAL FIX: Pass both actual and display variable names to quality check
+            private$.checkDataQuality(data, actual_vars, original_data, selected_vars)
 
             # Generate the table based on the chosen style.
             if (table_style == "t1") {
@@ -169,24 +176,31 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
                 # Wrap entire janitor operation in tryCatch for error handling
                 result <- tryCatch({
-                    table_list <- lapply(selected_vars, function(var) {
+                    # CRITICAL FIX: Use actual column names (after jmvcore::select renaming)
+                    # Create mapping for display (original -> actual column names)
+                    var_mapping <- setNames(selected_vars, actual_vars)
+
+                    table_list <- lapply(seq_along(actual_vars), function(i) {
+                    var <- actual_vars[i]  # Actual column name in data
+                    display_var <- selected_vars[i]  # Original name for display
+
                     # Checkpoint for each variable processing (for incremental results)
                     private$.checkpoint(flush = FALSE)
-                    
+
                     freq_table <- tryCatch({
                         # Check if variable exists and has data
                         if (!var %in% names(data)) {
-                            stop("Variable '", htmltools::htmlEscape(var), "' not found in data")
+                            stop("Variable '", htmltools::htmlEscape(display_var), "' not found in data")
                         }
 
                         # Remove missing values for this variable to avoid issues
                         var_data <- data[!is.na(data[[var]]), ]
 
                         if (nrow(var_data) == 0) {
-                            stop("Variable '", htmltools::htmlEscape(var), "' has no non-missing values")
+                            stop("Variable '", htmltools::htmlEscape(display_var), "' has no non-missing values")
                         }
-                        
-                        # Create tabyl table
+
+                        # Create tabyl table using actual column name
                         table <- janitor::tabyl(var_data, !!rlang::sym(var))
                         
                         # Add totals
@@ -217,16 +231,16 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         
                         table
                     }, error = function(e) {
-                        # Provide more detailed error information
-                        safe_var <- htmltools::htmlEscape(var)
+                        # Provide more detailed error information using display name
+                        safe_var <- htmltools::htmlEscape(display_var)
                         stop("Error processing variable '", safe_var, "' with janitor: ", e$message,
                              " (Variable type: ", class(data[[var]])[1],
                              ", Non-missing values: ", sum(!is.na(data[[var]])), ")")
                     })
 
                     # Add a header for clarity for each variable's table, plus a top margin.
-                    # Use escaped variable name for safe HTML rendering
-                    safe_var_name <- htmltools::htmlEscape(var)
+                    # Use escaped original variable name for safe HTML rendering
+                    safe_var_name <- htmltools::htmlEscape(display_var)
                     header <- paste0("<h4 style='margin-top:20px;'>Frequency Table for '", safe_var_name, "'</h4>")
 
                     # Convert to an HTML table with columns centered from the second column onward:
@@ -360,11 +374,16 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             self$results$about$setContent(about_text)
         },
         
-        .generateSummary = function(data, vars, original_data, excluded_n) {
+        .generateSummary = function(data, actual_vars, original_data, excluded_n, display_vars = NULL) {
             # CRITICAL FIX: Report statistics from ORIGINAL data to show true missingness
+            # CRITICAL FIX: Use actual_vars for data access, display_vars for messages
+            if (is.null(display_vars)) {
+                display_vars <- actual_vars
+            }
+
             n_original <- nrow(original_data)
             n_final <- nrow(data)
-            n_vars <- length(vars)
+            n_vars <- length(actual_vars)
 
             # Calculate missing data from ORIGINAL dataset
             n_complete_original <- sum(complete.cases(original_data))
@@ -381,10 +400,12 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             type_text <- paste(names(type_summary), ":", type_summary, collapse = "; ")
 
             # Per-variable missing counts (from ORIGINAL data)
-            var_missing <- sapply(vars, function(v) sum(is.na(original_data[[v]])))
-            high_missing_vars <- vars[var_missing > n_original * 0.2]  # >20% missing
-            # Escape variable names for safe HTML display
-            high_missing_vars_safe <- sapply(high_missing_vars, htmltools::htmlEscape)
+            # CRITICAL FIX: Use actual_vars for data access
+            var_missing <- sapply(actual_vars, function(v) sum(is.na(original_data[[v]])))
+            high_missing_vars_actual <- actual_vars[var_missing > n_original * 0.2]  # >20% missing
+            high_missing_vars_display <- display_vars[var_missing > n_original * 0.2]
+            # Escape variable names for safe HTML display (use display names)
+            high_missing_vars_safe <- sapply(high_missing_vars_display, htmltools::htmlEscape)
 
             # Build summary text with transparent reporting
             summary_text <- paste0(
@@ -430,11 +451,17 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             self$results$summary$setContent(summary_text)
         },
         
-        .checkDataQuality = function(data, vars, original_data) {
+        .checkDataQuality = function(data, actual_vars, original_data, display_vars = NULL) {
             # NOTE: Data quality thresholds align with clinical research standards:
             # - STRONG_WARNING thresholds: N<10, missing>50%, exclusion>30%
             # - WARNING thresholds: N<30, missing>20%, exclusion>10%
             # These would map to NoticeType when Notice serialization is supported.
+
+            # CRITICAL FIX: Use display_vars for user messages, actual_vars for data access
+            # If display_vars not provided, use actual_vars for both
+            if (is.null(display_vars)) {
+                display_vars <- actual_vars
+            }
 
             # CRITICAL FIX: Check sample size on FINAL data (after exclusions)
             n_final <- nrow(data)
@@ -475,7 +502,11 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             }
 
             # Check variable types and unusual patterns
-            for (var in vars) {
+            # CRITICAL FIX: Use actual_vars to access data, display_vars for messages
+            for (i in seq_along(actual_vars)) {
+                var <- actual_vars[i]
+                display_var <- display_vars[i]
+
                 if (var %in% names(data)) {
                     var_data <- data[[var]]
                     n_unique <- length(unique(var_data[!is.na(var_data)]))
@@ -483,12 +514,12 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
                     if (is.numeric(var_data) && n_unique < 5 && n_valid > 10) {
                         # INFO: Variable type recommendation
-                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' has few unique values (%d).</em> Consider treating as categorical.", htmltools::htmlEscape(var), n_unique))
+                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' has few unique values (%d).</em> Consider treating as categorical.", htmltools::htmlEscape(display_var), n_unique))
                     }
 
                     if (is.character(var_data) && n_unique > n_valid * 0.8) {
                         # INFO: Variable type recommendation
-                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' has many unique text values.</em> Consider grouping categories.", htmltools::htmlEscape(var)))
+                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' has many unique text values.</em> Consider grouping categories.", htmltools::htmlEscape(display_var)))
                     }
                 }
             }

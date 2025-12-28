@@ -5,7 +5,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: VariableSupplier
-    persistentItems: false
+    persistentItems: true
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
@@ -24,23 +24,30 @@ children:
             fitToGrid: true
           - type: LevelSelector
             name: outcomeLevel
-            label: "Positive Outcome Level"
+            label: "Positive Level"
             enable: (outcome)
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
+        name: showExplanations
+  - type: CollapseBox
+    label: Nomogram Options
+    collapsed: true
+    margin: large
+    children:
+      - type: CheckBox
         name: showNomogram
         label: Show diagnostic nomogram
-      - type: TargetLayoutBox
-        label: Diagnostic predictor (binary)
+      - type: VariableSupplier
+        name: diagnosticPredictorSupplier
+        persistentItems: true
+        stretchFactor: 1
         children:
-          - type: VariablesListBox
-            name: diagnosticPredictor
-            maxItemCount: 1
-            isTarget: true
-            enable: (showNomogram)
-      - type: CheckBox
-        name: showExplanations
-      - type: CheckBox
-        name: showSummaries
+          - type: TargetLayoutBox
+            label: Diagnostic Predictor (binary)
+            children:
+              - type: VariablesListBox
+                name: diagnosticPredictor
+                maxItemCount: 1
+                isTarget: true

@@ -45,7 +45,7 @@ children:
             children:
               - type: CheckBox
                 name: findcut
-                enable: (contexpl)
+                enable: (contexpl && !multiple_cutoffs)
                 label: Find Optimal Cut-off
               - type: Output
                 name: calculatedcutoff
@@ -58,18 +58,23 @@ children:
             children:
               - type: CheckBox
                 name: multiple_cutoffs
+                enable: (contexpl && !findcut)
               - type: ComboBox
                 name: num_cutoffs
+                enable: (multiple_cutoffs)
                 label: Number of Cut-offs
               - type: ComboBox
                 name: cutoff_method
+                enable: (multiple_cutoffs)
                 label: Multiple Cut-off Method
               - type: TextBox
                 name: min_group_size
                 format: number
+                enable: (multiple_cutoffs)
                 label: Minimum Group Size (%)
               - type: Output
                 name: calculatedmulticut
+                enable: (multiple_cutoffs)
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -190,23 +195,23 @@ children:
             children:
               - type: CheckBox
                 name: sc
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Survival Curves (Kaplan-Meier)
               - type: CheckBox
                 name: kmunicate
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: KMunicate-Style Plot (Publication Ready)
               - type: CheckBox
                 name: ce
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Cumulative Events Plot
               - type: CheckBox
                 name: ch
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Cumulative Hazard Plot
               - type: CheckBox
                 name: loglog
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Log-Log Plot (Proportional Hazards Check)
       - type: Label
         label: Plot Customization
@@ -217,38 +222,38 @@ children:
               - type: TextBox
                 name: endplot
                 format: number
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Plot End Time
               - type: TextBox
                 name: byplot
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 format: number
                 label: Time Interval
               - type: TextBox
                 name: ybegin_plot
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 format: number
                 label: Y-axis Start
               - type: TextBox
                 name: yend_plot
                 format: number
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Y-axis End
               - type: CheckBox
                 name: ci95
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: 95% Confidence Intervals
               - type: CheckBox
                 name: risktable
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Number at Risk Table
               - type: CheckBox
                 name: censored
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Show Censored Observations
               - type: ComboBox
                 name: medianline
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 label: Median Survival Line
   - type: CollapseBox
     label: Survival Tables
@@ -263,7 +268,7 @@ children:
               - type: TextBox
                 name: cutp
                 format: string
-                enable: (findcut)
+                enable: (findcut || multiple_cutoffs)
                 width: large
                 label: "Survival Time Points (default: 1,3,5 years)"
   - type: CollapseBox

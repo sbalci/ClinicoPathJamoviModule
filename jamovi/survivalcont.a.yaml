@@ -1,10 +1,10 @@
 ---
 name:  survivalcont
 title: Survival Analysis for Continuous Variable
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 options:

@@ -388,9 +388,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (self$options$residual_diagnostics) {
                         self$results$residualDiagnosticsExplanation$setVisible(TRUE)
                     }
-                    if (self$options$use_parametric) {
-                        self$results$parametricModelsExplanation$setVisible(TRUE)
-                    }
+                    # Parametric features temporarily disabled for next release
+                    # if (self$options$use_parametric) {
+                    #     self$results$parametricModelsExplanation$setVisible(TRUE)
+                    # }
                     
                     # Survival plots explanation requires showExplanations AND at least one plot
                     if (self$options$sc || self$options$ce || self$options$ch || 
@@ -425,29 +426,29 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$pairwiseTable$setVisible(TRUE)
                 }
                 
-                # Handle parametric models visibility
-                if (self$options$use_parametric) {
-                    self$results$parametricModelSummary$setVisible(TRUE)
-                    if (self$options$compare_distributions) {
-                        self$results$parametricModelComparison$setVisible(TRUE)
-                    }
-                    if (self$options$parametric_diagnostics) {
-                        self$results$parametricDiagnostics$setVisible(TRUE)
-                    }
-                    if (self$options$parametric_survival_plots) {
-                        self$results$parametricSurvivalPlot$setVisible(TRUE)
-                    }
-                    if (self$options$hazard_plots) {
-                        self$results$hazardFunctionPlot$setVisible(TRUE)
-                    }
-                    if (self$options$parametric_extrapolation) {
-                        self$results$extrapolationPlot$setVisible(TRUE)
-                        self$results$extrapolationTable$setVisible(TRUE)
-                    }
-                    if (self$options$showExplanations) {
-                        self$results$parametricModelsExplanation$setVisible(TRUE)
-                    }
-                }
+                # Parametric models visibility - DISABLED for this release
+                # if (self$options$use_parametric) {
+                #     self$results$parametricModelSummary$setVisible(TRUE)
+                #     if (self$options$compare_distributions) {
+                #         self$results$parametricModelComparison$setVisible(TRUE)
+                #     }
+                #     if (self$options$parametric_diagnostics) {
+                #         self$results$parametricDiagnostics$setVisible(TRUE)
+                #     }
+                #     if (self$options$parametric_survival_plots) {
+                #         self$results$parametricSurvivalPlot$setVisible(TRUE)
+                #     }
+                #     if (self$options$hazard_plots) {
+                #         self$results$hazardFunctionPlot$setVisible(TRUE)
+                #     }
+                #     if (self$options$parametric_extrapolation) {
+                #         self$results$extrapolationPlot$setVisible(TRUE)
+                #         self$results$extrapolationTable$setVisible(TRUE)
+                #     }
+                #     if (self$options$showExplanations) {
+                #         self$results$parametricModelsExplanation$setVisible(TRUE)
+                #     }
+                # }
                 
                 # Handle Cox PH visibility
                 if (self$options$ph_cox) {
@@ -474,13 +475,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$residual_diagnostics) {
                     self$results$residualsPlot$setVisible(TRUE)
                 }
-                if (self$options$use_parametric) {
-                    # Parametric plots handled in parametric section
-                    self$results$parametricSurvivalPlot$setVisible(TRUE)
-                    if (self$options$hazard_plots) {
-                        self$results$hazardFunctionPlot$setVisible(TRUE)
-                    }
-                }
+                # Parametric plots - DISABLED for this release
+                # if (self$options$use_parametric) {
+                #     # Parametric plots handled in parametric section
+                #     self$results$parametricSurvivalPlot$setVisible(TRUE)
+                #     if (self$options$hazard_plots) {
+                #         self$results$hazardFunctionPlot$setVisible(TRUE)
+                #     }
+                # }
             }
             ,
 
@@ -783,46 +785,25 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             mydata[["start"]] <- date_parser(mydata[[dxdate]])
                             mydata[["end"]] <- date_parser(mydata[[fudate]])
                         } else {
-                            # ERROR Notice for invalid date format
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'invalidDateFormat',
-                                type = jmvcore::NoticeType$ERROR
-                            )
-                            notice$setContent(sprintf(
-                                'Unknown date format: %s • Supported formats: %s • Please select correct format in Date Type options',
+                            # ERROR for invalid date format
+                            stop(sprintf(
+                                .('Unknown date format: %s\nSupported formats: %s\nPlease select correct format in Date Type options'),
                                 self$options$timetypedata,
                                 paste(names(lubridate_functions), collapse = ", ")
                             ))
-                            self$results$insert(1, notice)
-                            return()
                         }
                     } else {
-                        # ERROR Notice for mixed date types
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'mixedDateTypes',
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent('Diagnosis date and follow-up date must be in the same format (both numeric or both text) • Please check your date variables and ensure consistent formatting')
-                        self$results$insert(1, notice)
-                        return()
+                        # ERROR for mixed date types
+                        stop(.('Diagnosis date and follow-up date must be in the same format (both numeric or both text)\nPlease check your date variables and ensure consistent formatting'))
                     }
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
-                        # ERROR Notice for time calculation failure
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'timeCalculationFailed',
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent(sprintf(
-                            'Time difference cannot be calculated • Date parsing produced no valid dates • Current date type setting: %s • Please verify date format matches your data',
+                        # ERROR for time calculation failure
+                        stop(sprintf(
+                            .('Time difference cannot be calculated\nDate parsing produced no valid dates\nCurrent date type setting: %s\nPlease verify date format matches your data'),
                             self$options$timetypedata
                         ))
-                        self$results$insert(1, notice)
-                        return()
                     }
 
                     timetypeoutput <-
@@ -883,6 +864,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             # mydata[[self$options$outcome]]
 
                     } else if (inherits(outcome1, "factor")) {
+                        # Validate that outcomeLevel is specified for factor outcomes
+                        if (is.null(outcomeLevel) || length(outcomeLevel) == 0) {
+                            stop(sprintf(
+                                .('Event level must be specified for factor outcomes.\nOutcome variable "%s" has levels: %s\nPlease select which level represents the event (death/recurrence) in the analysis options.'),
+                                myoutcome_labelled,
+                                paste(levels(outcome1), collapse = ", ")
+                            ))
+                        }
+
                         mydata[["myoutcome"]] <-
                             ifelse(
                                 test = outcome1 == outcomeLevel,
@@ -958,9 +948,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Validate recode set is limited to 0/1/2
-                if (any(!mydata[["myoutcome"]] %in% c(0, 1, 2), na.rm = TRUE)) {
-                    stop("Outcome recode produced values outside {0,1,2}. Please check level selections.")
+                # Note: NAs are allowed (they'll be dropped during analysis)
+                #       Only error on invalid non-NA values
+                outcome_values <- mydata[["myoutcome"]]
+                non_na_values <- outcome_values[!is.na(outcome_values)]
+                invalid_values <- non_na_values[!(non_na_values %in% c(0, 1, 2))]
+
+                if (length(invalid_values) > 0) {
+                    unique_invalid <- unique(invalid_values)
+                    stop(sprintf(
+                        .('Outcome recode produced invalid values: %s\n\nExpected values: 0=censored, 1=event, 2=competing risk\n\nPossible causes:\n- For binary outcomes: Ensure numeric values are exactly 0 and 1\n- For factor outcomes: Verify "Event Level" is selected in analysis options\n- For multi-state outcomes: Enable "Multiple Event Levels" and select all outcome levels (Dead of Disease, Dead of Other Causes, Alive with Disease, Alive without Disease)'),
+                        paste(unique_invalid, collapse = ", ")
+                    ))
                 }
+
+                # Note: NAs are automatically excluded by jmvcore::naOmit() during cleandata
+                # Cannot use dynamic Notice insertion here due to serialization issues
 
                 df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
 
@@ -1027,26 +1030,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                   landmark <- jmvcore::toNumeric(self$options$landmark)
 
-                  n_before <- nrow(cleanData)
+                  # Apply landmark filtering
                   cleanData <- cleanData %>%
                     dplyr::filter(mytime >= landmark) %>%
                     dplyr::mutate(mytime = mytime - landmark)
-                  n_after <- nrow(cleanData)
-                  if (n_after < n_before) {
-                    # WARNING Notice for landmark exclusions
-                    landmark_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'landmarkExclusions',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    landmark_notice$setContent(sprintf(
-                        'Landmark analysis excluded %d subjects with time < %d %s • Analysis is conditional on surviving to landmark time • Results apply only to subjects alive at landmark',
-                        n_before - n_after,
-                        landmark,
-                        self$options$timetypeoutput
-                    ))
-                    self$results$insert(2, landmark_notice)
-                  }
+
+                  # Note: Subjects with time < landmark are excluded
+                  # Cannot show notice due to serialization issues
                 }
 
                 # Time Dependent Covariate ----
@@ -1187,13 +1177,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.checkpoint()
                 }
                 
-                # Parametric Survival Models
-                if (self$options$use_parametric) {
-                    private$.safeAnalysis(function() {
-                        private$.parametricSurvival(results)
-                    }, .("Parametric survival analysis failed"))
-                    private$.checkpoint()
-                }
+                # Parametric Survival Models - DISABLED for this release
+                # if (self$options$use_parametric) {
+                #     private$.safeAnalysis(function() {
+                #         private$.parametricSurvival(results)
+                #     }, .("Parametric survival analysis failed"))
+                #     private$.checkpoint()
+                # }
                 
                 # Pairwise Comparisons
                 if (self$options$pw) {
@@ -1295,51 +1285,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Clinical Safety: Event Count Checking ----
                 mydata <- results$cleanData
-                n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
+                outcome_col <- results$name2outcome
+                n_events <- sum(mydata[[outcome_col]] == 1, na.rm = TRUE)
                 n_total <- nrow(mydata)
 
                 # CRITICAL: < 10 events - ERROR (block analysis)
                 if (n_events < 10) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'insufficientEvents',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
-                        'CRITICAL: Only %d events detected • Minimum 10 events required for reliable survival analysis • Results cannot be computed • Please collect more data before proceeding',
+                    stop(sprintf(
+                        .('CRITICAL: Only %d events detected\nMinimum 10 events required for reliable survival analysis\nResults cannot be computed\nPlease collect more data before proceeding'),
                         n_events
                     ))
-                    self$results$insert(1, notice)
-                    return()
                 }
 
-                # STRONG WARNING: 10-19 events
-                if (n_events >= 10 && n_events < 20) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'limitedEvents',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf(
-                        'Limited events (n=%d of %d observations) • Unstable estimates likely • Confidence intervals may be very wide • Interpret results with extreme caution • Consider collecting additional data',
-                        n_events, n_total
-                    ))
-                    self$results$insert(1, notice)
-                }
-
-                # WARNING: 20-49 events
-                if (n_events >= 20 && n_events < 50) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'moderateEvents',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
-                        'Moderate event count (n=%d) • Statistical power may be limited for detecting smaller effects • Confidence intervals may be wider than ideal',
-                        n_events
-                    ))
-                    self$results$insert(1, notice)
-                }
+                # Note: Event count warnings for 10-49 events removed due to serialization issues
+                # Analysis proceeds for n_events >= 10
 
                 # Run Analysis ----
                 ## Median Survival ----
@@ -1379,16 +1338,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ## Cox ----
                 if (!(self$options$multievent && self$options$analysistype == "compete")) {
                     private$.cox(results)
-                } else {
-                    # INFO Notice for competing risk analysis limitations
-                    competing_risk_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'competingRiskLimitations',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    competing_risk_notice$setContent('Competing risk analysis selected • Some analyses (Cox regression, pairwise tests, person-time rates) are not applicable for multi-state competing risk outcomes in this module • Use cumulative incidence functions instead')
-                    self$results$insert(2, competing_risk_notice)
                 }
+                # Note: Competing risk analysis skips Cox regression
+                # Cannot show info notice due to serialization issues
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Survival Table ----
@@ -1399,10 +1351,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.exportSurvivalData(results)
                 private$.checkpoint()  # Add checkpoint here
 
-                ## Parametric Survival Models ----
-                if (self$options$use_parametric) {
-                    private$.parametricSurvival(results)
-                }
+                ## Parametric Survival Models - DISABLED for this release ----
+                # if (self$options$use_parametric) {
+                #     private$.parametricSurvival(results)
+                # }
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Pairwise ----
@@ -1453,19 +1405,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Populate enhanced clinical content
                 private$.populateEnhancedClinicalContent()
 
-                # Analysis completion INFO Notice
-                completion_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-                completion_notice$setContent(sprintf(
-                    'Analysis completed successfully • %d observations analyzed • %d events observed (%.1f%% event rate) • See detailed results below',
-                    n_total,
-                    n_events,
-                    (n_events / n_total) * 100
-                ))
-                self$results$insert(999, completion_notice)
+                # Note: Analysis completion notice removed due to serialization issues
             }
 
             # RMST Analysis Function ----
@@ -1992,20 +1932,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     self$results$cox_ph$setContent(print(zph))
 
-                    # Check for PH assumption violation and create Notice banner
-                    p_value <- zph$table[nrow(zph$table), "p"]  # Global test p-value
-                    if (p_value < 0.05) {
-                        ph_notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'phViolation',
-                            type = jmvcore::NoticeType$STRONG_WARNING
-                        )
-                        ph_notice$setContent(sprintf(
-                            'Proportional Hazards Assumption Violated (p=%.4f) • Cox model may be inappropriate for this data • Consider stratified analysis or time-varying covariates • See detailed recommendations below',
-                            p_value
-                        ))
-                        self$results$insert(1, ph_notice)
-                    }
+                    # Note: PH assumption violation notice removed due to serialization issues
+                    # Check interpretation section for PH violation details
 
                     # Generate enhanced PH interpretation
                     ph_interpretation <- private$.generatePHInterpretation(zph, myfactor)

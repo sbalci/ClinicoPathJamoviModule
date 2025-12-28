@@ -338,7 +338,7 @@ children:
                 enable: (multievent)
   - type: CollapseBox
     label: Analysis Explanations
-    collapsed: true
+    collapsed: false
     children:
       - type: Label
         label: Help & Interpretation
@@ -352,76 +352,77 @@ children:
               - type: CheckBox
                 name: showSummaries
                 label: Show Natural Language Summaries
-  - type: CollapseBox
-    label: Parametric Survival Models
-    collapsed: true
-    children:
-      - type: Label
-        label: Parametric Model Configuration
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: use_parametric
-                label: Enable Parametric Models
-              - type: ComboBox
-                name: parametric_distribution
-                enable: (use_parametric)
-                label: Distribution Type
-              - type: CheckBox
-                name: parametric_covariates
-                enable: (use_parametric)
-                label: Include Covariates
-      - type: Label
-        label: Spline Model Options
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: spline_knots
-                format: number
-                enable: (use_parametric && parametric_distribution:survspline)
-                label: Number of Knots
-              - type: ComboBox
-                name: spline_scale
-                enable: (use_parametric && parametric_distribution:survspline)
-                label: Spline Scale
-      - type: Label
-        label: Extrapolation Analysis
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: parametric_extrapolation
-                enable: (use_parametric)
-                label: Enable Extrapolation
-              - type: TextBox
-                name: extrapolation_time
-                format: number
-                enable: (use_parametric && parametric_extrapolation)
-                label: Extrapolation Time Horizon
-      - type: Label
-        label: Parametric Model Outputs
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: parametric_diagnostics
-                enable: (use_parametric)
-                label: Model Diagnostics
-              - type: CheckBox
-                name: compare_distributions
-                enable: (use_parametric)
-                label: Compare Distributions
-              - type: CheckBox
-                name: parametric_survival_plots
-                enable: (use_parametric)
-                label: Parametric Survival Plots
-              - type: CheckBox
-                name: hazard_plots
-                enable: (use_parametric)
-                label: Hazard Function Plots
+  
+  # - type: CollapseBox
+  #   label: Parametric Survival Models
+  #   collapsed: true
+  #   children:
+  #     - type: Label
+  #       label: Parametric Model Configuration
+  #       children:
+  #         - type: LayoutBox
+  #           margin: large
+  #           children:
+  #             - type: CheckBox
+  #               name: use_parametric
+  #               label: Enable Parametric Models
+  #             - type: ComboBox
+  #               name: parametric_distribution
+  #               enable: (use_parametric)
+  #               label: Distribution Type
+  #             - type: CheckBox
+  #               name: parametric_covariates
+  #               enable: (use_parametric)
+  #               label: Include Covariates
+  #     - type: Label
+  #       label: Spline Model Options
+  #       children:
+  #         - type: LayoutBox
+  #           margin: large
+  #           children:
+  #             - type: TextBox
+  #               name: spline_knots
+  #               format: number
+  #               enable: (use_parametric && parametric_distribution:survspline)
+  #               label: Number of Knots
+  #             - type: ComboBox
+  #               name: spline_scale
+  #               enable: (use_parametric && parametric_distribution:survspline)
+  #               label: Spline Scale
+  #     - type: Label
+  #       label: Extrapolation Analysis
+  #       children:
+  #         - type: LayoutBox
+  #           margin: large
+  #           children:
+  #             - type: CheckBox
+  #               name: parametric_extrapolation
+  #               enable: (use_parametric)
+  #               label: Enable Extrapolation
+  #             - type: TextBox
+  #               name: extrapolation_time
+  #               format: number
+  #               enable: (use_parametric && parametric_extrapolation)
+  #               label: Extrapolation Time Horizon
+  #     - type: Label
+  #       label: Parametric Model Outputs
+  #       children:
+  #         - type: LayoutBox
+  #           margin: large
+  #           children:
+  #             - type: CheckBox
+  #               name: parametric_diagnostics
+  #               enable: (use_parametric)
+  #               label: Model Diagnostics
+  #             - type: CheckBox
+  #               name: compare_distributions
+  #               enable: (use_parametric)
+  #               label: Compare Distributions
+  #             - type: CheckBox
+  #               name: parametric_survival_plots
+  #               enable: (use_parametric)
+  #               label: Parametric Survival Plots
+  #             - type: CheckBox
+  #               name: hazard_plots
+  #               enable: (use_parametric)
+  #               label: Hazard Function Plots
