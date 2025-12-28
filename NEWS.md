@@ -1,5 +1,65 @@
 # ClinicoPath News
 
+## Version 0.0.32.60
+
+### 🗓️ **December 28, 2025 - Comprehensive Analysis Enhancements**
+
+---
+
+## 🏥 **SURVIVAL & ODDS RATIO**
+
+### **Enhancements & Fixes**
+
+#### **1. `multisurvival` Function**
+*   **Diagnostics**: Enhanced Proportional Hazards diagnostics.
+*   **Visualization**: Improved plot state management and subtitle handling.
+
+#### **2. `singlearm` Function**
+*   **Visualization**: Adjusted cumulative hazard plot Y-axis for better readability.
+*   **Documentation**: Enhanced explanation of rate multipliers.
+
+#### **3. `oddsratio` Function**
+*   **UI/UX**: Removed redundant headings and refined subtitles for cleaner output.
+
+---
+
+## 📊 **STATISTICAL TESTS & MODULES**
+
+### **Updates & Refactoring**
+
+#### **1. `chisqposttest` Function**
+*   **Testing**: Introduced comprehensive test datasets and a testing guide.
+*   **UI**: Updated Jamovi module definitions and removed example interpretation generation.
+
+#### **2. `patientsimilarity` Function**
+*   **Defaults**: Updated default option states for better usability.
+
+#### **3. `outlierdetection` Function**
+*   **UX**: Improved outlier detection message display for clarity.
+*   **Refactor**: Simplified module name usage.
+
+#### **4. `lollipop` & `nogoldstandard` Functions**
+*   **System**: Migrated to the Jamovi Notice system for standardized user feedback.
+
+---
+
+## 🛠️ **DATA PREPARATION & QUALITY**
+
+### **Infrastructure Improvements**
+
+#### **1. `datevalidator` (formerly `datecorrection`)**
+*   **Refactor**: Renamed and refactored for better clarity and functionality.
+*   **Testing**: Added comprehensive date/datetime validation testing.
+
+#### **2. `timeinterval` & `outcomeorganizer`**
+*   **Testing**: Added robust test coverage for these modules.
+
+#### **3. General Improvements**
+*   **Quality Reports**: Introduced quality reports for better module maintenance.
+*   **Cleanup**: Cleaned up temporary files and refined module definitions.
+
+---
+
 ## Version 0.0.32.48
 
 ### 🗓️ **December 16, 2025 - JJStatsPlot Enhancements**
