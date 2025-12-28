@@ -700,7 +700,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(e$message)
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             })
             
@@ -715,7 +715,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent("No valid data available for analysis. Check your variable selections and data.")
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -729,7 +729,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(e$message)
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             })
             
@@ -771,7 +771,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Recommendations: Aggregate to one value per subject, use specialized repeated measures models, or treat statistics as exploratory only."
                     )
                     notice$setContent(notice_msg)
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 private$.generateTests(plot_data)

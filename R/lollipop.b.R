@@ -144,7 +144,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(error_msg)
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             

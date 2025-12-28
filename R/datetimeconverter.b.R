@@ -55,7 +55,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No valid datetime values found for format detection. • All values in the selected variable are missing (NA). • Select a different variable or check your data source.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
             }
 
@@ -148,7 +148,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 type = jmvcore::NoticeType$WARNING
             )
             notice$setContent(msg)
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
 
             return(msg)
         },
@@ -482,7 +482,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         'Error parsing datetimes with format "%s". • Parser error: %s • Try selecting a different format. • Check that your data matches the selected format.',
                         format, e$message
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     # Return NA vector to allow analysis to continue
                     return(rep(as.POSIXct(NA), length(datetime_vector)))
                 })
@@ -1244,7 +1244,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No datetime variable selected. • Please select a variable containing datetime information from the left panel. • Use the "DateTime Variable" dropdown to choose a column.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -1267,7 +1267,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     datetime_var,
                     available_preview
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -1278,7 +1278,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Dataset contains no rows. • Please ensure your dataset has at least one observation. • Check for data loading or filtering issues.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -1298,7 +1298,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "All values in '%s' are missing (NA). • Please select a column with valid datetime entries before proceeding.",
                     datetime_var
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 

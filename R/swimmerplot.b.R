@@ -1495,7 +1495,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     type = jmvcore::NoticeType$ERROR
                 )
                 err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
-                self$results$insert(1, err)
+                self$results$insert(999, err)
 
                 # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()
@@ -1520,7 +1520,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     type = jmvcore::NoticeType$ERROR
                 )
                 err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
-                self$results$insert(1, err)
+                self$results$insert(999, err)
 
                 # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()
@@ -1551,7 +1551,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         'Data type mismatch detected: Time Input Type is set to Date/Time but data contains numeric values (%s). Change to Raw Values in Time & Date Settings section.',
                         example_vals
                     ))
-                    self$results$insert(1, err)
+                    self$results$insert(999, err)
 
                     # Keep detailed HTML guidance
                     mismatch_guidance <- paste0(

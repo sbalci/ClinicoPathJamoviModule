@@ -317,7 +317,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             notice$setContent(clean_content)
 
             # Insert at beginning of results
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
 
             return(notice)
         },

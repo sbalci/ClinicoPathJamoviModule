@@ -36,7 +36,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste(missing_pkgs, collapse = ', '),
                     paste(sprintf('"%s"', missing_pkgs), collapse = ', ')
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Populate glossary (always visible)
@@ -53,7 +53,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Time and Tumor Size variables are required. Please select both to begin tumor growth modeling.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -85,7 +85,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     nrow(clean_data),
                     if (!is.null(self$options$patientId)) ', patient ID' else ''
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -101,7 +101,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Insufficient longitudinal structure for NLME: %d patients, avg %.1f obs/patient. Minimum 5 patients with avg 2.5 obs/patient required. Switch to NLS approach or collect more data.', n_patients, avg_obs))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
             }
@@ -1492,7 +1492,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('Invalid tumor size data: %d measurement(s) are zero or negative. Tumor size must be positive. Check data quality and remove invalid entries.', n_invalid))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -1505,7 +1505,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('Invalid time data: %d value(s) are negative. Time must be non-negative (days/weeks/months from baseline). Check data entry.', n_invalid))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -1518,7 +1518,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('All time measurements are identical. Tumor growth modeling requires variation in time. Ensure longitudinal data with multiple timepoints per patient.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             

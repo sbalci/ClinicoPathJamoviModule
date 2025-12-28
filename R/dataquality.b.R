@@ -58,7 +58,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 type = jmvcore::NoticeType$ERROR
             )
             notice$setContent('Dataset contains no rows. Please provide data with at least one observation.')
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
             return()
         }
 
@@ -83,7 +83,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     'Variables not found in dataset: %s. Please check variable names and try again.',
                     paste(missing_vars, collapse = ', ')
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 

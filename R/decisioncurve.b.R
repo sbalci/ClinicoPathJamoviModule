@@ -160,7 +160,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     min = round(min_thresh * 100, 1),
                     max = round(max_thresh * 100, 1)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 stop("Validation failed", call. = FALSE)
             }
 
@@ -175,7 +175,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     min = round(min_thresh * 100, 1),
                     max = round(max_thresh * 100, 1)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 stop("Validation failed", call. = FALSE)
             }
             
@@ -190,7 +190,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     'Very high maximum threshold ({max}%). • Decision thresholds above 80% are rarely clinically meaningful for most medical decisions. • Consider whether this reflects your actual clinical decision context.',
                     max = round(max_thresh * 100, 1)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             if (min_thresh < 0.01) {
@@ -203,7 +203,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     'Very low minimum threshold ({min}%). • Thresholds below 1% may not be clinically interpretable for most medical decisions. • Ensure this aligns with your clinical context.',
                     min = round(min_thresh * 100, 1)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Range size warnings
@@ -218,7 +218,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     'Very wide threshold range ({span}% span). • Consider focusing on clinically relevant range for your specific decision context (e.g., 5-50% for most screening decisions).',
                     span = round(range_size * 100, 1)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             if (range_size < 0.05) {
@@ -231,7 +231,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     'Narrow threshold range ({span}% span). • Decision curve analysis is most informative across wider probability ranges (typically 10-30% span or more).',
                     span = round(range_size * 100, 1)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
             
             # Clinical context guidance
@@ -413,7 +413,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     n_pred = length(predictions),
                     n_out = length(outcomes)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 stop("Validation failed", call. = FALSE)
             }
 
@@ -427,7 +427,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     'Low bootstrap replications ({n}). • Using fewer than 100 replications may give unreliable confidence intervals. • Consider increasing to at least 1000 replications for stable estimates.',
                     n = n_boot
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
             
             # Use chunked bootstrap for very large n_boot to manage memory
@@ -536,7 +536,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     'Bootstrap confidence interval calculation failed: {msg}. • Continuing analysis without confidence intervals. • Results are still valid, but CI uncertainty estimates are unavailable.',
                     msg = conditionMessage(e)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(list(
                     lower = rep(NA, length(thresholds)),
                     upper = rep(NA, length(thresholds))
@@ -624,7 +624,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     pkgs = paste(missing_packages, collapse = ", "),
                     quoted_pkgs = paste0('"', paste(missing_packages, collapse = '", "'), '"')
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -693,7 +693,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     'Insufficient complete cases for analysis ({n} cases available, minimum 10 required). • Decision curve analysis requires adequate sample size for stable net benefit estimates. • Remove missing data or collect additional cases.',
                     n = sum(complete_cases)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -720,7 +720,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     severity_cap = tools::toTitleCase(severity),
                     n = n_total
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Check outcome is binary
@@ -737,7 +737,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     n = length(unique_outcomes),
                     levels = paste(unique_outcomes, collapse = ", ")
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -753,7 +753,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     level = unique_outcomes[1],
                     levels = paste(unique_outcomes, collapse = ", ")
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 outcome_positive <- unique_outcomes[1]
             }
 
@@ -773,7 +773,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     n_diseased = n_diseased,
                     n_total = n_total
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Validate clinical decision rule variable if provided
@@ -793,7 +793,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         n = length(rule_levels),
                         levels = paste(rule_levels, collapse = ", ")
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
                 if (is.null(rule_positive) || !(rule_positive %in% rule_levels)) {
@@ -807,7 +807,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         level = rule_levels[1],
                         levels = paste(rule_levels, collapse = ", ")
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     rule_positive <- rule_levels[1]
                 }
             }
@@ -854,7 +854,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         min = round(pred_min, 3),
                         max = round(pred_max, 3)
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -871,7 +871,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         min = round(pred_min, 3),
                         max = round(pred_max, 3)
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 # Optimized threshold calculations - vectorize when possible

@@ -187,7 +187,10 @@
       "Skill(pubmed-database)",
       "Bash(mdfind:*)",
       "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" Rscript:*)",
-      "Bash(perl:*)"
+      "Bash(perl:*)",
+      "Bash(chmod:*)",
+      "Bash(do sed -i.bak 's/self\\\\$results\\\\$insert\\(0,/self$results$insert\\(1,/g' \"$file\")",
+      "Bash(do sed -i.bak 's/insert\\(1,/insert\\(999,/g' \"$file\")"
     ],
     "deny": [],
     "ask": [],

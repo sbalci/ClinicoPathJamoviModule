@@ -430,7 +430,7 @@ survivalPowerClass <- R6::R6Class(
                     paste(missing_packages, collapse = ", "),
                     paste(missing_packages, collapse = '", "')
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(FALSE)
             }
 

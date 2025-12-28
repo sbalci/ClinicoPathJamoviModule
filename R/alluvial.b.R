@@ -57,7 +57,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Invalid Weight Variable: '%s' must be numeric (current type: %s). Please select a numeric variable containing counts, frequencies, or sampling weights.",
                     weight_var, class(weight_col)[1]
                 ))
-                self$results$insert(1, error_notice)
+                self$results$insert(999, error_notice)
                 return(FALSE)
             }
 
@@ -74,7 +74,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Negative Weights Detected: Weight variable '%s' contains %d negative value%s. Weights must be non-negative (>= 0).",
                     weight_var, n_negative, if(n_negative > 1) "s" else ""
                 ))
-                self$results$insert(1, error_notice)
+                self$results$insert(999, error_notice)
                 return(FALSE)
             }
 
@@ -92,7 +92,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "%) have missing weights. ",
                 # "These will be excluded from the visualization."
                 # ))
-                # REMOVED: # REMOVED: self$results$insert(1, warning_notice)  # Causes serialization error
+                # REMOVED: # REMOVED: self$results$insert(999, warning_notice)  # Causes serialization error
             }
 
             return(TRUE)
@@ -154,7 +154,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Variables with missingness: ", missing_details, "<br/>",
                     "Analysis based on ", nrow(data_clean), " complete cases."
                 ))
-                self$results$insert(1, info_notice)
+                self$results$insert(999, info_notice)
             }
 
             return(data_clean)
@@ -240,7 +240,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             name = "continuousVariableNotAllowed",
                             type = jmvcore::NoticeType$ERROR)
                         error_notice$setContent(sprintf("Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.", var, unique_values))
-                        self$results$insert(1, error_notice)
+                        self$results$insert(999, error_notice)
                         return(FALSE)
                     }
 
@@ -265,7 +265,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "<b>Recommendation:</b> Consider reducing to 3-7 categories for optimal visualization. ",
                 # "Use Data → Transform to group less frequent categories."
                 # ))
-                # REMOVED: # REMOVED: self$results$insert(1, warning_notice)  # Causes serialization error
+                # REMOVED: # REMOVED: self$results$insert(999, warning_notice)  # Causes serialization error
                     }
                 }
             }
@@ -476,7 +476,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # error_notice$setContent(
                 # "⛔ <b>Validation Failed:</b> Alluvial diagram requires at least 2 variables with valid data. Please check variable selection and ensure sufficient data."
                 # )
-                # REMOVED: self$results$insert(1, error_notice)
+                # REMOVED: self$results$insert(999, error_notice)
                     return()
                 }
 
@@ -495,7 +495,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "⛔ <b>Variable Not Found:</b> Condensation variable '", condvar_safe,
                 # "' does not exist in the data. Please select a valid variable from the available list."
                 # ))
-                # REMOVED: self$results$insert(1, error_notice)
+                # REMOVED: self$results$insert(999, error_notice)
                     return()
                 }
 
@@ -551,7 +551,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # error_notice$setContent(
                 # "⛔ <b>No Complete Data:</b> All observations have missing values in one or more selected variables. Cannot generate plot."
                 # )
-                # REMOVED: self$results$insert(1, error_notice)
+                # REMOVED: self$results$insert(999, error_notice)
                     return()
                 }
 
@@ -600,7 +600,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "but maximum is ", maxvars, ". Only the first ", maxvars, " variables will be displayed.<br/>",
                         "<b>Tip:</b> Increase 'Maximum variables' setting (up to 20) to display more variables."
                     ))
-                    self$results$insert(1, truncate_notice)
+                    self$results$insert(999, truncate_notice)
 
                     # Keep detailed warning in dataWarning
                     warning_html <- paste0(
@@ -651,7 +651,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "• Group less frequent categories to reduce category counts<br/>",
                 # "• Focus on 3-5 variables with 3-7 categories each for optimal readability"
                 # ))
-                # REMOVED: # REMOVED: self$results$insert(1, warning_notice)  # Causes serialization error
+                # REMOVED: # REMOVED: self$results$insert(999, warning_notice)  # Causes serialization error
                 }
 
                 # Generate plot based on selected engine ----
@@ -698,7 +698,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "⚠️ <b>Weight Variable Ignored:</b> The 'Weight Variable' option is only supported by the <strong>GG Alluvial</strong> engine.<br/>",
                 # "<b>Suggestion:</b> Switch 'Plot Engine' to 'GG Alluvial (manual control)' to use weighted flows."
                 # ))
-                # REMOVED: # REMOVED: self$results$insert(1, warning_notice)  # Causes serialization error
+                # REMOVED: # REMOVED: self$results$insert(999, warning_notice)  # Causes serialization error
                 }
 
                 # Add marginal histograms if requested (easyalluvial only) ----
@@ -760,7 +760,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "• Disable 'Use custom title' to keep marginal plots<br/>",
                 # "• Disable 'Marginal plots' to use custom title"
                 # ))
-                # REMOVED: self$results$insert(1, error_notice)
+                # REMOVED: self$results$insert(999, error_notice)
                     return()  # Stop execution to prevent ambiguous output
                 }
 
@@ -794,7 +794,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "• Check for variables with too many unique categories<br/>",
                 # "• Ensure all selected variables exist in the data"
                 # ))
-                # REMOVED: self$results$insert(1, error_notice)
+                # REMOVED: self$results$insert(999, error_notice)
             })
         }
 

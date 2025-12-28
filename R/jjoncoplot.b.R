@@ -655,7 +655,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Sample ID variable is required. Please select a variable containing unique patient or sample identifiers (e.g., PatientID, SampleID, TCGA-ID).')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(FALSE)
             }
 
@@ -667,7 +667,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('At least one gene variable is required. Please select variables representing mutation status (0 = wild-type, 1 = mutated). Common examples: TP53, KRAS, PIK3CA, EGFR, BRAF.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(FALSE)
             }
 
@@ -679,7 +679,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No data loaded. Please open a dataset containing genomic mutation information to begin analysis.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(FALSE)
             }
 
@@ -702,7 +702,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('The following variables were not found in your dataset: %s. Please check variable names for typos, case sensitivity, or ensure your dataset contains these columns.', paste(missing_vars, collapse = ', ')))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(FALSE)
             }
 
@@ -714,7 +714,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('At least 2 samples are required for oncoplot visualization. Your dataset contains %d sample(s). Please load a dataset with multiple samples.', nrow(data)))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(FALSE)
             }
 
@@ -727,7 +727,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent(sprintf('%d duplicate sample IDs detected in the %s variable. Only the first occurrence of each sample will be retained for analysis. Consider deduplicating your data before analysis to ensure data integrity.', dup_count, sampleVar))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 private$.guidanceNotes <- c(private$.guidanceNotes, sprintf("Duplicate sample IDs (n=%d) will be removed", dup_count))
             }
 
@@ -743,7 +743,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent(sprintf('Non-binary mutation values detected in the following genes: %s. Expected values are 0 (wild-type) or 1 (mutated). All non-zero values will be clipped to 1, and zero/negative values to 0 for analysis.', bad_genes))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 private$.guidanceNotes <- c(private$.guidanceNotes, sprintf("Non-binary values in %d genes", sum(nonbinary)))
             }
 
@@ -755,7 +755,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent(sprintf('Small sample size detected (n = %d). For robust mutation frequency analysis and statistical testing, a minimum of 10-20 samples is recommended. Findings should be interpreted with caution and validated in larger cohorts.', nrow(data)))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             return(TRUE)
@@ -825,7 +825,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         paste(missing_genes, collapse = ', '),
                         available_sample
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -842,7 +842,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         paste(selected_genes, collapse = ', '),
                         paste(missing_genes, collapse = ', ')
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
             } else {
                 # Calculate mutation frequencies and select top N genes

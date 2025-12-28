@@ -9,6 +9,8 @@ children:
     children:
       - type: CheckBox
         name: enableGuidedMode
+      - type: CheckBox
+        name: showExplanations
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -63,36 +65,43 @@ children:
             children:
               - type: ComboBox
                 name: sortBy
+                enable: (showWaterfallPlot)
               - type: ComboBox
                 name: colorBy
+                enable: (showWaterfallPlot)
               - type: ComboBox
                 name: colorScheme
+                enable: (showWaterfallPlot)
           - type: Label
             label: Annotations
             children:
               - type: CheckBox
                 name: showThresholds
+                enable: (showWaterfallPlot)
               - type: CheckBox
                 name: labelOutliers
+                enable: (showWaterfallPlot)
               - type: CheckBox
                 name: showMedian
+                enable: (showWaterfallPlot)
               - type: CheckBox
                 name: showCI
+                enable: (showWaterfallPlot)
           - type: Label
             label: Plot Customization
             children:
               - type: TextBox
                 name: minResponseForLabel
                 format: number
-                enable: ()
+                enable: (showWaterfallPlot)
               - type: TextBox
                 name: barAlpha
                 format: number
-                enable: ()
+                enable: (showWaterfallPlot)
               - type: TextBox
                 name: barWidth
                 format: number
-                enable: ()
+                enable: (showWaterfallPlot)
           - type: LayoutBox
             margin: large
             children:
@@ -101,6 +110,7 @@ children:
                 children:
                   - type: Output
                     name: addResponseCategory
+                    enable: (showWaterfallPlot)
   - type: CollapseBox
     label: Spider Plot Options
     collapsed: true
@@ -118,17 +128,21 @@ children:
             children:
               - type: ComboBox
                 name: spiderColorBy
+                enable: (showSpiderPlot)
               - type: ComboBox
                 name: spiderColorScheme
+                enable: (showSpiderPlot)
               - type: ComboBox
                 name: timeUnitLabel
+                enable: (showSpiderPlot)
               - type: Label
                 label: >-
                   Note: This only changes the x-axis label; data values are not
                   rescaled.
+                enable: (showSpiderPlot)
   - type: CollapseBox
     label: Clinical Reporting Options
-    collapsed: true
+    collapsed: false
     children:
       - type: LayoutBox
         margin: large

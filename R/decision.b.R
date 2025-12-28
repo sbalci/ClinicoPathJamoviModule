@@ -79,7 +79,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No gold standard variable selected. • Select a reference variable (e.g., biopsy result, final diagnosis). • This represents the true disease status.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
                 if (length(self$options$newtest) == 0) {
@@ -89,7 +89,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No test variable selected. • Select the diagnostic test you want to evaluate. • This is typically a new, faster, or less expensive test.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
                 if (length(self$options$goldPositive) == 0) {
@@ -99,7 +99,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No disease-present level selected for gold standard. • Select the level that indicates disease is present. • This represents the condition you want to detect.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
                 if (length(self$options$testPositive) == 0) {
@@ -109,7 +109,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No positive level selected for test variable. • Select the level that represents a positive test result. • This should indicate suspected disease presence.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -121,7 +121,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No data available for analysis. • Please ensure your data is loaded. • Check that your dataset contains observations.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -133,7 +133,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Insufficient data: %d cases found. • At least 4 cases are required for diagnostic test analysis. • Each cell of the 2×2 table should have at least one observation.', nrow(self$data)))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -145,7 +145,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Invalid population prevalence: %.3f • Prevalence must be between 0 and 1 (exclusive). • For 5%% prevalence, enter 0.05. • For 20%% prevalence, enter 0.20.', self$options$pprob))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -157,7 +157,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent('Confidence Intervals Interpretation: • The displayed confidence intervals (95% CI) are calculated based on your study sample data. • They apply to the sample-based Sensitivity, Specificity, PPV, and NPV. • They do NOT apply to the adjusted "Post-test Probabilities" calculated using the fixed population prevalence.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 # Validate that selected levels actually exist in the data
@@ -192,7 +192,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Disease-present level "%s" not found in gold standard variable. • Available levels: %s • Check for typos or select the correct level from the dropdown.', self$options$goldPositive, available_levels))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -209,7 +209,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Test-positive level "%s" not found in test variable. • Available levels: %s • Check for typos or select the correct level from the dropdown.', self$options$testPositive, available_levels))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -227,7 +227,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent(sprintf('Disease-absent level "%s" not found in gold standard variable. • Available levels: %s • Check for typos or select the correct level from the dropdown.', self$options$goldNegative, available_levels))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return(FALSE)
                     }
 
@@ -239,7 +239,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent('Disease-present and disease-absent levels cannot be the same. • Select different levels for positive and negative outcomes.')
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return(FALSE)
                     }
                 }
@@ -258,7 +258,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent(sprintf('Test-negative level "%s" not found in test variable. • Available levels: %s • Check for typos or select the correct level from the dropdown.', self$options$testNegative, available_levels))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return(FALSE)
                     }
 
@@ -270,7 +270,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent('Test-positive and test-negative levels cannot be the same. • Select different levels for positive and negative outcomes.')
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return(FALSE)
                     }
                 }
@@ -346,7 +346,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Selected variables are not available in the data. • Check that variable names are correct. • Ensure the data has been loaded properly.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -365,7 +365,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Removed %d row(s) with missing diagnostic data. • Complete-case analysis uses %d of %d cases. • Consider investigating patterns of missingness.', removed, nrow(mydata), nrow(self$data)))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
                 
                 # Convert to factors and recode in single pipeline
@@ -406,7 +406,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     } else {
                         notice$setContent(sprintf('Gold standard has %d level(s) beyond positive: %s • These will be treated as disease-absent (negative). • If this is incorrect, explicitly select the "Disease Absent Level".', length(gold_excluded), excluded_str))
                     }
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 if (length(test_excluded) > 0) {
@@ -425,7 +425,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     } else {
                         notice$setContent(sprintf('Test variable has %d level(s) beyond positive: %s • These will be treated as test-negative. • If this is incorrect, explicitly select the "Test Negative Level".', length(test_excluded), excluded_str))
                     }
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 # Efficient recoding with explicit negative level handling
@@ -465,7 +465,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Invalid data structure: Both test and gold standard variables must have exactly 2 levels each. • Ensure your variables are dichotomous (binary). • Check that positive/negative levels are correctly specified.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 }
                 
@@ -477,7 +477,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$STRONG_WARNING
                     )
                     notice$setContent('Zero counts detected in contingency table. • Results may be unstable or undefined (e.g., infinite likelihood ratios). • Consider collecting more data or using exact methods. • Ensure both tests and gold standard have both positive and negative cases.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
                 
                 return(list(data = mydata, testVar = testVar, goldVar = goldVar))
@@ -740,7 +740,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Very large dataset detected (%d rows). • Analysis may take longer than usual. • Consider sampling for initial exploratory analysis. • Full dataset will still be used for final results.', n_rows))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 } else if (n_rows > 10000) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
@@ -748,7 +748,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(sprintf('Large dataset detected (%d rows). • Analysis may take a moment to complete.', n_rows))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
             },
 
@@ -765,7 +765,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$STRONG_WARNING
                     )
                     notice$setContent(sprintf('Very small sample size: n = %d (< 20 cases). • Results may be unreliable and unstable. • Confidence intervals will be very wide. • Consider collecting more data before making clinical decisions. • Minimum recommended: 100 cases for robust estimates.', total_n))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 } else if (total_n < 50) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
@@ -773,7 +773,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Small sample size: n = %d (< 50 cases). • Interpret results with caution. • Confidence intervals may be wide. • Minimum recommended: 100 cases for robust estimates.', total_n))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 } else if (total_n < 100) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
@@ -781,7 +781,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(sprintf('Sample size: n = %d. • For robust diagnostic test evaluation, 100+ cases recommended. • Current sample provides preliminary estimates.', total_n))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 if (min_cell < 5) {
@@ -791,7 +791,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$WARNING
                     )
                     notice$setContent(sprintf('Small cell count detected (minimum = %d, < 5). • Statistical estimates may be unstable. • Consider Fisher\'s exact test for small samples. • Collect more data for stable estimates of sensitivity/specificity.', min_cell))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
             },
 
@@ -1262,7 +1262,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Error extracting confusion matrix values: %s • Check your data formatting. • Ensure both variables have exactly 2 levels. • Verify positive/negative levels are correctly specified.', e$message))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 })
 
@@ -1287,7 +1287,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Invalid contingency table values detected. • Confusion matrix contains NA or negative values. • Check that your data is properly formatted. • Ensure sufficient observations in all categories.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -1486,7 +1486,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(sprintf('Likelihood ratio adjustments applied: • %s • Results have been adjusted for statistical validity.', paste(lr_validation$issues, collapse = " • ")))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 if (continuity_used) {
@@ -1496,7 +1496,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent("Zero cells detected; applied Haldane-Anscombe 0.5 continuity correction for LR/OR calculations (sensitivity/specificity still use observed counts).")
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
 

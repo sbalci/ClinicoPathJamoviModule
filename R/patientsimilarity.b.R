@@ -86,7 +86,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Please select at least 2 variables for similarity analysis.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -155,7 +155,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Insufficient data for analysis (n=%d after removing missing values). At least 5 complete observations required.', nrow(data)))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 } else if (nrow(data) < 10) {
                     notice <- jmvcore::Notice$new(
@@ -208,7 +208,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(paste('Error preparing data:', e$message, 'Please check that all selected variables contain valid numeric values.'))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             })
         },
@@ -253,7 +253,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(paste('Error in projection:', e$message, 'This may be due to insufficient data or numerical issues. Try a different method or check your input data.'))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             })
         },
@@ -298,7 +298,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Package "Rtsne" is required for t-SNE analysis. Install with: install.packages("Rtsne")')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             }
 
@@ -344,7 +344,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Package "umap" is required for UMAP analysis. Install with: install.packages("umap")')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             }
 
@@ -587,7 +587,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Survival analysis requires both time and event variables. Please select survival time and event in the Survival Analysis panel.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 

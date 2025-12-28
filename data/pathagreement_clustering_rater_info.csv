@@ -1,0 +1,13 @@
+"Rater","Experience_Years","Specialty","Institution","Monthly_Volume","Training_Location","True_Style_Group"
+"A",5,"Fellow","Community Hospital",195,"University C",1
+"B",5,"General Pathology","Community Hospital",84,"University D",1
+"C",9,"Fellow","Academic Medical Center",144,"University D",1
+"D",16,"Community Practice","Reference Lab",197,"University B",1
+"E",14,"General Pathology","Academic Medical Center",481,"University D",2
+"F",17,"General Pathology","Reference Lab",198,"University B",2
+"G",14,"Subspecialist","Community Hospital",439,"University A",2
+"H",16,"Subspecialist","Community Hospital",396,"University B",2
+"I",21,"General Pathology","Academic Medical Center",212,"University A",3
+"J",21,"Fellow","Reference Lab",36,"University D",3
+"K",8,"Community Practice","Academic Medical Center",231,"University D",3
+"L",23,"Community Practice","Community Hospital",300,"University B",3

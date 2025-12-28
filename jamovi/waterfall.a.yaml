@@ -1,7 +1,7 @@
 ---
 name: waterfall
 title: Treatment Response Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
 version: '0.0.31'
@@ -280,7 +280,7 @@ options:
     - name: showSpiderPlot
       title: Show Spider Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display spider plot showing response trajectories over time (requires time variable).
@@ -400,6 +400,22 @@ options:
             • Provides contextual help and best practice recommendations
             • Includes misuse detection and warnings
             Recommended for new users or complex analyses
+
+    - name: showExplanations
+      title: Show Analysis Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display comprehensive explanation of what this analysis does, when to use it,
+            data requirements, and key assumptions/limitations
+          jamovi: >
+            Show detailed explanations at the bottom of results:
+            • What this analysis does (waterfall and spider plots)
+            • When to use this analysis (clinical trials, response monitoring)
+            • Data requirements (patient ID, response data, time variable)
+            • Key assumptions and limitations (RECIST thresholds, baseline handling)
+            Recommended for new users or when documenting analysis methods
 
     - name: addResponseCategory
       title: Add Response Category to Data

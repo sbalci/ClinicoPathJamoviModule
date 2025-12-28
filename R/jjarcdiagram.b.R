@@ -144,7 +144,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(paste('Error creating plot:', e$message))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 stop(e$message)
             })
 
@@ -296,7 +296,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No data available. Please load a dataset and re-run the analysis.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             }
 
@@ -314,7 +314,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Source or target variables not found in the dataset.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             }
 
@@ -338,7 +338,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No complete rows after removing missing values. Check your data for NA values in source, target, weight, or group variables.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             }
 
@@ -366,7 +366,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No valid edge data available after processing. Ensure source and target variables have overlapping values.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             }
 
@@ -471,7 +471,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent('Network has fewer than 3 nodes. Centrality measures are not meaningful for networks this small. Consider adding more entities or combining data.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             } else if (n_nodes < 5) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
@@ -479,7 +479,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 notice$setContent('Network has fewer than 5 nodes. Centrality measures may be unreliable. Interpret with caution and consider qualitative assessment instead of quantitative metrics.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             } else if (n_nodes < 10) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
@@ -507,7 +507,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Network too large (> 50,000 edges after aggregation). Consider filtering or sampling data first.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 stop('Network too large (> 50,000 edges after aggregation). Consider filtering or sampling data first.')
             }
 
@@ -575,7 +575,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Invalid edge structure detected. Check for duplicate or self-referencing edges.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(NULL)
             })
 

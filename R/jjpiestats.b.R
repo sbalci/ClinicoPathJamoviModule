@@ -405,7 +405,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$ERROR
                     # )
                     # notice$setContent(counts_validation$message)
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     stop(counts_validation$message)
                 }
             }
@@ -836,7 +836,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$ERROR
                     # )
                     # notice$setContent(.('Ratio specification contains non-numeric values. Expected format: "0.5,0.5" for two equal groups or "0.25,0.5,0.25" for three groups. Using equal proportions as fallback.'))
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -851,7 +851,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     .('Ratios must sum to 1.0 but your values sum to %s. Example valid input: "0.3,0.7" (sums to 1.0). Using equal proportions as fallback.'),
                     #     round(sum(ratios), 3)
                     # ))
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -863,7 +863,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$ERROR
                     # )
                     # notice$setContent(.('All ratio values must be positive (> 0). Negative or zero values are not allowed in proportion specifications. Using equal proportions as fallback.'))
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -878,7 +878,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 #     .('Error parsing ratio specification: %s. Please use comma-separated decimal values (e.g., "0.5,0.5"). Using equal proportions as fallback.'),
                 #     e$message
                 # ))
-                # self$results$insert(1, notice)
+                # self$results$insert(999, notice)
                 return(NULL)
             })
         },
@@ -1102,7 +1102,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # notice$setContent(
                 #     .('Paired/repeated measures analysis requires a grouping variable (e.g., Pre vs Post). Single variable pie charts cannot use paired option. Please add a grouping variable or disable the paired option.')
                 # )
-                # self$results$insert(1, notice)
+                # self$results$insert(999, notice)
                 return()
             }
 
@@ -1200,7 +1200,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$ERROR
                     # )
                     # notice$setContent(validation$message)
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return()
                 }
             }
@@ -1346,7 +1346,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         #     type = jmvcore::NoticeType$ERROR
                         # )
                         # notice$setContent(validation$message)
-                        # self$results$insert(1, notice)
+                        # self$results$insert(999, notice)
                         return()
                     }
                 }

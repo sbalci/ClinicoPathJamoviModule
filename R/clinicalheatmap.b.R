@@ -219,7 +219,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Row, column, and value variables are required. Select all three variables from the left panel to generate the clinical heatmap.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
 
                 return()
             } else {
@@ -235,7 +235,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Dataset contains no rows. Ensure data was imported correctly and check if filters excluded all observations.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
 
                 # Keep detailed HTML explanation
                 error_msg <- "
@@ -264,7 +264,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Required package tidyheatmaps is not installed. Install it using: install.packages("tidyheatmaps") then restart R.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
 
                 # Keep detailed HTML explanation
                 error_msg <- "
@@ -375,7 +375,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Data preparation failed. Ensure data is in tidy format with one row per row-variable/column-variable combination and check for excessive missing values.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
 
                 # Keep detailed HTML explanation
                 error_msg <- "

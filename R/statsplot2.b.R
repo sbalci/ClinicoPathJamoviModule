@@ -105,7 +105,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 #     "• Required: ≥2 observations\n",
                 #     "• Check your data filtering."
                 # ))
-                # self$results$insert(1, notice)
+                # self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -126,7 +126,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     #     "• Required: ≥2 valid values\n",
                     #     "• Check for missing data in '{y_var}'."
                     # ))
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -142,7 +142,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     #     "• Required: ≥2 valid values\n",
                     #     "• Check for missing data in '{x_var}'."
                     # ))
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -160,7 +160,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         #     "• All values are missing after data cleaning\n",
                         #     "• Check data for: {paste(unique(data[[y_var]]), collapse=', ')}"
                         # ))
-                        # self$results$insert(1, notice)
+                        # self$results$insert(999, notice)
                         return(FALSE)
                     }
                 }
@@ -178,7 +178,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         #     "• All values are missing after data cleaning\n",
                         #     "• Check data for: {paste(unique(data[[x_var]]), collapse=', ')}"
                         # ))
-                        # self$results$insert(1, notice)
+                        # self$results$insert(999, notice)
                         return(FALSE)
                     }
                 }
@@ -747,7 +747,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     #     type = jmvcore::NoticeType$INFO
                     # )
                     # notice$setContent("Alluvial style option applies only to repeated factor vs factor data; it is ignored for this combination.")
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                 }
             },
             
@@ -1229,7 +1229,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     #     "• Verify data is loaded and variables exist\n",
                     #     "• Check that dataset contains observations"
                     # ))
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return()
                 }
                 
@@ -1256,7 +1256,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # sample_notice$setContent(glue::glue(
                     #     "Large dataset detected; sampled 5,000 of {n_total} rows for plotting. Disable 'Sample Large Datasets' to use full data."
                     # ))
-                    # self$results$insert(1, sample_notice)
+                    # self$results$insert(999, sample_notice)
                 }
                 # Notify if rows dropped due to NA exclusion
                 if (!is.null(prepared_data$dropped) && prepared_data$dropped > 0) {
@@ -1268,7 +1268,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # drop_notice$setContent(glue::glue(
                     #     "{prepared_data$dropped} row(s) removed due to missing values."
                     # ))
-                    # self$results$insert(1, drop_notice)
+                    # self$results$insert(999, drop_notice)
                 }
                 
                 # Adjust plot size if grouping variable is used

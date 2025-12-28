@@ -35,7 +35,7 @@ irecistClass <- R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent("Required variables missing: Please select Patient ID, Assessment Time, Target Lesion Sum, and New Lesions to begin analysis.")
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
 
                 self$results$instructions$setContent(
                     "<h3>Welcome to iRECIST Analysis</h3>
@@ -119,7 +119,7 @@ irecistClass <- R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent("PR threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -130,7 +130,7 @@ irecistClass <- R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent("PD threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -141,7 +141,7 @@ irecistClass <- R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent("PD absolute increase must be non-negative. Please check iRECIST Criteria Settings.")
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -153,7 +153,7 @@ irecistClass <- R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent("Invalid confirmation window: maximum must be greater than minimum. Please check iRECIST Criteria Settings.")
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -171,7 +171,7 @@ irecistClass <- R6::R6Class(
                     )
                     notice$setContent(paste0("Critically small sample size (N=", nPatients,
                                          " patients). iRECIST analysis requires at least 10 patients for meaningful results."))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 } else if (nPatients < 30) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
@@ -195,7 +195,7 @@ irecistClass <- R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent("All patients have only baseline assessment. At least one follow-up assessment is required for response evaluation.")
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -289,7 +289,7 @@ irecistClass <- R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(errorMsg)
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 stop(e)
             })
         },
@@ -359,7 +359,7 @@ irecistClass <- R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent("Target lesion sum cannot be negative. Please check your data for errors.")
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 stop("Negative target lesion sum detected")
             }
 

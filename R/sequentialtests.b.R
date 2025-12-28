@@ -266,7 +266,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     # If any calculation fails, show error notice
                     n <- jmvcore::Notice$new(options=self$options, name='calculation_error', type=jmvcore::NoticeType$ERROR)
                     n$setContent(sprintf('Calculation error with provided values: %s. Please verify all parameters and try again.', e$message))
-                    self$results$insert(1, n)
+                    self$results$insert(999, n)
                     return()
                 })
 

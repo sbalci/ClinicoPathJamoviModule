@@ -63,7 +63,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(paste0('No valid lesion data after removing rows with missing Patient ID, Lesion ID, or Visit Time. Ensure baseline visit (time=', self$options$baselineTimepoint, ') exists and data is in lesion-level format.'))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -141,7 +141,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Patient ID variable is required. Select a patient identifier variable and re-run.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -153,7 +153,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Lesion ID variable is required. Select a lesion identifier variable and re-run.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -165,7 +165,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Visit Time variable is required. Select a time variable (baseline=0 recommended) and re-run.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -177,7 +177,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Lesion Diameter variable is required. Select a numeric diameter variable (in mm) and re-run.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -189,7 +189,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No data available. Load a dataset in lesion-level format (one row per lesion per visit).')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -205,7 +205,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(paste0('Visit Time variable "', self$options$visitTime, '" not found in dataset. Verify variable name and re-run.'))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -218,7 +218,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(paste0('Baseline timepoint (', self$options$baselineTimepoint, ') not found in Visit Time. Ensure baseline measurements exist or adjust Baseline Timepoint Value.'))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -231,7 +231,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(paste0('Diameter variable "', self$options$diameter, '" not found in dataset. Verify variable name and re-run.'))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -244,7 +244,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Diameter values must be non-negative (>=0 mm). Correct negative values and re-run.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -422,7 +422,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                     )
                     # Single-line format (jamovi Notices don't support newlines)
                     notice$setContent(paste0('RECIST v1.1 COMPLIANCE VIOLATIONS: ', paste(violations, collapse=' • '), ' • Results may not be suitable for regulatory submissions.'))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 return(list(

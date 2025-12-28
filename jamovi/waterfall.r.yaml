@@ -161,32 +161,6 @@ items:
         - groupVar
         - inputType
 
-    - name: spiderplot
-      title: 'Spider Plot - Response Over Time'
-      type: Image
-      width: 800
-      height: 500
-      renderFun: .spiderplot
-      requiresData: true
-      visible: (showSpiderPlot)
-      # Note: Spider plot requires both showSpiderPlot=true AND a time variable for meaningful trajectories
-      clearWith:
-        - patientID
-        - responseVar
-        - timeVar
-        - inputType
-        - sortBy
-        - groupVar
-        - showThresholds
-        - labelOutliers
-        - colorBy
-        - colorScheme
-        - spiderColorBy
-        - spiderColorScheme
-        - timeUnitLabel
-        - showMedian
-        - showCI
-
     - name: copyReadyReport
       title: Copy-Ready Report Sentences
       type: Html
@@ -300,6 +274,54 @@ items:
          - groupVar
          - inputType
 
+
+    - name: spiderplot
+      title: 'Spider Plot - Response Over Time'
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .spiderplot
+      requiresData: true
+      visible: (showSpiderPlot)
+      # Note: Spider plot requires both showSpiderPlot=true AND a time variable for meaningful trajectories
+      clearWith:
+        - patientID
+        - responseVar
+        - timeVar
+        - inputType
+        - sortBy
+        - groupVar
+        - showThresholds
+        - labelOutliers
+        - colorBy
+        - colorScheme
+        - spiderColorBy
+        - spiderColorScheme
+        - timeUnitLabel
+        - showMedian
+        - showCI
+
+
+
+    - name: naturalLanguageSummary
+      title: Treatment Response Summary
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - groupVar
+         - showExplanations
+
+    - name: explanations
+      title: Analysis Guide
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+         - showExplanations
+
     - name: addResponseCategory
       title: Add Response Category to Data
       type: Output
@@ -316,6 +338,18 @@ items:
     # - name: mydataview
     #   title: mydataview
     #   type: Preformatted
+
+
+    # Notice outputs converted to HTML to avoid serialization errors
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - groupVar
 
 
 refs:

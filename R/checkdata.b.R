@@ -1164,7 +1164,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Dataset contains no rows. Please provide data for quality assessment.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -1183,7 +1183,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(paste("Data Validation Error:", paste(validation_results$error_messages, collapse = "; ")))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             

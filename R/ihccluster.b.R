@@ -1152,7 +1152,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('At least 2 IHC markers required. Select categorical or continuous markers from the variable list to perform clustering analysis.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -1275,7 +1275,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     'Cannot cluster %d continuous-only markers with missing data using pairwise distances. Solution: Change Missing Data Handling to "Complete cases only" (uses %d of %d cases) or add categorical markers to enable pairwise calculation.',
                     length(contVars), complete_n, nrow(df)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 

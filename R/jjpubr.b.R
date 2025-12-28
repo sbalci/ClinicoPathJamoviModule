@@ -637,7 +637,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         #     round(sw_test$p.value, 3), "). t-test results may be unreliable. ",
                         #     "Consider using 'Pairwise Wilcoxon tests' for non-normal data."
                         # ))
-                        # self$results$insert(1, notice)
+                        # self$results$insert(999, notice)
                     }
                 } else if (n > 200) {
                     # Skewness check for large samples
@@ -838,7 +838,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 #     type = jmvcore::NoticeType$STRONG_WARNING
                 # )
                 # notice$setContent(paste("Correlation analysis failed:", e$message))
-                # self$results$insert(1, notice)
+                # self$results$insert(999, notice)
             })
         },
 
@@ -873,7 +873,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     "Groups with fewer than 5 observations may not meet assumptions for statistical tests. ",
                     #     "Results should be interpreted with caution."
                     # ))
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                 }
 
                 # Infer parametric vs nonparametric based on assumptions when auto
@@ -1057,7 +1057,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         #     ") and '", g2, "' (n=", length(data2), "). ",
                         #     "At least 2 observations per group required for comparison."
                         # ))
-                        # self$results$insert(1, notice)
+                        # self$results$insert(999, notice)
                         stop("Insufficient data for statistical comparison.")
                     }
 
@@ -1138,7 +1138,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 #     type = jmvcore::NoticeType$STRONG_WARNING
                 # )
                 # notice$setContent(paste("Statistics calculation failed:", e$message))
-                # self$results$insert(1, notice)
+                # self$results$insert(999, notice)
                 stop(e)
             })
         },

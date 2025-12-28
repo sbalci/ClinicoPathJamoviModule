@@ -117,7 +117,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 #     type = jmvcore::NoticeType$ERROR
                 # )
                 # notice$setContent('Dataset contains no complete rows. Please check your data and ensure at least one complete observation exists.')
-                # self$results$insert(1, notice)
+                # self$results$insert(999, notice)
                 return()
             }
 
@@ -182,7 +182,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$ERROR
                     # )
                     # notice$setContent('Percentage variable not found in dataset. Please verify your variable selection.')
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return()
                 } else if (!is.null(percvar)) {
                     # Ensure requested level exists
@@ -196,7 +196,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # )
                         # notice$setContent(sprintf("Selected percentage level '%s' not present in percentage variable. Available levels: %s",
                         #                           self$options$percvarLevel, available_levels))
-                        # self$results$insert(1, notice)
+                        # self$results$insert(999, notice)
                         return()
                     }
                 }
@@ -210,7 +210,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         #     type = jmvcore::NoticeType$ERROR
                         # )
                         # notice$setContent('Summary variable not found in dataset. Please verify your variable selection.')
-                        # self$results$insert(1, notice)
+                        # self$results$insert(999, notice)
                         return()
                     }
                     if (!is.numeric(mydata[[summaryvar]])) {
@@ -232,7 +232,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$ERROR
                     # )
                     # notice$setContent('Prune below variable not found in dataset. Please verify your variable selection.')
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return()
                 }
 
@@ -244,7 +244,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$ERROR
                     # )
                     # notice$setContent('Follow variable not found in dataset. Please verify your variable selection.')
-                    # self$results$insert(1, notice)
+                    # self$results$insert(999, notice)
                     return()
                 }
             }
@@ -332,7 +332,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     'CASE EXCLUSION: %d cases (%.1f%%) excluded due to missing values. Original N=%d, Final N=%d. Tree counts and percentages reflect complete cases only. Consider implications for generalizability.',
                     #     excluded_n, excluded_pct, original_n, nrow(mydata)
                     # ))
-                    # self$results$insert(1, notice)  # Top priority
+                    # self$results$insert(999, notice)  # Top priority
                 }
             }
 

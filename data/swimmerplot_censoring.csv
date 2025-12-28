@@ -1,0 +1,11 @@
+"PatientID","StartTime","EndTime","Response","CensorStatus"
+"PT001",0,12,"CR",1
+"PT002",0,18,"PR",0
+"PT003",0,8,"SD",1
+"PT004",0,24,"PR",0
+"PT005",0,6,"PD",1
+"PT006",0,15,"CR",1
+"PT007",0,20,"PR",0
+"PT008",0,10,"SD",1
+"PT009",0,14,"CR",0
+"PT010",0,22,"PR",0

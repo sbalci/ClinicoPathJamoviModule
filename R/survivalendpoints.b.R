@@ -152,7 +152,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     sprintf('Required variables missing: %s • Please select all required variables to derive survival endpoints.',
                             paste(missingVars, collapse=', '))
                 )
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -167,7 +167,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No data available • Dataset contains no rows • Please load data to derive survival endpoints.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -187,7 +187,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent('No survival endpoints selected • Please select at least one endpoint to calculate: PFS (Progression-Free Survival), OS (Overall Survival), TTP (Time to Progression), DOR (Duration of Response), or Time on Treatment.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -305,7 +305,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     notice$setContent(
                         sprintf('Data error: %d observations have event dates BEFORE start dates • This indicates incorrect date entry • Please fix your data before proceeding with analysis.', total_neg)
                     )
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()  # STOP analysis - data must be corrected
                 }
             }
@@ -621,7 +621,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     notice$setContent(
                         sprintf('Date conversion failed: Could not convert %d of %d date values to Date format • Ensure dates are in standard format (YYYY-MM-DD or YYYY/MM/DD) or use Numeric input type.', na_count, total_count)
                     )
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     rep(NA, length(x))
                 })
             })

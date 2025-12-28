@@ -62,7 +62,7 @@ enhancedROCClass <- R6::R6Class(
                 notice$setContent(jmvcore::format(
                     'Please select an outcome variable and at least one predictor variable for ROC analysis. • Outcome variable: required (binary/factor). • Predictor variables: at least one numeric variable required for ROC curve calculation.'
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -191,7 +191,7 @@ enhancedROCClass <- R6::R6Class(
                 notice$setContent(jmvcore::format(
                     'Time-Dependent and Survival ROC analyses are not currently supported. • These features require time-to-event input variables (event time, censoring indicator) which are not yet available in this interface. • For survival ROC analysis, please use standard ROC analysis with risk scores or predicted probabilities from survival models.'
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
             
             # Generate natural language summary
@@ -667,7 +667,7 @@ enhancedROCClass <- R6::R6Class(
                             n_pos = n_positive,
                             n_neg = n_negative
                         ))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                     }
 
                     # Low AUC notice
@@ -696,7 +696,7 @@ enhancedROCClass <- R6::R6Class(
                             auc = round(auc_value, 3),
                             interpretation = interpretation
                         ))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                     }
 
                     # Extreme prevalence notice
@@ -721,7 +721,7 @@ enhancedROCClass <- R6::R6Class(
                             direction = direction,
                             metric_concern = metric_concern
                         ))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                     }
 
                 }, error = function(e) {
@@ -1750,7 +1750,7 @@ enhancedROCClass <- R6::R6Class(
                     severity = severity,
                     prc_rec = prc_recommendation
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
         },
 
@@ -2205,7 +2205,7 @@ enhancedROCClass <- R6::R6Class(
                 notice$setContent(jmvcore::format(
                     'No valid ROC results available for report generation. • ROC analysis may have failed for all predictors. • Check that outcome variable is binary and predictors are numeric. • Verify sufficient data for each predictor-outcome combination.'
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             

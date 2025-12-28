@@ -789,7 +789,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent(paired_valid$message)
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
 
                         # SAFETY: Override paired option to prevent invalid McNemar
                         self$options$paired <- FALSE
@@ -802,7 +802,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             type = jmvcore::NoticeType$STRONG_WARNING
                         )
                         notice$setContent(paired_valid$message)
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                     }
                 }
 
@@ -822,7 +822,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         type = jmvcore::NoticeType$INFO
                     )
                     notice$setContent(fisher_check$fisher_reason)
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
 
                     message(paste("INFO:", fisher_check$fisher_reason))
                 }

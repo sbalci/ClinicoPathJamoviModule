@@ -2181,7 +2181,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             "Critical: Only %d events detected. Cox regression requires at least 10 events for reliable estimation. Recommendations: (1) Collect more data, (2) Extend follow-up period, (3) Use descriptive methods (Kaplan-Meier) instead of regression, or (4) Pool event types if clinically appropriate.",
             n_events
           ))
-          self$results$insert(1, notice)
+          self$results$insert(999, notice)
           return(NULL)
         }
 
@@ -2196,7 +2196,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             "Low event count (%d events). Results may be unstable; confidence intervals may be unreliable; small-sample bias likely. Recommendations: (1) Interpret results cautiously and report exact p-values, (2) Consider Firth's penalized likelihood in R (coxphf package) for bias reduction, (3) Validate findings externally, or (4) Collect additional data if feasible.",
             n_events
           ))
-          self$results$insert(1, notice)
+          self$results$insert(999, notice)
         }
 
         # WARNING: 20-49 events - Limited statistical power
@@ -2729,7 +2729,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               type = jmvcore::NoticeType$ERROR
             )
             notice$setContent("AFT Model Error: Outcome with more than two levels is not supported for AFT models. Please select a binary outcome variable or disable competing risk analysis for AFT.")
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
             return()
           }
         }
@@ -2767,7 +2767,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             type = jmvcore::NoticeType$ERROR
           )
           notice$setContent(paste0("AFT Model Fitting Error: ", e$message, ". Check data quality, ensure adequate events, and verify distribution choice is appropriate for your data."))
-          self$results$insert(1, notice)
+          self$results$insert(999, notice)
           return(NULL)
         })
 
@@ -6686,7 +6686,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             type = jmvcore::NoticeType$ERROR
           )
           notice$setContent(paste0("Survival Decision Tree Error: ", e$message, ". Recommendations: (1) Check sufficient data for tree building, (2) Try reducing minimum node size, or (3) Ensure variables contain valid data."))
-          self$results$insert(1, notice)
+          self$results$insert(999, notice)
           return(NULL)
         })
       }

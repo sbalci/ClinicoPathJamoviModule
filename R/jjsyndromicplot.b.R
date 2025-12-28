@@ -45,13 +45,10 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Dynamic insertion based on type
-            # ERROR (1) and STRONG_WARNING (2) at top
-            # WARNING (3) and INFO (4) at bottom
-            if (type <= 2) {
-                self$results$notices$insert(0, notice)
-            } else {
-                self$results$notices$insert(999, notice)
-            }
+            # All notices now go to the end (position 999)
+            # Previously: ERROR (1) and STRONG_WARNING (2) at top, WARNING (3) and INFO (4) at bottom
+            # Now: All notices at bottom for consistent ordering
+            self$results$notices$insert(999, notice)
         },
 
         # init ----

@@ -33,7 +33,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                     type = type
                 )
                 notice$setContent(content)
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 private$.notices[[name]] <- TRUE  # Track that we added it
             }
         },

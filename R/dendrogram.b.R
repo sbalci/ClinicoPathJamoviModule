@@ -40,7 +40,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         pkgs = paste(missing_heatmap, collapse = ", "),
                         install_cmd = install_cmd
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
             }
@@ -56,7 +56,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         'ggraph and igraph packages recommended for {plot_type} plots. • Install with install.packages(c("ggraph", "igraph")). • Falling back to base plot.',
                         plot_type = if (plotType == "linear") "linear" else "circular"
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
             }
 
@@ -120,7 +120,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     total = nrow(data),
                     removed = removedRows
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -139,7 +139,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     notice$setContent(jmvcore::format(
                         'Grouping variable required when "Color by groups" is enabled. • Please select a grouping variable in the "Grouping & Colors" panel. • Alternatively, disable "Color by groups" to continue without group coloring.'
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -154,7 +154,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         group = group,
                         vars = paste(names(data)[1:min(10, length(names(data)))], collapse = ", ")
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -188,7 +188,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(prep$message)
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -204,7 +204,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(validationResult$message)
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             if (!is.null(validationResult$warning)) {
@@ -270,7 +270,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     severity_cap = tools::toTitleCase(severity),
                     n = n_clustered
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             highlightClusters <- highlightClusters && effectiveClusters > 1

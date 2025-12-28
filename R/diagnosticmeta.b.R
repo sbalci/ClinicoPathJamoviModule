@@ -1693,7 +1693,7 @@ diagnosticmetaClass <- R6::R6Class(
                     'Meta-analysis requires at least 3 studies with complete data. Current studies: %d. Please add more studies or use individual study analysis instead.',
                     nrow(meta_data)
                 ))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return(FALSE)
             }
 

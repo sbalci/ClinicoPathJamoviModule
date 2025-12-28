@@ -121,7 +121,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No data available. Please load data before running analysis.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -132,7 +132,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Gold standard variable is required. Please select a reference test.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -143,7 +143,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Please select the disease present level for the gold standard.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -154,7 +154,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Test 1 is required. Please select at least one test variable.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -165,7 +165,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Please select the positive level for Test 1.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -180,7 +180,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent('Please select the positive level for Test 2.')
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return(FALSE)
                     }
                 }
@@ -195,7 +195,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                             type = jmvcore::NoticeType$ERROR
                         )
                         notice$setContent('Please select the positive level for Test 3.')
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return(FALSE)
                     }
                 }
@@ -208,7 +208,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Insufficient data: At least 4 cases are required for analysis.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(FALSE)
                 }
 
@@ -246,7 +246,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('No complete cases available after removing missing data.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -277,7 +277,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         )
                         notice$setContent(sprintf('The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
                                                   rl$level, rl$var, rl$label))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return(NULL)
                     }
                 }
@@ -354,7 +354,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('epiR package is required for diagnostic test analysis. • Install with install.packages("epiR"). • Or disable "Show Individual Test Statistics" option.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -389,7 +389,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         'Invalid counts detected for Test %d. Skipping individual analysis.',
                         test_num
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -404,7 +404,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         'No valid observations for Test %d. Skipping individual analysis.',
                         test_num
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -428,7 +428,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         'Continuity correction (+0.5) applied to Test %d due to zero cell count(s).',
                         test_num
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 } else {
                     cont_table_for_epi <- cont_table
                 }
@@ -506,7 +506,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('epiR package is required for combination analysis. • Install with install.packages("epiR").')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -517,7 +517,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     type = jmvcore::NoticeType$INFO
                 )
                 prevalence_notice$setContent('Positive/Negative Predictive Values are calculated using the sample prevalence. Interpret cautiously if your sample does not reflect the target clinical population.')
-                self$results$insert(1, prevalence_notice)
+                self$results$insert(999, prevalence_notice)
 
                 has_test2 <- "test2Variable2" %in% names(data_prep)
                 has_test3 <- "test3Variable2" %in% names(data_prep)
@@ -593,7 +593,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         'Invalid counts detected for pattern "%s". Skipping this combination.',
                         pattern_name
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -608,7 +608,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         'No observations found for pattern "%s". Skipping this combination.',
                         pattern_name
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -630,7 +630,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         'Continuity correction (+0.5) applied to pattern "%s" due to zero cell count(s).',
                         pattern_name
                     ))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 } else {
                     tp_adj <- tp
                     fp_adj <- fp

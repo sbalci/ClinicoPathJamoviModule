@@ -95,7 +95,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent('Dataset contains no complete rows. Please provide data.')
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
             }
@@ -154,7 +154,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 notice$setContent(sprintf('Non-numeric variables detected: %s. PCA requires numeric variables only. Factors and character variables cannot be used.',
                     paste(non_numeric_vars, collapse = ', ')))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -170,7 +170,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('Insufficient data for PCA (N=%d). Need at least 3 complete observations.', nrow(pca_matrix)))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -216,7 +216,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 notice$setContent(sprintf('Variables with zero variance detected: %s. Please remove constant variables.',
                     paste(zero_var_names, collapse = ', ')))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 

@@ -87,7 +87,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     "<b>Required Action:</b> Enter the positive response level (exactly as it appears above) ",
                     "in the 'Positive Response Level' field."
                 ))
-                self$results$insert(0, error_notice)
+                self$results$insert(999, error_notice)
                 return(NULL)  # Hard stop - do not proceed with analysis
             }
 
@@ -605,7 +605,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     "Results should be considered preliminary and validated in larger cohort. ",
                     "Recommend n>=50 for biomarker development, n>=100 for clinical validation."
                 ))
-                self$results$insert(0, small_n_notice)
+                self$results$insert(999, small_n_notice)
             }
 
             # Notice 2: Low Event Count Validation (Binary Response Only)
@@ -628,7 +628,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         "Minimum 10 per group required for stable AUC/threshold estimates (Hanley & McNeil, 1982). ",
                         "Collect additional data before proceeding with biomarker validation."
                     ))
-                    self$results$insert(0, low_events_error)
+                    self$results$insert(999, low_events_error)
                     return()  # HARD STOP - do not proceed
                 }
 
@@ -645,7 +645,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         "FDA biomarker guidance recommends n>=50 per group for clinical validation studies. ",
                         "Consider collecting additional data or use results cautiously as exploratory only."
                     ))
-                    self$results$insert(0, moderate_events_warning)
+                    self$results$insert(999, moderate_events_warning)
                 }
 
                 # Notice 3: Extreme Prevalence Warning
@@ -663,7 +663,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         "ROC analysis assumes balanced sampling (recommend 40-60% prevalence for biomarker development). ",
                         "Consider stratified sampling or interpret with caution."
                     ))
-                    self$results$insert(0, extreme_prev_notice)
+                    self$results$insert(999, extreme_prev_notice)
                 }
             }
 
@@ -710,7 +710,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         "<b>⚠️ Important:</b> Outlier removal can bias results, especially in small samples or skewed distributions. ",
                         "Consider reviewing excluded values to ensure they represent true outliers rather than valid extreme values."
                     ))
-                    self$results$insert(0, outlier_notice)
+                    self$results$insert(999, outlier_notice)
                 }
             }
             
@@ -829,7 +829,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         "PPV = (Sens × Prev) / (Sens × Prev + (1 - Spec) × (1 - Prev))<br/>",
                         "NPV = (Spec × (1 - Prev)) / (Spec × (1 - Prev) + (1 - Sens) × Prev)"
                     ))
-                    self$results$insert(1, ppv_npv_notice)
+                    self$results$insert(999, ppv_npv_notice)
 
                     # For optimal threshold method, we have bootstrap CIs from .calculateOptimalThreshold()
                     # For other methods (manual, median, q75), CIs are not available
@@ -898,7 +898,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                                 "(3) Data quality (check for data entry errors, measurement issues). ",
                                 "Do NOT use this biomarker for clinical decision-making."
                             ))
-                            self$results$insert(0, auc_catastrophic_notice)
+                            self$results$insert(999, auc_catastrophic_notice)
                         }
                         # STRONG WARNING: Poor discrimination (0.5-0.7)
                         else if (auc_val < 0.7) {
@@ -916,7 +916,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                                 "(3) Investigate alternative biomarkers. ",
                                 "Only use in multi-factorial clinical decision algorithms, NOT as standalone test."
                             ))
-                            self$results$insert(0, auc_poor_notice)
+                            self$results$insert(999, auc_poor_notice)
                         }
                         # INFO: Good-to-excellent performance (>= 0.8)
                         else if (auc_val >= 0.8) {
@@ -1029,7 +1029,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                             "<b>Use case:</b> Compare biomarker performance across treatment arms, disease stages, or patient subgroups.<br/><br/>",
                             "<b>Note:</b> Groups with <10 patients or insufficient class representation were excluded from stratified analysis."
                         ))
-                        self$results$insert(1, strat_notice)
+                        self$results$insert(999, strat_notice)
                     }
                 }
             }

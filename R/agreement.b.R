@@ -623,7 +623,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 # error_notice$setContent(
                 #     "⛔ <b>Empty Dataset:</b> The dataset contains no rows. Please load data before running analysis."
                 # )
-                # self$results$insert(0, error_notice)
+                # self$results$insert(999, error_notice)
                 return()
             }
 
@@ -638,7 +638,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 #     "Currently ", nrow(self$data), " observation(s) available. ",
                 #     "Please use a dataset with more cases."
                 # ))
-                # self$results$insert(0, error_notice)
+                # self$results$insert(999, error_notice)
                 return()
             }
 
@@ -655,7 +655,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     #     "Available variables: ", paste(names(self$data), collapse = ", "), ". ",
                     #     "Please select valid rater variables."
                     # ))
-                    # self$results$insert(0, error_notice)
+                    # self$results$insert(999, error_notice)
                     return()
                 }
                 var_data <- self$data[[v]]
@@ -670,7 +670,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     #     "Current type: ", class(var_data)[1], ". ",
                     #     "Please convert to appropriate type in jamovi Data tab (Setup → Data Type)."
                     # ))
-                    # self$results$insert(0, error_notice)
+                    # self$results$insert(999, error_notice)
                     return()
                 }
             }
@@ -758,7 +758,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         #     "This ensures statistically valid kappa calculations. ",
                         #     "Verify this matches your intended category structure."
                         # ))
-                        # self$results$insert(1, warning_notice)
+                        # self$results$insert(999, warning_notice)
                     }
 
                     # Store harmonized levels for later use (Krippendorff, cluster analyses)
@@ -819,7 +819,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             #     "Please either convert to ordinal in jamovi Data tab (Setup → Data Type → Ordinal) ",
                             #     "or change weighting to 'Unweighted' for nominal categories."
                             # ))
-                            # self$results$insert(0, error_notice)
+                            # self$results$insert(999, error_notice)
                             return()
                         }
                     }
@@ -836,7 +836,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     #     "Currently 2 raters selected. ",
                     #     "Either select additional rater variables, or disable 'Exact Kappa' option to use normal approximation."
                     # ))
-                    # self$results$insert(0, error_notice)
+                    # self$results$insert(999, error_notice)
                     return()
                 }
 
@@ -1635,7 +1635,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 # )
 
                 # icc_error_notice$setContent(error_msg)
-                # self$results$insert(0, icc_error_notice)
+                # self$results$insert(999, icc_error_notice)
 
                 # Populate table with error message
                 table$setRow(rowNo=1, values=list(
@@ -1841,7 +1841,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 #           "Variance decomposition requires continuous numeric measurements. ",
                 #           "For categorical data, use kappa-based agreement measures instead.")
                 # )
-                # self$results$insert(0, vc_error_notice)
+                # self$results$insert(999, vc_error_notice)
 
                 # Populate table with error message
                 table$setRow(rowNo=1, values=list(

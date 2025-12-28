@@ -1,0 +1,8 @@
+"PatientID","StartTime","EndTime","Response"
+"PT001",0,0,"CR"
+"PT002",0,-5,"PR"
+"PT003",5,10,"SD"
+"PT004",0,1000,"PD"
+"PT005",0,5,NA
+"PT006",NA,10,"CR"
+"PT007",0,NA,"PR"

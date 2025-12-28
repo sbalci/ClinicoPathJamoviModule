@@ -103,7 +103,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Confidence intervals are unavailable when using population prevalence. • epiR::epi.tests() computes CIs from the study sample, not an externally supplied prevalence. • Disable either "95% Confidence Intervals" or "Use Known Population Prevalence" to proceed. • Point estimates will still be Bayes-adjusted when prevalence is supplied.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -115,7 +115,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$INFO
                 )
                 notice$setContent('Confidence intervals are not calculated when using population prevalence. • epiR::epi.tests() provides CIs only for sample-based prevalence. • Point estimates shown here are Bayes-adjusted to the supplied prevalence without CIs.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Validate prevalence when provided programmatically
@@ -126,7 +126,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Invalid prior probability. • Prior probability must be between 0 and 1 (exclusive). • Update the "Prior Probability (prevalence)" value.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -138,7 +138,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Non-finite counts detected. • TP, FP, TN, and FN must be finite numbers. • Please check your input values.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -150,7 +150,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Negative counts detected. • All counts (TP, FP, TN, FN) must be non-negative. • Please check your input values for errors.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -162,7 +162,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('All counts are zero. • Please provide valid diagnostic test data. • Ensure TP, FP, TN, and FN values are entered correctly.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -174,7 +174,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No diseased subjects detected (TP + FN = 0). • Cannot calculate sensitivity and related metrics. • Ensure your confusion matrix includes cases with disease present.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -186,7 +186,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('No healthy subjects detected (TN + FP = 0). • Cannot calculate specificity and related metrics. • Ensure your confusion matrix includes cases without disease.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
             
@@ -198,7 +198,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$WARNING
                 )
                 notice$setContent('No positive test results detected (TP + FP = 0). • Positive Predictive Value (PPV) is undefined. • Ensure your confusion matrix includes both positive and negative test results.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
             
             # Check for negative tests
@@ -209,7 +209,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$WARNING
                 )
                 notice$setContent('No negative test results detected (TN + FN = 0). • Negative Predictive Value (NPV) is undefined. • Ensure your confusion matrix includes both positive and negative test results.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
 
@@ -295,7 +295,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                 type = jmvcore::NoticeType$WARNING
             )
             notice$setContent('Non-integer counts detected. • Diagnostic test counts are typically whole numbers. • Proceeding with calculations, but verify your inputs.')
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
         }
 
         # Continuity correction for zero-cell issues (stabilizes LR/DOR and CIs)
@@ -317,7 +317,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                 type = jmvcore::NoticeType$WARNING
             )
             notice$setContent('Zero cells detected. Applied Haldane-Anscombe 0.5 continuity correction for likelihood ratios, diagnostic odds ratio, and confidence intervals to avoid infinite or undefined estimates.')
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
         }
 
         # Calculate metrics with safe division
@@ -633,7 +633,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('epiR package is required for confidence intervals. • Install with install.packages("epiR"). • Or disable "95% Confidence Intervals" option.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -801,7 +801,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('Invalid inputs for cut-off "%s". • All values (TP=%s, FP=%s, TN=%s, FN=%s) must be non-negative numbers. • Check your input values for errors.', cutoff_name, tp, fp, tn, fn))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -817,7 +817,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent(sprintf('No cases for cut-off "%s". • Total cases (TP+FP+TN+FN) = 0. • Check your confusion matrix inputs.', cutoff_name))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return(NULL)
                 }
 
@@ -843,7 +843,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     if (healthy == 0) msg <- paste0(msg, ' • No healthy cases (TN+FP=0): Specificity is undefined.')
                     msg <- paste0(msg, ' • Consider this cut-off unreliable for clinical decisions.')
                     notice$setContent(msg)
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 # Clinical recommendation based on Youden index and balanced metrics
@@ -893,7 +893,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent('Cut-off comparison cannot be performed due to invalid inputs. • Check the error messages above for specific issues. • Ensure all TP, FP, TN, FN values are non-negative numbers.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 

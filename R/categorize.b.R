@@ -333,7 +333,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf("Variable '%s' not found in dataset. Please select a valid variable from the data.", varname))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -347,7 +347,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf("Variable '%s' is not numeric. Categorization requires a continuous numeric variable.", varname))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -366,7 +366,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf("Variable '%s' has zero variability (constant value). Cannot create categories from a constant variable.", varname))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -412,7 +412,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf("Break point validation failed: %s", validation$message))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -426,7 +426,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = jmvcore::NoticeType$ERROR
                     )
                     notice$setContent("Invalid manual break points. Please enter comma-separated numeric values (e.g., 0, 25, 50, 75, 100).")
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     return()
                 }
             }

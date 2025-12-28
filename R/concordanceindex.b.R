@@ -21,7 +21,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 is.null(self$options$predictor)) {
                 notice <- jmvcore::Notice$new(options=self$options, name='.requiredInputs', type=jmvcore::NoticeType$ERROR)
                 notice$setContent('Time, Event, and Predictor variables are all required. Please select all three variables and re-run the analysis.')
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             }
 
@@ -59,7 +59,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             "Event variable has non-binary values (%s). Please specify which value represents the event using the Event Code option.",
                             paste(unique_vals, collapse = ", ")
                         ))
-                        self$results$insert(1, notice)
+                        self$results$insert(999, notice)
                         return()
                     }
                 }
@@ -80,7 +80,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 notice$setContent(
                     "Competing risks C-index is not yet implemented. Please disable this option. Standard C-index will be calculated treating competing events as censored."
                 )
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             if (self$options$decompose_cindex) {
@@ -92,7 +92,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 notice$setContent(
                     "C-index decomposition by risk groups is not yet implemented. Please disable this option."
                 )
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             if (self$options$stratified_cindex) {
@@ -104,7 +104,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 notice$setContent(
                     "Stratified C-index analysis is not yet implemented. Please disable this option."
                 )
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Warn about unimplemented plots
@@ -121,7 +121,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 notice$setContent(
                     "C-index over time plot and decomposition plot are not yet implemented. These plots will be empty. Model comparison and risk group K-M plots are available."
                 )
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Apply restricted time if requested
@@ -279,7 +279,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 notice$setContent(msg)
                 if (pct_missing > 20) {
-                    self$results$insert(1, notice)  # Warning at top
+                    self$results$insert(999, notice)  # Warning at top
                 } else {
                     self$results$insert(999, notice)  # Info at bottom
                 }
@@ -296,19 +296,19 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (n_events < 10) {
                 notice <- jmvcore::Notice$new(options=self$options, name='.tooFewEvents', type=jmvcore::NoticeType$ERROR)
                 notice$setContent(sprintf('Too few events for reliable C-index estimation (n_events=%d). Minimum 10 events required, 100+ recommended for stable estimates. Results may be unreliable.', n_events))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
                 return()
             } else if (n_events < 50) {
                 notice <- jmvcore::Notice$new(options=self$options, name='.lowEvents', type=jmvcore::NoticeType$STRONG_WARNING)
                 notice$setContent(sprintf('Low number of events (n_events=%d). Standard errors and confidence intervals may be unstable. Consider cautious interpretation. Recommended minimum: 100 events.', n_events))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Notice: extreme censoring
             if (censoring_rate > 70) {
                 notice <- jmvcore::Notice$new(options=self$options, name='.heavyCensoring', type=jmvcore::NoticeType$WARNING)
                 notice$setContent(sprintf('Heavy censoring detected (%.1f%% censored). C-index estimates may be biased. Consider sensitivity analyses or alternative discrimination metrics.', censoring_rate))
-                self$results$insert(1, notice)
+                self$results$insert(999, notice)
             }
 
             # Calculate C-index using Harrell's method (survival::concordance)
@@ -572,7 +572,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     notice <- jmvcore::Notice$new(options=self$options, name='.bootstrapFailures', type=jmvcore::NoticeType$WARNING)
                     notice$setContent(sprintf('%d/%d bootstrap samples failed (%.1f%%). Confidence intervals may be unreliable. Consider using asymptotic CI method or checking data quality.',
                         n_failed, n_boot, 100 * n_failed / n_boot))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                 }
 
                 # Calculate percentile CI
@@ -607,7 +607,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             notice$setContent(
                 "Time-dependent C-index is NOT properly implemented. This analysis uses a simplified approximation that filters data by time and re-runs Harrell's C-index. It does NOT use inverse probability of censoring weighting or proper time-dependent methodology (timeROC/survivalROC). Results should NOT be considered valid time-dependent C-index estimates. Proper implementation planned for future release."
             )
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
 
             table <- self$results$timeDependentCindex
 
@@ -630,7 +630,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     notice <- jmvcore::Notice$new(options=self$options, name=paste0('.tdCindexSkipped_', i), type=jmvcore::NoticeType$WARNING)
                     notice$setContent(sprintf('Time-dependent C-index at time point %.1f skipped due to insufficient observations (n=%d < 10). Consider removing this time point or using shorter evaluation times.',
                         t_horizon, sum(include)))
-                    self$results$insert(1, notice)
+                    self$results$insert(999, notice)
                     next  # Skip if too few observations
                 }
 
@@ -760,7 +760,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             notice$setContent(
                 "Pairwise comparison tests assume independence between models. Since all models are evaluated on the same patients, C-indices are correlated. These p-values may be anticonservative (inflated Type I error). Use bootstrap methods or DeLong's test for valid inference."
             )
-            self$results$insert(1, notice)
+            self$results$insert(999, notice)
 
             n_models <- comparison_table$rowCount
             row_key <- 1
