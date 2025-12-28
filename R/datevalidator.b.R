@@ -118,25 +118,34 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                 return()
             }
 
-            # Safely require packages
-            required_packages <- c("datefixR", "anytime")
+            # Check for optional packages and notify if missing (but continue)
+            optional_pkgs <- c("datefixR", "anytime")
             missing_pkgs <- c()
-            for (pkg in required_packages) {
+            for (pkg in optional_pkgs) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
                     missing_pkgs <- c(missing_pkgs, pkg)
                 }
             }
 
             if (length(missing_pkgs) > 0) {
-                pkg_list <- paste(missing_pkgs, collapse = ", ")
-                install_cmds <- paste0("install.packages(c(", paste0("'", missing_pkgs, "'", collapse = ", "), "))")
-                private$.addNotice(
-                    'missingPackages',
-                    jmvcore::NoticeType$ERROR,
-                    sprintf('Required package(s) not installed: %s • Install using: %s • Restart jamovi after installation. • These packages are required for date/datetime validation functionality.',
-                            pkg_list, install_cmds)
-                )
-                return()
+                # Only show notice if user explicitly requested a method that needs these packages
+                requested_method <- self$options$correction_method
+                needs_datefixr <- requested_method %in% c("datefixr", "consensus")
+                needs_anytime <- requested_method %in% c("anytime", "consensus")
+                
+                show_warning <- FALSE
+                if ("datefixR" %in% missing_pkgs && needs_datefixr) show_warning <- TRUE
+                if ("anytime" %in% missing_pkgs && needs_anytime) show_warning <- TRUE
+
+                if (show_warning) {
+                   private$.addNotice(
+                        'missingPackages',
+                        jmvcore::NoticeType$WARNING,
+                        sprintf('Optional package(s) not found: %s • The selected method "%s" requires these packages. • Falling back to basic date validation (lubridate) where possible. • Please install the full version of the module for advanced date correction features.',
+                                paste(missing_pkgs, collapse = ", "),
+                                requested_method)
+                    )
+                }
             }
 
             # Get data and variables
@@ -356,6 +365,17 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
         },
 
         .correct_with_datefixr = function(date_char) {
+            
+            if (!requireNamespace("datefixR", quietly = TRUE)) {
+                return(list(
+                    corrected = rep(as.Date(NA), length(date_char)),
+                    success = rep(FALSE, length(date_char)),
+                    method_used = "datefixR (missing)",
+                    errors = rep("datefixR package not installed - feature unavailable", length(date_char)),
+                    ambiguous = rep(FALSE, length(date_char)),
+                    plausibility_flag = rep(FALSE, length(date_char))
+                ))
+            }
 
             tryCatch({
                 fmt <- self$options$date_format
@@ -431,6 +451,17 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
         },
 
         .correct_with_anytime = function(date_char) {
+            
+            if (!requireNamespace("anytime", quietly = TRUE)) {
+                 return(list(
+                    corrected = rep(as.Date(NA), length(date_char)),
+                    success = rep(FALSE, length(date_char)),
+                    method_used = "anytime (missing)",
+                    errors = rep("anytime package not installed - feature unavailable", length(date_char)),
+                    ambiguous = rep(FALSE, length(date_char)),
+                    plausibility_flag = rep(FALSE, length(date_char))
+                ))
+            }
 
             tryCatch({
                 corrected_dates <- anytime::anytime(date_char, tz = self$options$timezone)
