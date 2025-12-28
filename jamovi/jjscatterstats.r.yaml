@@ -59,7 +59,7 @@ items:
       height: 450
       renderFun: .plot2
       requiresData: true
-      visible: (grvar)
+      visible: (!is.null(grvar))
 
     - name: plot
       title: '`${dep} vs {group}`'
@@ -102,7 +102,7 @@ items:
       height: 450
       renderFun: .plotGGPubr2
       requiresData: true
-      visible: (addGGPubrPlot && grvar)
+      visible: (addGGPubrPlot && !is.null(grvar))
       clearWith:
         - dep
         - group
