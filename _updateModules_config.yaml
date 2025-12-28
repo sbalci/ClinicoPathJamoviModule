@@ -13,16 +13,16 @@
 new_version: "0.0.32.62"
 new_date: "2025-12-28"
 quick: false
-# TEST: true
+TEST: true
 meddecide: false
 jjstatsplot: false
-# jsurvival: false
+jsurvival: false
 ClinicoPathDescriptives: false
 OncoPath: false
-TEST: false
+# TEST: false
 # meddecide: true
 # jjstatsplot: true
-jsurvival: true
+# jsurvival: true
 # ClinicoPathDescriptives: true
 # OncoPath: true
 

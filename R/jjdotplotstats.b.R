@@ -18,7 +18,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .data_hash = NULL,
         .options_hash = NULL,
         .messages = NULL,
-        .currentPreset = "basic",
+        .noticesList = NULL,
+        # .currentPreset = "basic",
 
         # Variable name escaping for special characters
         .escapeVar = function(var) {
@@ -30,12 +31,79 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(var)
         },
 
+        # Notice accumulation system (HTML-based, avoids serialization issues)
+        .addNotice = function(message, type = "INFO") {
+            if (is.null(private$.noticesList)) {
+                private$.noticesList <- list()
+            }
+
+            # Determine styling based on type
+            style_info <- switch(type,
+                "ERROR" = list(
+                    color = "#721c24",
+                    bg = "#f8d7da",
+                    border = "#f5c6cb",
+                    icon = "❌"
+                ),
+                "STRONG_WARNING" = list(
+                    color = "#856404",
+                    bg = "#fff3cd",
+                    border = "#ffeaa7",
+                    icon = "⚠️"
+                ),
+                "WARNING" = list(
+                    color = "#856404",
+                    bg = "#fff3cd",
+                    border = "#ffeaa7",
+                    icon = "⚠️"
+                ),
+                "INFO" = list(
+                    color = "#004085",
+                    bg = "#cce5ff",
+                    border = "#b8daff",
+                    icon = "ℹ️"
+                ),
+                # Default
+                list(
+                    color = "#004085",
+                    bg = "#cce5ff",
+                    border = "#b8daff",
+                    icon = "ℹ️"
+                )
+            )
+
+            notice_html <- glue::glue(
+                "<div style='background-color: {style_info$bg}; ",
+                "border-left: 4px solid {style_info$border}; ",
+                "padding: 12px; margin: 8px 0; color: {style_info$color};'>",
+                "<strong>{style_info$icon} {type}:</strong> {message}",
+                "</div>"
+            )
+
+            private$.noticesList <- append(private$.noticesList, notice_html)
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (is.null(private$.noticesList) || length(private$.noticesList) == 0) {
+                return()
+            }
+
+            notices_html <- paste(private$.noticesList, collapse = "\n")
+            self$results$notices$setContent(notices_html)
+        },
+
+        .clearNotices = function() {
+            private$.noticesList <- NULL
+            self$results$notices$setContent("")
+        },
+
         # init ----
 
         .init = function() {
             # Apply clinical presets if not custom
-            private$.applyClinicalPreset()
-            
+            # private$.applyClinicalPreset()
+
             # Since dep is single variable, use fixed size
             # Use configurable plot dimensions
             plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 650
@@ -68,38 +136,20 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
 
             if (nrow(self$data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noCompleteRows',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Data contains no complete rows. Please check for missing values in your selected variables.')
-                self$results$insert(1, notice)
+                private$.addNotice('Data contains no complete rows. Please check for missing values in your selected variables.', "ERROR")
                 return(FALSE)
             }
 
             # Check variable existence with better context
             if (!(self$options$dep %in% names(self$data))) {
                 available_vars <- paste(names(self$data), collapse=", ")
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'depVarNotFound',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid continuous variable for the dependent variable.', self$options$dep, available_vars))
-                self$results$insert(1, notice)
+                private$.addNotice(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid continuous variable for the dependent variable.', self$options$dep, available_vars), "ERROR")
                 return(FALSE)
             }
 
             if (!(self$options$group %in% names(self$data))) {
                 available_vars <- paste(names(self$data), collapse=", ")
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'groupVarNotFound',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid grouping variable.', self$options$group, available_vars))
-                self$results$insert(1, notice)
+                private$.addNotice(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid grouping variable.', self$options$group, available_vars), "ERROR")
                 return(FALSE)
             }
 
@@ -110,26 +160,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             complete_rows <- complete.cases(self$data[relevant_cols])
             group_levels <- nlevels(droplevels(as.factor(self$data[[self$options$group]][complete_rows])))
             if (group_levels < 2) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'insufficientGroups',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('At least two groups with data are required for comparison. Found %d group(s) with complete data. Please check for missing values or select different variables.', group_levels))
-                self$results$insert(1, notice)
+                private$.addNotice(sprintf('At least two groups with data are required for comparison. Found %d group(s) with complete data. Please check for missing values or select different variables.', group_levels), "ERROR")
                 return(FALSE)
             }
 
             # Check total sample size
             n_total <- sum(complete_rows)
             if (n_total < 30) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSampleSize',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Small total sample size (N = %d). Statistical tests may be unreliable with N < 30. Consider interpreting results cautiously or collecting more data.', n_total))
-                self$results$insert(1, notice)
+                private$.addNotice(sprintf('Small total sample size (N = %d). Statistical tests may be unreliable with N < 30. Consider interpreting results cautiously or collecting more data.', n_total), "STRONG_WARNING")
             }
 
             # Check minimum group size
@@ -138,13 +176,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             min_group_n <- min(group_sizes)
             if (min_group_n < 10) {
                 min_group_name <- names(which.min(group_sizes))
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'verySmallGroups',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Very small group sizes detected (minimum n = %d in group "%s"). Groups with n < 10 may produce unreliable test results. Consider combining groups or collecting more data.', min_group_n, min_group_name))
-                self$results$insert(1, notice)
+                private$.addNotice(sprintf('Very small group sizes detected (minimum n = %d in group "%s"). Groups with n < 10 may produce unreliable test results. Consider combining groups or collecting more data.', min_group_n, min_group_name), "STRONG_WARNING")
             }
 
             # Validate centrality parameter consistency
@@ -156,33 +188,15 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Centrality parameter validation helper
         .validateCentralityOptions = function() {
             if (self$options$centralityparameter == "none" && self$options$centralityk != 2) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'centralityKUnused',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent('Centrality decimal places specified but centrality parameter is "none". The precision setting will have no effect.')
-                self$results$insert(999, notice)
+                private$.addNotice('Centrality decimal places specified but centrality parameter is "none". The precision setting will have no effect.', "INFO")
             }
 
             if (self$options$centralityplotting && self$options$centralityparameter == "none") {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'centralityPlotMismatch',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent('Centrality plotting enabled but centrality parameter is "none". No centrality lines will be displayed.')
-                self$results$insert(1, notice)
+                private$.addNotice('Centrality plotting enabled but centrality parameter is "none". No centrality lines will be displayed.', "WARNING")
             }
 
             if (!self$options$centralityplotting && self$options$centralitytype != "parametric") {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'centralityTypeUnused',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent('Centrality type specified but centrality plotting is disabled. The type setting will have no effect.')
-                self$results$insert(999, notice)
+                private$.addNotice('Centrality type specified but centrality plotting is disabled. The type setting will have no effect.', "INFO")
             }
         },
         
@@ -338,13 +352,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 test_recommendation <- switch(self$options$typestatistics,
                     "parametric" = if(abs(skewness_rough) > 1 || min_n < 10) {
                         # Add Notice for clinical safety
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'testDataMismatch',
-                            type = jmvcore::NoticeType$STRONG_WARNING
-                        )
-                        notice$setContent(sprintf('Parametric test selected but data shows high skewness (%.2f) and/or small sample sizes (minimum n = %d). Parametric tests assume normality. Consider switching to nonparametric test (Mann-Whitney/Kruskal-Wallis) for more reliable results.', skewness_rough, min_n))
-                        self$results$insert(1, notice)
+                        private$.addNotice(sprintf('Parametric test selected but data shows high skewness (%.2f) and/or small sample sizes (minimum n = %d). Parametric tests assume normality. Consider switching to nonparametric test (Mann-Whitney/Kruskal-Wallis) for more reliable results.', skewness_rough, min_n), "STRONG_WARNING")
                         "💡 <strong>Recommendation:</strong> Consider switching to non-parametric test due to distribution or sample size."
                     } else {
                         "✓ <strong>Parametric test</strong> is appropriate for your data."
@@ -381,30 +389,30 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Clinical preset application
-        .applyClinicalPreset = function() {
-            preset <- self$options$clinicalPreset
-            if (is.null(preset) || preset == "custom") {
-                private$.currentPreset <- "custom"
-                private$.accumulateMessage("<br>📋 Using custom analysis settings.<br>")
-                return()
-            }
-
-            private$.currentPreset <- preset
-            preset_message <- ""
-
-            # Apply settings based on preset
-            if (preset == "basic") {
-                preset_message <- "Using basic analysis settings optimized for straightforward comparisons."
-            } else if (preset == "publication") {
-                preset_message <- "Using publication-ready settings with comprehensive statistical reporting."
-            } else if (preset == "clinical") {
-                preset_message <- "Using clinical settings optimized for medical decision-making."
-            }
-
-            if (nchar(preset_message) > 0) {
-                private$.accumulateMessage(glue::glue("<br>📋 {preset_message}<br>"))
-            }
-        },
+        # .applyClinicalPreset = function() {
+        #     preset <- self$options$clinicalPreset
+        #     if (is.null(preset) || preset == "custom") {
+        #         private$.currentPreset <- "custom"
+        #         private$.accumulateMessage("<br>📋 Using custom analysis settings.<br>")
+        #         return()
+        #     }
+        #
+        #     private$.currentPreset <- preset
+        #     preset_message <- ""
+        #
+        #     # Apply settings based on preset
+        #     if (preset == "basic") {
+        #         preset_message <- "Using basic analysis settings optimized for straightforward comparisons."
+        #     } else if (preset == "publication") {
+        #         preset_message <- "Using publication-ready settings with comprehensive statistical reporting."
+        #     } else if (preset == "clinical") {
+        #         preset_message <- "Using clinical settings optimized for medical decision-making."
+        #     }
+        #
+        #     if (nchar(preset_message) > 0) {
+        #         private$.accumulateMessage(glue::glue("<br>📋 {preset_message}<br>"))
+        #     }
+        # },
         
         # Report sentence generator
         .generateReportSentence = function() {
@@ -461,72 +469,72 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Guided steps generator
-        .generateGuidedSteps = function() {
-            if (!self$options$guidedMode) return()
-            
-            steps <- glue::glue(
-                "<div style='background-color: #e8f5e8; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;'>",
-                "<h4 style='color: #155724; margin-top: 0;'>🎯 Analysis Steps</h4>",
-                "<ol style='margin: 10px 0; padding-left: 20px;'>",
-                "<li><strong>Data Selection:</strong> Choose continuous variable and grouping variable</li>",
-                "<li><strong>Test Selection:</strong> Review data assessment recommendations above</li>",
-                "<li><strong>Options:</strong> Configure display and statistical options</li>",
-                "<li><strong>Interpretation:</strong> Review clinical interpretation and assumptions</li>",
-                "<li><strong>Report:</strong> Copy report template for documentation</li>",
-                "</ol>",
-                "<p><em>💡 Tip: Follow these steps in order for best results. Check the Data Assessment panel for recommendations.</em></p>",
-                "</div>"
-            )
-            
-            self$results$guidedSteps$setContent(steps)
-        },
+        # .generateGuidedSteps = function() {
+        #     if (!self$options$guidedMode) return()
+        #
+        #     steps <- glue::glue(
+        #         "<div style='background-color: #e8f5e8; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;'>",
+        #         "<h4 style='color: #155724; margin-top: 0;'>🎯 Analysis Steps</h4>",
+        #         "<ol style='margin: 10px 0; padding-left: 20px;'>",
+        #         "<li><strong>Data Selection:</strong> Choose continuous variable and grouping variable</li>",
+        #         "<li><strong>Test Selection:</strong> Review data assessment recommendations above</li>",
+        #         "<li><strong>Options:</strong> Configure display and statistical options</li>",
+        #         "<li><strong>Interpretation:</strong> Review clinical interpretation and assumptions</li>",
+        #         "<li><strong>Report:</strong> Copy report template for documentation</li>",
+        #         "</ol>",
+        #         "<p><em>💡 Tip: Follow these steps in order for best results. Check the Data Assessment panel for recommendations.</em></p>",
+        #         "</div>"
+        #     )
+        #
+        #     self$results$guidedSteps$setContent(steps)
+        # },
         
         # Next steps recommendations
-        .generateRecommendations = function() {
-            if (!self$options$guidedMode) return()
-            
-            preset <- private$.currentPreset
-            
-            recommendations <- switch(preset,
-                "publication" = glue::glue(
-                    "<div style='background-color: #fff8e1; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>📚 Publication Checklist</h4>",
-                    "<ul style='margin: 10px 0; padding-left: 20px;'>",
-                    "<li>✓ Report effect size with confidence intervals</li>",
-                    "<li>✓ Include assumption checking results</li>",
-                    "<li>✓ State statistical test used and why</li>",
-                    "<li>✓ Report exact p-values (not just p < 0.05)</li>",
-                    "<li>✓ Consider multiple testing corrections if applicable</li>",
-                    "</ul>",
-                    "</div>"
-                ),
-                "clinical" = glue::glue(
-                    "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>",
-                    "<h4 style='color: #1976d2; margin-top: 0;'>🏥 Clinical Decision Points</h4>",
-                    "<ul style='margin: 10px 0; padding-left: 20px;'>",
-                    "<li>Consider clinical significance vs. statistical significance</li>",
-                    "<li>Evaluate practical impact of observed differences</li>",
-                    "<li>Review sample representativeness for your population</li>",
-                    "<li>Consider confounding variables not in this analysis</li>",
-                    "<li>Discuss findings with clinical colleagues</li>",
-                    "</ul>",
-                    "</div>"
-                ),
-                glue::glue(
-                    "<div style='background-color: #f3e5f5; padding: 15px; border-left: 4px solid #9c27b0; margin: 10px 0;'>",
-                    "<h4 style='color: #7b1fa2; margin-top: 0;'>🔍 Next Steps</h4>",
-                    "<ul style='margin: 10px 0; padding-left: 20px;'>",
-                    "<li>Review the statistical assumptions above</li>",
-                    "<li>Consider additional analyses if needed</li>",
-                    "<li>Document your methods and findings</li>",
-                    "<li>Consider replication with independent data</li>",
-                    "</ul>",
-                    "</div>"
-                )
-            )
-            
-            self$results$recommendations$setContent(recommendations)
-        },
+        # .generateRecommendations = function() {
+        #     if (!self$options$guidedMode) return()
+        #
+        #     preset <- private$.currentPreset
+        #
+        #     recommendations <- switch(preset,
+        #         "publication" = glue::glue(
+        #             "<div style='background-color: #fff8e1; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
+        #             "<h4 style='color: #856404; margin-top: 0;'>📚 Publication Checklist</h4>",
+        #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
+        #             "<li>✓ Report effect size with confidence intervals</li>",
+        #             "<li>✓ Include assumption checking results</li>",
+        #             "<li>✓ State statistical test used and why</li>",
+        #             "<li>✓ Report exact p-values (not just p < 0.05)</li>",
+        #             "<li>✓ Consider multiple testing corrections if applicable</li>",
+        #             "</ul>",
+        #             "</div>"
+        #         ),
+        #         "clinical" = glue::glue(
+        #             "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>",
+        #             "<h4 style='color: #1976d2; margin-top: 0;'>🏥 Clinical Decision Points</h4>",
+        #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
+        #             "<li>Consider clinical significance vs. statistical significance</li>",
+        #             "<li>Evaluate practical impact of observed differences</li>",
+        #             "<li>Review sample representativeness for your population</li>",
+        #             "<li>Consider confounding variables not in this analysis</li>",
+        #             "<li>Discuss findings with clinical colleagues</li>",
+        #             "</ul>",
+        #             "</div>"
+        #         ),
+        #         glue::glue(
+        #             "<div style='background-color: #f3e5f5; padding: 15px; border-left: 4px solid #9c27b0; margin: 10px 0;'>",
+        #             "<h4 style='color: #7b1fa2; margin-top: 0;'>🔍 Next Steps</h4>",
+        #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
+        #             "<li>Review the statistical assumptions above</li>",
+        #             "<li>Consider additional analyses if needed</li>",
+        #             "<li>Document your methods and findings</li>",
+        #             "<li>Consider replication with independent data</li>",
+        #             "</ul>",
+        #             "</div>"
+        #         )
+        #     )
+        #
+        #     self$results$recommendations$setContent(recommendations)
+        # },
         
         # Data quality validation helper
         .validateDataQuality = function(mydata, dep_var) {
@@ -765,17 +773,17 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Apply preset overrides without mutating options object
-            if (private$.currentPreset == "basic") {
-                options_list$resultssubtitle <- TRUE
-            } else if (private$.currentPreset == "publication") {
-                options_list$resultssubtitle <- TRUE
-                options_list$originaltheme <- TRUE
-            } else if (private$.currentPreset == "clinical") {
-                centrality_plotting <- TRUE
-                centrality_type <- "nonparametric"
-                options_list$centralityplotting <- TRUE
-                options_list$centralityparameter <- "median"
-            }
+            # if (private$.currentPreset == "basic") {
+            #     options_list$resultssubtitle <- TRUE
+            # } else if (private$.currentPreset == "publication") {
+            #     options_list$resultssubtitle <- TRUE
+            #     options_list$originaltheme <- TRUE
+            # } else if (private$.currentPreset == "clinical") {
+            #     centrality_plotting <- TRUE
+            #     centrality_type <- "nonparametric"
+            #     options_list$centralityplotting <- TRUE
+            #     options_list$centralityparameter <- "median"
+            # }
             
             # Process centrality parameters if enabled
             options_list$centrality.plotting <- centrality_plotting
@@ -799,9 +807,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # run ----
         .run = function() {
-            # Clear messages at start of new run
+            # Clear messages and notices at start of new run
             private$.messages <- NULL
-            
+            private$.clearNotices()
+
             # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
 
@@ -831,13 +840,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent(todo)
 
                 if (nrow(self$data) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noDataInRun',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Data contains no complete rows after filtering. Please check for missing values.')
-                    self$results$insert(1, notice)
+                    private$.addNotice('Data contains no complete rows after filtering. Please check for missing values.', "ERROR")
                     return()
                 }
 
@@ -847,21 +850,15 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.prepareOptions()
 
                     # Generate clinical interpretation and assumptions
-                    private$.generateClinicalInterpretation(mydata)
-                    private$.checkAssumptions(mydata)
-                    private$.generateReportSentence()
+                    # private$.generateClinicalInterpretation(mydata)
+                    # private$.checkAssumptions(mydata)
+                    # private$.generateReportSentence()
 
                     # Generate guided mode content if enabled
-                    private$.generateGuidedSteps()
-                    private$.generateRecommendations()
+                    # private$.generateGuidedSteps()
+                    # private$.generateRecommendations()
                 }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'dataProcessingFailed',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf('Data processing failed: %s. Please check your variable selections and try again.', e$message))
-                    self$results$insert(1, notice)
+                    private$.addNotice(sprintf('Data processing failed: %s. Please check your variable selections and try again.', e$message), "ERROR")
                     return()
                 })
 
@@ -906,13 +903,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
                 )
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'plotGenerationFailed',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Plot generation failed: %s. Please check your data for issues (constant variables, insufficient variation, or extreme outliers) or try a different statistical test.', e$message))
-                self$results$insert(1, notice)
+                private$.addNotice(sprintf('Plot generation failed: %s. Please check your data for issues (constant variables, insufficient variation, or extreme outliers) or try a different statistical test.', e$message), "ERROR")
                 return(NULL)
             })
 
@@ -929,13 +920,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "selected"
             )
 
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice$setContent(sprintf('Analysis completed successfully using %s test. Compared %d groups with N = %d total observations.', test_name, n_groups, n_obs))
-            self$results$insert(999, notice)
+            private$.addNotice(sprintf('Analysis completed successfully using %s test. Compared %d groups with N = %d total observations.', test_name, n_groups, n_obs), "INFO")
 
             # Print Plot ----
 
@@ -989,13 +974,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         title = options_data$mytitle
                     )
                 }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'groupedPlotFailed',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf('Grouped plot generation failed: %s. Please check your grouping variable and data.', e$message))
-                    self$results$insert(1, notice)
+                    private$.addNotice(sprintf('Grouped plot generation failed: %s. Please check your grouping variable and data.', e$message), "ERROR")
                     return(NULL)
                 })
 

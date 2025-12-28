@@ -26,8 +26,8 @@ clearWith:
     - centralityk
     - plotwidth
     - plotheight
-    - guidedMode
-    - clinicalPreset
+    # - guidedMode
+    # - clinicalPreset
 
 
 
@@ -36,6 +36,10 @@ items:
     - name:  todo
       title: To Do
       type:  Html
+
+    - name: notices
+      title: Notices
+      type: Html
 
     - name: plot2
       title: '`${dep} - {group} by {grvar}`'
@@ -57,27 +61,32 @@ items:
     - name: interpretation
       title: Clinical Interpretation
       type: Html
-      visible: (guidedMode)
+      visible: false
+      # visible: (guidedMode)
 
     - name: assumptions
       title: Data Assessment & Recommendations
       type: Html
-      visible: (guidedMode)
+      visible: false
+      # visible: (guidedMode)
 
     - name: reportSentence
       title: Report Template
       type: Html
-      visible: (guidedMode)
+      visible: false
+      # visible: (guidedMode)
 
     - name: guidedSteps
       title: Analysis Steps
       type: Html
-      visible: (guidedMode)
+      visible: false
+      # visible: (guidedMode)
 
     - name: recommendations
       title: Next Steps
       type: Html
-      visible: (guidedMode)
+      visible: false
+      # visible: (guidedMode)
 
 
 refs:

@@ -150,17 +150,17 @@ children:
               - type: TextBox
                 name: plotheight
                 format: number
-  - type: CollapseBox
-    label: Clinical Assistance
-    collapsed: false
-    children:
-      - type: Label
-        label: Analysis Guidance
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: clinicalPreset
-              - type: CheckBox
-                name: guidedMode
+  # - type: CollapseBox
+  #   label: Clinical Assistance
+  #   collapsed: false
+  #   children:
+  #     - type: Label
+  #       label: Analysis Guidance
+  #       children:
+  #         - type: LayoutBox
+  #           margin: large
+  #           children:
+  #             - type: ComboBox
+  #               name: clinicalPreset
+  #             - type: CheckBox
+  #               name: guidedMode

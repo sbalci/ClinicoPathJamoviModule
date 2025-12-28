@@ -1,7 +1,7 @@
 ---
 name:  jjdotplotstats
 title: Dot Chart
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 # menuSubtitle: Dot Chart
 version: '0.0.32'
@@ -321,32 +321,32 @@ options:
             Height of the plot in pixels. Adjust based on number of groups
             to ensure readability. Default: 450 pixels.
 
-    - name: guidedMode
-      title: Guided Analysis Mode
-      type: Bool
-      default: false
-      description:
-          R: >
-            Enable step-by-step guidance for clinical researchers. Provides
-            recommendations for test selection and interpretation.
+    # - name: guidedMode
+    #   title: Guided Analysis Mode
+    #   type: Bool
+    #   default: false
+    #   description:
+    #       R: >
+    #         Enable step-by-step guidance for clinical researchers. Provides
+    #         recommendations for test selection and interpretation.
 
-    - name: clinicalPreset
-      title: Clinical Analysis Presets
-      type: List
-      options:
-        - title: Basic Comparison (recommended for beginners)
-          name: basic
-        - title: Publication Ready (formatted for journals)
-          name: publication
-        - title: Clinical Report (optimized for medical reports)
-          name: clinical
-        - title: Custom Settings (advanced users)
-          name: custom
-      default: basic
-      description:
-          R: >
-            Pre-configured analysis settings optimized for different use cases.
-            Basic: Simple comparison with key statistics; Publication: Journal-ready
-            formatting; Clinical: Medical report optimization; Custom: Full control.
+    # - name: clinicalPreset
+    #   title: Clinical Analysis Presets
+    #   type: List
+    #   options:
+    #     - title: Basic Comparison (recommended for beginners)
+    #       name: basic
+    #     - title: Publication Ready (formatted for journals)
+    #       name: publication
+    #     - title: Clinical Report (optimized for medical reports)
+    #       name: clinical
+    #     - title: Custom Settings (advanced users)
+    #       name: custom
+    #   default: basic
+    #   description:
+    #       R: >
+    #         Pre-configured analysis settings optimized for different use cases.
+    #         Basic: Simple comparison with key statistics; Publication: Journal-ready
+    #         formatting; Clinical: Medical report optimization; Custom: Full control.
 
 ...
