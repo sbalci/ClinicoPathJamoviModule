@@ -4,6 +4,12 @@ title: Pathology Agreement Analysis
 jrs: '1.1'
 
 items:
+    - name: warnings
+      title: Notices and Warnings
+      type: Html
+      visible: true
+      description: Important notices, warnings, and error messages
+
     - name: interpretation
       title: Clinical Interpretation and Analysis Summary
       type: Html

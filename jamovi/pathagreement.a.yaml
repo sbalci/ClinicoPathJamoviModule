@@ -232,7 +232,7 @@ options:
     - name: showClinicalSummary
       title: Clinical Summary
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show clinical summary with plain-language interpretation of agreement statistics and their practical implications.
@@ -270,29 +270,6 @@ options:
             Show glossary of statistical terms (kappa, ICC, alpha, etc.) with clinical interpretations and usage guidelines.
 
     # Diagnostic Style Analysis (Usubutun Method)
-    - name: diagnosticStyleAnalysis
-      title: Diagnostic Style Clustering
-      type: Bool
-      default: false
-      description:
-          R: >
-            Enable diagnostic style clustering analysis using the Usubutun method to identify pathologist "schools" or diagnostic approaches.
-
-    - name: styleClusterMethod
-      title: Style Clustering Method
-      type: List
-      options:
-        - title: Ward's Linkage
-          name: ward
-        - title: Complete Linkage
-          name: complete
-        - title: Average Linkage
-          name: average
-      default: ward
-      description:
-          R: >
-            Hierarchical clustering method for diagnostic style analysis. Ward's linkage is the Usubutun standard.
-
     - name: styleDistanceMetric
       title: Style Distance Metric
       type: List
@@ -307,16 +284,6 @@ options:
       description:
           R: >
             Distance metric for measuring diagnostic similarity between raters for style clustering.
-
-    - name: styleGroups
-      title: Number of Style Groups
-      type: Number
-      min: 2
-      max: 10
-      default: 3
-      description:
-          R: >
-            Number of diagnostic style groups to identify. Usubutun et al. found 3 groups optimal for most analyses.
 
     - name: raterCharacteristics
       title: Include Rater Characteristics
@@ -365,14 +332,6 @@ options:
       description:
           R: >
             Identify cases that distinguish different diagnostic styles - useful for training and consensus development.
-
-    - name: styleHeatmap
-      title: Show Diagnostic Style Heatmap
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display diagnostic style heatmap.
 
     - name: caseID
       title: Case ID Variable

@@ -19,11 +19,66 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             BOOTSTRAP_RECOMMENDED = 2000    # FDA guidance for high-stakes validation
         ),
 
+        # Collect warnings/notices as HTML instead of dynamic Notice objects
+        .warnings = list(),
+
         .escapeVar = function(x) {
             # Safely escape variable names for data.frame access
             # Handles variables with spaces, special characters, etc.
             if (is.null(x) || length(x) == 0) return(NULL)
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        .addWarning = function(type, message) {
+            # Add warning to list instead of using Notice objects
+            # type: "ERROR", "STRONG_WARNING", "WARNING", or "INFO"
+
+            style <- switch(type,
+                "ERROR" = "background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24;",
+                "STRONG_WARNING" = "background-color: #fff3cd; border-left: 4px solid #ff6b6b; color: #856404;",
+                "WARNING" = "background-color: #fff3cd; border-left: 4px solid #ffc107; color: #856404;",
+                "INFO" = "background-color: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460;",
+                "background-color: #f8f9fa; border-left: 4px solid #6c757d; color: #383d41;"
+            )
+
+            icon <- switch(type,
+                "ERROR" = "❌",
+                "STRONG_WARNING" = "⚠️",
+                "WARNING" = "⚠️",
+                "INFO" = "ℹ️",
+                "•"
+            )
+
+            label <- switch(type,
+                "ERROR" = "ERROR",
+                "STRONG_WARNING" = "STRONG WARNING",
+                "WARNING" = "WARNING",
+                "INFO" = "INFO",
+                "NOTICE"
+            )
+
+            html <- sprintf(
+                "<div style='padding: 12px; margin: 8px 0; border-radius: 4px; %s'>
+                <strong>%s %s:</strong> %s
+                </div>",
+                style, icon, label, message
+            )
+
+            private$.warnings[[length(private$.warnings) + 1]] <- list(
+                type = type,
+                message = message,
+                html = html
+            )
+        },
+
+        .renderWarnings = function() {
+            # Render all collected warnings as HTML
+            if (length(private$.warnings) == 0) {
+                return("")
+            }
+
+            html_parts <- sapply(private$.warnings, function(w) w$html)
+            paste(html_parts, collapse = "\n")
         },
         
         .init = function() {
@@ -77,22 +132,18 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         },
         
         .run = function() {
-            # Track notice insertion position
-            notice_position <- 1
+            # Initialize warnings list
+            private$.warnings <- list()
 
             # ====================================================================
-            # CRITICAL ERRORS (Position 1-5)
+            # CRITICAL ERRORS
             # ====================================================================
 
             # ERROR: Missing required variables
             if (is.null(self$options$dep1) || is.null(self$options$dep2)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingVariables',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Method 1 and Method 2 variables are required. Please select both variables to begin analysis.')
-                self$results$insert(notice_position, notice)
+                private$.addWarning("ERROR",
+                    "Method 1 and Method 2 variables are required. Please select both variables to begin analysis.")
+                self$results$warnings$setContent(private$.renderWarnings())
                 return()
             }
 
@@ -100,36 +151,24 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             # ERROR: Empty dataset
             if (nrow(data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'emptyDataset',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Dataset is empty. Please provide data with observations.')
-                self$results$insert(notice_position, notice)
+                private$.addWarning("ERROR",
+                    "Dataset is empty. Please provide data with observations.")
+                self$results$warnings$setContent(private$.renderWarnings())
                 return()
             }
 
             # ERROR: Check package availability EARLY
             if (!requireNamespace('psych', quietly = TRUE)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'psychPackageMissing',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Required R package "psych" not installed. Install via: install.packages("psych")')
-                self$results$insert(notice_position, notice)
+                private$.addWarning("ERROR",
+                    'Required R package "psych" not installed. Install via: install.packages("psych")')
+                self$results$warnings$setContent(private$.renderWarnings())
                 return()
             }
 
             if (!requireNamespace('epiR', quietly = TRUE)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'epiRPackageMissing',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Required R package "epiR" not installed. Install via: install.packages("epiR")')
-                self$results$insert(notice_position, notice)
+                private$.addWarning("ERROR",
+                    'Required R package "epiR" not installed. Install via: install.packages("epiR")')
+                self$results$warnings$setContent(private$.renderWarnings())
                 return()
             }
 
@@ -149,51 +188,32 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             # ERROR: Insufficient data after cleaning
             if (length(method1) < 3) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'insufficientData',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Insufficient complete observations (n=%d). At least 3 paired observations required for agreement analysis.', length(method1)))
-                self$results$insert(notice_position, notice)
+                private$.addWarning("ERROR",
+                    sprintf('Insufficient complete observations (n=%d). At least 3 paired observations required for agreement analysis.', length(method1)))
+                self$results$warnings$setContent(private$.renderWarnings())
                 return()
             }
 
             # ====================================================================
-            # STRONG WARNINGS (Position 6-20)
+            # STRONG WARNINGS
             # ====================================================================
 
-            notice_position <- 6  # Start STRONG_WARNING section
             n <- length(method1)
 
             # STRONG_WARNING: Very small sample (clinical threshold)
             if (n < 10) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'verySmallSample',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Very small sample (n=%d). Results may be unreliable. Minimum n=30 recommended for pathology validation studies.', n))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
+                private$.addWarning("STRONG_WARNING",
+                    sprintf('Very small sample (n=%d). Results may be unreliable. Minimum n=30 recommended for pathology validation studies.', n))
             }
 
             # ====================================================================
-            # WARNINGS (Position 21-100)
+            # WARNINGS
             # ====================================================================
-
-            notice_position <- 21  # Start WARNING section
 
             # WARNING: Sample size below recommended minimum
             if (n >= 10 && n < private$.CLINICAL_CONSTANTS$MIN_SAMPLE_PATHOLOGY) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'sampleSizeWarning',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Sample size (n=%d) below recommended minimum (n=30) for pathology validation studies. Consider increasing sample size for robust estimates.', n))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
+                private$.addWarning("WARNING",
+                    sprintf('Sample size (n=%d) below recommended minimum (n=30) for pathology validation studies. Consider increasing sample size for robust estimates.', n))
             }
 
             # WARNING: Biomarker range validation
@@ -204,28 +224,16 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                                    method2 > private$.CLINICAL_CONSTANTS$BIOMARKER_MAX_RANGE, na.rm = TRUE)
 
                 if (range_check1 || range_check2) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'biomarkerRangeWarning',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent('Some biomarker values outside typical 0-100% range. Please verify data scaling (e.g., ensure percentages not decimals).')
-                    self$results$insert(notice_position, notice)
-                    notice_position <- notice_position + 1
+                    private$.addWarning("WARNING",
+                        'Some biomarker values outside typical 0-100% range. Please verify data scaling (e.g., ensure percentages not decimals).')
                 }
             }
 
             # WARNING: Bootstrap recommendation for high-stakes studies
             if (self$options$bootstrap_n < private$.CLINICAL_CONSTANTS$BOOTSTRAP_RECOMMENDED &&
                 self$options$clinical_preset %in% c("multisite_validation", "ai_pathologist")) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'bootstrapRecommendation',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Bootstrap replicates (n=%d) below FDA-recommended threshold (n=2000) for high-stakes validation studies. Consider increasing for regulatory submissions.', self$options$bootstrap_n))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
+                private$.addWarning("WARNING",
+                    sprintf('Bootstrap replicates (n=%d) below FDA-recommended threshold (n=2000) for high-stakes validation studies. Consider increasing for regulatory submissions.', self$options$bootstrap_n))
             }
 
             # ====================================================================
@@ -267,29 +275,22 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             }
 
             # ====================================================================
-            # INFO NOTICES (Position 999)
+            # INFO NOTICES
             # ====================================================================
 
             # INFO: Missing data summary (if any removed)
             if (n_removed > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingDataInfo',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(sprintf('Listwise deletion removed %d cases (%.1f%%) with missing values. Analysis based on %d complete observations.', n_removed, 100*n_removed/(n+n_removed), n))
-                self$results$insert(999, notice)
+                private$.addWarning("INFO",
+                    sprintf('Listwise deletion removed %d cases (%.1f%%) with missing values. Analysis based on %d complete observations.', n_removed, 100*n_removed/(n+n_removed), n))
             }
 
             # INFO: Analysis completion summary
             n_methods <- if (!is.null(self$options$additional_methods)) length(self$options$additional_methods) + 2 else 2
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice$setContent(sprintf('Agreement analysis completed: %d methods compared, %d complete observations analyzed.', n_methods, n))
-            self$results$insert(999, notice)
+            private$.addWarning("INFO",
+                sprintf('Agreement analysis completed: %d methods compared, %d complete observations analyzed.', n_methods, n))
+
+            # Render all collected warnings to HTML
+            self$results$warnings$setContent(private$.renderWarnings())
         },
         
         
@@ -336,13 +337,8 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
                 # STRONG_WARNING: Negative ICC indicates severe reliability issues
                 if (!is.na(icc_value) && icc_value < 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'negativeICC',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf('Negative ICC (%.3f) indicates severe reliability issues, often due to model assumption errors or greater within-subject than between-subject variance.', icc_value))
-                    self$results$insert(6, notice)  # STRONG_WARNING position
+                    private$.addWarning("STRONG_WARNING",
+                        sprintf('Negative ICC (%.3f) indicates severe reliability issues, often due to model assumption errors or greater within-subject than between-subject variance.', icc_value))
                 }
 
                 icc_interp <- ifelse(icc_value >= private$.CLINICAL_CONSTANTS$ICC_EXCELLENT, "Excellent reliability",
@@ -401,13 +397,8 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             prop_bias_p <- summary(ba_regression)$coefficients[2, 4]
 
             if (prop_bias_p < 0.05) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'proportionalBias',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Proportional bias detected (slope=%.3f, p=%.3f). Disagreement increases at higher values. Consider non-linear transformation or stratified analysis.', prop_bias_slope, prop_bias_p))
-                self$results$insert(21, notice)
+                private$.addWarning("WARNING",
+                    sprintf('Proportional bias detected (slope=%.3f, p=%.3f). Disagreement increases at higher values. Consider non-linear transformation or stratified analysis.', prop_bias_slope, prop_bias_p))
             }
 
             # Bias significance check
@@ -495,13 +486,8 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                      sw1 <- shapiro.test(method1)
                      sw2 <- shapiro.test(method2)
                      if (sw1$p.value < 0.05 || sw2$p.value < 0.05) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'normalityViolation',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent('Normality assumption violated (Shapiro-Wilk p<0.05). Spearman rank correlation recommended over Pearson for non-normal data.')
-                        self$results$insert(21, notice)  # WARNING position
+                        private$.addWarning("WARNING",
+                            'Normality assumption violated (Shapiro-Wilk p<0.05). Spearman rank correlation recommended over Pearson for non-normal data.')
                      }
                 }
 

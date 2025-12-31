@@ -228,7 +228,7 @@ items:
     - name: diagnosticStyleTable
       title: 'Diagnostic Style Clustering Results'
       type: Table
-      visible: (diagnosticStyleAnalysis)
+      visible: (performClustering)
       columns:
         - name: rater
           title: 'Rater'
@@ -260,7 +260,7 @@ items:
     - name: styleSummaryTable
       title: 'Diagnostic Style Group Summary'
       type: Table
-      visible: (diagnosticStyleAnalysis)
+      visible: (performClustering)
       columns:
         - name: style_group
           title: 'Style Group'
@@ -423,7 +423,7 @@ items:
       width: 800
       height: 600
       renderFun: .diagnosticStyleDendrogram
-      visible: (diagnosticStyleAnalysis)
+      visible: (performClustering)
 
     - name: diagnosticStyleHeatmap
       title: 'Diagnostic Style Heatmap'
@@ -431,14 +431,14 @@ items:
       width: 800
       height: 600
       renderFun: .diagnosticStyleHeatmap
-      visible: (diagnosticStyleAnalysis && styleHeatmap)
+      visible: (performClustering && showClusteringHeatmap)
     - name: diagnosticStyleCombined
       title: 'Combined Dendrogram + Heatmap (Usubutun Style)'
       type: Image
       width: 1000
       height: 1000
       renderFun: .diagnosticStyleCombined
-      visible: (diagnosticStyleAnalysis)
+      visible: (performClustering)
 
     - name: raterFrequencyTables
       title: 'Individual Rater Frequencies'

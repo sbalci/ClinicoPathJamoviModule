@@ -248,7 +248,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             #     private$.showInterpretationGuidelines()
             # }
 
-            if (self$options$diagnosticStyleAnalysis) {
+            if (self$options$performClustering) {
                 # Checkpoint before computationally intensive style analysis
                 private$.checkpoint()
                 private$.performDiagnosticStyleAnalysis()
@@ -1161,12 +1161,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             distance_matrix <- private$.calculateRaterDistanceMatrix()
 
             # Perform hierarchical clustering
-            cluster_method <- self$options$styleClusterMethod
+            cluster_method <- self$options$clusteringMethod
             hc <- hclust(distance_matrix, method = cluster_method)
 
             # Cut dendrogram to get specified number of groups
-            # Use styleGroups for diagnosticStyleAnalysis, nStyleGroups for performClustering
-            n_groups <- self$options$styleGroups
+            n_groups <- self$options$nStyleGroups
             style_groups <- cutree(hc, k = n_groups)
 
             # Populate style clustering results table
@@ -1699,9 +1698,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # Diagnostic style dendrogram - Creates hierarchical clustering visualization matching Usubutun et al.
         .diagnosticStyleDendrogram = function(image, ggtheme, theme, ...) {
-             if (!self$options$diagnosticStyleAnalysis || is.null(private$.style_clustering_results)) {
+             if (!self$options$performClustering || is.null(private$.style_clustering_results)) {
                 p <- ggplot() +
-                    geom_text(aes(x = 0.5, y = 0.5, label = "Enable Diagnostic Style Analysis\nto view dendrogram"),
+                    geom_text(aes(x = 0.5, y = 0.5, label = "Enable Rater Clustering Analysis\nto view dendrogram"),
                              size = 6) +
                     xlim(0, 1) + ylim(0, 1) +
                     theme_void()
@@ -1830,7 +1829,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         #
         # Diagnostic style heatmap - Creates case-by-rater heatmap with two-way clustering
         .diagnosticStyleHeatmap = function(image, ggtheme, theme, ...) {
-            if (!self$options$diagnosticStyleAnalysis || !self$options$styleHeatmap || is.null(private$.style_clustering_results)) {
+            if (!self$options$performClustering || !self$options$showClusteringHeatmap || is.null(private$.style_clustering_results)) {
                 p <- ggplot() +
                     geom_text(aes(x = 0.5, y = 0.5, label = "Enable Diagnostic Style Analysis\nto view style heatmap"),
                              size = 6) +
@@ -2015,7 +2014,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # Combined dendrogram and heatmap - Exact reproduction of Usubutun et al. Figure 1
         .diagnosticStyleCombined = function(image, ggtheme, theme, ...) {
-            if (!self$options$diagnosticStyleAnalysis || is.null(private$.style_clustering_results)) {
+            if (!self$options$performClustering || is.null(private$.style_clustering_results)) {
                 p <- ggplot() +
                     geom_text(aes(x = 0.5, y = 0.5, label = "Enable Diagnostic Style Analysis\nto view combined visualization"),
                              size = 8, hjust = 0.5, vjust = 0.5) +
