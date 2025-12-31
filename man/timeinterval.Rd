@@ -92,6 +92,7 @@ systems and time zones.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$messages} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr

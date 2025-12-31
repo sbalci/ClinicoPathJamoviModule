@@ -62,7 +62,7 @@ analysis.}
 
 \item{naHandling}{Choose how missing values are handled. Listwise drops
 rows with missing values in selected variables; pairwise uses available
-data for each pair.@param clinicalpreset Pre-configured settings optimized for common clinicalcorrelation scenarios. Biomarker: Focus on molecular correlations withrobust methods. Lab Values: Emphasize clinical laboratory parameterrelationships. Imaging: Specialized for radiological and pathologicalimaging metrics.}
+data for each pair.}
 
 \item{lowcolor}{Color for low (negative) correlation values.}
 
@@ -89,6 +89,7 @@ is 450.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr

@@ -33,6 +33,7 @@ options:
     type: Variable
     suggested: [continuous]
     permitted: [numeric]
+    default: null
     description:
       R: The time-to-event variable for survival analysis.
       jamovi: Variable containing time to event or censoring.
@@ -43,6 +44,7 @@ options:
     type: Variable
     suggested: [nominal, ordinal]
     permitted: [factor, numeric]
+    default: null
     description:
       R: The event indicator variable (1=event, 0=censored).
       jamovi: Variable indicating whether event occurred (1) or was censored (0).
@@ -53,6 +55,7 @@ options:
     type: Variables
     suggested: [continuous, nominal, ordinal]
     permitted: [numeric, factor]
+    default: null
     description:
       R: Variables to include as covariates in the Cox model.
       jamovi: Select variables to include as predictors in the Cox regression model.

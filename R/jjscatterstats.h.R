@@ -462,7 +462,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                visible="(grvar)"))
+                visible="(!is.null(grvar))"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -504,7 +504,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 height=450,
                 renderFun=".plotGGPubr2",
                 requiresData=TRUE,
-                visible="(addGGPubrPlot && grvar)",
+                visible="(addGGPubrPlot && !is.null(grvar))",
                 clearWith=list(
                     "dep",
                     "group",

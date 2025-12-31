@@ -14,7 +14,7 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             zscore_threshold = 3.29,
             iqr_multiplier = 1.7,
             confidence_level = 0.999,
-            show_outlier_table = FALSE,
+            show_outlier_table = TRUE,
             show_method_comparison = FALSE,
             show_exclusion_summary = FALSE,
             show_visualization = FALSE,
@@ -89,7 +89,7 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..show_outlier_table <- jmvcore::OptionBool$new(
                 "show_outlier_table",
                 show_outlier_table,
-                default=FALSE)
+                default=TRUE)
             private$..show_method_comparison <- jmvcore::OptionBool$new(
                 "show_method_comparison",
                 show_method_comparison,
@@ -270,7 +270,7 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "outlierdetection",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = outlierdetectionResults$new(options=options),
                 data = data,
@@ -285,8 +285,8 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
 #' Outlier Detection
 #'
-#' Advanced outlier detection using multiple statistical methods from the 
-#' easystats performance package.
+#' Outlier detection using multiple statistical methods from the easystats 
+#' performance package.
 #' This module provides comprehensive outlier detection through univariate 
 #' methods (Z-scores, IQR, confidence intervals),
 #' multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), and 
@@ -367,7 +367,7 @@ outlierdetection <- function(
     zscore_threshold = 3.29,
     iqr_multiplier = 1.7,
     confidence_level = 0.999,
-    show_outlier_table = FALSE,
+    show_outlier_table = TRUE,
     show_method_comparison = FALSE,
     show_exclusion_summary = FALSE,
     show_visualization = FALSE,

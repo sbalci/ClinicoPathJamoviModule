@@ -8,6 +8,7 @@ eurostatmap(
   data,
   dataset_id = "demo_r_gind3",
   indicator,
+  geo_var = NULL,
   geo_level = "nuts2",
   year = 2022,
   map_type = "static",
@@ -26,6 +27,9 @@ eurostatmap(
 \item{dataset_id}{The Eurostat dataset identifier to retrieve data from.}
 
 \item{indicator}{The variable containing the indicator values to map.}
+
+\item{geo_var}{The variable containing NUTS geographic codes (for local
+data).}
 
 \item{geo_level}{The geographic level for mapping.}
 
@@ -53,6 +57,7 @@ spreadsheet.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$info} \tab \tab \tab \tab \tab a table \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr

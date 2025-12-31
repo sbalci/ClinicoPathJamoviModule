@@ -41,6 +41,18 @@ options:
           jamovi: >
             The variable containing the indicator values to map.
 
+    - name: geo_var
+      title: Geography Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric, id]
+      default: null
+      description:
+          R: >
+            The variable containing NUTS geographic codes (for local data).
+          jamovi: >
+            The variable containing NUTS geographic codes (for local data).
+
     - name: geo_level
       title: Geographic Level
       type: List

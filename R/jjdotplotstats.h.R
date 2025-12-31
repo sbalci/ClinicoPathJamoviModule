@@ -26,9 +26,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             centralityparameter = "mean",
             centralityk = 2,
             plotwidth = 650,
-            plotheight = 450,
-            guidedMode = FALSE,
-            clinicalPreset = "basic", ...) {
+            plotheight = 450, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -160,19 +158,6 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 default=450,
                 min=300,
                 max=800)
-            private$..guidedMode <- jmvcore::OptionBool$new(
-                "guidedMode",
-                guidedMode,
-                default=FALSE)
-            private$..clinicalPreset <- jmvcore::OptionList$new(
-                "clinicalPreset",
-                clinicalPreset,
-                options=list(
-                    "basic",
-                    "publication",
-                    "clinical",
-                    "custom"),
-                default="basic")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -195,8 +180,6 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..centralityk)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
-            self$.addOption(private$..guidedMode)
-            self$.addOption(private$..clinicalPreset)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -219,9 +202,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         centralityparameter = function() private$..centralityparameter$value,
         centralityk = function() private$..centralityk$value,
         plotwidth = function() private$..plotwidth$value,
-        plotheight = function() private$..plotheight$value,
-        guidedMode = function() private$..guidedMode$value,
-        clinicalPreset = function() private$..clinicalPreset$value),
+        plotheight = function() private$..plotheight$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -243,9 +224,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..centralityparameter = NA,
         ..centralityk = NA,
         ..plotwidth = NA,
-        ..plotheight = NA,
-        ..guidedMode = NA,
-        ..clinicalPreset = NA)
+        ..plotheight = NA)
 )
 
 jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -253,6 +232,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]],
         interpretation = function() private$.items[["interpretation"]],
@@ -294,13 +274,15 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "centralityparameter",
                     "centralityk",
                     "plotwidth",
-                    "plotheight",
-                    "guidedMode",
-                    "clinicalPreset"))
+                    "plotheight"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -322,27 +304,27 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation",
-                visible="(guidedMode)"))
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
                 title="Data Assessment & Recommendations",
-                visible="(guidedMode)"))
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentence",
                 title="Report Template",
-                visible="(guidedMode)"))
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="guidedSteps",
                 title="Analysis Steps",
-                visible="(guidedMode)"))
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="recommendations",
                 title="Next Steps",
-                visible="(guidedMode)"))}))
+                visible=FALSE))}))
 
 jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjdotplotstatsBase",
@@ -481,15 +463,10 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   detail but may not fit well in reports. Default: 650 pixels.
 #' @param plotheight Height of the plot in pixels. Adjust based on number of
 #'   groups to ensure readability. Default: 450 pixels.
-#' @param guidedMode Enable step-by-step guidance for clinical researchers.
-#'   Provides recommendations for test selection and interpretation.
-#' @param clinicalPreset Pre-configured analysis settings optimized for
-#'   different use cases. Basic: Simple comparison with key statistics;
-#'   Publication: Journal-ready formatting; Clinical: Medical report
-#'   optimization; Custom: Full control.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
@@ -522,9 +499,7 @@ jjdotplotstats <- function(
     centralityparameter = "mean",
     centralityk = 2,
     plotwidth = 650,
-    plotheight = 450,
-    guidedMode = FALSE,
-    clinicalPreset = "basic") {
+    plotheight = 450) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjdotplotstats requires jmvcore to be installed (restart may be required)")
@@ -563,9 +538,7 @@ jjdotplotstats <- function(
         centralityparameter = centralityparameter,
         centralityk = centralityk,
         plotwidth = plotwidth,
-        plotheight = plotheight,
-        guidedMode = guidedMode,
-        clinicalPreset = clinicalPreset)
+        plotheight = plotheight)
 
     analysis <- jjdotplotstatsClass$new(
         options = options,

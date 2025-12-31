@@ -80,6 +80,22 @@ basegraphics(
 \item{y_min}{Minimum value for y-axis (when custom limits enabled).}
 
 \item{y_max}{Maximum value for y-axis (when custom limits enabled).}
+
+\item{line_type}{Line type for line plots (lty parameter).}
+
+\item{line_width}{Width of lines in line plots (lwd parameter).}
+
+\item{bar_width}{Width of bars in bar plots.}
+
+\item{grid_style}{Style of grid lines.}
+
+\item{show_regression_line}{Whether to add a regression line to scatter
+plots.}
+
+\item{regression_line_color}{Color of the regression line.}
+
+\item{show_confidence_interval}{Whether to display confidence interval for
+regression line.}
 }
 \value{
 A results object containing:

@@ -7,7 +7,7 @@ items:
     - name: welcome
       title: ""
       type: Html
-      visible: (biopsy1 == null)
+      visible: (!biopsy1)
       description: Welcome screen shown when no variables selected
 
     - name: interpretation
@@ -158,7 +158,7 @@ items:
     - name: compartmentComparison
       title: Compartment Heterogeneity Comparison
       type: Table
-      visible: (compareCompartments && !is.null(spatial_id))
+      visible: (compareCompartments && spatial_id)
       description: Statistical comparison of heterogeneity metrics between compartments
       columns:
         - name: metric
@@ -186,7 +186,7 @@ items:
     - name: compartmentTests
       title: Statistical Tests for Compartment Differences
       type: Table
-      visible: (compartmentTests && !is.null(spatial_id))
+      visible: (compartmentTests && spatial_id)
       description: Formal statistical tests comparing heterogeneity across compartments
       columns:
         - name: test_type

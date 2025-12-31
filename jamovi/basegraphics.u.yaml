@@ -139,5 +139,42 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: ComboBox
+        name: line_type
+  - type: LayoutBox
+    margin: large
+    children:
       - type: CheckBox
         name: show_summary
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: line_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bar_width
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: grid_style
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_regression_line
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: regression_line_color
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_confidence_interval

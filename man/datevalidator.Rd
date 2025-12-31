@@ -23,17 +23,19 @@ datevalidator(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{date_vars}{Variables containing date or datetime information in various formats
-that need validation and quality assessment. Can handle character strings,
-numeric values, factors with date/datetime representations.}
+\item{date_vars}{Variables containing date or datetime information in
+various formats that need validation and quality assessment. Can handle
+character strings, numeric values, factors with date/datetime
+representations.}
 
-\item{correction_method}{Method for date/datetime validation. datefixR provides
-robust format detection, anytime offers flexible parsing, lubridate allows
-format specification, and consensus combines methods for maximum
-reliability.}
+\item{correction_method}{Method for date/datetime validation. datefixR
+provides robust format detection, anytime offers flexible parsing,
+lubridate allows format specification, and consensus combines methods for
+maximum reliability.}
 
-\item{date_format}{Expected date or datetime format for ambiguous cases. Auto-detect
-tries to determine the most likely format based on the data patterns. HMS formats include time components (hours, minutes, seconds).}
+\item{date_format}{Expected date or datetime format for ambiguous cases.
+Auto-detect tries to determine the most likely format based on the data
+patterns. HMS formats include time components (hours, minutes, seconds).}
 
 \item{day_impute}{Day of month to impute when day is missing (1-31).
 Default is 1st of month. If value exceeds days in month, last day of month
@@ -45,9 +47,9 @@ is 7 (July). Commonly used middle-year value for clinical research.}
 \item{handle_excel}{Whether to convert Excel numeric date values (days
 since 1900-01-01). Useful for data exported from Excel spreadsheets.}
 
-\item{timezone}{Timezone for output dates/datetimes. Use UTC for standardization, or
-local timezone if time-of-day information is critical. Only applies to
-anytime and consensus methods.}
+\item{timezone}{Timezone for output dates/datetimes. Use UTC for
+standardization, or local timezone if time-of-day information is critical.
+Only applies to anytime and consensus methods.}
 
 \item{show_correction_table}{Display detailed table showing original
 values, validated values, and validation status for each observation.}
@@ -55,14 +57,15 @@ values, validated values, and validation status for each observation.}
 \item{show_quality_assessment}{Provide quality assessment including success
 rates, common problems, and recommendations for further validation.}
 
-\item{show_format_analysis}{Analyze detected date/datetime formats and patterns in
-the original data.}
+\item{show_format_analysis}{Analyze detected date/datetime formats and
+patterns in the original data.}
 
 \item{show_correction_summary}{Summary statistics of the validation process
 including before/after comparison and data quality metrics.}
 
-\item{show_interpretation}{Display guidance on date/datetime validation methods,
-best practices, and recommendations for clinical research data. Includes information about the DateTime Converter module.}
+\item{show_interpretation}{Display guidance on date/datetime validation
+methods, best practices, and recommendations for clinical research data.
+Includes information about the DateTime Converter module.}
 }
 \value{
 A results object containing:
@@ -83,15 +86,18 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$corrected_data)}
 }
 \description{
-Comprehensive date and datetime field validation and quality assessment using multiple R
-packages (datefixR, anytime, lubridate).
-This module validates and diagnoses messy date/datetime formats commonly found in clinical
-databases: different separators,
-month representations, missing components, and ambiguous formats. Provides detailed validation reports and quality assessment.
-Perfect for clinical research data quality control and database audit workflows.
+Comprehensive date and datetime field validation and quality assessment
+using multiple R packages (datefixR, anytime, lubridate).
+This module validates and diagnoses messy date/datetime formats commonly
+found in clinical databases: different separators,
+month representations, missing components, and ambiguous formats. Provides
+detailed validation reports and quality assessment.
+Perfect for clinical research data quality control and database audit
+workflows.
 }
 \details{
-For datetime conversion with component extraction (year, month, day, hour, minute, second), see the DateTime Converter module.
+For datetime conversion with component extraction (year, month, day, hour,
+minute, second), see the DateTime Converter module.
 }
 \examples{
 \donttest{

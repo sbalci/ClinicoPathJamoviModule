@@ -40,7 +40,8 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..event <- jmvcore::OptionVariable$new(
                 "event",
                 event,
@@ -49,7 +50,8 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ordinal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..covariates <- jmvcore::OptionVariables$new(
                 "covariates",
                 covariates,
@@ -59,7 +61,8 @@ coxdiagnosticsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ordinal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..strata_var <- jmvcore::OptionVariable$new(
                 "strata_var",
                 strata_var,
@@ -255,7 +258,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="model_summary",
                 title="Cox Model Summary",
-                visible="(time && event && covariates && show_model_summary)",
+                visible="(show_model_summary)",
                 clearWith=list(
                     "time",
                     "event",
@@ -266,7 +269,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="ph_test_results",
                 title="Proportional Hazards Test",
-                visible="(time && event && covariates && show_ph_test)",
+                visible="(show_ph_test)",
                 clearWith=list(
                     "time",
                     "event",
@@ -277,7 +280,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="vif_results",
                 title="Multicollinearity Analysis (VIF)",
-                visible="(time && event && covariates && show_vif)",
+                visible="(show_vif)",
                 clearWith=list(
                     "time",
                     "event",
@@ -291,7 +294,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=700,
                 height=500,
                 renderFun=".plot_martingale",
-                visible="(time && event && covariates && show_martingale)",
+                visible="(show_martingale)",
                 clearWith=list(
                     "time",
                     "event",
@@ -309,7 +312,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=700,
                 height=500,
                 renderFun=".plot_deviance",
-                visible="(time && event && covariates && show_deviance)",
+                visible="(show_deviance)",
                 clearWith=list(
                     "time",
                     "event",
@@ -327,7 +330,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=700,
                 height=500,
                 renderFun=".plot_score",
-                visible="(time && event && covariates && show_score)",
+                visible="(show_score)",
                 clearWith=list(
                     "time",
                     "event",
@@ -345,7 +348,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=700,
                 height=500,
                 renderFun=".plot_schoenfeld",
-                visible="(time && event && covariates && show_schoenfeld)",
+                visible="(show_schoenfeld)",
                 clearWith=list(
                     "time",
                     "event",
@@ -363,7 +366,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=700,
                 height=500,
                 renderFun=".plot_dfbeta",
-                visible="(time && event && covariates && show_dfbeta)",
+                visible="(show_dfbeta)",
                 clearWith=list(
                     "time",
                     "event",
@@ -378,7 +381,7 @@ coxdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="interpretation",
                 title="Diagnostic Interpretation Guide",
-                visible="(time && event && covariates && show_interpretation)",
+                visible="(show_interpretation)",
                 clearWith=list(
                     "show_interpretation")))}))
 
@@ -462,9 +465,9 @@ coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @export
 coxdiagnostics <- function(
     data,
-    time,
-    event,
-    covariates,
+    time = NULL,
+    event = NULL,
+    covariates = NULL,
     strata_var = NULL,
     show_martingale = TRUE,
     show_deviance = TRUE,

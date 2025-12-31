@@ -4,6 +4,21 @@ title: "Swimmer Plot"
 jrs: '1.1'
 
 items:
+    - name: errorNotice
+      title: ""
+      type: Html
+      visible: false
+
+    - name: warningNotice
+      title: ""
+      type: Html
+      visible: false
+
+    - name: infoNotice
+      title: ""
+      type: Html
+      visible: false
+
     - name: instructions
       title: "Instructions"
       type: Html

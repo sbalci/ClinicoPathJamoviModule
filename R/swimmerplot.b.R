@@ -1337,93 +1337,32 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
 
         # Add clinical profile notices based on data characteristics
+        # DISABLED: Dynamic Notice insertion causes serialization errors
+        # HTML-based notices are used instead via errorNotice/warningNotice/infoNotice
         .addClinicalProfileNotices = function(patient_data, stats) {
-            notice_position <- 2  # Start after any ERROR notices
+            # This function is disabled to prevent serialization errors
+            # All notices are now handled via HTML containers defined in r.yaml
+            # See errorNotice, warningNotice, infoNotice in swimmerplot.r.yaml
 
-            # STRONG_WARNING: Small sample size (<10 patients)
-            if (!is.null(stats$n_patients) && stats$n_patients < 10) {
-                warn <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSampleSize',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                warn$setContent(sprintf(
-                    'Very small sample size (n=%d patients). Results may have limited statistical power and generalizability. Consider interpreting findings as exploratory.',
-                    stats$n_patients
-                ))
-                self$results$insert(notice_position, warn)
-                notice_position <- notice_position + 1
-            }
-
-            # WARNING: Possible reversed censoring variable
-            if (!is.null(self$options$censorVar) && "censor_status" %in% names(patient_data)) {
-                # Check proportion of events (value = 1)
-                censor_values <- patient_data$censor_status[!is.na(patient_data$censor_status)]
-
-                if (length(censor_values) > 0) {
-                    # Convert to numeric if factor
-                    if (is.factor(censor_values)) {
-                        censor_values <- as.numeric(as.character(censor_values))
-                    }
-
-                    # Calculate proportion coded as 1
-                    prop_events <- mean(censor_values == 1, na.rm = TRUE)
-
-                    # Warn if >80% are coded as events (unusual in most clinical datasets)
-                    if (prop_events > 0.8) {
-                        warn <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'possibleCensoringReversed',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        warn$setContent(sprintf(
-                            'Censoring variable has %.0f%% coded as events (value=1). If these represent ongoing patients, values may be reversed. Convention: 0 = censored/ongoing, 1 = event/completed.',
-                            prop_events * 100
-                        ))
-                        self$results$insert(notice_position, warn)
-                        notice_position <- notice_position + 1
-                    }
-                }
-            }
-
-            # INFO: Missing censoring data (use simple median instead of reverse KM)
-            if (is.null(self$options$censorVar) && self$options$personTimeAnalysis) {
-                info <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noCensoringData',
-                    type = jmvcore::NoticeType$INFO
-                )
-                info$setContent('No censoring variable provided. Median follow-up calculated using simple median instead of reverse Kaplan-Meier method. For accurate median follow-up with censored data, add Censoring/Event Status variable in Core Data Variables.')
-                self$results$insert(999, info)  # Bottom position for INFO
-            }
-
-            # INFO: Analysis completion summary
-            if (!is.null(stats$n_patients) && !is.null(stats$median_duration)) {
-                success <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-
-                msg_parts <- sprintf(
-                    'Swimmer plot analysis completed: %d patients, median follow-up %.1f %s (range %.1f-%.1f)',
-                    stats$n_patients,
-                    stats$median_duration,
-                    self$options$timeUnit,
-                    stats$min_duration,
-                    stats$max_duration
-                )
-
-                # Add response summary if available
-                if (self$options$responseAnalysis && !is.null(stats$orr)) {
-                    msg_parts <- paste0(msg_parts, sprintf(' • ORR %.1f%% • DCR %.1f%%',
-                                                           stats$orr * 100,
-                                                           stats$dcr * 100))
-                }
-
-                success$setContent(msg_parts)
-                self$results$insert(999, success)  # Bottom position for INFO
-            }
+            # # Original code commented out to prevent serialization errors:
+            # notice_position <- 2  # Start after any ERROR notices
+            #
+            # # STRONG_WARNING: Small sample size (<10 patients)
+            # if (!is.null(stats$n_patients) && stats$n_patients < 10) {
+            #     warn <- jmvcore::Notice$new(
+            #         options = self$options,
+            #         name = 'smallSampleSize',
+            #         type = jmvcore::NoticeType$STRONG_WARNING
+            #     )
+            #     warn$setContent(sprintf(
+            #         'Very small sample size (n=%d patients). Results may have limited statistical power and generalizability. Consider interpreting findings as exploratory.',
+            #         stats$n_patients
+            #     ))
+            #     self$results$insert(notice_position, warn)
+            #     notice_position <- notice_position + 1
+            # }
+            #
+            # # ... rest of notice code commented out
         },
 
         # Apply clinical preset configurations with context
@@ -1489,13 +1428,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 is.null(self$options$endTime)) {
 
                 # ERROR Notice (single line, position 1)
-                err <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingRequiredVariables',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
-                self$results$insert(999, err)
+                # DISABLED: Dynamic Notice insertion causes serialization errors
+                # err <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'missingRequiredVariables',
+                #     type = jmvcore::NoticeType$ERROR
+                # )
+                # err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
+                # self$results$insert(999, err)
 
                 # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()
@@ -1514,20 +1454,21 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 is.null(self$options$endTime)) {
 
                 # ERROR Notice (single line, position 1)
-                err <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingRequiredVariables',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
-                self$results$insert(999, err)
+                # DISABLED: Dynamic Notice insertion causes serialization errors
+                # err <- jmvcore::Notice$new(
+                #     options = self$options,
+                #     name = 'missingRequiredVariables',
+                #     type = jmvcore::NoticeType$ERROR
+                # )
+                # err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
+                # self$results$insert(999, err)
 
                 # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()
                 self$results$instructions$setContent(instructions)
                 return()
             }
-            
+
             # Validate and process data with comprehensive error handling
             debug_mode <- isTRUE(getOption("swimmerplot.debug"))
 
@@ -1536,24 +1477,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 # Check for data type mismatch (Date/Time selected but numeric data)
                 if (isTRUE(validation_result$data_type_mismatch)) {
-                    # ERROR Notice (single line)
-                    err <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'dataTypeMismatch',
-                        type = jmvcore::NoticeType$ERROR
-                    )
+                    # REPLACED Notice with HTML to prevent serialization errors
                     example_vals <- if (!is.null(validation_result$examples)) {
                         paste(validation_result$examples[1:min(2, length(validation_result$examples))], collapse=', ')
                     } else {
                         "numeric values"
                     }
-                    err$setContent(sprintf(
-                        'Data type mismatch detected: Time Input Type is set to Date/Time but data contains numeric values (%s). Change to Raw Values in Time & Date Settings section.',
-                        example_vals
-                    ))
-                    self$results$insert(999, err)
 
-                    # Keep detailed HTML guidance
+                    # Detailed HTML guidance
                     mismatch_guidance <- paste0(
                         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
 
@@ -2257,16 +2188,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             min_cell <- min(c(min_cell_orr, min_cell_dcr), na.rm = TRUE)
 
             if (!is.na(min_cell) && min_cell < 5) {
-                warn <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'lowCellCountFisher',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                warn$setContent(sprintf(
-                    'Fisher exact test has cells with counts < 5 (minimum cell count = %d). Test remains valid but interpret p-values cautiously with small cell counts. Consider grouping categories or collecting more data.',
+                # REPLACED Notice with HTML to prevent serialization errors
+                warning_html <- sprintf(
+                    "<div style='background:#fff3cd;border-left:4px solid #ffc107;padding:12px;margin:10px 0;font-family:Arial,sans-serif;'>
+                    <strong style='color:#856404;'>Warning:</strong> Fisher exact test has cells with counts &lt; 5 (minimum cell count = %d).
+                    Test remains valid but interpret p-values cautiously with small cell counts.
+                    Consider grouping categories or collecting more data.
+                    </div>",
                     min_cell
-                ))
-                self$results$insert(2, warn)  # Insert after ERROR notices
+                )
+                self$results$warningNotice$setContent(warning_html)
+                self$results$warningNotice$setVisible(TRUE)
             }
         },
 

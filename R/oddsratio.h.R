@@ -11,7 +11,6 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             outcomeLevel = NULL,
             diagnosticPredictor = NULL,
             showNomogram = FALSE,
-            showSummaries = FALSE,
             showExplanations = FALSE, ...) {
 
             super$initialize(
@@ -53,10 +52,6 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showNomogram",
                 showNomogram,
                 default=FALSE)
-            private$..showSummaries <- jmvcore::OptionBool$new(
-                "showSummaries",
-                showSummaries,
-                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -67,7 +62,6 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..diagnosticPredictor)
             self$.addOption(private$..showNomogram)
-            self$.addOption(private$..showSummaries)
             self$.addOption(private$..showExplanations)
         }),
     active = list(
@@ -76,7 +70,6 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         outcomeLevel = function() private$..outcomeLevel$value,
         diagnosticPredictor = function() private$..diagnosticPredictor$value,
         showNomogram = function() private$..showNomogram$value,
-        showSummaries = function() private$..showSummaries$value,
         showExplanations = function() private$..showExplanations$value),
     private = list(
         ..explanatory = NA,
@@ -84,7 +77,6 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..outcomeLevel = NA,
         ..diagnosticPredictor = NA,
         ..showNomogram = NA,
-        ..showSummaries = NA,
         ..showExplanations = NA)
 )
 
@@ -95,14 +87,13 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
-        oddsRatioSummary = function() private$.items[["oddsRatioSummary"]],
         plot = function() private$.items[["plot"]],
         oddsRatioExplanation = function() private$.items[["oddsRatioExplanation"]],
         riskMeasuresExplanation = function() private$.items[["riskMeasuresExplanation"]],
         diagnosticTestExplanation = function() private$.items[["diagnosticTestExplanation"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
+        diagnosticMetrics = function() private$.items[["diagnosticMetrics"]],
         nomogram = function() private$.items[["nomogram"]],
-        nomogramSummary = function() private$.items[["nomogramSummary"]],
         nomogramAnalysisExplanation = function() private$.items[["nomogramAnalysisExplanation"]]),
     private = list(),
     public=list(
@@ -136,14 +127,6 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="text2",
                 title="Model Performance Metrics"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="oddsRatioSummary",
-                title="",
-                visible="(showSummaries)",
-                clearWith=list(
-                    "explanatory",
-                    "outcome")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -190,17 +173,18 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showNomogram)"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="diagnosticMetrics",
+                title="Diagnostic Test Performance",
+                visible="(showNomogram)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "diagnosticPredictor")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="nomogram",
                 title="Nomogram Details",
                 visible="(showNomogram)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="nomogramSummary",
-                title="",
-                visible="(showNomogram && showSummaries)",
-                clearWith=list(
-                    "explanatory",
-                    "outcome")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogramAnalysisExplanation",
@@ -219,7 +203,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "oddsratio",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = oddsratioResults$new(options=options),
                 data = data,
@@ -279,11 +263,8 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param diagnosticPredictor Specify the predictor to drive likelihood
 #'   ratios; must be binary. Defaults to the first explanatory variable.
 #' @param showNomogram Display an interactive nomogram for converting pre-test
-#'   to post-test  probabilities using likelihood ratios calculated from the
+#'   to post-test probabilities using likelihood ratios calculated from the
 #'   data.
-#' @param showSummaries Display natural language interpretations of the
-#'   results to help understand the clinical significance of odds ratios,
-#'   confidence intervals, and diagnostic metrics.
 #' @param showExplanations Display educational explanations for each analysis
 #'   type to help interpret  odds ratios, risk ratios, diagnostic test
 #'   performance, ROC analysis,  and likelihood ratios.
@@ -292,14 +273,13 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$oddsRatioSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$oddsRatioExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticMetrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -311,7 +291,6 @@ oddsratio <- function(
     outcomeLevel,
     diagnosticPredictor = NULL,
     showNomogram = FALSE,
-    showSummaries = FALSE,
     showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -336,7 +315,6 @@ oddsratio <- function(
         outcomeLevel = outcomeLevel,
         diagnosticPredictor = diagnosticPredictor,
         showNomogram = showNomogram,
-        showSummaries = showSummaries,
         showExplanations = showExplanations)
 
     analysis <- oddsratioClass$new(

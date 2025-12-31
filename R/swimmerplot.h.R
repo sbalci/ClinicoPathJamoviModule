@@ -964,7 +964,7 @@ swimmerplot <- function(
     patientID,
     startTime,
     endTime,
-    responseVar,
+    responseVar = NULL,
     censorVar = NULL,
     groupVar = NULL,
     timeType = "raw",

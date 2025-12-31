@@ -23,27 +23,38 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get data based on user choice
             if (self$options$use_local_data) {
                 if (is.null(self$options$indicator) || nrow(self$data) == 0) {
-                    self$results$.setStatus("Please import your Eurostat data and select an indicator variable")
+                    self$results$instructions$setContent("Please import your Eurostat data and select an indicator variable")
                     return()
                 }
                 
-                # Check if geo column exists
-                if (!"geo" %in% names(self$data)) {
-                    self$results$.setError("Your data must contain a 'geo' column with NUTS geographic codes (e.g., 'DE', 'FR', 'ES'). Please check your data format.")
-                    return()
+                # Check geography variable
+                geo_col <- self$options$geo_var
+                
+                if (is.null(geo_col)) {
+                    stop("Please select a Geography Variable containing NUTS codes (e.g., 'DE', 'FR').")
                 }
                 
                 plotData <- self$data
+                
+                # Ensure geo column is present (paranoia check)
+                if (!geo_col %in% names(plotData)) {
+                    stop(paste0("Geography variable '", geo_col, "' not found in data."))
+                }
+                
+                # Standardize to 'geo' for downstream processing
+                if (geo_col != "geo") {
+                    plotData$geo <- plotData[[geo_col]]
+                }
                 indicator_var <- self$options$indicator
                 
                 # Provide feedback about local data
-                self$results$.setStatus(paste("Using local data with", nrow(plotData), "observations"))
+                self$results$instructions$setContent(paste("Using local data with", nrow(plotData), "observations"))
                 
             } else {
                 # Download from Eurostat
                 dataset_id <- self$options$dataset_id
                 if (is.null(dataset_id) || dataset_id == "") {
-                    self$results$.setStatus("Please enter a Eurostat dataset ID (e.g., 'demo_r_gind3' for population density)")
+                    self$results$instructions$setContent("Please enter a Eurostat dataset ID (e.g., 'demo_r_gind3' for population density)")
                     return()
                 }
                 
@@ -66,7 +77,7 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     if (is.null(cached_data)) {
                         # Download data with progress indication
-                        self$results$.setStatus("Downloading data from Eurostat...")
+                        self$results$instructions$setContent("Downloading data from Eurostat...")
                         
                         # Set timeout for download (default is 60 seconds)
                         options(timeout = 120)
@@ -117,7 +128,7 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         error_msg <- paste(error_msg, "\n\nSuggestion: Check your internet connection.")
                     }
                     
-                    self$results$.setError(error_msg)
+                    stop(error_msg)
                     return()
                 })
             }
@@ -276,7 +287,7 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(TRUE)
                 
             }, error = function(e) {
-                self$results$.setError(paste("Error creating map:", e$message))
+                stop(paste("Error creating map:", e$message))
                 return(FALSE)
             })
         }

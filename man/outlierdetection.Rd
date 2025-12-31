@@ -14,7 +14,7 @@ outlierdetection(
   zscore_threshold = 3.29,
   iqr_multiplier = 1.7,
   confidence_level = 0.999,
-  show_outlier_table = FALSE,
+  show_outlier_table = TRUE,
   show_method_comparison = FALSE,
   show_exclusion_summary = FALSE,
   show_visualization = FALSE,
@@ -90,8 +90,8 @@ A results object containing:
 }
 }
 \description{
-Advanced outlier detection using multiple statistical methods from the
-easystats performance package.
+Outlier detection using multiple statistical methods from the easystats
+performance package.
 This module provides comprehensive outlier detection through univariate
 methods (Z-scores, IQR, confidence intervals),
 multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), and

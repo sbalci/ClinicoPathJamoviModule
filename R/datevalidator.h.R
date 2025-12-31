@@ -166,32 +166,32 @@ datevalidatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 rows=0,
                 columns=list(
                     list(
-                        `name`="row_num",
-                        `title`="Row",
+                        `name`="row_num", 
+                        `title`="Row", 
                         `type`="integer"),
                     list(
-                        `name`="variable",
-                        `title`="Variable",
+                        `name`="variable", 
+                        `title`="Variable", 
                         `type`="text"),
                     list(
-                        `name`="original",
-                        `title`="Original Value",
+                        `name`="original", 
+                        `title`="Original Value", 
                         `type`="text"),
                     list(
-                        `name`="corrected",
-                        `title`="Validated Date/DateTime",
+                        `name`="corrected", 
+                        `title`="Validated Date/DateTime", 
                         `type`="text"),
                     list(
-                        `name`="status",
-                        `title`="Status",
+                        `name`="status", 
+                        `title`="Status", 
                         `type`="text"),
                     list(
-                        `name`="method",
-                        `title`="Method",
+                        `name`="method", 
+                        `title`="Method", 
                         `type`="text"),
                     list(
-                        `name`="errors",
-                        `title`="Errors/Warnings",
+                        `name`="errors", 
+                        `title`="Errors/Warnings", 
                         `type`="text")),
                 clearWith=list(
                     "date_vars",
@@ -263,7 +263,7 @@ datevalidatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "datevalidator",
-                version = c(0,0,3),
+                version = c(0,0,32),
                 options = options,
                 results = datevalidatorResults$new(options=options),
                 data = data,
@@ -278,15 +278,18 @@ datevalidatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Date/DateTime Validator
 #'
-#' Comprehensive date and datetime field validation and quality assessment using multiple R
-#' packages (datefixR, anytime, lubridate).
-#' This module validates and diagnoses messy date/datetime formats commonly found in clinical
-#' databases: different separators,
-#' month representations, missing components, and ambiguous formats. Provides detailed validation reports and quality assessment.
-#' Perfect for clinical research data quality control and database audit workflows.
-#'
-#' For datetime conversion with component extraction (year, month, day, hour, minute, second), see the DateTime Converter module.
-#'
+#' Comprehensive date and datetime field validation and quality assessment 
+#' using multiple R packages (datefixR, anytime, lubridate).
+#' This module validates and diagnoses messy date/datetime formats commonly 
+#' found in clinical databases: different separators,
+#' month representations, missing components, and ambiguous formats. Provides 
+#' detailed validation reports and quality assessment.
+#' Perfect for clinical research data quality control and database audit 
+#' workflows.
+#' 
+#' For datetime conversion with component extraction (year, month, day, hour, 
+#' minute, second), see the DateTime Converter module.
+#' 
 #'
 #' @examples
 #' \donttest{
@@ -297,15 +300,17 @@ datevalidatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # 4. Review validation results and quality assessment.
 #'}
 #' @param data The data as a data frame.
-#' @param date_vars Variables containing date or datetime information in various formats
-#'   that need validation and quality assessment. Can handle character strings,
-#'   numeric values, factors with date/datetime representations.
-#' @param correction_method Method for date/datetime validation. datefixR provides
-#'   robust format detection, anytime offers flexible parsing, lubridate allows
-#'   format specification, and consensus combines methods for maximum
-#'   reliability.
-#' @param date_format Expected date or datetime format for ambiguous cases. Auto-detect
-#'   tries to determine the most likely format based on the data patterns. HMS formats include time components (hours, minutes, seconds).
+#' @param date_vars Variables containing date or datetime information in
+#'   various formats that need validation and quality assessment. Can handle
+#'   character strings, numeric values, factors with date/datetime
+#'   representations.
+#' @param correction_method Method for date/datetime validation. datefixR
+#'   provides robust format detection, anytime offers flexible parsing,
+#'   lubridate allows format specification, and consensus combines methods for
+#'   maximum reliability.
+#' @param date_format Expected date or datetime format for ambiguous cases.
+#'   Auto-detect tries to determine the most likely format based on the data
+#'   patterns. HMS formats include time components (hours, minutes, seconds).
 #' @param day_impute Day of month to impute when day is missing (1-31).
 #'   Default is 1st of month. If value exceeds days in month, last day of month
 #'   will be used.
@@ -313,19 +318,20 @@ datevalidatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   is 7 (July). Commonly used middle-year value for clinical research.
 #' @param handle_excel Whether to convert Excel numeric date values (days
 #'   since 1900-01-01). Useful for data exported from Excel spreadsheets.
-#' @param timezone Timezone for output dates/datetimes. Use UTC for standardization, or
-#'   local timezone if time-of-day information is critical. Only applies to
-#'   anytime and consensus methods.
+#' @param timezone Timezone for output dates/datetimes. Use UTC for
+#'   standardization, or local timezone if time-of-day information is critical.
+#'   Only applies to anytime and consensus methods.
 #' @param show_correction_table Display detailed table showing original
 #'   values, validated values, and validation status for each observation.
 #' @param show_quality_assessment Provide quality assessment including success
 #'   rates, common problems, and recommendations for further validation.
-#' @param show_format_analysis Analyze detected date/datetime formats and patterns in
-#'   the original data.
+#' @param show_format_analysis Analyze detected date/datetime formats and
+#'   patterns in the original data.
 #' @param show_correction_summary Summary statistics of the validation process
 #'   including before/after comparison and data quality metrics.
-#' @param show_interpretation Display guidance on date/datetime validation methods,
-#'   best practices, and recommendations for clinical research data. Includes information about the DateTime Converter module.
+#' @param show_interpretation Display guidance on date/datetime validation
+#'   methods, best practices, and recommendations for clinical research data.
+#'   Includes information about the DateTime Converter module.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

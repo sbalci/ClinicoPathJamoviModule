@@ -5,8 +5,6 @@
 \title{Single Arm Survival}
 \usage{
 singlearm(
-  clinical_preset = "overall_survival",
-  guided_mode = TRUE,
   data,
   elapsedtime,
   tint = FALSE,
@@ -48,13 +46,6 @@ singlearm(
 )
 }
 \arguments{
-\item{clinical_preset}{Select the type of survival analysis that matches
-your research question. This automatically configures appropriate settings
-for your study type.}
-
-\item{guided_mode}{Enables step-by-step guidance and clinical
-interpretation helpers. Recommended for users new to survival analysis.}
-
 \item{data}{The data as a data frame.}
 
 \item{elapsedtime}{The time-to-event or follow-up duration for each
@@ -228,6 +219,9 @@ reliability and  analysis quality without affecting core results.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$info} \tab \tab \tab \tab \tab a html \cr
 \code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
@@ -246,9 +240,9 @@ A results object containing:
 \code{results$personTimeHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$baselineHazardHeading} \tab \tab \tab \tab \tab a preformatted \cr

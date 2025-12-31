@@ -120,7 +120,7 @@ of converted data. Perfect for preparing datetime data for analysis and
 creating time-based variables.
 }
 \examples{
-# Basic datetime conversion: '0.0.31'
+# Basic datetime conversion: '0.0.32'
 datetimeconverter(
   data = study_data,
   datetime_var = "event_date",

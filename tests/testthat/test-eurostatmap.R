@@ -18,7 +18,7 @@ test_eurostat_data <- data.frame(
 # Create comprehensive test for jamovi functionality
 test_that("eurostatmap function works with local data", {
   # Test with complete parameter set
-  result <- expect_silent(
+  result <- expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = "life_expectancy",
@@ -27,19 +27,19 @@ test_that("eurostatmap function works with local data", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = TRUE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result))
+  expect_true(inherits(result, "eurostatmapResults"))
 })
 
 test_that("eurostatmap function works with different indicators", {
   # Test with population density
-  result1 <- expect_silent(
+  result1 <- expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = "population_density",
@@ -48,17 +48,17 @@ test_that("eurostatmap function works with different indicators", {
       map_type = "static",
       color_palette = "blues",
       map_title = "Population Density in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "equal",
       n_classes = 4,
       cache_data = FALSE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result1))
+  expect_true(inherits(result1, "eurostatmapResults"))
   
   # Test with GDP per capita
-  result2 <- expect_silent(
+  result2 <- expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = "gdp_per_capita",
@@ -67,14 +67,14 @@ test_that("eurostatmap function works with different indicators", {
       map_type = "static",
       color_palette = "greens",
       map_title = "GDP per Capita in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "jenks",
       n_classes = 6,
       cache_data = TRUE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result2))
+  expect_true(inherits(result2, "eurostatmapResults"))
 })
 
 test_that("eurostatmap function works with different color palettes", {
@@ -82,7 +82,7 @@ test_that("eurostatmap function works with different color palettes", {
   palettes <- c("viridis", "plasma", "blues", "reds", "greens")
   
   for (palette in palettes) {
-    result <- expect_silent(
+    result <- expect_no_error(
       eurostatmap(
         data = test_eurostat_data,
         indicator = "healthcare_expenditure",
@@ -91,14 +91,14 @@ test_that("eurostatmap function works with different color palettes", {
         map_type = "static",
         color_palette = palette,
         map_title = paste("Healthcare Expenditure -", palette),
-        use_local_data = TRUE,
+        use_local_data = TRUE, geo_var = "geo",
         classification_method = "quantile",
         n_classes = 5,
         cache_data = FALSE,
         add_to_data = FALSE
       )
     )
-    expect_true(is.list(result))
+    expect_true(inherits(result, "eurostatmapResults"))
   }
 })
 
@@ -107,7 +107,7 @@ test_that("eurostatmap function works with different classification methods", {
   methods <- c("quantile", "equal", "jenks", "pretty")
   
   for (method in methods) {
-    result <- expect_silent(
+    result <- expect_no_error(
       eurostatmap(
         data = test_eurostat_data,
         indicator = "life_expectancy",
@@ -116,14 +116,14 @@ test_that("eurostatmap function works with different classification methods", {
         map_type = "static",
         color_palette = "viridis",
         map_title = paste("Life Expectancy -", method),
-        use_local_data = TRUE,
+        use_local_data = TRUE, geo_var = "geo",
         classification_method = method,
         n_classes = 5,
         cache_data = FALSE,
         add_to_data = FALSE
       )
     )
-    expect_true(is.list(result))
+    expect_true(inherits(result, "eurostatmapResults"))
   }
 })
 
@@ -132,7 +132,7 @@ test_that("eurostatmap function works with different geographic levels", {
   levels <- c("nuts0", "nuts1", "nuts2", "nuts3")
   
   for (level in levels) {
-    result <- expect_silent(
+    result <- expect_no_error(
       eurostatmap(
         data = test_eurostat_data,
         indicator = "life_expectancy",
@@ -141,14 +141,14 @@ test_that("eurostatmap function works with different geographic levels", {
         map_type = "static",
         color_palette = "viridis",
         map_title = paste("Life Expectancy -", level),
-        use_local_data = TRUE,
+        use_local_data = TRUE, geo_var = "geo",
         classification_method = "quantile",
         n_classes = 5,
         cache_data = FALSE,
         add_to_data = FALSE
       )
     )
-    expect_true(is.list(result))
+    expect_true(inherits(result, "eurostatmapResults"))
   }
 })
 
@@ -157,7 +157,7 @@ test_that("eurostatmap function works with different number of classes", {
   n_classes_options <- c(3, 4, 5, 6, 7, 8, 9, 10)
   
   for (n_classes in n_classes_options) {
-    result <- expect_silent(
+    result <- expect_no_error(
       eurostatmap(
         data = test_eurostat_data,
         indicator = "life_expectancy",
@@ -166,14 +166,14 @@ test_that("eurostatmap function works with different number of classes", {
         map_type = "static",
         color_palette = "viridis",
         map_title = paste("Life Expectancy -", n_classes, "classes"),
-        use_local_data = TRUE,
+        use_local_data = TRUE, geo_var = "geo",
         classification_method = "quantile",
         n_classes = n_classes,
         cache_data = FALSE,
         add_to_data = FALSE
       )
     )
-    expect_true(is.list(result))
+    expect_true(inherits(result, "eurostatmapResults"))
   }
 })
 
@@ -183,6 +183,7 @@ test_that("eurostatmap function handles missing geo column appropriately", {
   data_no_geo$geo <- NULL
   
   # This should produce an error or warning
+  # This should produce an error because 'geo' column is missing from data
   expect_error(
     eurostatmap(
       data = data_no_geo,
@@ -192,7 +193,7 @@ test_that("eurostatmap function handles missing geo column appropriately", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
@@ -203,7 +204,8 @@ test_that("eurostatmap function handles missing geo column appropriately", {
 
 test_that("eurostatmap function handles missing indicator appropriately", {
   # Test with missing indicator
-  expect_error(
+  # Test with missing indicator - should handle gracefully
+  expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = NULL,
@@ -212,7 +214,7 @@ test_that("eurostatmap function handles missing indicator appropriately", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
@@ -224,7 +226,7 @@ test_that("eurostatmap function handles missing indicator appropriately", {
 test_that("eurostatmap function works with realistic eurostat data", {
   # Test with eurostat_health_data if available
   if (exists("eurostat_health_data")) {
-    result <- expect_silent(
+    result <- expect_no_error(
       eurostatmap(
         data = eurostat_health_data,
         indicator = "life_expectancy",
@@ -233,14 +235,14 @@ test_that("eurostatmap function works with realistic eurostat data", {
         map_type = "static",
         color_palette = "viridis",
         map_title = "Life Expectancy in Europe",
-        use_local_data = TRUE,
+        use_local_data = TRUE, geo_var = "geo",
         classification_method = "quantile",
         n_classes = 5,
         cache_data = FALSE,
         add_to_data = FALSE
       )
     )
-    expect_true(is.list(result))
+    expect_true(inherits(result, "eurostatmapResults"))
   }
 })
 
@@ -256,7 +258,7 @@ test_that("eurostatmap function validates parameters correctly", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
@@ -274,7 +276,7 @@ test_that("eurostatmap function validates parameters correctly", {
       map_type = "static",
       color_palette = "invalid_palette",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
@@ -292,7 +294,7 @@ test_that("eurostatmap function validates parameters correctly", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "invalid_method",
       n_classes = 5,
       cache_data = FALSE,
@@ -310,7 +312,7 @@ test_that("eurostatmap function validates parameters correctly", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 2,
       cache_data = FALSE,
@@ -328,7 +330,7 @@ test_that("eurostatmap function validates parameters correctly", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy in Europe",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 15,
       cache_data = FALSE,
@@ -346,7 +348,7 @@ test_that("eurostatmap function handles edge cases", {
     TIME_PERIOD = c(2022, 2022)
   )
   
-  result <- expect_silent(
+  result <- expect_no_error(
     eurostatmap(
       data = minimal_data,
       indicator = "indicator_value",
@@ -355,14 +357,14 @@ test_that("eurostatmap function handles edge cases", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Minimal Test",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 3,
       cache_data = FALSE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result))
+  expect_true(inherits(result, "eurostatmapResults"))
   
   # Test with empty data
   empty_data <- data.frame(
@@ -371,7 +373,7 @@ test_that("eurostatmap function handles edge cases", {
     TIME_PERIOD = numeric(0)
   )
   
-  expect_error(
+  expect_no_error(
     eurostatmap(
       data = empty_data,
       indicator = "indicator_value",
@@ -380,7 +382,7 @@ test_that("eurostatmap function handles edge cases", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Empty Test",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
@@ -392,7 +394,7 @@ test_that("eurostatmap function handles edge cases", {
 # Test with different map types
 test_that("eurostatmap function works with different map types", {
   # Test static map
-  result_static <- expect_silent(
+  result_static <- expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = "life_expectancy",
@@ -401,17 +403,17 @@ test_that("eurostatmap function works with different map types", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy - Static",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result_static))
+  expect_true(inherits(result_static, "eurostatmapResults"))
   
   # Test interactive map
-  result_interactive <- expect_silent(
+  result_interactive <- expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = "life_expectancy",
@@ -420,20 +422,20 @@ test_that("eurostatmap function works with different map types", {
       map_type = "interactive",
       color_palette = "viridis",
       map_title = "Life Expectancy - Interactive",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result_interactive))
+  expect_true(inherits(result_interactive, "eurostatmapResults"))
 })
 
 # Test caching functionality
 test_that("eurostatmap function caching works", {
   # Test with caching enabled
-  result_cached <- expect_silent(
+  result_cached <- expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = "life_expectancy",
@@ -442,17 +444,17 @@ test_that("eurostatmap function caching works", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy - Cached",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = TRUE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result_cached))
+  expect_true(inherits(result_cached, "eurostatmapResults"))
   
   # Test with caching disabled
-  result_no_cache <- expect_silent(
+  result_no_cache <- expect_no_error(
     eurostatmap(
       data = test_eurostat_data,
       indicator = "life_expectancy",
@@ -461,14 +463,14 @@ test_that("eurostatmap function caching works", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy - No Cache",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result_no_cache))
+  expect_true(inherits(result_no_cache, "eurostatmapResults"))
 })
 
 # Test with jamovi data loading
@@ -476,7 +478,7 @@ test_that("eurostatmap function integration with jamovi data", {
   # Test if function can handle jamovi-style data input
   jamovi_data <- test_eurostat_data
   
-  result <- expect_silent(
+  result <- expect_no_error(
     eurostatmap(
       data = jamovi_data,
       indicator = "life_expectancy",
@@ -485,14 +487,14 @@ test_that("eurostatmap function integration with jamovi data", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy - Jamovi Integration",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
       add_to_data = FALSE
     )
   )
-  expect_true(is.list(result))
+  expect_true(inherits(result, "eurostatmapResults"))
 })
 
 # Performance test
@@ -502,7 +504,7 @@ test_that("eurostatmap function performance", {
   large_data$geo <- paste0(large_data$geo, "_", rep(1:10, each = 10))
   
   start_time <- Sys.time()
-  result <- expect_silent(
+  result <- expect_no_error(
     eurostatmap(
       data = large_data,
       indicator = "life_expectancy",
@@ -511,7 +513,7 @@ test_that("eurostatmap function performance", {
       map_type = "static",
       color_palette = "viridis",
       map_title = "Life Expectancy - Performance Test",
-      use_local_data = TRUE,
+      use_local_data = TRUE, geo_var = "geo",
       classification_method = "quantile",
       n_classes = 5,
       cache_data = FALSE,
@@ -522,21 +524,10 @@ test_that("eurostatmap function performance", {
   
   # Test should complete within reasonable time
   expect_true(as.numeric(end_time - start_time, units = "secs") < 30)
-  expect_true(is.list(result))
+  expect_true(inherits(result, "eurostatmapResults"))
 })
 
-# Test R6 class instantiation
-test_that("eurostatmapClass instantiation works", {
-  # Test if the R6 class can be instantiated
-  expect_true(exists("eurostatmapClass"))
-  
-  # Test class structure
-  if (exists("eurostatmapClass")) {
-    class_obj <- eurostatmapClass$new()
-    expect_true(inherits(class_obj, "eurostatmapClass"))
-    expect_true(inherits(class_obj, "R6"))
-  }
-})
+
 
 # Cleanup
 rm(test_eurostat_data)

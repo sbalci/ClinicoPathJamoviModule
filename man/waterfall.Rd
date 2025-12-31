@@ -22,14 +22,15 @@ waterfall(
   barAlpha = 1,
   barWidth = 0.7,
   showWaterfallPlot = TRUE,
-  showSpiderPlot = TRUE,
+  showSpiderPlot = FALSE,
   spiderColorBy = "response",
   spiderColorScheme = "classic",
   timeUnitLabel = "generic",
   generateCopyReadyReport = FALSE,
   showClinicalSignificance = FALSE,
   showConfidenceIntervals = TRUE,
-  enableGuidedMode = FALSE
+  enableGuidedMode = FALSE,
+  showExplanations = FALSE
 )
 }
 \arguments{
@@ -107,6 +108,10 @@ interpretations for ORR and DCR}
 confidence intervals for ORR and DCR}
 
 \item{enableGuidedMode}{Enable step-by-step guidance for new users}
+
+\item{showExplanations}{Display comprehensive explanation of what this
+analysis does, when to use it, data requirements, and key
+assumptions/limitations}
 }
 \value{
 A results object containing:
@@ -120,14 +125,17 @@ A results object containing:
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
-\code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSignificance} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$enhancedClinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$groupComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
+\code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

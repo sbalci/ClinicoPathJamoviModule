@@ -620,7 +620,7 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                     `name`="classif", 
                                     `title`="Classification", 
                                     `type`="Number"))))}))$new(options=options))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
                 title=""))
@@ -732,6 +732,7 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   metrics terms.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSettings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$confusion$matrix} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$classificationMetrics$general} \tab \tab \tab \tab \tab a table \cr
@@ -742,7 +743,7 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$decisionTreeModel} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$predictedFreqPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$printRandForest$randomForestModel} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr

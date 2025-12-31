@@ -149,6 +149,7 @@ metrics terms.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSettings} \tab \tab \tab \tab \tab a html \cr
 \code{results$confusion$matrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$classificationMetrics$general} \tab \tab \tab \tab \tab a table \cr
@@ -159,7 +160,7 @@ A results object containing:
 \code{results$decisionTreeModel} \tab \tab \tab \tab \tab an image \cr
 \code{results$predictedFreqPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$printRandForest$randomForestModel} \tab \tab \tab \tab \tab a table \cr
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr

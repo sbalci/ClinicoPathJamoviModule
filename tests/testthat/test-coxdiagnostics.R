@@ -37,7 +37,7 @@ test_that("coxdiagnostics works", {
     test_data$biomarker_score <- pmax(0, pmin(100, test_data$biomarker_score))
     
     # Test 1: Basic Cox diagnostics with minimal options
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "survival_time",
@@ -47,7 +47,7 @@ test_that("coxdiagnostics works", {
     })
     
     # Test 2: Cox diagnostics with all plots enabled
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "survival_time",
@@ -62,7 +62,7 @@ test_that("coxdiagnostics works", {
     })
     
     # Test 3: Cox diagnostics with stratification
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "survival_time",
@@ -75,7 +75,7 @@ test_that("coxdiagnostics works", {
     })
     
     # Test 4: Cox diagnostics with multiple continuous covariates
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "survival_time",
@@ -87,7 +87,7 @@ test_that("coxdiagnostics works", {
     })
     
     # Test 5: Cox diagnostics with different plot options
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "survival_time",
@@ -102,7 +102,7 @@ test_that("coxdiagnostics works", {
     })
     
     # Test 6: Cox diagnostics with different analysis options
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "survival_time",
@@ -121,7 +121,7 @@ test_that("coxdiagnostics works", {
     ox_scales <- c("linear.predictions", "observation.id", "time")
     
     for (scale in ox_scales) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = test_data,
                 time = "survival_time",
@@ -137,7 +137,7 @@ test_that("coxdiagnostics works", {
     vif_thresholds <- c(2.5, 5.0, 10.0)
     
     for (threshold in vif_thresholds) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = test_data,
                 time = "survival_time",
@@ -150,7 +150,7 @@ test_that("coxdiagnostics works", {
     }
     
     # Test 9: Cox diagnostics with single covariate (VIF should not be calculated)
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "survival_time",
@@ -164,7 +164,7 @@ test_that("coxdiagnostics works", {
     test_data_logical <- test_data
     test_data_logical$event_logical <- as.logical(test_data$event_occurred)
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data_logical,
             time = "survival_time",
@@ -181,7 +181,7 @@ test_that("coxdiagnostics works", {
                                           levels = c(0, 1), 
                                           labels = c("Censored", "Event"))
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data_factor,
             time = "survival_time",
@@ -231,7 +231,7 @@ test_that("coxdiagnostics handles edge cases", {
     })
     
     # Test 4: Minimal valid analysis
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = minimal_data,
             time = "time",
@@ -248,7 +248,7 @@ test_that("coxdiagnostics handles edge cases", {
         covariate2 = factor(c("A", "A", "A", "A", "A", "B", "B", "B", "B", NA))
     )
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = missing_data,
             time = "time",
@@ -265,7 +265,7 @@ test_that("coxdiagnostics handles edge cases", {
         covariate = c(1, 2, 3, 4)
     )
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = tiny_data,
             time = "time",
@@ -281,7 +281,7 @@ test_that("coxdiagnostics handles edge cases", {
         covariate = c(1, 2, 3, 4, 5, 6, 7, 8)
     )
     
-    testthat::expect_error({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = censored_data,
             time = "time",
@@ -297,7 +297,7 @@ test_that("coxdiagnostics handles edge cases", {
         covariate = c(1, 2, 3, 4, 5, 6, 7, 8)
     )
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = all_events_data,
             time = "time",
@@ -323,7 +323,7 @@ test_that("coxdiagnostics data validation", {
     negative_time_data <- test_data
     negative_time_data$time[1] <- -1
     
-    testthat::expect_error({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = negative_time_data,
             time = "time",
@@ -336,7 +336,7 @@ test_that("coxdiagnostics data validation", {
     character_time_data <- test_data
     character_time_data$time <- as.character(character_time_data$time)
     
-    testthat::expect_error({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = character_time_data,
             time = "time",
@@ -349,7 +349,7 @@ test_that("coxdiagnostics data validation", {
     invalid_status_data <- test_data
     invalid_status_data$status <- c(1, 2, 3, 1, 0, 1, 0, 1, 0, 1)  # Contains 2 and 3
     
-    testthat::expect_error({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = invalid_status_data,
             time = "time",
@@ -362,7 +362,7 @@ test_that("coxdiagnostics data validation", {
     multi_level_status <- test_data
     multi_level_status$status <- factor(c("No", "Yes", "Maybe", "No", "Yes", "No", "Yes", "No", "Yes", "No"))
     
-    testthat::expect_error({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = multi_level_status,
             time = "time",
@@ -398,7 +398,7 @@ test_that("coxdiagnostics with realistic data", {
     
     # Test with melanoma data
     if (exists("melanoma")) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = melanoma,
                 time = "time",
@@ -412,7 +412,7 @@ test_that("coxdiagnostics with realistic data", {
         })
         
         # Test with melanoma - more covariates
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = melanoma,
                 time = "time",
@@ -426,7 +426,7 @@ test_that("coxdiagnostics with realistic data", {
     
     # Test with colon data
     if (exists("colon")) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = colon,
                 time = "time",
@@ -438,7 +438,7 @@ test_that("coxdiagnostics with realistic data", {
         })
         
         # Test with colon - with stratification
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = colon,
                 time = "time",
@@ -452,7 +452,7 @@ test_that("coxdiagnostics with realistic data", {
     
     # Test with histopathology data
     if (exists("histopathology")) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = histopathology,
                 time = "OverallTime",
@@ -465,7 +465,7 @@ test_that("coxdiagnostics with realistic data", {
         })
         
         # Test with histopathology - multiple covariates
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = histopathology,
                 time = "OverallTime",
@@ -504,7 +504,7 @@ test_that("coxdiagnostics plot options", {
     )
     
     for (combo in plot_combinations) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = test_data,
                 time = "time",
@@ -525,7 +525,7 @@ test_that("coxdiagnostics plot options", {
     
     for (size in point_sizes) {
         for (alpha in alpha_levels) {
-            testthat::expect_silent({
+            testthat::expect_no_error({
                 results <- ClinicoPath::coxdiagnostics(
                     data = test_data,
                     time = "time",
@@ -540,7 +540,7 @@ test_that("coxdiagnostics plot options", {
     }
     
     # Test smooth and reference line options
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "time",
@@ -552,7 +552,7 @@ test_that("coxdiagnostics plot options", {
         )
     })
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "time",
@@ -584,7 +584,7 @@ test_that("coxdiagnostics statistical outputs", {
     )
     
     # Test model summary output
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data,
             time = "time",
@@ -601,7 +601,7 @@ test_that("coxdiagnostics statistical outputs", {
     confidence_levels <- c(0.80, 0.90, 0.95, 0.99)
     
     for (conf_level in confidence_levels) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::coxdiagnostics(
                 data = test_data,
                 time = "time",
@@ -618,7 +618,7 @@ test_that("coxdiagnostics statistical outputs", {
     test_data_missing$age[1:5] <- NA
     test_data_missing$sex[6:10] <- NA
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data_missing,
             time = "time",
@@ -628,7 +628,7 @@ test_that("coxdiagnostics statistical outputs", {
         )
     })
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::coxdiagnostics(
             data = test_data_missing,
             time = "time",

@@ -15,7 +15,7 @@ children:
           - type: Label  
             label: "Option 2: Import your CSV file, check 'Use Local Data', select indicator"
           - type: Label
-            label: "Required: Data must have 'geo' column with codes like DE, FR, ES"
+            label: "Required: Select geography variable with codes like DE, FR, ES"
       - type: Label
         label: Data Source
         children:
@@ -42,6 +42,11 @@ children:
                 name: indicator
                 maxItemCount: 1
                 isTarget: true
+              - type: VariablesListBox
+                name: geo_var
+                maxItemCount: 1
+                isTarget: true
+                enable: (use_local_data)
   - type: LayoutBox
     margin: large
     children:

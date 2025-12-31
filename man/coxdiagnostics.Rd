@@ -6,9 +6,9 @@
 \usage{
 coxdiagnostics(
   data,
-  time,
-  event,
-  covariates,
+  time = NULL,
+  event = NULL,
+  covariates = NULL,
   strata_var = NULL,
   show_martingale = TRUE,
   show_deviance = TRUE,

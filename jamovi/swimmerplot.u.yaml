@@ -4,39 +4,20 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # === QUICK SETUP WIZARD ===
-  - type: CollapseBox
-    label: "🚀 Quick Setup Wizard"
-    collapsed: false
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: |
-              <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 8px; color: white;'>
-              <h3 style='margin-top: 0; color: white;'>Getting Started</h3>
-              <p><strong>Required Variables:</strong></p>
-              <ol style='line-height: 1.8;'>
-                <li><strong>Patient ID</strong> - Unique identifier for each patient</li>
-                <li><strong>Start Time</strong> - Treatment/observation start date or time</li>
-                <li><strong>End Time</strong> - Treatment/observation end date or time</li>
-              </ol>
-              <p><strong>Optional Enhancements:</strong></p>
-              <ul style='line-height: 1.8;'>
-                <li><strong>Response Variable</strong> - For ORR/DCR calculations (CR, PR, SD, PD)</li>
-                <li><strong>Censoring Variable</strong> - For accurate median follow-up (0=ongoing, 1=completed)</li>
-                <li><strong>Grouping Variable</strong> - For Fisher's exact test comparisons</li>
-                <li><strong>Milestones</strong> - Key clinical events (surgery, progression, etc.)</li>
-                <li><strong>Event Markers</strong> - Additional timeline events</li>
-              </ul>
-              <p style='margin-bottom: 0;'><em>💡 Tip: Select required variables first, then configure optional features below.</em></p>
-              </div>
-            format: html
+  # # === QUICK SETUP WIZARD ===
+  # - type: CollapseBox
+  #   label: "Quick Setup Wizard"
+  #   collapsed: false
+  #   children:
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: Label
+  #           label: "Getting Started: Required Variables - Patient ID, Start Time, End Time. Optional Enhancements - Response Variable (for ORR/DCR), Censoring Variable (for median follow-up), Grouping Variable (for comparisons), Milestones (key clinical events), Event Markers (additional timeline events)."
 
   # === CORE DATA VARIABLES ===
   - type: CollapseBox
-    label: "📊 Core Data Variables"
+    label: "Core Data Variables"
     collapsed: false
     children:
       - type: VariableSupplier
@@ -88,7 +69,7 @@ children:
 
   # === TIME & DATE SETTINGS ===
   - type: CollapseBox
-    label: "⏰ Time & Date Settings"
+    label: "Time & Date Settings"
     collapsed: true
     children:
       - type: LayoutBox
@@ -109,7 +90,7 @@ children:
 
   # === MILESTONES ===
   - type: CollapseBox
-    label: "🎯 Clinical Milestones"
+    label: "Clinical Milestones"
     collapsed: true
     children:
       - type: LayoutBox
@@ -122,8 +103,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: "<b>Milestone Names</b>"
-            format: html
+            label: "Milestone Names"
             children:
               - type: TextBox
                 name: milestone1Name
@@ -149,8 +129,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: "<b>Milestone Times/Dates</b>"
-            format: html
+            label: "Milestone Times/Dates"
             fitToGrid: true
             stretchFactor: 1
       - type: VariableSupplier
@@ -196,7 +175,7 @@ children:
 
   # === EVENT MARKERS ===
   - type: CollapseBox
-    label: "🔵 Event Markers"
+    label: "Event Markers"
     collapsed: true
     children:
       - type: LayoutBox
@@ -225,7 +204,7 @@ children:
 
   # === VISUALIZATION OPTIONS ===
   - type: CollapseBox
-    label: "🎨 Visualization Options"
+    label: "Visualization Options"
     collapsed: true
     children:
       - type: LayoutBox
@@ -265,7 +244,7 @@ children:
 
   # === SORTING & DISPLAY ===
   - type: CollapseBox
-    label: "📋 Sorting & Display Options"
+    label: "Sorting & Display Options"
     collapsed: true
     children:
       - type: LayoutBox
@@ -287,7 +266,7 @@ children:
 
   # === ANALYSIS OPTIONS ===
   - type: CollapseBox
-    label: "📈 Analysis & Interpretation"
+    label: "Analysis & Interpretation"
     collapsed: true
     children:
       - type: LayoutBox
@@ -314,7 +293,7 @@ children:
 
   # === EXPORT OPTIONS ===
   - type: CollapseBox
-    label: "💾 Export Options"
+    label: "Export Options"
     collapsed: true
     children:
       - type: LayoutBox

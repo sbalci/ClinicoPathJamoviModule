@@ -491,6 +491,9 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         welcome = function() private$.items[["welcome"]],
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
+        validationErrors = function() private$.items[["validationErrors"]],
+        validationWarnings = function() private$.items[["validationWarnings"]],
+        analysisInfo = function() private$.items[["analysisInfo"]],
         plotGgvenn = function() private$.items[["plotGgvenn"]],
         plotGgVennDiagram = function() private$.items[["plotGgVennDiagram"]],
         plotUpsetR = function() private$.items[["plotUpsetR"]],
@@ -562,6 +565,21 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="True %", 
                         `type`="number", 
                         `format`="pc"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="validationErrors",
+                title="Validation Errors",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="validationWarnings",
+                title="Important Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="analysisInfo",
+                title="Analysis Information",
+                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="ggvenn Plot",
@@ -784,6 +802,9 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$validationErrors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$validationWarnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plotGgvenn} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotGgVennDiagram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotUpsetR} \tab \tab \tab \tab \tab an image \cr

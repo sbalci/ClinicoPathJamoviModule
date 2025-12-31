@@ -17,7 +17,6 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             k = 2,
             partial = FALSE,
             naHandling = "listwise",
-            # clinicalpreset = "custom",  # Commented out - clinical preset disabled
             lowcolor = "#E69F00",
             midcolor = "white",
             highcolor = "#009E73",
@@ -114,15 +113,6 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "listwise",
                     "pairwise"),
                 default="listwise")
-            # private$..clinicalpreset <- jmvcore::OptionList$new(  # Commented out - clinical preset disabled
-            #     "clinicalpreset",
-            #     clinicalpreset,
-            #     options=list(
-            #         "custom",
-            #         "biomarker",
-            #         "labvalues",
-            #         "imaging"),
-            #     default="custom")
             private$..lowcolor <- jmvcore::OptionString$new(
                 "lowcolor",
                 lowcolor,
@@ -175,7 +165,6 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..k)
             self$.addOption(private$..partial)
             self$.addOption(private$..naHandling)
-            # self$.addOption(private$..clinicalpreset)  # Commented out - clinical preset disabled
             self$.addOption(private$..lowcolor)
             self$.addOption(private$..midcolor)
             self$.addOption(private$..highcolor)
@@ -198,7 +187,6 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         k = function() private$..k$value,
         partial = function() private$..partial$value,
         naHandling = function() private$..naHandling$value,
-        # clinicalpreset = function() private$..clinicalpreset$value,  # Commented out - clinical preset disabled
         lowcolor = function() private$..lowcolor$value,
         midcolor = function() private$..midcolor$value,
         highcolor = function() private$..highcolor$value,
@@ -220,7 +208,6 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..k = NA,
         ..partial = NA,
         ..naHandling = NA,
-        # ..clinicalpreset = NA,  # Commented out - clinical preset disabled
         ..lowcolor = NA,
         ..midcolor = NA,
         ..highcolor = NA,
@@ -269,7 +256,6 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "padjustmethod",
                     "k",
                     "partial",
-                    # "clinicalpreset",  # Commented out - clinical preset disabled
                     "lowcolor",
                     "midcolor",
                     "highcolor",
@@ -451,11 +437,6 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param naHandling Choose how missing values are handled. Listwise drops
 #'   rows with missing values in selected variables; pairwise uses available
 #'   data for each pair.
-#' # @param clinicalpreset Pre-configured settings optimized for common clinical
-#' #   correlation scenarios. Biomarker: Focus on molecular correlations with
-#' #   robust methods. Lab Values: Emphasize clinical laboratory parameter
-#' #   relationships. Imaging: Specialized for radiological and pathological
-#' #   imaging metrics.
 #' @param lowcolor Color for low (negative) correlation values.
 #' @param midcolor Color for mid (zero) correlation values.
 #' @param highcolor Color for high (positive) correlation values.
@@ -471,6 +452,7 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
@@ -500,7 +482,6 @@ jjcorrmat <- function(
     k = 2,
     partial = FALSE,
     naHandling = "listwise",
-    # clinicalpreset = "custom",  # Commented out - clinical preset disabled
     lowcolor = "#E69F00",
     midcolor = "white",
     highcolor = "#009E73",
@@ -536,7 +517,6 @@ jjcorrmat <- function(
         k = k,
         partial = partial,
         naHandling = naHandling,
-        # clinicalpreset = clinicalpreset,  # Commented out - clinical preset disabled
         lowcolor = lowcolor,
         midcolor = midcolor,
         highcolor = highcolor,

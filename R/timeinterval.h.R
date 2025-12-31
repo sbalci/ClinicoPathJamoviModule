@@ -270,7 +270,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "timeinterval",
-                version = c(0,0,3),
+                version = c(0,0,32),
                 options = options,
                 results = timeintervalResults$new(options=options),
                 data = data,
@@ -361,6 +361,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   systems and time zones.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$messages} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr

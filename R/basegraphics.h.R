@@ -393,14 +393,7 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "x_min",
                     "x_max",
                     "y_min",
-                    "y_max",
-                    "line_type",
-                    "line_width",
-                    "bar_width",
-                    "grid_style",
-                    "show_regression_line",
-                    "regression_line_color",
-                    "show_confidence_interval")))}))
+                    "y_max")))}))
 
 basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "basegraphicsBase",
@@ -461,6 +454,15 @@ basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param x_max Maximum value for x-axis (when custom limits enabled).
 #' @param y_min Minimum value for y-axis (when custom limits enabled).
 #' @param y_max Maximum value for y-axis (when custom limits enabled).
+#' @param line_type Line type for line plots (lty parameter).
+#' @param line_width Width of lines in line plots (lwd parameter).
+#' @param bar_width Width of bars in bar plots.
+#' @param grid_style Style of grid lines.
+#' @param show_regression_line Whether to add a regression line to scatter
+#'   plots.
+#' @param regression_line_color Color of the regression line.
+#' @param show_confidence_interval Whether to display confidence interval for
+#'   regression line.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr

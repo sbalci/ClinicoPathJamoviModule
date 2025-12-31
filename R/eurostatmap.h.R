@@ -8,6 +8,7 @@ eurostatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         initialize = function(
             dataset_id = "demo_r_gind3",
             indicator = NULL,
+            geo_var = NULL,
             geo_level = "nuts2",
             year = 2022,
             map_type = "static",
@@ -36,6 +37,16 @@ eurostatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..geo_var <- jmvcore::OptionVariable$new(
+                "geo_var",
+                geo_var,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric",
+                    "id"),
+                default=NULL)
             private$..geo_level <- jmvcore::OptionList$new(
                 "geo_level",
                 geo_level,
@@ -100,6 +111,7 @@ eurostatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
             self$.addOption(private$..dataset_id)
             self$.addOption(private$..indicator)
+            self$.addOption(private$..geo_var)
             self$.addOption(private$..geo_level)
             self$.addOption(private$..year)
             self$.addOption(private$..map_type)
@@ -114,6 +126,7 @@ eurostatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         dataset_id = function() private$..dataset_id$value,
         indicator = function() private$..indicator$value,
+        geo_var = function() private$..geo_var$value,
         geo_level = function() private$..geo_level$value,
         year = function() private$..year$value,
         map_type = function() private$..map_type$value,
@@ -127,6 +140,7 @@ eurostatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     private = list(
         ..dataset_id = NA,
         ..indicator = NA,
+        ..geo_var = NA,
         ..geo_level = NA,
         ..year = NA,
         ..map_type = NA,
@@ -143,6 +157,7 @@ eurostatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     "eurostatmapResults",
     inherit = jmvcore::Group,
     active = list(
+        instructions = function() private$.items[["instructions"]],
         plot = function() private$.items[["plot"]],
         info = function() private$.items[["info"]],
         summary = function() private$.items[["summary"]],
@@ -158,6 +173,11 @@ eurostatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ClinicoPathJamoviModule",
                     "tmap",
                     "eurostat"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -224,7 +244,7 @@ eurostatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="downloaded_data",
                 title="Downloaded Data",
-                visible="(add_to_data == true && use_local_data == false)",
+                visible="(add_to_data && !use_local_data)",
                 clearWith=list(
                     "dataset_id",
                     "year",
@@ -262,6 +282,8 @@ eurostatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param dataset_id The Eurostat dataset identifier to retrieve data from.
 #' @param indicator The variable containing the indicator values to map.
+#' @param geo_var The variable containing NUTS geographic codes (for local
+#'   data).
 #' @param geo_level The geographic level for mapping.
 #' @param year The year for which to display data.
 #' @param map_type Choose between static or interactive map visualization.
@@ -277,6 +299,7 @@ eurostatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   spreadsheet.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$info} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
@@ -294,6 +317,7 @@ eurostatmap <- function(
     data,
     dataset_id = "demo_r_gind3",
     indicator,
+    geo_var = NULL,
     geo_level = "nuts2",
     year = 2022,
     map_type = "static",
@@ -309,15 +333,18 @@ eurostatmap <- function(
         stop("eurostatmap requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(indicator)) indicator <- jmvcore::resolveQuo(jmvcore::enquo(indicator))
+    if ( ! missing(geo_var)) geo_var <- jmvcore::resolveQuo(jmvcore::enquo(geo_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(indicator), indicator, NULL))
+            `if`( ! missing(indicator), indicator, NULL),
+            `if`( ! missing(geo_var), geo_var, NULL))
 
 
     options <- eurostatmapOptions$new(
         dataset_id = dataset_id,
         indicator = indicator,
+        geo_var = geo_var,
         geo_level = geo_level,
         year = year,
         map_type = map_type,

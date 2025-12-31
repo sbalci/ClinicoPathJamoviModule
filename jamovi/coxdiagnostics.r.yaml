@@ -12,7 +12,7 @@ items:
   - name: model_summary
     title: "Cox Model Summary"
     type: Html
-    visible: (time && event && covariates && show_model_summary)
+    visible: (show_model_summary)
     clearWith:
       - time
       - event
@@ -23,7 +23,7 @@ items:
   - name: ph_test_results
     title: "Proportional Hazards Test"
     type: Html
-    visible: (time && event && covariates && show_ph_test)
+    visible: (show_ph_test)
     clearWith:
       - time
       - event
@@ -34,7 +34,7 @@ items:
   - name: vif_results
     title: "Multicollinearity Analysis (VIF)"
     type: Html
-    visible: (time && event && covariates && show_vif)
+    visible: (show_vif)
     clearWith:
       - time
       - event
@@ -48,7 +48,7 @@ items:
     width: 700
     height: 500
     renderFun: .plot_martingale
-    visible: (time && event && covariates && show_martingale)
+    visible: (show_martingale)
     clearWith:
       - time
       - event
@@ -66,7 +66,7 @@ items:
     width: 700
     height: 500
     renderFun: .plot_deviance
-    visible: (time && event && covariates && show_deviance)
+    visible: (show_deviance)
     clearWith:
       - time
       - event
@@ -84,7 +84,7 @@ items:
     width: 700
     height: 500
     renderFun: .plot_score
-    visible: (time && event && covariates && show_score)
+    visible: (show_score)
     clearWith:
       - time
       - event
@@ -102,7 +102,7 @@ items:
     width: 700
     height: 500
     renderFun: .plot_schoenfeld
-    visible: (time && event && covariates && show_schoenfeld)
+    visible: (show_schoenfeld)
     clearWith:
       - time
       - event
@@ -120,7 +120,7 @@ items:
     width: 700
     height: 500
     renderFun: .plot_dfbeta
-    visible: (time && event && covariates && show_dfbeta)
+    visible: (show_dfbeta)
     clearWith:
       - time
       - event
@@ -135,7 +135,7 @@ items:
   - name: interpretation
     title: "Diagnostic Interpretation Guide"
     type: Html
-    visible: (time && event && covariates && show_interpretation)
+    visible: (show_interpretation)
     clearWith:
       - show_interpretation
 

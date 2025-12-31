@@ -57,8 +57,6 @@ children:
               - type: ComboBox
                 name: naHandling
                 label: Missing Data Handling
-              - type: ComboBox
-                name: clinicalpreset
   - type: CollapseBox
     label: Matrix Display
     collapsed: true

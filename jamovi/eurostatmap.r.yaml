@@ -4,6 +4,10 @@ title: Eurostat Map
 jrs: '1.1'
 
 items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
     - name: plot
       title: Map
       type: Image
@@ -63,7 +67,7 @@ items:
     - name: downloaded_data
       title: Downloaded Data
       type: Table
-      visible: (add_to_data == true && use_local_data == false)
+      visible: (add_to_data && !use_local_data)
       clearWith:
         - dataset_id
         - year

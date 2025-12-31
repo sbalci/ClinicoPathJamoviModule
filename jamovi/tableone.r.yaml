@@ -9,40 +9,6 @@ items:
     type: Html
     # Displays welcome and instruction text when no variables are selected.
 
-  - name: reportSentence
-    title: "📋 Copy to Manuscript"
-    type: Html
-    visible: (showReportSentence)
-    clearWith:
-      - vars
-      - excl
-    refs: ClinicoPathJamoviModule
-
-  - name: summary
-    title: "Summary"
-    type: Html
-    visible: (showSummary)
-    clearWith:
-      - vars
-      - excl
-    # Clinical summary and data quality information
-
-  - name: about
-    title: "About This Analysis"
-    type: Html
-    visible: (showAbout)
-    clearWith:
-      - vars
-    # Educational content about Table One
-
-  - name: assumptions
-    title: "Data Quality & Assumptions"
-    type: Html
-    clearWith:
-      - vars
-      - excl
-    # Data quality warnings and statistical assumptions
-
   - name: tablestyle1
     title: "Table One Output (tableone)"
     type: Preformatted
@@ -78,6 +44,45 @@ items:
       - excl
     visible: (sty:t4)
     refs: janitor
+
+
+
+  - name: reportSentence
+    title: "📋 Copy to Manuscript"
+    type: Html
+    visible: (showReportSentence)
+    clearWith:
+      - vars
+      - excl
+    refs: ClinicoPathJamoviModule
+
+  - name: summary
+    title: "Summary"
+    type: Html
+    visible: (showSummary)
+    clearWith:
+      - vars
+      - excl
+    # Clinical summary and data quality information
+
+  - name: about
+    title: "About This Analysis"
+    type: Html
+    visible: (showAbout)
+    clearWith:
+      - vars
+    # Educational content about Table One
+
+  - name: assumptions
+    title: "Data Quality & Assumptions"
+    type: Html
+    clearWith:
+      - vars
+      - excl
+    # Data quality warnings and statistical assumptions
+
+
+
 
 refs:
     - ClinicoPathJamoviModule

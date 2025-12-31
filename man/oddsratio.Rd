@@ -11,7 +11,6 @@ oddsratio(
   outcomeLevel,
   diagnosticPredictor = NULL,
   showNomogram = FALSE,
-  showSummaries = FALSE,
   showExplanations = FALSE
 )
 }
@@ -30,12 +29,8 @@ use the second level alphabetically.}
 ratios; must be binary. Defaults to the first explanatory variable.}
 
 \item{showNomogram}{Display an interactive nomogram for converting pre-test
-to post-test  probabilities using likelihood ratios calculated from the
+to post-test probabilities using likelihood ratios calculated from the
 data.}
-
-\item{showSummaries}{Display natural language interpretations of the
-results to help understand the clinical significance of odds ratios,
-confidence intervals, and diagnostic metrics.}
 
 \item{showExplanations}{Display educational explanations for each analysis
 type to help interpret  odds ratios, risk ratios, diagnostic test
@@ -47,14 +42,13 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
-\code{results$oddsRatioSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$oddsRatioExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticMetrics} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
-\code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 }

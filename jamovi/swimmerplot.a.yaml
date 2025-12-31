@@ -1,9 +1,9 @@
 ---
 name: swimmerplot
 title: "Swimmer Plot"
-menuGroup: OncoPathT
+menuGroup: OncoPath
 menuSubgroup: Patient Follow-Up Plots
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -112,6 +112,7 @@ options:
       suggested: [nominal, ordinal]
       permitted: [factor]
       required: false
+      default: NULL
       description:
           R: >
             Optional variable for response types (e.g., CR, PR, SD, PD) to color lanes.

@@ -22,14 +22,15 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             barAlpha = 1,
             barWidth = 0.7,
             showWaterfallPlot = TRUE,
-            showSpiderPlot = TRUE,
+            showSpiderPlot = FALSE,
             spiderColorBy = "response",
             spiderColorScheme = "classic",
             timeUnitLabel = "generic",
             generateCopyReadyReport = FALSE,
             showClinicalSignificance = FALSE,
             showConfidenceIntervals = TRUE,
-            enableGuidedMode = FALSE, ...) {
+            enableGuidedMode = FALSE,
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -143,7 +144,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showSpiderPlot <- jmvcore::OptionBool$new(
                 "showSpiderPlot",
                 showSpiderPlot,
-                default=TRUE)
+                default=FALSE)
             private$..spiderColorBy <- jmvcore::OptionList$new(
                 "spiderColorBy",
                 spiderColorBy,
@@ -186,6 +187,10 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "enableGuidedMode",
                 enableGuidedMode,
                 default=FALSE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
             private$..addResponseCategory <- jmvcore::OptionOutput$new(
                 "addResponseCategory")
 
@@ -213,6 +218,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showClinicalSignificance)
             self$.addOption(private$..showConfidenceIntervals)
             self$.addOption(private$..enableGuidedMode)
+            self$.addOption(private$..showExplanations)
             self$.addOption(private$..addResponseCategory)
         }),
     active = list(
@@ -240,6 +246,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showClinicalSignificance = function() private$..showClinicalSignificance$value,
         showConfidenceIntervals = function() private$..showConfidenceIntervals$value,
         enableGuidedMode = function() private$..enableGuidedMode$value,
+        showExplanations = function() private$..showExplanations$value,
         addResponseCategory = function() private$..addResponseCategory$value),
     private = list(
         ..patientID = NA,
@@ -266,6 +273,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showClinicalSignificance = NA,
         ..showConfidenceIntervals = NA,
         ..enableGuidedMode = NA,
+        ..showExplanations = NA,
         ..addResponseCategory = NA)
 )
 
@@ -282,14 +290,17 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         personTimeTable = function() private$.items[["personTimeTable"]],
         clinicalMetrics = function() private$.items[["clinicalMetrics"]],
         waterfallplot = function() private$.items[["waterfallplot"]],
-        spiderplot = function() private$.items[["spiderplot"]],
         copyReadyReport = function() private$.items[["copyReadyReport"]],
         clinicalSignificance = function() private$.items[["clinicalSignificance"]],
         clinicalGlossary = function() private$.items[["clinicalGlossary"]],
         enhancedClinicalMetrics = function() private$.items[["enhancedClinicalMetrics"]],
         groupComparisonTable = function() private$.items[["groupComparisonTable"]],
         groupComparisonTest = function() private$.items[["groupComparisonTest"]],
-        addResponseCategory = function() private$.items[["addResponseCategory"]]),
+        spiderplot = function() private$.items[["spiderplot"]],
+        naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
+        explanations = function() private$.items[["explanations"]],
+        addResponseCategory = function() private$.items[["addResponseCategory"]],
+        notices = function() private$.items[["notices"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -453,31 +464,6 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "showCI",
                     "groupVar",
                     "inputType")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="spiderplot",
-                title="Spider Plot - Response Over Time",
-                width=800,
-                height=500,
-                renderFun=".spiderplot",
-                requiresData=TRUE,
-                visible="(showSpiderPlot)",
-                clearWith=list(
-                    "patientID",
-                    "responseVar",
-                    "timeVar",
-                    "inputType",
-                    "sortBy",
-                    "groupVar",
-                    "showThresholds",
-                    "labelOutliers",
-                    "colorBy",
-                    "colorScheme",
-                    "spiderColorBy",
-                    "spiderColorScheme",
-                    "timeUnitLabel",
-                    "showMedian",
-                    "showCI")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="copyReadyReport",
@@ -604,6 +590,50 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "groupVar",
                     "inputType")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="spiderplot",
+                title="Spider Plot - Response Over Time",
+                width=800,
+                height=500,
+                renderFun=".spiderplot",
+                requiresData=TRUE,
+                visible="(showSpiderPlot)",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "timeVar",
+                    "inputType",
+                    "sortBy",
+                    "groupVar",
+                    "showThresholds",
+                    "labelOutliers",
+                    "colorBy",
+                    "colorScheme",
+                    "spiderColorBy",
+                    "spiderColorScheme",
+                    "timeUnitLabel",
+                    "showMedian",
+                    "showCI")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalLanguageSummary",
+                title="Treatment Response Summary",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "timeVar",
+                    "inputType",
+                    "groupVar",
+                    "showExplanations")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="Analysis Guide",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "showExplanations")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addResponseCategory",
@@ -615,7 +645,17 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patientID",
                     "responseVar",
                     "timeVar",
-                    "inputType")))}))
+                    "inputType")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "timeVar",
+                    "inputType",
+                    "groupVar")))}))
 
 waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "waterfallBase",
@@ -695,6 +735,9 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showConfidenceIntervals Calculate and display exact binomial
 #'   confidence intervals for ORR and DCR
 #' @param enableGuidedMode Enable step-by-step guidance for new users
+#' @param showExplanations Display comprehensive explanation of what this
+#'   analysis does, when to use it, data requirements, and key
+#'   assumptions/limitations
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$guidedAnalysis} \tab \tab \tab \tab \tab a html \cr
@@ -706,14 +749,17 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSignificance} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$enhancedClinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$groupComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -741,14 +787,15 @@ waterfall <- function(
     barAlpha = 1,
     barWidth = 0.7,
     showWaterfallPlot = TRUE,
-    showSpiderPlot = TRUE,
+    showSpiderPlot = FALSE,
     spiderColorBy = "response",
     spiderColorScheme = "classic",
     timeUnitLabel = "generic",
     generateCopyReadyReport = FALSE,
     showClinicalSignificance = FALSE,
     showConfidenceIntervals = TRUE,
-    enableGuidedMode = FALSE) {
+    enableGuidedMode = FALSE,
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("waterfall requires jmvcore to be installed (restart may be required)")
@@ -790,7 +837,8 @@ waterfall <- function(
         generateCopyReadyReport = generateCopyReadyReport,
         showClinicalSignificance = showClinicalSignificance,
         showConfidenceIntervals = showConfidenceIntervals,
-        enableGuidedMode = enableGuidedMode)
+        enableGuidedMode = enableGuidedMode,
+        showExplanations = showExplanations)
 
     analysis <- waterfallClass$new(
         options = options,

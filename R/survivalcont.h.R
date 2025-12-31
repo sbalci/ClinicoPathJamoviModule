@@ -471,6 +471,10 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         todo = function() private$.items[["todo"]],
         clinicalWarnings = function() private$.items[["clinicalWarnings"]],
+        errors = function() private$.items[["errors"]],
+        strongWarnings = function() private$.items[["strongWarnings"]],
+        warnings = function() private$.items[["warnings"]],
+        infoMessages = function() private$.items[["infoMessages"]],
         coxRegressionHeading = function() private$.items[["coxRegressionHeading"]],
         coxSummary = function() private$.items[["coxSummary"]],
         coxTable = function() private$.items[["coxTable"]],
@@ -538,6 +542,26 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="clinicalWarnings",
                 title="Clinical Assumptions and Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Critical Errors",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="strongWarnings",
+                title="Strong Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="infoMessages",
+                title="Information",
                 visible=FALSE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -1547,7 +1571,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survivalcont",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = survivalcontResults$new(options=options),
                 data = data,
@@ -1695,6 +1719,10 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr

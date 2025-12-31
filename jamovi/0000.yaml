@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.62
+version: 0.0.32.63
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-12-28'
+date: '2025-12-29'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -103,7 +103,7 @@ analyses:
     name: categorize
     ns: ClinicoPath
     menuGroup: Exploration
-    menuSubgroup: Data Preparation
+    menuSubgroup: ClinicoPath Data Preparation
     menuTitle: Categorize Continuous Variables
     menuSubtitle: Bin numeric variables into categories
     description: >
@@ -128,7 +128,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -384,13 +384,13 @@ analyses:
   - title: Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Outlier Detection
     menuSubtitle: easystats Performance Package
     description: >
-      Advanced outlier detection using multiple statistical methods from the
-      easystats performance package.
+      Outlier detection using multiple statistical methods from the easystats
+      performance package.
 
       This module provides comprehensive outlier detection through univariate
       methods (Z-scores, IQR, confidence intervals),
@@ -734,7 +734,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: OncoPathT
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -918,7 +918,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: >
@@ -1018,7 +1018,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1035,7 +1035,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -1052,7 +1052,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -1096,7 +1096,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
@@ -1106,7 +1106,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -1168,7 +1168,7 @@ analyses:
   - title: DateTime Converter
     name: datetimeconverter
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: Data Preparation
     menuTitle: DateTime Converter
     menuSubtitle: Convert datetime and extract components
@@ -1224,7 +1224,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1664,7 +1664,7 @@ analyses:
   - title: Scatter Plot
     name: jjscatterstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Continuous vs Continuous
     menuTitle: Scatter Plot
     ribbon: analyses
@@ -1711,7 +1711,7 @@ analyses:
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
@@ -1723,7 +1723,7 @@ analyses:
   - title: Dot Chart
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart
     ribbon: analyses
@@ -2029,7 +2029,7 @@ analyses:
     ns: ClinicoPath
     menuGroup: JJStatsPlotT
     menuTitle: Base Graphics Visualization
-    menuSubgroup: Base R Graphics
+    menuSubgroup: All-In-One
     menuSubtitle: Fast & Customizable Base R Plots
     description: >-
       Base R graphics visualization module providing fast, blazing fast, and
@@ -5727,7 +5727,7 @@ analyses:
     name: survivalendpoints
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: OncoPathT
     menuSubgroup: Data Preparation
     menuTitle: Survival Endpoint Derivation
     menuSubtitle: Derive PFS, OS, TTP, DOR from Timeline Data
@@ -5757,6 +5757,26 @@ analyses:
       lesion summation, new lesion detection, non-target progression assessment,
       and response confirmation requirements. REGULATORY-READY: Suitable for
       clinical trial endpoints and regulatory submissions.
+  - title: Date/DateTime Validator
+    name: datevalidator
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: Data Preparation
+    menuTitle: Date/DateTime Validator
+    menuSubtitle: Validate and diagnose messy date/datetime formats
+    description: >-
+      Comprehensive date and datetime field validation and quality assessment
+      using multiple R packages (datefixR, anytime, lubridate).
+
+      This module validates and diagnoses messy date/datetime formats commonly
+      found in clinical databases: different separators,
+
+      month representations, missing components, and ambiguous formats. Provides
+      detailed validation reports and quality assessment.
+
+      Perfect for clinical research data quality control and database audit
+      workflows.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

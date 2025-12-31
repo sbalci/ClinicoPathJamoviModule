@@ -1,0 +1,1699 @@
+ℹ Loading ClinicoPath
+Registered S3 methods overwritten by 'car':
+  method       from
+  hist.boot    FSA 
+  confint.boot FSA 
+Registered S3 methods overwritten by 'Hmisc':
+  method               from   
+  as.data.frame.impute tangram
+  print.impute         tangram
+  [.impute             tangram
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 methods overwritten by 'ggfortify':
+  method          from   
+  autoplot.acf    useful 
+  autoplot.glmnet parsnip
+  fortify.acf     useful 
+  fortify.kmeans  useful 
+  fortify.ts      useful 
+Registered S3 method overwritten by 'spatstat.explore':
+  method   from
+  plot.roc pROC
+Registered S3 method overwritten by 'partitions':
+  method            from
+  print.equivalence lava
+Registered S3 method overwritten by 'DoE.base':
+  method           from       
+  factorize.factor conf.design
+Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+Registered S3 methods overwritten by 'forecast':
+  method                 from     
+  autoplot.Arima         ggfortify
+  autoplot.acf           ggfortify
+  autoplot.ar            ggfortify
+  autoplot.bats          ggfortify
+  autoplot.decomposed.ts ggfortify
+  autoplot.ets           ggfortify
+  autoplot.forecast      ggfortify
+  autoplot.stl           ggfortify
+  autoplot.ts            ggfortify
+  fitted.ar              ggfortify
+  fortify.ts             ggfortify
+  residuals.ar           ggfortify
+Registered S3 methods overwritten by 'logspline':
+  method               from     
+  plot.logspline       polspline
+  plot.oldlogspline    polspline
+  print.logspline      polspline
+  print.oldlogspline   polspline
+  summary.logspline    polspline
+  summary.oldlogspline polspline
+Registered S3 methods overwritten by 'huge':
+  method    from            
+  plot.roc  spatstat.explore
+  plot.sim  lava            
+  print.roc pROC            
+  print.sim lava            
+Registered S3 method overwritten by 'fit.models':
+  method       from 
+  vcov.default Hmisc
+Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+Serdar Balci MD Pathologist 
+ https://www.serdarbalci.com/ 
+ 
+There were 50 or more warnings (use warnings() to see the first 50)
+
+══ Testing test-coxdiagnostics.R ═══════════════════════════════════════════════
+
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 1 ]
+[ FAIL 0 | WARN 2 | SKIP 0 | PASS 1 ]
+[ FAIL 0 | WARN 2 | SKIP 0 | PASS 2 ]
+[ FAIL 0 | WARN 3 | SKIP 0 | PASS 2 ]
+[ FAIL 0 | WARN 3 | SKIP 0 | PASS 3 ]
+[ FAIL 0 | WARN 4 | SKIP 0 | PASS 3 ]
+[ FAIL 0 | WARN 4 | SKIP 0 | PASS 4 ]
+[ FAIL 0 | WARN 5 | SKIP 0 | PASS 4 ]
+[ FAIL 0 | WARN 5 | SKIP 0 | PASS 5 ]
+[ FAIL 0 | WARN 6 | SKIP 0 | PASS 5 ]
+[ FAIL 0 | WARN 6 | SKIP 0 | PASS 6 ]
+[ FAIL 0 | WARN 7 | SKIP 0 | PASS 6 ]
+[ FAIL 0 | WARN 7 | SKIP 0 | PASS 7 ]
+[ FAIL 0 | WARN 8 | SKIP 0 | PASS 7 ]
+[ FAIL 0 | WARN 8 | SKIP 0 | PASS 8 ]
+[ FAIL 0 | WARN 9 | SKIP 0 | PASS 8 ]
+[ FAIL 0 | WARN 9 | SKIP 0 | PASS 9 ]
+[ FAIL 0 | WARN 10 | SKIP 0 | PASS 9 ]
+[ FAIL 0 | WARN 10 | SKIP 0 | PASS 10 ]
+[ FAIL 0 | WARN 11 | SKIP 0 | PASS 10 ]
+[ FAIL 0 | WARN 11 | SKIP 0 | PASS 11 ]
+[ FAIL 0 | WARN 12 | SKIP 0 | PASS 11 ]
+[ FAIL 0 | WARN 12 | SKIP 0 | PASS 12 ]
+[ FAIL 0 | WARN 12 | SKIP 0 | PASS 13 ]
+[ FAIL 0 | WARN 13 | SKIP 0 | PASS 13 ]
+[ FAIL 0 | WARN 13 | SKIP 0 | PASS 14 ]
+[ FAIL 0 | WARN 13 | SKIP 0 | PASS 15 ]
+[ FAIL 1 | WARN 13 | SKIP 0 | PASS 15 ]
+[ FAIL 1 | WARN 13 | SKIP 0 | PASS 16 ]
+[ FAIL 1 | WARN 13 | SKIP 0 | PASS 17 ]
+[ FAIL 1 | WARN 14 | SKIP 0 | PASS 17 ]
+[ FAIL 1 | WARN 14 | SKIP 0 | PASS 18 ]
+[ FAIL 1 | WARN 15 | SKIP 0 | PASS 18 ]
+[ FAIL 1 | WARN 16 | SKIP 0 | PASS 18 ]
+[ FAIL 1 | WARN 16 | SKIP 0 | PASS 19 ]
+[ FAIL 1 | WARN 17 | SKIP 0 | PASS 19 ]
+[ FAIL 1 | WARN 17 | SKIP 0 | PASS 20 ]
+[ FAIL 1 | WARN 17 | SKIP 0 | PASS 21 ]
+[ FAIL 1 | WARN 18 | SKIP 0 | PASS 21 ]
+[ FAIL 1 | WARN 18 | SKIP 0 | PASS 22 ]
+[ FAIL 1 | WARN 19 | SKIP 0 | PASS 22 ]
+[ FAIL 1 | WARN 19 | SKIP 0 | PASS 23 ]
+[ FAIL 2 | WARN 19 | SKIP 0 | PASS 23 ]
+[ FAIL 2 | WARN 20 | SKIP 0 | PASS 23 ]
+[ FAIL 2 | WARN 21 | SKIP 0 | PASS 23 ]
+[ FAIL 2 | WARN 22 | SKIP 0 | PASS 23 ]
+[ FAIL 2 | WARN 22 | SKIP 0 | PASS 24 ]
+[ FAIL 2 | WARN 22 | SKIP 0 | PASS 25 ]
+[ FAIL 2 | WARN 22 | SKIP 0 | PASS 26 ]
+[ FAIL 2 | WARN 23 | SKIP 0 | PASS 26 ]
+[ FAIL 2 | WARN 24 | SKIP 0 | PASS 26 ]
+[ FAIL 2 | WARN 25 | SKIP 0 | PASS 26 ]
+[ FAIL 2 | WARN 26 | SKIP 0 | PASS 26 ]
+[ FAIL 2 | WARN 26 | SKIP 0 | PASS 27 ]
+[ FAIL 2 | WARN 27 | SKIP 0 | PASS 27 ]
+[ FAIL 2 | WARN 28 | SKIP 0 | PASS 27 ]
+[ FAIL 2 | WARN 29 | SKIP 0 | PASS 27 ]
+[ FAIL 2 | WARN 30 | SKIP 0 | PASS 27 ]
+[ FAIL 2 | WARN 30 | SKIP 0 | PASS 28 ]
+[ FAIL 2 | WARN 31 | SKIP 0 | PASS 28 ]
+[ FAIL 2 | WARN 31 | SKIP 0 | PASS 29 ]
+[ FAIL 2 | WARN 32 | SKIP 0 | PASS 29 ]
+[ FAIL 2 | WARN 32 | SKIP 0 | PASS 30 ]
+[ FAIL 2 | WARN 33 | SKIP 0 | PASS 30 ]
+[ FAIL 2 | WARN 33 | SKIP 0 | PASS 31 ]
+[ FAIL 2 | WARN 34 | SKIP 0 | PASS 31 ]
+[ FAIL 2 | WARN 34 | SKIP 0 | PASS 32 ]
+[ FAIL 2 | WARN 35 | SKIP 0 | PASS 32 ]
+[ FAIL 2 | WARN 35 | SKIP 0 | PASS 33 ]
+[ FAIL 2 | WARN 36 | SKIP 0 | PASS 33 ]
+[ FAIL 2 | WARN 36 | SKIP 0 | PASS 34 ]
+[ FAIL 2 | WARN 37 | SKIP 0 | PASS 34 ]
+[ FAIL 2 | WARN 37 | SKIP 0 | PASS 35 ]
+[ FAIL 2 | WARN 38 | SKIP 0 | PASS 35 ]
+[ FAIL 2 | WARN 38 | SKIP 0 | PASS 36 ]
+[ FAIL 2 | WARN 39 | SKIP 0 | PASS 36 ]
+[ FAIL 2 | WARN 39 | SKIP 0 | PASS 37 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 37 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 38 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 39 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 40 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 41 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 42 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 43 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 44 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 45 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 46 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 47 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 48 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 49 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 50 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 51 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 52 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 53 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 54 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 55 ]
+[ FAIL 2 | WARN 40 | SKIP 0 | PASS 56 ]
+[ FAIL 2 | WARN 41 | SKIP 0 | PASS 56 ]
+[ FAIL 2 | WARN 41 | SKIP 0 | PASS 57 ]
+[ FAIL 2 | WARN 42 | SKIP 0 | PASS 57 ]
+[ FAIL 2 | WARN 42 | SKIP 0 | PASS 58 ]
+[ FAIL 2 | WARN 43 | SKIP 0 | PASS 58 ]
+[ FAIL 2 | WARN 43 | SKIP 0 | PASS 59 ]
+[ FAIL 2 | WARN 44 | SKIP 0 | PASS 59 ]
+[ FAIL 2 | WARN 44 | SKIP 0 | PASS 60 ]
+[ FAIL 2 | WARN 45 | SKIP 0 | PASS 60 ]
+[ FAIL 2 | WARN 45 | SKIP 0 | PASS 61 ]
+[ FAIL 2 | WARN 46 | SKIP 0 | PASS 61 ]
+[ FAIL 2 | WARN 46 | SKIP 0 | PASS 62 ]
+[ FAIL 2 | WARN 47 | SKIP 0 | PASS 62 ]
+[ FAIL 2 | WARN 47 | SKIP 0 | PASS 63 ]
+
+── Warning ('test-coxdiagnostics.R:41:9'): coxdiagnostics works ────────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:40:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:41:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:51:9'): coxdiagnostics works ────────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:50:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:51:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:66:9'): coxdiagnostics works ────────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:65:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:66:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:79:9'): coxdiagnostics works ────────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:78:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:79:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:91:9'): coxdiagnostics works ────────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:90:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:91:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:106:9'): coxdiagnostics works ───────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:105:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:106:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:125:13'): coxdiagnostics works ──────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:124:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:125:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:125:13'): coxdiagnostics works ──────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:124:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:125:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:125:13'): coxdiagnostics works ──────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:124:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:125:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:141:13'): coxdiagnostics works ──────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:140:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:141:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:141:13'): coxdiagnostics works ──────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:140:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:141:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:141:13'): coxdiagnostics works ──────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:140:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:141:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:168:9'): coxdiagnostics works ───────────────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:167:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:168:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Failure ('test-coxdiagnostics.R:210:5'): coxdiagnostics handles edge cases ──
+Expected `{ ... }` not to throw any errors.
+Actually got a <simpleError> with message:
+  'names' attribute [4] must be the same length as the vector [0]
+
+── Warning ('test-coxdiagnostics.R:235:9'): coxdiagnostics handles edge cases ──
+Ran out of iterations and did not converge
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:234:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:235:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.           └─survival::coxph.fit(...)
+
+── Warning ('test-coxdiagnostics.R:252:9'): coxdiagnostics handles edge cases ──
+Ran out of iterations and did not converge
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:251:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:252:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.           └─survival::coxph.fit(...)
+
+── Warning ('test-coxdiagnostics.R:252:9'): coxdiagnostics handles edge cases ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:251:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:252:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:269:9'): coxdiagnostics handles edge cases ──
+Ran out of iterations and did not converge
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:268:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:269:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.           └─survival::coxph.fit(...)
+
+── Warning ('test-coxdiagnostics.R:301:9'): coxdiagnostics handles edge cases ──
+Ran out of iterations and did not converge
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:300:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:301:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.           └─survival::coxph.fit(...)
+
+── Warning ('test-coxdiagnostics.R:327:9'): coxdiagnostics data validation ─────
+Ran out of iterations and did not converge
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:326:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:327:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.           └─survival::coxph.fit(...)
+
+── Failure ('test-coxdiagnostics.R:339:5'): coxdiagnostics data validation ─────
+Expected `{ ... }` not to throw any errors.
+Actually got a <simpleError> with message:
+  Argument 'time' requires a numeric variable ('time' is not valid)
+
+── Warning ('test-coxdiagnostics.R:353:9'): coxdiagnostics data validation ─────
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:352:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:353:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.         │ └─base::eval(tform, parent.frame())
+ 22.         │   └─base::eval(tform, parent.frame())
+ 23.         ├─stats::model.frame(...)
+ 24.         └─stats::model.frame.default(...)
+ 25.           └─base::eval(predvars, data, env)
+ 26.             └─base::eval(predvars, data, env)
+ 27.               └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:353:9'): coxdiagnostics data validation ─────
+Ran out of iterations and did not converge
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:352:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:353:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.           └─survival::coxph.fit(...)
+
+── Warning ('test-coxdiagnostics.R:353:9'): coxdiagnostics data validation ─────
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:352:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:353:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::cox.zph(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:229:17
+ 21.           └─survival:::coxph.getdata(...)
+ 22.             ├─stats::model.frame(fit)
+ 23.             └─survival:::model.frame.coxph(fit)
+ 24.               └─base::eval(temp, environment(formula$terms), parent.frame())
+ 25.                 └─base::eval(temp, environment(formula$terms), parent.frame())
+ 26.                   ├─stats::model.frame(...)
+ 27.                   └─stats::model.frame.default(...)
+ 28.                     └─base::eval(predvars, data, env)
+ 29.                       └─base::eval(predvars, data, env)
+ 30.                         └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:402:13'): coxdiagnostics with realistic data ──
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:401:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:402:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.         │ └─base::eval(tform, parent.frame())
+ 22.         │   └─base::eval(tform, parent.frame())
+ 23.         ├─stats::model.frame(...)
+ 24.         └─stats::model.frame.default(...)
+ 25.           └─base::eval(predvars, data, env)
+ 26.             └─base::eval(predvars, data, env)
+ 27.               └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:402:13'): coxdiagnostics with realistic data ──
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:401:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:402:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::cox.zph(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:229:17
+ 21.           └─survival:::coxph.getdata(...)
+ 22.             ├─stats::model.frame(fit)
+ 23.             └─survival:::model.frame.coxph(fit)
+ 24.               └─base::eval(temp, environment(formula$terms), parent.frame())
+ 25.                 └─base::eval(temp, environment(formula$terms), parent.frame())
+ 26.                   ├─stats::model.frame(...)
+ 27.                   └─stats::model.frame.default(...)
+ 28.                     └─base::eval(predvars, data, env)
+ 29.                       └─base::eval(predvars, data, env)
+ 30.                         └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:402:13'): coxdiagnostics with realistic data ──
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:401:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:402:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+ 22.           ├─stats::model.matrix(mod)
+ 23.           └─survival:::model.matrix.coxph(mod)
+ 24.             ├─stats::model.frame(object)
+ 25.             └─survival:::model.frame.coxph(object)
+ 26.               └─base::eval(temp, environment(formula$terms), parent.frame())
+ 27.                 └─base::eval(temp, environment(formula$terms), parent.frame())
+ 28.                   ├─stats::model.frame(...)
+ 29.                   └─stats::model.frame.default(...)
+ 30.                     └─base::eval(predvars, data, env)
+ 31.                       └─base::eval(predvars, data, env)
+ 32.                         └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:402:13'): coxdiagnostics with realistic data ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:401:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:402:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:416:13'): coxdiagnostics with realistic data ──
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:415:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:416:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─survival::coxph(formula_obj, data = mydata) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:226:17
+ 21.         │ └─base::eval(tform, parent.frame())
+ 22.         │   └─base::eval(tform, parent.frame())
+ 23.         ├─stats::model.frame(...)
+ 24.         └─stats::model.frame.default(...)
+ 25.           └─base::eval(predvars, data, env)
+ 26.             └─base::eval(predvars, data, env)
+ 27.               └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:416:13'): coxdiagnostics with realistic data ──
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:415:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:416:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.fit_cox_model() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:132:13
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:212:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         └─survival::cox.zph(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:229:17
+ 21.           └─survival:::coxph.getdata(...)
+ 22.             ├─stats::model.frame(fit)
+ 23.             └─survival:::model.frame.coxph(fit)
+ 24.               └─base::eval(temp, environment(formula$terms), parent.frame())
+ 25.                 └─base::eval(temp, environment(formula$terms), parent.frame())
+ 26.                   ├─stats::model.frame(...)
+ 27.                   └─stats::model.frame.default(...)
+ 28.                     └─base::eval(predvars, data, env)
+ 29.                       └─base::eval(predvars, data, env)
+ 30.                         └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:416:13'): coxdiagnostics with realistic data ──
+Invalid status value, converted to NA
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:415:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:416:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+ 22.           ├─stats::model.matrix(mod)
+ 23.           └─survival:::model.matrix.coxph(mod)
+ 24.             ├─stats::model.frame(object)
+ 25.             └─survival:::model.frame.coxph(object)
+ 26.               └─base::eval(temp, environment(formula$terms), parent.frame())
+ 27.                 └─base::eval(temp, environment(formula$terms), parent.frame())
+ 28.                   ├─stats::model.frame(...)
+ 29.                   └─stats::model.frame.default(...)
+ 30.                     └─base::eval(predvars, data, env)
+ 31.                       └─base::eval(predvars, data, env)
+ 32.                         └─survival::Surv(time, status)
+
+── Warning ('test-coxdiagnostics.R:416:13'): coxdiagnostics with realistic data ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:415:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:416:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:430:13'): coxdiagnostics with realistic data ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:429:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:430:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:442:13'): coxdiagnostics with realistic data ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:441:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:442:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:456:13'): coxdiagnostics with realistic data ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:455:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:456:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:469:13'): coxdiagnostics with realistic data ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:468:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:469:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:508:13'): coxdiagnostics plot options ───────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:507:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:508:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:508:13'): coxdiagnostics plot options ───────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:507:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:508:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:508:13'): coxdiagnostics plot options ───────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:507:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:508:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:508:13'): coxdiagnostics plot options ───────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:507:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:508:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:508:13'): coxdiagnostics plot options ───────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:507:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:508:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:508:13'): coxdiagnostics plot options ───────
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:507:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:508:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:588:9'): coxdiagnostics statistical outputs ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:587:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:588:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:605:13'): coxdiagnostics statistical outputs ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:604:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:605:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:605:13'): coxdiagnostics statistical outputs ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:604:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:605:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:605:13'): coxdiagnostics statistical outputs ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:604:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:605:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:605:13'): coxdiagnostics statistical outputs ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:604:9
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:605:13
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:622:9'): coxdiagnostics statistical outputs ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:621:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:622:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+── Warning ('test-coxdiagnostics.R:632:9'): coxdiagnostics statistical outputs ──
+No intercept: vifs may not be sensible.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_no_error(...) at test-coxdiagnostics.R:631:5
+  2. │ └─testthat:::expect_no_(...)
+  3. │   └─testthat:::quasi_capture(enquo(object), NULL, capture)
+  4. │     ├─testthat (local) .capture(...)
+  5. │     │ ├─base::withRestarts(...)
+  6. │     │ │ └─base (local) withOneRestart(expr, restarts[[1L]])
+  7. │     │ │   └─base (local) doWithOneRestart(return(expr), restart)
+  8. │     │ └─base::withCallingHandlers(...)
+  9. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 10. └─ClinicoPath::coxdiagnostics(...) at test-coxdiagnostics.R:632:9
+ 11.   └─analysis$run() at ClinicoPathJamoviModule/R/coxdiagnostics.h.R:534:5
+ 12.     ├─jmvcore (local) try(...)
+ 13.     │ └─base::eval(expr)
+ 14.     └─private$.run()
+ 15.       └─private$.generate_vif_analysis() at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:146:17
+ 16.         ├─base::tryCatch(...) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:363:13
+ 17.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 18.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 19.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 20.         ├─car::vif(private$.cox_model) at ClinicoPathJamoviModule/R/coxdiagnostics.b.R:379:17
+ 21.         └─car:::vif.default(private$.cox_model)
+
+[ FAIL 2 | WARN 47 | SKIP 0 | PASS 63 ]
+
+══ Testing test-eurostatmap.R ══════════════════════════════════════════════════
+
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
+
+-- Warning ('test-eurostatmap.R:1:1'): (code run outside of `test_that()`) -----
+`context()` was deprecated in the 3rd edition.
+Backtrace:
+    x
+ 1. \-testthat::context("Eurostat Map - eurostatmap") at test-eurostatmap.R:1:1
+ 2.   \-testthat:::edition_deprecate(3, "context()")
+ 3.     \-cli::cli_warn(...)
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]i tmap modes "plot" - "view"
+i toggle with `tmap::ttm()`
+This message is displayed once per session.
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 1 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 2 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 3 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 4 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 5 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 6 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 7 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 8 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 9 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 10 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 11 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 12 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 13 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 14 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 15 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 16 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 17 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 18 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 19 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 20 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 21 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 22 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 23 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 24 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 25 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 26 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 27 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 28 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 29 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 30 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 31 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 32 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 33 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 34 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 35 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 36 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 37 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 38 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 39 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 40 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 41 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 42 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 43 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 44 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 45 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 46 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 47 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 48 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 49 ]i tmap modes "plot" - "view"
+
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 49 ]i tmap modes "plot" - "view"
+
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 50 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 51 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 52 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 53 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 54 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 55 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 56 ]i tmap modes "plot" - "view"
+
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 57 ]
+[ FAIL 1 | WARN 1 | SKIP 0 | PASS 58 ]i tmap modes "plot" - "view"
+
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 58 ]i tmap modes "plot" - "view"
+
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 59 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 60 ]i tmap modes "plot" - "view"
+
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 61 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 62 ]i tmap modes "plot" - "view"
+
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 63 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 64 ]i tmap modes "plot" - "view"
+
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 65 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 66 ]i tmap modes "plot" - "view"
+
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 67 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 68 ]i tmap modes "plot" - "view"
+
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 69 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 70 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 71 ]
+[ FAIL 2 | WARN 1 | SKIP 0 | PASS 72 ]
+[ FAIL 3 | WARN 1 | SKIP 0 | PASS 72 ]
+
+── Failure ('test-eurostatmap.R:206:3'): eurostatmap function handles missing indicator appropriately ──
+Expected `eurostatmap(...)` to throw a error.
+
+── Failure ('test-eurostatmap.R:374:3'): eurostatmap function handles edge cases ──
+Expected `eurostatmap(...)` to throw a error.
+
+── Error ('test-eurostatmap.R:535:5'): eurostatmapClass instantiation works ────
+<evalError/missingArgError/error/condition>
+Error in `initialize(...)`: argument "options" is missing, with no default
+Backtrace:
+    ▆
+ 1. └─eurostatmapClass$new() at test-eurostatmap.R:535:5
+ 2.   └─ClinicoPath (local) initialize(...)
+ 3.     └─super$initialize(...) at ClinicoPathJamoviModule/R/eurostatmap.h.R:259:13
+
+[ FAIL 3 | WARN 1 | SKIP 0 | PASS 72 ]
+
+══ Testing test-eurostatmap-turkey.R ═══════════════════════════════════════════
+
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
+
+-- Warning ('test-eurostatmap-turkey.R:4:1'): (code run outside of `test_that()`) --
+`context()` was deprecated in the 3rd edition.
+Backtrace:
+    x
+ 1. \-testthat::context("Eurostat Map - Turkey Data Tests") at test-eurostatmap-turkey.R:4:1
+ 2.   \-testthat:::edition_deprecate(3, "context()")
+ 3.     \-cli::cli_warn(...)
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:ClinicoPath':
+
+    collapse, groups, select
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 1 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 2 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 3 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 4 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 5 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 6 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 7 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 8 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 9 ]i tmap modes "plot" - "view"
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 10 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 11 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 12 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 13 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 14 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 15 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 16 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 17 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 18 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 19 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 20 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 21 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 22 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 23 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 24 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 25 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 26 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 27 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 28 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 29 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 30 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 31 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 32 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 33 ]
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 33 ]

@@ -6,8 +6,6 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            clinical_preset = "overall_survival",
-            guided_mode = TRUE,
             elapsedtime = NULL,
             tint = FALSE,
             dxdate = NULL,
@@ -52,20 +50,6 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..clinical_preset <- jmvcore::OptionList$new(
-                "clinical_preset",
-                clinical_preset,
-                options=list(
-                    "overall_survival",
-                    "disease_free",
-                    "treatment_effect",
-                    "post_surgical",
-                    "custom"),
-                default="overall_survival")
-            private$..guided_mode <- jmvcore::OptionBool$new(
-                "guided_mode",
-                guided_mode,
-                default=TRUE)
             private$..elapsedtime <- jmvcore::OptionVariable$new(
                 "elapsedtime",
                 elapsedtime,
@@ -264,8 +248,6 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 advancedDiagnostics,
                 default=FALSE)
 
-            self$.addOption(private$..clinical_preset)
-            self$.addOption(private$..guided_mode)
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
             self$.addOption(private$..dxdate)
@@ -307,8 +289,6 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..advancedDiagnostics)
         }),
     active = list(
-        clinical_preset = function() private$..clinical_preset$value,
-        guided_mode = function() private$..guided_mode$value,
         elapsedtime = function() private$..elapsedtime$value,
         tint = function() private$..tint$value,
         dxdate = function() private$..dxdate$value,
@@ -349,8 +329,6 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showSummaries = function() private$..showSummaries$value,
         advancedDiagnostics = function() private$..advancedDiagnostics$value),
     private = list(
-        ..clinical_preset = NA,
-        ..guided_mode = NA,
         ..elapsedtime = NA,
         ..tint = NA,
         ..dxdate = NA,
@@ -397,6 +375,9 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        errors = function() private$.items[["errors"]],
+        warnings = function() private$.items[["warnings"]],
+        info = function() private$.items[["info"]],
         medianHeading = function() private$.items[["medianHeading"]],
         medianTable = function() private$.items[["medianTable"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
@@ -415,9 +396,9 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         personTimeHeading3 = function() private$.items[["personTimeHeading3"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         plot = function() private$.items[["plot"]],
+        plot6 = function() private$.items[["plot6"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
-        plot6 = function() private$.items[["plot6"]],
         survivalPlotsHeading3 = function() private$.items[["survivalPlotsHeading3"]],
         survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
         baselineHazardHeading = function() private$.items[["baselineHazardHeading"]],
@@ -458,6 +439,48 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Errors",
+                visible=FALSE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="info",
+                title="Information",
+                visible=FALSE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianHeading",
@@ -514,9 +537,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "elapsedtime",
-                    "clinical_preset",
-                    "guided_mode")))
+                    "elapsedtime")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -755,6 +776,30 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "medianline")))
             self$add(jmvcore::Image$new(
                 options=options,
+                name="plot6",
+                title="KMunicate-Style Plot",
+                width=600,
+                height=450,
+                renderFun=".plot6",
+                visible="(kmunicate)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "kmunicate",
+                    "endplot",
+                    "byplot",
+                    "sas",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent"),
+                refs=list(
+                    "KMunicate",
+                    "KMunicate2")))
+            self$add(jmvcore::Image$new(
+                options=options,
                 name="plot2",
                 title="Cumulative Events",
                 width=600,
@@ -801,30 +846,6 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot6",
-                title="KMunicate-Style Plot",
-                width=600,
-                height=450,
-                renderFun=".plot6",
-                visible="(kmunicate)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "kmunicate",
-                    "endplot",
-                    "byplot",
-                    "sas",
-                    "outcome",
-                    "outcomeLevel",
-                    "elapsedtime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent"),
-                refs=list(
-                    "KMunicate",
-                    "KMunicate2")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survivalPlotsHeading3",
@@ -1019,7 +1040,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "singlearm",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = singlearmResults$new(options=options),
                 data = data,
@@ -1052,11 +1073,6 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #   outcomeLevel = "Dead"
 #' # )
 #'}
-#' @param clinical_preset Select the type of survival analysis that matches
-#'   your research question. This automatically configures appropriate settings
-#'   for your study type.
-#' @param guided_mode Enables step-by-step guidance and clinical
-#'   interpretation helpers. Recommended for users new to survival analysis.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time-to-event or follow-up duration for each
 #'   patient. The sum of these values represents the total person-time follow-up
@@ -1191,6 +1207,9 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$info} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
@@ -1209,9 +1228,9 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$personTimeHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$baselineHazardHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1236,8 +1255,6 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 singlearm <- function(
-    clinical_preset = "overall_survival",
-    guided_mode = TRUE,
     data,
     elapsedtime,
     tint = FALSE,
@@ -1294,8 +1311,6 @@ singlearm <- function(
 
 
     options <- singlearmOptions$new(
-        clinical_preset = clinical_preset,
-        guided_mode = guided_mode,
         elapsedtime = elapsedtime,
         tint = tint,
         dxdate = dxdate,
