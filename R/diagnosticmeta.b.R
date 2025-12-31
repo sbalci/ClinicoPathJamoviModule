@@ -217,13 +217,9 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     private$.pooled_sensitivity <- NULL
                     private$.pooled_specificity <- NULL
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = '.bivariateAnalysisError',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('Bivariate analysis error: %s', e$message))
-                    self$results$insert(50, notice)
+                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
+                    # Instead, use table note
+                    self$results$bivariateresults$setNote("error", sprintf('Bivariate analysis error: %s', e$message))
                     private$.generateSummary(meta_data)
                 })
             } else {
@@ -240,14 +236,9 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performHSROCAnalysis(meta_data = meta_data,
                                                   mada_data = mada_data)
                 }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = '.hsrocAnalysisError',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('HSROC analysis error: %s', e$message))
-                    self$results$insert(51, notice)
-                    self$results$hsrocresults$setNote("error", e$message)
+                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
+                    # Use table note instead
+                    self$results$hsrocresults$setNote("error", sprintf('HSROC analysis error: %s', e$message))
                 })
             }
 
@@ -257,14 +248,9 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performHeterogeneityAnalysis(meta_data = meta_data,
                                                           analysis_data = analysis_data)
                 }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = '.heterogeneityAnalysisError',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('Heterogeneity analysis error: %s', e$message))
-                    self$results$insert(52, notice)
-                    self$results$heterogeneity$setNote("error", e$message)
+                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
+                    # Use table note instead
+                    self$results$heterogeneity$setNote("error", sprintf('Heterogeneity analysis error: %s', e$message))
                 })
             }
 
@@ -274,14 +260,9 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performMetaRegression(meta_data = meta_data,
                                                    analysis_data = analysis_data)
                 }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = '.metaRegressionError',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('Meta-regression error: %s', e$message))
-                    self$results$insert(53, notice)
-                    self$results$metaregression$setNote("error", e$message)
+                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
+                    # Use table note instead
+                    self$results$metaregression$setNote("error", sprintf('Meta-regression error: %s', e$message))
                 })
             }
 
@@ -291,14 +272,9 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.performPublicationBiasAssessment(meta_data = meta_data,
                                                               analysis_data = analysis_data)
                 }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = '.publicationBiasError',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('Publication bias analysis error: %s', e$message))
-                    self$results$insert(54, notice)
-                    self$results$publicationbias$setNote("error", e$message)
+                    # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
+                    # Use table note instead
+                    self$results$publicationbias$setNote("error", sprintf('Publication bias analysis error: %s', e$message))
                 })
             }
             
@@ -340,21 +316,8 @@ diagnosticmetaClass <- R6::R6Class(
                 self$results$about$setVisible(self$options$show_methodology)
             }
 
-            # Add completion notice
-            if (!is.null(meta_data) && nrow(meta_data) >= 3) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-                total_n <- sum(meta_data$tp + meta_data$fp + meta_data$fn + meta_data$tn, na.rm = TRUE)
-                method_used <- self$options$method %||% "reml"
-                notice$setContent(sprintf(
-                    'Diagnostic meta-analysis completed using %d studies (N=%d total participants). Method: %s. Confidence level: %d%%.',
-                    nrow(meta_data), total_n, toupper(method_used), self$options$confidence_level
-                ))
-                self$results$insert(999, notice)
-            }
+            # SERIALIZATION FIX: Removed completion notice (causes serialization errors)
+            # Analysis completion info is shown in summary table instead
         },
         
         .performBivariateMetaAnalysis = function(meta_data, analysis_data, mada_data) {
@@ -382,16 +345,11 @@ diagnosticmetaClass <- R6::R6Class(
             valid_methods <- c("fixed", "ml", "reml", "mm", "vc")
             if (!(method_option %in% valid_methods)) {
                 method_used <- "reml"
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.methodNotSupported',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf(
+                # SERIALIZATION FIX: Use table note instead of inserting Notice
+                self$results$bivariateresults$setNote("method_warning", sprintf(
                     "Method '%s' is not supported for bivariate diagnostic meta-analysis. Using REML instead.",
                     method_option
                 ))
-                self$results$insert(55, notice)
             } else {
                 method_used <- method_option
             }
@@ -486,16 +444,10 @@ diagnosticmetaClass <- R6::R6Class(
             sens_i2 <- NA_real_
             spec_i2 <- NA_real_
 
-            # Add note about heterogeneity to table
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = '.heterogeneityNote',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice$setContent(
+            # SERIALIZATION FIX: Use table note instead of inserting Notice
+            self$results$bivariateresults$setNote("heterogeneity_info",
                 "I² values are not included in the bivariate table as univariate I² calculations ignore within-study correlation and bivariate model structure. Please refer to the Heterogeneity Assessment table for proper evaluation using Q-statistics and tau-squared."
             )
-            self$results$insert(60, notice)
 
             bivariate_table$addRow(rowKey = "sensitivity", values = list(
                 parameter = "Pooled Sensitivity",
@@ -843,28 +795,19 @@ diagnosticmetaClass <- R6::R6Class(
             analysis_data <- analysis_data[!is.na(analysis_data$covariate), , drop = FALSE]
 
             if (nrow(analysis_data) < 3) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'metaRegressionTooFewStudies',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent('Meta-regression not run: fewer than three studies remain after removing missing covariate values.')
-                self$results$insert(61, notice)
+                # SERIALIZATION FIX: Use table note instead of inserting Notice
+                self$results$metaregression$setNote("insufficient_data",
+                    'Meta-regression not run: fewer than three studies remain after removing missing covariate values.')
                 return()
             }
 
             # Stability warning for small sample sizes
             if (nrow(analysis_data) < 10) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSampleMetaRegression',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf(
+                # SERIALIZATION FIX: Use table note instead of inserting Notice
+                self$results$metaregression$setNote("small_sample_warning", sprintf(
                     'Meta-regression with only %d studies may produce unstable estimates. Results should be interpreted with extreme caution. Confidence intervals may be unreliable and parameter estimates may be biased. Consider reporting as exploratory analysis only.',
                     nrow(analysis_data)
                 ))
-                self$results$insert(2, notice)
             }
 
             if (requireNamespace("metafor", quietly = TRUE)) {
@@ -993,8 +936,14 @@ diagnosticmetaClass <- R6::R6Class(
         },
         
         .populateForestPlot = function(meta_data) {
-            
+
             image <- self$results$forestplot
+            # SERIALIZATION FIX: Ensure it's a plain data frame
+            if (!is.null(meta_data) && is.data.frame(meta_data)) {
+                meta_data <- as.data.frame(meta_data, stringsAsFactors = FALSE)
+                # Remove any attributes that might contain functions
+                attributes(meta_data) <- attributes(meta_data)[c("names", "row.names", "class")]
+            }
             image$setState(meta_data)
         },
         
@@ -1206,7 +1155,49 @@ diagnosticmetaClass <- R6::R6Class(
                 return()
             }
 
-            image$setState(list(model = private$.biv_model, data = meta_data))
+            # CRITICAL FIX: Extract only serializable data from model
+            # Do NOT store the model object itself (contains non-serializable functions)
+            biv_model <- private$.biv_model
+            summary_results <- summary(biv_model)
+            coefficients <- summary_results$coefficients
+
+            # Helper to safely get coefficient by name
+            get_coef <- function(target) {
+                if (is.null(rownames(coefficients))) return(NULL)
+                idx <- which(rownames(coefficients) == target)
+                if (length(idx) == 0) idx <- which(tolower(rownames(coefficients)) == tolower(target))
+                if (length(idx) > 0) coefficients[idx[1], 1] else NULL
+            }
+
+            sum_sens <- get_coef("sensitivity")
+            sum_fpr <- get_coef("false pos. rate")
+
+            # Fallback to intercept transformation if named rows missing
+            if (is.null(sum_sens)) {
+                tsens <- get_coef("tsens.(Intercept)")
+                if (!is.null(tsens)) sum_sens <- stats::plogis(tsens)
+            }
+
+            if (is.null(sum_fpr)) {
+                tfpr <- get_coef("tfpr.(Intercept)")
+                if (!is.null(tfpr)) sum_fpr <- stats::plogis(tfpr)
+            }
+
+            # Store only serializable data (no model object!)
+            # SERIALIZATION FIX: Ensure meta_data is a plain data frame
+            if (!is.null(meta_data) && is.data.frame(meta_data)) {
+                meta_data <- as.data.frame(meta_data, stringsAsFactors = FALSE)
+                # Remove any attributes that might contain functions
+                attributes(meta_data) <- attributes(meta_data)[c("names", "row.names", "class")]
+            }
+
+            plot_state <- list(
+                data = meta_data,
+                pooled_sens = as.numeric(sum_sens),
+                pooled_fpr = as.numeric(sum_fpr)
+            )
+
+            image$setState(plot_state)
         },
         
         .srocplot = function(image, ggtheme, theme, ...) {
@@ -1216,44 +1207,20 @@ diagnosticmetaClass <- R6::R6Class(
                 return(FALSE)
             }
 
-            biv_model <- state$model
+            # Extract pre-computed values from state (no model object)
             meta_data <- state$data
+            sum_sens <- state$pooled_sens
+            sum_fpr <- state$pooled_fpr
 
-            # Validate model and data
-            if (is.null(biv_model) || is.null(meta_data) || !is.data.frame(meta_data) || nrow(meta_data) == 0) {
+            # Validate data
+            if (is.null(meta_data) || !is.data.frame(meta_data) || nrow(meta_data) == 0) {
                 return(FALSE)
             }
 
-            if (requireNamespace("ggplot2", quietly = TRUE)) {
+            # Check if we have summary point values
+            has_summary <- !is.null(sum_sens) && !is.null(sum_fpr)
 
-                # CRITICAL FIX: Get summary point from bivariate model
-                summary_results <- summary(biv_model)
-                coefficients <- summary_results$coefficients
-                
-                # Helper to safely get coefficient by name
-                get_coef <- function(target) {
-                    if (is.null(rownames(coefficients))) return(NULL)
-                    idx <- which(rownames(coefficients) == target)
-                    if (length(idx) == 0) idx <- which(tolower(rownames(coefficients)) == tolower(target))
-                    if (length(idx) > 0) coefficients[idx[1], 1] else NULL
-                }
-                
-                sum_sens <- get_coef("sensitivity")
-                sum_fpr <- get_coef("false pos. rate")
-                
-                # Fallback to intercept transformation if named rows missing
-                if (is.null(sum_sens)) {
-                    tsens <- get_coef("tsens.(Intercept)")
-                    if (!is.null(tsens)) sum_sens <- stats::plogis(tsens)
-                }
-                
-                if (is.null(sum_fpr)) {
-                    tfpr <- get_coef("tfpr.(Intercept)")
-                    if (!is.null(tfpr)) sum_fpr <- stats::plogis(tfpr)
-                }
-                
-                # If still missing, cannot plot summary point
-                has_summary <- !is.null(sum_sens) && !is.null(sum_fpr)
+            if (requireNamespace("ggplot2", quietly = TRUE)) {
 
                 # Individual study points
                 meta_data$sens <- meta_data$tp / (meta_data$tp + meta_data$fn)
@@ -1291,8 +1258,14 @@ diagnosticmetaClass <- R6::R6Class(
         },
         
         .populateFunnelPlot = function(meta_data) {
-            
+
             image <- self$results$funnelplot
+            # SERIALIZATION FIX: Ensure it's a plain data frame
+            if (!is.null(meta_data) && is.data.frame(meta_data)) {
+                meta_data <- as.data.frame(meta_data, stringsAsFactors = FALSE)
+                # Remove any attributes that might contain functions
+                attributes(meta_data) <- attributes(meta_data)[c("names", "row.names", "class")]
+            }
             image$setState(meta_data)
         },
         
@@ -1684,16 +1657,14 @@ diagnosticmetaClass <- R6::R6Class(
 
             # Check minimum study requirement first (critical error)
             if (nrow(meta_data) < 3) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'insufficientData',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
+                # SERIALIZATION FIX: Use table note instead of inserting Notice
+                error_msg <- sprintf(
                     'Meta-analysis requires at least 3 studies with complete data. Current studies: %d. Please add more studies or use individual study analysis instead.',
                     nrow(meta_data)
-                ))
-                self$results$insert(999, notice)
+                )
+                self$results$bivariateresults$setNote("insufficient_data", error_msg)
+                self$results$hsrocresults$setNote("insufficient_data", error_msg)
+                self$results$heterogeneity$setNote("insufficient_data", error_msg)
                 return(FALSE)
             }
 
@@ -1781,18 +1752,13 @@ diagnosticmetaClass <- R6::R6Class(
                                          empirical = "empirical (1/N) correction",
                                          "unknown method")
 
-                    # Add STRONG_WARNING notice for zero-cell correction
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'zeroCellCorrection',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf(
+                    # SERIALIZATION FIX: Use table note instead of inserting Notice
+                    warning_msg <- sprintf(
                         'Zero-cell correction applied (%s) to %d of %d studies (%s). Results should be interpreted with caution as corrections can introduce bias, especially in large studies.',
                         method_label, n_corrected, private$.n_studies,
                         paste(head(private$.corrected_study_names, 3), collapse = ', ')
-                    ))
-                    self$results$insert(3, notice)
+                    )
+                    self$results$bivariateresults$setNote("zero_cell_warning", warning_msg)
 
                     correction_disclosure <- sprintf(
                         "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
