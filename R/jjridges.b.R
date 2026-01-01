@@ -989,8 +989,16 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply faceting if requested
             if (!is.null(self$options$facet_var)) {
                 show_facet_legend <- self$options$show_facet_legend %||% TRUE
+
+                # Create custom labeller to show variable name and value
+                facet_var_name <- self$options$facet_var
+                custom_labeller <- function(labels) {
+                    lapply(labels, function(x) paste0(facet_var_name, ": ", x))
+                }
+
                 if (show_facet_legend) {
-                    p <- p + facet_wrap(~ facet, scales = "free_x")
+                    p <- p + facet_wrap(~ facet, scales = "free_x",
+                                       labeller = labeller(facet = custom_labeller))
                 } else {
                     p <- p + facet_wrap(~ facet, scales = "free_x") +
                         theme(strip.text = element_blank())
