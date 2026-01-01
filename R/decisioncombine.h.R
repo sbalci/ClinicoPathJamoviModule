@@ -214,7 +214,8 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         heatmapPlot = function() private$.items[["heatmapPlot"]],
         forestPlot = function() private$.items[["forestPlot"]],
         decisionTreePlot = function() private$.items[["decisionTreePlot"]],
-        recommendationTable = function() private$.items[["recommendationTable"]]),
+        recommendationTable = function() private$.items[["recommendationTable"]],
+        notices = function() private$.items[["notices"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -625,7 +626,12 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="rationale", 
                         `title`="Clinical Rationale", 
-                        `type`="text"))))}))
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
+                visible=TRUE))}))
 
 decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineBase",
@@ -713,6 +719,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95\% confidence intervals for key diagnostic metrics \cr
 #'   \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Hierarchical decision tree showing test patterns with performance-based recommendations \cr
 #'   \code{results$recommendationTable} \tab \tab \tab \tab \tab Recommended optimal test combination pattern based on Youden index and clinical performance metrics \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -19,6 +19,23 @@ items:
         - goldNegative
         - testNegative
 
+    # Notice outputs converted to HTML to avoid serialization errors
+    - name: notices
+      title: 'Important Information'
+      type: Html
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
+        - goldNegative
+        - testNegative
+        - pp
+        - pprob
+        - ci
+        - showMisclassified
+        - maxCasesShow
+
     # - name:  todo
     #   title: To Do
     #   type:  Html
@@ -477,6 +494,18 @@ items:
       title: 'Interpretation of Misclassified Cases'
       type: Html
       visible: (showMisclassified)
+
+    - name: saveClassifications
+      title: 'Classification Groups'
+      type: Output
+      varTitle: "Classification Group"
+      varDescription: "Classification of each case: True Positive, False Positive, False Negative, or True Negative"
+      measureType: nominal
+      clearWith:
+        - gold
+        - newtest
+        - goldPositive
+        - testPositive
 
 
 refs:

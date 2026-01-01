@@ -21,22 +21,18 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             consensus_method = "majority",
             tie_breaking = "exclude",
             show_consensus_table = FALSE,
-            showClinicalSummary = TRUE,
+            showClinicalSummary = FALSE,
             showAboutAnalysis = FALSE,
             showAssumptions = FALSE,
             showWeightedKappaGuide = FALSE,
             showStatisticalGlossary = FALSE,
-            diagnosticStyleAnalysis = FALSE,
-            styleClusterMethod = "ward",
             styleDistanceMetric = "agreement",
-            styleGroups = 3,
             raterCharacteristics = FALSE,
             experienceVar = NULL,
             trainingVar = NULL,
             institutionVar = NULL,
             specialtyVar = NULL,
             identifyDiscordantCases = FALSE,
-            styleHeatmap = FALSE,
             caseID = NULL,
             icc = FALSE,
             bootstrap = FALSE,
@@ -174,7 +170,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showClinicalSummary <- jmvcore::OptionBool$new(
                 "showClinicalSummary",
                 showClinicalSummary,
-                default=TRUE)
+                default=FALSE)
             private$..showAboutAnalysis <- jmvcore::OptionBool$new(
                 "showAboutAnalysis",
                 showAboutAnalysis,
@@ -191,18 +187,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showStatisticalGlossary",
                 showStatisticalGlossary,
                 default=FALSE)
-            private$..diagnosticStyleAnalysis <- jmvcore::OptionBool$new(
-                "diagnosticStyleAnalysis",
-                diagnosticStyleAnalysis,
-                default=FALSE)
-            private$..styleClusterMethod <- jmvcore::OptionList$new(
-                "styleClusterMethod",
-                styleClusterMethod,
-                options=list(
-                    "ward",
-                    "complete",
-                    "average"),
-                default="ward")
             private$..styleDistanceMetric <- jmvcore::OptionList$new(
                 "styleDistanceMetric",
                 styleDistanceMetric,
@@ -211,12 +195,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "correlation",
                     "euclidean"),
                 default="agreement")
-            private$..styleGroups <- jmvcore::OptionNumber$new(
-                "styleGroups",
-                styleGroups,
-                min=2,
-                max=10,
-                default=3)
             private$..raterCharacteristics <- jmvcore::OptionBool$new(
                 "raterCharacteristics",
                 raterCharacteristics,
@@ -248,10 +226,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..identifyDiscordantCases <- jmvcore::OptionBool$new(
                 "identifyDiscordantCases",
                 identifyDiscordantCases,
-                default=FALSE)
-            private$..styleHeatmap <- jmvcore::OptionBool$new(
-                "styleHeatmap",
-                styleHeatmap,
                 default=FALSE)
             private$..caseID <- jmvcore::OptionVariable$new(
                 "caseID",
@@ -456,17 +430,13 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showAssumptions)
             self$.addOption(private$..showWeightedKappaGuide)
             self$.addOption(private$..showStatisticalGlossary)
-            self$.addOption(private$..diagnosticStyleAnalysis)
-            self$.addOption(private$..styleClusterMethod)
             self$.addOption(private$..styleDistanceMetric)
-            self$.addOption(private$..styleGroups)
             self$.addOption(private$..raterCharacteristics)
             self$.addOption(private$..experienceVar)
             self$.addOption(private$..trainingVar)
             self$.addOption(private$..institutionVar)
             self$.addOption(private$..specialtyVar)
             self$.addOption(private$..identifyDiscordantCases)
-            self$.addOption(private$..styleHeatmap)
             self$.addOption(private$..caseID)
             self$.addOption(private$..icc)
             self$.addOption(private$..bootstrap)
@@ -524,17 +494,13 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showAssumptions = function() private$..showAssumptions$value,
         showWeightedKappaGuide = function() private$..showWeightedKappaGuide$value,
         showStatisticalGlossary = function() private$..showStatisticalGlossary$value,
-        diagnosticStyleAnalysis = function() private$..diagnosticStyleAnalysis$value,
-        styleClusterMethod = function() private$..styleClusterMethod$value,
         styleDistanceMetric = function() private$..styleDistanceMetric$value,
-        styleGroups = function() private$..styleGroups$value,
         raterCharacteristics = function() private$..raterCharacteristics$value,
         experienceVar = function() private$..experienceVar$value,
         trainingVar = function() private$..trainingVar$value,
         institutionVar = function() private$..institutionVar$value,
         specialtyVar = function() private$..specialtyVar$value,
         identifyDiscordantCases = function() private$..identifyDiscordantCases$value,
-        styleHeatmap = function() private$..styleHeatmap$value,
         caseID = function() private$..caseID$value,
         icc = function() private$..icc$value,
         bootstrap = function() private$..bootstrap$value,
@@ -591,17 +557,13 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showAssumptions = NA,
         ..showWeightedKappaGuide = NA,
         ..showStatisticalGlossary = NA,
-        ..diagnosticStyleAnalysis = NA,
-        ..styleClusterMethod = NA,
         ..styleDistanceMetric = NA,
-        ..styleGroups = NA,
         ..raterCharacteristics = NA,
         ..experienceVar = NA,
         ..trainingVar = NA,
         ..institutionVar = NA,
         ..specialtyVar = NA,
         ..identifyDiscordantCases = NA,
-        ..styleHeatmap = NA,
         ..caseID = NA,
         ..icc = NA,
         ..bootstrap = NA,
@@ -985,7 +947,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="diagnosticStyleTable",
                 title="Diagnostic Style Clustering Results",
-                visible="(diagnosticStyleAnalysis)",
+                visible="(performClustering)",
                 columns=list(
                     list(
                         `name`="rater", 
@@ -1024,7 +986,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="styleSummaryTable",
                 title="Diagnostic Style Group Summary",
-                visible="(diagnosticStyleAnalysis)",
+                visible="(performClustering)",
                 columns=list(
                     list(
                         `name`="style_group", 
@@ -1196,7 +1158,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".diagnosticStyleDendrogram",
-                visible="(diagnosticStyleAnalysis)"))
+                visible="(performClustering)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticStyleHeatmap",
@@ -1204,7 +1166,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".diagnosticStyleHeatmap",
-                visible="(diagnosticStyleAnalysis && styleHeatmap)"))
+                visible="(performClustering && showClusteringHeatmap)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticStyleCombined",
@@ -1212,7 +1174,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=1000,
                 height=1000,
                 renderFun=".diagnosticStyleCombined",
-                visible="(diagnosticStyleAnalysis)"))
+                visible="(performClustering)"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -1813,15 +1775,8 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   options, including when to use linear vs quadratic weighting schemes.
 #' @param showStatisticalGlossary Show glossary of statistical terms (kappa,
 #'   ICC, alpha, etc.) with clinical interpretations and usage guidelines.
-#' @param diagnosticStyleAnalysis Enable diagnostic style clustering analysis
-#'   using the Usubutun method to identify pathologist "schools" or diagnostic
-#'   approaches.
-#' @param styleClusterMethod Hierarchical clustering method for diagnostic
-#'   style analysis. Ward's linkage is the Usubutun standard.
 #' @param styleDistanceMetric Distance metric for measuring diagnostic
 #'   similarity between raters for style clustering.
-#' @param styleGroups Number of diagnostic style groups to identify. Usubutun
-#'   et al. found 3 groups optimal for most analyses.
 #' @param raterCharacteristics Include rater background characteristics
 #'   (experience, training, institution) in style analysis.
 #' @param experienceVar Optional variable containing rater experience
@@ -1834,7 +1789,6 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   subspecialty information
 #' @param identifyDiscordantCases Identify cases that distinguish different
 #'   diagnostic styles - useful for training and consensus development.
-#' @param styleHeatmap Display diagnostic style heatmap.
 #' @param caseID Optional variable containing case identifiers. If not
 #'   specified, cases will be numbered automatically.
 #' @param icc Calculate ICC for continuous or ordinal data. Provides
@@ -1998,22 +1952,18 @@ pathagreement <- function(
     consensus_method = "majority",
     tie_breaking = "exclude",
     show_consensus_table = FALSE,
-    showClinicalSummary = TRUE,
+    showClinicalSummary = FALSE,
     showAboutAnalysis = FALSE,
     showAssumptions = FALSE,
     showWeightedKappaGuide = FALSE,
     showStatisticalGlossary = FALSE,
-    diagnosticStyleAnalysis = FALSE,
-    styleClusterMethod = "ward",
     styleDistanceMetric = "agreement",
-    styleGroups = 3,
     raterCharacteristics = FALSE,
     experienceVar,
     trainingVar,
     institutionVar,
     specialtyVar,
     identifyDiscordantCases = FALSE,
-    styleHeatmap = FALSE,
     caseID,
     icc = FALSE,
     bootstrap = FALSE,
@@ -2105,17 +2055,13 @@ pathagreement <- function(
         showAssumptions = showAssumptions,
         showWeightedKappaGuide = showWeightedKappaGuide,
         showStatisticalGlossary = showStatisticalGlossary,
-        diagnosticStyleAnalysis = diagnosticStyleAnalysis,
-        styleClusterMethod = styleClusterMethod,
         styleDistanceMetric = styleDistanceMetric,
-        styleGroups = styleGroups,
         raterCharacteristics = raterCharacteristics,
         experienceVar = experienceVar,
         trainingVar = trainingVar,
         institutionVar = institutionVar,
         specialtyVar = specialtyVar,
         identifyDiscordantCases = identifyDiscordantCases,
-        styleHeatmap = styleHeatmap,
         caseID = caseID,
         icc = icc,
         bootstrap = bootstrap,

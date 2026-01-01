@@ -155,6 +155,7 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     "pathologyagreementResults",
     inherit = jmvcore::Group,
     active = list(
+        warnings = function() private$.items[["warnings"]],
         interpretation = function() private$.items[["interpretation"]],
         summary = function() private$.items[["summary"]],
         explanations = function() private$.items[["explanations"]],
@@ -179,6 +180,11 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "ClinicoPathJamoviModule",
                     "psych",
                     "epiR"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Notices and Warnings",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -391,6 +397,7 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   this analysis, assumptions, and interpretation
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$warnings} \tab \tab \tab \tab \tab Important notices, warnings, and error messages \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab One-paragraph summary of results in plain language \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab Educational guide on agreement analysis \cr

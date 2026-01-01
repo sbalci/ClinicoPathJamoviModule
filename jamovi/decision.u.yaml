@@ -18,6 +18,9 @@ children:
           - type: LevelSelector
             name: goldPositive
             enable: (gold)
+          - type: LevelSelector
+            name: goldNegative
+            enable: (gold)
       - type: TargetLayoutBox
         label: New Test
         children:
@@ -28,9 +31,12 @@ children:
           - type: LevelSelector
             name: testPositive
             enable: (newtest)
+          - type: LevelSelector
+            name: testNegative
+            enable: (newtest)
   - type: CollapseBox
     label: Analysis Options
-    collapsed: false
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -45,11 +51,6 @@ children:
           - type: CheckBox
             name: od
             label: Show Raw Data Tables
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: goldNegative
   - type: CollapseBox
     label: Population Prevalence Settings
     collapsed: true
@@ -65,11 +66,6 @@ children:
         label: Disease Prevalence in Target Population (0.0-1.0)
         format: number
         enable: (!ci && pp)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: testNegative
   - type: CollapseBox
     label: Visualization
     collapsed: true
@@ -79,7 +75,7 @@ children:
         label: Fagan Nomogram
   - type: CollapseBox
     label: Output Options
-    collapsed: false
+    collapsed: true
     children:
       - type: CheckBox
         name: showNaturalLanguage

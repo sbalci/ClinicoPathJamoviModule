@@ -47,13 +47,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         paste(private$.escapeVar(var_name), "(", private$.escapeVar(test_name), ")")
                     )
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('missingPositiveLevel_', make.names(var_name)),
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Missing Positive Level",
+                        content = paste0("No positive level supplied for ", missing_for, ". Please select the level that represents a positive result in the variable selection panel.")
                     )
-                    notice$setContent(jmvcore::format('No positive level supplied for {variable}. • Please select the level that represents a positive result in the variable selection panel.', variable = missing_for))
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
@@ -63,13 +61,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         paste0(private$.escapeVar(test_name), " (", private$.escapeVar(var_name), ")")
                     )
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('invalidPositiveLevel_', make.names(var_name)),
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Invalid Positive Level",
+                        content = paste0('The positive level "', level, '" was not found in ', label, '. Check spelling and capitalisation. Available levels: ', paste(levels(x), collapse = ", "), '.')
                     )
-                    notice$setContent(jmvcore::format('The positive level "{level}" was not found in {variable}. • Check spelling and capitalisation. • Available levels: {levels}.', level = level, variable = label, levels = paste(levels(x), collapse = ", ")))
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
             },
@@ -145,6 +141,75 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 )
             },
 
+            # ======================================================================
+            # Notice Management Helper Methods (HTML output to avoid serialization)
+            # ======================================================================
+
+            # Initialize notice collection list
+            .noticeList = list(),
+
+            # Add a notice to the collection
+            .addNotice = function(type, title, content) {
+              private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+              )
+            },
+
+            # Render collected notices as HTML
+            .renderNotices = function() {
+              if (length(private$.noticeList) == 0) {
+                return()
+              }
+
+              # Map notice types to colors and icons
+              typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+              )
+
+              html <- "<div style='margin: 10px 0;'>"
+
+              for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+
+                html <- paste0(html,
+                  "<div style='background-color: ", style$bgcolor, "; ",
+                  "border-left: 4px solid ", style$border, "; ",
+                  "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                  "<strong style='color: ", style$color, ";'>",
+                  style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
+                  "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+                  "</div>"
+                )
+              }
+
+              html <- paste0(html, "</div>")
+
+              self$results$notices$setContent(html)
+            },
+
+            # HTML sanitization for security
+            .safeHtmlOutput = function(text) {
+              if (is.null(text) || length(text) == 0) return("")
+              text <- as.character(text)
+              # Sanitize potentially dangerous characters
+              text <- gsub("&", "&amp;", text, fixed = TRUE)
+              text <- gsub("<", "&lt;", text, fixed = TRUE)
+              text <- gsub(">", "&gt;", text, fixed = TRUE)
+              text <- gsub("\"", "&quot;", text, fixed = TRUE)
+              text <- gsub("'", "&#x27;", text, fixed = TRUE)
+              text <- gsub("/", "&#x2F;", text, fixed = TRUE)
+              return(text)
+            },
+
+            # ======================================================================
+            # Main Analysis Methods
+            # ======================================================================
+
             # Initialization - visibility now handled by .r.yaml
             .init = function() {
                 # Initialize table rows for dynamic population
@@ -216,19 +281,20 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         n_diseased <- sum(processed_data$data[[processed_data$goldVariable]] == processed_data$goldPLevel)
                         n_healthy <- n_cases - n_diseased
 
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'analysisComplete',
-                            type = jmvcore::NoticeType$INFO
+                        private$.addNotice(
+                            type = "INFO",
+                            title = "Analysis Completed Successfully",
+                            content = paste0(n_tests, " diagnostic tests compared using ", n_cases, " complete cases. Gold standard identified ", n_diseased, " diseased and ", n_healthy, " healthy cases. Review comparison tables and statistical tests below.")
                         )
-                        notice$setContent(jmvcore::format('Analysis completed successfully. • {n_tests} diagnostic tests compared using {n_cases} complete cases. • Gold standard identified {n_diseased} diseased and {n_healthy} healthy cases. • Review comparison tables and statistical tests below.', n_tests = n_tests, n_cases = n_cases, n_diseased = n_diseased, n_healthy = n_healthy))
-                        self$results$insert(999, notice)
                     },
                     error = function(e) {
                         # Re-throw the original error without wrapping
                         stop(conditionMessage(e), call. = FALSE)
                     }
                 )
+
+                # Step 11: Render all collected notices as HTML
+                private$.renderNotices()
             },
 
             # Check if minimum required variables are selected
@@ -256,13 +322,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .validateInputs = function() {
                 # Check for valid data
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noData',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "No Data Provided",
+                        content = "No data provided for analysis. Please ensure your dataset contains data. Load a dataset with diagnostic test variables and a gold standard reference."
                     )
-                    notice$setContent('No data provided for analysis. • Please ensure your dataset contains data. • Load a dataset with diagnostic test variables and a gold standard reference.')
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
@@ -283,49 +347,41 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 if (length(missing_positives) > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingPositiveLevels',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Missing Positive Levels",
+                        content = paste0("Please specify positive levels for: ", paste(missing_positives, collapse = ", "), ". Use the level selector in the variable panel to choose which level represents a positive test result.")
                     )
-                    notice$setContent(jmvcore::format('Please specify positive levels for: {tests}. • Use the level selector in the variable panel to choose which level represents a positive test result.', tests = paste(missing_positives, collapse = ", ")))
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
                 # Validate prevalence setting
                 if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidPrevalence',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Invalid Prevalence Value",
+                        content = paste0("Prior probability must be between 0 and 1 (exclusive). Current value: ", self$options$pprob, ". Enter a decimal value like 0.15 for 15% prevalence.")
                     )
-                    notice$setContent(jmvcore::format('Prior probability must be between 0 and 1 (exclusive). • Current value: {value}. • Enter a decimal value like 0.15 for 15% prevalence.', value = self$options$pprob))
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
                 # Check for conflicting options
                 if (self$options$pp && self$options$ci) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'conflictingOptions',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Conflicting Options",
+                        content = 'Prior probability and confidence intervals cannot both be enabled. Please disable either "Prior Probability" or "95% CI" option. Use CI for sample-based estimates or custom prevalence for population-based PPV/NPV.'
                     )
-                    notice$setContent('Prior probability and confidence intervals cannot both be enabled. • Please disable either "Prior Probability" or "95% CI" option. • Use CI for sample-based estimates or custom prevalence for population-based PPV/NPV.')
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
                 # Inform user about prevalence source
                 if (self$options$pp) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'ppvNpvPrevalenceSource',
-                        type = jmvcore::NoticeType$INFO
+                    private$.addNotice(
+                        type = "INFO",
+                        title = "Prevalence Source",
+                        content = "PPV/NPV will be calculated using the supplied population prevalence (pp=TRUE). Confidence intervals are unavailable in this mode."
                     )
-                    notice$setContent('PPV/NPV will be calculated using the supplied population prevalence (pp=TRUE). Confidence intervals are unavailable in this mode.')
-                    self$results$insert(999, notice)
                 }
             },
 
@@ -336,13 +392,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 goldPLevel <- self$options$goldPositive
 
                 if (is.null(goldVariable) || goldVariable == "") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noGoldStandard',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "No Gold Standard",
+                        content = "Gold standard variable must be specified. Select a reference test variable that represents the true disease status."
                     )
-                    notice$setContent('Gold standard variable must be specified. • Select a reference test variable that represents the true disease status.')
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
@@ -350,13 +404,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 testVariables <- private$.getTestVariables()
 
                 if (length(testVariables) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noTestVariables',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "No Test Variables",
+                        content = "At least one test variable must be specified. Select diagnostic test variables to compare against the gold standard."
                     )
-                    notice$setContent('At least one test variable must be specified. • Select diagnostic test variables to compare against the gold standard.')
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
@@ -374,23 +426,19 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     n_removed <- n_before - n_after
                     pct_retained <- round(n_after / n_before * 100, 1)
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingDataRemoved',
-                        type = jmvcore::NoticeType$WARNING
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = "Missing Data Removed",
+                        content = paste0("Removed ", n_removed, " rows with missing values in selected variables. ", pct_retained, "% of original data retained (", n_after, "/", n_before, " cases). This may affect prevalence estimates if data are not missing completely at random.")
                     )
-                    notice$setContent(jmvcore::format('Removed {n_removed} rows with missing values in selected variables. • {pct}% of original data retained ({n_after}/{n_before} cases). • This may affect prevalence estimates if data are not missing completely at random.', n_removed = n_removed, pct = pct_retained, n_after = n_after, n_before = n_before))
-                    self$results$insert(999, notice)
                 }
 
                 if (nrow(mydata) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noCompleteData',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "No Complete Data",
+                        content = "Data contains no complete rows after removing missing values. All cases have at least one missing value in selected variables. Check data quality and consider imputation or data cleaning."
                     )
-                    notice$setContent('Data contains no complete rows after removing missing values. • All cases have at least one missing value in selected variables. • Check data quality and consider imputation or data cleaning.')
-                    self$results$insert(999, notice)
                     stop("Validation failed", call. = FALSE)
                 }
 
@@ -401,17 +449,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Clinical profile notices: sample size adequacy
                 n_total <- nrow(mydata)
                 if (n_total < 50) {
-                    notice_type <- if (n_total < 30) jmvcore::NoticeType$STRONG_WARNING else jmvcore::NoticeType$WARNING
+                    notice_type <- if (n_total < 30) "STRONG_WARNING" else "WARNING"
+                    severity <- if (n_total < 30) "Very Small" else "Small"
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'smallSampleSize',
-                        type = notice_type
+                    private$.addNotice(
+                        type = notice_type,
+                        title = paste0(severity, " Sample Size"),
+                        content = paste0(severity, " sample size (n=", n_total, "). Confidence intervals may be wide and estimates unstable. Minimum recommended: n=50-100 for adequate precision in diagnostic accuracy studies. Consider collecting additional data for reliable assessment.")
                     )
-
-                    severity <- if (n_total < 30) "very small" else "small"
-                    notice$setContent(jmvcore::format('{severity_cap} sample size (n={n}). • Confidence intervals may be wide and estimates unstable. • Minimum recommended: n=50-100 for adequate precision in diagnostic accuracy studies. • Consider collecting additional data for reliable assessment.', severity_cap = tools::toTitleCase(severity), n = n_total))
-                    self$results$insert(999, notice)
                 }
 
                 # Clinical profile notices: extreme prevalence
@@ -419,13 +464,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 prevalence <- n_diseased / n_total
 
                 if (prevalence < 0.05 || prevalence > 0.95) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'extremePrevalence',
-                        type = jmvcore::NoticeType$STRONG_WARNING
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Extreme Disease Prevalence",
+                        content = paste0("Extreme disease prevalence: ", round(prevalence * 100, 1), "% (", n_diseased, "/", n_total, " cases). PPV and NPV are highly sensitive to prevalence and may not generalize to populations with different disease rates. Sensitivity and specificity are less affected by prevalence. Consider reporting likelihood ratios as primary metrics for broader applicability.")
                     )
-                    notice$setContent(jmvcore::format('Extreme disease prevalence: {prev}% ({n_diseased}/{n_total} cases). • PPV and NPV are highly sensitive to prevalence and may not generalize to populations with different disease rates. • Sensitivity and specificity are less affected by prevalence. • Consider reporting likelihood ratios as primary metrics for broader applicability.', prev = round(prevalence * 100, 1), n_diseased = n_diseased, n_total = n_total))
-                    self$results$insert(999, notice)
                 }
 
                 return(list(
@@ -539,25 +582,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     extra_levels <- setdiff(test_levels, testPLevel)
                     count_extra <- sum(!is.na(mydata[[testVariable]]) & mydata[[testVariable]] %in% extra_levels)
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('multiLevelTest_', private$.escapeVar(testVariable)),
-                        type = jmvcore::NoticeType$STRONG_WARNING
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Multi-Level Test Variable",
+                        content = paste0(testVariable, " has ", length(test_levels), " levels: ", paste(test_levels, collapse = ", "), '. Only "', testPLevel, '" treated as positive; all others (', paste(extra_levels, collapse = ", "), ') treated as NEGATIVE. This may inflate specificity/NPV if equivocal results are present. ', count_extra, ' non-positive cases detected. Consider enabling "Exclude Indeterminate" option or using binary variables.')
                     )
-                    notice$setContent(jmvcore::format('{test} has {n} levels: {levels}. • Only "{pos}" treated as positive; all others ({extra}) treated as NEGATIVE. • This may inflate specificity/NPV if equivocal results are present. • {count_extra} non-positive cases detected. • Consider enabling "Exclude Indeterminate" option or using binary variables.', test = testVariable, n = length(test_levels), levels = paste(test_levels, collapse = ", "), pos = testPLevel, extra = paste(extra_levels, collapse = ", "), count_extra = count_extra))
-                    self$results$insert(999, notice)
                 }
 
                 if (length(gold_levels) > 2) {
                     extra_levels <- setdiff(gold_levels, goldPLevel)
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'multiLevelGold',
-                        type = jmvcore::NoticeType$STRONG_WARNING
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Multi-Level Gold Standard",
+                        content = paste0('Gold standard "', goldVariable, '" has ', length(gold_levels), ' levels: ', paste(gold_levels, collapse = ", "), '. Only "', goldPLevel, '" treated as positive; all others (', paste(extra_levels, collapse = ", "), ') treated as NEGATIVE. Ensure your reference standard truly has only two outcomes or use a binary variable.')
                     )
-                    notice$setContent(jmvcore::format('Gold standard "{gold}" has {n} levels: {levels}. • Only "{pos}" treated as positive; all others ({extra}) treated as NEGATIVE. • Ensure your reference standard truly has only two outcomes or use a binary variable.', gold = goldVariable, n = length(gold_levels), levels = paste(gold_levels, collapse = ", "), pos = goldPLevel, extra = paste(extra_levels, collapse = ", ")))
-                    self$results$insert(999, notice)
                 }
 
                 # Optionally exclude indeterminate/equivocal levels instead of collapsing to Negative
@@ -573,18 +612,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         )
                     rows_after <- nrow(mydata)
                     if (rows_after < rows_before) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('excludedIndeterminate_', private$.escapeVar(testVariable)),
-                            type = jmvcore::NoticeType$INFO
+                        private$.addNotice(
+                            type = "INFO",
+                            title = "Excluded Indeterminate Levels",
+                            content = paste0("Excluded ", rows_before - rows_after, " rows for ", testVariable, " (and gold) with indeterminate/equivocal levels; retained ", rows_after, " rows.")
                         )
-                        notice$setContent(jmvcore::format(
-                            "Excluded {n} rows for {test} (and gold) with indeterminate/equivocal levels; retained {kept} rows.",
-                            n = rows_before - rows_after,
-                            test = testVariable,
-                            kept = rows_after
-                        ))
-                        self$results$insert(999, notice)
                     }
                 }
 
@@ -677,17 +709,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Apply continuity correction for LR stability only; do not alter reported counts
                zero_cells <- any(c(TP, FP, FN, TN) == 0)
                 if (zero_cells) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('lrContinuity_', private$.escapeVar(test_label)),
-                        type = jmvcore::NoticeType$INFO
+                    private$.addNotice(
+                        type = "INFO",
+                        title = "Zero Cell Continuity Correction",
+                        content = paste0("Zero cell detected for ", test_label, ". LR+/LR- computed with a ", private$ZERO_CELL_CONTINUITY, " continuity correction to avoid infinite/undefined values; interpret cautiously.")
                     )
-                    notice$setContent(jmvcore::format(
-                        "Zero cell detected for {test}. LR+/LR- computed with a {cc} continuity correction to avoid infinite/undefined values; interpret cautiously.",
-                        test = test_label,
-                        cc = private$ZERO_CELL_CONTINUITY
-                    ))
-                    self$results$insert(999, notice)
 
                     TP_cc <- TP + private$ZERO_CELL_CONTINUITY
                     FP_cc <- FP + private$ZERO_CELL_CONTINUITY
@@ -898,13 +924,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     # Check if epiR package is available
                     if (!requireNamespace("epiR", quietly = TRUE)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'epiRMissingCI',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Missing epiR Package",
+                            content = 'epiR package is required for confidence intervals. Install with install.packages("epiR"). Or disable "95% CI" option.'
                         )
-                        notice$setContent('epiR package is required for confidence intervals. • Install with install.packages("epiR"). • Or disable "95% CI" option.')
-                        self$results$insert(999, notice)
                         return()
                     }
 

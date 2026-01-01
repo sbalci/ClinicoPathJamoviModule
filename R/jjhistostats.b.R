@@ -21,6 +21,37 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .processedAesthetics = NULL,
             .optionsHash = NULL,
 
+            # Apply clinical preset configurations
+            .applyClinicalPreset = function() {
+                preset <- self$options$clinicalPreset
+
+                # Only apply preset if not using custom settings
+                if (preset == 'custom') return()
+
+                # Apply preset-specific configurations
+                if (preset == 'lab_values') {
+                    # Lab Values: parametric with centrality line
+                    self$options$typestatistics <- 'parametric'
+                    self$options$centralityline <- TRUE
+                    self$options$resultssubtitle <- TRUE
+                } else if (preset == 'biomarkers') {
+                    # Biomarker Distribution: nonparametric, robust
+                    self$options$typestatistics <- 'nonparametric'
+                    self$options$centralityline <- TRUE
+                    self$options$resultssubtitle <- TRUE
+                } else if (preset == 'patient_chars') {
+                    # Patient Characteristics: parametric for age, BMI
+                    self$options$typestatistics <- 'parametric'
+                    self$options$centralityline <- TRUE
+                    self$options$resultssubtitle <- TRUE
+                } else if (preset == 'pathology_scores') {
+                    # Pathology Scores: nonparametric for ordinal data
+                    self$options$typestatistics <- 'nonparametric'
+                    self$options$centralityline <- TRUE
+                    self$options$resultssubtitle <- TRUE
+                }
+            },
+
             # init ----
             .init = function() {
                 private$.applyClinicalPreset()
@@ -158,33 +189,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                ". Please select continuous numeric variables for histogram analysis."))
                 }
 
+                # Get the data - ggstatsplot handles NAs internally
                 mydata <- self$data
-
-                # SELECTIVE NA OMISSION - only remove rows with NAs in selected variables
-                # This prevents dropping patients with NAs in unused columns
-                relevant_cols <- vars
-
-                # Add grouping variable if present
-                if (!is.null(self$options$grvar)) {
-                    relevant_cols <- c(relevant_cols, self$options$grvar)
-                }
-
-                # Checkpoint before NA exclusion
-                private$.checkpoint(flush = FALSE)
-
-                # Count rows before and after NA removal
-                n_before <- nrow(mydata)
-                mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
-                n_after <- nrow(mydata)
-
-                # Report NA removal if any occurred
-                if (n_before > n_after) {
-                    n_dropped <- n_before - n_after
-                    self$results$todo$setContent(
-                        glue::glue("<br>ℹ️ Info: {n_dropped} rows excluded due to missing values in selected variables.<br>",
-                                  "Rows with data: {n_after} of {n_before} ({round(100 * n_after / n_before, 1)}%)<br><hr>")
-                    )
-                }
 
                 # Cache the processed data
                 private$.processedData <- mydata

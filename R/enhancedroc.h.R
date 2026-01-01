@@ -812,6 +812,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
+                    notices = function() private$.items[["notices"]],
                     instructions = function() private$.items[["instructions"]],
                     imbalanceWarning = function() private$.items[["imbalanceWarning"]],
                     imbalanceMetrics = function() private$.items[["imbalanceMetrics"]],
@@ -859,6 +860,15 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="results",
                             title="Analysis Results")
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="notices",
+                            title="Important Information",
+                            clearWith=list(
+                                "outcome",
+                                "predictor",
+                                "detectImbalance",
+                                "analysisType")))
                         self$add(jmvcore::Html$new(
                             options=options,
                             name="instructions",
@@ -1970,6 +1980,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param transportability Assess model transportability across populations
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$imbalanceWarning} \tab \tab \tab \tab \tab Warning and recommendations for imbalanced datasets \cr
 #'   \code{results$results$imbalanceMetrics} \tab \tab \tab \tab \tab a table \cr

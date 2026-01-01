@@ -364,6 +364,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         todo = function() private$.items[["todo"]],
         warnings = function() private$.items[["warnings"]],
+        notices = function() private$.items[["notices"]],
         interpretation = function() private$.items[["interpretation"]],
         explanations = function() private$.items[["explanations"]],
         plot = function() private$.items[["plot"]],
@@ -418,6 +419,17 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="warnings",
                 title="Messages",
                 visible=TRUE,
+                clearWith=list(
+                    "dep1",
+                    "dep2",
+                    "dep3",
+                    "dep4",
+                    "typestatistics",
+                    "clinicalpreset")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
                 clearWith=list(
                     "dep1",
                     "dep2",
@@ -664,6 +676,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr

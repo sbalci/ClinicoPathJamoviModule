@@ -246,7 +246,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="welcome",
                 title="",
-                visible="(biopsy1 == null)"))
+                visible="(!biopsy1)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -411,7 +411,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="compartmentComparison",
                 title="Compartment Heterogeneity Comparison",
-                visible="(compareCompartments && !is.null(spatial_id))",
+                visible="(compareCompartments && spatial_id)",
                 columns=list(
                     list(
                         `name`="metric", 
@@ -444,7 +444,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="compartmentTests",
                 title="Statistical Tests for Compartment Differences",
-                visible="(compartmentTests && !is.null(spatial_id))",
+                visible="(compartmentTests && spatial_id)",
                 columns=list(
                     list(
                         `name`="test_type", 
@@ -501,7 +501,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "ihcheterogeneity",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = ihcheterogeneityResults$new(options=options),
                 data = data,

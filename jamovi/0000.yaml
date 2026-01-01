@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.65
+version: 0.0.32.67
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -142,7 +142,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -766,7 +766,7 @@ analyses:
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
@@ -1396,7 +1396,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1750,7 +1750,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -1776,7 +1776,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -1788,7 +1788,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >
@@ -1803,7 +1803,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-
@@ -1849,7 +1849,7 @@ analyses:
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Lollipop Chart
     ribbon: analyses
@@ -1905,7 +1905,7 @@ analyses:
   - title: Ridge Plot
     name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization
@@ -2060,7 +2060,7 @@ analyses:
   - title: Segmented Total Bar Charts
     name: jjsegmentedtotalbar
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuTitle: Segmented Total Bar Charts
     menuSubgroup: Categorical vs Categorical
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
@@ -2491,7 +2491,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
   - title: Digital Pathology Validation
@@ -2696,7 +2696,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed

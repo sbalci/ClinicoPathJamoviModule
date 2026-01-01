@@ -190,7 +190,8 @@
       "Bash(perl:*)",
       "Bash(chmod:*)",
       "Bash(do sed -i.bak 's/self\\\\$results\\\\$insert\\(0,/self$results$insert\\(1,/g' \"$file\")",
-      "Bash(do sed -i.bak 's/insert\\(1,/insert\\(999,/g' \"$file\")"
+      "Bash(do sed -i.bak 's/insert\\(1,/insert\\(999,/g' \"$file\")",
+      "Bash(/Applications/jamovi.app/Contents/Resources/app/bin/jamovi-compiler:*)"
     ],
     "deny": [],
     "ask": [],

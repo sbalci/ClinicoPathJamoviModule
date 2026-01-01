@@ -656,7 +656,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".plotClinicalImpact",
-                visible="(calculateClinicalImpact && showPlot) || (showClinicalImpactPlot)",
+                visible="(calculateClinicalImpact || showClinicalImpactPlot)",
                 clearWith=list(
                     "outcome",
                     "outcomePositive",

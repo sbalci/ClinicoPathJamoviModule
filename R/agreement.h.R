@@ -9,6 +9,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             vars = NULL,
             baConfidenceLevel = 0.95,
             proportionalBias = FALSE,
+            blandAltmanPlot = FALSE,
             sft = FALSE,
             wght = "unweighted",
             exct = FALSE,
@@ -68,6 +69,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..proportionalBias <- jmvcore::OptionBool$new(
                 "proportionalBias",
                 proportionalBias,
+                default=FALSE)
+            private$..blandAltmanPlot <- jmvcore::OptionBool$new(
+                "blandAltmanPlot",
+                blandAltmanPlot,
                 default=FALSE)
             private$..sft <- jmvcore::OptionBool$new(
                 "sft",
@@ -245,6 +250,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
             self$.addOption(private$..proportionalBias)
+            self$.addOption(private$..blandAltmanPlot)
             self$.addOption(private$..sft)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
@@ -283,6 +289,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         vars = function() private$..vars$value,
         baConfidenceLevel = function() private$..baConfidenceLevel$value,
         proportionalBias = function() private$..proportionalBias$value,
+        blandAltmanPlot = function() private$..blandAltmanPlot$value,
         sft = function() private$..sft$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
@@ -320,6 +327,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..vars = NA,
         ..baConfidenceLevel = NA,
         ..proportionalBias = NA,
+        ..blandAltmanPlot = NA,
         ..sft = NA,
         ..wght = NA,
         ..exct = NA,
@@ -904,6 +912,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   diagnosis given by the observer, variable can be categorical or ordinal.
 #' @param baConfidenceLevel .
 #' @param proportionalBias .
+#' @param blandAltmanPlot Generate Bland-Altman plot for continuous agreement
+#'   analysis. Displays mean difference and limits of agreement between the
+#'   first two raters. Only applicable when raters provide continuous
+#'   measurements (e.g., tumor size in mm).
 #' @param sft Display frequency tables showing the distribution of ratings for
 #'   each rater. Useful for understanding rating patterns and identifying
 #'   potential biases.
@@ -1048,6 +1060,7 @@ agreement <- function(
     vars,
     baConfidenceLevel = 0.95,
     proportionalBias = FALSE,
+    blandAltmanPlot = FALSE,
     sft = FALSE,
     wght = "unweighted",
     exct = FALSE,
@@ -1102,6 +1115,7 @@ agreement <- function(
         vars = vars,
         baConfidenceLevel = baConfidenceLevel,
         proportionalBias = proportionalBias,
+        blandAltmanPlot = blandAltmanPlot,
         sft = sft,
         wght = wght,
         exct = exct,

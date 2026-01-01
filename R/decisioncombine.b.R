@@ -14,6 +14,48 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
         "decisioncombineClass",
         inherit = decisioncombineBase,
         private = list(
+            .noticeList = list(),
+
+            .addNotice = function(type, title, content) {
+                notice <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+                private$.noticeList[[length(private$.noticeList) + 1]] <- notice
+            },
+
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
+
+                html <- '<div style="margin: 10px 0;">'
+                for (notice in private$.noticeList) {
+                    if (notice$type == "ERROR") {
+                        color <- "#d9534f"
+                        icon <- "&#x26A0;"  # Warning sign
+                    } else if (notice$type == "WARNING") {
+                        color <- "#f0ad4e"
+                        icon <- "&#x26A0;"
+                    } else {  # INFO
+                        color <- "#5bc0de"
+                        icon <- "&#x2139;"  # Info sign
+                    }
+
+                    html <- paste0(html,
+                        '<div style="background-color: ', color, '; color: white; padding: 10px; margin: 5px 0; border-radius: 4px;">',
+                        '<strong>', icon, ' ', notice$title, ':</strong> ',
+                        notice$content,
+                        '</div>'
+                    )
+                }
+                html <- paste0(html, '</div>')
+
+                self$results$notices$setContent(html)
+            },
+
             .escapeVariableNames = function(var_names) {
                 # Escape variable names with spaces/special characters
                 sapply(var_names, function(x) {
@@ -27,6 +69,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
             .init = function() {
                 # Minimal initialization
+                private$.noticeList <- list()
             },
 
             .run = function() {
@@ -81,6 +124,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 if (self$options$addPatternToData) {
                     private$.addPatternColumn(data_prep)
                 }
+
+                # Step 8: Render all notices
+                private$.renderNotices()
             },
 
             .hasRequiredVars = function() {
@@ -111,61 +157,31 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             },
 
             .validateInputs = function() {
-                # Strict validation with clear error messages using jmvcore::Notice
+                # Strict validation with clear error messages using HTML notices
                 # Returns TRUE if validation passes, FALSE otherwise
 
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noData',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('No data available. Please load data before running analysis.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "No Data", "No data available. Please load data before running analysis.")
                     return(FALSE)
                 }
 
                 if (length(self$options$gold) == 0 || self$options$gold == "") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noGoldStandard',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Gold standard variable is required. Please select a reference test.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "No Gold Standard", "Gold standard variable is required. Please select a reference test.")
                     return(FALSE)
                 }
 
                 if (is.null(self$options$goldPositive) || self$options$goldPositive == "") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noGoldPositiveLevel',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Please select the disease present level for the gold standard.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "No Gold Positive Level", "Please select the disease present level for the gold standard.")
                     return(FALSE)
                 }
 
                 if (length(self$options$test1) == 0 || self$options$test1 == "") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noTest1',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Test 1 is required. Please select at least one test variable.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "No Test 1", "Test 1 is required. Please select at least one test variable.")
                     return(FALSE)
                 }
 
                 if (is.null(self$options$test1Positive) || self$options$test1Positive == "") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noTest1PositiveLevel',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Please select the positive level for Test 1.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "No Test 1 Positive Level", "Please select the positive level for Test 1.")
                     return(FALSE)
                 }
 
@@ -174,13 +190,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 if (has_test2) {
                     if (is.null(self$options$test2Positive) || self$options$test2Positive == "") {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'noTest2PositiveLevel',
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent('Please select the positive level for Test 2.')
-                        self$results$insert(999, notice)
+                        private$.addNotice("ERROR", "No Test 2 Positive Level", "Please select the positive level for Test 2.")
                         return(FALSE)
                     }
                 }
@@ -189,26 +199,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 has_test3 <- !is.null(self$options$test3) && self$options$test3 != ""
                 if (has_test3) {
                     if (is.null(self$options$test3Positive) || self$options$test3Positive == "") {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'noTest3PositiveLevel',
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent('Please select the positive level for Test 3.')
-                        self$results$insert(999, notice)
+                        private$.addNotice("ERROR", "No Test 3 Positive Level", "Please select the positive level for Test 3.")
                         return(FALSE)
                     }
                 }
 
                 # Minimum data requirement
                 if (nrow(self$data) < 4) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'insufficientData',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Insufficient data: At least 4 cases are required for analysis.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "Insufficient Data", "Insufficient data: At least 4 cases are required for analysis.")
                     return(FALSE)
                 }
 
@@ -240,13 +238,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 mydata <- jmvcore::naOmit(subset_data)
 
                 if (nrow(mydata) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noCompleteCases',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('No complete cases available after removing missing data.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "No Complete Cases", "No complete cases available after removing missing data.")
                     return(NULL)
                 }
 
@@ -270,14 +262,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 for (rl in required_levels) {
                     if (!rl$level %in% levels(mydata[[rl$var]])) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('missingLevel_', rl$var),
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent(sprintf('The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
-                                                  rl$level, rl$var, rl$label))
-                        self$results$insert(999, notice)
+                        private$.addNotice("ERROR", "Missing Level",
+                            sprintf('The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
+                                    rl$level, rl$var, rl$label))
                         return(NULL)
                     }
                 }
@@ -348,13 +335,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Check if epiR package is available
                 if (!requireNamespace("epiR", quietly = TRUE)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'epiRMissing',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('epiR package is required for diagnostic test analysis. • Install with install.packages("epiR"). • Or disable "Show Individual Test Statistics" option.')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "epiR Package Missing",
+                        'epiR package is required for diagnostic test analysis. Install with install.packages("epiR") or disable "Show Individual Test Statistics" option.')
                     return()
                 }
 
@@ -380,31 +362,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Validate counts
                 if (any(is.na(c(tp, fp, fn, tn))) || any(c(tp, fp, fn, tn) < 0)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('invalidCountsTest', test_num),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
-                        'Invalid counts detected for Test %d. Skipping individual analysis.',
-                        test_num
-                    ))
-                    self$results$insert(999, notice)
+                    private$.addNotice("WARNING", "Invalid Counts",
+                        sprintf('Invalid counts detected for Test %d. Skipping individual analysis.', test_num))
                     return()
                 }
 
                 # Check if all counts are zero
                 if (tp == 0 && fp == 0 && fn == 0 && tn == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('allZeroCountsTest', test_num),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
-                        'No valid observations for Test %d. Skipping individual analysis.',
-                        test_num
-                    ))
-                    self$results$insert(999, notice)
+                    private$.addNotice("WARNING", "All Zero Counts",
+                        sprintf('No valid observations for Test %d. Skipping individual analysis.', test_num))
                     return()
                 }
 
@@ -419,16 +385,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                                                  nrow = 2, byrow = TRUE,
                                                  dimnames = list(c("Positive", "Negative"), c("Positive", "Negative")))
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('continuityCorrectionApplied_test', test_num),
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf(
-                        'Continuity correction (+0.5) applied to Test %d due to zero cell count(s).',
-                        test_num
-                    ))
-                    self$results$insert(999, notice)
+                    private$.addNotice("INFO", "Continuity Correction",
+                        sprintf('Continuity correction (+0.5) applied to Test %d due to zero cell count(s).', test_num))
                 } else {
                     cont_table_for_epi <- cont_table
                 }
@@ -500,24 +458,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Check if epiR package is available for combination analysis
                 if (!requireNamespace("epiR", quietly = TRUE)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'epiRMissingCombinations',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('epiR package is required for combination analysis. • Install with install.packages("epiR").')
-                    self$results$insert(999, notice)
+                    private$.addNotice("ERROR", "epiR Package Missing",
+                        'epiR package is required for combination analysis. Install with install.packages("epiR").')
                     return()
                 }
 
                 # Inform users that PPV/NPV are based on sample prevalence
-                prevalence_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'ppvNpvSamplePrevalence',
-                    type = jmvcore::NoticeType$INFO
-                )
-                prevalence_notice$setContent('Positive/Negative Predictive Values are calculated using the sample prevalence. Interpret cautiously if your sample does not reflect the target clinical population.')
-                self$results$insert(999, prevalence_notice)
+                private$.addNotice("INFO", "PPV/NPV Interpretation",
+                    'Positive/Negative Predictive Values are calculated using the sample prevalence. Interpret cautiously if your sample does not reflect the target clinical population.')
 
                 has_test2 <- "test2Variable2" %in% names(data_prep)
                 has_test3 <- "test3Variable2" %in% names(data_prep)
@@ -584,31 +532,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Validate counts - check for negative values
                 if (any(is.na(c(tp, fp, fn, tn))) || any(c(tp, fp, fn, tn) < 0)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('invalidCounts_', gsub("[^A-Za-z0-9]", "_", pattern_name)),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
-                        'Invalid counts detected for pattern "%s". Skipping this combination.',
-                        pattern_name
-                    ))
-                    self$results$insert(999, notice)
+                    private$.addNotice("WARNING", "Invalid Counts",
+                        sprintf('Invalid counts detected for pattern "%s". Skipping this combination.', pattern_name))
                     return()
                 }
 
                 # Check if all counts are zero
                 if (tp == 0 && fp == 0 && fn == 0 && tn == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('allZeroCounts_', gsub("[^A-Za-z0-9]", "_", pattern_name)),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
-                        'No observations found for pattern "%s". Skipping this combination.',
-                        pattern_name
-                    ))
-                    self$results$insert(999, notice)
+                    private$.addNotice("WARNING", "All Zero Counts",
+                        sprintf('No observations found for pattern "%s". Skipping this combination.', pattern_name))
                     return()
                 }
 
@@ -621,16 +553,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     fn_adj <- fn + 0.5
                     tn_adj <- tn + 0.5
                     # Post informative notice
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('continuityCorrectionApplied_', gsub("[^A-Za-z0-9]", "_", pattern_name)),
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf(
-                        'Continuity correction (+0.5) applied to pattern "%s" due to zero cell count(s).',
-                        pattern_name
-                    ))
-                    self$results$insert(999, notice)
+                    private$.addNotice("INFO", "Continuity Correction",
+                        sprintf('Continuity correction (+0.5) applied to pattern "%s" due to zero cell count(s).', pattern_name))
                 } else {
                     tp_adj <- tp
                     fp_adj <- fp

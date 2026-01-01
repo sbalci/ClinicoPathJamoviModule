@@ -12,6 +12,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             fill_var = NULL,
             facet_var = NULL,
             show_plot = FALSE,
+            plot_type = "stacked",
             chart_style = "clinical",
             color_palette = "clinical",
             show_percentages = FALSE,
@@ -31,8 +32,14 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             add_outline = FALSE,
             outline_color = "white",
             export_ready = FALSE,
+            flerlage_show_labels = FALSE,
+            flerlage_label_size = 4,
+            flerlage_label_color = "black",
+            flerlage_alpha = 0.3,
+            flerlage_box_color = "lightgrey",
             show_statistical_tests = FALSE,
             confidence_level = 0.95,
+            exclude_missing = TRUE,
             showExplanations = FALSE, ...) {
 
             super$initialize(
@@ -88,6 +95,13 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "show_plot",
                 show_plot,
                 default=FALSE)
+            private$..plot_type <- jmvcore::OptionList$new(
+                "plot_type",
+                plot_type,
+                options=list(
+                    "stacked",
+                    "flerlage"),
+                default="stacked")
             private$..chart_style <- jmvcore::OptionList$new(
                 "chart_style",
                 chart_style,
@@ -214,6 +228,39 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "export_ready",
                 export_ready,
                 default=FALSE)
+            private$..flerlage_show_labels <- jmvcore::OptionBool$new(
+                "flerlage_show_labels",
+                flerlage_show_labels,
+                default=FALSE)
+            private$..flerlage_label_size <- jmvcore::OptionNumber$new(
+                "flerlage_label_size",
+                flerlage_label_size,
+                min=2,
+                max=12,
+                default=4)
+            private$..flerlage_label_color <- jmvcore::OptionList$new(
+                "flerlage_label_color",
+                flerlage_label_color,
+                options=list(
+                    "black",
+                    "white",
+                    "gray"),
+                default="black")
+            private$..flerlage_alpha <- jmvcore::OptionNumber$new(
+                "flerlage_alpha",
+                flerlage_alpha,
+                min=0,
+                max=1,
+                default=0.3)
+            private$..flerlage_box_color <- jmvcore::OptionList$new(
+                "flerlage_box_color",
+                flerlage_box_color,
+                options=list(
+                    "lightgrey",
+                    "white",
+                    "lightblue",
+                    "beige"),
+                default="lightgrey")
             private$..show_statistical_tests <- jmvcore::OptionBool$new(
                 "show_statistical_tests",
                 show_statistical_tests,
@@ -224,6 +271,10 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 min=0.8,
                 max=0.99,
                 default=0.95)
+            private$..exclude_missing <- jmvcore::OptionBool$new(
+                "exclude_missing",
+                exclude_missing,
+                default=TRUE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -235,6 +286,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..fill_var)
             self$.addOption(private$..facet_var)
             self$.addOption(private$..show_plot)
+            self$.addOption(private$..plot_type)
             self$.addOption(private$..chart_style)
             self$.addOption(private$..color_palette)
             self$.addOption(private$..show_percentages)
@@ -254,8 +306,14 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..add_outline)
             self$.addOption(private$..outline_color)
             self$.addOption(private$..export_ready)
+            self$.addOption(private$..flerlage_show_labels)
+            self$.addOption(private$..flerlage_label_size)
+            self$.addOption(private$..flerlage_label_color)
+            self$.addOption(private$..flerlage_alpha)
+            self$.addOption(private$..flerlage_box_color)
             self$.addOption(private$..show_statistical_tests)
             self$.addOption(private$..confidence_level)
+            self$.addOption(private$..exclude_missing)
             self$.addOption(private$..showExplanations)
         }),
     active = list(
@@ -265,6 +323,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         fill_var = function() private$..fill_var$value,
         facet_var = function() private$..facet_var$value,
         show_plot = function() private$..show_plot$value,
+        plot_type = function() private$..plot_type$value,
         chart_style = function() private$..chart_style$value,
         color_palette = function() private$..color_palette$value,
         show_percentages = function() private$..show_percentages$value,
@@ -284,8 +343,14 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         add_outline = function() private$..add_outline$value,
         outline_color = function() private$..outline_color$value,
         export_ready = function() private$..export_ready$value,
+        flerlage_show_labels = function() private$..flerlage_show_labels$value,
+        flerlage_label_size = function() private$..flerlage_label_size$value,
+        flerlage_label_color = function() private$..flerlage_label_color$value,
+        flerlage_alpha = function() private$..flerlage_alpha$value,
+        flerlage_box_color = function() private$..flerlage_box_color$value,
         show_statistical_tests = function() private$..show_statistical_tests$value,
         confidence_level = function() private$..confidence_level$value,
+        exclude_missing = function() private$..exclude_missing$value,
         showExplanations = function() private$..showExplanations$value),
     private = list(
         ..analysis_preset = NA,
@@ -294,6 +359,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..fill_var = NA,
         ..facet_var = NA,
         ..show_plot = NA,
+        ..plot_type = NA,
         ..chart_style = NA,
         ..color_palette = NA,
         ..show_percentages = NA,
@@ -313,8 +379,14 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..add_outline = NA,
         ..outline_color = NA,
         ..export_ready = NA,
+        ..flerlage_show_labels = NA,
+        ..flerlage_label_size = NA,
+        ..flerlage_label_color = NA,
+        ..flerlage_alpha = NA,
+        ..flerlage_box_color = NA,
         ..show_statistical_tests = NA,
         ..confidence_level = NA,
+        ..exclude_missing = NA,
         ..showExplanations = NA)
 )
 
@@ -342,7 +414,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Segmented Total Bar Charts",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ggsegmentedtotalbar"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -355,7 +428,9 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 width=650,
                 height=450,
                 requiresData=TRUE,
-                renderFun=".plot"))
+                renderFun=".plot",
+                clearWith=list(
+                    "plot_type")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -364,7 +439,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var"),
+                    "fill_var",
+                    "exclude_missing"),
                 columns=list(
                     list(
                         `name`="categories", 
@@ -389,7 +465,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var"),
+                    "fill_var",
+                    "exclude_missing"),
                 columns=list(
                     list(
                         `name`="category", 
@@ -424,7 +501,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var"),
+                    "fill_var",
+                    "exclude_missing"),
                 columns=list(
                     list(
                         `name`="measure", 
@@ -441,7 +519,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var")))
+                    "fill_var",
+                    "exclude_missing")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_summary",
@@ -449,7 +528,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var")))
+                    "fill_var",
+                    "exclude_missing")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="statistical_tests",
@@ -459,7 +539,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "x_var",
                     "y_var",
                     "fill_var",
-                    "show_statistical_tests"),
+                    "show_statistical_tests",
+                    "exclude_missing"),
                 columns=list(
                     list(
                         `name`="test_name", 
@@ -504,7 +585,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var")))
+                    "fill_var",
+                    "exclude_missing")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",
@@ -556,6 +638,8 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   composition.
 #' @param facet_var Optional variable for creating multiple panels.
 #' @param show_plot Show segmented total bar chart.
+#' @param plot_type Type of visualization - traditional 100\% stacked bars or
+#'   Flerlage-style segmented total bars.
 #' @param chart_style Overall visual style for the chart.
 #' @param color_palette Color palette for segment fills.
 #' @param show_percentages Whether to display percentage labels on segments.
@@ -575,9 +659,17 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param add_outline Whether to add white outlines around segments.
 #' @param outline_color Color for segment outlines.
 #' @param export_ready Whether to optimize plot for high-quality export.
+#' @param flerlage_show_labels Show value labels on Flerlage-style plots.
+#' @param flerlage_label_size Size of value labels in Flerlage plots.
+#' @param flerlage_label_color Color of value labels in Flerlage plots.
+#' @param flerlage_alpha Transparency of background boxes (0=transparent,
+#'   1=opaque).
+#' @param flerlage_box_color Color of background boxes in Flerlage plots.
 #' @param show_statistical_tests Whether to perform chi-square tests for
 #'   proportion differences.
 #' @param confidence_level Confidence level for statistical tests (0.80-0.99).
+#' @param exclude_missing Whether to exclude rows with missing values in key
+#'   variables.
 #' @param showExplanations Show explanations of the statistical results
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -610,6 +702,7 @@ jjsegmentedtotalbar <- function(
     fill_var,
     facet_var = NULL,
     show_plot = FALSE,
+    plot_type = "stacked",
     chart_style = "clinical",
     color_palette = "clinical",
     show_percentages = FALSE,
@@ -629,8 +722,14 @@ jjsegmentedtotalbar <- function(
     add_outline = FALSE,
     outline_color = "white",
     export_ready = FALSE,
+    flerlage_show_labels = FALSE,
+    flerlage_label_size = 4,
+    flerlage_label_color = "black",
+    flerlage_alpha = 0.3,
+    flerlage_box_color = "lightgrey",
     show_statistical_tests = FALSE,
     confidence_level = 0.95,
+    exclude_missing = TRUE,
     showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -659,6 +758,7 @@ jjsegmentedtotalbar <- function(
         fill_var = fill_var,
         facet_var = facet_var,
         show_plot = show_plot,
+        plot_type = plot_type,
         chart_style = chart_style,
         color_palette = color_palette,
         show_percentages = show_percentages,
@@ -678,8 +778,14 @@ jjsegmentedtotalbar <- function(
         add_outline = add_outline,
         outline_color = outline_color,
         export_ready = export_ready,
+        flerlage_show_labels = flerlage_show_labels,
+        flerlage_label_size = flerlage_label_size,
+        flerlage_label_color = flerlage_label_color,
+        flerlage_alpha = flerlage_alpha,
+        flerlage_box_color = flerlage_box_color,
         show_statistical_tests = show_statistical_tests,
         confidence_level = confidence_level,
+        exclude_missing = exclude_missing,
         showExplanations = showExplanations)
 
     analysis <- jjsegmentedtotalbarClass$new(

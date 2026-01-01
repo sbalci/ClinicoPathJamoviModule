@@ -76,14 +76,14 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        reportSentence = function() private$.items[["reportSentence"]],
-        summary = function() private$.items[["summary"]],
-        about = function() private$.items[["about"]],
-        assumptions = function() private$.items[["assumptions"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
-        tablestyle4 = function() private$.items[["tablestyle4"]]),
+        tablestyle4 = function() private$.items[["tablestyle4"]],
+        reportSentence = function() private$.items[["reportSentence"]],
+        summary = function() private$.items[["summary"]],
+        about = function() private$.items[["about"]],
+        assumptions = function() private$.items[["assumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -102,37 +102,6 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Instructions"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="reportSentence",
-                title="\uD83D\uDCCB Copy to Manuscript",
-                visible="(showReportSentence)",
-                clearWith=list(
-                    "vars",
-                    "excl"),
-                refs="ClinicoPathJamoviModule"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="summary",
-                title="Summary",
-                visible="(showSummary)",
-                clearWith=list(
-                    "vars",
-                    "excl")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="about",
-                title="About This Analysis",
-                visible="(showAbout)",
-                clearWith=list(
-                    "vars")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="assumptions",
-                title="Data Quality & Assumptions",
-                clearWith=list(
-                    "vars",
-                    "excl")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="tablestyle1",
@@ -168,7 +137,38 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "excl"),
                 visible="(sty:t4)",
-                refs="janitor"))}))
+                refs="janitor"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentence",
+                title="\uD83D\uDCCB Copy to Manuscript",
+                visible="(showReportSentence)",
+                clearWith=list(
+                    "vars",
+                    "excl"),
+                refs="ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Summary",
+                visible="(showSummary)",
+                clearWith=list(
+                    "vars",
+                    "excl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="about",
+                title="About This Analysis",
+                visible="(showAbout)",
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Data Quality & Assumptions",
+                clearWith=list(
+                    "vars",
+                    "excl")))}))
 
 tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "tableoneBase",
@@ -228,14 +228,14 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

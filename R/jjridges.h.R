@@ -497,7 +497,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot = function() private$.items[["plot"]],
         statistics = function() private$.items[["statistics"]],
         tests = function() private$.items[["tests"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        notices = function() private$.items[["notices"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -699,7 +700,12 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "plot_type")))}))
+                    "plot_type")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
+                visible=TRUE))}))
 
 jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjridgesBase",
@@ -844,6 +850,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$statistics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

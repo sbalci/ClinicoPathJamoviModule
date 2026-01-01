@@ -66,6 +66,16 @@ options:
       type: Bool
       default: false
 
+    - name: blandAltmanPlot
+      title: 'Bland-Altman Plot'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate Bland-Altman plot for continuous agreement analysis.
+            Displays mean difference and limits of agreement between the first two raters.
+            Only applicable when raters provide continuous measurements (e.g., tumor size in mm).
+
     - name:  sft
       title: 'Frequency Table'
       type:  Bool

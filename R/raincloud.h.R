@@ -10,9 +10,9 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group_var = NULL,
             facet_var = NULL,
             color_var = NULL,
-            show_violin = FALSE,
-            show_boxplot = FALSE,
-            show_dots = FALSE,
+            show_violin = TRUE,
+            show_boxplot = TRUE,
+            show_dots = TRUE,
             dots_side = "left",
             violin_width = 0.7,
             box_width = 0.2,
@@ -80,15 +80,15 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..show_violin <- jmvcore::OptionBool$new(
                 "show_violin",
                 show_violin,
-                default=FALSE)
+                default=TRUE)
             private$..show_boxplot <- jmvcore::OptionBool$new(
                 "show_boxplot",
                 show_boxplot,
-                default=FALSE)
+                default=TRUE)
             private$..show_dots <- jmvcore::OptionBool$new(
                 "show_dots",
                 show_dots,
-                default=FALSE)
+                default=TRUE)
             private$..dots_side <- jmvcore::OptionList$new(
                 "dots_side",
                 dots_side,
@@ -525,9 +525,9 @@ raincloud <- function(
     group_var,
     facet_var = NULL,
     color_var = NULL,
-    show_violin = FALSE,
-    show_boxplot = FALSE,
-    show_dots = FALSE,
+    show_violin = TRUE,
+    show_boxplot = TRUE,
+    show_dots = TRUE,
     dots_side = "left",
     violin_width = 0.7,
     box_width = 0.2,

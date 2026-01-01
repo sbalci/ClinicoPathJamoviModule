@@ -215,7 +215,8 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         reportSentence = function() private$.items[["reportSentence"]],
         explanationsContent = function() private$.items[["explanationsContent"]],
         clinicalReport = function() private$.items[["clinicalReport"]],
-        aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        notices = function() private$.items[["notices"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -548,7 +549,25 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible=TRUE))}))
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "pp",
+                    "pprob",
+                    "ci",
+                    "excludeIndeterminate",
+                    "statComp")))}))
 
 decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncompareBase",
@@ -681,6 +700,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

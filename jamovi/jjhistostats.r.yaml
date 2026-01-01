@@ -75,7 +75,7 @@ items:
       visible: (showInterpretation)
 
     - name: ggpubrPlot
-      title: 'Publication-Ready Histogram (ggpubr)'
+      title: 'Publication-Ready Histogram ggpubr'
       type: Image
       width: 600
       height: 450
@@ -89,13 +89,13 @@ items:
         - ggpubrAddMean
 
     - name: ggpubrPlot2
-      title: '`Publication-Ready Histogram by ${grvar} (ggpubr)`'
+      title: '`Publication-Ready Histogram ggpubr by ${grvar}`'
       type: Image
       width: 1200
       height: 450
       renderFun: .plotGGPubr2
       requiresData: true
-      visible: (addGGPubrPlot && grvar)
+      visible: (addGGPubrPlot && !is.null(grvar))
       clearWith:
         - dep
         - grvar
@@ -104,7 +104,7 @@ items:
         - ggpubrAddMean
 
     - name: densityPlot
-      title: 'Density Plot (ggpubr)'
+      title: 'Density Plot ggpubr'
       type: Image
       width: 600
       height: 400
@@ -116,7 +116,7 @@ items:
         - ggpubrDensityColor
 
     - name: qqPlot
-      title: 'QQ Plot - Normality Assessment (ggpubr)'
+      title: 'QQ Plot - Normality Assessment ggpubr'
       type: Image
       width: 600
       height: 400
@@ -127,7 +127,7 @@ items:
         - dep
 
     - name: ecdfPlot
-      title: 'Empirical CDF (ggpubr)'
+      title: 'Empirical CDF ggpubr'
       type: Image
       width: 600
       height: 400

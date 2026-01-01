@@ -337,6 +337,11 @@ items:
           type: text
       description: 'Recommended optimal test combination pattern based on Youden index and clinical performance metrics'
 
+    - name: notices
+      title: Notices
+      type: Html
+      visible: true
+
 refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule

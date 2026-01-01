@@ -299,6 +299,25 @@ items:
       type: Html
       visible: true
 
+    # Notice outputs converted to HTML to avoid serialization errors
+    - name: notices
+      title: 'Important Information'
+      type: Html
+      clearWith:
+          - gold
+          - goldPositive
+          - test1
+          - test1Positive
+          - test2
+          - test2Positive
+          - test3
+          - test3Positive
+          - pp
+          - pprob
+          - ci
+          - excludeIndeterminate
+          - statComp
+
 refs:
     - DiagnosticTests
     - ClinicoPathJamoviModule

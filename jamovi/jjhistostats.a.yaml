@@ -414,7 +414,7 @@ options:
     - name: ggpubrAddDensity
       title: Add Density Curve (ggpubr)
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Add density curve overlay to ggpubr histogram.
@@ -446,7 +446,7 @@ options:
     - name: ggpubrShowQQ
       title: Show QQ Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show QQ plot for normality assessment.
@@ -454,7 +454,7 @@ options:
     - name: ggpubrShowECDF
       title: Show ECDF Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show empirical cumulative distribution function plot.

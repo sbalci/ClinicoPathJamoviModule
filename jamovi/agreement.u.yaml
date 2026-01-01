@@ -65,6 +65,8 @@ children:
     children:
       - type: CheckBox
         name: proportionalBias
+      - type: CheckBox
+        name: blandAltmanPlot
   - type: CollapseBox
     label: Pairwise Kappa Analysis
     collapsed: true
@@ -138,18 +140,18 @@ children:
         children:
           - type: CheckBox
             name: hierarchicalKappa
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Cluster Variable
             children:
-              - type: TargetLayoutBox
-                label: Cluster Variable
-                children:
-                  - type: VariablesListBox
-                    name: clusterVariable
-                    isTarget: true
-                    maxItemCount: 1
-                    enable: (hierarchicalKappa)
+              - type: VariablesListBox
+                name: clusterVariable
+                isTarget: true
+                maxItemCount: 1
+                enable: (hierarchicalKappa)
       - type: LayoutBox
         margin: large
         children:

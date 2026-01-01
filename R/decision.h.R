@@ -183,6 +183,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         welcome = function() private$.items[["welcome"]],
+        notices = function() private$.items[["notices"]],
         rawContingency = function() private$.items[["rawContingency"]],
         rawCounts = function() private$.items[["rawCounts"]],
         cTable = function() private$.items[["cTable"]],
@@ -200,7 +201,8 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         confusionMatrixSummary = function() private$.items[["confusionMatrixSummary"]],
         falsePositiveTable = function() private$.items[["falsePositiveTable"]],
         falseNegativeTable = function() private$.items[["falseNegativeTable"]],
-        misclassificationInterpretation = function() private$.items[["misclassificationInterpretation"]]),
+        misclassificationInterpretation = function() private$.items[["misclassificationInterpretation"]],
+        saveClassifications = function() private$.items[["saveClassifications"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -226,6 +228,22 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "testNegative",
                     "goldNegative",
                     "testNegative")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative",
+                    "pp",
+                    "pprob",
+                    "ci",
+                    "showMisclassified",
+                    "maxCasesShow")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rawContingency",
@@ -573,7 +591,19 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="misclassificationInterpretation",
                 title="Interpretation of Misclassified Cases",
-                visible="(showMisclassified)"))}))
+                visible="(showMisclassified)"))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="saveClassifications",
+                title="Classification Groups",
+                varTitle="Classification Group",
+                varDescription="Classification of each case: True Positive, False Positive, False Negative, or True Negative",
+                measureType="nominal",
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive")))}))
 
 decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionBase",
@@ -645,6 +675,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rawContingency} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rawCounts} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
@@ -663,6 +694,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$falsePositiveTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$falseNegativeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$misclassificationInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$saveClassifications} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

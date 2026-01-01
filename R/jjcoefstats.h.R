@@ -434,7 +434,6 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="notices",
                 title="Important Information",
-                visible=TRUE,
                 clearWith=list(
                     "inputMode",
                     "term",
@@ -557,6 +556,7 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefficientTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -665,3 +665,4 @@ jjcoefstats <- function(
 
     analysis$results
 }
+

@@ -35,12 +35,12 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             plotheight = 450,
             addGGPubrPlot = FALSE,
             ggpubrPalette = "#0073C2FF",
-            ggpubrAddDensity = TRUE,
+            ggpubrAddDensity = FALSE,
             ggpubrAddMean = FALSE,
             addDistributionDiagnostics = FALSE,
             ggpubrDensityColor = "#0073C2FF",
-            ggpubrShowQQ = TRUE,
-            ggpubrShowECDF = TRUE, ...) {
+            ggpubrShowQQ = FALSE,
+            ggpubrShowECDF = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -210,7 +210,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..ggpubrAddDensity <- jmvcore::OptionBool$new(
                 "ggpubrAddDensity",
                 ggpubrAddDensity,
-                default=TRUE)
+                default=FALSE)
             private$..ggpubrAddMean <- jmvcore::OptionBool$new(
                 "ggpubrAddMean",
                 ggpubrAddMean,
@@ -226,11 +226,11 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..ggpubrShowQQ <- jmvcore::OptionBool$new(
                 "ggpubrShowQQ",
                 ggpubrShowQQ,
-                default=TRUE)
+                default=FALSE)
             private$..ggpubrShowECDF <- jmvcore::OptionBool$new(
                 "ggpubrShowECDF",
                 ggpubrShowECDF,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
@@ -419,7 +419,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Image$new(
                 options=options,
                 name="ggpubrPlot",
-                title="Publication-Ready Histogram (ggpubr)",
+                title="Publication-Ready Histogram ggpubr",
                 width=600,
                 height=450,
                 renderFun=".plotGGPubr",
@@ -433,12 +433,12 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Image$new(
                 options=options,
                 name="ggpubrPlot2",
-                title="`Publication-Ready Histogram by ${grvar} (ggpubr)`",
+                title="`Publication-Ready Histogram ggpubr by ${grvar}`",
                 width=1200,
                 height=450,
                 renderFun=".plotGGPubr2",
                 requiresData=TRUE,
-                visible="(addGGPubrPlot && grvar)",
+                visible="(addGGPubrPlot && !is.null(grvar))",
                 clearWith=list(
                     "dep",
                     "grvar",
@@ -448,7 +448,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Image$new(
                 options=options,
                 name="densityPlot",
-                title="Density Plot (ggpubr)",
+                title="Density Plot ggpubr",
                 width=600,
                 height=400,
                 renderFun=".plotDensity",
@@ -460,7 +460,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Image$new(
                 options=options,
                 name="qqPlot",
-                title="QQ Plot - Normality Assessment (ggpubr)",
+                title="QQ Plot - Normality Assessment ggpubr",
                 width=600,
                 height=400,
                 renderFun=".plotQQ",
@@ -471,7 +471,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Image$new(
                 options=options,
                 name="ecdfPlot",
-                title="Empirical CDF (ggpubr)",
+                title="Empirical CDF ggpubr",
                 width=600,
                 height=400,
                 renderFun=".plotECDF",
@@ -652,12 +652,12 @@ jjhistostats <- function(
     plotheight = 450,
     addGGPubrPlot = FALSE,
     ggpubrPalette = "#0073C2FF",
-    ggpubrAddDensity = TRUE,
+    ggpubrAddDensity = FALSE,
     ggpubrAddMean = FALSE,
     addDistributionDiagnostics = FALSE,
     ggpubrDensityColor = "#0073C2FF",
-    ggpubrShowQQ = TRUE,
-    ggpubrShowECDF = TRUE) {
+    ggpubrShowQQ = FALSE,
+    ggpubrShowECDF = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjhistostats requires jmvcore to be installed (restart may be required)")

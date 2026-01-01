@@ -4,9 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # ==========================================================================
-  # Variable Selection
-  # ==========================================================================
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -25,12 +22,8 @@ children:
             name: caseID
             maxItemCount: 1
             isTarget: true
-
-  # ==========================================================================
-  # Core Agreement Analysis
-  # ==========================================================================
   - type: CollapseBox
-    label: "Step 1: Core Agreement Analysis"
+    label: 'Step 1: Core Agreement Analysis'
     collapsed: false
     children:
       - type: LayoutBox
@@ -50,7 +43,6 @@ children:
                 name: fleiss
               - title: Krippendorff's Alpha (universal method)
                 name: krippendorff
-
       - type: LayoutBox
         margin: large
         children:
@@ -66,7 +58,6 @@ children:
                 name: equal
               - title: Quadratic Weighted (ordinal data, penalize distant errors)
                 name: squared
-
       - type: LayoutBox
         margin: large
         children:
@@ -78,12 +69,8 @@ children:
           - type: CheckBox
             name: exct
             label: Use Exact Method (more accurate, slower)
-
-  # ==========================================================================
-  # Clinical Output & Interpretation
-  # ==========================================================================
   - type: CollapseBox
-    label: "Step 2: Clinical Output & Interpretation"
+    label: 'Step 2: Clinical Output & Interpretation'
     collapsed: false
     children:
       - type: LayoutBox
@@ -97,7 +84,6 @@ children:
           - type: CheckBox
             name: sft
             label: Individual Rater Frequency Tables
-
       - type: LayoutBox
         margin: large
         children:
@@ -116,12 +102,8 @@ children:
             name: showWeightedKappaGuide
             label: Weighted Kappa Guide
             enable: (wght != 'unweighted')
-
-  # ==========================================================================
-  # Visualization
-  # ==========================================================================
   - type: CollapseBox
-    label: "Step 3: Visualization (Optional)"
+    label: 'Step 3: Visualization (Optional)'
     collapsed: true
     children:
       - type: LayoutBox
@@ -151,12 +133,8 @@ children:
                 name: bwr
               - title: Red-Yellow-Green (classic)
                 name: ryg
-
-  # ==========================================================================
-  # Advanced Analyses
-  # ==========================================================================
   - type: CollapseBox
-    label: "Advanced: Consensus Analysis"
+    label: 'Advanced: Consensus Analysis'
     collapsed: true
     children:
       - type: LayoutBox
@@ -191,9 +169,8 @@ children:
             name: show_consensus_table
             label: Show Detailed Case-by-Case Results
             enable: (consensus)
-
   - type: CollapseBox
-    label: "Advanced: Statistical Methods (Krippendorff, ICC, Gwet, etc.)"
+    label: 'Advanced: Statistical Methods (Krippendorff, ICC, Gwet, etc.)'
     collapsed: true
     children:
       - type: LayoutBox
@@ -226,7 +203,6 @@ children:
           - type: CheckBox
             name: pabak
             label: PABAK (Prevalence-Adjusted Kappa)
-
       - type: LayoutBox
         margin: large
         children:
@@ -240,24 +216,25 @@ children:
             label: Bootstrap Samples (100-5000)
             enable: (bootstrap)
             format: number
-
   - type: CollapseBox
-    label: "Advanced: Diagnostic Style Clustering (Usubutun Method)"
+    label: 'Advanced: Diagnostic Style Clustering (Usubutun Method)'
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: |
-              Identify diagnostic style groups (e.g., conservative vs. aggressive)
+            label: >
+              Identify diagnostic style groups (e.g., conservative vs.
+              aggressive)
+
               among raters based on their diagnosis patterns.
+
 
               Reference: Usubutun et al. (2012) Modern Pathology 25:877-884
           - type: CheckBox
             name: performClustering
             label: Enable Rater Clustering Analysis
-
       - type: LayoutBox
         margin: large
         children:
@@ -287,7 +264,6 @@ children:
                 name: correlation
               - title: Euclidean Distance
                 name: euclidean
-
       - type: LayoutBox
         margin: large
         children:
@@ -302,7 +278,6 @@ children:
             label: Number of Groups (if manual, 2-10)
             format: number
             enable: (performClustering && !autoSelectGroups)
-
       - type: LayoutBox
         margin: large
         children:
@@ -317,7 +292,6 @@ children:
             label: Disagreement Threshold (0.2-0.8)
             format: number
             enable: (performClustering && identifyDiscordant)
-
       - type: LayoutBox
         margin: large
         children:
@@ -342,7 +316,6 @@ children:
             name: showClusteringInterpretation
             label: Show Clustering Interpretation Guide
             enable: (performClustering)
-
       - type: LayoutBox
         margin: large
         children:
@@ -359,8 +332,6 @@ children:
             name: useMetadataRows
             label: Use metadata rows embedded in dataset (see guide below)
             enable: (performClustering && raterCharacteristics)
-
-      # Method 1: Variable-based input (only when NOT using metadata rows)
       - type: VariableSupplier
         persistentItems: false
         stretchFactor: 1
@@ -372,8 +343,9 @@ children:
                 name: raterExperience
                 maxItemCount: 1
                 isTarget: true
-                enable: (performClustering && raterCharacteristics && !useMetadataRows)
-
+                enable: >-
+                  (performClustering && raterCharacteristics &&
+                  !useMetadataRows)
           - type: TargetLayoutBox
             label: Specialty Variable
             children:
@@ -381,8 +353,9 @@ children:
                 name: raterSpecialty
                 maxItemCount: 1
                 isTarget: true
-                enable: (performClustering && raterCharacteristics && !useMetadataRows)
-
+                enable: >-
+                  (performClustering && raterCharacteristics &&
+                  !useMetadataRows)
           - type: TargetLayoutBox
             label: Institution Variable
             children:
@@ -390,8 +363,9 @@ children:
                 name: raterInstitution
                 maxItemCount: 1
                 isTarget: true
-                enable: (performClustering && raterCharacteristics && !useMetadataRows)
-
+                enable: >-
+                  (performClustering && raterCharacteristics &&
+                  !useMetadataRows)
           - type: TargetLayoutBox
             label: Case Volume Variable
             children:
@@ -399,8 +373,9 @@ children:
                 name: raterVolume
                 maxItemCount: 1
                 isTarget: true
-                enable: (performClustering && raterCharacteristics && !useMetadataRows)
-
+                enable: >-
+                  (performClustering && raterCharacteristics &&
+                  !useMetadataRows)
           - type: TargetLayoutBox
             label: Reference/Expert Standard (optional)
             children:
@@ -409,31 +384,38 @@ children:
                 maxItemCount: 1
                 isTarget: true
                 enable: (performClustering && !useMetadataRows)
-
-      # Method 2: Metadata rows guide
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: |
+            label: >
               Metadata Rows Method Guide:
 
-              If you checked "Use metadata rows" above, your dataset should include special rows:
+
+              If you checked "Use metadata rows" above, your dataset should
+              include special rows:
+
 
               1. Add rows at the bottom of your data
+
               2. Set case_id to: META_experience, META_specialty,
                  META_institution, or META_volume
               3. Fill rater columns with corresponding values
 
-              Example:
-              case_id          | Rater_A | Rater_B | Rater_C
-              1                | EIN     | Benign  | EIN
-              2                | Benign  | Benign  | Adenoca
-              META_experience  | 25      | 13      | 8
-              META_specialty   | GYN     | GYN     | GEN
 
+              Example:
+
+              case_id          | Rater_A | Rater_B | Rater_C
+
+              1                | EIN     | Benign  | EIN
+
+              2                | Benign  | Benign  | Adenoca
+
+              META_experience  | 25      | 13      | 8
+
+              META_specialty   | GYN     | GYN     | GEN
   - type: CollapseBox
-    label: "Advanced: Detailed Analysis (Pairwise, Bias, Trends)"
+    label: 'Advanced: Detailed Analysis (Pairwise, Bias, Trends)'
     collapsed: true
     children:
       - type: LayoutBox
@@ -450,7 +432,6 @@ children:
           - type: CheckBox
             name: agreementTrendAnalysis
             label: Agreement Trend Over Cases (training effect)
-
       - type: LayoutBox
         margin: large
         children:
@@ -465,7 +446,6 @@ children:
           - type: CheckBox
             name: caseDifficultyScoring
             label: Case Difficulty Assessment
-
       - type: LayoutBox
         margin: large
         children:
@@ -477,9 +457,40 @@ children:
           - type: CheckBox
             name: agreementStabilityAnalysis
             label: Agreement Stability Analysis (bootstrap-based)
-
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Experience Variable
+        children:
+          - type: VariablesListBox
+            name: experienceVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Training Variable
+        children:
+          - type: VariablesListBox
+            name: trainingVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Institution Variable
+        children:
+          - type: VariablesListBox
+            name: institutionVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Specialty Variable
+        children:
+          - type: VariablesListBox
+            name: specialtyVar
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
-    label: "Planning: Study Design & Sample Size"
+    label: 'Planning: Study Design & Sample Size'
     collapsed: true
     children:
       - type: LayoutBox
@@ -498,9 +509,13 @@ children:
             label: Target Precision (CI Width, e.g., 0.1)
             format: number
             enable: (sampleSizePlanning)
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: identifyDiscordantCases
   - type: CollapseBox
-    label: "Technical: System Options"
+    label: 'Technical: System Options'
     collapsed: true
     children:
       - type: LayoutBox
