@@ -207,7 +207,7 @@ items:
       width: 700
       height: 500
       renderFun: .plotClinicalImpact
-      visible: (calculateClinicalImpact && showPlot) || (showClinicalImpactPlot)
+      visible: (calculateClinicalImpact || showClinicalImpactPlot)
       description: Number of true/false positives per population unit
       clearWith:
         - outcome

@@ -264,9 +264,11 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     
                 }, error = function(e) {
                     # If any calculation fails, show error notice
-                    n <- jmvcore::Notice$new(options=self$options, name='calculation_error', type=jmvcore::NoticeType$ERROR)
-                    n$setContent(sprintf('Calculation error with provided values: %s. Please verify all parameters and try again.', e$message))
-                    self$results$insert(999, n)
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Calculation Error",
+                        content = sprintf('Calculation error with provided values: %s. Please verify all parameters and try again.', e$message)
+                    )
                     return()
                 })
 
@@ -322,9 +324,11 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     self$results$insert(position, n)
                     position <- position + 1
                 } else if (is.infinite(combined_plr)) {
-                    n <- jmvcore::Notice$new(options=self$options, name='plr_infinite', type=jmvcore::NoticeType$INFO)
-                    n$setContent('Combined positive likelihood ratio is infinite (combined specificity is effectively 100%). This indicates perfect rule-in capability.')
-                    self$results$insert(999, n)
+                    private$.addNotice(
+                        type = "INFO",
+                        title = "Infinite Positive Likelihood Ratio",
+                        content = 'Combined positive likelihood ratio is infinite (combined specificity is effectively 100%). This indicates perfect rule-in capability.'
+                    )
                 }
 
                 combined_nlr <- private$.safeDivide(1 - combined_sens, combined_spec, allowInfinite = TRUE)
@@ -1108,15 +1112,22 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Success notices at bottom
-                info <- jmvcore::Notice$new(options=self$options, name='analysis_complete', type=jmvcore::NoticeType$INFO)
-                info$setContent(sprintf('Sequential testing analysis completed: %s strategy with prevalence %.1f%%, combined sensitivity %.1f%%, combined specificity %.1f%%.',
-                                        strategy_name, prevalence*100, combined_sens*100, combined_spec*100))
-                self$results$insert(999, info)
+                private$.addNotice(
+                    type = "INFO",
+                    title = "Analysis Complete",
+                    content = sprintf('Sequential testing analysis completed: %s strategy with prevalence %.1f%%, combined sensitivity %.1f%%, combined specificity %.1f%%.',
+                                        strategy_name, prevalence*100, combined_sens*100, combined_spec*100)
+                )
 
                 # Independence assumption notice
-                assumption <- jmvcore::Notice$new(options=self$options, name='independence_assumption', type=jmvcore::NoticeType$INFO)
-                assumption$setContent('Combined metrics assume conditional independence between tests. If tests are correlated (similar biology/technology), combined performance may be overestimated.')
-                self$results$insert(999, assumption)
+                private$.addNotice(
+                    type = "INFO",
+                    title = "Independence Assumption",
+                    content = 'Combined metrics assume conditional independence between tests. If tests are correlated (similar biology/technology), combined performance may be overestimated.'
+                )
+
+                # Render all collected notices as HTML (last step)
+                private$.renderNotices()
 
                 },
 
@@ -1613,6 +1624,67 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 print(sens_plot)
                 return(TRUE)
+            },
+
+            # Notice collection and rendering (converted from insert(999, ) to avoid serialization errors)
+            .noticeList = list(),
+
+            # Add a notice to the collection
+            .addNotice = function(type, title, content) {
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+            },
+
+            # HTML sanitization for security
+            .safeHtmlOutput = function(text) {
+                if (is.null(text) || length(text) == 0) return("")
+                text <- as.character(text)
+                # Sanitize potentially dangerous characters
+                text <- gsub("&", "&amp;", text, fixed = TRUE)
+                text <- gsub("<", "&lt;", text, fixed = TRUE)
+                text <- gsub(">", "&gt;", text, fixed = TRUE)
+                text <- gsub("\"", "&quot;", text, fixed = TRUE)
+                text <- gsub("'", "&#x27;", text, fixed = TRUE)
+                text <- gsub("/", "&#x2F;", text, fixed = TRUE)
+                return(text)
+            },
+
+            # Render collected notices as HTML
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    return()
+                }
+
+                # Map notice types to colors and icons
+                typeStyles <- list(
+                    ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
+                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
+                    WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
+                    INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+                )
+
+                html <- "<div style='margin: 10px 0;'>"
+
+                for (notice in private$.noticeList) {
+                    style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+
+                    html <- paste0(html,
+                        "<div style='background-color: ", style$bgcolor, "; ",
+                        "border-left: 4px solid ", style$border, "; ",
+                        "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                        "<strong style='color: ", style$color, ";'>",
+                        style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
+                        "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+                        "</div>"
+                    )
+                }
+
+                html <- paste0(html, "</div>")
+
+                self$results$notices$setContent(html)
             },
 
             # Helper function for safe division

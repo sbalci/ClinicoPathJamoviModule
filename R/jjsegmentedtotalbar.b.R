@@ -658,6 +658,84 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             return(p)
         },
 
+        .getChartTheme = function(style) {
+            # Returns a ggplot2 theme object based on chart style
+            # Used for Flerlage plots where themes are applied differently
+
+            if (style == "clean") {
+                return(ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        panel.grid.major.x = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        text = ggplot2::element_text(size = 11),
+                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
+                        plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5)
+                    ))
+            } else if (style == "publication") {
+                return(ggplot2::theme_classic() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 10),
+                        axis.title = ggplot2::element_text(size = 11, face = "bold"),
+                        plot.title = ggplot2::element_text(size = 12, face = "bold", hjust = 0.5),
+                        legend.text = ggplot2::element_text(size = 9),
+                        axis.line = ggplot2::element_line(color = "black", linewidth = 0.5)
+                    ))
+            } else if (style == "presentation") {
+                return(ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 14),
+                        axis.title = ggplot2::element_text(size = 16, face = "bold"),
+                        plot.title = ggplot2::element_text(size = 18, face = "bold", hjust = 0.5),
+                        legend.text = ggplot2::element_text(size = 12),
+                        panel.grid.major.x = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank()
+                    ))
+            } else if (style == "clinical") {
+                return(ggplot2::theme_bw() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 11),
+                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
+                        plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5),
+                        panel.grid.major.x = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        legend.position = "right",
+                        legend.background = ggplot2::element_rect(fill = "white", color = "gray80"),
+                        panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 1)
+                    ))
+            } else if (style == "bbc_style") {
+                return(ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 11),
+                        plot.title = ggplot2::element_text(size = 18, face = "bold", hjust = 0),
+                        plot.subtitle = ggplot2::element_text(size = 14, hjust = 0),
+                        axis.title = ggplot2::element_blank(),
+                        axis.text = ggplot2::element_text(size = 10),
+                        panel.grid.major.x = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        panel.background = ggplot2::element_blank(),
+                        legend.position = "top",
+                        legend.justification = "left",
+                        legend.text = ggplot2::element_text(size = 10),
+                        legend.title = ggplot2::element_blank()
+                    ))
+            } else if (style == "prism_style") {
+                return(ggplot2::theme_classic() +
+                    ggplot2::theme(
+                        text = ggplot2::element_text(size = 10),
+                        axis.title = ggplot2::element_text(size = 11),
+                        plot.title = ggplot2::element_text(size = 12, face = "bold", hjust = 0.5),
+                        axis.line = ggplot2::element_line(color = "black", linewidth = 0.5),
+                        axis.ticks = ggplot2::element_line(color = "black", linewidth = 0.5),
+                        legend.text = ggplot2::element_text(size = 9),
+                        legend.key.size = ggplot2::unit(0.8, "cm"),
+                        panel.background = ggplot2::element_rect(fill = "white")
+                    ))
+            }
+
+            # Default to minimal theme if unknown style
+            return(ggplot2::theme_minimal())
+        },
+
         .addTitles = function(p) {
 
             # Set titles
@@ -1051,12 +1129,13 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Create base Flerlage plot
             p <- ggsegmentedtotalbar::ggsegmentedtotalbar(
-                data = plot_data,
+                df = plot_data,
                 group = "group",
                 segment = "segment",
                 value = "value",
                 total = "total",
-                label = self$options$flerlage_show_labels,
+                value_label = self$options$flerlage_show_labels,
+                total_label = self$options$flerlage_show_labels,
                 label_size = self$options$flerlage_label_size,
                 label_color = self$options$flerlage_label_color,
                 alpha = self$options$flerlage_alpha,

@@ -8,6 +8,16 @@ items:
       name: results
       type: Group
       items:
+          # Notice outputs converted to HTML to avoid serialization errors
+          - name: notices
+            title: Important Information
+            type: Html
+            clearWith:
+               - outcome
+               - predictor
+               - detectImbalance
+               - analysisType
+
           - name: instructions
             title: Instructions
             type: Html

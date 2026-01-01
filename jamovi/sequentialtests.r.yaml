@@ -187,7 +187,17 @@ items:
       title: 'Clinical Guidance'
       type: Html
 
-
+    # Notice outputs converted to HTML to avoid serialization errors
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+         - strategy_type
+         - prevalence
+         - sens_first
+         - spec_first
+         - sens_second
+         - spec_second
 
 
 refs:
