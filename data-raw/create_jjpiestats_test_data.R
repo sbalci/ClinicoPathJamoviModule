@@ -1,4 +1,8 @@
 # Create test data for jjpiestats function
+
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Create pie chart test data suitable for clinical research
@@ -149,8 +153,8 @@ for (i in 1:nrow(jjpiestats_test_data)) {
   }
 }
 
-# Save the dataset
-usethis::use_data(jjpiestats_test_data, overwrite = TRUE)
+# Save the dataset in all formats (.rda, .omv, .csv)
+use_data_multi_format(jjpiestats_test_data, overwrite = TRUE, save_csv = TRUE)
 
 # Preview the data
 print("jjpiestats_test_data structure:")

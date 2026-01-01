@@ -1,5 +1,7 @@
 
 test_that("irecist works for responder scenario", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     data <- data.frame(
         patient = c("P1", "P1", "P1"),
         time = c(0, 8, 16),

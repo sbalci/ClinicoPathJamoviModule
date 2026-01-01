@@ -13,6 +13,8 @@ pcacomponenttest <- function(data, ...) {
 }
 
 test_that("Reproducibility works with seed", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # Create synthetic data with clear structure
     # Create random noise data to ensure p-values vary
     set.seed(123)

@@ -1,6 +1,9 @@
 # Example Datasets for Bayesian Decision Curve Analysis
 # This script creates realistic datasets for demonstrating DCA functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(ClinicoPath)
 
 # Set seed for reproducibility
@@ -117,11 +120,11 @@ comprehensive_dca_data$biomarker_high_prob <- with(comprehensive_dca_data,
   (max(biomarker_high_good) - min(biomarker_high_good)))
 
 # Export datasets to data/ folder
-usethis::use_data(cancer_screening_data, overwrite = TRUE)
-usethis::use_data(treatment_decision_data, overwrite = TRUE)
-usethis::use_data(diagnostic_test_data, overwrite = TRUE)
-usethis::use_data(external_prevalence_data, overwrite = TRUE)
-usethis::use_data(comprehensive_dca_data, overwrite = TRUE)
+use_data_multi_format(cancer_screening_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(treatment_decision_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(diagnostic_test_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(external_prevalence_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(comprehensive_dca_data, overwrite = TRUE, save_csv = TRUE)
 
 # Create documentation for the datasets
 cat("📊 Bayesian DCA Example Datasets Created Successfully!\n\n")

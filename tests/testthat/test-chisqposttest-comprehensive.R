@@ -32,6 +32,8 @@ extract_table_data <- function(result, table_name) {
 # ===== Omnibus Chi-Squared Test Validation =====
 
 test_that("Chi-squared statistic matches stats::chisq.test() for 2x2 table", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create simple 2x2 contingency table
   data <- data.frame(
     treatment = factor(rep(c("Drug", "Placebo"), c(60, 60))),

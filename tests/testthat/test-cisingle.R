@@ -1,4 +1,6 @@
 test_that("cisingle works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     
     # Load test data
     data("histopathology", package = "ClinicoPath")

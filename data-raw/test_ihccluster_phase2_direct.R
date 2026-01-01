@@ -3,6 +3,9 @@
 # Tests helper functions directly without jamovi interface
 
 # Load test data
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 data <- read.csv(
     "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/ihc_breast_cancer.csv",
     stringsAsFactors = TRUE

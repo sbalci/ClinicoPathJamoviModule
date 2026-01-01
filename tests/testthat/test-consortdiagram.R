@@ -3,6 +3,8 @@ source("../../R/consortdiagram.h.R")
 source("../../R/consortdiagram.b.R")
 
 test_that("consortdiagram works with basic single-arm inputs", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # skip_on_cran()
 
     # Create simple single-arm trial data

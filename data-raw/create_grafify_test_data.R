@@ -2,6 +2,9 @@
 # This script generates datasets specifically designed to test all grafify features
 
 # Load required libraries
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility  
@@ -228,11 +231,47 @@ attr(grafify_factorial_data, "description") <-
 
 # Save all datasets
 save(grafify_comprehensive_data, file = "data/grafify_comprehensive_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(grafify_comprehensive_data, "data/grafify_comprehensive_data.omv")
+  message("✓ Created grafify_comprehensive_data.omv")
+}
 save(grafify_simple_data, file = "data/grafify_simple_data.rda") 
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(grafify_simple_data, "data/grafify_simple_data.omv")
+  message("✓ Created grafify_simple_data.omv")
+}
 save(grafify_longitudinal_data, file = "data/grafify_longitudinal_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(grafify_longitudinal_data, "data/grafify_longitudinal_data.omv")
+  message("✓ Created grafify_longitudinal_data.omv")
+}
 save(grafify_correlation_data, file = "data/grafify_correlation_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(grafify_correlation_data, "data/grafify_correlation_data.omv")
+  message("✓ Created grafify_correlation_data.omv")
+}
 save(grafify_dose_response_data, file = "data/grafify_dose_response_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(grafify_dose_response_data, "data/grafify_dose_response_data.omv")
+  message("✓ Created grafify_dose_response_data.omv")
+}
 save(grafify_factorial_data, file = "data/grafify_factorial_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(grafify_factorial_data, "data/grafify_factorial_data.omv")
+  message("✓ Created grafify_factorial_data.omv")
+}
 
 # Print summary information
 cat("Created grafify test datasets:\n")

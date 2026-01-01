@@ -124,6 +124,8 @@ create_mock_self <- function(data, options = list()) {
 
 
 test_that("jjridgesClass initializes correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   data <- iris
   options <- list(x_var = "Sepal.Length", y_var = "Species")
   self_obj <- create_mock_self(data, options)

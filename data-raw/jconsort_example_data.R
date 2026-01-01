@@ -1,6 +1,9 @@
 # CONSORT Example Data Generation
 # This script creates sample CONSORT flow chart parameters for different types of clinical trials
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(tibble)
 library(dplyr)
 library(usethis)
@@ -191,7 +194,7 @@ jconsort_examples_data <- jconsort_examples_data %>%
     )
 
 # Save the dataset
-usethis::use_data(jconsort_examples_data, overwrite = TRUE)
+use_data_multi_format(jconsort_examples_data, overwrite = TRUE, save_csv = TRUE)
 
 # Documentation for the dataset
 # This will be added to the data.R file

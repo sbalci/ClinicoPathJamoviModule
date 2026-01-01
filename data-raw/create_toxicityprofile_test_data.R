@@ -4,6 +4,9 @@
 # Comprehensive Test Data Generation for Enhanced toxicityprofile Function
 # =============================================================================
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 cat("Creating comprehensive test datasets for enhanced toxicityprofile function...\n")
 
 # Load required libraries
@@ -605,11 +608,83 @@ cat("\nSaving datasets...\n")
 
 # Save as .rda files
 save(toxicityprofile_oncology_trial, file = "data/toxicityprofile_oncology_trial.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_oncology_trial, "data/toxicityprofile_oncology_trial.omv")
+  message("✓ Created toxicityprofile_oncology_trial.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_oncology_trial, "data/toxicityprofile_oncology_trial.omv")
+  message("✓ Created toxicityprofile_oncology_trial.omv")
+}
 save(toxicityprofile_immunotherapy, file = "data/toxicityprofile_immunotherapy.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_immunotherapy, "data/toxicityprofile_immunotherapy.omv")
+  message("✓ Created toxicityprofile_immunotherapy.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_immunotherapy, "data/toxicityprofile_immunotherapy.omv")
+  message("✓ Created toxicityprofile_immunotherapy.omv")
+}
 save(toxicityprofile_targeted_therapy, file = "data/toxicityprofile_targeted_therapy.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_targeted_therapy, "data/toxicityprofile_targeted_therapy.omv")
+  message("✓ Created toxicityprofile_targeted_therapy.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_targeted_therapy, "data/toxicityprofile_targeted_therapy.omv")
+  message("✓ Created toxicityprofile_targeted_therapy.omv")
+}
 save(toxicityprofile_dose_escalation, file = "data/toxicityprofile_dose_escalation.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_dose_escalation, "data/toxicityprofile_dose_escalation.omv")
+  message("✓ Created toxicityprofile_dose_escalation.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_dose_escalation, "data/toxicityprofile_dose_escalation.omv")
+  message("✓ Created toxicityprofile_dose_escalation.omv")
+}
 save(toxicityprofile_pediatric, file = "data/toxicityprofile_pediatric.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_pediatric, "data/toxicityprofile_pediatric.omv")
+  message("✓ Created toxicityprofile_pediatric.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_pediatric, "data/toxicityprofile_pediatric.omv")
+  message("✓ Created toxicityprofile_pediatric.omv")
+}
 save(toxicityprofile_small_sample, file = "data/toxicityprofile_small_sample.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_small_sample, "data/toxicityprofile_small_sample.omv")
+  message("✓ Created toxicityprofile_small_sample.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toxicityprofile_small_sample, "data/toxicityprofile_small_sample.omv")
+  message("✓ Created toxicityprofile_small_sample.omv")
+}
 
 # Save as .csv files for external use
 write.csv(toxicityprofile_oncology_trial, "data/toxicityprofile_oncology_trial.csv", row.names = FALSE)
@@ -666,6 +741,18 @@ summary_stats <- data.frame(
 )
 
 save(summary_stats, file = "data/toxicityprofile_datasets_summary.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/toxicityprofile_datasets_summary.omv")
+  message("✓ Created toxicityprofile_datasets_summary.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/toxicityprofile_datasets_summary.omv")
+  message("✓ Created toxicityprofile_datasets_summary.omv")
+}
 write.csv(summary_stats, "data/toxicityprofile_datasets_summary.csv", row.names = FALSE)
 
 # =============================================================================
@@ -717,6 +804,18 @@ test_scenarios <- data.frame(
 )
 
 save(test_scenarios, file = "data/toxicityprofile_test_scenarios.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_scenarios, "data/toxicityprofile_test_scenarios.omv")
+  message("✓ Created toxicityprofile_test_scenarios.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_scenarios, "data/toxicityprofile_test_scenarios.omv")
+  message("✓ Created toxicityprofile_test_scenarios.omv")
+}
 write.csv(test_scenarios, "data/toxicityprofile_test_scenarios.csv", row.names = FALSE)
 
 # =============================================================================

@@ -1,6 +1,9 @@
 # Create synthetic hemodynamic monitoring data for clinmon function testing
 # This script creates realistic physiological time series data
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 set.seed(42)
@@ -141,9 +144,9 @@ pathological_monitoring_data$mcav_cms <- pathological_monitoring_data$mcav_cms *
   (1 - 0.3 * (icp_increase / max(icp_increase)))
 
 # Save datasets
-usethis::use_data(hemodynamic_monitoring_data, overwrite = TRUE)
-usethis::use_data(hemodynamic_hf_data, overwrite = TRUE)
-usethis::use_data(pathological_monitoring_data, overwrite = TRUE)
+use_data_multi_format(hemodynamic_monitoring_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(hemodynamic_hf_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(pathological_monitoring_data, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary
 cat("✅ Created hemodynamic monitoring datasets:\n\n")

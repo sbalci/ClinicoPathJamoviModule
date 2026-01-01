@@ -2,6 +2,9 @@
 # This demonstrates that error messages have been replaced with helpful guidance
 
 # Load the module
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(ClinicoPath)
 
 # Load test data

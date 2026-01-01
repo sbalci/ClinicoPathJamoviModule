@@ -10,6 +10,8 @@ data(colon, package = "survival")
 colon_clean <- colon[colon$etype == 2, ]  # Only recurrence events
 
 test_that("Event indicator correctly identifies events", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Test numeric 0/1 encoding
   outcome_numeric <- c(0, 1, 0, 1, 1)
   result <- ClinicoPath:::.eventIndicator(outcome_numeric)

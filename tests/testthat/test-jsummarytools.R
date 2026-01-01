@@ -17,6 +17,8 @@ test_data_basic <- data.frame(
 
 # Basic function availability tests
 test_that("jsummarytools function exists and is properly defined", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     expect_true(exists("jsummarytools"))
     expect_true(is.function(jsummarytools))
 })

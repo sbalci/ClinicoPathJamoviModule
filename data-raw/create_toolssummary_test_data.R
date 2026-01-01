@@ -4,6 +4,9 @@
 # Comprehensive Test Data Generation for Enhanced toolssummary Function
 # =============================================================================
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 cat("Creating comprehensive test datasets for enhanced toolssummary function...\n")
 
 # Load required libraries
@@ -263,11 +266,83 @@ cat("\nSaving datasets...\n")
 
 # Save as .rda files
 save(toolssummary_clinical_demographics, file = "data/toolssummary_clinical_demographics.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_clinical_demographics, "data/toolssummary_clinical_demographics.omv")
+  message("✓ Created toolssummary_clinical_demographics.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_clinical_demographics, "data/toolssummary_clinical_demographics.omv")
+  message("✓ Created toolssummary_clinical_demographics.omv")
+}
 save(toolssummary_laboratory_results, file = "data/toolssummary_laboratory_results.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_laboratory_results, "data/toolssummary_laboratory_results.omv")
+  message("✓ Created toolssummary_laboratory_results.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_laboratory_results, "data/toolssummary_laboratory_results.omv")
+  message("✓ Created toolssummary_laboratory_results.omv")
+}
 save(toolssummary_mixed_datatypes, file = "data/toolssummary_mixed_datatypes.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_mixed_datatypes, "data/toolssummary_mixed_datatypes.omv")
+  message("✓ Created toolssummary_mixed_datatypes.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_mixed_datatypes, "data/toolssummary_mixed_datatypes.omv")
+  message("✓ Created toolssummary_mixed_datatypes.omv")
+}
 save(toolssummary_timeseries_data, file = "data/toolssummary_timeseries_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_timeseries_data, "data/toolssummary_timeseries_data.omv")
+  message("✓ Created toolssummary_timeseries_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_timeseries_data, "data/toolssummary_timeseries_data.omv")
+  message("✓ Created toolssummary_timeseries_data.omv")
+}
 save(toolssummary_edge_cases, file = "data/toolssummary_edge_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_edge_cases, "data/toolssummary_edge_cases.omv")
+  message("✓ Created toolssummary_edge_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_edge_cases, "data/toolssummary_edge_cases.omv")
+  message("✓ Created toolssummary_edge_cases.omv")
+}
 save(toolssummary_small_sample, file = "data/toolssummary_small_sample.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_small_sample, "data/toolssummary_small_sample.omv")
+  message("✓ Created toolssummary_small_sample.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(toolssummary_small_sample, "data/toolssummary_small_sample.omv")
+  message("✓ Created toolssummary_small_sample.omv")
+}
 
 # Save as .csv files for external use
 write.csv(toolssummary_clinical_demographics, "data/toolssummary_clinical_demographics.csv", row.names = FALSE)
@@ -321,6 +396,18 @@ summary_stats <- data.frame(
 )
 
 save(summary_stats, file = "data/toolssummary_datasets_summary.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/toolssummary_datasets_summary.omv")
+  message("✓ Created toolssummary_datasets_summary.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/toolssummary_datasets_summary.omv")
+  message("✓ Created toolssummary_datasets_summary.omv")
+}
 write.csv(summary_stats, "data/toolssummary_datasets_summary.csv", row.names = FALSE)
 
 # =============================================================================
@@ -363,6 +450,18 @@ test_scenarios <- data.frame(
 )
 
 save(test_scenarios, file = "data/toolssummary_test_scenarios.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_scenarios, "data/toolssummary_test_scenarios.omv")
+  message("✓ Created toolssummary_test_scenarios.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_scenarios, "data/toolssummary_test_scenarios.omv")
+  message("✓ Created toolssummary_test_scenarios.omv")
+}
 write.csv(test_scenarios, "data/toolssummary_test_scenarios.csv", row.names = FALSE)
 
 # =============================================================================

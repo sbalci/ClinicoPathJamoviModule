@@ -1,6 +1,9 @@
 # Pathology Sampling Test Data Generator
 # Creates realistic test datasets with edge cases for validation
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Function to generate realistic pathology sampling data

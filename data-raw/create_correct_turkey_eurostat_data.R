@@ -1,6 +1,9 @@
 # Create correct Turkey datasets from real Eurostat data
 # Based on actual available NUTS codes in Eurostat
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(eurostat)
 library(dplyr)
 
@@ -193,16 +196,16 @@ print(head(turkey_timeseries_nuts2, 12))
 # Save all real datasets
 cat("\n=== SAVING REAL TURKEY DATASETS ===\n")
 
-usethis::use_data(turkey_nuts2_eurostat, overwrite = TRUE)
+use_data_multi_format(turkey_nuts2_eurostat, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_nuts2_eurostat (26 NUTS-2 subregions)\n")
 
-usethis::use_data(turkey_eastern_anatolia, overwrite = TRUE) 
+use_data_multi_format(turkey_eastern_anatolia, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_eastern_anatolia (TRA, TRB, TRC regions)\n")
 
-usethis::use_data(turkey_nuts1_aggregated, overwrite = TRUE)
+use_data_multi_format(turkey_nuts1_aggregated, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_nuts1_aggregated (12 NUTS-1 regions)\n")
 
-usethis::use_data(turkey_timeseries_nuts2, overwrite = TRUE)
+use_data_multi_format(turkey_timeseries_nuts2, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_timeseries_nuts2 (2018-2023 time series)\n")
 
 # Print final summary

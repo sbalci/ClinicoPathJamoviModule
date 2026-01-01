@@ -1,5 +1,7 @@
 
 test_that("tumorgrowth works with exponential model (nls)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # Create synthetic data
     set.seed(123)
     t <- 0:10

@@ -47,6 +47,8 @@ setup_visual_test_data <- function() {
 # ============================================================================
 
 test_that("jjsegmentedtotalbar basic vertical chart visual regression", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed_vdiffr()
 
   test_data <- setup_visual_test_data()

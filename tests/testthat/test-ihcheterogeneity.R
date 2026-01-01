@@ -27,6 +27,8 @@ get_data_path <- function(filename) {
 sample_data <- read.csv(get_data_path("ihc_heterogeneity.csv"), stringsAsFactors = TRUE)
 
 test_that("ihcheterogeneity runs with default options", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     results <- ClinicoPath::ihcheterogeneity(
         data = sample_data,
         wholesection = "ki67_wholesection",

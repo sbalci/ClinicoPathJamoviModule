@@ -27,6 +27,8 @@ create_test_data <- function(n_rows = 50, n_raters = 3, type = "nominal", missin
 }
 
 test_that("Warnings panel is populated", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     data <- create_test_data(n_rows = 50, n_raters = 2)
     options <- pathagreementOptions$new(
         vars = colnames(data),

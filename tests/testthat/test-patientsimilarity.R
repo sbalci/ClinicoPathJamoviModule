@@ -1,5 +1,7 @@
 
 test_that("patientsimilarity works for PCA with K-means", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     set.seed(123)
     n <- 100
     data <- data.frame(

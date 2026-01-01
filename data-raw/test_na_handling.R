@@ -1,6 +1,9 @@
 # Test NA handling in advancedraincloud function
 # This script demonstrates the enhanced NA handling capabilities
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(jmvcore)
 
 # Create test data with NA values to simulate real-world missing data

@@ -4,6 +4,8 @@ context("test-crosstablepivot")
 library(ClinicoPath)
 
 test_that("crosstablepivot basic functionality", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Load test data
   data("histopathology", package = "ClinicoPath")

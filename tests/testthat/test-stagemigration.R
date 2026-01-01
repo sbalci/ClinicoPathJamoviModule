@@ -1,5 +1,7 @@
 
 test_that("stagemigration works with basic analysis", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     set.seed(123)
     n <- 200
     old_stage <- sample(c("I", "II", "III"), n, replace = TRUE, prob = c(0.4, 0.3, 0.3))

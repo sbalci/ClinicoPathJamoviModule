@@ -1,6 +1,9 @@
 #!/usr/bin/env Rscript
 # Simple conceptual test of Phase 2 logic
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 cat("=== Phase 2 Implementation Verification ===\n\n")
 
 # Simulate complete clean data for testing

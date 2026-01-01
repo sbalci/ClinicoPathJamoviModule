@@ -42,6 +42,8 @@ external_test_data <- data.frame(
 )
 
 test_that("BayesDCA - Basic functionality and parameter validation", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test basic function call
   expect_error(

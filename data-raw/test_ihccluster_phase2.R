@@ -3,6 +3,9 @@
 # Tests: Reproducibility testing and Supervised clustering
 
 # Load the module directly from source
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 devtools::load_all(".")
 
 # Load test data

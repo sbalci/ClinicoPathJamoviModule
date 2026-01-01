@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for jjbarstats function
 # This script generates multiple datasets to test various scenarios
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 set.seed(20250707)  # For reproducible data generation
@@ -103,11 +106,11 @@ diagnostic_test_data <- convert_to_factors(diagnostic_test_data)
 quality_improvement_data <- convert_to_factors(quality_improvement_data)
 
 # Save datasets
-usethis::use_data(medical_study_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(patient_satisfaction_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(clinical_trial_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(diagnostic_test_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(quality_improvement_data, overwrite = TRUE, internal = FALSE)
+use_data_multi_format(medical_study_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(patient_satisfaction_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(clinical_trial_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(diagnostic_test_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(quality_improvement_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
 
 # Create summary information
 cat("Test datasets created for jjbarstats function:\n")

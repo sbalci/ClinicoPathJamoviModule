@@ -10,6 +10,9 @@
 # Purpose: Testing stagemigration function with realistic clinical data
 # ===================================================================
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(survival)
 set.seed(42)  # Reproducible results
 

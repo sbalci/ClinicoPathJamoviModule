@@ -57,6 +57,8 @@ create_test_data_with_na <- function(n = 30) {
 # ============================================================================
 
 test_that("Basic tidyplots function works with minimal input", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   data <- create_test_data()
   
   # Test basic function call

@@ -20,6 +20,8 @@ if (file.exists(edge_data_path)) load(edge_data_path)
 # =============================================================================
 
 test_that("tinytable test datasets were created successfully", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Check if main test dataset exists and has correct structure
   expect_true(exists("tinytable_clinical_demographics"))

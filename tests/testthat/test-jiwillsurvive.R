@@ -4,6 +4,8 @@ context("test-jiwillsurvive")
 library(ClinicoPath)
 
 test_that("jiwillsurvive works with basic survival analysis", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Load test data
   data("jiwillsurvive_test_data", package = "ClinicoPath")

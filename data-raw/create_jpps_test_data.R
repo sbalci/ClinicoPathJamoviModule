@@ -4,6 +4,9 @@
 # This script generates comprehensive test datasets for the jpps function,
 # covering various scenarios and data types to ensure robust testing.
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(tibble)
 library(dplyr)
 
@@ -222,13 +225,109 @@ jpps_edge_cases <- tibble(
 
 # Save individual datasets
 save(jpps_linear_data, file = "data/jpps_linear_data.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_linear_data, "data/jpps_linear_data.omv")
+  message("✓ Created jpps_linear_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_linear_data, "data/jpps_linear_data.omv")
+  message("✓ Created jpps_linear_data.omv")
+}
 save(jpps_nonlinear_data, file = "data/jpps_nonlinear_data.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_nonlinear_data, "data/jpps_nonlinear_data.omv")
+  message("✓ Created jpps_nonlinear_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_nonlinear_data, "data/jpps_nonlinear_data.omv")
+  message("✓ Created jpps_nonlinear_data.omv")
+}
 save(jpps_mixed_data, file = "data/jpps_mixed_data.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_mixed_data, "data/jpps_mixed_data.omv")
+  message("✓ Created jpps_mixed_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_mixed_data, "data/jpps_mixed_data.omv")
+  message("✓ Created jpps_mixed_data.omv")
+}
 save(jpps_comparison_data, file = "data/jpps_comparison_data.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_comparison_data, "data/jpps_comparison_data.omv")
+  message("✓ Created jpps_comparison_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_comparison_data, "data/jpps_comparison_data.omv")
+  message("✓ Created jpps_comparison_data.omv")
+}
 save(jpps_timeseries_data, file = "data/jpps_timeseries_data.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_timeseries_data, "data/jpps_timeseries_data.omv")
+  message("✓ Created jpps_timeseries_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_timeseries_data, "data/jpps_timeseries_data.omv")
+  message("✓ Created jpps_timeseries_data.omv")
+}
 save(jpps_matrix_data, file = "data/jpps_matrix_data.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_matrix_data, "data/jpps_matrix_data.omv")
+  message("✓ Created jpps_matrix_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_matrix_data, "data/jpps_matrix_data.omv")
+  message("✓ Created jpps_matrix_data.omv")
+}
 save(jpps_clinical_data, file = "data/jpps_clinical_data.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_clinical_data, "data/jpps_clinical_data.omv")
+  message("✓ Created jpps_clinical_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_clinical_data, "data/jpps_clinical_data.omv")
+  message("✓ Created jpps_clinical_data.omv")
+}
 save(jpps_edge_cases, file = "data/jpps_edge_cases.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_edge_cases, "data/jpps_edge_cases.omv")
+  message("✓ Created jpps_edge_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_edge_cases, "data/jpps_edge_cases.omv")
+  message("✓ Created jpps_edge_cases.omv")
+}
 
 # =============================================================================
 # Generate Documentation
@@ -293,6 +392,18 @@ jpps_test_datasets_info <- list(
 )
 
 save(jpps_test_datasets_info, file = "data/jpps_test_datasets_info.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_test_datasets_info, "data/jpps_test_datasets_info.omv")
+  message("✓ Created jpps_test_datasets_info.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jpps_test_datasets_info, "data/jpps_test_datasets_info.omv")
+  message("✓ Created jpps_test_datasets_info.omv")
+}
 
 # =============================================================================
 # Print Summary

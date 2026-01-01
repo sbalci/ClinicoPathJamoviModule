@@ -2,6 +2,9 @@
 # Quality-adjusted Time Without Symptoms or Toxicity Analysis
 # Test data for oncology trials
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -193,7 +196,7 @@ qtwist_breast_cancer_final <- qtwist_breast_cancer %>%
 
 # Save dataset
 qtwist_breast_cancer <- qtwist_breast_cancer_final
-usethis::use_data(qtwist_breast_cancer, overwrite = TRUE)
+use_data_multi_format(qtwist_breast_cancer, overwrite = TRUE, save_csv = TRUE)
 
 
 # ========================================
@@ -247,7 +250,7 @@ qtwist_lung_simple <- tibble(
   )
 
 # Save
-usethis::use_data(qtwist_lung_simple, overwrite = TRUE)
+use_data_multi_format(qtwist_lung_simple, overwrite = TRUE, save_csv = TRUE)
 
 
 # ========================================
@@ -325,7 +328,7 @@ qtwist_colorectal <- tibble(
   )
 
 # Save
-usethis::use_data(qtwist_colorectal, overwrite = TRUE)
+use_data_multi_format(qtwist_colorectal, overwrite = TRUE, save_csv = TRUE)
 
 # ========================================
 # Document datasets

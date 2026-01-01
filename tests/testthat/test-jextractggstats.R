@@ -3,6 +3,8 @@ library(ClinicoPath)
 data(histopathology, package = "ClinicoPath")
 
 test_that("jextractggstats module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("jextractggstatsClass"))
   expect_true(is.function(jextractggstats))
 })

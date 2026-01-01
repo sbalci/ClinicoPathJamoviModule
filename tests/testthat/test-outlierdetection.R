@@ -437,6 +437,8 @@ testthat::context("outlierdetection - Summary")
 
 # Test execution summary
 testthat::test_that("All outlierdetection tests completed successfully", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     testthat::expect_true(TRUE)
     
     cat("\n")

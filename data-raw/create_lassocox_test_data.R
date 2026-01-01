@@ -1,6 +1,9 @@
 # Test data generation for lassocox function
 # Creates realistic clinical datasets for Lasso-Cox regression analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(survival)
 
@@ -339,9 +342,57 @@ cat("Median follow-up:", round(median(small_cohort_data$time_months), 1), "month
 
 # Save datasets
 save(breast_cancer_data, file = "data/lassocox_breast_cancer.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(breast_cancer_data, "data/lassocox_breast_cancer.omv")
+  message("✓ Created lassocox_breast_cancer.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(breast_cancer_data, "data/lassocox_breast_cancer.omv")
+  message("✓ Created lassocox_breast_cancer.omv")
+}
 save(lung_cancer_data, file = "data/lassocox_lung_cancer.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lung_cancer_data, "data/lassocox_lung_cancer.omv")
+  message("✓ Created lassocox_lung_cancer.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lung_cancer_data, "data/lassocox_lung_cancer.omv")
+  message("✓ Created lassocox_lung_cancer.omv")
+}
 save(cardiovascular_data, file = "data/lassocox_cardiovascular.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cardiovascular_data, "data/lassocox_cardiovascular.omv")
+  message("✓ Created lassocox_cardiovascular.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cardiovascular_data, "data/lassocox_cardiovascular.omv")
+  message("✓ Created lassocox_cardiovascular.omv")
+}
 save(small_cohort_data, file = "data/lassocox_small_cohort.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(small_cohort_data, "data/lassocox_small_cohort.omv")
+  message("✓ Created lassocox_small_cohort.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(small_cohort_data, "data/lassocox_small_cohort.omv")
+  message("✓ Created lassocox_small_cohort.omv")
+}
 
 # Also save as CSV for easy inspection
 write.csv(breast_cancer_data, "data-raw/lassocox_breast_cancer.csv", row.names = FALSE)

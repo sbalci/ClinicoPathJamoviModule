@@ -1,6 +1,9 @@
 # Create test data for jjscatterstats function
 # This script generates various datasets to test scatter plot functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(usethis)
 
 # Basic scatter plot test data
@@ -119,12 +122,12 @@ jjscatterstats_stats$weak_y <- 0.3 * jjscatterstats_stats$weak_x + rnorm(100, 0,
 jjscatterstats_stats$nonlinear_y <- jjscatterstats_stats$nonlinear_x^2 + rnorm(100, 0, 0.8)
 
 # Save all datasets
-usethis::use_data(jjscatterstats_basic, overwrite = TRUE)
-usethis::use_data(jjscatterstats_advanced, overwrite = TRUE)
-usethis::use_data(jjscatterstats_clinical, overwrite = TRUE)
-usethis::use_data(jjscatterstats_performance, overwrite = TRUE)
-usethis::use_data(jjscatterstats_edge_cases, overwrite = TRUE)
-usethis::use_data(jjscatterstats_stats, overwrite = TRUE)
+use_data_multi_format(jjscatterstats_basic, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjscatterstats_advanced, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjscatterstats_clinical, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjscatterstats_performance, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjscatterstats_edge_cases, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjscatterstats_stats, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary information
 cat("Test datasets created for jjscatterstats:\n")

@@ -2,6 +2,9 @@
 # This script tests the module functionality step by step
 
 # Load required libraries
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(ClinicoPath)
 
 # Create simple test data

@@ -1,4 +1,6 @@
 test_that("advancedbarplot module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("advancedbarplotClass"))
   expect_true(is.function(advancedbarplot))
 })
@@ -17,6 +19,9 @@ test_that("advancedbarplot handles basic input validation", {
 })
 
 test_that("advancedbarplot works with valid inputs", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
+  
   # Test basic functionality
   result <- advancedbarplot(
     data = histopathology,
@@ -28,6 +33,12 @@ test_that("advancedbarplot works with valid inputs", {
   expect_s3_class(result, "advancedbarplotClass")
   expect_true("Group" %in% names(histopathology))
   expect_true("Age" %in% names(histopathology))
+  
+  # Export OMV
+  omv_path <- file.path('omv_output', 'advancedbarplot.omv')
+  if (!dir.exists('omv_output')) dir.create('omv_output')
+  expect_no_error(jmvReadWrite::write_omv(result, omv_path))
+  expect_true(file.exists(omv_path))
 })
 
 test_that("advancedbarplot statistical summaries work correctly", {

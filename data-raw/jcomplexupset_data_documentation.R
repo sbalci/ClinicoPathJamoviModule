@@ -38,6 +38,9 @@
 #' # Analyze treatment combinations
 #' treatment_vars <- c("Surgery", "Chemotherapy", "Radiotherapy", "Immunotherapy")
 #' summary(jcomplexupset_test_data[, treatment_vars])
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "jcomplexupset_test_data"
 
 #' Molecular Subtype Data

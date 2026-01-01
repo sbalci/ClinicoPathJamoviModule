@@ -6,6 +6,8 @@ context("test-finegray-competing-risks")
 library(ClinicoPath)
 
 test_that("Competing events preserve distinct codes (not collapsed to 2)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("cmprsk")
 

@@ -28,8 +28,8 @@ library(ClinicoPath)
 # Test the trend test
 result <- contTables(
   data = test_data,
-  rows = blocks,
-  cols = result,
+  rows = "blocks",
+  cols = "result",
   trendTest = TRUE,
   trendDirection = "twosided"
 )

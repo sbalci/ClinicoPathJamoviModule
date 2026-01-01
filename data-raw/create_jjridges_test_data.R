@@ -1,4 +1,7 @@
 # Create test data for jjridges function
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Create ridgeline plot test data suitable for clinical research
@@ -233,7 +236,7 @@ jjridges_test_data$systolic_bp <- round(jjridges_test_data$systolic_bp, 0)
 jjridges_test_data$genetic_risk_score <- round(jjridges_test_data$genetic_risk_score, 1)
 
 # Save the dataset
-usethis::use_data(jjridges_test_data, overwrite = TRUE)
+use_data_multi_format(jjridges_test_data, overwrite = TRUE, save_csv = TRUE)
 
 # Preview the data
 print("jjridges_test_data structure:")

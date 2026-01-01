@@ -5,6 +5,8 @@ library(testthat)
 mtcars_small <- mtcars[, c("mpg", "disp", "hp", "drat")]
 
 test_that("pcaloadingheatmap rejects non-numeric variables", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   data <- data.frame(
     cont1 = rnorm(10),
     cont2 = rnorm(10),

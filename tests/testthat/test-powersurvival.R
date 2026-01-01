@@ -1,4 +1,6 @@
 test_that("powersurvival function exists and basic functionality works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test function existence
   expect_true(exists("powersurvival"))

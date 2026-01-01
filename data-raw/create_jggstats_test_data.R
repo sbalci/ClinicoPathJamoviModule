@@ -1,6 +1,9 @@
 # Create test data for jggstats function
 # This script generates comprehensive datasets for testing enhanced statistical visualization
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(123)
 
 # Load required libraries
@@ -215,14 +218,122 @@ model_comparison_data$test_score <- model_comparison_data$test_score +
 
 # Save all datasets
 save(linear_model_data, file = "data/linear_model_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(linear_model_data, "data/linear_model_data.omv")
+  message("✓ Created linear_model_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(linear_model_data, "data/linear_model_data.omv")
+  message("✓ Created linear_model_data.omv")
+}
 save(logistic_model_data, file = "data/logistic_model_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(logistic_model_data, "data/logistic_model_data.omv")
+  message("✓ Created logistic_model_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(logistic_model_data, "data/logistic_model_data.omv")
+  message("✓ Created logistic_model_data.omv")
+}
 save(likert_survey_data, file = "data/likert_survey_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(likert_survey_data, "data/likert_survey_data.omv")
+  message("✓ Created likert_survey_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(likert_survey_data, "data/likert_survey_data.omv")
+  message("✓ Created likert_survey_data.omv")
+}
 save(survival_analysis_data, file = "data/survival_analysis_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survival_analysis_data, "data/survival_analysis_data.omv")
+  message("✓ Created survival_analysis_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survival_analysis_data, "data/survival_analysis_data.omv")
+  message("✓ Created survival_analysis_data.omv")
+}
 save(mixed_effects_data, file = "data/mixed_effects_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(mixed_effects_data, "data/mixed_effects_data.omv")
+  message("✓ Created mixed_effects_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(mixed_effects_data, "data/mixed_effects_data.omv")
+  message("✓ Created mixed_effects_data.omv")
+}
 save(survey_proportion_data, file = "data/survey_proportion_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_proportion_data, "data/survey_proportion_data.omv")
+  message("✓ Created survey_proportion_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_proportion_data, "data/survey_proportion_data.omv")
+  message("✓ Created survey_proportion_data.omv")
+}
 save(cross_tab_data, file = "data/cross_tab_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cross_tab_data, "data/cross_tab_data.omv")
+  message("✓ Created cross_tab_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cross_tab_data, "data/cross_tab_data.omv")
+  message("✓ Created cross_tab_data.omv")
+}
 save(weighted_analysis_data, file = "data/weighted_analysis_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(weighted_analysis_data, "data/weighted_analysis_data.omv")
+  message("✓ Created weighted_analysis_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(weighted_analysis_data, "data/weighted_analysis_data.omv")
+  message("✓ Created weighted_analysis_data.omv")
+}
 save(model_comparison_data, file = "data/model_comparison_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(model_comparison_data, "data/model_comparison_data.omv")
+  message("✓ Created model_comparison_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(model_comparison_data, "data/model_comparison_data.omv")
+  message("✓ Created model_comparison_data.omv")
+}
 
 # Create combined dataset for comprehensive testing
 jggstats_comprehensive_data <- list(
@@ -238,6 +349,18 @@ jggstats_comprehensive_data <- list(
 )
 
 save(jggstats_comprehensive_data, file = "data/jggstats_comprehensive_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jggstats_comprehensive_data, "data/jggstats_comprehensive_data.omv")
+  message("✓ Created jggstats_comprehensive_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jggstats_comprehensive_data, "data/jggstats_comprehensive_data.omv")
+  message("✓ Created jggstats_comprehensive_data.omv")
+}
 
 message("Successfully created comprehensive test datasets for jggstats function:")
 message("- linear_model_data.rda")

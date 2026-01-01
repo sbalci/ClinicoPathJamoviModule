@@ -4,6 +4,8 @@ context("test-crosstable")
 library(ClinicoPath)
 
 test_that("crosstable works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Load test data
   data("histopathology", package = "ClinicoPath")

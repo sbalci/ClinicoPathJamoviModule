@@ -27,6 +27,71 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             janitor::make_clean_names(var)
         },
 
+        # HTML sanitization for security
+        .safeHtmlOutput = function(text) {
+            if (is.null(text) || length(text) == 0) return("")
+            text <- as.character(text)
+            # Sanitize potentially dangerous characters
+            text <- gsub("&", "&amp;", text, fixed = TRUE)
+            text <- gsub("<", "&lt;", text, fixed = TRUE)
+            text <- gsub(">", "&gt;", text, fixed = TRUE)
+            text <- gsub("\"", "&quot;", text, fixed = TRUE)
+            text <- gsub("'", "&#x27;", text, fixed = TRUE)
+            text <- gsub("/", "&#x2F;", text, fixed = TRUE)
+            return(text)
+        },
+
+        # Initialize notice collection list
+        .noticeList = list(),
+
+        # Add a notice to the collection
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+        },
+
+        # Render collected notices as HTML
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Map notice types to colors and icons
+            typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+            )
+
+            html <- "<div style='margin: 10px 0;'>"
+
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]]
+                if (is.null(style)) {
+                    style <- typeStyles$INFO
+                }
+
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
+                    "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+                    "</div>"
+                )
+            }
+
+            html <- paste0(html, "</div>")
+
+            self$results$notices$setContent(html)
+        },
+
         .init = function() {
             # Show initial instructions
             instructions <- glue::glue("
@@ -75,6 +140,9 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 .run = function() {
+    private$.noticeList <- list()
+    on.exit(private$.renderNotices(), add = TRUE)
+
     # Always generate About content
     private$.generateAboutContent()
 
@@ -85,23 +153,19 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # Check required packages
     if (!requireNamespace('ggstatsplot', quietly = TRUE)) {
-        notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'missingGgstatsplot',
-            type = jmvcore::NoticeType$ERROR
+        private$.addNotice(
+            type = "ERROR",
+            title = "Missing Package",
+            content = "The ggstatsplot package is required but not installed. Please install it with install.packages(\"ggstatsplot\") and try again."
         )
-        notice$setContent('The ggstatsplot package is required but not installed. Please install it with install.packages("ggstatsplot") and try again.')
-        self$results$insert(999, notice)
         return()
     }
     if (!requireNamespace('broom', quietly = TRUE)) {
-        notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'missingBroom',
-            type = jmvcore::NoticeType$ERROR
+        private$.addNotice(
+            type = "ERROR",
+            title = "Missing Package",
+            content = "The broom package is required but not installed. Please install it with install.packages(\"broom\") and try again."
         )
-        notice$setContent('The broom package is required but not installed. Please install it with install.packages("broom") and try again.')
-        self$results$insert(999, notice)
         return()
     }
 
@@ -128,12 +192,6 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             nrow(self$data)
         }
 
-        notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'analysisComplete',
-            type = jmvcore::NoticeType$INFO
-        )
-
         dist_method <- if (self$options$inputMode == "precomputed" &&
                           !is.null(self$options$degreesOfFreedom) &&
                           self$options$degreesOfFreedom > 0) {
@@ -142,8 +200,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             'normal approximation'
         }
 
-        notice$setContent(sprintf('Analysis completed successfully. %d coefficients plotted from N = %d observations. Confidence intervals and p-values calculated using %s.', nrow(private$.tidyCoefs), n_obs, dist_method))
-        self$results$insert(999, notice)
+        private$.addNotice(
+            type = "INFO",
+            title = "Analysis Complete",
+            content = sprintf("Analysis completed successfully. %d coefficients plotted from N = %d observations. Confidence intervals and p-values calculated using %s.", nrow(private$.tidyCoefs), n_obs, dist_method)
+        )
     }
 },
 
@@ -206,13 +267,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # Check required variables
     if (is.null(self$options$term) || is.null(self$options$estimate) ||
         is.null(self$options$stdError)) {
-        notice <- jmvcore::Notice$new(
-            options = self$options,
-            name = 'missingRequiredVars',
-            type = jmvcore::NoticeType$ERROR
+        private$.addNotice(
+            type = "ERROR",
+            title = "Missing Inputs",
+            content = "Pre-computed mode requires three variables: Term names, Estimates, and Standard Errors. Please select all three and re-run."
         )
-        notice$setContent('Pre-computed mode requires three variables: Term names, Estimates, and Standard Errors. Please select all three and re-run.')
-        self$results$insert(999, notice)
         return()
     }
 
@@ -321,33 +380,27 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .runFitModel = function() {
             # Check required variables
             if (self$options$modelType != "cox" && is.null(self$options$outcome)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingOutcome',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Missing Outcome",
+                    content = "Please select an outcome variable for model fitting."
                 )
-                notice$setContent('Please select an outcome variable for model fitting.')
-                self$results$insert(999, notice)
                 return()
             }
             if (self$options$modelType == "cox" && (is.null(self$options$survivalTime) || is.null(self$options$eventStatus))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingSurvivalVars',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Missing Survival Variables",
+                    content = "Cox proportional hazards model requires both Survival Time and Event Status variables. Please select both and re-run."
                 )
-                notice$setContent('Cox proportional hazards model requires both Survival Time and Event Status variables. Please select both and re-run.')
-                self$results$insert(999, notice)
                 return()
             }
             if (is.null(self$options$predictors) || length(self$options$predictors) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingPredictors',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Missing Predictors",
+                    content = "Please select at least one predictor variable for the model."
                 )
-                notice$setContent('Please select at least one predictor variable for the model.')
-                self$results$insert(999, notice)
                 return()
             }
 
@@ -380,13 +433,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     outcome_unique <- outcome_unique[!is.na(outcome_unique)]
 
                     if (length(outcome_unique) != 2) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'nonBinaryOutcome',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Non-Binary Outcome",
+                            content = sprintf("Logistic regression requires a binary outcome (exactly 2 unique values). Found %d unique values in %s. Expected 0/1 or TRUE/FALSE.", length(outcome_unique), self$options$outcome)
                         )
-                        notice$setContent(sprintf('Logistic regression requires a binary outcome (exactly 2 unique values). Found %d unique values in %s. Expected 0/1 or TRUE/FALSE.', length(outcome_unique), self$options$outcome))
-                        self$results$insert(999, notice)
                         return()
                     }
 
@@ -397,13 +448,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     if (!all(outcome_unique %in% c(0, 1))) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'wrongOutcomeCoding',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Invalid Outcome Coding",
+                            content = sprintf("Outcome variable must be coded as 0/1 for logistic regression. Found values: %s", paste(outcome_unique, collapse = ", "))
                         )
-                        notice$setContent(sprintf('Outcome variable must be coded as 0/1 for logistic regression. Found values: %s', paste(outcome_unique, collapse = ', ')))
-                        self$results$insert(999, notice)
                         return()
                     }
 
@@ -412,24 +461,20 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (model_type == "cox") {
                     # Cox proportional hazards
                     if (is.null(self$options$survivalTime) || is.null(self$options$eventStatus)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'missingSurvivalVarsInCox',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Missing Survival Variables",
+                            content = "Survival time and event status are required for Cox model. Please select both variables."
                         )
-                        notice$setContent('Survival time and event status are required for Cox model. Please select both variables.')
-                        self$results$insert(999, notice)
                         return()
                     }
 
                     if (!requireNamespace('survival', quietly = TRUE)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'missingSurvivalPackage',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Missing Package",
+                            content = "The survival package is required for Cox models. Please install it with install.packages(\"survival\") and try again."
                         )
-                        notice$setContent('The survival package is required for Cox models. Please install it with install.packages("survival") and try again.')
-                        self$results$insert(999, notice)
                         return()
                     }
 
@@ -446,13 +491,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     if (!all(event_unique %in% c(0, 1))) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'wrongEventCoding',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Invalid Event Coding",
+                            content = sprintf("Event status for Cox model must be coded as 0 (censored) or 1 (event). Found values: %s", paste(event_unique, collapse = ", "))
                         )
-                        notice$setContent(sprintf('Event status for Cox model must be coded as 0 (censored) or 1 (event). Found values: %s', paste(event_unique, collapse = ', ')))
-                        self$results$insert(999, notice)
                         return()
                     }
 
@@ -463,13 +506,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         mydata <- mydata[mydata[[time_var]] > 0, ]
                         n_after <- nrow(mydata)
 
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'nonPositiveTimes',
-                            type = jmvcore::NoticeType$STRONG_WARNING
+                        private$.addNotice(
+                            type = "STRONG_WARNING",
+                            title = "Non-Positive Survival Times",
+                            content = sprintf("Removed %d observations with non-positive survival times. Cox models require time > 0. Final sample: N = %d (from original N = %d).", n_removed, n_after, n_before)
                         )
-                        notice$setContent(sprintf('Removed %d observations with non-positive survival times. Cox models require time > 0. Final sample: N = %d (from original N = %d).', n_removed, n_after, n_before))
-                        self$results$insert(999, notice)
                     }
 
                     # Create Surv object and formula with escaped predictors
@@ -481,24 +522,20 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (model_type == "mixed") {
                     # Mixed effects models
                     if (is.null(self$options$randomEffects)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'missingRandomEffects',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Missing Random Effects",
+                            content = "Mixed effects models require a grouping variable for random effects (e.g., subject ID, cluster ID). Please select a grouping variable."
                         )
-                        notice$setContent('Mixed effects models require a grouping variable for random effects (e.g., subject ID, cluster ID). Please select a grouping variable.')
-                        self$results$insert(999, notice)
                         return()
                     }
 
                     if (!requireNamespace('lme4', quietly = TRUE)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'missingLme4',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Missing Package",
+                            content = "The lme4 package is required for mixed effects models. Please install it with install.packages(\"lme4\") and try again."
                         )
-                        notice$setContent('The lme4 package is required for mixed effects models. Please install it with install.packages("lme4") and try again.')
-                        self$results$insert(999, notice)
                         return()
                     }
 
@@ -516,13 +553,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (length(outcome_unique) == 2) {
                         # Binary outcome - use glmer
                         if (!all(outcome_unique %in% c(0, 1))) {
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'wrongGlmerOutcome',
-                                type = jmvcore::NoticeType$ERROR
+                            private$.addNotice(
+                                type = "ERROR",
+                                title = "Invalid Outcome Coding",
+                                content = "For mixed-effects logistic regression (glmer), outcome must be coded as 0 and 1."
                             )
-                            notice$setContent('For mixed-effects logistic regression (glmer), outcome must be coded as 0 and 1.')
-                            self$results$insert(999, notice)
                             return()
                         }
                         model <- lme4::glmer(mixed_formula, data = mydata, family = binomial(link = "logit"))
@@ -532,13 +567,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                 } else {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'unknownModelType',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Unsupported Model Type",
+                        content = sprintf("Unknown or unsupported model type: %s", model_type)
                     )
-                    notice$setContent(sprintf('Unknown or unsupported model type: %s', model_type))
-                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -547,13 +580,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Extract tidy coefficients using broom
                 if (inherits(model, "lmerMod")) {
                     if (!requireNamespace("broom.mixed", quietly = TRUE)) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'missingBroomMixed',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Missing Package",
+                            content = "The broom.mixed package is required for mixed-effects models. Please install it with install.packages(\"broom.mixed\") and try again."
                         )
-                        notice$setContent('The broom.mixed package is required for mixed-effects models. Please install it with install.packages("broom.mixed") and try again.')
-                        self$results$insert(999, notice)
                         return()
                     }
                     tidy_coefs <- broom.mixed::tidy(model, conf.int = TRUE, conf.level = self$options$ciLevel)
@@ -607,13 +638,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.populateModelMetrics(model)
 
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'modelFittingError',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Model Fitting Error",
+                    content = sprintf("Model fitting failed: %s", e$message)
                 )
-                notice$setContent(sprintf('Model fitting failed: %s', e$message))
-                self$results$insert(999, notice)
                 return()
             })
         },
@@ -628,13 +657,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     epv <- n_events / n_predictors
 
                     if (epv < 10) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'lowEventsPerPredictor',
-                            type = jmvcore::NoticeType$STRONG_WARNING
+                        private$.addNotice(
+                            type = "STRONG_WARNING",
+                            title = "Low Events per Predictor",
+                            content = sprintf("Low events-per-variable ratio (EPV = %.1f, with %d events and %d predictors). Models with EPV < 10 may have unstable estimates and inflated Type I error rates. Consider reducing predictors or collecting more data.", epv, n_events, n_predictors)
                         )
-                        notice$setContent(sprintf('Low events-per-variable ratio (EPV = %.1f, with %d events and %d predictors). Models with EPV < 10 may have unstable estimates and inflated Type I error rates. Consider reducing predictors or collecting more data.', epv, n_events, n_predictors))
-                        self$results$insert(999, notice)
                     }
                 } else if (inherits(model, "coxph")) {
                     # Cox model - check events-per-variable
@@ -643,29 +670,23 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     epv <- n_events / n_predictors
 
                     if (n_events < 10) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'veryLowEvents',
-                            type = jmvcore::NoticeType$ERROR
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = "Very Low Event Count",
+                            content = sprintf("Very low number of events (N = %d). Cox models require at least 10 events for reliable estimation. Results may be highly unstable.", n_events)
                         )
-                        notice$setContent(sprintf('Very low number of events (N = %d). Cox models require at least 10 events for reliable estimation. Results may be highly unstable.', n_events))
-                        self$results$insert(999, notice)
                     } else if (epv < 10) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'lowEventsPerPredictorCox',
-                            type = jmvcore::NoticeType$STRONG_WARNING
+                        private$.addNotice(
+                            type = "STRONG_WARNING",
+                            title = "Low Events per Predictor",
+                            content = sprintf("Low events-per-variable ratio (EPV = %.1f, with %d events and %d predictors). Cox models with EPV < 10 may produce biased estimates. Consider reducing predictors or collecting more data.", epv, n_events, n_predictors)
                         )
-                        notice$setContent(sprintf('Low events-per-variable ratio (EPV = %.1f, with %d events and %d predictors). Cox models with EPV < 10 may produce biased estimates. Consider reducing predictors or collecting more data.', epv, n_events, n_predictors))
-                        self$results$insert(999, notice)
                     } else if (epv < 20) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'moderateEventsPerPredictorCox',
-                            type = jmvcore::NoticeType$WARNING
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = "Moderate Events per Predictor",
+                            content = sprintf("Moderate events-per-variable ratio (EPV = %.1f). EPV between 10-20 is acceptable but EPV > 20 is preferred for optimal performance.", epv)
                         )
-                        notice$setContent(sprintf('Moderate events-per-variable ratio (EPV = %.1f). EPV between 10-20 is acceptable but EPV > 20 is preferred for optimal performance.', epv))
-                        self$results$insert(999, notice)
                     }
                 } else if (inherits(model, "lm")) {
                     # Linear regression - check sample size
@@ -674,21 +695,17 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ratio <- n_obs / n_predictors
 
                     if (n_obs < 30) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'smallSampleSize',
-                            type = jmvcore::NoticeType$WARNING
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = "Small Sample Size",
+                            content = sprintf("Small sample size (N = %d). Linear models typically require N > 30 for reliable inference. Consider interpreting results cautiously.", n_obs)
                         )
-                        notice$setContent(sprintf('Small sample size (N = %d). Linear models typically require N > 30 for reliable inference. Consider interpreting results cautiously.', n_obs))
-                        self$results$insert(999, notice)
                     } else if (ratio < 10) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'lowObsPerPredictor',
-                            type = jmvcore::NoticeType$WARNING
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = "Low Observations per Predictor",
+                            content = sprintf("Low observations-per-predictor ratio (%.1f with N = %d and %d predictors). A ratio of at least 10-15 observations per predictor is recommended.", ratio, n_obs, n_predictors)
                         )
-                        notice$setContent(sprintf('Low observations-per-predictor ratio (%.1f with N = %d and %d predictors). A ratio of at least 10-15 observations per predictor is recommended.', ratio, n_obs, n_predictors))
-                        self$results$insert(999, notice)
                     }
                 }
             }, error = function(e) {

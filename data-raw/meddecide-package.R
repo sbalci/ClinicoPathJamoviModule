@@ -18,4 +18,7 @@
 #' @docType package
 #' @aliases meddecide meddecide-package
 #' @name meddecide-package
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "_PACKAGE"

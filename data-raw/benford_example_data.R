@@ -9,6 +9,9 @@
 #' @author ClinicoPath package team
 
 # Set seed for reproducible data generation
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(20241202)
 
 # Helper functions for realistic data generation
@@ -367,11 +370,11 @@ economic_data <- data.frame(
 )
 
 # Export all datasets
-usethis::use_data(financial_data, overwrite = TRUE)
-usethis::use_data(fraudulent_data, overwrite = TRUE)
-usethis::use_data(natural_phenomena_data, overwrite = TRUE)
-usethis::use_data(scientific_data, overwrite = TRUE)
-usethis::use_data(economic_data, overwrite = TRUE)
+use_data_multi_format(financial_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(fraudulent_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(natural_phenomena_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(scientific_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(economic_data, overwrite = TRUE, save_csv = TRUE)
 
 # Generate comprehensive summary
 cat("✅ Created 5 comprehensive datasets for Benford's Law analysis:\n\n")

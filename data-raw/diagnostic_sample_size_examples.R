@@ -3,6 +3,9 @@
 
 # Scenario 1: High-Risk Population Colorectal Cancer Screening
 # A blood-based biomarker test for detecting colorectal cancer in high-risk patients
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 colorectal_screening <- data.frame(
     scenario = "Colorectal Cancer Blood Test",
     population = "High-risk patients (age >50, family history)",

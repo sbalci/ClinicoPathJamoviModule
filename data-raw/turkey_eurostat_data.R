@@ -1,6 +1,9 @@
 # Generate Turkey-specific Eurostat test data
 # This script creates sample datasets that mimic Eurostat data structure for Turkey
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -140,11 +143,11 @@ turkey_eastern_regions <- data.frame(
 )
 
 # Save all Turkey datasets
-usethis::use_data(turkey_nuts1, overwrite = TRUE)
-usethis::use_data(turkey_nuts2_sample, overwrite = TRUE)
-usethis::use_data(turkey_major_provinces, overwrite = TRUE)
-usethis::use_data(turkey_timeseries, overwrite = TRUE)
-usethis::use_data(turkey_eastern_regions, overwrite = TRUE)
+use_data_multi_format(turkey_nuts1, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(turkey_nuts2_sample, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(turkey_major_provinces, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(turkey_timeseries, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(turkey_eastern_regions, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary
 cat("Created Turkey-specific Eurostat datasets:\n")

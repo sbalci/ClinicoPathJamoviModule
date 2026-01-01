@@ -1,0 +1,3500 @@
+ℹ Testing ClinicoPath
+Registered S3 methods overwritten by 'car':
+  method       from
+  hist.boot    FSA 
+  confint.boot FSA 
+Registered S3 methods overwritten by 'Hmisc':
+  method               from   
+  as.data.frame.impute tangram
+  print.impute         tangram
+  [.impute             tangram
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 methods overwritten by 'ggfortify':
+  method          from   
+  autoplot.acf    useful 
+  autoplot.glmnet parsnip
+  fortify.acf     useful 
+  fortify.kmeans  useful 
+  fortify.ts      useful 
+Registered S3 method overwritten by 'spatstat.explore':
+  method   from
+  plot.roc pROC
+Registered S3 method overwritten by 'partitions':
+  method            from
+  print.equivalence lava
+Registered S3 method overwritten by 'DoE.base':
+  method           from       
+  factorize.factor conf.design
+Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+Registered S3 methods overwritten by 'forecast':
+  method                 from     
+  autoplot.Arima         ggfortify
+  autoplot.acf           ggfortify
+  autoplot.ar            ggfortify
+  autoplot.bats          ggfortify
+  autoplot.decomposed.ts ggfortify
+  autoplot.ets           ggfortify
+  autoplot.forecast      ggfortify
+  autoplot.stl           ggfortify
+  autoplot.ts            ggfortify
+  fitted.ar              ggfortify
+  fortify.ts             ggfortify
+  residuals.ar           ggfortify
+Registered S3 methods overwritten by 'logspline':
+  method               from     
+  plot.logspline       polspline
+  plot.oldlogspline    polspline
+  print.logspline      polspline
+  print.oldlogspline   polspline
+  summary.logspline    polspline
+  summary.oldlogspline polspline
+Registered S3 methods overwritten by 'huge':
+  method    from            
+  plot.roc  spatstat.explore
+  plot.sim  lava            
+  print.roc pROC            
+  print.sim lava            
+Registered S3 method overwritten by 'fit.models':
+  method       from 
+  vcov.default Hmisc
+Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+Serdar Balci MD Pathologist 
+ https://www.serdarbalci.com/ 
+ 
+✔ | F W  S  OK | Context
+
+⠏ |          0 | correlation                                                    Available numeric variables:
+ [1] "ID"               "Age"              "Grade"            "TStage"          
+ [5] "Anti-X-intensity" "Anti-Y-intensity" "OverallTime"      "Outcome"         
+ [9] "Rater 1"          "Rater 2"         
+
+ CORRELATION ANALYSIS
+
+ Correlation Matrix                           
+ ──────────────────────────────────────────── 
+   Variable       Age           OverallTime   
+ ──────────────────────────────────────────── 
+   Age            —              0.07400000   
+   OverallTime    0.07400000    —             
+ ──────────────────────────────────────────── 
+
+
+ Pairwise Correlations                                                                                         
+ ───────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+   Variable 1    Variable 2     r            p            t            df     Lower         Upper        N     
+ ───────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+   Age           OverallTime    0.0738587    0.2474876    1.1592384    245    -0.0514349    0.1968633    247   
+ ───────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+
+
+ Summary Statistics         
+ ────────────────────────── 
+   Statistic    Value       
+ ────────────────────────── 
+ ────────────────────────── 
+
+
+ <div style='background-color: #f8f9fa; padding: 15px; border-radius:
+ 5px; margin: 10px 0;'><h4 style='color: #495057; margin-top:
+ 0;'>Correlation Analysis Summary
+
+ Pearson's correlation analysis was performed on 2 variables with 247
+ complete observations. Out of 1 pairwise correlations, 0 (0%) were
+ statistically significant at α = 0.05.
+
+⠋ |   1      0 | correlation                                                    
+⠙ | 1 1      0 | correlation                                                    
+✖ | 1 1      0 | correlation [7.1s]
+────────────────────────────────────────────────────────────────────────────────
+Warning ('test_correlation.R:54:1'): (code run outside of `test_that()`)
+The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+i Please use the `linewidth` argument instead.
+i The deprecated feature was likely used in the jmvcore package.
+  Please report the issue at <https://github.com/jamovi/jmvcore/issues>.
+Backtrace:
+     ▆
+  1. ├─base::print(basic_correlation) at test_correlation.R:54:1
+  2. └─R6:::print.R6(basic_correlation)
+  3.   └─.subset2(x, "print")(...)
+  4.     └─self$.render()
+  5.       └─item$.render(...)
+  6.         └─self$analysis$.render(...)
+  7.           └─self$.createPlotObject(funName, image, ...)
+  8.             └─jmvcore:::getGlobalTheme(self$options$theme, self$options$palette)
+  9.               └─jmvcore:::getGGTheme(name, scale = "discrete", palette)
+ 10.                 └─jmvcore::theme_default(base_size, scale, palette)
+ 11.                   ├─ggplot2::`%+replace%`(...)
+ 12.                   │ └─ggplot2::is_theme(e2)
+ 13.                   │   └─S7::S7_inherits(x, class_theme)
+ 14.                   ├─ggplot2::theme(...)
+ 15.                   │ └─ggplot2:::find_args(..., complete = NULL, validate = NULL)
+ 16.                   │   └─base::mget(args, envir = env)
+ 17.                   └─ggplot2::element_line(size = 0.5, colour = "#333333")
+ 18.                     └─ggplot2:::deprecate_warn0("3.4.0", "element_line(size)", "element_line(linewidth)")
+
+Error ('test_correlation.R:222:3'): (code run outside of `test_that()`)
+Error in `attr(data, attributeName) <- attr(df, attributeName)`: 'names' attribute [38] must be the same length as the vector [0]
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::jcorrelation(...) at test_correlation.R:222:3
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/jcorrelation.h.R:363:5
+ 3.     └─self$init()
+ 4.       ├─jmvcore (local) try(...)
+ 5.       │ └─base::eval(expr)
+ 6.       └─jmvcore::select(private$.data, self$options$varsRequired)
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | na_handling                                                    
+Attaching package: 'jmvcore'
+
+The following objects are masked from 'package:base':
+
+    endsWith, format, startsWith
+
+Original test data dimensions: 30 rows
+NA values in ID: 3 
+NA values in score: 3 
+NA values in group: 1 
+
+Test data created successfully!
+Use this data with advancedraincloud to test NA handling:
+- Longitudinal connections with missing IDs
+- Change analysis with missing values
+- Complete case analysis reporting
+
+⠋ |      1   0 | na_handling                                                    
+✔ |      1   0 | na_handling
+
+⠏ |          0 | pairwise                                                       
+✖ | 1        0 | pairwise
+────────────────────────────────────────────────────────────────────────────────
+Error ('test_pairwise.R:13:1'): (code run outside of `test_that()`)
+Error in `ClinicoPath::crosstable(data = test_data, vars = "marker", group = "group", sty = "nejm", pcat = "chisq", pairwise = FALSE)`: unused argument (pairwise = FALSE)
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | riverplot                                                      
+Attaching package: 'ggplot2'
+
+The following object is masked from 'package:ClinicoPath':
+
+    %+%
+
+
+Attaching package: 'dplyr'
+
+The following object is masked from 'package:jmvcore':
+
+    select
+
+The following objects are masked from 'package:ClinicoPath':
+
+    collapse, groups, select
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Testing riverplot enhanced features:
+=====================================
+
+Test 1: Alluvial plot with curve granularity...
+
+⠙ | 1 1      0 | riverplot                                                      
+✖ | 1 1      0 | riverplot
+────────────────────────────────────────────────────────────────────────────────
+Warning ('test_riverplot.R:3:1'): (code run outside of `test_that()`)
+package 'ggplot2' was built under R version 4.5.2
+Backtrace:
+    ▆
+ 1. └─base::library(ggplot2) at test_riverplot.R:3:1
+ 2.   └─base (local) testRversion(pkgInfo, package, pkgpath)
+
+Error ('test_riverplot.R:38:1'): (code run outside of `test_that()`)
+Error: Argument 'curveType' must be one of 'linear', 'cubic', 'quintic', 'sine', 'arctangent', 'sigmoid'
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::riverplot(...) at test_riverplot.R:38:1
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/riverplot.h.R:1021:5
+ 3.     └─self$init()
+ 4.       ├─jmvcore (local) try(...)
+ 5.       │ └─base::eval(expr)
+ 6.       └─self$options$check(checkValues = TRUE)
+ 7.         └─option$check(checkValues, checkVars, checkData)
+ 8.           └─private$.check(data, checkValues, checkVars, checkData)
+ 9.             └─jmvcore::reject(...)
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | spider_groups                                                  [1] "Test data created with time series measurements:"
+   PatientID Time Measurement TreatmentArm DiseaseStage
+1        PT1    0          50        Arm A        Early
+2        PT1    2          35        Arm A        Early
+3        PT1    4          25        Arm A        Early
+4        PT1    6          20        Arm A        Early
+5        PT1    8          15        Arm A        Early
+6        PT2    0          60        Arm A     Advanced
+7        PT2    2          40        Arm A     Advanced
+8        PT2    4          30        Arm A     Advanced
+9        PT2    6          25        Arm A     Advanced
+10       PT2    8          20        Arm A     Advanced
+11       PT3    0          55        Arm A     Advanced
+12       PT3    2          38        Arm A     Advanced
+13       PT3    4          28        Arm A     Advanced
+14       PT3    6          22        Arm A     Advanced
+15       PT3    8          18        Arm A     Advanced
+
+=== Test 1: Default Spider Plot with Response Coloring ===
+Default spider plot with response coloring passed successfully!
+
+=== Test 2: Spider Plot with Group Coloring by Treatment Arm ===
+Spider plot with treatment arm group coloring passed successfully!
+
+=== Test 3: Spider Plot with Group Coloring by Disease Stage ===
+Spider plot with disease stage group coloring passed successfully!
+
+=== Test 4: Backward Compatibility Test (No spider options specified) ===
+Backward compatibility test passed - defaults work correctly!
+
+=== Test 5: Spider Plot with Percentage Data ===
+Note: Spider plot with percentage data shows static values over time. Consider using raw measurements for meaningful trajectories.
+Spider plot with percentage data and group coloring passed successfully!
+
+=== Test Summary ===
+Spider plot group coloring feature successfully implemented!
+Features tested:
+1. Default response-based coloring (backward compatible)
+2. Group-based coloring by treatment arm
+3. Group-based coloring by disease stage
+4. Multiple color schemes (classic, jamovi, colorful)
+5. Works with both raw and percentage data
+
+Users can now:
+- Set 'Spider Plot Color By' to 'Patient Groups' for group-based coloring
+- Choose color schemes optimized for different group counts
+- Maintain backward compatibility with existing analyses
+
+⠋ |      1   0 | spider_groups                                                  
+✔ |      1   0 | spider_groups [1.5s]
+
+⠏ |          0 | stagemigration_minimal                                         
+Attaching package: 'jmv'
+
+The following objects are masked from 'package:ClinicoPath':
+
+    contTables, contTablesPaired, pca, reliability
+
+Applying clinical preset: routine_clinical
+Analysis scope: Clinical validation with essential metrics for daily practice
+
+⠋ |   1      0 | stagemigration_minimal                                         
+✖ | 1 3      0 | stagemigration_minimal
+────────────────────────────────────────────────────────────────────────────────
+Warning ('test_stagemigration_minimal.R:14:1'): (code run outside of `test_that()`)
+Small sample size (n < 30). Results may be unreliable for staging validation.
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::stagemigration(...) at test_stagemigration_minimal.R:14:1
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/stagemigration.h.R:9446:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.validateData() at ClinicoPathJamoviModule/R/stagemigration.b.R:2984:13
+
+Warning ('test_stagemigration_minimal.R:14:1'): (code run outside of `test_that()`)
+Sample size < 100. Consider larger cohort for robust staging validation.
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::stagemigration(...) at test_stagemigration_minimal.R:14:1
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/stagemigration.h.R:9446:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.validateData() at ClinicoPathJamoviModule/R/stagemigration.b.R:2984:13
+
+Warning ('test_stagemigration_minimal.R:14:1'): (code run outside of `test_that()`)
+Some original stages have fewer than 5 events; migration and survival comparisons may be unstable for those stages.
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::stagemigration(...) at test_stagemigration_minimal.R:14:1
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/stagemigration.h.R:9446:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.validateData() at ClinicoPathJamoviModule/R/stagemigration.b.R:2984:13
+
+Error ('test_stagemigration_minimal.R:14:1'): (code run outside of `test_that()`)
+Error: 'note' is not an exported object from 'namespace:jmvcore'
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::stagemigration(...) at test_stagemigration_minimal.R:14:1
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/stagemigration.h.R:9446:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | stagemigration                                                 
+⠋ | 1        0 | stagemigration                                                 
+✖ | 1        0 | stagemigration
+────────────────────────────────────────────────────────────────────────────────
+Error ('test_stagemigration.R:9:1'): (code run outside of `test_that()`)
+Error in `attr(data, attributeName) <- attr(df, attributeName)`: 'names' attribute [16] must be the same length as the vector [0]
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::stagemigration(...) at test_stagemigration.R:9:1
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/stagemigration.h.R:9446:5
+ 3.     └─self$init()
+ 4.       ├─jmvcore (local) try(...)
+ 5.       │ └─base::eval(expr)
+ 6.       └─jmvcore::select(private$.data, self$options$varsRequired)
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | trend_test                                                     [1] "Test data contingency table:"
+     
+      negative positive
+  1-2      206       15
+  3-4       61        6
+  5-6      205       19
+  >6        21        3
+
+⠋ | 1        0 | trend_test                                                     
+✖ | 1        0 | trend_test
+────────────────────────────────────────────────────────────────────────────────
+Error ('test_trend_test.R:29:1'): (code run outside of `test_that()`)
+Error: Table$setRow(): rowNo 1 > No. rows (0)
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::contTables(...) at test_trend_test.R:29:1
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/conttables.h.R:852:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─trendResult$setRow(rowNo = othRowNo, values = values) at ClinicoPathJamoviModule/R/conttables.b.R:496:25
+ 7.         └─jmvcore::reject(...)
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | welcome_message                                                Testing advancedraincloud welcome message functionality...
+
+=== Test 1: No variables selected (should show welcome) ===
+Testing scenario: NULL variables 
+  -> Should display welcome message without errors
+Testing scenario: Empty string variables 
+  -> Should display welcome message without errors
+Testing scenario: Zero length variables 
+  -> Should display welcome message without errors
+
+=== Test 2: Variables selected (should proceed to analysis) ===
+Testing with actual data and variables:
+  -> Should proceed past welcome message to analysis
+
+Fix Summary:
+1. .init() now skips validation when no data is present
+2. .run() has robust variable checking (null, empty, zero-length)
+3. Welcome message should appear immediately without loading spinner
+4. No more initialization errors preventing todo display
+
+Test completed successfully!
+
+✔ |      1   0 | welcome_message
+
+⠏ |          0 | will_rogers_features                                           
+=== TEST 1: Data Generation ===
+Data dimensions: 500 x 5 
+Migration rate: 0.048 
+
+Migration Matrix:
+    
+      T1  T2  T3  T4
+  T1  98   0   0   0
+  T2   0 161  19   0
+  T3   0   3 144   2
+  T4   0   0   0  73
+
+
+=== TEST 2: Will Rogers Phenomenon Conditions ===
+
+Stage T2 :
+  Original system: n = 180 , median survival = 29.8 months
+  New system: n = 164 , median survival = 31.3 months
+  Improvement: 1.6 months (IMPROVED) 
+
+Stage T3 :
+  Original system: n = 149 , median survival = 21.7 months
+  New system: n = 163 , median survival = 21 months
+  Improvement: -0.7 months (WORSENED) 
+
+Stage T4 :
+  Original system: n = 73 , median survival = 18.2 months
+  New system: n = 75 , median survival = 18.2 months
+  Improvement: 0 months (WORSENED) 
+
+
+=== TEST 3: Expected Feature Outputs ===
+
+3.1 Will Rogers Visualization:
+- Should show bar chart comparing median survival
+- Should identify T2→T3 as dominant migration pattern
+- Should show survival changes for both T2 and T3
+
+3.2 Migration Survival Curves:
+- Should display faceted KM curves for T2 and T3
+- Red curves (before) vs Blue curves (after)
+- Sample sizes should be displayed
+
+3.3 Enhanced Statistical Analysis:
+
+Attaching package: 'survival'
+
+The following objects are masked from 'package:ClinicoPath':
+
+    colon, finegray
+
+
+T2 (original) analysis:
+- With migrated patients: n = 180 , median = 44.2 
+- Without migrated patients: n = 161 , median = 44.2 
+- Expected p-value from log-rank test
+
+
+=== TEST 4: Error Handling ===
+
+4.1 No migration scenario:
+- Should show 'No stage migration detected' message
+- All features should handle gracefully
+
+4.2 Small sample size (n=20):
+- Should show 'Insufficient data' messages where appropriate
+- Should not crash
+
+
+=== TEST 5: Integration Checklist ===
+
+Enable these options in jamovi:
+[ ] Advanced Migration Analysis
+[ ] Will Rogers Analysis
+[ ] Will Rogers Effect Visualization
+[ ] Migration Survival Curve Comparison
+[ ] Explanations for Results
+[ ] Show Abbreviation Glossary
+
+Verify these outputs:
+[ ] Enhanced Will Rogers Statistical Analysis table shows log-rank tests
+[ ] 95% CI columns are populated
+[ ] Overall Assessment shows combined p-value
+[ ] Will Rogers visualization plot displays
+[ ] Migration survival curves show color-coded KM plots
+[ ] Dashboard shows Will Rogers evidence row
+[ ] No Turkish locale errors
+
+
+Saving test data to: test_stage_migration_data.csv
+
+=== TEST COMPLETE ===
+Use the generated test data file with jamovi to validate all features.
+
+⠋ |      1   0 | will_rogers_features                                           
+✔ |      1   0 | will_rogers_features
+
+⠏ |          0 | aalenhazard                                                    
+✖ | 1        3 | aalenhazard
+────────────────────────────────────────────────────────────────────────────────
+Failure ('test-aalenhazard.R:35:3'): aalenhazard handles basic input validation
+Expected `{ ... }` not to throw any errors.
+Actually got a <evalError> with message:
+  argument "constant_effects" is missing, with no default
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | adaptivelasso                                                  i Loading ClinicoPath
+
+⠋ |   1      0 | adaptivelasso                                                  
+⠇ |   9      0 | adaptivelasso                                                  
+⠇ |   19      0 | adaptivelasso                                                 
+⠋ |   31      0 | adaptivelasso                                                 
+⠹ |   43      0 | adaptivelasso                                                 
+⠹ |   53      0 | adaptivelasso                                                 
+⠋ |   61      0 | adaptivelasso                                                 
+⠋ |   71      0 | adaptivelasso                                                 
+⠋ |   81      0 | adaptivelasso                                                 
+⠦ |   87      0 | adaptivelasso                                                 
+⠹ |   93      0 | adaptivelasso                                                 
+⠴ |   96      0 | adaptivelasso                                                 Serdar Balci MD Pathologist 
+ https://www.serdarbalci.com/ 
+ 
+
+⠧ |   98      0 | adaptivelasso                                                 
+✖ | 2 98      0 | adaptivelasso [12.4s]
+────────────────────────────────────────────────────────────────────────────────
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'ComplexUpset::upset' by 'UpSetR::upset' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'caret::precision' by 'cutpointr::precision' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'caret::recall' by 'cutpointr::recall' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'caret::specificity' by 'cutpointr::specificity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'caret::sensitivity' by 'cutpointr::sensitivity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'caret::cluster' by 'frailtypack::cluster' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::as_data_frame' by 'igraph::as_data_frame' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'DiagrammeR::count_automorphisms' by 'igraph::count_automorphisms' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::groups' by 'igraph::groups' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'DiagrammeR::get_edge_ids' by 'igraph::get_edge_ids' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::union' by 'igraph::union' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::select' by 'jmvcore::select' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'finalfit::remove_labels' by 'labelled::remove_labels' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::union' by 'lubridate::union' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::%--%' by 'lubridate::%--%' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::fpr' by 'mada::fpr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mada::forest' by 'metafor::forest' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::tnr' by 'mlr3measures::tnr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::precision' by 'mlr3measures::precision' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::tn' by 'mlr3measures::tn' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::fnr' by 'mlr3measures::fnr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::tp' by 'mlr3measures::tp' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::npv' by 'mlr3measures::npv' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::ppv' by 'mlr3measures::ppv' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::auc' by 'mlr3measures::auc' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::tpr' by 'mlr3measures::tpr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::fn' by 'mlr3measures::fn' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::fp' by 'mlr3measures::fp' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mada::fpr' by 'mlr3measures::fpr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::recall' by 'mlr3measures::recall' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::specificity' by 'mlr3measures::specificity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'metafor::se' by 'mlr3measures::se' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::sensitivity' by 'mlr3measures::sensitivity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'lme4::lmList' by 'nlme::lmList' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::collapse' by 'nlme::collapse' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mlr3measures::auc' by 'pROC::auc' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mlr3measures::rmse' by 'performance::rmse' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mlr3measures::mse' by 'performance::mse' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mlr3measures::mae' by 'performance::mae' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'boot::logit' by 'pracma::logit' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'magrittr::mod' by 'pracma::mod' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'magrittr::or' by 'pracma::or' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'magrittr::and' by 'pracma::and' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'cutpointr::cutpoints' by 'pracma::cutpoints' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mlr3measures::phi' by 'psych::phi' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'ggswim::%+%' by 'psych::%+%' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'pracma::logit' by 'psych::logit' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'pracma::polar' by 'psych::polar' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mada::AUC' by 'psych::AUC' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'GPArotation::equamax' by 'psych::equamax' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'ggplot2::alpha' by 'psych::alpha' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'GPArotation::varimin' by 'psych::varimin' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'magrittr::set_names' by 'purrr::set_names' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::simplify' by 'purrr::simplify' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'caret::lift' by 'purrr::lift' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'pracma::cross' by 'purrr::cross' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::compose' by 'purrr::compose' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::flatten_lgl' by 'rlang::flatten_lgl' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::splice' by 'rlang::splice' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::flatten_chr' by 'rlang::flatten_chr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::flatten_raw' by 'rlang::flatten_raw' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::is_named' by 'rlang::is_named' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::flatten' by 'rlang::flatten' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::flatten_dbl' by 'rlang::flatten_dbl' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::invoke' by 'rlang::invoke' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::flatten_int' by 'rlang::flatten_int' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'psych::alpha' by 'scales::alpha' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'purrr::discard' by 'scales::discard' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'psych::rescale' by 'scales::rescale' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'pROC::cov' by 'stats::cov' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::lag' by 'stats::lag' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::filter' by 'stats::filter' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'pROC::smooth' by 'stats::smooth' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::spectrum' by 'stats::spectrum' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'janitor::chisq.test' by 'stats::chisq.test' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'pROC::var' by 'stats::var' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::decompose' by 'stats::decompose' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'janitor::fisher.test' by 'stats::fisher.test' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'frailtypack::cluster' by 'survival::cluster' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::as_data_frame' by 'tibble::as_data_frame' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'ggVennDiagram::unite' by 'tidyr::unite' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::crossing' by 'tidyr::crossing' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'magrittr::extract' by 'tidyr::extract' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'igraph::compare' by 'timeROC::compare' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'metafor::vif' by 'VIF::vif' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'VIF::vif' by 'car::vif' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mlr3measures::sensitivity' by 'caret::sensitivity' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'mlr3measures::specificity' by 'caret::specificity' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'stats::filter' by 'dplyr::filter' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'stats::lag' by 'dplyr::lag' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'jmvcore::select' by 'dplyr::select' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'DataExplorer::plot_histogram' by 'grafify::plot_histogram' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'reReg::plot' by 'graphics::plot' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'dplyr::select' by 'jmvcore::select' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'metafor::regplot' by 'regplot::regplot' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+replacing previous import 'tibble::view' by 'summarytools::view' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivelasso.R:4:3'): adaptivelasso analysis works
+-- Conflicts ------------------------------------------ ClinicoPath conflicts --
+x `aalenhazard` masks `ClinicoPath::aalenhazard()`.
+x `calculateHScore` masks `ClinicoPath::calculateHScore()`.
+x `calculateIHCDistance` masks `ClinicoPath::calculateIHCDistance()`.
+  ... and more.
+i Did you accidentally source a file rather than using `load_all()`?
+  Run `rm(list = c("aalenhazard", "calculateHScore", "calculateIHCDistance", "calculateIHCMarkerSummary", "calculateIHCSilhouette", "convertIHCMarkerToNumeric", "convertIHCToNumeric", "formatIHCPValue", "getIHCColorPalette", "getIHCSignificanceStars", "getIHCTheme", "showIHCDataRequirements", "validateIHCClustering", "validateIHCData"))` to remove the conflicts.
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivelasso.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::warn_if_conflicts(package, out$env, globalenv())
+ 4.       └─cli::cli_warn(c(header, bullets, directions), class = "pkgload::conflict")
+
+Failure ('test-adaptivelasso.R:19:3'): adaptivelasso analysis works
+Expected `{ ... }` not to throw any errors.
+Actually got a <simpleError> with message:
+  bootstrap_samples must be between 50 and 1000 (is 10)
+
+Error ('test-adaptivelasso.R:65:3'): adaptivelasso analysis works
+Error in `eval(code, test_env)`: object 'model' not found
+Backtrace:
+    ▆
+ 1. └─testthat::expect_true(is.list(model)) at test-adaptivelasso.R:65:3
+ 2.   └─testthat::quasi_label(enquo(object), label)
+ 3.     └─rlang::eval_bare(expr, quo_get_env(quo))
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | adaptivetrialdesign                                            i Loading ClinicoPath
+
+⠋ |   1      0 | adaptivetrialdesign                                            
+⠦ |   7      0 | adaptivetrialdesign                                            
+⠋ |   11      0 | adaptivetrialdesign                                           
+⠴ |   26      0 | adaptivetrialdesign                                           
+⠼ |   45      0 | adaptivetrialdesign                                           
+⠋ |   61      0 | adaptivetrialdesign                                           
+⠧ |   78      0 | adaptivetrialdesign                                           
+⠙ |   92      0 | adaptivetrialdesign                                           
+⠦ |   97      0 | adaptivetrialdesign                                           Serdar Balci MD Pathologist 
+ https://www.serdarbalci.com/ 
+ 
+
+⠧ |   98      0 | adaptivetrialdesign                                           
+✖ | 2 98      0 | adaptivetrialdesign [12.2s]
+────────────────────────────────────────────────────────────────────────────────
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'ComplexUpset::upset' by 'UpSetR::upset' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'caret::precision' by 'cutpointr::precision' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'caret::recall' by 'cutpointr::recall' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'caret::specificity' by 'cutpointr::specificity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'caret::sensitivity' by 'cutpointr::sensitivity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'caret::cluster' by 'frailtypack::cluster' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::as_data_frame' by 'igraph::as_data_frame' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'DiagrammeR::count_automorphisms' by 'igraph::count_automorphisms' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::groups' by 'igraph::groups' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'DiagrammeR::get_edge_ids' by 'igraph::get_edge_ids' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::union' by 'igraph::union' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::select' by 'jmvcore::select' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'finalfit::remove_labels' by 'labelled::remove_labels' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::union' by 'lubridate::union' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::%--%' by 'lubridate::%--%' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::fpr' by 'mada::fpr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mada::forest' by 'metafor::forest' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::tnr' by 'mlr3measures::tnr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::precision' by 'mlr3measures::precision' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::tn' by 'mlr3measures::tn' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::fnr' by 'mlr3measures::fnr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::tp' by 'mlr3measures::tp' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::npv' by 'mlr3measures::npv' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::ppv' by 'mlr3measures::ppv' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::auc' by 'mlr3measures::auc' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::tpr' by 'mlr3measures::tpr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::fn' by 'mlr3measures::fn' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::fp' by 'mlr3measures::fp' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mada::fpr' by 'mlr3measures::fpr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::recall' by 'mlr3measures::recall' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::specificity' by 'mlr3measures::specificity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'metafor::se' by 'mlr3measures::se' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::sensitivity' by 'mlr3measures::sensitivity' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'lme4::lmList' by 'nlme::lmList' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::collapse' by 'nlme::collapse' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mlr3measures::auc' by 'pROC::auc' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mlr3measures::rmse' by 'performance::rmse' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mlr3measures::mse' by 'performance::mse' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mlr3measures::mae' by 'performance::mae' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'boot::logit' by 'pracma::logit' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'magrittr::mod' by 'pracma::mod' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'magrittr::or' by 'pracma::or' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'magrittr::and' by 'pracma::and' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'cutpointr::cutpoints' by 'pracma::cutpoints' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mlr3measures::phi' by 'psych::phi' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'ggswim::%+%' by 'psych::%+%' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'pracma::logit' by 'psych::logit' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'pracma::polar' by 'psych::polar' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mada::AUC' by 'psych::AUC' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'GPArotation::equamax' by 'psych::equamax' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'ggplot2::alpha' by 'psych::alpha' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'GPArotation::varimin' by 'psych::varimin' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'magrittr::set_names' by 'purrr::set_names' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::simplify' by 'purrr::simplify' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'caret::lift' by 'purrr::lift' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'pracma::cross' by 'purrr::cross' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::compose' by 'purrr::compose' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::flatten_lgl' by 'rlang::flatten_lgl' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::splice' by 'rlang::splice' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::flatten_chr' by 'rlang::flatten_chr' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::flatten_raw' by 'rlang::flatten_raw' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::is_named' by 'rlang::is_named' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::flatten' by 'rlang::flatten' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::flatten_dbl' by 'rlang::flatten_dbl' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::invoke' by 'rlang::invoke' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::flatten_int' by 'rlang::flatten_int' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'psych::alpha' by 'scales::alpha' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'purrr::discard' by 'scales::discard' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'psych::rescale' by 'scales::rescale' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'pROC::cov' by 'stats::cov' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::lag' by 'stats::lag' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::filter' by 'stats::filter' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'pROC::smooth' by 'stats::smooth' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::spectrum' by 'stats::spectrum' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'janitor::chisq.test' by 'stats::chisq.test' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'pROC::var' by 'stats::var' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::decompose' by 'stats::decompose' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'janitor::fisher.test' by 'stats::fisher.test' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'frailtypack::cluster' by 'survival::cluster' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::as_data_frame' by 'tibble::as_data_frame' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'ggVennDiagram::unite' by 'tidyr::unite' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::crossing' by 'tidyr::crossing' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'magrittr::extract' by 'tidyr::extract' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'igraph::compare' by 'timeROC::compare' when loading 'ClinicoPath'
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::process_imports(path)
+  5.         ├─base::tryCatch(...)
+  6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+  7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+  9.         └─base::namespaceImport(...)
+ 10.           └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'metafor::vif' by 'VIF::vif' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'VIF::vif' by 'car::vif' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mlr3measures::sensitivity' by 'caret::sensitivity' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'mlr3measures::specificity' by 'caret::specificity' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'stats::filter' by 'dplyr::filter' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'stats::lag' by 'dplyr::lag' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'jmvcore::select' by 'dplyr::select' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'DataExplorer::plot_histogram' by 'grafify::plot_histogram' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'reReg::plot' by 'graphics::plot' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'dplyr::select' by 'jmvcore::select' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'metafor::regplot' by 'regplot::regplot' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+replacing previous import 'tibble::view' by 'summarytools::view' when loading 'ClinicoPath'
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::load_imports(path)
+ 4.       └─pkgload:::process_imports(path)
+ 5.         ├─base::tryCatch(...)
+ 6.         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 7.         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 9.         └─base::namespaceImportFrom(...)
+
+Warning ('test-adaptivetrialdesign.R:4:3'): adaptivetrialdesign analysis works
+-- Conflicts ------------------------------------------ ClinicoPath conflicts --
+x `aalenhazard` masks `ClinicoPath::aalenhazard()`.
+x `calculateHScore` masks `ClinicoPath::calculateHScore()`.
+x `calculateIHCDistance` masks `ClinicoPath::calculateIHCDistance()`.
+  ... and more.
+i Did you accidentally source a file rather than using `load_all()`?
+  Run `rm(list = c("aalenhazard", "calculateHScore", "calculateIHCDistance", "calculateIHCMarkerSummary", "calculateIHCSilhouette", "convertIHCMarkerToNumeric", "convertIHCToNumeric", "formatIHCPValue", "getIHCColorPalette", "getIHCSignificanceStars", "getIHCTheme", "showIHCDataRequirements", "validateIHCClustering", "validateIHCData"))` to remove the conflicts.
+Backtrace:
+    ▆
+ 1. └─devtools::load_all() at test-adaptivetrialdesign.R:4:3
+ 2.   └─pkgload::load_all(...)
+ 3.     └─pkgload:::warn_if_conflicts(package, out$env, globalenv())
+ 4.       └─cli::cli_warn(c(header, bullets, directions), class = "pkgload::conflict")
+
+Failure ('test-adaptivetrialdesign.R:19:3'): adaptivetrialdesign analysis works
+Expected `{ ... }` not to throw any errors.
+Actually got a <evalError> with message:
+  argument "outcomeLevel" is missing, with no default
+
+Error ('test-adaptivetrialdesign.R:70:3'): adaptivetrialdesign analysis works
+Error in `eval(code, test_env)`: object 'model' not found
+Backtrace:
+    ▆
+ 1. └─testthat::expect_true(is.list(model)) at test-adaptivetrialdesign.R:70:3
+ 2.   └─testthat::quasi_label(enquo(object), label)
+ 3.     └─rlang::eval_bare(expr, quo_get_env(quo))
+────────────────────────────────────────────────────────────────────────────────
+
+Maximum number of failures exceeded; quitting.
+ℹ Increase this number with (e.g.) `testthat::set_max_fails(Inf)` 
+There were 50 or more warnings (use warnings() to see the first 50)

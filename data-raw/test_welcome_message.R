@@ -1,6 +1,9 @@
 # Test script to validate welcome message appears correctly
 # This demonstrates the fix for the missing todo/welcome message issue
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(jmvcore)
 
 cat("Testing advancedraincloud welcome message functionality...\n")

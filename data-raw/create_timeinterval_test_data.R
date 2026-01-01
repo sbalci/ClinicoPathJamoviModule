@@ -11,6 +11,9 @@
 # =============================================================================
 
 # Load required libraries
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(lubridate)
 
@@ -353,6 +356,18 @@ summary_stats <- data.frame(
 write.csv(summary_stats, "data/timeinterval_datasets_summary.csv", row.names = FALSE)
 save(summary_stats, file = "data/timeinterval_datasets_summary.rda")
 
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/timeinterval_datasets_summary.omv")
+  message("✓ Created timeinterval_datasets_summary.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/timeinterval_datasets_summary.omv")
+  message("✓ Created timeinterval_datasets_summary.omv")
+}
+
 # =============================================================================
 # Create Test Scenarios Documentation
 # =============================================================================
@@ -399,6 +414,18 @@ test_scenarios <- data.frame(
 
 write.csv(test_scenarios, "data/timeinterval_test_scenarios.csv", row.names = FALSE)
 save(test_scenarios, file = "data/timeinterval_test_scenarios.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_scenarios, "data/timeinterval_test_scenarios.omv")
+  message("✓ Created timeinterval_test_scenarios.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_scenarios, "data/timeinterval_test_scenarios.omv")
+  message("✓ Created timeinterval_test_scenarios.omv")
+}
 
 # =============================================================================
 # Summary Report

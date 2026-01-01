@@ -4,6 +4,8 @@
 library(ClinicoPath)
 
 test_that("permV permutation test is mathematically sound", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
 
     # Create test data with known structure

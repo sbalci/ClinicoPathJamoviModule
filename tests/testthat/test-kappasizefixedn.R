@@ -117,6 +117,8 @@ test_data <- setup_test_parameters()
 describe("kappasizefixedn Basic Functionality", {
   
   test_that("kappasizefixedn creates lower bound calculations for binary outcomes", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("kappaSize")
     

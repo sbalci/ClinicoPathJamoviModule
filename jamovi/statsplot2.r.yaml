@@ -20,7 +20,7 @@ items:
 
     - name:  ExplanationMessage
       title: Explanation
-      type:  Preformatted
+      type:  Html
       clearWith:
           - dep
           - group

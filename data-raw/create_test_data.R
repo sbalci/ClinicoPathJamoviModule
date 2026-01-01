@@ -1,4 +1,7 @@
 # Create wide format test data for time-dependent covariates
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(123)
 n <- 200
 
@@ -38,6 +41,18 @@ test_wide_time_dependent$time[test_wide_time_dependent$time > 24] <-
 
 # Save the dataset
 save(test_wide_time_dependent, file = "data/test_wide_time_dependent.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_wide_time_dependent, "data/test_wide_time_dependent.omv")
+  message("✓ Created test_wide_time_dependent.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_wide_time_dependent, "data/test_wide_time_dependent.omv")
+  message("✓ Created test_wide_time_dependent.omv")
+}
 
 # Create long format test data for time-dependent covariates
 set.seed(456)
@@ -105,6 +120,18 @@ for (i in 1:n) {
 
 # Save the long format dataset
 save(test_long_time_dependent, file = "data/test_long_time_dependent.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_long_time_dependent, "data/test_long_time_dependent.omv")
+  message("✓ Created test_long_time_dependent.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(test_long_time_dependent, "data/test_long_time_dependent.omv")
+  message("✓ Created test_long_time_dependent.omv")
+}
 
 cat("Test datasets created successfully:\n")
 cat("- test_wide_time_dependent.rda:", nrow(test_wide_time_dependent), "subjects\n")

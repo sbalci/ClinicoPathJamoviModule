@@ -1,4 +1,7 @@
 # Create test data for jjhistostats function
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Create histogram test data suitable for clinical research
@@ -92,7 +95,7 @@ jjhistostats_test_data$correlated_biomarker <- round(
   (jjhistostats_test_data$correlated_biomarker - min(jjhistostats_test_data$correlated_biomarker, na.rm = TRUE)) * 50 + 10, 1)
 
 # Save the dataset
-usethis::use_data(jjhistostats_test_data, overwrite = TRUE)
+use_data_multi_format(jjhistostats_test_data, overwrite = TRUE, save_csv = TRUE)
 
 # Preview the data
 print("jjhistostats_test_data structure:")

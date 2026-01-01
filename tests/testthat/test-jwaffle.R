@@ -47,6 +47,8 @@ test_data <- setup_test_data()
 describe("jwaffle Basic Functionality", {
   
   test_that("jwaffle creates basic waffle chart", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("waffle")
     

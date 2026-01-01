@@ -1,6 +1,7 @@
 # Load the necessary libraries
 library(jmv)
-library(ClinicoPath)
+library(jmv)
+if (requireNamespace("devtools")) devtools::load_all(".") else library(ClinicoPath)
 
 # Create a simple test data frame
 stage_migration_test_data <- data.frame(

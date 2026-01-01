@@ -4,6 +4,8 @@ source("../../R/outlierdetection.h.R")
 source("../../R/outlierdetection.b.R")
 
 test_that("warnings panel captures small sample size", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # Create small dataset (N < 30)
     data <- data.frame(
         x = rnorm(20),

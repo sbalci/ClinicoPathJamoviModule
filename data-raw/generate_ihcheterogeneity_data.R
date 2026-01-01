@@ -1,6 +1,9 @@
 # IHC Heterogeneity Analysis - Test Data Generator
 # Generates realistic immunohistochemistry measurements with spatial heterogeneity
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(2025)
 
 generate_ihc_data <- function(n_cases = 50) {

@@ -3,6 +3,9 @@
 #' @author ClinicoPath Development Team
 
 # Load required libraries
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -159,10 +162,70 @@ error_test_cases <- list(
 
 # Save all test datasets
 save(clinical_scenarios, file = "data/nomogrammer_clinical_test_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_scenarios, "data/nomogrammer_clinical_test_data.omv")
+  message("✓ Created nomogrammer_clinical_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_scenarios, "data/nomogrammer_clinical_test_data.omv")
+  message("✓ Created nomogrammer_clinical_test_data.omv")
+}
 save(edge_cases, file = "data/nomogrammer_edge_cases_test_data.rda") 
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(edge_cases, "data/nomogrammer_edge_cases_test_data.omv")
+  message("✓ Created nomogrammer_edge_cases_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(edge_cases, "data/nomogrammer_edge_cases_test_data.omv")
+  message("✓ Created nomogrammer_edge_cases_test_data.omv")
+}
 save(lr_scenarios, file = "data/nomogrammer_lr_test_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lr_scenarios, "data/nomogrammer_lr_test_data.omv")
+  message("✓ Created nomogrammer_lr_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lr_scenarios, "data/nomogrammer_lr_test_data.omv")
+  message("✓ Created nomogrammer_lr_test_data.omv")
+}
 save(math_validation, file = "data/nomogrammer_math_validation_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(math_validation, "data/nomogrammer_math_validation_data.omv")
+  message("✓ Created nomogrammer_math_validation_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(math_validation, "data/nomogrammer_math_validation_data.omv")
+  message("✓ Created nomogrammer_math_validation_data.omv")
+}
 save(error_test_cases, file = "data/nomogrammer_error_test_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(error_test_cases, "data/nomogrammer_error_test_cases.omv")
+  message("✓ Created nomogrammer_error_test_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(error_test_cases, "data/nomogrammer_error_test_cases.omv")
+  message("✓ Created nomogrammer_error_test_cases.omv")
+}
 
 # Create a comprehensive combined dataset
 nomogrammer_test_data <- list(
@@ -174,6 +237,18 @@ nomogrammer_test_data <- list(
 )
 
 save(nomogrammer_test_data, file = "data/nomogrammer_test_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(nomogrammer_test_data, "data/nomogrammer_test_data.omv")
+  message("✓ Created nomogrammer_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(nomogrammer_test_data, "data/nomogrammer_test_data.omv")
+  message("✓ Created nomogrammer_test_data.omv")
+}
 
 #' =============================================================================
 #' Summary Statistics

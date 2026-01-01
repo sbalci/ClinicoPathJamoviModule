@@ -2,6 +2,8 @@
 context("StatsPlot2 Smoke Test")
 
 test_that("Type inference works correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Mock data
   df <- data.frame(
     y_cont = rnorm(50),

@@ -1,6 +1,9 @@
 # Create Example Data for Sequential Testing Analysis
 # Realistic clinical scenarios demonstrating different testing strategies
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tidyr)
 
@@ -324,16 +327,16 @@ teaching_examples <- data.frame(
 # =============================================================================
 
 # Save main clinical scenarios
-usethis::use_data(sequential_testing_examples, overwrite = TRUE)
+use_data_multi_format(sequential_testing_examples, overwrite = TRUE, save_csv = TRUE)
 
 # Save strategy comparison data
-usethis::use_data(strategy_comparison, overwrite = TRUE)
+use_data_multi_format(strategy_comparison, overwrite = TRUE, save_csv = TRUE)
 
 # Save cost-effectiveness examples
-usethis::use_data(cost_effectiveness_examples, overwrite = TRUE)
+use_data_multi_format(cost_effectiveness_examples, overwrite = TRUE, save_csv = TRUE)
 
 # Save teaching examples
-usethis::use_data(teaching_examples, overwrite = TRUE)
+use_data_multi_format(teaching_examples, overwrite = TRUE, save_csv = TRUE)
 
 # =============================================================================
 # CREATE REFERENCE DATA FOR COMMON TEST COMBINATIONS
@@ -406,7 +409,7 @@ common_test_combinations <- data.frame(
   stringsAsFactors = FALSE
 )
 
-usethis::use_data(common_test_combinations, overwrite = TRUE)
+use_data_multi_format(common_test_combinations, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary
 cat("Created sequential testing example datasets:\n")

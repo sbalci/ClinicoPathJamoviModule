@@ -29,6 +29,8 @@ create_test_data <- function() {
 
 # Test: Basic heatmap creation
 test_that("Basic heatmap creation works without errors", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("tidyheatmaps")
 
     data <- create_test_data()

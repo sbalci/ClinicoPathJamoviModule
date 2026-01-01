@@ -1,6 +1,9 @@
 # Generate test data for eurostatmap function
 # This script creates sample datasets that mimic Eurostat data structure
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Create sample eurostat map data
@@ -132,10 +135,10 @@ for (year in years) {
 }
 
 # Save all datasets
-usethis::use_data(eurostat_health_data, overwrite = TRUE)
-usethis::use_data(eurostat_nuts1_data, overwrite = TRUE)
-usethis::use_data(eurostat_comprehensive_data, overwrite = TRUE)
-usethis::use_data(eurostat_timeseries_data, overwrite = TRUE)
+use_data_multi_format(eurostat_health_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(eurostat_nuts1_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(eurostat_comprehensive_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(eurostat_timeseries_data, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary
 cat("Created eurostat test datasets:\n")

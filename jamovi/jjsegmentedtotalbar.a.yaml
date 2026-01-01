@@ -92,6 +92,19 @@ options:
         R: Show segmented total bar chart.
         jamovi: Display segmented total bar chart.
 
+    - name: plot_type
+      title: "Plot Type"
+      type: List
+      options:
+        - title: "100% Stacked Bars (Traditional)"
+          name: stacked
+        - title: "Flerlage Segmented Total Bars"
+          name: flerlage
+      default: stacked
+      description:
+        R: Type of visualization - traditional 100% stacked bars or Flerlage-style segmented total bars.
+        jamovi: Choose between traditional percentage-based stacking or Kevin Flerlage's segmented total bar design that emphasizes both totals and composition.
+
     - name: chart_style
       title: "Chart Style"
       type: List
@@ -329,6 +342,66 @@ options:
         R: Whether to optimize plot for high-quality export.
         jamovi: Optimize plot for publication/presentation export.
 
+    - name: flerlage_show_labels
+      title: "Show Value Labels (Flerlage)"
+      type: Bool
+      default: false
+      description:
+        R: Show value labels on Flerlage-style plots.
+        jamovi: Display totals and segment values as labels (only for Flerlage plot type).
+
+    - name: flerlage_label_size
+      title: "Label Size (Flerlage)"
+      type: Number
+      min: 2
+      max: 12
+      default: 4
+      description:
+        R: Size of value labels in Flerlage plots.
+        jamovi: Font size for value labels in Flerlage plot type.
+
+    - name: flerlage_label_color
+      title: "Label Color (Flerlage)"
+      type: List
+      options:
+        - title: "Black"
+          name: black
+        - title: "White"
+          name: white
+        - title: "Gray"
+          name: gray
+      default: black
+      description:
+        R: Color of value labels in Flerlage plots.
+        jamovi: Choose label color for Flerlage plot type.
+
+    - name: flerlage_alpha
+      title: "Background Transparency (Flerlage)"
+      type: Number
+      min: 0
+      max: 1
+      default: 0.3
+      description:
+        R: Transparency of background boxes (0=transparent, 1=opaque).
+        jamovi: Adjust transparency of background boxes in Flerlage plot type.
+
+    - name: flerlage_box_color
+      title: "Background Box Color (Flerlage)"
+      type: List
+      options:
+        - title: "Light Gray"
+          name: lightgrey
+        - title: "White"
+          name: white
+        - title: "Light Blue"
+          name: lightblue
+        - title: "Beige"
+          name: beige
+      default: lightgrey
+      description:
+        R: Color of background boxes in Flerlage plots.
+        jamovi: Choose background box color for Flerlage plot type.
+
     - name: show_statistical_tests
       title: "Show Statistical Tests"
       type: Bool
@@ -346,6 +419,14 @@ options:
       description:
         R: Confidence level for statistical tests (0.80-0.99).
         jamovi: Confidence level for proportion comparisons.
+
+    - name: exclude_missing
+      title: "Exclude Missing Values"
+      type: Bool
+      default: true
+      description:
+        R: Whether to exclude rows with missing values in key variables.
+        jamovi: Automatically remove rows with missing data from the analysis.
 
     - name: showExplanations
       title: Show Explanations

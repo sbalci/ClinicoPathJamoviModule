@@ -65,10 +65,14 @@ children:
     children:
       - type: CheckBox
         name: show_plot
+      - type: ComboBox
+        name: plot_type
+        label: Plot Type
+        enable: (show_plot)
   - type: CollapseBox
     label: Clinical Analysis Templates
     collapsed: false
-    stretchFactor: 0
+    stretchFactor: 1
     children:
       - type: LayoutBox
         margin: large
@@ -81,20 +85,9 @@ children:
             margin: small
             style: list-inline
   - type: CollapseBox
-    label: Plot Selection
-    collapsed: false
-    stretchFactor: 0
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: 'Select plots to display:'
-            margin: small
-  - type: CollapseBox
     label: Chart Options
     collapsed: false
-    stretchFactor: 0
+    stretchFactor: 1
     children:
       - type: LayoutBox
         margin: large
@@ -112,9 +105,37 @@ children:
             name: sort_categories
             label: Sort Categories
   - type: CollapseBox
-    label: Labels and Statistics
+    label: Chart Labels and Titles
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plot_title
+            format: string
+            label: Chart Title
+            width: largest
+          - type: TextBox
+            name: x_title
+            format: string
+            label: X-axis Title
+            width: largest
+          - type: TextBox
+            name: y_title
+            format: string
+            label: Y-axis Title
+            width: largest
+          - type: TextBox
+            name: legend_title
+            format: string
+            label: Legend Title
+            width: largest
+  - type: CollapseBox
+    label: Data Labels
     collapsed: false
-    stretchFactor: 0
+    stretchFactor: 1
     children:
       - type: LayoutBox
         margin: large
@@ -134,34 +155,30 @@ children:
             format: number
             suffix: '%'
             label: Min Segment Size for Labels
+  - type: CollapseBox
+    label: Statistical Tests
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
           - type: Label
             label: '⚠️ Requirements: Value Variable must be integer counts for valid Chi-square tests.'
             margin: small
             style: list-inline
           - type: CheckBox
             name: show_statistical_tests
-            label: Statistical Tests (Chi-square)
+            label: Perform Chi-square Test
           - type: TextBox
             name: confidence_level
             enable: (show_statistical_tests)
             format: number
             label: Confidence Level
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plot_title
-        format: string
-        label: Chart Title
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showExplanations
   - type: CollapseBox
     label: Layout and Styling
     collapsed: true
-    stretchFactor: 0
+    stretchFactor: 1
     children:
       - type: LayoutBox
         margin: large
@@ -181,17 +198,10 @@ children:
             name: outline_color
             enable: (add_outline)
             label: Outline Color
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: x_title
-        format: string
-        label: X-axis Title
   - type: CollapseBox
     label: Plot Dimensions
     collapsed: true
-    stretchFactor: 0
+    stretchFactor: 1
     children:
       - type: LayoutBox
         margin: large
@@ -209,17 +219,50 @@ children:
           - type: CheckBox
             name: export_ready
             label: Export Ready
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Flerlage Plot Options
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: y_title
-        format: string
-        label: Y-axis Title
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: 'These options apply only when "Flerlage Segmented Total Bars" plot type is selected.'
+            margin: small
+            style: list-inline
+          - type: CheckBox
+            name: flerlage_show_labels
+            label: Show Value Labels
+            enable: (plot_type == 'flerlage')
+          - type: TextBox
+            name: flerlage_label_size
+            format: number
+            label: Label Size
+            enable: (plot_type == 'flerlage' && flerlage_show_labels)
+          - type: ComboBox
+            name: flerlage_label_color
+            label: Label Color
+            enable: (plot_type == 'flerlage' && flerlage_show_labels)
+          - type: TextBox
+            name: flerlage_alpha
+            format: number
+            label: Background Transparency
+            enable: (plot_type == 'flerlage')
+          - type: ComboBox
+            name: flerlage_box_color
+            label: Background Box Color
+            enable: (plot_type == 'flerlage')
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: legend_title
-        format: string
-        label: Legend Title
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: exclude_missing
+            label: Exclude Missing Values
+          - type: CheckBox
+            name: showExplanations

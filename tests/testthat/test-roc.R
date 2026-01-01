@@ -16,6 +16,8 @@ auc_val <- pROC::auc(roc_obj)
 best_coords <- pROC::coords(roc_obj, "best", best.method = "youden")
 
 test_that("basic ROC output is correct", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_equal(round(as.numeric(auc_val), 2), 0.88)
   expect_equal(round(best_coords$threshold, 2), 0.5)
 })

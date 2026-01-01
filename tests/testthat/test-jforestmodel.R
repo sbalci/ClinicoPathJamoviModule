@@ -8,6 +8,8 @@ data(colon, package = "ClinicoPath")
 data(melanoma, package = "ClinicoPath")
 
 test_that("jforestmodel module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("jforestmodelClass"))
   expect_true(is.function(jforestmodel))
 })

@@ -18,6 +18,8 @@ setup_pca_test_data <- function() {
 # ============================================================================
 
 test_that("jjsyndromicplot creates valid output structure", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   test_data <- setup_pca_test_data()
 
   result <- jjsyndromicplot(

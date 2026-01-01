@@ -20,6 +20,8 @@ skip_if_not_installed <- function() {
 # =============================================================================
 
 test_that("Feature ranking: Cox models fitted correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed()
 
   # Create test dataset

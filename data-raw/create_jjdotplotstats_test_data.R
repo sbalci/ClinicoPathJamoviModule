@@ -1,4 +1,7 @@
 # Create test data for jjdotplotstats function
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Create dot plot test data suitable for clinical research
@@ -116,7 +119,7 @@ jjdotplotstats_test_data$hemoglobin_level <- ifelse(
 jjdotplotstats_test_data$hemoglobin_level <- round(jjdotplotstats_test_data$hemoglobin_level, 1)
 
 # Save the dataset
-usethis::use_data(jjdotplotstats_test_data, overwrite = TRUE)
+use_data_multi_format(jjdotplotstats_test_data, overwrite = TRUE, save_csv = TRUE)
 
 # Preview the data
 print("jjdotplotstats_test_data structure:")

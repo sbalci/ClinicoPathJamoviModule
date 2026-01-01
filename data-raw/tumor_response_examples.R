@@ -20,4 +20,7 @@
 #' data(tumor_response_examples)
 #' head(tumor_response_examples$raw_with_time)
 #' head(tumor_response_examples$percent_no_time)
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "tumor_response_examples"

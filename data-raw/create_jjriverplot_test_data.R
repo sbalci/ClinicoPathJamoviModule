@@ -1,4 +1,7 @@
 # Create test data for jjriverplot function
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Create river plot test data suitable for clinical research
@@ -332,10 +335,10 @@ jjriverplot_marketing_data <- data.frame(
 )
 
 # Save all datasets
-usethis::use_data(jjriverplot_test_data_long, overwrite = TRUE)
-usethis::use_data(jjriverplot_test_data_wide, overwrite = TRUE) 
-usethis::use_data(jjriverplot_education_data, overwrite = TRUE)
-usethis::use_data(jjriverplot_marketing_data, overwrite = TRUE)
+use_data_multi_format(jjriverplot_test_data_long, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjriverplot_test_data_wide, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjriverplot_education_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjriverplot_marketing_data, overwrite = TRUE, save_csv = TRUE)
 
 # Preview the data
 print("jjriverplot_test_data_long structure:")

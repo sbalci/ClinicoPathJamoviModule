@@ -16,6 +16,8 @@ items:
       height: 450
       requiresData: true
       renderFun: .plot
+      clearWith:
+        - plot_type
 
     - name: summary
       title: 'Chart Summary'
@@ -25,6 +27,7 @@ items:
         - x_var
         - y_var
         - fill_var
+        - exclude_missing
       columns:
         - name: categories
           title: 'Categories'
@@ -46,6 +49,7 @@ items:
         - x_var
         - y_var
         - fill_var
+        - exclude_missing
       columns:
         - name: category
           title: 'Category'
@@ -75,6 +79,7 @@ items:
         - x_var
         - y_var
         - fill_var
+        - exclude_missing
       columns:
         - name: measure
           title: 'Measure'
@@ -90,6 +95,7 @@ items:
         - x_var
         - y_var
         - fill_var
+        - exclude_missing
 
     - name: clinical_summary
       title: 'Clinical Summary'
@@ -98,6 +104,7 @@ items:
         - x_var
         - y_var
         - fill_var
+        - exclude_missing
 
     - name: statistical_tests
       title: 'Statistical Tests'
@@ -108,6 +115,7 @@ items:
         - y_var
         - fill_var
         - show_statistical_tests
+        - exclude_missing
       columns:
         - name: test_name
           title: 'Test'
@@ -148,6 +156,7 @@ items:
         - x_var
         - y_var
         - fill_var
+        - exclude_missing
 
     - name: explanations
       title: 'Explanations'

@@ -24,6 +24,8 @@ setup_test_data <- function() {
 
 # Basic functionality tests ----
 test_that("decisiongraphClass can be instantiated", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed("jmvcore")
   
   test_data <- setup_test_data()

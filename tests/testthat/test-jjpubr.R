@@ -1,5 +1,7 @@
 
 test_that("jjpubr works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # Source the files
     source("../../R/jjpubr.h.R")
     source("../../R/jjpubr.b.R")

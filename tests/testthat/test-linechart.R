@@ -108,6 +108,8 @@ create_dose_response_data <- function(n = 80, seed = 789) {
 describe("linechart Basic Functionality", {
   
   test_that("linechart creates basic time series plots", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("ggplot2")
     

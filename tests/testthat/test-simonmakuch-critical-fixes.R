@@ -19,6 +19,8 @@ skip_if_not_installed <- function() {
 # =============================================================================
 
 test_that("Immortal time bias: Naive model is actually fitted (not NA)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed()
 
   # Create test data: patients with time-dependent treatment

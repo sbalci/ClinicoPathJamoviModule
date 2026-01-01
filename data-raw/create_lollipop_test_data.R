@@ -1,6 +1,9 @@
 # Test data generation for lollipop function
 # Creates realistic clinical and research datasets for lollipop chart analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -301,10 +304,70 @@ quality_metrics_data <- create_quality_metrics_data()
 
 # Save datasets
 save(biomarker_data, file = "data/lollipop_biomarker_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_data, "data/lollipop_biomarker_data.RData")
+  message("✓ Created lollipop_biomarker_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_data, "data/lollipop_biomarker_data.RData")
+  message("✓ Created lollipop_biomarker_data.RData")
+}
 save(treatment_response_data, file = "data/lollipop_treatment_response_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(treatment_response_data, "data/lollipop_treatment_response_data.RData")
+  message("✓ Created lollipop_treatment_response_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(treatment_response_data, "data/lollipop_treatment_response_data.RData")
+  message("✓ Created lollipop_treatment_response_data.RData")
+}
 save(patient_timeline_data, file = "data/lollipop_patient_timeline_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(patient_timeline_data, "data/lollipop_patient_timeline_data.RData")
+  message("✓ Created lollipop_patient_timeline_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(patient_timeline_data, "data/lollipop_patient_timeline_data.RData")
+  message("✓ Created lollipop_patient_timeline_data.RData")
+}
 save(survey_response_data, file = "data/lollipop_survey_response_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_response_data, "data/lollipop_survey_response_data.RData")
+  message("✓ Created lollipop_survey_response_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_response_data, "data/lollipop_survey_response_data.RData")
+  message("✓ Created lollipop_survey_response_data.RData")
+}
 save(quality_metrics_data, file = "data/lollipop_quality_metrics_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(quality_metrics_data, "data/lollipop_quality_metrics_data.RData")
+  message("✓ Created lollipop_quality_metrics_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(quality_metrics_data, "data/lollipop_quality_metrics_data.RData")
+  message("✓ Created lollipop_quality_metrics_data.RData")
+}
 
 # Print summaries
 cat("\n=== LOLLIPOP TEST DATA GENERATION SUMMARY ===\n")

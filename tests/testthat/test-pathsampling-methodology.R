@@ -19,6 +19,8 @@ library(ClinicoPath)
 # ==============================================================================
 
 test_that("Beta-binomial estimation differs from unweighted when N varies", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("VGAM")
 
     # Create test data with VARYING sample sizes

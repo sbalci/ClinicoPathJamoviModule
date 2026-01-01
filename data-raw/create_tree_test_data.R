@@ -4,6 +4,9 @@
 # Comprehensive Test Data Generation for Enhanced Tree Function
 # =============================================================================
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 cat("Creating comprehensive test datasets for enhanced tree function...\n")
 
 # Load required libraries
@@ -357,12 +360,12 @@ small_sample_tree <- tibble(
 cat("Saving datasets...\n")
 
 # Save as .rda files
-usethis::use_data(cancer_biomarkers, overwrite = TRUE)
-usethis::use_data(cardiovascular_risk, overwrite = TRUE)  
-usethis::use_data(pathology_diagnosis, overwrite = TRUE)
-usethis::use_data(drug_response, overwrite = TRUE)
-usethis::use_data(pediatric_growth, overwrite = TRUE)
-usethis::use_data(small_sample_tree, overwrite = TRUE)
+use_data_multi_format(cancer_biomarkers, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(cardiovascular_risk, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(pathology_diagnosis, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(drug_response, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(pediatric_growth, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(small_sample_tree, overwrite = TRUE, save_csv = TRUE)
 
 # Save as .csv files for jamovi
 write.csv(cancer_biomarkers, "data/cancer_biomarkers.csv", row.names = FALSE)
@@ -403,7 +406,7 @@ tree_datasets_summary <- tibble(
 )
 
 # Save summary
-usethis::use_data(tree_datasets_summary, overwrite = TRUE)
+use_data_multi_format(tree_datasets_summary, overwrite = TRUE, save_csv = TRUE)
 write.csv(tree_datasets_summary, "data/tree_datasets_summary.csv", row.names = FALSE)
 
 # =============================================================================
@@ -435,7 +438,7 @@ tree_test_scenarios <- tibble(
 )
 
 # Save test scenarios
-usethis::use_data(tree_test_scenarios, overwrite = TRUE)
+use_data_multi_format(tree_test_scenarios, overwrite = TRUE, save_csv = TRUE)
 write.csv(tree_test_scenarios, "data/tree_test_scenarios.csv", row.names = FALSE)
 
 cat("\n=== TREE TEST DATA GENERATION COMPLETE ===\n")

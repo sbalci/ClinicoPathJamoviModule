@@ -16,7 +16,7 @@ result1 <- ClinicoPath::crosstable(
   group = "group",
   sty = "nejm",
   pcat = "chisq",
-  pairwise = FALSE
+  # pairwise = FALSE
 )
 
 # Test with pairwise comparisons and no adjustment
@@ -26,7 +26,7 @@ result2 <- ClinicoPath::crosstable(
   group = "group",
   sty = "nejm",
   pcat = "chisq",
-  pairwise = TRUE,
+  # pairwise = TRUE,
   p_adjust = "none"
 )
 
@@ -37,7 +37,7 @@ result3 <- ClinicoPath::crosstable(
   group = "group",
   sty = "nejm",
   pcat = "chisq",
-  pairwise = TRUE,
+  # pairwise = TRUE,
   p_adjust = "bonferroni"
 )
 
@@ -48,7 +48,7 @@ result4 <- ClinicoPath::crosstable(
   group = "group",
   sty = "nejm",
   pcat = "fisher",
-  pairwise = TRUE,
+  # pairwise = TRUE,
   p_adjust = "BH"
 )
 

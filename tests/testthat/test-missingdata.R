@@ -84,6 +84,8 @@ create_empty_variable_data <- function(n = 50, seed = 789) {
 describe("missingdata Basic Functionality", {
   
   test_that("missingdata data structure validation works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("mice")
     skip_if_not_installed("ggmice")
     

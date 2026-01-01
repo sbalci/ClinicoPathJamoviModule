@@ -5,6 +5,8 @@ source("../../R/ihccluster.h.R")
 source("../../R/ihccluster.b.R")
 
 test_that("ihccluster works with basic PAM clustering", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     set.seed(123)
     data <- data.frame(
         CaseID = paste0("Case", 1:50),

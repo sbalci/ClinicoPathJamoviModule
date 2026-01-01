@@ -9,6 +9,9 @@
 #' @author ClinicoPath package team
 
 # Set seed for reproducible data generation
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(20241203)
 
 # Helper functions for realistic biomarker data generation
@@ -450,11 +453,11 @@ for (i in 1:100) {
 }
 
 # Export all datasets
-usethis::use_data(her2_breast_cancer_data, overwrite = TRUE)
-usethis::use_data(pdl1_immunotherapy_data, overwrite = TRUE)
-usethis::use_data(cyp2d6_pharmacogenomics_data, overwrite = TRUE)
-usethis::use_data(oncotype_dx_data, overwrite = TRUE)
-usethis::use_data(psa_longitudinal_data, overwrite = TRUE)
+use_data_multi_format(her2_breast_cancer_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(pdl1_immunotherapy_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(cyp2d6_pharmacogenomics_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(oncotype_dx_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(psa_longitudinal_data, overwrite = TRUE, save_csv = TRUE)
 
 # Generate comprehensive summary
 cat("✅ Created 5 comprehensive datasets for biomarker response analysis:\n\n")

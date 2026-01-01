@@ -53,6 +53,18 @@ items:
         - typestatistics
         - clinicalpreset
 
+    # Notice outputs converted to HTML to avoid serialization errors
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+        - dep1
+        - dep2
+        - dep3
+        - dep4
+        - typestatistics
+        - clinicalpreset
+
     - name: interpretation
       title: Clinical Interpretation
       type: Html

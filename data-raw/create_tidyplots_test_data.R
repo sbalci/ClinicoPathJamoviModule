@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for tidyplots function
 # This script generates various datasets that showcase different tidyplots features
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tidyr)
 
@@ -326,10 +329,70 @@ tidyplots_demo <- tibble(
 
 # Save individual datasets
 save(tidyplots_medical, file = "data/tidyplots_medical.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_medical, "data/tidyplots_medical.omv")
+  message("✓ Created tidyplots_medical.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_medical, "data/tidyplots_medical.omv")
+  message("✓ Created tidyplots_medical.omv")
+}
 save(tidyplots_education, file = "data/tidyplots_education.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_education, "data/tidyplots_education.omv")
+  message("✓ Created tidyplots_education.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_education, "data/tidyplots_education.omv")
+  message("✓ Created tidyplots_education.omv")
+}
 save(tidyplots_business, file = "data/tidyplots_business.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_business, "data/tidyplots_business.omv")
+  message("✓ Created tidyplots_business.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_business, "data/tidyplots_business.omv")
+  message("✓ Created tidyplots_business.omv")
+}
 save(tidyplots_environmental, file = "data/tidyplots_environmental.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_environmental, "data/tidyplots_environmental.omv")
+  message("✓ Created tidyplots_environmental.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_environmental, "data/tidyplots_environmental.omv")
+  message("✓ Created tidyplots_environmental.omv")
+}
 save(tidyplots_demo, file = "data/tidyplots_demo.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_demo, "data/tidyplots_demo.omv")
+  message("✓ Created tidyplots_demo.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_demo, "data/tidyplots_demo.omv")
+  message("✓ Created tidyplots_demo.omv")
+}
 
 # Create comprehensive list for examples
 tidyplots_datasets <- list(
@@ -341,6 +404,18 @@ tidyplots_datasets <- list(
 )
 
 save(tidyplots_datasets, file = "data/tidyplots_datasets.rda", compress = "xz")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_datasets, "data/tidyplots_datasets.omv")
+  message("✓ Created tidyplots_datasets.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tidyplots_datasets, "data/tidyplots_datasets.omv")
+  message("✓ Created tidyplots_datasets.omv")
+}
 
 # Print summary information
 cat("Created comprehensive tidyplots test datasets:\n")

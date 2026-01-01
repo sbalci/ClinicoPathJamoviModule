@@ -1,6 +1,9 @@
 # Create test data for nogoldstandard function
 # This script generates synthetic diagnostic test data without a gold standard
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)  # For reproducibility
 
 # Number of patients
@@ -75,8 +78,8 @@ nogoldstandard_test_data$test5_result[missing_indices(n)] <- NA
 nogoldstandard_test_data_small <- nogoldstandard_test_data[1:50, ]
 
 # Save the datasets
-usethis::use_data(nogoldstandard_test_data, overwrite = TRUE)
-usethis::use_data(nogoldstandard_test_data_small, overwrite = TRUE)
+use_data_multi_format(nogoldstandard_test_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(nogoldstandard_test_data_small, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary
 cat("Created nogoldstandard_test_data with", nrow(nogoldstandard_test_data), "patients\n")

@@ -43,6 +43,8 @@ extract_plot <- function(result, plot_name = "plot") {
 context("statsplot2 - Dispatch Path Visual Tests")
 
 test_that("Path 1: Independent Factor × Continuous renders ggbetweenstats", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed_vdiffr()
   skip_if_not_installed_ggstatsplot()
 

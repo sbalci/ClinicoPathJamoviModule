@@ -1,4 +1,8 @@
 set.seed(123)
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
+set.seed(123)
 
 #------------------------------------------------------------------------------
 # Function to simulate no‐gold‐standard test data

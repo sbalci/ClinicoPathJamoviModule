@@ -1,4 +1,6 @@
 test_that("multisurvival HR plot renders (finalfit)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed("survival")
   skip_if_not_installed("finalfit")
 

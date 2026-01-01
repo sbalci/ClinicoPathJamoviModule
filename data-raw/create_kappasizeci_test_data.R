@@ -2,6 +2,9 @@
 # Creates realistic datasets for comprehensive testing of kappa sample size calculations
 # Each dataset represents different research scenarios requiring interobserver agreement studies
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -714,8 +717,44 @@ kappa_statistical_cases <- tibble(
 # Save datasets to package data directory (if it exists)
 if (dir.exists("data")) {
   save(kappa_scenarios_comprehensive, file = "data/kappasizeci_scenarios_comprehensive.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_scenarios_comprehensive, "data/kappasizeci_scenarios_comprehensive.omv")
+  message("✓ Created kappasizeci_scenarios_comprehensive.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_scenarios_comprehensive, "data/kappasizeci_scenarios_comprehensive.omv")
+  message("✓ Created kappasizeci_scenarios_comprehensive.omv")
+}
   save(kappa_validation_cases, file = "data/kappasizeci_validation_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_validation_cases, "data/kappasizeci_validation_cases.omv")
+  message("✓ Created kappasizeci_validation_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_validation_cases, "data/kappasizeci_validation_cases.omv")
+  message("✓ Created kappasizeci_validation_cases.omv")
+}
   save(kappa_statistical_cases, file = "data/kappasizeci_statistical_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_statistical_cases, "data/kappasizeci_statistical_cases.omv")
+  message("✓ Created kappasizeci_statistical_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_statistical_cases, "data/kappasizeci_statistical_cases.omv")
+  message("✓ Created kappasizeci_statistical_cases.omv")
+}
   
   message("✓ All kappa test datasets saved to data/ directory")
 } else {

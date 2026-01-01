@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for groupsummary function
 # This script generates datasets specifically designed for testing groupsummary functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(789)
 
 # Load existing medical research data and convert to RDA
@@ -31,6 +34,18 @@ if (file.exists("data/medical_research_data.csv")) {
                                              ordered = TRUE)
   
   save(medical_research_data, file = "data/medical_research_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(medical_research_data, "data/medical_research_data.omv")
+  message("✓ Created medical_research_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(medical_research_data, "data/medical_research_data.omv")
+  message("✓ Created medical_research_data.omv")
+}
 }
 
 # Load existing hourly admission data and convert to RDA
@@ -45,6 +60,18 @@ if (file.exists("data/hospital_admission_hourly.csv")) {
   hospital_admission_hourly$Department <- as.factor(hospital_admission_hourly$Department)
   
   save(hospital_admission_hourly, file = "data/hospital_admission_hourly.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hospital_admission_hourly, "data/hospital_admission_hourly.omv")
+  message("✓ Created hospital_admission_hourly.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hospital_admission_hourly, "data/hospital_admission_hourly.omv")
+  message("✓ Created hospital_admission_hourly.omv")
+}
 }
 
 # 1. Simple groupsummary dataset for basic testing
@@ -229,11 +256,83 @@ groupsummary_web_analytics <- create_groupsummary_web_analytics()
 
 # Save datasets
 save(groupsummary_simple, file = "data/groupsummary_simple.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_simple, "data/groupsummary_simple.omv")
+  message("✓ Created groupsummary_simple.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_simple, "data/groupsummary_simple.omv")
+  message("✓ Created groupsummary_simple.omv")
+}
 save(groupsummary_sales_data, file = "data/groupsummary_sales_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_sales_data, "data/groupsummary_sales_data.omv")
+  message("✓ Created groupsummary_sales_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_sales_data, "data/groupsummary_sales_data.omv")
+  message("✓ Created groupsummary_sales_data.omv")
+}
 save(groupsummary_survey_data, file = "data/groupsummary_survey_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_survey_data, "data/groupsummary_survey_data.omv")
+  message("✓ Created groupsummary_survey_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_survey_data, "data/groupsummary_survey_data.omv")
+  message("✓ Created groupsummary_survey_data.omv")
+}
 save(groupsummary_financial_data, file = "data/groupsummary_financial_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_financial_data, "data/groupsummary_financial_data.omv")
+  message("✓ Created groupsummary_financial_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_financial_data, "data/groupsummary_financial_data.omv")
+  message("✓ Created groupsummary_financial_data.omv")
+}
 save(groupsummary_manufacturing_data, file = "data/groupsummary_manufacturing_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_manufacturing_data, "data/groupsummary_manufacturing_data.omv")
+  message("✓ Created groupsummary_manufacturing_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_manufacturing_data, "data/groupsummary_manufacturing_data.omv")
+  message("✓ Created groupsummary_manufacturing_data.omv")
+}
 save(groupsummary_web_analytics, file = "data/groupsummary_web_analytics.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_web_analytics, "data/groupsummary_web_analytics.omv")
+  message("✓ Created groupsummary_web_analytics.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupsummary_web_analytics, "data/groupsummary_web_analytics.omv")
+  message("✓ Created groupsummary_web_analytics.omv")
+}
 
 # Print dataset summaries
 cat("\n=== GROUPSUMMARY TEST DATASETS CREATED ===\n")

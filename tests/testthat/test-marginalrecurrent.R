@@ -1,4 +1,6 @@
 test_that("baseline hazard yields valid survival estimates", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("reReg")
 
     data("simDat", package = "reReg")

@@ -1,6 +1,9 @@
 # Generate Comprehensive Diagnostic Style Clustering Test Data
 # Based on Usubutun et al. 2012 methodology for identifying pathologist diagnostic "schools"
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 library(tidyr)
@@ -351,8 +354,44 @@ lymphoma_data <- generate_lymphoma_diagnostic_data()
 
 # Save datasets
 save(endometrial_data, file = "data/endometrial_diagnostic_styles.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(endometrial_data, "data/endometrial_diagnostic_styles.omv")
+  message("✓ Created endometrial_diagnostic_styles.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(endometrial_data, "data/endometrial_diagnostic_styles.omv")
+  message("✓ Created endometrial_diagnostic_styles.omv")
+}
 save(breast_data, file = "data/breast_diagnostic_styles.rda")  
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(breast_data, "data/breast_diagnostic_styles.omv")
+  message("✓ Created breast_diagnostic_styles.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(breast_data, "data/breast_diagnostic_styles.omv")
+  message("✓ Created breast_diagnostic_styles.omv")
+}
 save(lymphoma_data, file = "data/lymphoma_diagnostic_styles.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lymphoma_data, "data/lymphoma_diagnostic_styles.omv")
+  message("✓ Created lymphoma_diagnostic_styles.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lymphoma_data, "data/lymphoma_diagnostic_styles.omv")
+  message("✓ Created lymphoma_diagnostic_styles.omv")
+}
 
 # Export CSV versions for jamovi
 write.csv(endometrial_data$diagnosis_data, "data/endometrial_diagnostic_styles.csv", row.names = FALSE)

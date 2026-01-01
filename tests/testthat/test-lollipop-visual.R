@@ -53,6 +53,8 @@ setup_visual_test_data <- function() {
 # ==============================================================================
 
 test_that("lollipop basic vertical chart", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed_vdiffr()
 
   test_data <- setup_visual_test_data()

@@ -116,6 +116,8 @@ test_data <- setup_test_parameters()
 describe("kappasizeci Basic Functionality", {
   
   test_that("kappasizeci creates sample size calculations for binary outcomes", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("jmvcore")
     
     params <- test_data$basic$binary

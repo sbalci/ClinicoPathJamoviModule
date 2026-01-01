@@ -1,6 +1,9 @@
 # Create test data for jjtreemap function
 # This script generates various datasets to test treemap visualization functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(usethis)
 
 # Basic treemap test data
@@ -182,15 +185,15 @@ jjtreemap_clinical <- data.frame(
 )
 
 # Save all datasets
-usethis::use_data(jjtreemap_basic, overwrite = TRUE)
-usethis::use_data(jjtreemap_market, overwrite = TRUE)
-usethis::use_data(jjtreemap_products, overwrite = TRUE)
-usethis::use_data(jjtreemap_hierarchical, overwrite = TRUE)
-usethis::use_data(jjtreemap_budget, overwrite = TRUE)
-usethis::use_data(jjtreemap_web_traffic, overwrite = TRUE)
-usethis::use_data(jjtreemap_performance, overwrite = TRUE)
-usethis::use_data(jjtreemap_edge_cases, overwrite = TRUE)
-usethis::use_data(jjtreemap_clinical, overwrite = TRUE)
+use_data_multi_format(jjtreemap_basic, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_market, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_products, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_hierarchical, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_budget, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_web_traffic, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_performance, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_edge_cases, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjtreemap_clinical, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary information
 cat("Test datasets created for jjtreemap:\n")

@@ -1,6 +1,9 @@
 # Create Example Data for Screening Calculator
 # Clinical scenarios with realistic test characteristics
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # =============================================================================
@@ -192,12 +195,12 @@ sequential_demo$final_probability <- c(
 # =============================================================================
 
 # Save main clinical scenarios
-usethis::use_data(screening_examples, overwrite = TRUE)
+use_data_multi_format(screening_examples, overwrite = TRUE, save_csv = TRUE)
 
 # Save educational demonstrations
-usethis::use_data(prevalence_demo, overwrite = TRUE)
-usethis::use_data(performance_demo, overwrite = TRUE)
-usethis::use_data(sequential_demo, overwrite = TRUE)
+use_data_multi_format(prevalence_demo, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(performance_demo, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(sequential_demo, overwrite = TRUE, save_csv = TRUE)
 
 # =============================================================================
 # CREATE QUICK REFERENCE TABLES
@@ -233,7 +236,7 @@ common_tests <- data.frame(
   stringsAsFactors = FALSE
 )
 
-usethis::use_data(common_tests, overwrite = TRUE)
+use_data_multi_format(common_tests, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary
 cat("Created screening calculator example datasets:\n")

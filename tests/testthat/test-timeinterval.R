@@ -14,6 +14,8 @@ library(testthat)
 # =============================================================================
 
 test_that("timeinterval module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("timeintervalClass"))
   expect_true(is.function(timeinterval))
 })

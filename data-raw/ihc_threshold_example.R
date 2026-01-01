@@ -1,4 +1,7 @@
 # IHC Threshold Example Data - Ki-67 staining
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Simulate 6 sample areas tested at 3 threshold levels
@@ -39,5 +42,17 @@ ihc_ki67_data <- do.call(rbind, data_list)
 
 # Save
 save(ihc_ki67_data, file = "data/ihc_ki67_data.rda", compress = "bzip2")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(ihc_ki67_data, "data/ihc_ki67_data.omv")
+  message("✓ Created ihc_ki67_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(ihc_ki67_data, "data/ihc_ki67_data.omv")
+  message("✓ Created ihc_ki67_data.omv")
+}
 write.csv(ihc_ki67_data, file = "data/ihc_ki67_data.csv", row.names = FALSE)
 cat("✅ IHC threshold data created\n")

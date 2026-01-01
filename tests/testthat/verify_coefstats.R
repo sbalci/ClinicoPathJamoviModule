@@ -14,6 +14,8 @@ source("R/jjcoefstats.h.R")
 source("R/jjcoefstats.b.R")
 
 test_that("jjcoefstats handles pre-computed data correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   data <- data.frame(
     term = c("A", "B", "C"),

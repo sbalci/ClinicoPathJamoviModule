@@ -1,6 +1,9 @@
 # Generate Realistic Haralick Texture Test Data for Digital Pathology
 # This script creates comprehensive test datasets for the haralicktexture function
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -266,6 +269,18 @@ for(name in names(datasets)) {
 
 # Create combined RData file
 save(datasets, file = "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/test_data/haralick_test_datasets.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(datasets, "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/test_data/haralick_test_datasets.RData")
+  message("✓ Created haralick_test_datasets.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(datasets, "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/test_data/haralick_test_datasets.RData")
+  message("✓ Created haralick_test_datasets.RData")
+}
 
 # Generate summary report
 message("Dataset Summary:")

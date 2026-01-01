@@ -128,7 +128,7 @@ options:
     - name: show_violin
       title: Show Half-Violin (Density)
       type: Bool
-      default: false
+      default: true
       description:
         R: >
           If TRUE, displays half-violin plot showing probability density distribution.
@@ -136,7 +136,7 @@ options:
     - name: show_boxplot
       title: Show Box Plot
       type: Bool
-      default: false
+      default: true
       description:
         R: >
           If TRUE, displays box plot with median, quartiles, and outliers.
@@ -144,7 +144,7 @@ options:
     - name: show_dots
       title: Show Data Points
       type: Bool
-      default: false
+      default: true
       description:
         R: >
           If TRUE, displays individual data points as dots.

@@ -1,4 +1,6 @@
 test_that("jwaffle handles warnings, captions, and todo text correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     
     # Create test data
     set.seed(123)

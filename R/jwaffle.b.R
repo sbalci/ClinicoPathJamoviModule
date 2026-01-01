@@ -768,34 +768,35 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             if (is.null(self$options$groups)) {
                 todo <- paste0(
-                    "<div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); ",
-                    "padding: 30px; border-radius: 12px; color: white; margin: 20px 0; ",
-                    "box-shadow: 0 8px 16px rgba(0,0,0,0.1);'>",
+                    "<div style='background: #f8f9fa; ",
+                    "padding: 30px; border-radius: 8px; border: 2px solid #dee2e6; ",
+                    "margin: 20px 0; color: #212529;'>",
 
-                    "<h2 style='margin-top: 0; font-size: 28px; font-weight: bold;'>",
+                    "<h2 style='margin-top: 0; font-size: 24px; font-weight: bold; color: #495057;'>",
                     "📊 Welcome to Waffle Charts</h2>",
 
-                    "<p style='font-size: 16px; line-height: 1.8; margin: 20px 0;'>",
+                    "<p style='font-size: 15px; line-height: 1.6; margin: 15px 0; color: #495057;'>",
                     "Create professional waffle charts to visualize categorical distributions ",
                     "using colored squares in a grid format.</p>",
 
-                    "<h3 style='font-size: 20px; margin-top: 25px; margin-bottom: 15px;'>",
+                    "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #343a40;'>",
                     "🎯 Getting Started:</h3>",
-                    "<ol style='font-size: 15px; line-height: 2; margin-left: 20px;'>",
+                    "<ol style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: #495057;'>",
                     "<li><strong>Required:</strong> Select a <strong>Groups</strong> variable (categorical)</li>",
                     "<li><strong>Optional:</strong> Add <strong>Counts</strong> variable for weighted data</li>",
                     "<li><strong>Optional:</strong> Use <strong>Facet By</strong> to compare across subgroups</li>",
                     "</ol>",
 
-                    "<h3 style='font-size: 20px; margin-top: 25px; margin-bottom: 15px;'>",
+                    "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #343a40;'>",
                     "💡 Clinical Examples:</h3>",
-                    "<ul style='font-size: 15px; line-height: 2; margin-left: 20px;'>",
+                    "<ul style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: #495057;'>",
                     "<li>Tumor grade distribution (G1/G2/G3)</li>",
                     "<li>Treatment response rates (Complete/Partial/None)</li>",
                     "<li>Risk category proportions (Low/Medium/High)</li>",
                     "</ul>",
 
-                    "<p style='font-size: 14px; margin-top: 25px; opacity: 0.9;'>",
+                    "<p style='font-size: 14px; margin-top: 20px; padding: 10px; ",
+                    "background: #e7f3ff; border-left: 3px solid #0066cc; color: #004085;'>",
                     "<strong>💡 Tip:</strong> Each square represents ~1% of your sample, ",
                     "making percentages immediately clear.</p>",
                     "</div>"

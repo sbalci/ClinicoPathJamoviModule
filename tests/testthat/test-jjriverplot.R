@@ -1,4 +1,6 @@
 test_that("jjriverplot works with basic alluvial plot", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create simple test data
   test_data <- data.frame(
     time = factor(rep(c("T1", "T2", "T3"), each = 20)),

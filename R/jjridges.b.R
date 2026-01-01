@@ -26,6 +26,48 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Option overrides for presets
         overrides = list(),
 
+        # Notice collection list for HTML rendering
+        .noticeList = list(),
+
+        # Add a notice to the collection
+        .addNotice = function(type, title, content) {
+          private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+            type = type,
+            title = title,
+            content = content
+          )
+        },
+
+        # Render collected notices as HTML
+        .renderNotices = function() {
+          if (length(private$.noticeList) == 0) {
+            return()
+          }
+
+          typeStyles <- list(
+            ERROR = "background:#ffebee; border-left:4px solid #c62828; color:#b71c1c;",
+            STRONG_WARNING = "background:#fff3e0; border-left:4px solid #ef6c00; color:#e65100;",
+            WARNING = "background:#fff9c4; border-left:4px solid #f9a825; color:#f57f17;",
+            INFO = "background:#e3f2fd; border-left:4px solid #1976d2; color:#0d47a1;"
+          )
+
+          html <- "<div style='margin: 10px 0;'>"
+
+          for (notice in private$.noticeList) {
+            style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+
+            html <- paste0(html,
+              "<div style='", style, " padding:12px; margin:8px 0; border-radius:4px;'>",
+                "<strong style='display:block; margin-bottom:4px;'>", notice$title, "</strong>",
+                "<span style='opacity:0.9;'>", notice$content, "</span>",
+              "</div>"
+            )
+          }
+
+          html <- paste0(html, "</div>")
+          self$results$notices$setContent(html)
+        },
+
         # === Helper: Escape Variable Names ===
         .escapeVarName = function(var) {
             if (is.null(var) || var == "") return(var)
@@ -50,13 +92,20 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply presets first to ensure UI reflects overrides
             private$.applyClinicalPreset()
 
+            # Auto-enable legend when fill variable is specified
+            # This ensures the fill colors are explained in the plot
+            if (!is.null(self$options$fill_var) &&
+                self$options$legend_position == "none") {
+                # Override legend_position to show the fill legend
+                private$overrides$legend_position <- "right"
+            }
 
             # Check if required variables are provided
             if (is.null(self$options$x_var) || is.null(self$options$y_var)) {
                 self$results$instructions$setContent(paste0(
                     "<h3>", .("Ridge Plot Instructions"), "</h3>",
                     "<p>", .("Welcome to the Advanced Ridge Plot analysis!"), "</p>",
-                    
+
                     "<div style='background:#f0f8ff; border-left:4px solid #2196F3; padding:15px; margin:15px 0;'>",
                         "<h4 style='color:#2196F3; margin-top:0;'>📊 ", .("Clinical Guidance"), "</h4>",
                         "<p><strong>", .("When to Use Ridge Plots:"), "</strong></p>",
@@ -74,7 +123,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "<li>", .("Compare ridge positions (left/right shift) for group differences"), "</li>",
                         "</ul>",
                     "</div>",
-                    
+
                     "<p><strong>", .("Required:"), "</strong></p>",
                     "<ul>",
                         "<li><strong>", .("X Variable:"), "</strong> ", .("Continuous variable for distributions"), "</li>",
@@ -106,37 +155,40 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$interpretation$setVisible(visible = FALSE)
                 return()
             }
-            
+
             # Set visibility based on options
             self$results$instructions$setVisible(visible = FALSE)
             self$results$plot$setVisible(visible = TRUE)
             self$results$statistics$setVisible(visible = TRUE)
             self$results$tests$setVisible(visible = private$.option("show_stats"))
             self$results$interpretation$setVisible(visible = TRUE)
-            
+
             # Set plot dimensions - increase size if legends are likely to be shown
             plot_width <- self$options$width
             plot_height <- self$options$height
-            
+
+            # Get effective legend position (considering overrides)
+            effective_legend_pos <- private$.option("legend_position")
+
             # Increase width if fill legend is shown and legend position is right/left
-            if (!is.null(self$options$fill_var) && 
+            if (!is.null(self$options$fill_var) &&
                 (self$options$show_fill_legend %||% TRUE) &&
-                self$options$legend_position %in% c("right", "left")) {
+                effective_legend_pos %in% c("right", "left")) {
                 plot_width <- max(plot_width, 900)  # Minimum 900px when right/left legend
             }
-            
+
             # Increase height if fill legend is shown and legend position is top/bottom
-            if (!is.null(self$options$fill_var) && 
+            if (!is.null(self$options$fill_var) &&
                 (self$options$show_fill_legend %||% TRUE) &&
-                self$options$legend_position %in% c("top", "bottom")) {
+                effective_legend_pos %in% c("top", "bottom")) {
                 plot_height <- max(plot_height, 650)  # Minimum 650px when top/bottom legend
             }
-            
+
             # Increase height if faceting is used
             if (!is.null(self$options$facet_var)) {
                 plot_height <- max(plot_height, 700)  # Minimum 700px when faceting
             }
-            
+
             self$results$plot$setSize(plot_width, plot_height)
         },
         
@@ -694,13 +746,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             input_warnings <- tryCatch({
                 private$.validateInputs()
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'inputValidationError',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Input Validation Error",
+                    content = e$message
                 )
-                notice$setContent(e$message)
-                self$results$insert(999, notice)
                 return()
             })
             
@@ -709,13 +759,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot_data <- private$.prepareData()
             
             if (nrow(plot_data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noValidData',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "No Valid Data",
+                    content = "No valid data available for analysis. Check your variable selections and data."
                 )
-                notice$setContent("No valid data available for analysis. Check your variable selections and data.")
-                self$results$insert(999, notice)
                 return()
             }
             
@@ -723,13 +771,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             data_warnings <- tryCatch({
                 private$.validateData(plot_data)
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'dataValidationError',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Data Validation Error",
+                    content = e$message
                 )
-                notice$setContent(e$message)
-                self$results$insert(999, notice)
                 return()
             })
             
@@ -759,19 +805,16 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 repeated_measures_warning <- private$.checkRepeatedMeasures(plot_data)
                 if (!is.null(repeated_measures_warning)) {
                     # Create STRONG_WARNING Notice about independence assumption violation
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'independenceAssumption',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    # Combine key points into single-line message using bullet separators
                     notice_msg <- paste0(
                         "INDEPENDENCE ASSUMPTION: ", repeated_measures_warning, " • ",
                         "Statistical tests assume independent observations. Repeated measures, matched samples, or clustered data may produce invalid results. • ",
                         "Recommendations: Aggregate to one value per subject, use specialized repeated measures models, or treat statistics as exploratory only."
                     )
-                    notice$setContent(notice_msg)
-                    self$results$insert(999, notice)
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Independence Assumption Violation",
+                        content = notice_msg
+                    )
                 }
 
                 private$.generateTests(plot_data)
@@ -816,11 +859,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add completion INFO notice
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
             n_obs <- nrow(plot_data)
             n_groups <- length(unique(plot_data$y))
             notice_msg <- paste0(
@@ -829,8 +867,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "Plot type: ", self$options$plot_type,
                 if(self$options$show_stats) paste0(" • Statistical tests: ", self$options$test_type) else ""
             )
-            notice$setContent(notice_msg)
-            self$results$insert(999, notice)
+            private$.addNotice(
+                type = "INFO",
+                title = "Analysis Complete",
+                content = notice_msg
+            )
+
+            # Render all collected notices as HTML
+            private$.renderNotices()
         },
         
         .prepareData = function() {
@@ -1287,10 +1331,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     panel.spacing = unit(0, "lines")
                 )
             }
-            
-            # Set legend position
-            p <- p + theme(legend.position = self$options$legend_position)
-            
+
+            # Set legend position (use .option to respect overrides)
+            p <- p + theme(legend.position = private$.option("legend_position"))
+
             return(p)
         },
         

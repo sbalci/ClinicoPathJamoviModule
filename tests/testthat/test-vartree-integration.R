@@ -4,6 +4,8 @@
 library(ClinicoPath)
 
 test_that("percvar and percvarLevel are wired to vtree correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("vtree")
 

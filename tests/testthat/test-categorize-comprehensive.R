@@ -55,6 +55,8 @@ extract_table_data <- function(result, table_name) {
 # ===== Break Calculation Tests =====
 
 test_that("Equal intervals creates correct breakpoints", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   set.seed(123)
   data <- data.frame(value = 1:100)
 

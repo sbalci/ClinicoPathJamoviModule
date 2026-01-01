@@ -15,6 +15,8 @@ library(ClinicoPath)
 # ============================================================================
 
 test_that("jjcorrmat uses selective NA omission, not global", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create data with NAs in different columns
   data_with_nas <- data.frame(
     var1 = rnorm(50, mean = 10, sd = 2),

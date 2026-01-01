@@ -51,33 +51,53 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
-        # Notice helper function to create and insert notices
-        # Creates fresh Notice objects to avoid serialization issues
-        .setNotice = function(noticeName, type, content, position = NULL) {
-            # Ensure content is single-line (replace any newlines with spaces)
-            content <- gsub("\n", " ", content, fixed = TRUE)
+        # Initialize notice collection list
+        .noticeList = list(),
 
-            # Create notice object
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = noticeName,
-                type = type
+        # Add a notice to the collection
+        .addNotice = function(type, title, content) {
+          private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+            type = type,
+            title = title,
+            content = content
+          )
+        },
+
+        # Render collected notices as HTML
+        .renderNotices = function() {
+          if (length(private$.noticeList) == 0) {
+            self$results$warnings$setVisible(FALSE)
+            return()
+          }
+
+          # Map notice types to colors and icons
+          typeStyles <- list(
+            ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
+            STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
+            WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
+            INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+          )
+
+          html <- "<div style='margin: 10px 0;'>"
+
+          for (notice in private$.noticeList) {
+            style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+
+            html <- paste0(html,
+              "<div style='background-color: ", style$bgcolor, "; ",
+              "border-left: 4px solid ", style$border, "; ",
+              "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+              "<strong style='color: ", style$color, ";'>",
+              style$icon, " ", notice$title, "</strong><br>",
+              "<span style='color: #374151;'>", notice$content, "</span>",
+              "</div>"
             )
-            notice$setContent(content)
+          }
 
-            # Determine position based on type if not specified
-            if (is.null(position)) {
-                position <- switch(as.character(type),
-                    "1" = 1,        # ERROR at top
-                    "2" = 2,        # STRONG_WARNING after errors
-                    "3" = 50,       # WARNING mid-results
-                    "4" = 999,      # INFO at bottom
-                    50              # Default to mid
-                )
-            }
+          html <- paste0(html, "</div>")
 
-            # Insert notice at appropriate position
-            self$results$insert(position, notice)
+          self$results$warnings$setContent(html)
+          self$results$warnings$setVisible(TRUE)
         },
 
         .init = function() {
@@ -127,18 +147,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 if (!is.null(self$results$preset_guidance)) self$results$preset_guidance$setVisible(FALSE)
                 if (!is.null(self$results$presetInfo)) self$results$presetInfo$setVisible(FALSE)
             }
-            
-            # Hide legacy HTML warnings (now using Notices)
-            if (!is.null(self$results$warnings)) {
-                 self$results$warnings$setVisible(FALSE)
-            }
 
-            # Ensure all notices are initially hidden
-            if (!is.null(self$results$validationError)) self$results$validationError$setVisible(FALSE)
-            if (!is.null(self$results$dataQualityWarning)) self$results$dataQualityWarning$setVisible(FALSE)
-            if (!is.null(self$results$smallSampleWarning)) self$results$smallSampleWarning$setVisible(FALSE)
-            if (!is.null(self$results$nonCountDataWarning)) self$results$nonCountDataWarning$setVisible(FALSE)
-            if (!is.null(self$results$analysisInfo)) self$results$analysisInfo$setVisible(FALSE)
+            # Note: Notices are collected in private$.noticeList and rendered as HTML
+            # at the end of .run() via private$.renderNotices()
         },
 
         .run = function() {
@@ -150,14 +161,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
 
             # Clear existing tables to prevent accumulation
-            self$results$composition_table$setRow(rowNo=1, values=list(category="", segment="", count=0, percentage=0, overall_percentage=0, total_in_category=0))
             self$results$composition_table$deleteRows()
-
-            self$results$detailed_stats$setRow(rowNo=1, values=list(measure="", value=""))
             self$results$detailed_stats$deleteRows()
 
             if (self$options$show_statistical_tests) {
-                 self$results$statistical_tests$setRow(rowNo=1, values=list(test_name="", statistic=0, df=0, p_value=0, interpretation=""))
                  self$results$statistical_tests$deleteRows()
             }
 
@@ -211,7 +218,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 is_count_data <- all(private$.processed_data$count %% 1 == 0) && all(private$.processed_data$count >= 0)
 
                 if (!is_count_data) {
-                    private$.setNotice('nonCountDataWarning', jmvcore::NoticeType$STRONG_WARNING,
+                    private$.addNotice("STRONG_WARNING", "Non-Count Data Warning",
                         .("Statistical tests skipped. Value Variable contains non-integer or negative values suggesting continuous data rather than counts. Chi-square tests are only valid for count/frequency data."))
                 } else {
                     private$.performStatisticalTests()
@@ -229,7 +236,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 n_categories <- length(unique(private$.processed_data[[self$options$x_var]]))
                 n_segments <- length(unique(private$.processed_data[[self$options$fill_var]]))
 
-                private$.setNotice('analysisInfo', jmvcore::NoticeType$INFO,
+                private$.addNotice("INFO", "Analysis Info",
                     sprintf(.("Analysis completed successfully using %d observations across %d categories and %d segments."),
                         n_total, n_categories, n_segments))
             }
@@ -260,7 +267,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             required_vars <- c(x_var, y_var, fill_var)
             missing_vars <- setdiff(required_vars, names(data))
             if (length(missing_vars) > 0) {
-                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                private$.addNotice("ERROR", "Missing Variables",
                     paste(.("Missing variables in data:"), paste(missing_vars, collapse = ", ")))
                 return()
             }
@@ -268,21 +275,31 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Check for NA values in key variables
             if (sum(is.na(data[[x_var]])) > 0) {
                 na_count <- sum(is.na(data[[x_var]]))
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
-                    paste("Found", na_count, "NA values in", x_var, "- these will be removed"))
-                data <- data[!is.na(data[[x_var]]), ]
+                if (self$options$exclude_missing) {
+                    private$.addNotice("WARNING", "Missing Data",
+                        paste("Found", na_count, "NA values in", x_var, "- these will be removed"))
+                    data <- data[!is.na(data[[x_var]]), ]
+                } else {
+                    private$.addNotice("INFO", "Missing Data Present",
+                        paste("Found", na_count, "NA values in", x_var, "- these will be included in the analysis"))
+                }
             }
 
             if (sum(is.na(data[[fill_var]])) > 0) {
                 na_count <- sum(is.na(data[[fill_var]]))
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
-                    paste("Found", na_count, "NA values in", fill_var, "- these will be removed"))
-                data <- data[!is.na(data[[fill_var]]), ]
+                if (self$options$exclude_missing) {
+                    private$.addNotice("WARNING", "Missing Data",
+                        paste("Found", na_count, "NA values in", fill_var, "- these will be removed"))
+                    data <- data[!is.na(data[[fill_var]]), ]
+                } else {
+                    private$.addNotice("INFO", "Missing Data Present",
+                        paste("Found", na_count, "NA values in", fill_var, "- these will be included in the analysis"))
+                }
             }
 
             # Check if y_var is numeric
             if (!is.numeric(data[[y_var]])) {
-                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                private$.addNotice("ERROR", "Invalid Variable Type",
                     paste(y_var, .("must be a numeric variable")))
                 return()
             }
@@ -293,20 +310,20 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Check for sufficient levels
             if (length(levels(data[[x_var]])) < 1) {
-                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                private$.addNotice("ERROR", "Empty Variable",
                     paste(x_var, "must have at least one category"))
                 return()
             }
 
             if (length(levels(data[[fill_var]])) < 1) {
-                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                private$.addNotice("ERROR", "Empty Variable",
                     paste(fill_var, "must have at least one segment"))
                 return()
             }
 
             if (!is.null(facet_var)) {
                 if (!facet_var %in% names(data)) {
-                    private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                    private$.addNotice("ERROR", "Missing Facet Variable",
                         paste("Facet variable", facet_var, "not found in data"))
                     return()
                 }
@@ -365,7 +382,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Check for empty groups
             if (nrow(processed_data) == 0) {
-                private$.setNotice('validationError', jmvcore::NoticeType$ERROR,
+                private$.addNotice("ERROR", "No Valid Data",
                     .("No valid data after processing. Please check your input variables."))
                 return()
             }
@@ -377,7 +394,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(total == 0)
 
             if (nrow(zero_totals) > 0) {
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                private$.addNotice("WARNING", "Zero Total Categories",
                     paste("Categories with zero totals found:",
                         paste(zero_totals[[x_var]], collapse = ", "),
                         "- these may appear empty in the plot"))
@@ -465,7 +482,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(total_count < 5)
 
             if (nrow(small_categories) > 0) {
-                private$.setNotice('smallSampleWarning', jmvcore::NoticeType$STRONG_WARNING,
+                private$.addNotice("STRONG_WARNING", "Small Sample Size",
                     paste(.("Some categories have fewer than 5 observations. Results may be unreliable for small groups:"),
                         paste(small_categories[[x_var]], collapse = ", ")))
             }
@@ -475,7 +492,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(percentage > 95)
 
             if (nrow(extreme_segments) > 0) {
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$STRONG_WARNING,
+                private$.addNotice("STRONG_WARNING", "Extreme Proportions",
                     .("Some segments represent >95% of their category. Consider combining rare categories or checking data quality."))
             }
 
@@ -484,14 +501,14 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::filter(percentage < 1 & count < 3)
 
             if (nrow(tiny_segments) > 0) {
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                private$.addNotice("WARNING", "Tiny Segments",
                     .("Some segments represent <1% with very small counts. These may not be clinically meaningful."))
             }
 
             # Check for reasonable number of categories for visualization
             n_categories <- length(unique(data[[x_var]]))
             if (n_categories > 10) {
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                private$.addNotice("WARNING", "Too Many Categories",
                     paste(.("Large number of categories ("), n_categories,
                         .(") may make the chart difficult to interpret. Consider grouping similar categories.")))
             }
@@ -499,7 +516,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Check for reasonable number of segments
             n_segments <- length(unique(data[[fill_var]]))
             if (n_segments > 8) {
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                private$.addNotice("WARNING", "Too Many Segments",
                     paste(.("Large number of segments ("), n_segments,
                         .(") may make colors difficult to distinguish. Consider grouping similar segments.")))
             }
@@ -509,7 +526,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             actual_combinations <- nrow(data)
             if (actual_combinations < expected_combinations) {
                 missing_combinations <- expected_combinations - actual_combinations
-                private$.setNotice('dataQualityWarning', jmvcore::NoticeType$WARNING,
+                private$.addNotice("WARNING", "Missing Data Combinations",
                     paste(.("Missing data combinations detected:"), missing_combinations,
                         .("empty category-segment pairs. This may indicate sparse data.")))
             }
@@ -816,8 +833,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
         .plot = function(image, ggtheme, theme, ...) {
 
-            # Plain, self-contained plot builder for 100% stacked bars
-            # Keeps logic local to ensure clear data flow.
+            # Plot builder supporting both traditional stacked bars and Flerlage-style plots
 
             # Check if this plot should be shown
             if (!self$options$show_plot) {
@@ -833,6 +849,21 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             df <- private$.processed_data
             if (is.null(df) || nrow(df) == 0) return()
+
+            # Route to appropriate plot type
+            if (self$options$plot_type == "flerlage") {
+                p <- private$.plotFlerlage(df, image, ggtheme, theme)
+            } else {
+                p <- private$.plotTraditional(df, image, ggtheme, theme)
+            }
+
+            # Print plot
+            print(p)
+            TRUE
+        },
+
+        .plotTraditional = function(df, image, ggtheme, theme, ...) {
+            # Traditional 100% stacked bar chart implementation
 
             x_var <- self$options$x_var
             fill_var <- self$options$fill_var
@@ -968,6 +999,108 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             if (isTRUE(self$options$export_ready)) {
                 p <- p + ggplot2::theme(
                     # text = ggplot2::element_text(family = "Arial"),
+                    plot.background = ggplot2::element_rect(fill = "white", color = NA),
+                    panel.background = ggplot2::element_rect(fill = "white", color = NA),
+                    legend.background = ggplot2::element_rect(fill = "white", color = NA)
+                )
+            }
+
+            return(p)
+        },
+
+        .plotFlerlage = function(df, image, ggtheme, theme, ...) {
+            # Flerlage-style segmented total bar chart using ggsegmentedtotalbar package
+
+            # Check if package is available
+            if (!requireNamespace("ggsegmentedtotalbar", quietly = TRUE)) {
+                private$.addNotice("ERROR", "Missing Package",
+                    "The ggsegmentedtotalbar package is required for Flerlage-style plots. Install it with: install.packages('ggsegmentedtotalbar')")
+                return(ggplot2::ggplot() + ggplot2::theme_void() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                        label = "ggsegmentedtotalbar package not installed",
+                        size = 6, color = "red"))
+            }
+
+            x_var <- self$options$x_var
+            fill_var <- self$options$fill_var
+
+            # Prepare data for ggsegmentedtotalbar
+            # The package expects: group, segment, value, total columns
+            plot_data <- df %>%
+                dplyr::group_by(!!rlang::sym(x_var)) %>%
+                dplyr::mutate(total = sum(.data$value)) %>%
+                dplyr::ungroup() %>%
+                dplyr::rename(
+                    group = !!rlang::sym(x_var),
+                    segment = !!rlang::sym(fill_var)
+                )
+
+            # Apply sorting if requested
+            if (self$options$sort_categories != "none") {
+                if (self$options$sort_categories == "total") {
+                    category_order <- plot_data %>%
+                        dplyr::group_by(.data$group) %>%
+                        dplyr::summarise(total = sum(.data$value), .groups = 'drop') %>%
+                        dplyr::arrange(desc(.data$total)) %>%
+                        dplyr::pull(.data$group)
+                    plot_data$group <- factor(plot_data$group, levels = unique(category_order))
+                } else if (self$options$sort_categories == "alpha") {
+                    plot_data$group <- factor(plot_data$group, levels = sort(unique(as.character(plot_data$group))))
+                }
+            }
+
+            # Create base Flerlage plot
+            p <- ggsegmentedtotalbar::ggsegmentedtotalbar(
+                data = plot_data,
+                group = "group",
+                segment = "segment",
+                value = "value",
+                total = "total",
+                label = self$options$flerlage_show_labels,
+                label_size = self$options$flerlage_label_size,
+                label_color = self$options$flerlage_label_color,
+                alpha = self$options$flerlage_alpha,
+                color = self$options$flerlage_box_color
+            )
+
+            # Add custom titles
+            p <- p + ggplot2::labs(
+                title = if (nchar(self$options$plot_title) > 0) self$options$plot_title else NULL,
+                x = if (nchar(self$options$x_title) > 0) self$options$x_title else x_var,
+                y = if (nchar(self$options$y_title) > 0) self$options$y_title else "Total",
+                fill = if (nchar(self$options$legend_title) > 0) self$options$legend_title else fill_var
+            )
+
+            # Apply chart style
+            chart_theme <- private$.getChartTheme(self$options$chart_style)
+            if (!is.null(chart_theme)) {
+                p <- p + chart_theme
+            }
+
+            # Apply color palette
+            palette_colors <- private$.getColorPalette(
+                self$options$color_palette,
+                length(unique(plot_data$segment))
+            )
+            if (!is.null(palette_colors)) {
+                p <- p + ggplot2::scale_fill_manual(values = palette_colors)
+            }
+
+            # Legend position
+            if (!identical(self$options$legend_position, "none")) {
+                p <- p + ggplot2::theme(legend.position = self$options$legend_position)
+            } else {
+                p <- p + ggplot2::theme(legend.position = "none")
+            }
+
+            # Orientation (if horizontal requested)
+            if (identical(self$options$orientation, "horizontal")) {
+                p <- p + ggplot2::coord_flip()
+            }
+
+            # Export-friendly tweaks
+            if (isTRUE(self$options$export_ready)) {
+                p <- p + ggplot2::theme(
                     plot.background = ggplot2::element_rect(fill = "white", color = NA),
                     panel.background = ggplot2::element_rect(fill = "white", color = NA),
                     legend.background = ggplot2::element_rect(fill = "white", color = NA)
@@ -1237,6 +1370,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 
                 self$results$statistical_tests$addRow(rowKey = 1, values = error_row)
             })
+
+            # Render all collected notices as HTML
+            private$.renderNotices()
         }
     )
 )

@@ -1,6 +1,9 @@
 # Create comprehensive test data for jiwillsurvive function
 # This script generates various survival datasets to test all features
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(lubridate)
 
@@ -126,9 +129,57 @@ single_group_data <- data.frame(
 
 # Save all datasets
 save(jiwillsurvive_test_data, file = "../data/jiwillsurvive_test_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jiwillsurvive_test_data, "../data/jiwillsurvive_test_data.omv")
+  message("✓ Created jiwillsurvive_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jiwillsurvive_test_data, "../data/jiwillsurvive_test_data.omv")
+  message("✓ Created jiwillsurvive_test_data.omv")
+}
 save(short_followup_data, file = "../data/jiwillsurvive_short_followup.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(short_followup_data, "../data/jiwillsurvive_short_followup.omv")
+  message("✓ Created jiwillsurvive_short_followup.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(short_followup_data, "../data/jiwillsurvive_short_followup.omv")
+  message("✓ Created jiwillsurvive_short_followup.omv")
+}
 save(long_followup_data, file = "../data/jiwillsurvive_long_followup.rda") 
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(long_followup_data, "../data/jiwillsurvive_long_followup.omv")
+  message("✓ Created jiwillsurvive_long_followup.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(long_followup_data, "../data/jiwillsurvive_long_followup.omv")
+  message("✓ Created jiwillsurvive_long_followup.omv")
+}
 save(single_group_data, file = "../data/jiwillsurvive_single_group.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(single_group_data, "../data/jiwillsurvive_single_group.omv")
+  message("✓ Created jiwillsurvive_single_group.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(single_group_data, "../data/jiwillsurvive_single_group.omv")
+  message("✓ Created jiwillsurvive_single_group.omv")
+}
 
 # Display summary of main dataset
 cat("=== jiwillsurvive Test Data Summary ===\n")

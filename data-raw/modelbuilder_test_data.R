@@ -6,6 +6,9 @@
 # Enhanced version includes multiple scenarios, missing data patterns, and
 # realistic clinical relationships.
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -150,6 +153,18 @@ write.csv(modelbuilder_test_data, "./data/modelbuilder_test_data.csv", row.names
 
 # Save as RData for R use
 save(modelbuilder_test_data, file = "./data/modelbuilder_test_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_test_data, "./data/modelbuilder_test_data.RData")
+  message("✓ Created modelbuilder_test_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_test_data, "./data/modelbuilder_test_data.RData")
+  message("✓ Created modelbuilder_test_data.RData")
+}
 
 cat("\nTest data saved as:\n")
 cat("- modelbuilder_test_data.csv (for jamovi)\n")
@@ -470,15 +485,99 @@ cat("\n=== Saving All Test Datasets ===\n")
 
 # Save main dataset
 save(modelbuilder_test_data, file = "data/modelbuilder_test_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_test_data, "data/modelbuilder_test_data.RData")
+  message("✓ Created modelbuilder_test_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_test_data, "data/modelbuilder_test_data.RData")
+  message("✓ Created modelbuilder_test_data.RData")
+}
 write.csv(modelbuilder_test_data, "data/modelbuilder_test_data.csv", row.names = FALSE)
 
 # Save additional datasets
 save(modelbuilder_small_data, file = "data/modelbuilder_small_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_small_data, "data/modelbuilder_small_data.RData")
+  message("✓ Created modelbuilder_small_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_small_data, "data/modelbuilder_small_data.RData")
+  message("✓ Created modelbuilder_small_data.RData")
+}
 save(modelbuilder_high_missing_data, file = "data/modelbuilder_high_missing_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_high_missing_data, "data/modelbuilder_high_missing_data.RData")
+  message("✓ Created modelbuilder_high_missing_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_high_missing_data, "data/modelbuilder_high_missing_data.RData")
+  message("✓ Created modelbuilder_high_missing_data.RData")
+}
 save(modelbuilder_imbalanced_data, file = "data/modelbuilder_imbalanced_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_imbalanced_data, "data/modelbuilder_imbalanced_data.RData")
+  message("✓ Created modelbuilder_imbalanced_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_imbalanced_data, "data/modelbuilder_imbalanced_data.RData")
+  message("✓ Created modelbuilder_imbalanced_data.RData")
+}
 save(modelbuilder_separation_data, file = "data/modelbuilder_separation_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_separation_data, "data/modelbuilder_separation_data.RData")
+  message("✓ Created modelbuilder_separation_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_separation_data, "data/modelbuilder_separation_data.RData")
+  message("✓ Created modelbuilder_separation_data.RData")
+}
 save(modelbuilder_collinear_data, file = "data/modelbuilder_collinear_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_collinear_data, "data/modelbuilder_collinear_data.RData")
+  message("✓ Created modelbuilder_collinear_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_collinear_data, "data/modelbuilder_collinear_data.RData")
+  message("✓ Created modelbuilder_collinear_data.RData")
+}
 save(modelbuilder_longitudinal_data, file = "data/modelbuilder_longitudinal_data.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_longitudinal_data, "data/modelbuilder_longitudinal_data.RData")
+  message("✓ Created modelbuilder_longitudinal_data.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(modelbuilder_longitudinal_data, "data/modelbuilder_longitudinal_data.RData")
+  message("✓ Created modelbuilder_longitudinal_data.RData")
+}
 
 # ============================================================================
 # COMPREHENSIVE SUMMARY AND VALIDATION SCENARIOS

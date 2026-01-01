@@ -1,4 +1,7 @@
 # Test script for ihcadvanced function
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 source('R/ihc_utilities.R')
 source('R/ihcadvanced.b.R')
 

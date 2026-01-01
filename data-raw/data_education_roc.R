@@ -25,4 +25,7 @@
 #'
 #' @source Simulated data for demonstration purposes
 #' @keywords datasets
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "education_roc_data"

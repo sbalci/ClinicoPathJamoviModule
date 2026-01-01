@@ -3,6 +3,8 @@ library(testthat)
 library(ClinicoPath)
 
 test_that("dataquality basic functionality", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test data
   data("histopathology", package = "ClinicoPath")
 

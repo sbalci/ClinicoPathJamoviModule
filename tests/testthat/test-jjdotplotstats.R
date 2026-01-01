@@ -1,4 +1,6 @@
 test_that("jjdotplotstats works with basic dot plot", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test data with continuous and categorical variables
   data(iris)
   

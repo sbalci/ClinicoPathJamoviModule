@@ -5,6 +5,9 @@
 # This script creates example datasets for testing and demonstrating the
 # sophisticated psychopdaROC ROC analysis function.
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(usethis)
 
 # Set seed for reproducibility

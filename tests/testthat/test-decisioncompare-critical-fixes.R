@@ -6,6 +6,8 @@
 # 4. Sample size reporting
 
 test_that("McNemar compares diagnostic CORRECTNESS, not raw positivity rates", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
 
     # Create test data where Test1 has higher positivity but LOWER accuracy

@@ -1,6 +1,9 @@
 # Create comprehensive test data for outlierdetection function
 # This script generates datasets covering all outlier detection scenarios and edge cases
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(MASS)
 
@@ -304,14 +307,122 @@ outlierdetection_problematic <- data.frame(
 
 # Save individual datasets
 save(outlierdetection_basic, file = "data/outlierdetection_basic.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_basic, "data/outlierdetection_basic.omv")
+  message("✓ Created outlierdetection_basic.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_basic, "data/outlierdetection_basic.omv")
+  message("✓ Created outlierdetection_basic.omv")
+}
 save(outlierdetection_multivariate, file = "data/outlierdetection_multivariate.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_multivariate, "data/outlierdetection_multivariate.omv")
+  message("✓ Created outlierdetection_multivariate.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_multivariate, "data/outlierdetection_multivariate.omv")
+  message("✓ Created outlierdetection_multivariate.omv")
+}
 save(outlierdetection_edge_cases, file = "data/outlierdetection_edge_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_edge_cases, "data/outlierdetection_edge_cases.omv")
+  message("✓ Created outlierdetection_edge_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_edge_cases, "data/outlierdetection_edge_cases.omv")
+  message("✓ Created outlierdetection_edge_cases.omv")
+}
 save(outlierdetection_international, file = "data/outlierdetection_international.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_international, "data/outlierdetection_international.omv")
+  message("✓ Created outlierdetection_international.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_international, "data/outlierdetection_international.omv")
+  message("✓ Created outlierdetection_international.omv")
+}
 save(outlierdetection_large, file = "data/outlierdetection_large.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_large, "data/outlierdetection_large.omv")
+  message("✓ Created outlierdetection_large.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_large, "data/outlierdetection_large.omv")
+  message("✓ Created outlierdetection_large.omv")
+}
 save(outlierdetection_clinical, file = "data/outlierdetection_clinical.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_clinical, "data/outlierdetection_clinical.omv")
+  message("✓ Created outlierdetection_clinical.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_clinical, "data/outlierdetection_clinical.omv")
+  message("✓ Created outlierdetection_clinical.omv")
+}
 save(outlierdetection_psychological, file = "data/outlierdetection_psychological.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_psychological, "data/outlierdetection_psychological.omv")
+  message("✓ Created outlierdetection_psychological.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_psychological, "data/outlierdetection_psychological.omv")
+  message("✓ Created outlierdetection_psychological.omv")
+}
 save(outlierdetection_temporal, file = "data/outlierdetection_temporal.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_temporal, "data/outlierdetection_temporal.omv")
+  message("✓ Created outlierdetection_temporal.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_temporal, "data/outlierdetection_temporal.omv")
+  message("✓ Created outlierdetection_temporal.omv")
+}
 save(outlierdetection_problematic, file = "data/outlierdetection_problematic.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_problematic, "data/outlierdetection_problematic.omv")
+  message("✓ Created outlierdetection_problematic.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outlierdetection_problematic, "data/outlierdetection_problematic.omv")
+  message("✓ Created outlierdetection_problematic.omv")
+}
 
 # Save combined dataset
 save(outlierdetection_basic, outlierdetection_multivariate, outlierdetection_edge_cases,

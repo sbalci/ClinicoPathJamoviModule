@@ -26,6 +26,8 @@ create_test_data <- function(n = 100) {
 }
 
 test_that("basic timeROC package functionality works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test direct timeROC functionality first
   test_data <- create_test_data()

@@ -39,7 +39,7 @@ result1 <- riverplot(
   data = wide_data,
   strata = c("Response_Baseline", "Response_Month3", "Response_Month6"),
   plotType = "alluvial",
-  curveType = "cardinal",
+  curveType = "cubic",
   curveGranularity = 200,
   labelNodes = TRUE,
   backgroundLabels = TRUE,

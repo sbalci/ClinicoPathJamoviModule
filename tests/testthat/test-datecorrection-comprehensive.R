@@ -28,6 +28,8 @@ run_correction <- function(data, vars, method = "datefixr", date_format = "auto"
 
 # Test 1: ISO date format (YYYY-MM-DD) - should parse correctly
 test_that("ISO date format parses correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   test_data <- data.frame(
     date_col = c("2020-01-15", "2021-06-30", "2019-12-25")
   )

@@ -29,6 +29,8 @@ test_data_violin <- data.frame(
 
 # Basic function availability tests
 test_that("jviolin function exists and is properly defined", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     expect_true(exists("jviolinClass"))
     expect_true(R6::is.R6Class(jviolinClass))
 })

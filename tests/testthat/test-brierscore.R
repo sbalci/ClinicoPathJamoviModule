@@ -13,6 +13,8 @@
 # clinical decision-making or regulatory submissions.
 
 test_that("brierscore handles basic inputs", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("survival")
 
     # Simulate survival data

@@ -2,6 +2,8 @@ context("Medical Decision Calculator")
 
 # Test basic function execution
 test_that("decisioncalculator function works with basic parameters", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Test basic function call without errors
   expect_no_error({
     result <- decisioncalculator(

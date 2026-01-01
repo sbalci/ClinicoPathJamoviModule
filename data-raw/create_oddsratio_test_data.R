@@ -2,6 +2,9 @@
 #' @description Creates comprehensive test datasets for validating the oddsratio function
 #' @author ClinicoPath Development Team
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 library(MASS)  # For mvrnorm
@@ -278,10 +281,70 @@ cat("6. Saving all datasets...\n")
 
 # Save individual datasets
 save(basic_clinical_data, file = "data/basic_clinical_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(basic_clinical_data, "data/basic_clinical_data.omv")
+  message("✓ Created basic_clinical_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(basic_clinical_data, "data/basic_clinical_data.omv")
+  message("✓ Created basic_clinical_data.omv")
+}
 save(edge_cases_data, file = "data/edge_cases_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(edge_cases_data, "data/edge_cases_data.omv")
+  message("✓ Created edge_cases_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(edge_cases_data, "data/edge_cases_data.omv")
+  message("✓ Created edge_cases_data.omv")
+}
 save(effect_size_data, file = "data/effect_size_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(effect_size_data, "data/effect_size_data.omv")
+  message("✓ Created effect_size_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(effect_size_data, "data/effect_size_data.omv")
+  message("✓ Created effect_size_data.omv")
+}
 save(cardio_data, file = "data/cardio_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cardio_data, "data/cardio_data.omv")
+  message("✓ Created cardio_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cardio_data, "data/cardio_data.omv")
+  message("✓ Created cardio_data.omv")
+}
 save(oncology_data, file = "data/oncology_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(oncology_data, "data/oncology_data.omv")
+  message("✓ Created oncology_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(oncology_data, "data/oncology_data.omv")
+  message("✓ Created oncology_data.omv")
+}
 
 # Create comprehensive test data list
 oddsratio_test_data <- list(
@@ -294,6 +357,18 @@ oddsratio_test_data <- list(
 
 # Save comprehensive test data
 save(oddsratio_test_data, file = "data/oddsratio_test_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(oddsratio_test_data, "data/oddsratio_test_data.omv")
+  message("✓ Created oddsratio_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(oddsratio_test_data, "data/oddsratio_test_data.omv")
+  message("✓ Created oddsratio_test_data.omv")
+}
 
 cat("   - All datasets saved successfully!\n")
 

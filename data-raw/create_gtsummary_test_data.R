@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for gtsummary function
 # This script generates datasets specifically designed for testing gtsummary functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(magrittr)
 
@@ -369,10 +372,70 @@ gtsummary_cross_data <- create_gtsummary_cross_data()
 
 # Save datasets
 save(gtsummary_clinical_trial, file = "data/gtsummary_clinical_trial.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_clinical_trial, "data/gtsummary_clinical_trial.omv")
+  message("✓ Created gtsummary_clinical_trial.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_clinical_trial, "data/gtsummary_clinical_trial.omv")
+  message("✓ Created gtsummary_clinical_trial.omv")
+}
 save(gtsummary_survey_data, file = "data/gtsummary_survey_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_survey_data, "data/gtsummary_survey_data.omv")
+  message("✓ Created gtsummary_survey_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_survey_data, "data/gtsummary_survey_data.omv")
+  message("✓ Created gtsummary_survey_data.omv")
+}
 save(gtsummary_laboratory_data, file = "data/gtsummary_laboratory_data.rda") 
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_laboratory_data, "data/gtsummary_laboratory_data.omv")
+  message("✓ Created gtsummary_laboratory_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_laboratory_data, "data/gtsummary_laboratory_data.omv")
+  message("✓ Created gtsummary_laboratory_data.omv")
+}
 save(gtsummary_manufacturing_data, file = "data/gtsummary_manufacturing_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_manufacturing_data, "data/gtsummary_manufacturing_data.omv")
+  message("✓ Created gtsummary_manufacturing_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_manufacturing_data, "data/gtsummary_manufacturing_data.omv")
+  message("✓ Created gtsummary_manufacturing_data.omv")
+}
 save(gtsummary_cross_data, file = "data/gtsummary_cross_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_cross_data, "data/gtsummary_cross_data.omv")
+  message("✓ Created gtsummary_cross_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gtsummary_cross_data, "data/gtsummary_cross_data.omv")
+  message("✓ Created gtsummary_cross_data.omv")
+}
 
 # Print dataset summaries
 cat("\n=== GTSUMMARY TEST DATASETS CREATED ===\n")

@@ -6,6 +6,8 @@ library(ClinicoPath)
 
 # Test Data Setup
 test_that("Test data loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("linear_model_data"))
   expect_true(exists("logistic_model_data"))
   expect_true(exists("jggstats_comprehensive_data"))

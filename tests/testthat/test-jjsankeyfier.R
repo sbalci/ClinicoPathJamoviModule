@@ -6,6 +6,8 @@ library(ClinicoPath)
 
 # Test Data Setup
 test_that("Test data loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("sankey_simple_data"))
   expect_true(exists("simple_flow_data"))
   expect_true(exists("complex_alluvial_data"))

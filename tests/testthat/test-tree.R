@@ -5,6 +5,8 @@
 # =============================================================================
 
 test_that("tree basic functionality works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Load required test data
   data("small_sample_tree", package = "ClinicoPath")

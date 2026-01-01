@@ -1,4 +1,6 @@
 test_that("comparingsurvival works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     
     # Skip if survival package is not available
     skip_if_not_installed("survival")

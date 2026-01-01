@@ -19,4 +19,7 @@
 #' @docType package
 #' @aliases ClinicoPathDescriptives ClinicoPathDescriptives-package
 #' @name ClinicoPathDescriptives-package
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "_PACKAGE"

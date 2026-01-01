@@ -31,6 +31,8 @@ library(tibble)
 # ============================================================================
 
 test_that("CRITICAL: Patient IDs preserved through pivot_wider transformation", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create test data with known patient IDs
   test_data <- data.frame(
     patient_id = rep(c("P001", "P002", "P003"), each = 3),

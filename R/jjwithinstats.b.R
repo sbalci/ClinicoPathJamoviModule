@@ -167,6 +167,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .messages = NULL,
         .data_messages = NULL,
 
+        # Notice collection list for HTML-based notices (avoids serialization errors)
+        .noticeList = list(),
+
         # Variable name safety utility ----
         .escapeVar = function(var) {
             if (is.null(var)) return(NULL)
@@ -245,34 +248,16 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$warnings$setVisible(TRUE)
             }
 
-            # MODERN: Also add as jmvcore::Notice for consistent UX
-            # Combine all accumulated messages into a single notice to avoid clutter
-            if (length(private$.messages) > 0) {
-                # Clean messages for notice display
-                combined_msg <- paste(private$.messages, collapse = "\n")
-                clean_msg <- gsub("<br>|<br/>|<hr>", "\n", combined_msg)
-                clean_msg <- gsub("<[^>]*>", "", clean_msg)
-                clean_msg <- gsub("&bull;", "•", clean_msg)
-                clean_msg <- gsub("&nbsp;", " ", clean_msg)
-                clean_msg <- trimws(clean_msg)
-
-                # Remove any existing accumulated_warnings notice before adding new one
-                # (jamovi will handle duplicates, but this keeps it clean)
-                tryCatch({
-                    private$.addNotice(
-                        content = clean_msg,
-                        type = notice_type,
-                        name = "accumulated_warnings"
-                    )
-                }, error = function(e) {
-                    # Silent fail if notice system unavailable
-                })
-            }
+            # MODERN: Add to HTML-based notice system (no serialization issues)
+            # Note: We don't call .renderNotices() here - that's done at end of .run()
+            # This just accumulates the notices for later rendering
         },
         
         # Reset messages for new analysis run
         .resetMessages = function() {
             private$.messages <- character()
+            # Clear HTML-based notice list
+            private$.noticeList <- list()
             # Don't clear TODO here, as it might hold "Welcome" or "Ready"
             # warning content is cleared
             if (!is.null(self$results$warnings)) {
@@ -281,45 +266,74 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
-        # Add jmvcore::Notice to results (modern notice system)
-        .addNotice = function(content, type = "WARNING", name = NULL) {
-            # Generate unique name if not provided
-            if (is.null(name)) {
-                name <- paste0("notice_", digest::digest(content, algo = "md5"))
+        # DEPRECATED: Old notice system with serialization errors
+        # DO NOT USE - kept for reference only
+        # Use .addNoticeHTML() instead
+        # .addNotice = function(content, type = "WARNING", name = NULL) {
+        #     # This method causes serialization errors due to insert(999, notice)
+        #     # See CLAUDE.md > Notice Serialization and HTML Conversion
+        #     stop("Deprecated: Use .addNoticeHTML() instead to avoid serialization errors")
+        # },
+
+        # MODERN NOTICE SYSTEM (HTML-based, no serialization issues) ----
+
+        # Add a notice to the HTML-based collection (recommended for all new code)
+        .addNoticeHTML = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+        },
+
+        # HTML sanitization for security
+        .safeHtmlOutput = function(text) {
+            if (is.null(text) || length(text) == 0) return("")
+            text <- as.character(text)
+            # Sanitize potentially dangerous characters
+            text <- gsub("&", "&amp;", text, fixed = TRUE)
+            text <- gsub("<", "&lt;", text, fixed = TRUE)
+            text <- gsub(">", "&gt;", text, fixed = TRUE)
+            text <- gsub("\"", "&quot;", text, fixed = TRUE)
+            text <- gsub("'", "&#x27;", text, fixed = TRUE)
+            text <- gsub("/", "&#x2F;", text, fixed = TRUE)
+            return(text)
+        },
+
+        # Render collected notices as HTML (call at end of .run())
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                return()
             }
 
-            # Map string types to jmvcore::NoticeType
-            notice_type <- switch(type,
-                "ERROR" = jmvcore::NoticeType$ERROR,
-                "STRONG_WARNING" = jmvcore::NoticeType$STRONG_WARNING,
-                "WARNING" = jmvcore::NoticeType$WARNING,
-                "INFO" = jmvcore::NoticeType$INFO,
-                jmvcore::NoticeType$WARNING  # Default
+            # Map notice types to colors and icons
+            typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
             )
 
-            # Create notice
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = name,
-                type = notice_type
-            )
+            html <- "<div style='margin: 10px 0;'>"
 
-            # Clean content for notice (remove HTML tags since notices don't support HTML)
-            clean_content <- gsub("<br>|<br/>|<hr>", "\n", content)
-            clean_content <- gsub("<[^>]*>", "", clean_content)
-            clean_content <- gsub("&bull;", "•", clean_content)
-            clean_content <- gsub("&nbsp;", " ", clean_content)
-            # Remove multiple consecutive line breaks
-            clean_content <- gsub("\n\n+", "\n\n", clean_content)
-            # Trim leading/trailing whitespace
-            clean_content <- trimws(clean_content)
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]]
+                if (is.null(style)) style <- typeStyles$INFO
 
-            notice$setContent(clean_content)
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
+                    "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+                    "</div>"
+                )
+            }
 
-            # Insert at beginning of results
-            self$results$insert(999, notice)
+            html <- paste0(html, "</div>")
 
-            return(notice)
+            self$results$notices$setContent(html)
         },
 
         # Helper to cache data-specific messages
@@ -999,6 +1013,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (self$options$showExplanations) {
                     private$.generateExplanations()
                 }
+
+                # Render accumulated HTML-based notices (if any)
+                private$.renderNotices()
 
             }
         }

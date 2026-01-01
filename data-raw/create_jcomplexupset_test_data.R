@@ -1,6 +1,9 @@
 # Create test data for jcomplexupset function
 # This script generates datasets suitable for testing Complex UpSet plots
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(tidyverse)
 
 # Create comprehensive UpSet plot test data
@@ -117,8 +120,44 @@ diagnostic_test_data <- data.frame(
 
 # Save the datasets
 save(jcomplexupset_test_data, file = "data/jcomplexupset_test_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jcomplexupset_test_data, "data/jcomplexupset_test_data.omv")
+  message("✓ Created jcomplexupset_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jcomplexupset_test_data, "data/jcomplexupset_test_data.omv")
+  message("✓ Created jcomplexupset_test_data.omv")
+}
 save(molecular_subtype_data, file = "data/molecular_subtype_data.rda") 
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(molecular_subtype_data, "data/molecular_subtype_data.omv")
+  message("✓ Created molecular_subtype_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(molecular_subtype_data, "data/molecular_subtype_data.omv")
+  message("✓ Created molecular_subtype_data.omv")
+}
 save(diagnostic_test_data, file = "data/diagnostic_test_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(diagnostic_test_data, "data/diagnostic_test_data.omv")
+  message("✓ Created diagnostic_test_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(diagnostic_test_data, "data/diagnostic_test_data.omv")
+  message("✓ Created diagnostic_test_data.omv")
+}
 
 # Print summary
 cat("Created jcomplexupset test datasets:\n")

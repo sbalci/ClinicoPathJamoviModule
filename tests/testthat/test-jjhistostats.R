@@ -1,4 +1,6 @@
 test_that("jjhistostats works with basic histogram", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test data with continuous variables
   data(iris)
   

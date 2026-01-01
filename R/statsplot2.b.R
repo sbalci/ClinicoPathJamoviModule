@@ -12,13 +12,27 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
         private = list(
             # Cache for analysis results to avoid redundant calculations
             .cached_analysis = NULL,
-            
+
             # Plot dimension constants
             .PLOT_DIMENSIONS = list(
                 default = list(width = 800, height = 600),
                 grouped_native = list(width_per_level = 400, height_per_level = 300, max_width = 1600, max_height = 1200),
                 grouped_manual = list(width = 1200, height_per_row = 450, max_height = 1400)
             ),
+
+            # HTML sanitization for security
+            .safeHtmlOutput = function(text) {
+                if (is.null(text) || length(text) == 0) return("")
+                text <- as.character(text)
+                # Sanitize potentially dangerous characters
+                text <- gsub("&", "&amp;", text, fixed = TRUE)
+                text <- gsub("<", "&lt;", text, fixed = TRUE)
+                text <- gsub(">", "&gt;", text, fixed = TRUE)
+                text <- gsub("\"", "&quot;", text, fixed = TRUE)
+                text <- gsub("'", "&#x27;", text, fixed = TRUE)
+                text <- gsub("/", "&#x2F;", text, fixed = TRUE)
+                return(text)
+            },
             
             # Method to invalidate cache when options change
             .invalidateCache = function() {
@@ -49,7 +63,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     if (n_obs %% n_levels != 0) {
                         warning_msg <- glue::glue(
                             "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
-                            "<strong>⚠ Design-Data Mismatch Warning</strong><br/>",
+                            "<strong>Design-Data Mismatch Warning</strong><br/>",
                             "You selected <strong>Repeated Measures</strong> design, but the data structure may not match:<br/>",
                             "• Total observations: {n_obs}<br/>",
                             "• Groups in '{group_var}': {n_levels} ({paste(group_levels, collapse=', ')})<br/>",
@@ -71,7 +85,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         obs_per_group <- unique(group_counts)[1]
                         warning_msg <- glue::glue(
                             "<div style='background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0;'>",
-                            "<strong>ℹ Design Check</strong><br/>",
+                            "<strong>Design Check</strong><br/>",
                             "Perfectly balanced groups detected ({obs_per_group} observations per group).<br/>",
                             "• This pattern is common in <strong>independent groups</strong> designs<br/>",
                             "• For repeated measures, each <em>subject</em> should appear in multiple groups<br/>",
@@ -273,104 +287,228 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
             .generateExplanationMessage = function(analysis_info) {
                 # Format variable descriptions with their types
-                dep_desc <- glue::glue("{analysis_info$dep_var} ({analysis_info$dep_type})")
-                group_desc <- glue::glue("{analysis_info$group_var} ({analysis_info$group_type})")
-                
-                # Generate explanation message based on plot type
+                dep_var_safe <- private$.safeHtmlOutput(analysis_info$dep_var)
+                group_var_safe <- private$.safeHtmlOutput(analysis_info$group_var)
+                dep_type_safe <- private$.safeHtmlOutput(analysis_info$dep_type)
+                group_type_safe <- private$.safeHtmlOutput(analysis_info$group_type)
+
+                # Generate HTML explanation message based on plot type
+                html <- "<div style='background: #f8f9fa; border-left: 4px solid #2196f3; padding: 15px; margin: 10px 0; border-radius: 4px;'>"
+                html <- paste0(html, "<h4 style='margin-top: 0; color: #1976d2;'>Plot Selection Summary</h4>")
+
+                # Main message based on plot type
                 base_message <- switch(analysis_info$plot_type,
                     "independent_factor_continuous" = glue::glue(
-                        "You have selected to use a violin plot to compare {dep_desc} between independent groups defined by {group_desc}."
+                        "<p><strong>Violin plot</strong> will be used to compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> between independent groups defined by <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>"
                     ),
                     "independent_continuous_continuous" = glue::glue(
-                        "You have selected to use a scatter plot to examine the relationship between {group_desc} and {dep_desc}."
+                        "<p><strong>Scatter plot</strong> will examine the relationship between <code>{group_var_safe}</code> <em>({group_type_safe})</em> and <code>{dep_var_safe}</code> <em>({dep_type_safe})</em>.</p>"
                     ),
                     "independent_factor_factor" = glue::glue(
-                        "You have selected to use a bar chart to compare {dep_desc} across categories of {group_desc}."
+                        "<p><strong>Bar chart</strong> will compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> across categories of <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>"
                     ),
                     "independent_continuous_factor" = glue::glue(
-                        "You have selected to compare {dep_desc} with {group_desc}. Note: Consider switching variables for a more appropriate visualization."
+                        "<p><strong>Dot plot</strong> will compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> with <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>",
+                        "<p style='background: #fff3e0; padding: 8px; border-radius: 4px; color: #f57c00;'>",
+                        "<strong>Tip:</strong> Consider switching variables for a more conventional visualization.</p>"
                     ),
                     "repeated_factor_continuous" = glue::glue(
-                        "You have selected to use a violin plot to compare {dep_desc} between repeated measurements defined by {group_desc}. For more customization options, consider using jjstatsplot::jjwithinstats. To verify statistical results, check with jmv::ttestPS for paired samples t-test."
+                        "<p><strong>Paired violin plot</strong> will compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> between repeated measurements defined by <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>",
+                        "<p style='font-size: 0.9em;'><strong>Advanced options:</strong> ",
+                        "For more customization, use <code>jjstatsplot::jjwithinstats</code>. ",
+                        "To verify results, check with <code>jmv::ttestPS</code> for paired samples t-test.</p>"
                     ),
                     "repeated_continuous_continuous" = glue::glue(
-                        "Scatterplots for repeated measurements of {group_desc} and {dep_desc} aren't supported by specialized functions. Consider: 1) Using 'independent' design, 2) Creating difference scores, or 3) Using correlation analysis. A basic ggplot2 visualization will be generated instead."
+                        "<p><strong>Basic scatter plot</strong> will be generated for repeated measurements of <code>{group_var_safe}</code> and <code>{dep_var_safe}</code>.</p>",
+                        "<div style='background: #fff3e0; padding: 10px; margin: 10px 0; border-radius: 4px;'>",
+                        "<strong>Limited Support:</strong> Specialized functions don't support this combination. Consider:<br>",
+                        "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                        "<li>Using 'independent' design instead</li>",
+                        "<li>Creating difference scores</li>",
+                        "<li>Using correlation analysis</li>",
+                        "</ul></div>"
                     ),
                     "repeated_factor_factor" = glue::glue(
-                        "You have selected to compare repeated measurements of {dep_desc} and {group_desc} using an alluvial diagram."
+                        "<p><strong>Alluvial diagram</strong> will show repeated measurements of <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> and <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>"
                     ),
                     "repeated_continuous_factor" = glue::glue(
-                        "This combination ({dep_desc} vs {group_desc}) in repeated measures has limited support. Consider: 1) Switching variables ({group_desc} as dependent), 2) Using 'independent' design, or 3) Creating summary scores. A basic ggplot2 visualization will be generated."
+                        "<p><strong>Basic visualization</strong> will be generated for <code>{dep_var_safe}</code> vs <code>{group_var_safe}</code> in repeated measures.</p>",
+                        "<div style='background: #fff3e0; padding: 10px; margin: 10px 0; border-radius: 4px;'>",
+                        "<strong>Limited Support:</strong> Consider alternatives:<br>",
+                        "<ul style='margin: 5px 0; padding-left: 20px;'>",
+                        "<li>Switching variables (<code>{group_var_safe}</code> as dependent)</li>",
+                        "<li>Using 'independent' design</li>",
+                        "<li>Creating summary scores</li>",
+                        "</ul></div>"
                     ),
-                    # Default case for unknown combinations or types
-                    glue::glue("This variable combination ({dep_desc} vs {group_desc} with {analysis_info$direction} design) will use a basic ggplot2 visualization since specialized statistical plots are not available.")
+                    # Default case
+                    glue::glue(
+                        "<p><strong>Basic ggplot2 visualization</strong> will be used for <code>{dep_var_safe}</code> vs <code>{group_var_safe}</code> with {analysis_info$direction} design.</p>",
+                        "<p style='color: #757575;'><em>Specialized statistical plots are not available for this combination.</em></p>"
+                    )
                 )
-                
+
+                html <- paste0(html, base_message)
+
                 # Add notes about option applicability
-                notes <- character(0)
-                
+                notes_html <- ""
+
                 # Note about statistical approach
                 if (analysis_info$dep_type == "factor" && analysis_info$group_type == "factor") {
-                    notes <- c(notes, "Note: Statistical approach option does not apply to categorical comparisons.")
-                }
-                
-                # Note about alluvial style
-                if (analysis_info$plot_type == "repeated_factor_factor") {
-                    notes <- c(notes, "Alluvial style option is now available for this repeated categorical comparison.")
-                } else if (analysis_info$direction == "repeated") {
-                    notes <- c(notes, "Alluvial style option only applies to repeated factor vs factor comparisons.")
+                    notes_html <- paste0(notes_html,
+                        "<p style='background: #e3f2fd; padding: 8px; border-radius: 4px; font-size: 0.9em;'>",
+                        "<strong>Note:</strong> Statistical approach option does not apply to categorical comparisons.</p>"
+                    )
                 }
 
-                notes <- c(notes, glue::glue("Selected plot type: {analysis_info$plot_type}. Variable types inferred as {dep_desc} (y) and {group_desc} (x)."))
-                
-                # Combine messages
-                if (length(notes) > 0) {
-                    stat_exp <- glue::glue("{base_message}\n\n{paste(notes, collapse = '\n')}")
-                } else {
-                    stat_exp <- base_message
+                # Note about alluvial style
+                if (analysis_info$plot_type == "repeated_factor_factor") {
+                    notes_html <- paste0(notes_html,
+                        "<p style='background: #e8f5e9; padding: 8px; border-radius: 4px; font-size: 0.9em;'>",
+                        "<strong>Alluvial style option is available</strong> for this repeated categorical comparison.</p>"
+                    )
+                } else if (analysis_info$direction == "repeated") {
+                    notes_html <- paste0(notes_html,
+                        "<p style='background: #e3f2fd; padding: 8px; border-radius: 4px; font-size: 0.9em;'>",
+                        "<strong>Note:</strong> Alluvial style option only applies to repeated factor vs factor comparisons.</p>"
+                    )
                 }
-                
-                return(stat_exp)
+
+                # Plot type information
+                plot_type_safe <- private$.safeHtmlOutput(analysis_info$plot_type)
+                notes_html <- paste0(notes_html,
+                    "<p style='color: #616161; font-size: 0.85em; margin-top: 10px;'>",
+                    "<strong>Technical details:</strong> Plot type: <code>", plot_type_safe, "</code> | ",
+                    "Variables: <code>", dep_var_safe, "</code> (", dep_type_safe, ") vs ",
+                    "<code>", group_var_safe, "</code> (", group_type_safe, ")</p>"
+                )
+
+                html <- paste0(html, notes_html, "</div>")
+
+                return(html)
             },
             
             # Generate clinical interpretation for results
             .generateClinicalInterpretation = function(analysis_info) {
+                dep_var_safe <- private$.safeHtmlOutput(analysis_info$dep_var)
+                group_var_safe <- private$.safeHtmlOutput(analysis_info$group_var)
+
+                # Start HTML container
+                html <- "<div style='background: #f1f8e9; border-left: 4px solid #689f38; padding: 15px; margin: 10px 0; border-radius: 4px;'>"
+                html <- paste0(html, "<h4 style='margin-top: 0; color: #558b2f;'>Clinical Interpretation</h4>")
+
+                # Main interpretation based on plot type
                 interpretation <- switch(analysis_info$plot_type,
                     "independent_factor_continuous" = glue::glue(
-                        "Clinical Interpretation: This violin plot compares the distribution of {analysis_info$dep_var} between different {analysis_info$group_var} groups. Look for differences in medians (center lines) and spread (violin width). Wider violins indicate more variability. Statistical significance testing is included when applicable."
+                        "<p>This <strong>violin plot</strong> compares the distribution of <code>{dep_var_safe}</code> between different <code>{group_var_safe}</code> groups.</p>",
+                        "<ul style='margin: 10px 0; padding-left: 20px;'>",
+                        "<li><strong>Medians:</strong> Center lines show typical values in each group</li>",
+                        "<li><strong>Spread:</strong> Wider violins indicate more variability</li>",
+                        "<li><strong>Distribution shape:</strong> Violin width reveals data density at different values</li>",
+                        "<li><strong>Statistical testing:</strong> Included when applicable to assess group differences</li>",
+                        "</ul>"
                     ),
                     "independent_continuous_continuous" = glue::glue(
-                        "Clinical Interpretation: This scatter plot examines the linear relationship between {analysis_info$group_var} and {analysis_info$dep_var}. The trend line shows the association with confidence bands (gray area). Positive slopes indicate that higher {analysis_info$group_var} values are associated with higher {analysis_info$dep_var} values."
+                        "<p>This <strong>scatter plot</strong> examines the linear relationship between <code>{group_var_safe}</code> and <code>{dep_var_safe}</code>.</p>",
+                        "<ul style='margin: 10px 0; padding-left: 20px;'>",
+                        "<li><strong>Trend line:</strong> Shows the association direction and strength</li>",
+                        "<li><strong>Confidence bands:</strong> Gray area indicates uncertainty in the trend</li>",
+                        "<li><strong>Positive slope:</strong> Higher {group_var_safe} values → higher {dep_var_safe} values</li>",
+                        "<li><strong>Correlation:</strong> Tighter scatter around line indicates stronger association</li>",
+                        "</ul>"
                     ),
                     "independent_factor_factor" = glue::glue(
-                        "Clinical Interpretation: This bar chart compares the frequency distribution of {analysis_info$dep_var} categories across {analysis_info$group_var} groups. Height differences indicate varying proportions. Chi-square statistics test for independence between the variables."
+                        "<p>This <strong>bar chart</strong> compares the frequency distribution of <code>{dep_var_safe}</code> categories across <code>{group_var_safe}</code> groups.</p>",
+                        "<ul style='margin: 10px 0; padding-left: 20px;'>",
+                        "<li><strong>Bar height:</strong> Represents count or proportion in each category</li>",
+                        "<li><strong>Height differences:</strong> Indicate varying proportions between groups</li>",
+                        "<li><strong>Chi-square test:</strong> Tests for independence between variables</li>",
+                        "<li><strong>Patterns:</strong> Look for systematic differences across groups</li>",
+                        "</ul>"
                     ),
                     "repeated_factor_continuous" = glue::glue(
-                        "Clinical Interpretation: This paired violin plot compares {analysis_info$dep_var} between two time points or conditions ({analysis_info$group_var}). Connected points show individual changes. The statistical test evaluates whether the mean change is significantly different from zero."
+                        "<p>This <strong>paired violin plot</strong> compares <code>{dep_var_safe}</code> between two time points or conditions (<code>{group_var_safe}</code>).</p>",
+                        "<ul style='margin: 10px 0; padding-left: 20px;'>",
+                        "<li><strong>Connected points:</strong> Show individual subject changes over time</li>",
+                        "<li><strong>Distribution shift:</strong> Reveals overall treatment/time effect</li>",
+                        "<li><strong>Statistical test:</strong> Evaluates if mean change differs significantly from zero</li>",
+                        "<li><strong>Individual variability:</strong> Lines show subject-specific responses</li>",
+                        "</ul>"
                     ),
                     "repeated_factor_factor" = glue::glue(
-                        "Clinical Interpretation: This alluvial diagram shows how subjects transition between {analysis_info$dep_var} categories from {analysis_info$group_var}. Flow thickness represents the number of subjects. Useful for tracking changes in disease stages, treatment responses, or classifications over time."
+                        "<p>This <strong>alluvial diagram</strong> shows how subjects transition between <code>{dep_var_safe}</code> categories from <code>{group_var_safe}</code>.</p>",
+                        "<ul style='margin: 10px 0; padding-left: 20px;'>",
+                        "<li><strong>Flow thickness:</strong> Represents the number of subjects in each transition</li>",
+                        "<li><strong>Pathways:</strong> Show movement between categories over time</li>",
+                        "<li><strong>Applications:</strong> Tracking disease stages, treatment responses, or classifications</li>",
+                        "<li><strong>Stability:</strong> Straight flows = stable categories; crossed flows = changes</li>",
+                        "</ul>"
                     ),
                     "independent_continuous_factor" = glue::glue(
-                        "Clinical Interpretation: This dot plot shows the distribution of {analysis_info$group_var} values within each {analysis_info$dep_var} category. Each dot represents individual observations. Compare the central tendency and spread between categories."
+                        "<p>This <strong>dot plot</strong> shows the distribution of <code>{group_var_safe}</code> values within each <code>{dep_var_safe}</code> category.</p>",
+                        "<ul style='margin: 10px 0; padding-left: 20px;'>",
+                        "<li><strong>Individual dots:</strong> Each represents a single observation</li>",
+                        "<li><strong>Central tendency:</strong> Compare typical values between categories</li>",
+                        "<li><strong>Spread:</strong> Horizontal spread shows variability within categories</li>",
+                        "<li><strong>Outliers:</strong> Isolated dots may represent unusual cases</li>",
+                        "</ul>"
                     ),
                     # Default for unsupported combinations
-                    glue::glue("Clinical Interpretation: This basic plot shows the relationship between {analysis_info$dep_var} and {analysis_info$group_var}. While specialized statistical tests aren't available for this combination, the visualization can still provide valuable insights about patterns in your data.")
+                    glue::glue(
+                        "<p>This <strong>basic plot</strong> shows the relationship between <code>{dep_var_safe}</code> and <code>{group_var_safe}</code>.</p>",
+                        "<p style='color: #616161;'><em>While specialized statistical tests aren't available for this combination, ",
+                        "the visualization can still provide valuable insights about patterns in your data.</em></p>"
+                    )
                 )
-                
+
+                html <- paste0(html, interpretation)
+
                 # Add assumption notes based on statistical approach
-                assumption_notes <- ""
-                if (analysis_info$distribution == "p") {
-                    assumption_notes <- "\n\nParametric Approach: Assumes normally distributed data. Best for continuous variables with bell-shaped distributions."
-                } else if (analysis_info$distribution == "np") {
-                    assumption_notes <- "\n\nNonparametric Approach: Distribution-free method. Suitable for skewed data, ordinal scales, or when normality assumptions are violated."
-                } else if (analysis_info$distribution == "r") {
-                    assumption_notes <- "\n\nRobust Approach: Less sensitive to outliers. Good choice when your data contains extreme values that might affect standard statistical tests."
-                } else if (analysis_info$distribution == "bf") {
-                    assumption_notes <- "\n\nBayesian Approach: Provides evidence for or against the null hypothesis. Bayes factors > 3 suggest moderate evidence, > 10 suggest strong evidence."
+                if (analysis_info$dep_type == "continuous" || analysis_info$group_type == "continuous") {
+                    assumption_html <- "<div style='background: #ffffff; padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #ddd;'>"
+                    assumption_html <- paste0(assumption_html, "<h5 style='margin-top: 0; color: #424242;'>Statistical Approach</h5>")
+
+                    if (analysis_info$distribution == "p") {
+                        assumption_html <- paste0(assumption_html,
+                            "<p style='margin: 5px 0;'><strong>Parametric:</strong> Assumes normally distributed data. ",
+                            "Best for continuous variables with bell-shaped distributions.</p>",
+                            "<p style='font-size: 0.85em; color: #757575;'>",
+                            "<strong>When to use:</strong> Data appears symmetric, no extreme outliers, n≥30 per group</p>"
+                        )
+                    } else if (analysis_info$distribution == "np") {
+                        assumption_html <- paste0(assumption_html,
+                            "<p style='margin: 5px 0;'><strong>Nonparametric:</strong> Distribution-free method. ",
+                            "Suitable for skewed data, ordinal scales, or when normality assumptions are violated.</p>",
+                            "<p style='font-size: 0.85em; color: #757575;'>",
+                            "<strong>When to use:</strong> Skewed data, outliers present, ordinal scales, small samples</p>"
+                        )
+                    } else if (analysis_info$distribution == "r") {
+                        assumption_html <- paste0(assumption_html,
+                            "<p style='margin: 5px 0;'><strong>Robust:</strong> Less sensitive to outliers. ",
+                            "Good choice when data contains extreme values that might affect standard tests.</p>",
+                            "<p style='font-size: 0.85em; color: #757575;'>",
+                            "<strong>When to use:</strong> Outliers present but meaningful, heavy-tailed distributions</p>"
+                        )
+                    } else if (analysis_info$distribution == "bf") {
+                        assumption_html <- paste0(assumption_html,
+                            "<p style='margin: 5px 0;'><strong>Bayesian:</strong> Provides evidence for or against the null hypothesis.</p>",
+                            "<ul style='margin: 5px 0; padding-left: 20px; font-size: 0.9em;'>",
+                            "<li>BF > 3: Moderate evidence</li>",
+                            "<li>BF > 10: Strong evidence</li>",
+                            "<li>BF > 30: Very strong evidence</li>",
+                            "</ul>",
+                            "<p style='font-size: 0.85em; color: #757575;'>",
+                            "<strong>When to use:</strong> Want to quantify evidence, need to support null hypothesis</p>"
+                        )
+                    }
+
+                    assumption_html <- paste0(assumption_html, "</div>")
+                    html <- paste0(html, assumption_html)
                 }
-                
-                return(paste0(interpretation, assumption_notes))
+
+                html <- paste0(html, "</div>")
+
+                return(html)
             },
             
             # Check statistical assumptions and provide warnings
@@ -520,7 +658,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                     todo <- glue::glue(
                 "<div style='padding: 20px; background: #f5f5f5; border-radius: 8px;'>",
-                "<h3 style='color: #1976d2; margin-top: 0;'>📊 Welcome to Automatic Plot Selection</h3>",
+                "<h3 style='color: #1976d2; margin-top: 0;'>Welcome to Automatic Plot Selection</h3>",
                 "<p style='font-size: 14px;'>This tool automatically selects the most appropriate statistical visualization based on your variable types.</p>",
                 "<h4 style='color: #424242;'>Getting Started:</h4>",
                 "<ol style='font-size: 13px;'>",
@@ -548,7 +686,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     group_name <- self$options$group %||% "not selected"
                     error_html <- glue::glue(
                         "<div style='color: #d32f2f; padding: 15px; border-left: 4px solid #d32f2f; background: #ffebee;'>",
-                        "<h4 style='margin-top: 0;'>⚠ No Data Available</h4>",
+                        "<h4 style='margin-top: 0;'>No Data Available</h4>",
                         "<p><strong>Variables selected:</strong></p>",
                         "<ul style='margin: 5px 0;'>",
                         "<li>Dependent: <code>{dep_name}</code></li>",
@@ -573,7 +711,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (n_complete < 10) {
                     validation_warnings <- paste0(validation_warnings, glue::glue(
                         "<div style='background: #ffebee; border-left: 4px solid #d32f2f; padding: 12px; margin: 10px 0;'>",
-                        "<strong>⚠ CRITICAL: Very Small Sample (n={n_complete})</strong><br/>",
+                        "<strong>CRITICAL: Very Small Sample (n={n_complete})</strong><br/>",
                         "Your analysis has only <strong>{n_complete} complete observations</strong>.<br/><br/>",
                         "<strong>Statistical concerns:</strong><br/>",
                         "• Results are <em>highly unreliable</em> with n&lt;10<br/>",
@@ -591,7 +729,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # Warning: 10 ≤ n < 30
                     validation_warnings <- paste0(validation_warnings, glue::glue(
                         "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
-                        "<strong>⚠ Small Sample Warning (n={n_complete})</strong><br/>",
+                        "<strong>Small Sample Warning (n={n_complete})</strong><br/>",
                         "You have <strong>{n_complete} complete observations</strong> (below the conventional n≥30 guideline).<br/><br/>",
                         "<strong>Recommendations:</strong><br/>",
                         "• Consider <strong>nonparametric</strong> statistical approach (less sensitive to small samples)<br/>",
@@ -638,16 +776,19 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Generate clinical interpretation
                 clinical_interpretation <- private$.generateClinicalInterpretation(analysis_info)
 
-                # Combine explanations (without warnings - those are now separate Notices)
-                combined_explanation <- paste(stat_exp, "\n\n", clinical_interpretation, sep = "")
+                # Combine HTML explanations
+                combined_html <- "<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;'>"
 
-                # Prepend validation warnings if any
+                # Add validation warnings if any
                 if (nchar(validation_warnings) > 0) {
-                    combined_explanation <- paste(validation_warnings, "\n\n", combined_explanation, sep = "")
+                    combined_html <- paste0(combined_html, validation_warnings)
                 }
 
+                # Add main explanations
+                combined_html <- paste0(combined_html, stat_exp, clinical_interpretation, "</div>")
+
                 # Set the explanation message in results
-                self$results$ExplanationMessage$setContent(combined_explanation)
+                self$results$ExplanationMessage$setContent(combined_html)
 
                 # Add success summary at the end
                 # success <- jmvcore::Notice$new(
@@ -677,7 +818,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     install_cmd <- paste0("install.packages(c('", paste(missing_packages, collapse = "', '"), "'))")
                     warning_html <- glue::glue(
                         "<div style='color: #f57c00; padding: 15px; border-left: 4px solid #f57c00; background: #fff3e0;'>",
-                        "<h4 style='margin-top: 0;'>⚠ Optional Packages Missing</h4>",
+                        "<h4 style='margin-top: 0;'>Optional Packages Missing</h4>",
                         "<p><strong>Missing:</strong> {paste(missing_packages, collapse = ', ')}</p>",
                         "<p><strong>Install with:</strong></p>",
                         "<pre style='background: #f5f5f5; padding: 8px; border-radius: 4px; overflow-x: auto;'>{install_cmd}</pre>",

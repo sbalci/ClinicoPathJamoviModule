@@ -3,6 +3,9 @@
 ## Created: 2025-10-05
 ## Functions tested: consortdiagram, studydiagram
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(20251005)
 
 # ============================================================================
@@ -209,6 +212,18 @@ cat("Final analyzed:", n_analyzed, sprintf("(%.1f%% retention)\n", n_analyzed / 
 
 # Save as .rda
 save(clinical_trial_consort_data, file = "data/clinical_trial_consort_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_trial_consort_data, "data/clinical_trial_consort_data.omv")
+  message("✓ Created clinical_trial_consort_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_trial_consort_data, "data/clinical_trial_consort_data.omv")
+  message("✓ Created clinical_trial_consort_data.omv")
+}
 cat("\n✓ Saved: data/clinical_trial_consort_data.rda\n")
 
 # Save as .csv
@@ -308,6 +323,18 @@ cat("Final analysis:", n_final, sprintf("(%.1f%% retention)\n", n_final / n_part
 
 # Save as .rda
 save(observational_study_flow_data, file = "data/observational_study_flow_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(observational_study_flow_data, "data/observational_study_flow_data.omv")
+  message("✓ Created observational_study_flow_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(observational_study_flow_data, "data/observational_study_flow_data.omv")
+  message("✓ Created observational_study_flow_data.omv")
+}
 cat("\n✓ Saved: data/observational_study_flow_data.rda\n")
 
 # Save as .csv
@@ -418,6 +445,18 @@ for (site in sites) {
 
 # Save
 save(multicenter_trial_data, file = "data/multicenter_trial_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(multicenter_trial_data, "data/multicenter_trial_data.omv")
+  message("✓ Created multicenter_trial_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(multicenter_trial_data, "data/multicenter_trial_data.omv")
+  message("✓ Created multicenter_trial_data.omv")
+}
 cat("\n✓ Saved: data/multicenter_trial_data.rda\n")
 
 write.csv(multicenter_trial_data,

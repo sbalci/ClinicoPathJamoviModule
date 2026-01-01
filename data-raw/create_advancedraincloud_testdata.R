@@ -1,6 +1,9 @@
 # Create comprehensive test dataset for Advanced Raincloud Plot
 # This script generates a realistic clinical trial dataset that tests all features
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 library(tidyr)
@@ -217,10 +220,10 @@ advancedraincloud_change <- advancedraincloud_data %>%
   filter(complete.cases(.))
 
 # Save datasets
-usethis::use_data(advancedraincloud_data, overwrite = TRUE)
-usethis::use_data(advancedraincloud_baseline, overwrite = TRUE) 
-usethis::use_data(advancedraincloud_endpoint, overwrite = TRUE)
-usethis::use_data(advancedraincloud_change, overwrite = TRUE)
+use_data_multi_format(advancedraincloud_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(advancedraincloud_baseline, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(advancedraincloud_endpoint, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(advancedraincloud_change, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary for documentation
 message("=== ADVANCED RAINCLOUD TEST DATASETS CREATED ===")

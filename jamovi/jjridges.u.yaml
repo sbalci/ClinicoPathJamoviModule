@@ -186,17 +186,17 @@ children:
             name: plot_title
             label: Plot Title
             format: string
-            width: large
+            width: largest
           - type: TextBox
             name: plot_subtitle
             label: Plot Subtitle
             format: string
-            width: large
+            width: largest
           - type: TextBox
             name: plot_caption
             label: Plot Caption
             format: string
-            width: large
+            width: largest
       - type: LayoutBox
         margin: large
         children:
@@ -225,7 +225,7 @@ children:
             name: custom_annotations
             label: Custom Annotations
             format: string
-            width: large
+            width: largest
   - type: CollapseBox
     label: Export Options
     collapsed: true

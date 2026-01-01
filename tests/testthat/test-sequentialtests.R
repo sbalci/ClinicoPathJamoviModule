@@ -43,6 +43,8 @@ calculate_npv <- function(sens, spec, prev) {
 }
 
 test_that("Serial testing (positive strategy) calculations are mathematically correct", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Test case 1: Standard clinical scenario
   sens1 <- 0.95
   spec1 <- 0.70

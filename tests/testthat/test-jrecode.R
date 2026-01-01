@@ -1,5 +1,7 @@
 
 test_that("jrecode basic functionality works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed("jmvcore")
 
   source("../../R/jrecode.h.R")

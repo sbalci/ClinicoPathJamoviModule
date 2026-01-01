@@ -1,6 +1,9 @@
 # Create clean Turkey datasets from real Eurostat data
 # This script creates properly structured datasets using actual Eurostat data
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(eurostat)
 library(dplyr)
 
@@ -227,19 +230,19 @@ print(turkey_major_provinces_real)
 # Save all datasets
 cat("\n=== SAVING DATASETS ===\n")
 
-usethis::use_data(turkey_nuts1_real, overwrite = TRUE)
+use_data_multi_format(turkey_nuts1_real, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_nuts1_real\n")
 
-usethis::use_data(turkey_nuts2_real, overwrite = TRUE)
+use_data_multi_format(turkey_nuts2_real, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_nuts2_real\n")
 
-usethis::use_data(turkey_eastern_regions_real, overwrite = TRUE)
+use_data_multi_format(turkey_eastern_regions_real, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_eastern_regions_real\n")
 
-usethis::use_data(turkey_timeseries_real, overwrite = TRUE)
+use_data_multi_format(turkey_timeseries_real, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_timeseries_real\n")
 
-usethis::use_data(turkey_major_provinces_real, overwrite = TRUE)
+use_data_multi_format(turkey_major_provinces_real, overwrite = TRUE, save_csv = TRUE)
 cat("✓ Saved turkey_major_provinces_real\n")
 
 # Print final summary

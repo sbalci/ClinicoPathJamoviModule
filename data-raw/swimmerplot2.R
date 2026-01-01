@@ -1,4 +1,7 @@
 # Create long-format dataset for swimmerplot2
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 swimmer_data <- data.frame(
     # Patient identifier
     patient_id = c(

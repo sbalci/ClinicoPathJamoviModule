@@ -10,6 +10,8 @@ library(dplyr)
 # These tests verify that the user-selected positive outcome level is properly used
 
 test_that("Outcome releveling: Dead as positive (standard coding)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create test data where "Dead" is naturally the second level
   # This should work correctly even before the fix
   test_data <- data.frame(

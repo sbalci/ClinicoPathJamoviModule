@@ -11,6 +11,8 @@ library(ClinicoPath)
 library(igraph)
 
 test_that("jjarcdiagram correctly handles node-level groups (not edge-level)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create test data where nodes have consistent groups
   # but edges would give different counts
   test_data <- data.frame(

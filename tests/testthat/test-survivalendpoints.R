@@ -1,4 +1,6 @@
 test_that("survivalendpoints calculates PFS correctly with actual event dates", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("survival")
 

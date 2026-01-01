@@ -1,4 +1,6 @@
 test_that("jjtreemap works with basic treemap", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create test data for treemap
   test_data <- data.frame(
     category = factor(rep(c("A", "B", "C", "D"), each = 5)),

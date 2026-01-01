@@ -1,4 +1,6 @@
 test_that("venn works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load the package
   library(ClinicoPath)
   

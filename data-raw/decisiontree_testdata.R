@@ -1,6 +1,9 @@
 # Decision Tree Test Data Generation
 # This script creates comprehensive test datasets for the decision tree graph module
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -249,12 +252,12 @@ edge_case_data <- tibble(
 )
 
 # Save all datasets ----
-usethis::use_data(basic_decision_data, overwrite = TRUE)
-usethis::use_data(markov_decision_data, overwrite = TRUE)
-usethis::use_data(pharma_decision_data, overwrite = TRUE)
-usethis::use_data(screening_decision_data, overwrite = TRUE)
-usethis::use_data(minimal_test_data, overwrite = TRUE)
-usethis::use_data(edge_case_data, overwrite = TRUE)
+use_data_multi_format(basic_decision_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(markov_decision_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(pharma_decision_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(screening_decision_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(minimal_test_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(edge_case_data, overwrite = TRUE, save_csv = TRUE)
 
 # Create CSV versions for jamovi
 write.csv(basic_decision_data, "inst/extdata/basic_decision_data.csv", row.names = FALSE)

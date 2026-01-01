@@ -1,6 +1,9 @@
 # Competing Survival Example Data Generation
 # This script creates comprehensive test data for the competingsurvival function
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(survival)
 
@@ -161,6 +164,18 @@ print(stage_summary)
 
 # Save the dataset
 save(competing_survival_data, file = "data/competing_survival_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(competing_survival_data, "data/competing_survival_data.omv")
+  message("✓ Created competing_survival_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(competing_survival_data, "data/competing_survival_data.omv")
+  message("✓ Created competing_survival_data.omv")
+}
 
 cat("\nDataset saved as 'competing_survival_data.rda'\n")
 cat("Variables included:\n")

@@ -9,6 +9,8 @@ library(jmvcore)
 # =============================================================================
 
 test_that("missing multievent selections show helpful guidance instead of errors", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed("ClinicoPath")
 
   # Create test data with multiple outcome levels

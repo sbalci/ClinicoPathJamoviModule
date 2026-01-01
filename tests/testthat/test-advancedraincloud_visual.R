@@ -1,4 +1,6 @@
 test_that("advancedraincloud produces valid ggplot objects", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed("ggrain")
   
   # Create a temporary directory for saving plots

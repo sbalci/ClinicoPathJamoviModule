@@ -2,6 +2,8 @@
 # Tests the current implementation with Notice API and modern architecture
 
 testthat::test_that("reportcat works with standard categorical data", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # Skip if required packages are not available
     testthat::skip_if_not_installed("ClinicoPath")
 

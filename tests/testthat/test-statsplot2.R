@@ -96,6 +96,8 @@ setup_repeated_factor_factor_data <- function() {
 describe("statsplot2 Type Detection", {
 
   test_that("detects Independent Factor × Continuous correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     test_data <- setup_factor_continuous_data()
 
     result <- statsplot2(

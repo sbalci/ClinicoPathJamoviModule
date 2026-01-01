@@ -26,6 +26,8 @@ get_weighted_table <- function(data, var1, var2, counts_var) {
 
 # 1. Verify Weighted Table
 test_that("Weighted table matches xtabs", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   wt_table <- get_weighted_table(df, "outcome", "group", "count")
   
   # Manual calculation

@@ -1,6 +1,9 @@
 # Enhanced Variable Name Handling for Crosstable
 # This demonstrates the recommended approach
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 .escapeVariableNames <- function(var_names) {
     # Check if variable names contain special characters that need escaping
     need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)

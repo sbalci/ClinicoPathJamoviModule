@@ -6,6 +6,8 @@ library(ClinicoPath)
 
 # Test 1: Data Validation - Numeric X for Boxplot Should Fail ----
 test_that("jjpubr rejects numeric patient IDs as boxplot X variable", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   test_data <- data.frame(
     patient_id = 1:20,  # Numeric IDs - should be rejected
     biomarker = rnorm(20, mean = 100, sd = 15)

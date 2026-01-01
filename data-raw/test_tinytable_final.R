@@ -4,6 +4,9 @@
 # Final Implementation Test for TinyTable Function
 # =============================================================================
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 cat("Testing TinyTable function with generated test data...\n")
 
 # Load required libraries

@@ -19,6 +19,8 @@ create_test_data <- function() {
 }
 
 test_that("parallelplot function exists and can be called", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     expect_true(exists("parallelplot"))
     expect_true(is.function(parallelplot))
 })

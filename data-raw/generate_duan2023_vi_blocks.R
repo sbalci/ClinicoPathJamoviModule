@@ -8,6 +8,9 @@
 # - EMVI sensitivity: 1=35%, 3=73%, 5=89%, 6=96%, 7-8=96%
 # - N=217 total cases, 55% VI+, 37% EMVI+
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(2023)
 
 # Study parameters from Duan 2023

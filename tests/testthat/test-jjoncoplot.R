@@ -1,5 +1,7 @@
 
 test_that("jjoncoplot works for basic oncoplot", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     set.seed(123)
     data <- data.frame(
         SampleID = paste0("S", 1:20),

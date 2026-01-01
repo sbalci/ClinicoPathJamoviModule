@@ -9,6 +9,9 @@
 #' @author ClinicoPath package team
 
 # Set seed for reproducible data generation
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(20241201)
 
 # 1. Economic News Dataset - For Column/Bar Charts
@@ -312,13 +315,13 @@ digital_technology_data <- data.frame(
 )
 
 # Create the data-raw script for generating these datasets
-usethis::use_data(economic_indicators_data, overwrite = TRUE)
-usethis::use_data(election_survey_data, overwrite = TRUE)
-usethis::use_data(health_statistics_data, overwrite = TRUE)
-usethis::use_data(sports_performance_data, overwrite = TRUE)
-usethis::use_data(climate_environment_data, overwrite = TRUE)
-usethis::use_data(education_attainment_data, overwrite = TRUE)
-usethis::use_data(digital_technology_data, overwrite = TRUE)
+use_data_multi_format(economic_indicators_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(election_survey_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(health_statistics_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(sports_performance_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(climate_environment_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(education_attainment_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(digital_technology_data, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary of created datasets
 cat("✅ Created 7 example datasets for BBC-style visualization:\n\n")

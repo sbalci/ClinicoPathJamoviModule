@@ -2,6 +2,9 @@
 # These datasets are designed for testing and demonstrating joint longitudinal-survival models
 
 # Load required packages
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(survival)
 
@@ -421,10 +424,10 @@ cat("\nSimple Cancer Data:")
 create_data_summary(simple_cancer_data, "patient_id", "visit_time", "tumor_marker", "survival_time", "progression_status")
 
 # Save datasets
-usethis::use_data(psa_joint_data, overwrite = TRUE)
-usethis::use_data(cd4_joint_data, overwrite = TRUE)
-usethis::use_data(kidney_joint_data, overwrite = TRUE)
-usethis::use_data(cardiac_joint_data, overwrite = TRUE)
-usethis::use_data(simple_cancer_data, overwrite = TRUE)
+use_data_multi_format(psa_joint_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(cd4_joint_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(kidney_joint_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(cardiac_joint_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(simple_cancer_data, overwrite = TRUE, save_csv = TRUE)
 
 cat("\n✅ All joint modeling datasets created and saved!\n")

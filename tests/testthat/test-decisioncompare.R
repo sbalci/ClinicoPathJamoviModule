@@ -36,6 +36,8 @@ basic_args <- list(
 )
 
 test_that("decisioncompare works with basic 2 test comparison", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   result <- do.call(decisioncompare, c(list(data = diagnostic_sample), basic_args))
 
   expect_true(!is.null(result))

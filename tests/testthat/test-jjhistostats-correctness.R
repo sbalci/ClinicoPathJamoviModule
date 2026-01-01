@@ -14,6 +14,8 @@ library(ClinicoPath)
 # ============================================================================
 
 test_that("jjhistostats uses selective NA omission, not global", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create data with NAs in different columns
   data_with_nas <- data.frame(
     biomarker = rnorm(100, mean = 50, sd = 10),

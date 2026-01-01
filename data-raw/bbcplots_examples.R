@@ -1,6 +1,9 @@
 # Example Datasets for BBC-Style Data Visualization
 # This script creates realistic datasets for demonstrating BBC visualization functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(ClinicoPath)
 
 # Set seed for reproducibility
@@ -251,13 +254,13 @@ digital_technology_data <- data.frame(
 )
 
 # Export datasets
-usethis::use_data(economic_indicators_data, overwrite = TRUE)
-usethis::use_data(election_survey_data, overwrite = TRUE)
-usethis::use_data(health_statistics_data, overwrite = TRUE)
-usethis::use_data(sports_performance_data, overwrite = TRUE)
-usethis::use_data(climate_environment_data, overwrite = TRUE)
-usethis::use_data(education_attainment_data, overwrite = TRUE)
-usethis::use_data(digital_technology_data, overwrite = TRUE)
+use_data_multi_format(economic_indicators_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(election_survey_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(health_statistics_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(sports_performance_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(climate_environment_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(education_attainment_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(digital_technology_data, overwrite = TRUE, save_csv = TRUE)
 
 # Generate performance metrics for validation
 cat("📊 BBC Visualization Example Datasets Created Successfully!\n\n")

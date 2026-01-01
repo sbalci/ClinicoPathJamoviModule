@@ -1,6 +1,9 @@
 # Test Script: Replicate Usubutun et al. (2012) Figure 1
 # Verify clustering implementation produces expected analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(pheatmap)
 library(cluster)

@@ -7,6 +7,8 @@ library(ggplot2)
 library(scales)
 
 test_that("Visual plot generation works correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test 1: Basic plot structure
   plot_basic <- nomogrammer(Prevalence = 0.3, Sens = 0.9, Spec = 0.8)

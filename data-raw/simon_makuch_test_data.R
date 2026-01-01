@@ -1,6 +1,9 @@
 # Create Simon-Makuch Test Data
 # This script creates example datasets for testing Simon-Makuch time-dependent survival analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 

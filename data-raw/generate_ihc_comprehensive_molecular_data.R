@@ -9,6 +9,9 @@
 # Educational Focus: Modern pathology practice combining morphology, 
 # immunophenotyping, and molecular characterization
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 library(magrittr)
@@ -326,6 +329,18 @@ ihc_molecular_comprehensive <- tibble(
 
 # Save main comprehensive dataset
 save(ihc_molecular_comprehensive, file = "data/ihc_molecular_comprehensive.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(ihc_molecular_comprehensive, "data/ihc_molecular_comprehensive.omv")
+  message("✓ Created ihc_molecular_comprehensive.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(ihc_molecular_comprehensive, "data/ihc_molecular_comprehensive.omv")
+  message("✓ Created ihc_molecular_comprehensive.omv")
+}
 write.csv(ihc_molecular_comprehensive, "data/ihc_molecular_comprehensive.csv", row.names = FALSE)
 
 # Create focused datasets for specific educational purposes
@@ -339,6 +354,18 @@ biomarker_validation <- ihc_molecular_comprehensive %>%
   filter(Tumor_Type %in% c("Lung_Adenocarcinoma", "Breast_Invasive_Ductal", "Melanoma"))
 
 save(biomarker_validation, file = "data/biomarker_validation_study.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_validation, "data/biomarker_validation_study.omv")
+  message("✓ Created biomarker_validation_study.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_validation, "data/biomarker_validation_study.omv")
+  message("✓ Created biomarker_validation_study.omv")
+}
 write.csv(biomarker_validation, "data/biomarker_validation_study.csv", row.names = FALSE)
 
 # 2. Precision oncology dataset
@@ -351,6 +378,18 @@ precision_oncology <- ihc_molecular_comprehensive %>%
                            "Colorectal_Adenocarcinoma", "Melanoma"))
 
 save(precision_oncology, file = "data/precision_oncology_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(precision_oncology, "data/precision_oncology_data.omv")
+  message("✓ Created precision_oncology_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(precision_oncology, "data/precision_oncology_data.omv")
+  message("✓ Created precision_oncology_data.omv")
+}
 write.csv(precision_oncology, "data/precision_oncology_data.csv", row.names = FALSE)
 
 # 3. Digital pathology validation
@@ -362,6 +401,18 @@ digital_pathology_validation <- ihc_molecular_comprehensive %>%
   filter(!is.na(Ki67_Manual))
 
 save(digital_pathology_validation, file = "data/digital_pathology_validation.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(digital_pathology_validation, "data/digital_pathology_validation.omv")
+  message("✓ Created digital_pathology_validation.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(digital_pathology_validation, "data/digital_pathology_validation.omv")
+  message("✓ Created digital_pathology_validation.omv")
+}
 write.csv(digital_pathology_validation, "data/digital_pathology_validation.csv", row.names = FALSE)
 
 # =============================================================================

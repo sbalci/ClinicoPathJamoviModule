@@ -35,6 +35,9 @@
 #' # Probabilities: prob_success_surgery, prob_success_medical
 #' # Costs: cost_surgery, cost_medical
 #' # Utilities: utility_success, utility_failure
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "basic_decision_data"
 
 #' Markov Model Decision Tree Test Data

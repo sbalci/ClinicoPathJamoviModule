@@ -1,6 +1,9 @@
 # Generate Comprehensive Survival Comparison Test Data
 # This script creates multiple datasets for testing the comparingsurvival function
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -358,13 +361,13 @@ comprehensive_survival_comparison_data <- data.frame(
 # =============================================================================
 
 # Save individual datasets
-usethis::use_data(basic_survival_data, overwrite = TRUE)
-usethis::use_data(multi_group_survival_data, overwrite = TRUE)
-usethis::use_data(biomarker_survival_data, overwrite = TRUE)
-usethis::use_data(high_event_data, overwrite = TRUE)
-usethis::use_data(low_event_data, overwrite = TRUE)
-usethis::use_data(unbalanced_data, overwrite = TRUE)
-usethis::use_data(comprehensive_survival_comparison_data, overwrite = TRUE)
+use_data_multi_format(basic_survival_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(multi_group_survival_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(biomarker_survival_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(high_event_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(low_event_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(unbalanced_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(comprehensive_survival_comparison_data, overwrite = TRUE, save_csv = TRUE)
 
 # =============================================================================
 # Create summary documentation

@@ -44,6 +44,8 @@ tryCatch({
 # =============================================================================
 
 test_that("test data structure is correct", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Test basic dataset structure
   expect_true(is.data.frame(outcomeorganizer_basic))
   expect_true(nrow(outcomeorganizer_basic) > 0)

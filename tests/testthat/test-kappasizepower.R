@@ -126,6 +126,8 @@ test_data <- setup_test_parameters()
 describe("kappasizepower Basic Functionality", {
   
   test_that("kappasizepower calculates sample size for binary outcomes", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("kappaSize")
     

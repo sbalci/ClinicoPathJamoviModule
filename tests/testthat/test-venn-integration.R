@@ -4,6 +4,8 @@
 library(ClinicoPath)
 
 test_that("venn only excludes cases with NAs in SELECTED variables", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
 
     # CRITICAL TEST: Create data with NAs in UNRELATED columns

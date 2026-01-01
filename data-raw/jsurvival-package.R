@@ -18,4 +18,7 @@
 #' @docType package
 #' @aliases jsurvival jsurvival-package
 #' @name jsurvival-package
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "_PACKAGE"

@@ -1,6 +1,9 @@
 # Comprehensive Test Data Generation for Waterfall Function
 # This script generates various test datasets to validate the waterfall function
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 set.seed(42)  # For reproducible results
 

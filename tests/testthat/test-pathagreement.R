@@ -8,6 +8,8 @@ library(ClinicoPath)
 # =============================================================================
 
 test_that("pathagreement works with two raters (Cohen's kappa)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
 
   # Load test data
   data("pathagreement_two_raters", package = "ClinicoPath")

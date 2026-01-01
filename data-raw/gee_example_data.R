@@ -1,6 +1,9 @@
 # Generate example data for GEE analysis demonstration
 # This simulates a pathology study with multiple liver samples per dog
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Number of dogs and samples per dog
@@ -74,7 +77,7 @@ gee_liver_data$fibrosis_score[missing_indices[1:3]] <- NA
 gee_liver_data$cell_count[missing_indices[4:6]] <- NA
 
 # Save the data
-usethis::use_data(gee_liver_data, overwrite = TRUE)
+use_data_multi_format(gee_liver_data, overwrite = TRUE, save_csv = TRUE)
 
 # Create documentation
 #' Example Liver Pathology Data for GEE Analysis

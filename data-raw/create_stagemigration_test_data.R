@@ -1,6 +1,9 @@
 # Create comprehensive test data for stagemigration function
 # This script generates realistic TNM staging datasets for testing the enhanced stagemigration analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(survival)
 library(dplyr)
 library(tibble)
@@ -381,11 +384,83 @@ problematic_data <- create_problematic_data(200)
 
 # Save datasets
 save(lung_cancer_data, file = "data/stagemigration_lung_cancer.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lung_cancer_data, "data/stagemigration_lung_cancer.omv")
+  message("✓ Created stagemigration_lung_cancer.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lung_cancer_data, "data/stagemigration_lung_cancer.omv")
+  message("✓ Created stagemigration_lung_cancer.omv")
+}
 save(breast_cancer_data, file = "data/stagemigration_breast_cancer.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(breast_cancer_data, "data/stagemigration_breast_cancer.omv")
+  message("✓ Created stagemigration_breast_cancer.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(breast_cancer_data, "data/stagemigration_breast_cancer.omv")
+  message("✓ Created stagemigration_breast_cancer.omv")
+}
 save(colorectal_cancer_data, file = "data/stagemigration_colorectal_cancer.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(colorectal_cancer_data, "data/stagemigration_colorectal_cancer.omv")
+  message("✓ Created stagemigration_colorectal_cancer.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(colorectal_cancer_data, "data/stagemigration_colorectal_cancer.omv")
+  message("✓ Created stagemigration_colorectal_cancer.omv")
+}
 save(small_sample_data, file = "data/stagemigration_small_sample.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(small_sample_data, "data/stagemigration_small_sample.omv")
+  message("✓ Created stagemigration_small_sample.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(small_sample_data, "data/stagemigration_small_sample.omv")
+  message("✓ Created stagemigration_small_sample.omv")
+}
 save(large_performance_data, file = "data/stagemigration_large_performance.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(large_performance_data, "data/stagemigration_large_performance.omv")
+  message("✓ Created stagemigration_large_performance.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(large_performance_data, "data/stagemigration_large_performance.omv")
+  message("✓ Created stagemigration_large_performance.omv")
+}
 save(problematic_data, file = "data/stagemigration_problematic.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(problematic_data, "data/stagemigration_problematic.omv")
+  message("✓ Created stagemigration_problematic.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(problematic_data, "data/stagemigration_problematic.omv")
+  message("✓ Created stagemigration_problematic.omv")
+}
 
 # Create a comprehensive combined dataset
 combined_data <- bind_rows(
@@ -396,6 +471,18 @@ combined_data <- bind_rows(
   mutate(patient_id = row_number())
 
 save(combined_data, file = "data/stagemigration_combined.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(combined_data, "data/stagemigration_combined.omv")
+  message("✓ Created stagemigration_combined.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(combined_data, "data/stagemigration_combined.omv")
+  message("✓ Created stagemigration_combined.omv")
+}
 
 # Create summary statistics
 summary_stats <- list(
@@ -438,6 +525,18 @@ summary_stats <- list(
 )
 
 save(summary_stats, file = "data/stagemigration_summary_stats.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/stagemigration_summary_stats.omv")
+  message("✓ Created stagemigration_summary_stats.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(summary_stats, "data/stagemigration_summary_stats.omv")
+  message("✓ Created stagemigration_summary_stats.omv")
+}
 
 # Print summary
 cat("\n=== DATASET SUMMARY ===\n")

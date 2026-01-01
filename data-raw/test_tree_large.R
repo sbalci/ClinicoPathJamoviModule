@@ -1,6 +1,9 @@
 #!/usr/bin/env Rscript
 
 # Test tree function with larger dataset
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 source('R/tree.h.R')
 source('R/tree.b.R')
 library(jmvcore)

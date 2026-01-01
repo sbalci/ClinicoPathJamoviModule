@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for jforester function
 # This script generates realistic meta-analysis data for forest plot visualization
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility

@@ -1,6 +1,9 @@
 # Create comprehensive test data for jjarcdiagram function
 # This script generates various network datasets to test all features
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducible data
@@ -127,14 +130,122 @@ simple_weighted_network <- data.frame(
 
 # Save all datasets as .rda files
 save(social_network_data, file = "../data/jjarcdiagram_social_network.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(social_network_data, "../data/jjarcdiagram_social_network.omv")
+  message("✓ Created jjarcdiagram_social_network.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(social_network_data, "../data/jjarcdiagram_social_network.omv")
+  message("✓ Created jjarcdiagram_social_network.omv")
+}
 save(academic_network_data, file = "../data/jjarcdiagram_academic_network.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(academic_network_data, "../data/jjarcdiagram_academic_network.omv")
+  message("✓ Created jjarcdiagram_academic_network.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(academic_network_data, "../data/jjarcdiagram_academic_network.omv")
+  message("✓ Created jjarcdiagram_academic_network.omv")
+}
 save(org_hierarchy_data, file = "../data/jjarcdiagram_org_hierarchy.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(org_hierarchy_data, "../data/jjarcdiagram_org_hierarchy.omv")
+  message("✓ Created jjarcdiagram_org_hierarchy.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(org_hierarchy_data, "../data/jjarcdiagram_org_hierarchy.omv")
+  message("✓ Created jjarcdiagram_org_hierarchy.omv")
+}
 save(gene_network_data, file = "../data/jjarcdiagram_gene_network.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gene_network_data, "../data/jjarcdiagram_gene_network.omv")
+  message("✓ Created jjarcdiagram_gene_network.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(gene_network_data, "../data/jjarcdiagram_gene_network.omv")
+  message("✓ Created jjarcdiagram_gene_network.omv")
+}
 save(supply_chain_data, file = "../data/jjarcdiagram_supply_chain.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(supply_chain_data, "../data/jjarcdiagram_supply_chain.omv")
+  message("✓ Created jjarcdiagram_supply_chain.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(supply_chain_data, "../data/jjarcdiagram_supply_chain.omv")
+  message("✓ Created jjarcdiagram_supply_chain.omv")
+}
 save(minimal_network_data, file = "../data/jjarcdiagram_minimal_network.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(minimal_network_data, "../data/jjarcdiagram_minimal_network.omv")
+  message("✓ Created jjarcdiagram_minimal_network.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(minimal_network_data, "../data/jjarcdiagram_minimal_network.omv")
+  message("✓ Created jjarcdiagram_minimal_network.omv")
+}
 save(selfloop_network_data, file = "../data/jjarcdiagram_selfloop_network.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(selfloop_network_data, "../data/jjarcdiagram_selfloop_network.omv")
+  message("✓ Created jjarcdiagram_selfloop_network.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(selfloop_network_data, "../data/jjarcdiagram_selfloop_network.omv")
+  message("✓ Created jjarcdiagram_selfloop_network.omv")
+}
 save(large_network_data, file = "../data/jjarcdiagram_large_network.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(large_network_data, "../data/jjarcdiagram_large_network.omv")
+  message("✓ Created jjarcdiagram_large_network.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(large_network_data, "../data/jjarcdiagram_large_network.omv")
+  message("✓ Created jjarcdiagram_large_network.omv")
+}
 save(simple_weighted_network, file = "../data/jjarcdiagram_simple_weighted.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(simple_weighted_network, "../data/jjarcdiagram_simple_weighted.omv")
+  message("✓ Created jjarcdiagram_simple_weighted.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(simple_weighted_network, "../data/jjarcdiagram_simple_weighted.omv")
+  message("✓ Created jjarcdiagram_simple_weighted.omv")
+}
 
 # Export all datasets as CSV files
 write.csv(social_network_data, file = "../data/jjarcdiagram_social_network.csv", row.names = FALSE)

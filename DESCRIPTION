@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.32.63
-Date: 2025-12-29
+Version: 0.0.32.65
+Date: 2026-01-01
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -312,5 +312,6 @@ Suggests:
     concaveman,
     VGAM,
     effsize,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    jmvReadWrite
 Config/testthat/edition: 3

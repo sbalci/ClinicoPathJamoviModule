@@ -1,4 +1,7 @@
 # Test script for pairwise comparisons in crosstable
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(ClinicoPath)
 
 # Create test data with 3 groups

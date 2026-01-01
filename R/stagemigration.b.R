@@ -345,9 +345,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             # Advisory note: presets currently provide guidance; verify outputs align with your intent
-            try(jmvcore::note(self$results$migrationOverview,
-                              glue::glue("Clinical preset '{preset}' selected. Presets are advisory; please confirm displayed tables/plots and advanced options match your scenario.")),
-                silent = TRUE)
+            self$results$migrationOverview$setNote("clinicalPreset",
+                              glue::glue("Clinical preset '{preset}' selected. Presets are advisory; please confirm displayed tables/plots and advanced options match your scenario."))
             
             # Define preset configurations
             preset_configs <- list(
@@ -2938,9 +2937,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 is.null(self$options$event) || self$options$event == "") {
 
                 # Display ERROR notice for missing required variables
-                jmvcore::note(self$results$migrationOverview,
-                              note = "ERROR: Please select all required variables - Old Stage, New Stage, Survival Time, and Event variable.",
-                              type = "ERROR")
+                self$results$migrationOverview$setNote("missingVars", 
+                                                       "ERROR: Please select all required variables - Old Stage, New Stage, Survival Time, and Event variable.")
 
                 # Show welcome message and exit
                 welcome_html <- private$.generateWelcomeMessage()
@@ -2984,7 +2982,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             data <- private$.validateData()
 
             if (isTRUE(self$options$performCompetingRisks)) {
-                jmvcore::note(self$results$migrationOverview,
+                self$results$migrationOverview$setNote("competingRisks",
                               "Competing risks option is currently not supported in stage migration workflow; proceeding with standard survival analysis.")
             }
 
@@ -2993,17 +2991,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             total_n <- nrow(data)
 
             if (total_events < 10) {
-                jmvcore::note(self$results$migrationOverview,
-                              note = paste0("CRITICAL: Only ", total_events, " events in ", total_n, " patients. Minimum 10 events required for reliable survival analysis. Results are NOT clinically valid."),
-                              type = "ERROR")
+                self$results$migrationOverview$setNote("eventsCritical",
+                              paste0("CRITICAL: Only ", total_events, " events in ", total_n, " patients. Minimum 10 events required for reliable survival analysis. Results are NOT clinically valid."))
             } else if (total_events < 20) {
-                jmvcore::note(self$results$migrationOverview,
-                              note = paste0("WARNING: Only ", total_events, " events detected. Results may have limited statistical power and wide confidence intervals. Consider larger cohort (recommended: 20+ events per stage)."),
-                              type = "STRONG_WARNING")
+                self$results$migrationOverview$setNote("eventsWarning",
+                              paste0("WARNING: Only ", total_events, " events detected. Results may have limited statistical power and wide confidence intervals. Consider larger cohort (recommended: 20+ events per stage)."))
             } else if (total_events < 50) {
-                jmvcore::note(self$results$migrationOverview,
-                              note = paste0("NOTICE: ", total_events, " events detected. Adequate for basic analysis but bootstrap validation may be unstable. For robust staging validation, 50+ events recommended."),
-                              type = "WARNING")
+                self$results$migrationOverview$setNote("eventsNotice",
+                              paste0("NOTICE: ", total_events, " events detected. Adequate for basic analysis but bootstrap validation may be unstable. For robust staging validation, 50+ events recommended."))
             }
 
             # Apply memory optimization for large datasets
@@ -3247,9 +3242,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             # Success summary notice
-            jmvcore::note(self$results$migrationOverview,
-                          note = paste0("Stage migration analysis completed successfully for ", total_n, " patients with ", total_events, " events. Review statistical comparisons and clinical interpretation below."),
-                          type = "INFO")
+            self$results$migrationOverview$setNote("completion",
+                          paste0("Stage migration analysis completed successfully for ", total_n, " patients with ", total_events, " events. Review statistical comparisons and clinical interpretation below."))
 
         },
 

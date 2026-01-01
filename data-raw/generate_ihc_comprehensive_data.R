@@ -5,6 +5,9 @@
 # 3. Olsen 2006 - Differential diagnosis clustering for sarcomas
 # 4. Sterlacci 2019 - TIL signature analysis for NSCLC
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 library(magrittr)
@@ -303,6 +306,18 @@ ihc_comprehensive_data$Immune_Signature <- as.factor(ihc_comprehensive_data$Immu
 # Save as R data file
 save(ihc_comprehensive_data, file = "data/ihc_comprehensive_data.rda")
 
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(ihc_comprehensive_data, "data/ihc_comprehensive_data.omv")
+  message("✓ Created ihc_comprehensive_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(ihc_comprehensive_data, "data/ihc_comprehensive_data.omv")
+  message("✓ Created ihc_comprehensive_data.omv")
+}
+
 # Save as CSV for jamovi
 write.csv(ihc_comprehensive_data, "data/ihc_comprehensive_data.csv", row.names = FALSE)
 
@@ -316,6 +331,18 @@ sarcoma_data <- ihc_comprehensive_data %>%
   filter(Tumor_Type %in% tumor_types)
 
 save(sarcoma_data, file = "data/sarcoma_ihc_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(sarcoma_data, "data/sarcoma_ihc_data.omv")
+  message("✓ Created sarcoma_ihc_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(sarcoma_data, "data/sarcoma_ihc_data.omv")
+  message("✓ Created sarcoma_ihc_data.omv")
+}
 write.csv(sarcoma_data, "data/sarcoma_ihc_data.csv", row.names = FALSE)
 
 # 2. NSCLC TIL analysis dataset (Sterlacci approach)
@@ -327,6 +354,18 @@ nsclc_til_data <- ihc_comprehensive_data %>%
   filter(Histotype %in% nsclc_histotypes)
 
 save(nsclc_til_data, file = "data/nsclc_til_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(nsclc_til_data, "data/nsclc_til_data.omv")
+  message("✓ Created nsclc_til_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(nsclc_til_data, "data/nsclc_til_data.omv")
+  message("✓ Created nsclc_til_data.omv")
+}
 write.csv(nsclc_til_data, "data/nsclc_til_data.csv", row.names = FALSE)
 
 # 3. Colorectal prognostic dataset (Matsuoka approach)
@@ -339,6 +378,18 @@ colorectal_data <- ihc_comprehensive_data %>%
   slice_head(n = 150)  # Smaller focused dataset
 
 save(colorectal_data, file = "data/colorectal_ihc_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(colorectal_data, "data/colorectal_ihc_data.omv")
+  message("✓ Created colorectal_ihc_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(colorectal_data, "data/colorectal_ihc_data.omv")
+  message("✓ Created colorectal_ihc_data.omv")
+}
 write.csv(colorectal_data, "data/colorectal_ihc_data.csv", row.names = FALSE)
 
 # 4. Renal oncocytoma dataset (Carvalho approach)
@@ -349,6 +400,18 @@ renal_data <- ihc_comprehensive_data %>%
   slice_head(n = 100)  # Smaller focused dataset for iterative selection
 
 save(renal_data, file = "data/renal_ihc_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(renal_data, "data/renal_ihc_data.omv")
+  message("✓ Created renal_ihc_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(renal_data, "data/renal_ihc_data.omv")
+  message("✓ Created renal_ihc_data.omv")
+}
 write.csv(renal_data, "data/renal_ihc_data.csv", row.names = FALSE)
 
 # =============================================================================

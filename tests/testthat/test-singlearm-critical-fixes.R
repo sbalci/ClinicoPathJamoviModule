@@ -17,6 +17,8 @@ create_test_data <- function(n = 100) {
 }
 
 test_that("Event counting is consistent with binary events", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create test dataset
   test_data <- create_test_data(100)
 

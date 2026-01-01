@@ -1,4 +1,6 @@
 test_that("jjwithinstats handles presets, N reporting, and ggpubr correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     
     # Create test data
     set.seed(123)

@@ -2,6 +2,9 @@
 # Creates realistic datasets for comprehensive testing of kappa fixed-n power analysis
 # Each dataset represents different research scenarios requiring power analysis for available sample sizes
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -564,8 +567,44 @@ kappa_fixedn_power_cases <- create_power_analysis_cases()
 # Save datasets to package data directory (if it exists)
 if (dir.exists("data")) {
   save(kappa_fixedn_scenarios_comprehensive, file = "data/kappasizefixedn_scenarios_comprehensive.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_fixedn_scenarios_comprehensive, "data/kappasizefixedn_scenarios_comprehensive.omv")
+  message("✓ Created kappasizefixedn_scenarios_comprehensive.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_fixedn_scenarios_comprehensive, "data/kappasizefixedn_scenarios_comprehensive.omv")
+  message("✓ Created kappasizefixedn_scenarios_comprehensive.omv")
+}
   save(kappa_fixedn_validation_cases, file = "data/kappasizefixedn_validation_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_fixedn_validation_cases, "data/kappasizefixedn_validation_cases.omv")
+  message("✓ Created kappasizefixedn_validation_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_fixedn_validation_cases, "data/kappasizefixedn_validation_cases.omv")
+  message("✓ Created kappasizefixedn_validation_cases.omv")
+}
   save(kappa_fixedn_power_cases, file = "data/kappasizefixedn_power_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_fixedn_power_cases, "data/kappasizefixedn_power_cases.omv")
+  message("✓ Created kappasizefixedn_power_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_fixedn_power_cases, "data/kappasizefixedn_power_cases.omv")
+  message("✓ Created kappasizefixedn_power_cases.omv")
+}
   
   message("✓ All kappa fixed-n test datasets saved to data/ directory")
 } else {

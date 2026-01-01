@@ -19,6 +19,9 @@
 #'
 #' # Generate data with staggered entry times
 #' test_data_staggered <- generate_swimmerplot_data(n_patients = 25, staggered_entry = TRUE)
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 generate_swimmerplot_data <- function(
     n_patients = 30,
     seed = 123,

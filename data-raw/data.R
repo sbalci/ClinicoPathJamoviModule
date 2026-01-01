@@ -48,6 +48,9 @@
 #' @examples
 #' data(histopathology)
 #' str(histopathology)
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "histopathology"
 
 #' @title No Gold Standard Test Data

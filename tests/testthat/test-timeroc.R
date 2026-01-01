@@ -23,6 +23,8 @@ source("../../R/timeroc.h.R")
 # =============================================================================
 
 test_that("timeroc basic functionality works with cancer biomarker data", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test basic analysis
   result <- timeroc(

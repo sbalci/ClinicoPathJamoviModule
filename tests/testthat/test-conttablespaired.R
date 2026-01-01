@@ -4,6 +4,8 @@ data(histopathology, package = "ClinicoPath")
 data(prostate_agreement_data, package = "ClinicoPath")
 
 test_that("contTablesPaired module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("contTablesPairedClass"))
   expect_true(is.function(contTablesPaired))
 })

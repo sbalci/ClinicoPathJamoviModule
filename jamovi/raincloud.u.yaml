@@ -119,6 +119,7 @@ children:
             name: plot_title
             format: string
             label: "Plot Title"
+            width: largest
       - type: LayoutBox
         margin: large
         children:
@@ -126,10 +127,12 @@ children:
             name: x_label
             format: string
             label: "X-Axis Label"
+            width: largest
           - type: TextBox
             name: y_label
             format: string
             label: "Y-Axis Label"
+            width: largest
 
   - type: CollapseBox
     label: Statistical Analysis
@@ -139,15 +142,16 @@ children:
         margin: large
         children:
           - type: Label
-            label: "Summary Statistics"
-            children:
-              - type: CheckBox
-                name: show_statistics
+            label: Summary Statistics
+            style: list-inline
+          - type: CheckBox
+            name: show_statistics
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: "Outlier Detection"
+            label: Outlier Detection
+            style: list-inline
           - type: CheckBox
             name: show_outliers
           - type: ComboBox
@@ -157,14 +161,16 @@ children:
         margin: large
         children:
           - type: Label
-            label: "Normality Assessment"
+            label: Normality Assessment
+            style: list-inline
           - type: CheckBox
             name: normality_test
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: "Group Comparisons"
+            label: Group Comparisons
+            style: list-inline
           - type: CheckBox
             name: comparison_test
           - type: ComboBox

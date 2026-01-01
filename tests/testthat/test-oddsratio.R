@@ -65,6 +65,8 @@ if (file.exists("data/oddsratio_test_data.rda")) {
 }
 
 test_that("Basic functionality tests", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test 1: Function executes without error on basic data
   basic_data <- oddsratio_test_data$basic_clinical

@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for coefplot function
 # This script generates realistic datasets for testing coefficient plots
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 set.seed(123)
@@ -176,10 +179,10 @@ coefplot_advanced_data <- coefplot_test_data %>%
   )
 
 # Save all datasets
-usethis::use_data(coefplot_test_data, overwrite = TRUE)
-usethis::use_data(coefplot_simple_data, overwrite = TRUE)
-usethis::use_data(coefplot_edge_cases, overwrite = TRUE)
-usethis::use_data(coefplot_advanced_data, overwrite = TRUE)
+use_data_multi_format(coefplot_test_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(coefplot_simple_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(coefplot_edge_cases, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(coefplot_advanced_data, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary information
 cat("✅ Created coefficient plot test datasets:\n\n")

@@ -1,4 +1,7 @@
 # Test swimmerplot with sample data
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(ClinicoPathDescriptives)
 
 # Read sample data

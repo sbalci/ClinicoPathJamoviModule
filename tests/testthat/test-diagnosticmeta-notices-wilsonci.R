@@ -8,6 +8,8 @@ library(testthat)
 # ==============================================================================
 
 test_that("Wilson score CI matches known textbook values", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed("ClinicoPath")
 
   # Known test case from Agresti & Coull (1998)

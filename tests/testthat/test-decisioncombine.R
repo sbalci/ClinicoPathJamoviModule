@@ -29,6 +29,8 @@ known_data_3_tests <- data.frame(
 
 
 test_that("decisioncombine reports expected metrics for a two-test pattern", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_on_cran()
 
   result <- decisioncombine(

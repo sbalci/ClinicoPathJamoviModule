@@ -1,4 +1,6 @@
 test_that("classification produces valid outputs with decision tree", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # Load test data
     data("BreastCancer", package = "ClinicoPath")
 

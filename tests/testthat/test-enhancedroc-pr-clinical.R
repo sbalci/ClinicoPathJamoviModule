@@ -1,6 +1,8 @@
 library(testthat)
 
 test_that("enhancedROC precision-recall and clinical metrics honor prevalence and impact options", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     library(R6)
     library(pROC)
     library(caret)

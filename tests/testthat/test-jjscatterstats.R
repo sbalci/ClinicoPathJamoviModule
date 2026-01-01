@@ -1,4 +1,6 @@
 test_that("jjscatterstats works with basic scatter plot", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test data
   data(iris)
   

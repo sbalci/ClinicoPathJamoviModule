@@ -2,6 +2,9 @@
 # Creates realistic datasets for comprehensive testing of kappa power analysis for sample size determination
 # Each dataset represents different research scenarios requiring sample size calculations based on power analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -573,8 +576,44 @@ kappa_power_relationship_cases <- create_power_relationship_cases()
 # Save datasets to package data directory (if it exists)
 if (dir.exists("data")) {
   save(kappa_power_scenarios_comprehensive, file = "data/kappasizepower_scenarios_comprehensive.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_power_scenarios_comprehensive, "data/kappasizepower_scenarios_comprehensive.omv")
+  message("✓ Created kappasizepower_scenarios_comprehensive.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_power_scenarios_comprehensive, "data/kappasizepower_scenarios_comprehensive.omv")
+  message("✓ Created kappasizepower_scenarios_comprehensive.omv")
+}
   save(kappa_power_validation_cases, file = "data/kappasizepower_validation_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_power_validation_cases, "data/kappasizepower_validation_cases.omv")
+  message("✓ Created kappasizepower_validation_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_power_validation_cases, "data/kappasizepower_validation_cases.omv")
+  message("✓ Created kappasizepower_validation_cases.omv")
+}
   save(kappa_power_relationship_cases, file = "data/kappasizepower_relationship_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_power_relationship_cases, "data/kappasizepower_relationship_cases.omv")
+  message("✓ Created kappasizepower_relationship_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(kappa_power_relationship_cases, "data/kappasizepower_relationship_cases.omv")
+  message("✓ Created kappasizepower_relationship_cases.omv")
+}
   
   message("✓ All kappa power analysis test datasets saved to data/ directory")
 } else {

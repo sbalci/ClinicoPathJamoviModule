@@ -1,6 +1,9 @@
 # Create comprehensive test data for outcomeorganizer function
 # This script generates datasets covering all analysis types and edge cases
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(lubridate)
 
@@ -264,14 +267,122 @@ outcomeorganizer_problematic <- data.frame(
 
 # Save individual datasets
 save(outcomeorganizer_basic, file = "data/outcomeorganizer_basic.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_basic, "data/outcomeorganizer_basic.omv")
+  message("✓ Created outcomeorganizer_basic.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_basic, "data/outcomeorganizer_basic.omv")
+  message("✓ Created outcomeorganizer_basic.omv")
+}
 save(outcomeorganizer_multievent, file = "data/outcomeorganizer_multievent.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_multievent, "data/outcomeorganizer_multievent.omv")
+  message("✓ Created outcomeorganizer_multievent.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_multievent, "data/outcomeorganizer_multievent.omv")
+  message("✓ Created outcomeorganizer_multievent.omv")
+}
 save(outcomeorganizer_recurrence, file = "data/outcomeorganizer_recurrence.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_recurrence, "data/outcomeorganizer_recurrence.omv")
+  message("✓ Created outcomeorganizer_recurrence.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_recurrence, "data/outcomeorganizer_recurrence.omv")
+  message("✓ Created outcomeorganizer_recurrence.omv")
+}
 save(outcomeorganizer_edge_cases, file = "data/outcomeorganizer_edge_cases.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_edge_cases, "data/outcomeorganizer_edge_cases.omv")
+  message("✓ Created outcomeorganizer_edge_cases.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_edge_cases, "data/outcomeorganizer_edge_cases.omv")
+  message("✓ Created outcomeorganizer_edge_cases.omv")
+}
 save(outcomeorganizer_international, file = "data/outcomeorganizer_international.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_international, "data/outcomeorganizer_international.omv")
+  message("✓ Created outcomeorganizer_international.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_international, "data/outcomeorganizer_international.omv")
+  message("✓ Created outcomeorganizer_international.omv")
+}
 save(outcomeorganizer_complex, file = "data/outcomeorganizer_complex.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_complex, "data/outcomeorganizer_complex.omv")
+  message("✓ Created outcomeorganizer_complex.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_complex, "data/outcomeorganizer_complex.omv")
+  message("✓ Created outcomeorganizer_complex.omv")
+}
 save(outcomeorganizer_large, file = "data/outcomeorganizer_large.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_large, "data/outcomeorganizer_large.omv")
+  message("✓ Created outcomeorganizer_large.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_large, "data/outcomeorganizer_large.omv")
+  message("✓ Created outcomeorganizer_large.omv")
+}
 save(outcomeorganizer_admin_censor, file = "data/outcomeorganizer_admin_censor.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_admin_censor, "data/outcomeorganizer_admin_censor.omv")
+  message("✓ Created outcomeorganizer_admin_censor.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_admin_censor, "data/outcomeorganizer_admin_censor.omv")
+  message("✓ Created outcomeorganizer_admin_censor.omv")
+}
 save(outcomeorganizer_problematic, file = "data/outcomeorganizer_problematic.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_problematic, "data/outcomeorganizer_problematic.omv")
+  message("✓ Created outcomeorganizer_problematic.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(outcomeorganizer_problematic, "data/outcomeorganizer_problematic.omv")
+  message("✓ Created outcomeorganizer_problematic.omv")
+}
 
 # Save combined dataset
 save(outcomeorganizer_basic, outcomeorganizer_multievent, outcomeorganizer_recurrence,

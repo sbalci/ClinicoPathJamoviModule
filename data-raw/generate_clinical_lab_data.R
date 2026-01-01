@@ -1,6 +1,9 @@
 # Clinical Lab Data Generator for Lollipop Chart Testing
 # Generates realistic clinical laboratory values for testing lollipop charts
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 n_patients <- 60
@@ -49,12 +52,24 @@ clinical_lab_data$white_blood_cells <- pmax(2, pmin(20, clinical_lab_data$white_
 
 # Save to data/ as RDA (for package use)
 if (requireNamespace("usethis", quietly = TRUE)) {
-  usethis::use_data(clinical_lab_data, overwrite = TRUE)
+  use_data_multi_format(clinical_lab_data, overwrite = TRUE, save_csv = TRUE)
   cat("✓ Generated clinical_lab_data with", nrow(clinical_lab_data), "rows\n")
   cat("✓ Saved to data/clinical_lab_data.rda\n")
 } else {
   # Fallback if usethis not available
   save(clinical_lab_data, file = "data/clinical_lab_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_lab_data, "data/clinical_lab_data.omv")
+  message("✓ Created clinical_lab_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_lab_data, "data/clinical_lab_data.omv")
+  message("✓ Created clinical_lab_data.omv")
+}
   cat("✓ Generated clinical_lab_data with", nrow(clinical_lab_data), "rows\n")
   cat("✓ Saved to data/clinical_lab_data.rda (usethis not available)\n")
 }

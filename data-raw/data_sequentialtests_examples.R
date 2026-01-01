@@ -127,6 +127,9 @@
 #' }
 #'
 #' @keywords datasets sequential-testing clinical-scenarios diagnostic
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 "sequential_testing_examples"
 
 

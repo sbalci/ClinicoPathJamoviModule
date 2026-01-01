@@ -1,4 +1,6 @@
 test_that("jpps works with single predictor analysis", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create test data with known relationship
   test_data <- data.frame(
     target = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),

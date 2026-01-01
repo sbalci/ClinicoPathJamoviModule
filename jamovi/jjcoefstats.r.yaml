@@ -86,6 +86,39 @@ items:
             title: 'Value'
             type: text
 
+    # Notice outputs converted to HTML to avoid serialization errors
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+          - inputMode
+          - term
+          - estimate
+          - stdError
+          - confLow
+          - confHigh
+          - pValue
+          - degreesOfFreedom
+          - outcome
+          - predictors
+          - modelType
+          - survivalTime
+          - eventStatus
+          - randomEffects
+          - sortCoefs
+          - excludeIntercept
+          - showPValues
+          - pValueDisplay
+          - ciLevel
+          - exponentiate
+          - expScaleLabel
+          - referenceValue
+          - colorScheme
+          - plotTheme
+          - plotWidth
+          - plotHeight
+          - showexplanations
+
 
 refs:
     - ClinicoPathJamoviModule

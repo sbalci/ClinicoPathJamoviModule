@@ -27,6 +27,8 @@ large_data <- data.frame(
 
 # Test basic functionality
 test_that("jscattermore basic functionality works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     # Test basic scatter plot
     result <- jscattermore(
         data = test_data,

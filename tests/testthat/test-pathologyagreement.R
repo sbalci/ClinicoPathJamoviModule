@@ -1,5 +1,7 @@
 
 test_that("pathologyagreement works for basic agreement", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("psych")
     skip_if_not_installed("epiR")
     

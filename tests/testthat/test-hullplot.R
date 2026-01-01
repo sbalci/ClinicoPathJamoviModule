@@ -2,6 +2,8 @@
 ## Testing comprehensive hull plot visualization functionality
 
 test_that("hullplot loads test data correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test datasets
   data(hullplot_customer_data, package = "ClinicoPath")
   data(hullplot_clinical_data, package = "ClinicoPath")

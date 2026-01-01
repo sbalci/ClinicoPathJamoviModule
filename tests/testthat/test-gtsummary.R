@@ -2,6 +2,8 @@
 ## Testing comprehensive publication-ready table generation
 
 test_that("gtsummary loads test data correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test datasets
   data(gtsummary_clinical_trial, package = "ClinicoPath")
   data(gtsummary_survey_data, package = "ClinicoPath")

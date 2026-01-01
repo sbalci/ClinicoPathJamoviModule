@@ -50,6 +50,8 @@ create_jjbetweenstats_analysis <- function(data, dep, group, grvar = NULL, ...) 
 
 # Test 1: Basic functionality with single dependent variable
 test_that("jjbetweenstats works with single continuous dependent variable", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test with clinical lab data
   expect_no_error({

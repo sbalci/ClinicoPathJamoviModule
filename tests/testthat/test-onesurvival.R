@@ -51,6 +51,8 @@ tryCatch({
 
 # Test 1: Basic Functionality
 test_that("onesurvival basic functionality works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test with standard survival data
   test_data <- onesurvival_basic

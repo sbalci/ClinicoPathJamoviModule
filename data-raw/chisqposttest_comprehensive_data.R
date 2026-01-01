@@ -3,6 +3,9 @@
 # Author: Auto-generated for comprehensive testing
 # Date: 2025-12-23
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 set.seed(123)  # For reproducibility

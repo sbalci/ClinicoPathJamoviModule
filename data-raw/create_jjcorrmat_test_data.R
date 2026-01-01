@@ -1,4 +1,7 @@
 # Create test data for jjcorrmat function
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(MASS)
 
 set.seed(42)
@@ -52,7 +55,7 @@ jjcorrmat_test_data$treatment_response <- as.factor(jjcorrmat_test_data$treatmen
 jjcorrmat_test_data$study_center <- as.factor(jjcorrmat_test_data$study_center)
 
 # Save the dataset
-usethis::use_data(jjcorrmat_test_data, overwrite = TRUE)
+use_data_multi_format(jjcorrmat_test_data, overwrite = TRUE, save_csv = TRUE)
 
 # Preview the data
 print("jjcorrmat_test_data structure:")

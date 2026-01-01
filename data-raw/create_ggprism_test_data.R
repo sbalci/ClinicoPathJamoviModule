@@ -2,6 +2,9 @@
 # This script generates various datasets for testing the ggprism function
 # ggprism creates GraphPad Prism style plots with various plot types and features
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -180,16 +183,148 @@ comprehensive_prism_data <- rbind(
 
 # Save all datasets
 save(clinical_prism_data, file = "data/clinical_prism_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_prism_data, "data/clinical_prism_data.omv")
+  message("✓ Created clinical_prism_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_prism_data, "data/clinical_prism_data.omv")
+  message("✓ Created clinical_prism_data.omv")
+}
 save(dose_response_prism_data, file = "data/dose_response_prism_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(dose_response_prism_data, "data/dose_response_prism_data.omv")
+  message("✓ Created dose_response_prism_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(dose_response_prism_data, "data/dose_response_prism_data.omv")
+  message("✓ Created dose_response_prism_data.omv")
+}
 save(time_course_prism_data, file = "data/time_course_prism_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(time_course_prism_data, "data/time_course_prism_data.omv")
+  message("✓ Created time_course_prism_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(time_course_prism_data, "data/time_course_prism_data.omv")
+  message("✓ Created time_course_prism_data.omv")
+}
 save(statistical_comparison_data, file = "data/statistical_comparison_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(statistical_comparison_data, "data/statistical_comparison_data.omv")
+  message("✓ Created statistical_comparison_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(statistical_comparison_data, "data/statistical_comparison_data.omv")
+  message("✓ Created statistical_comparison_data.omv")
+}
 save(biomarker_expression_data, file = "data/biomarker_expression_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_expression_data, "data/biomarker_expression_data.omv")
+  message("✓ Created biomarker_expression_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_expression_data, "data/biomarker_expression_data.omv")
+  message("✓ Created biomarker_expression_data.omv")
+}
 save(pharmacokinetics_data, file = "data/pharmacokinetics_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(pharmacokinetics_data, "data/pharmacokinetics_data.omv")
+  message("✓ Created pharmacokinetics_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(pharmacokinetics_data, "data/pharmacokinetics_data.omv")
+  message("✓ Created pharmacokinetics_data.omv")
+}
 save(colorblind_safe_data, file = "data/colorblind_safe_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(colorblind_safe_data, "data/colorblind_safe_data.omv")
+  message("✓ Created colorblind_safe_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(colorblind_safe_data, "data/colorblind_safe_data.omv")
+  message("✓ Created colorblind_safe_data.omv")
+}
 save(minimal_prism_data, file = "data/minimal_prism_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(minimal_prism_data, "data/minimal_prism_data.omv")
+  message("✓ Created minimal_prism_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(minimal_prism_data, "data/minimal_prism_data.omv")
+  message("✓ Created minimal_prism_data.omv")
+}
 save(large_prism_dataset, file = "data/large_prism_dataset.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(large_prism_dataset, "data/large_prism_dataset.omv")
+  message("✓ Created large_prism_dataset.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(large_prism_dataset, "data/large_prism_dataset.omv")
+  message("✓ Created large_prism_dataset.omv")
+}
 save(publication_prism_data, file = "data/publication_prism_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(publication_prism_data, "data/publication_prism_data.omv")
+  message("✓ Created publication_prism_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(publication_prism_data, "data/publication_prism_data.omv")
+  message("✓ Created publication_prism_data.omv")
+}
 save(comprehensive_prism_data, file = "data/comprehensive_prism_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(comprehensive_prism_data, "data/comprehensive_prism_data.omv")
+  message("✓ Created comprehensive_prism_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(comprehensive_prism_data, "data/comprehensive_prism_data.omv")
+  message("✓ Created comprehensive_prism_data.omv")
+}
 
 # Display summary
 cat("=== GGPRISM TEST DATA CREATED ===\n\n")

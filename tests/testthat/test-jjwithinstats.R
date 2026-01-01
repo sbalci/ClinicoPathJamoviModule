@@ -1,4 +1,6 @@
 test_that("jjwithinstats works with basic two measurements", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create repeated measures test data
   test_data <- data.frame(
     pre_treatment = c(85, 92, 78, 88, 94, 82, 90, 76, 89, 93),

@@ -4,6 +4,8 @@ context("test-jjarcdiagram")
 library(ClinicoPath)
 
 test_that("jjarcdiagram works with basic network data", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Load test data
   data("arcDiagram", package = "ClinicoPath")

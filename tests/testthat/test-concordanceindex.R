@@ -1,6 +1,8 @@
 # Tests for concordanceindex function
 
 test_that("concordanceindex works with basic inputs", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_on_cran()
 
     # Create test data

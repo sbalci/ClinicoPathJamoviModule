@@ -21,6 +21,8 @@ calculate_expected_lrn <- function(sens, spec) {
 }
 
 test_that("Single test calculations are mathematically correct", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Test case 1: Standard values
   sens <- 0.90
   spec <- 0.80

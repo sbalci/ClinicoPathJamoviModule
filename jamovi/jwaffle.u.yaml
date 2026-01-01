@@ -77,12 +77,12 @@ children:
                 name: mytitle
                 format: string
                 label: Chart Title
-                width: large
+                width: largest
               - type: TextBox
                 name: legendtitle
                 format: string
                 label: Legend Title
-                width: large
+                width: largest
 
   - type: CollapseBox
     label: Output Options

@@ -1,6 +1,9 @@
 # Test data generation for missingdata function
 # Creates realistic clinical datasets with various missing data patterns
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -520,10 +523,70 @@ multicenter_data <- create_multicenter_data()
 
 # Save datasets
 save(clinical_trial_data, file = "data/missingdata_clinical_trial.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_trial_data, "data/missingdata_clinical_trial.RData")
+  message("✓ Created missingdata_clinical_trial.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_trial_data, "data/missingdata_clinical_trial.RData")
+  message("✓ Created missingdata_clinical_trial.RData")
+}
 save(survey_data, file = "data/missingdata_survey.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_data, "data/missingdata_survey.RData")
+  message("✓ Created missingdata_survey.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_data, "data/missingdata_survey.RData")
+  message("✓ Created missingdata_survey.RData")
+}
 save(laboratory_data, file = "data/missingdata_laboratory.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(laboratory_data, "data/missingdata_laboratory.RData")
+  message("✓ Created missingdata_laboratory.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(laboratory_data, "data/missingdata_laboratory.RData")
+  message("✓ Created missingdata_laboratory.RData")
+}
 save(patient_registry_data, file = "data/missingdata_patient_registry.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(patient_registry_data, "data/missingdata_patient_registry.RData")
+  message("✓ Created missingdata_patient_registry.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(patient_registry_data, "data/missingdata_patient_registry.RData")
+  message("✓ Created missingdata_patient_registry.RData")
+}
 save(multicenter_data, file = "data/missingdata_multicenter.RData")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(multicenter_data, "data/missingdata_multicenter.RData")
+  message("✓ Created missingdata_multicenter.RData")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(multicenter_data, "data/missingdata_multicenter.RData")
+  message("✓ Created missingdata_multicenter.RData")
+}
 
 # Print summaries
 cat("\n=== MISSING DATA TEST GENERATION SUMMARY ===\n")

@@ -1,4 +1,6 @@
 test_that("datecorrection function works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     testthat::skip_on_cran()
     
     # Test basic function existence

@@ -1,6 +1,9 @@
 # Test data generation for linechart function
 # Creates realistic clinical and research datasets for line chart analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -456,10 +459,70 @@ cat("Tumor size range:", round(min(tumor_response_data$tumor_size_cm), 1), "-",
 
 # Save datasets
 save(hemoglobin_data, file = "data/linechart_hemoglobin.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hemoglobin_data, "data/linechart_hemoglobin.omv")
+  message("✓ Created linechart_hemoglobin.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hemoglobin_data, "data/linechart_hemoglobin.omv")
+  message("✓ Created linechart_hemoglobin.omv")
+}
 save(blood_pressure_data, file = "data/linechart_blood_pressure.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(blood_pressure_data, "data/linechart_blood_pressure.omv")
+  message("✓ Created linechart_blood_pressure.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(blood_pressure_data, "data/linechart_blood_pressure.omv")
+  message("✓ Created linechart_blood_pressure.omv")
+}
 save(biomarker_data, file = "data/linechart_biomarker.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_data, "data/linechart_biomarker.omv")
+  message("✓ Created linechart_biomarker.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_data, "data/linechart_biomarker.omv")
+  message("✓ Created linechart_biomarker.omv")
+}
 save(quality_life_data, file = "data/linechart_quality_life.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(quality_life_data, "data/linechart_quality_life.omv")
+  message("✓ Created linechart_quality_life.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(quality_life_data, "data/linechart_quality_life.omv")
+  message("✓ Created linechart_quality_life.omv")
+}
 save(tumor_response_data, file = "data/linechart_tumor_response.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tumor_response_data, "data/linechart_tumor_response.omv")
+  message("✓ Created linechart_tumor_response.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tumor_response_data, "data/linechart_tumor_response.omv")
+  message("✓ Created linechart_tumor_response.omv")
+}
 
 # Also save as CSV for easy inspection
 write.csv(hemoglobin_data, "data-raw/linechart_hemoglobin.csv", row.names = FALSE)

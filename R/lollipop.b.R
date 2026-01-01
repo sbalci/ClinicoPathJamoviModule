@@ -201,7 +201,6 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Hide results until data is provided
                 self$results$summary$setVisible(FALSE)
                 self$results$plot$setVisible(FALSE)
-                self$results$warnings$setVisible(FALSE)
             }
         },
         

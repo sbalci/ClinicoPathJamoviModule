@@ -5,6 +5,8 @@
 # =============================================================================
 
 test_that("toxicityprofile basic functionality works", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Load required test data
   data("toxicityprofile_small_sample", package = "ClinicoPath")

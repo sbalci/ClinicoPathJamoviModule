@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for hullplot function
 # This script generates datasets specifically designed for testing hullplot functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(magrittr)
 
@@ -316,10 +319,70 @@ hullplot_quality_data <- create_hullplot_quality_data()
 
 # Save datasets
 save(hullplot_customer_data, file = "data/hullplot_customer_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_customer_data, "data/hullplot_customer_data.omv")
+  message("✓ Created hullplot_customer_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_customer_data, "data/hullplot_customer_data.omv")
+  message("✓ Created hullplot_customer_data.omv")
+}
 save(hullplot_clinical_data, file = "data/hullplot_clinical_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_clinical_data, "data/hullplot_clinical_data.omv")
+  message("✓ Created hullplot_clinical_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_clinical_data, "data/hullplot_clinical_data.omv")
+  message("✓ Created hullplot_clinical_data.omv")
+}
 save(hullplot_experimental_data, file = "data/hullplot_experimental_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_experimental_data, "data/hullplot_experimental_data.omv")
+  message("✓ Created hullplot_experimental_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_experimental_data, "data/hullplot_experimental_data.omv")
+  message("✓ Created hullplot_experimental_data.omv")
+}
 save(hullplot_survey_data, file = "data/hullplot_survey_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_survey_data, "data/hullplot_survey_data.omv")
+  message("✓ Created hullplot_survey_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_survey_data, "data/hullplot_survey_data.omv")
+  message("✓ Created hullplot_survey_data.omv")
+}
 save(hullplot_quality_data, file = "data/hullplot_quality_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_quality_data, "data/hullplot_quality_data.omv")
+  message("✓ Created hullplot_quality_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(hullplot_quality_data, "data/hullplot_quality_data.omv")
+  message("✓ Created hullplot_quality_data.omv")
+}
 
 # Print dataset summaries
 cat("\n=== HULLPLOT TEST DATASETS CREATED ===\n")

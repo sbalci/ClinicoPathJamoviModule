@@ -1,4 +1,8 @@
 files <- c(
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
+files <- c(
   "data/BreastCancer.rda", "data/arcDiagram.rda", "data/bayesdca_test_data.rda",
   "data/breast_cancer_data.rda", "data/cancer_biomarker_data.rda", "data/cardiac_troponin_data.rda",
   "data/colon.rda", "data/combined_data.rda", "data/covid_screening_data.rda",

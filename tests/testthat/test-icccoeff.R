@@ -1,4 +1,6 @@
 test_that("icccoeff module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("icccoeffClass"))
   expect_true(is.function(icccoeff))
 })

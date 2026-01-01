@@ -9,6 +9,8 @@ create_analysis <- function(data, opts) {
 }
 
 test_that("pairwise missing values remain unmapped and are documented", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     data <- data.frame(
         ER = factor(c("pos", "neg", NA, "neg", "pos")),
         PR = factor(c("pos", "pos", "neg", "neg", "pos")),

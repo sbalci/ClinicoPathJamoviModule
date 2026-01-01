@@ -1,6 +1,9 @@
 # Create test data for jjwithinstats function
 # This script generates various datasets to test within-subjects repeated measures functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(usethis)
 
 # Basic pre-post treatment data
@@ -202,18 +205,18 @@ jjwithinstats_edge_cases <- data.frame(
 )
 
 # Save all datasets
-usethis::use_data(jjwithinstats_prepost, overwrite = TRUE)
-usethis::use_data(jjwithinstats_therapy, overwrite = TRUE)
-usethis::use_data(jjwithinstats_clinical, overwrite = TRUE)
-usethis::use_data(jjwithinstats_pain, overwrite = TRUE)
-usethis::use_data(jjwithinstats_education, overwrite = TRUE)
-usethis::use_data(jjwithinstats_exercise, overwrite = TRUE)
-usethis::use_data(jjwithinstats_bloodpressure, overwrite = TRUE)
-usethis::use_data(jjwithinstats_cognitive, overwrite = TRUE)
-usethis::use_data(jjwithinstats_dosage, overwrite = TRUE)
-usethis::use_data(jjwithinstats_recovery, overwrite = TRUE)
-usethis::use_data(jjwithinstats_performance, overwrite = TRUE)
-usethis::use_data(jjwithinstats_edge_cases, overwrite = TRUE)
+use_data_multi_format(jjwithinstats_prepost, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_therapy, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_clinical, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_pain, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_education, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_exercise, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_bloodpressure, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_cognitive, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_dosage, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_recovery, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_performance, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(jjwithinstats_edge_cases, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary information
 cat("Test datasets created for jjwithinstats:\\n")

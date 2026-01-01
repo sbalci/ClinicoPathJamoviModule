@@ -36,6 +36,8 @@ expand_weighted_data <- function(data, counts_col) {
 }
 
 test_that("jjbarstats correctly handles weighted data in sample size reporting", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   weighted_data <- create_weighted_data()
 
   # Total count should be 140 (50+30+20+40), not 4 rows

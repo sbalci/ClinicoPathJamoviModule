@@ -3,6 +3,9 @@
 # for use in ClinicoPath and its submodules
 
 # Load required packages
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(OncoDataSets)
 library(usethis)
 library(devtools)
@@ -230,6 +233,18 @@ oncology_datasets_summary <- data.frame(
 
 # Save the summary
 save(oncology_datasets_summary, file = "data/oncology_datasets_summary.rda", compress = "bzip2")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(oncology_datasets_summary, "data/oncology_datasets_summary.omv")
+  message("✓ Created oncology_datasets_summary.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(oncology_datasets_summary, "data/oncology_datasets_summary.omv")
+  message("✓ Created oncology_datasets_summary.omv")
+}
 
 cat("\nCreated oncology_datasets_summary with dataset information\n")
 cat("Use data('oncology_datasets_summary') to see all available datasets\n")

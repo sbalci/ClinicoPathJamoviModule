@@ -13,6 +13,8 @@ library(jmvcore)
 # =============================================================================
 
 test_that("Binary outcome: 0/1 coding is preserved", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Test data with proper 0/1 coding
   test_data <- data.frame(
     patient_id = 1:100,

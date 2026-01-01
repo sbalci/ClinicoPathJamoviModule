@@ -1,6 +1,9 @@
 # Survival Power Analysis Scenarios Dataset
 # Pre-configured scenarios for common clinical trial designs
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 survivalpower_scenarios <- data.frame(
   Scenario = c(
     "Oncology Phase III",
@@ -188,7 +191,7 @@ survivalpower_scenarios <- data.frame(
 )
 
 # Save the dataset
-usethis::use_data(survivalpower_scenarios, overwrite = TRUE)
+use_data_multi_format(survivalpower_scenarios, overwrite = TRUE, save_csv = TRUE)
 
 # Create documentation
 cat("Survival Power Analysis Scenarios Dataset Created\n")

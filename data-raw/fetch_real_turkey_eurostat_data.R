@@ -1,6 +1,9 @@
 # Fetch real Turkey data from Eurostat API
 # This script attempts to download actual Turkey data from Eurostat
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(eurostat)
 library(dplyr)
 
@@ -172,7 +175,7 @@ if (length(available_datasets) >= 2) {
     print(paste("Dimensions:", nrow(turkey_real_eurostat_data), "x", ncol(turkey_real_eurostat_data)))
     
     # Save to RDA file
-    usethis::use_data(turkey_real_eurostat_data, overwrite = TRUE)
+    use_data_multi_format(turkey_real_eurostat_data, overwrite = TRUE, save_csv = TRUE)
     cat("Saved combined Turkey data as 'turkey_real_eurostat_data'\n")
   }
 }

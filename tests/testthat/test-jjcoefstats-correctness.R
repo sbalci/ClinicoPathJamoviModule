@@ -15,6 +15,8 @@ library(ClinicoPath)
 # ============================================================================
 
 test_that("jjcoefstats precomputed mode with z-distribution (no df)", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create precomputed coefficient data
   coef_data <- data.frame(
     term = c("intercept", "age", "treatment"),

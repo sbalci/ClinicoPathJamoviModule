@@ -1,6 +1,9 @@
 ## Comprehensive Test Data for Clinical Classification Analysis
 ## This script generates multiple datasets testing all classification features
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -276,13 +279,13 @@ classification_with_missing$Category1[missing_indices[11:20]] <- NA
 # Save all datasets
 # ==============================================================================
 
-usethis::use_data(classification_binary_balanced, overwrite = TRUE)
-usethis::use_data(classification_binary_imbalanced, overwrite = TRUE)
-usethis::use_data(classification_multiclass, overwrite = TRUE)
-usethis::use_data(classification_small_sample, overwrite = TRUE)
-usethis::use_data(classification_perfect, overwrite = TRUE)
-usethis::use_data(classification_high_dim, overwrite = TRUE)
-usethis::use_data(classification_with_missing, overwrite = TRUE)
+use_data_multi_format(classification_binary_balanced, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(classification_binary_imbalanced, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(classification_multiclass, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(classification_small_sample, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(classification_perfect, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(classification_high_dim, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(classification_with_missing, overwrite = TRUE, save_csv = TRUE)
 
 
 # Also save as CSV for jamovi testing

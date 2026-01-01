@@ -1,6 +1,9 @@
 # TidyDensity Example Data Generation
 # This script creates example datasets for demonstrating TidyDensity functionality
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(TidyDensity)
 library(dplyr)
 library(usethis)
@@ -193,16 +196,16 @@ create_distribution_comparison <- function() {
 tidydensity_distribution_comparison <- create_distribution_comparison()
 
 # Save all datasets
-usethis::use_data(tidydensity_normal_example, overwrite = TRUE)
-usethis::use_data(tidydensity_gamma_psa, overwrite = TRUE)
-usethis::use_data(tidydensity_beta_response, overwrite = TRUE)
-usethis::use_data(tidydensity_lognormal_drug, overwrite = TRUE)
-usethis::use_data(tidydensity_exponential_survival, overwrite = TRUE)
-usethis::use_data(tidydensity_poisson_events, overwrite = TRUE)
-usethis::use_data(tidydensity_lab_values, overwrite = TRUE)
-usethis::use_data(tidydensity_qc_analysis, overwrite = TRUE)
-usethis::use_data(tidydensity_power_analysis, overwrite = TRUE)
-usethis::use_data(tidydensity_distribution_comparison, overwrite = TRUE)
+use_data_multi_format(tidydensity_normal_example, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_gamma_psa, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_beta_response, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_lognormal_drug, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_exponential_survival, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_poisson_events, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_lab_values, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_qc_analysis, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_power_analysis, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(tidydensity_distribution_comparison, overwrite = TRUE, save_csv = TRUE)
 
 # Create CSV versions for easier access
 write.csv(tidydensity_normal_example, "data/tidydensity_normal_example.csv", row.names = FALSE)

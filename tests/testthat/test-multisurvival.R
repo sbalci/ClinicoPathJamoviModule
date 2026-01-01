@@ -1,6 +1,8 @@
 context("multisurvival")
 
 test_that("multisurvival works with basic Cox regression", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test data
   data("colon", package = "survival")
   

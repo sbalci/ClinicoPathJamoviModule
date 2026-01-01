@@ -51,6 +51,8 @@ library(data.table)
 # ============================================================================
 
 test_that("CRITICAL: Upsampling does not leak into test set", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create imbalanced dataset
   set.seed(123)
   data <- data.frame(

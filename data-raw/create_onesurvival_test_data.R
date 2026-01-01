@@ -1,6 +1,9 @@
 # Create test data for onesurvival function
 # This script generates various survival analysis test datasets
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(survival)
 library(dplyr)
 set.seed(42)

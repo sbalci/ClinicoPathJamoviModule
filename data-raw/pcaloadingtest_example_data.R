@@ -2,6 +2,9 @@
 # This dataset demonstrates the permutation-based loading significance testing
 
 # Set seed for reproducibility
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Sample size
@@ -56,7 +59,7 @@ attr(pcaloadingtest_data, "notes") <- paste0(
 )
 
 # Save to data/
-usethis::use_data(pcaloadingtest_data, overwrite = TRUE)
+use_data_multi_format(pcaloadingtest_data, overwrite = TRUE, save_csv = TRUE)
 
 # Print summary
 cat("\n=== PCA Loading Test Example Data Generated ===\n")

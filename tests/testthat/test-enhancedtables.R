@@ -55,6 +55,8 @@ clinical_data <- data.frame(
 )
 
 test_that("Enhanced Tables - Basic functionality and parameter validation", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test that enhanced tables implementation files exist
   enhancedtables_b_file <- file.exists("../../R/enhancedtables.b.R")

@@ -1,6 +1,9 @@
 # Create comprehensive test dataset for chisqposttest function
 # This script generates a dataset with known associations and various configurations
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)  # For reproducibility
 
 # Sample size

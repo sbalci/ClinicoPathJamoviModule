@@ -1,6 +1,9 @@
 # Generate medical research test data for groupsummary function
 # This creates a clinical study dataset with patient data over time
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(456)  # For reproducibility
 
 # Number of patients

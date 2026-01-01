@@ -17,6 +17,8 @@ test_eurostat_data <- data.frame(
 
 # Create comprehensive test for jamovi functionality
 test_that("eurostatmap function works with local data", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Test with complete parameter set
   result <- expect_no_error(
     eurostatmap(

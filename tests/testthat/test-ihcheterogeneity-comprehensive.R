@@ -25,6 +25,8 @@ load_test_data <- function(filename) {
 # ============================================================================
 
 test_that("ihcheterogeneity module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("ihcheterogeneityClass"))
   expect_true(is.function(ihcheterogeneity))
 })

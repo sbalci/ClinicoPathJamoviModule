@@ -19,6 +19,8 @@ skip_if_not_installed <- function() {
 # =============================================================================
 
 test_that("Negative intervals: Rejected with clear error message", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed()
   
   # Create data with negative interval (end before start)

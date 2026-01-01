@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for jjbetweenstats function
 # This script generates multiple datasets optimized for continuous vs categorical analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 set.seed(20250707)  # For reproducible data generation
@@ -144,11 +147,11 @@ psychological_assessment_data <- convert_to_factors(psychological_assessment_dat
 exercise_physiology_data <- convert_to_factors(exercise_physiology_data)
 
 # Save datasets
-usethis::use_data(clinical_lab_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(biomarker_expression_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(pharmacokinetics_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(psychological_assessment_data, overwrite = TRUE, internal = FALSE)
-usethis::use_data(exercise_physiology_data, overwrite = TRUE, internal = FALSE)
+use_data_multi_format(clinical_lab_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(biomarker_expression_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(pharmacokinetics_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(psychological_assessment_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
+use_data_multi_format(exercise_physiology_data, overwrite = TRUE, internal = FALSE, save_csv = TRUE)
 
 # Create summary information
 cat("Test datasets created for jjbetweenstats function:\n")

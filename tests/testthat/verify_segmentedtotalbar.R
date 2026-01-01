@@ -13,6 +13,8 @@ source("R/jjsegmentedtotalbar.b.R")
 # (Assuming it might be a typo or a missing dependency, but let's see if it runs without it first if we don't use that plot option)
 
 test_that("jjsegmentedtotalbar handles raw data correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   set.seed(123)
   data <- data.frame(

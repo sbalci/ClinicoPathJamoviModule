@@ -63,6 +63,8 @@ setup_visual_test_data <- function() {
 # ==============================================================================
 
 test_that("raincloud basic horizontal plot", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed_vdiffr()
   skip_if_not_installed_ggdist()
 

@@ -2,6 +2,9 @@
 # This dataset simulates an AI model predicting disease diagnosis
 # compared to human expert assessment and biomarkers
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 # Sample size
@@ -55,7 +58,7 @@ medical_ai_data$biomarker1[missing_indices[1:5]] <- NA
 medical_ai_data$biomarker2[missing_indices[6:10]] <- NA
 
 # Save dataset
-usethis::use_data(medical_ai_data, overwrite = TRUE)
+use_data_multi_format(medical_ai_data, overwrite = TRUE, save_csv = TRUE)
 
 # Create documentation
 # This will go in R/data.R or similar

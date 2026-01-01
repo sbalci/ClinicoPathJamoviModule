@@ -10,6 +10,8 @@ context("test-jjbetweenstats-correctness")
 library(ClinicoPath)
 
 test_that("jjbetweenstats uses selective NA omission, not global", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create data with NAs in different columns
   data_with_nas <- data.frame(
     outcome = c(10, 15, 20, 25, 30, 35, 40),

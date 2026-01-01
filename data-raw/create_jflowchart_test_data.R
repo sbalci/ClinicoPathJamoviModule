@@ -1,6 +1,9 @@
 # Create comprehensive test data for flowchart function
 # This script generates various datasets for testing the flowchart function
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 
 # Set seed for reproducibility
@@ -149,16 +152,148 @@ jflowchart_comprehensive_data <- rbind(
 
 # Save all datasets
 save(clinical_trial_flow, file = "data/clinical_trial_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_trial_flow, "data/clinical_trial_flow.omv")
+  message("✓ Created clinical_trial_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(clinical_trial_flow, "data/clinical_trial_flow.omv")
+  message("✓ Created clinical_trial_flow.omv")
+}
 save(cancer_pathway_flow, file = "data/cancer_pathway_flow.rda") 
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cancer_pathway_flow, "data/cancer_pathway_flow.omv")
+  message("✓ Created cancer_pathway_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(cancer_pathway_flow, "data/cancer_pathway_flow.omv")
+  message("✓ Created cancer_pathway_flow.omv")
+}
 save(biomarker_discovery_flow, file = "data/biomarker_discovery_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_discovery_flow, "data/biomarker_discovery_flow.omv")
+  message("✓ Created biomarker_discovery_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(biomarker_discovery_flow, "data/biomarker_discovery_flow.omv")
+  message("✓ Created biomarker_discovery_flow.omv")
+}
 save(multiarm_trial_flow, file = "data/multiarm_trial_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(multiarm_trial_flow, "data/multiarm_trial_flow.omv")
+  message("✓ Created multiarm_trial_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(multiarm_trial_flow, "data/multiarm_trial_flow.omv")
+  message("✓ Created multiarm_trial_flow.omv")
+}
 save(diagnostic_validation_flow, file = "data/diagnostic_validation_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(diagnostic_validation_flow, "data/diagnostic_validation_flow.omv")
+  message("✓ Created diagnostic_validation_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(diagnostic_validation_flow, "data/diagnostic_validation_flow.omv")
+  message("✓ Created diagnostic_validation_flow.omv")
+}
 save(epidemiology_study_flow, file = "data/epidemiology_study_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(epidemiology_study_flow, "data/epidemiology_study_flow.omv")
+  message("✓ Created epidemiology_study_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(epidemiology_study_flow, "data/epidemiology_study_flow.omv")
+  message("✓ Created epidemiology_study_flow.omv")
+}
 save(lab_workflow_flow, file = "data/lab_workflow_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lab_workflow_flow, "data/lab_workflow_flow.omv")
+  message("✓ Created lab_workflow_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(lab_workflow_flow, "data/lab_workflow_flow.omv")
+  message("✓ Created lab_workflow_flow.omv")
+}
 save(minimal_flow, file = "data/minimal_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(minimal_flow, "data/minimal_flow.omv")
+  message("✓ Created minimal_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(minimal_flow, "data/minimal_flow.omv")
+  message("✓ Created minimal_flow.omv")
+}
 save(research_pipeline_flow, file = "data/research_pipeline_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(research_pipeline_flow, "data/research_pipeline_flow.omv")
+  message("✓ Created research_pipeline_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(research_pipeline_flow, "data/research_pipeline_flow.omv")
+  message("✓ Created research_pipeline_flow.omv")
+}
 save(patient_journey_flow, file = "data/patient_journey_flow.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(patient_journey_flow, "data/patient_journey_flow.omv")
+  message("✓ Created patient_journey_flow.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(patient_journey_flow, "data/patient_journey_flow.omv")
+  message("✓ Created patient_journey_flow.omv")
+}
 save(jflowchart_comprehensive_data, file = "data/jflowchart_comprehensive_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jflowchart_comprehensive_data, "data/jflowchart_comprehensive_data.omv")
+  message("✓ Created jflowchart_comprehensive_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(jflowchart_comprehensive_data, "data/jflowchart_comprehensive_data.omv")
+  message("✓ Created jflowchart_comprehensive_data.omv")
+}
 
 # Display summary
 cat("=== FLOWCHART TEST DATA CREATED ===\n\n")

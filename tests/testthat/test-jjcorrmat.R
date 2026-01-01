@@ -1,4 +1,6 @@
 test_that("jjcorrmat works with basic correlation matrix", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Load test data with multiple continuous variables
   data(iris)
   

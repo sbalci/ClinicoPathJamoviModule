@@ -56,6 +56,8 @@ create_roc_test_data <- function(n = 200, seed = 123) {
 # =============================================================================
 
 test_that("psychopdaROC function exists and loads properly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Check function existence
   expect_true(exists("psychopdaROC"))
   expect_true(is.function(psychopdaROC))

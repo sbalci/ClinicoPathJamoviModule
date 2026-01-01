@@ -2,6 +2,8 @@ context("Medical Decision Analysis")
 
 # Test utility functions
 test_that("sensitivity calculation is correct", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_equal(calculate_sensitivity(tp = 90, fn = 10), 0.9)
   expect_equal(calculate_sensitivity(tp = 0, fn = 10), 0)
   expect_equal(calculate_sensitivity(tp = 50, fn = 50), 0.5)

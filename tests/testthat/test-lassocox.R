@@ -67,6 +67,8 @@ create_high_dim_data <- function(n = 50, p = 100, seed = 456) {
 describe("lassocox Data Validation", {
   
   test_that("lassocox validates time variable correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     skip_if_not_installed("glmnet")
     skip_if_not_installed("survival")
     skip_if_not_installed("jmvcore")

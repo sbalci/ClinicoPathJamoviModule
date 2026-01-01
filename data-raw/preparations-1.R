@@ -1,4 +1,7 @@
 # Prepare data for analysis
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 mydata <- self$data
 
 ## Get rownames to data

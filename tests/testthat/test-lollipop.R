@@ -47,6 +47,8 @@ setup_treatment_response_data <- function() {
 # ==============================================================================
 
 test_that("lollipop creates valid output structure", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   test_data <- setup_clinical_biomarker_data()
 
   result <- lollipop(

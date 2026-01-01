@@ -1,6 +1,9 @@
 # Generate test data for jjsegmentedtotalbar function
 # This script creates test datasets and saves them to data/ folder
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(here)
 
 # Create data directory if it doesn't exist

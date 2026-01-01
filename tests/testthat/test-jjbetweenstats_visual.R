@@ -1,5 +1,7 @@
 
 test_that("jjbetweenstats produces valid ggplot objects", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   skip_if_not_installed("ggstatsplot")
   
   # Create a temporary directory for saving plots

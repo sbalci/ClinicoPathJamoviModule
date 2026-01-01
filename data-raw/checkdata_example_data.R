@@ -10,6 +10,9 @@
 #' @author ClinicoPath package team
 
 # Set seed for reproducible data generation
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(20241204)
 
 # Helper functions for realistic data generation
@@ -552,14 +555,14 @@ for (patient in dropout_patients) {
 }
 
 # Export all datasets
-usethis::use_data(excellent_quality_data, overwrite = TRUE)
-usethis::use_data(missing_data_challenge, overwrite = TRUE)
-usethis::use_data(outlier_detection_data, overwrite = TRUE)
-usethis::use_data(low_variability_data, overwrite = TRUE)
-usethis::use_data(poor_quality_data, overwrite = TRUE)
-usethis::use_data(categorical_quality_data, overwrite = TRUE)
-usethis::use_data(clinical_trial_data, overwrite = TRUE)
-usethis::use_data(longitudinal_quality_data, overwrite = TRUE)
+use_data_multi_format(excellent_quality_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(missing_data_challenge, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(outlier_detection_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(low_variability_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(poor_quality_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(categorical_quality_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(clinical_trial_data, overwrite = TRUE, save_csv = TRUE)
+use_data_multi_format(longitudinal_quality_data, overwrite = TRUE, save_csv = TRUE)
 
 # Generate comprehensive summary
 cat("✅ Created 8 comprehensive datasets for data quality assessment:\n\n")

@@ -47,6 +47,8 @@ test_data_missing_baseline <- data.frame(
 # =================================
 
 test_that("Data validation works correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   
   # Test empty data
   expect_error(

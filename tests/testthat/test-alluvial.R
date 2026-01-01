@@ -1,4 +1,6 @@
 test_that("alluvial class exists and can be instantiated", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
     
     # Test that alluvial class exists
     expect_true(exists("alluvialClass"))

@@ -2,6 +2,9 @@
 # Based on Kayser et al. (2009) stereology methods
 # Simulates vessel density measurements in tumor tissue
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(42)
 
 n_samples <- 50

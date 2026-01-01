@@ -82,6 +82,8 @@ extract_quality_grade <- function(result) {
 # ===== Consensus Outlier Detection =====
 
 test_that("Consensus outliers require 2 of 3 methods", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   # Create data with known outliers
   set.seed(123)
   data <- data.frame(

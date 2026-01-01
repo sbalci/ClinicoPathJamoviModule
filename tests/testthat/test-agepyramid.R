@@ -1,4 +1,6 @@
 test_that("agepyramid module loads correctly", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   expect_true(exists("agepyramidClass"))
   expect_true(is.function(agepyramid))
 })

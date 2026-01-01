@@ -1,4 +1,6 @@
 testthat::test_that("diagnosticmeta pooled estimates align with mada", {
+  skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   testthat::skip_if_not_installed("mada")
   testthat::skip_if_not_installed("metafor")
 

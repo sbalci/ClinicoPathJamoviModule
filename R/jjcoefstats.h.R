@@ -321,7 +321,8 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         coefPlot = function() private$.items[["coefPlot"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficientTable = function() private$.items[["coefficientTable"]],
-        modelMetrics = function() private$.items[["modelMetrics"]]),
+        modelMetrics = function() private$.items[["modelMetrics"]],
+        notices = function() private$.items[["notices"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -428,7 +429,40 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="text"))))}))
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                visible=TRUE,
+                clearWith=list(
+                    "inputMode",
+                    "term",
+                    "estimate",
+                    "stdError",
+                    "confLow",
+                    "confHigh",
+                    "pValue",
+                    "degreesOfFreedom",
+                    "outcome",
+                    "predictors",
+                    "modelType",
+                    "survivalTime",
+                    "eventStatus",
+                    "randomEffects",
+                    "sortCoefs",
+                    "excludeIntercept",
+                    "showPValues",
+                    "pValueDisplay",
+                    "ciLevel",
+                    "exponentiate",
+                    "expScaleLabel",
+                    "referenceValue",
+                    "colorScheme",
+                    "plotTheme",
+                    "plotWidth",
+                    "plotHeight",
+                    "showexplanations")))}))
 
 jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjcoefstatsBase",
@@ -631,4 +665,3 @@ jjcoefstats <- function(
 
     analysis$results
 }
-

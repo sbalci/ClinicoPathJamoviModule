@@ -1,6 +1,9 @@
 # Create test data for jjsankeyfier function
 # This script generates comprehensive datasets for testing sankey and alluvial diagrams
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(123)
 
 # Load required libraries
@@ -94,12 +97,96 @@ complex_alluvial_data <- data.frame(
 
 # Save all datasets
 save(sankey_simple_data, file = "data/sankey_simple_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(sankey_simple_data, "data/sankey_simple_data.omv")
+  message("✓ Created sankey_simple_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(sankey_simple_data, "data/sankey_simple_data.omv")
+  message("✓ Created sankey_simple_data.omv")
+}
 save(treatment_pathways_data, file = "data/treatment_pathways_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(treatment_pathways_data, "data/treatment_pathways_data.omv")
+  message("✓ Created treatment_pathways_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(treatment_pathways_data, "data/treatment_pathways_data.omv")
+  message("✓ Created treatment_pathways_data.omv")
+}
 save(education_pathways_data, file = "data/education_pathways_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(education_pathways_data, "data/education_pathways_data.omv")
+  message("✓ Created education_pathways_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(education_pathways_data, "data/education_pathways_data.omv")
+  message("✓ Created education_pathways_data.omv")
+}
 save(business_process_data, file = "data/business_process_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(business_process_data, "data/business_process_data.omv")
+  message("✓ Created business_process_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(business_process_data, "data/business_process_data.omv")
+  message("✓ Created business_process_data.omv")
+}
 save(tech_migration_data, file = "data/tech_migration_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tech_migration_data, "data/tech_migration_data.omv")
+  message("✓ Created tech_migration_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(tech_migration_data, "data/tech_migration_data.omv")
+  message("✓ Created tech_migration_data.omv")
+}
 save(simple_flow_data, file = "data/simple_flow_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(simple_flow_data, "data/simple_flow_data.omv")
+  message("✓ Created simple_flow_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(simple_flow_data, "data/simple_flow_data.omv")
+  message("✓ Created simple_flow_data.omv")
+}
 save(complex_alluvial_data, file = "data/complex_alluvial_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(complex_alluvial_data, "data/complex_alluvial_data.omv")
+  message("✓ Created complex_alluvial_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(complex_alluvial_data, "data/complex_alluvial_data.omv")
+  message("✓ Created complex_alluvial_data.omv")
+}
 
 # Create combined dataset for comprehensive testing
 sankey_comprehensive_data <- list(
@@ -113,6 +200,18 @@ sankey_comprehensive_data <- list(
 )
 
 save(sankey_comprehensive_data, file = "data/sankey_comprehensive_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(sankey_comprehensive_data, "data/sankey_comprehensive_data.omv")
+  message("✓ Created sankey_comprehensive_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(sankey_comprehensive_data, "data/sankey_comprehensive_data.omv")
+  message("✓ Created sankey_comprehensive_data.omv")
+}
 
 message("Successfully created comprehensive test datasets for jjsankeyfier function:")
 message("- sankey_simple_data.rda")

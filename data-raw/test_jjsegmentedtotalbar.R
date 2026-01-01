@@ -1,6 +1,9 @@
 # Test script for jjsegmentedtotalbar function
 # Make sure to compile the module first with jmvtools::prepare()
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(ClinicoPath)
 
 # Test 1: Simple data

@@ -2,6 +2,9 @@
 # Creates diverse, realistic datasets for comprehensive testing of waffle chart functionality
 # Each dataset represents different real-world scenarios and use cases
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 library(dplyr)
 library(tibble)
 
@@ -797,15 +800,135 @@ time_usage_data <- create_time_usage_data()
 # Save datasets to package data directory (if it exists)
 if (dir.exists("data")) {
   save(market_research_data, file = "data/jwaffle_market_research.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(market_research_data, "data/jwaffle_market_research.omv")
+  message("✓ Created jwaffle_market_research.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(market_research_data, "data/jwaffle_market_research.omv")
+  message("✓ Created jwaffle_market_research.omv")
+}
   save(survey_response_data, file = "data/jwaffle_survey_response.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_response_data, "data/jwaffle_survey_response.omv")
+  message("✓ Created jwaffle_survey_response.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(survey_response_data, "data/jwaffle_survey_response.omv")
+  message("✓ Created jwaffle_survey_response.omv")
+}
   save(social_media_data, file = "data/jwaffle_social_media.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(social_media_data, "data/jwaffle_social_media.omv")
+  message("✓ Created jwaffle_social_media.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(social_media_data, "data/jwaffle_social_media.omv")
+  message("✓ Created jwaffle_social_media.omv")
+}
   save(healthcare_data, file = "data/jwaffle_healthcare.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(healthcare_data, "data/jwaffle_healthcare.omv")
+  message("✓ Created jwaffle_healthcare.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(healthcare_data, "data/jwaffle_healthcare.omv")
+  message("✓ Created jwaffle_healthcare.omv")
+}
   save(education_data, file = "data/jwaffle_education.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(education_data, "data/jwaffle_education.omv")
+  message("✓ Created jwaffle_education.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(education_data, "data/jwaffle_education.omv")
+  message("✓ Created jwaffle_education.omv")
+}
   save(portfolio_data, file = "data/jwaffle_portfolio.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(portfolio_data, "data/jwaffle_portfolio.omv")
+  message("✓ Created jwaffle_portfolio.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(portfolio_data, "data/jwaffle_portfolio.omv")
+  message("✓ Created jwaffle_portfolio.omv")
+}
   save(customer_satisfaction_data, file = "data/jwaffle_customer_satisfaction.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(customer_satisfaction_data, "data/jwaffle_customer_satisfaction.omv")
+  message("✓ Created jwaffle_customer_satisfaction.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(customer_satisfaction_data, "data/jwaffle_customer_satisfaction.omv")
+  message("✓ Created jwaffle_customer_satisfaction.omv")
+}
   save(election_data, file = "data/jwaffle_election.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(election_data, "data/jwaffle_election.omv")
+  message("✓ Created jwaffle_election.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(election_data, "data/jwaffle_election.omv")
+  message("✓ Created jwaffle_election.omv")
+}
   save(resource_allocation_data, file = "data/jwaffle_resource_allocation.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(resource_allocation_data, "data/jwaffle_resource_allocation.omv")
+  message("✓ Created jwaffle_resource_allocation.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(resource_allocation_data, "data/jwaffle_resource_allocation.omv")
+  message("✓ Created jwaffle_resource_allocation.omv")
+}
   save(time_usage_data, file = "data/jwaffle_time_usage.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(time_usage_data, "data/jwaffle_time_usage.omv")
+  message("✓ Created jwaffle_time_usage.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(time_usage_data, "data/jwaffle_time_usage.omv")
+  message("✓ Created jwaffle_time_usage.omv")
+}
   
   message("✓ All datasets saved to data/ directory")
 } else {

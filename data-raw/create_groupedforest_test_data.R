@@ -1,6 +1,9 @@
 # Create comprehensive test datasets for groupedforest function
 # This script generates various survival datasets suitable for grouped forest plot analysis
 
+# Load helper functions for multi-format data saving
+source("data-raw/data_save_helpers.R")
+
 set.seed(123)
 
 # 1. Main comprehensive dataset for grouped forest analysis
@@ -206,11 +209,83 @@ groupedforest_interaction_data <- create_groupedforest_interaction_data()
 
 # Save datasets
 save(groupedforest_comprehensive_data, file = "data/groupedforest_comprehensive_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_comprehensive_data, "data/groupedforest_comprehensive_data.omv")
+  message("✓ Created groupedforest_comprehensive_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_comprehensive_data, "data/groupedforest_comprehensive_data.omv")
+  message("✓ Created groupedforest_comprehensive_data.omv")
+}
 save(groupedforest_simple_data, file = "data/groupedforest_simple_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_simple_data, "data/groupedforest_simple_data.omv")
+  message("✓ Created groupedforest_simple_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_simple_data, "data/groupedforest_simple_data.omv")
+  message("✓ Created groupedforest_simple_data.omv")
+}
 save(groupedforest_multi_subgroups, file = "data/groupedforest_multi_subgroups.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_multi_subgroups, "data/groupedforest_multi_subgroups.omv")
+  message("✓ Created groupedforest_multi_subgroups.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_multi_subgroups, "data/groupedforest_multi_subgroups.omv")
+  message("✓ Created groupedforest_multi_subgroups.omv")
+}
 save(groupedforest_precision_medicine, file = "data/groupedforest_precision_medicine.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_precision_medicine, "data/groupedforest_precision_medicine.omv")
+  message("✓ Created groupedforest_precision_medicine.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_precision_medicine, "data/groupedforest_precision_medicine.omv")
+  message("✓ Created groupedforest_precision_medicine.omv")
+}
 save(groupedforest_biomarker_data, file = "data/groupedforest_biomarker_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_biomarker_data, "data/groupedforest_biomarker_data.omv")
+  message("✓ Created groupedforest_biomarker_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_biomarker_data, "data/groupedforest_biomarker_data.omv")
+  message("✓ Created groupedforest_biomarker_data.omv")
+}
 save(groupedforest_interaction_data, file = "data/groupedforest_interaction_data.rda")
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_interaction_data, "data/groupedforest_interaction_data.omv")
+  message("✓ Created groupedforest_interaction_data.omv")
+}
+
+# Also save as .omv for jamovi
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(groupedforest_interaction_data, "data/groupedforest_interaction_data.omv")
+  message("✓ Created groupedforest_interaction_data.omv")
+}
 
 # Print dataset summaries
 cat("\n=== GROUPEDFOREST TEST DATASETS CREATED ===\n")
