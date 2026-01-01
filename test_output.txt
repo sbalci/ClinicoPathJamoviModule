@@ -1,0 +1,197 @@
+
+══ Testing test-agreement.R ════════════════════════════════════════════════════
+
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 0 ]i Loading ClinicoPath
+Registered S3 methods overwritten by 'car':
+  method       from
+  hist.boot    FSA 
+  confint.boot FSA 
+Registered S3 methods overwritten by 'Hmisc':
+  method               from   
+  as.data.frame.impute tangram
+  print.impute         tangram
+  [.impute             tangram
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 methods overwritten by 'ggfortify':
+  method          from   
+  autoplot.acf    useful 
+  autoplot.glmnet parsnip
+  fortify.acf     useful 
+  fortify.kmeans  useful 
+  fortify.ts      useful 
+Registered S3 method overwritten by 'spatstat.explore':
+  method   from
+  plot.roc pROC
+Registered S3 method overwritten by 'partitions':
+  method            from
+  print.equivalence lava
+Registered S3 method overwritten by 'DoE.base':
+  method           from       
+  factorize.factor conf.design
+Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+Registered S3 methods overwritten by 'forecast':
+  method                 from     
+  autoplot.Arima         ggfortify
+  autoplot.acf           ggfortify
+  autoplot.ar            ggfortify
+  autoplot.bats          ggfortify
+  autoplot.decomposed.ts ggfortify
+  autoplot.ets           ggfortify
+  autoplot.forecast      ggfortify
+  autoplot.stl           ggfortify
+  autoplot.ts            ggfortify
+  fitted.ar              ggfortify
+  fortify.ts             ggfortify
+  residuals.ar           ggfortify
+Registered S3 methods overwritten by 'logspline':
+  method               from     
+  plot.logspline       polspline
+  plot.oldlogspline    polspline
+  print.logspline      polspline
+  print.oldlogspline   polspline
+  summary.logspline    polspline
+  summary.oldlogspline polspline
+Registered S3 methods overwritten by 'huge':
+  method    from            
+  plot.roc  spatstat.explore
+  plot.sim  lava            
+  print.roc pROC            
+  print.sim lava            
+Registered S3 method overwritten by 'fit.models':
+  method       from 
+  vcov.default Hmisc
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 2 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 3 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 4 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 5 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 6 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 7 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 8 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 9 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 10 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 11 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 12 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 13 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 14 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 15 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 16 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 17 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 18 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 19 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 20 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 21 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 22 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 23 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 24 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 25 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 26 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 27 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 28 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 29 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 30 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 31 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 32 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 33 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 34 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 35 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 36 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 37 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 38 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 39 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 40 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 41 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 42 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 43 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 44 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 45 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 46 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 47 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 48 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 49 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 50 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 51 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 52 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 53 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 54 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 55 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 56 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 57 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 58 | SKIP 0 | PASS 0 ]Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+
+[ FAIL 0 | WARN 59 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 60 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 61 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 62 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 63 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 64 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 65 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 66 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 67 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 68 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 69 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 70 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 71 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 72 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 73 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 74 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 75 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 76 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 77 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 78 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 79 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 80 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 81 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 82 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 83 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 84 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 85 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 86 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 87 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 88 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 89 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 90 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 91 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 92 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 93 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 94 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 95 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 96 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 97 | SKIP 0 | PASS 0 ]Serdar Balci MD Pathologist 
+ https://www.serdarbalci.com/ 
+ 
+
+[ FAIL 0 | WARN 98 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 98 | SKIP 0 | PASS 1 ]
+[ FAIL 0 | WARN 98 | SKIP 0 | PASS 2 ]
+[ FAIL 1 | WARN 98 | SKIP 0 | PASS 2 ]
+[ FAIL 1 | WARN 98 | SKIP 0 | PASS 3 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 3 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 4 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 5 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 6 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 7 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 8 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 9 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 10 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 11 ]
+[ FAIL 2 | WARN 98 | SKIP 0 | PASS 12 ]
+[ FAIL 3 | WARN 98 | SKIP 0 | PASS 12 ]
+[ FAIL 4 | WARN 98 | SKIP 0 | PASS 12 ]
+[ FAIL 5 | WARN 98 | SKIP 0 | PASS 12 ]
+[ FAIL 6 | WARN 98 | SKIP 0 | PASS 12 ]
+[ FAIL 7 | WARN 98 | SKIP 0 | PASS 12 ]
+[ FAIL 8 | WARN 98 | SKIP 0 | PASS 12 ]
+[ FAIL 8 | WARN 98 | SKIP 0 | PASS 13 ]
+[ FAIL 8 | WARN 98 | SKIP 0 | PASS 14 ]
+[ FAIL 8 | WARN 98 | SKIP 0 | PASS 15 ]
+[ FAIL 8 | WARN 98 | SKIP 0 | PASS 16 ]
+[ FAIL 8 | WARN 98 | SKIP 0 | PASS 17 ]X connection to /private/tmp/com.apple.launchd.dYsbOfb4Mw/org.xquartz:0 broken (explicit kill or server shutdown).

@@ -70,6 +70,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             .init = function() {
                 # Minimal initialization
                 private$.noticeList <- list()
+
+                # Control visibility of individual test performance groups
+                showIndividual <- self$options$showIndividual
+
+                # Test 1 visibility
+                hasTest1 <- !is.null(self$options$test1) && self$options$test1 != ""
+                self$results$individualTest1$setVisible(showIndividual && hasTest1)
+
+                # Test 2 visibility
+                hasTest2 <- !is.null(self$options$test2) && self$options$test2 != ""
+                self$results$individualTest2$setVisible(showIndividual && hasTest2)
+
+                # Test 3 visibility
+                hasTest3 <- !is.null(self$options$test3) && self$options$test3 != ""
+                self$results$individualTest3$setVisible(showIndividual && hasTest3)
             },
 
             .run = function() {

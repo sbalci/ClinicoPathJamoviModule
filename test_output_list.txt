@@ -1,0 +1,71 @@
+i Loading ClinicoPath
+Registered S3 methods overwritten by 'car':
+  method       from
+  hist.boot    FSA 
+  confint.boot FSA 
+Registered S3 methods overwritten by 'Hmisc':
+  method               from   
+  as.data.frame.impute tangram
+  print.impute         tangram
+  [.impute             tangram
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 methods overwritten by 'ggfortify':
+  method          from   
+  autoplot.acf    useful 
+  autoplot.glmnet parsnip
+  fortify.acf     useful 
+  fortify.kmeans  useful 
+  fortify.ts      useful 
+Registered S3 method overwritten by 'spatstat.explore':
+  method   from
+  plot.roc pROC
+Registered S3 method overwritten by 'partitions':
+  method            from
+  print.equivalence lava
+Registered S3 method overwritten by 'DoE.base':
+  method           from       
+  factorize.factor conf.design
+Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+Registered S3 methods overwritten by 'forecast':
+  method                 from     
+  autoplot.Arima         ggfortify
+  autoplot.acf           ggfortify
+  autoplot.ar            ggfortify
+  autoplot.bats          ggfortify
+  autoplot.decomposed.ts ggfortify
+  autoplot.ets           ggfortify
+  autoplot.forecast      ggfortify
+  autoplot.stl           ggfortify
+  autoplot.ts            ggfortify
+  fitted.ar              ggfortify
+  fortify.ts             ggfortify
+  residuals.ar           ggfortify
+Registered S3 methods overwritten by 'logspline':
+  method               from     
+  plot.logspline       polspline
+  plot.oldlogspline    polspline
+  print.logspline      polspline
+  print.oldlogspline   polspline
+  summary.logspline    polspline
+  summary.oldlogspline polspline
+Registered S3 methods overwritten by 'huge':
+  method    from            
+  plot.roc  spatstat.explore
+  plot.sim  lava            
+  print.roc pROC            
+  print.sim lava            
+Registered S3 method overwritten by 'fit.models':
+  method       from 
+  vcov.default Hmisc
+Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+Serdar Balci MD Pathologist 
+ https://www.serdarbalci.com/ 
+ 
+X connection to /private/tmp/com.apple.launchd.dYsbOfb4Mw/org.xquartz:0 broken (explicit kill or server shutdown).
