@@ -685,9 +685,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.checkpoint()
 
             # Perform pivot_longer transformation once using safe variable names
+            # Use unname() to avoid "Can't rename variables" error from named vector
             long_data <- tidyr::pivot_longer(
                 mydata,
-                cols = safe_vars_check,
+                cols = unname(safe_vars_check),
                 names_to = "measurement",
                 values_to = "value"
             )
