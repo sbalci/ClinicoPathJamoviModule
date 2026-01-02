@@ -1,45 +1,5 @@
 #' @title Interrater Reliability Analysis
-#' @description Calculate interrater reliability for multiple raters using kappa statistics,
-#'   Krippendorff's alpha, and Gwet's AC. Supports weighted kappa for ordinal data,
-#'   hierarchical/multilevel analysis, and consensus score derivation.
-#'
-#' @param data The dataset containing ratings
-#' @param vars Character vector of rater variable names (minimum 2 required)
-#' @param wght Weighting scheme for kappa: "unweighted" (default), "equal", or "squared".
-#'   Use weighted kappa for ordinal data to account for degree of disagreement.
-#' @param exct Logical; use exact p-values for 3+ raters (default: FALSE)
-#' @param kripp Logical; calculate Krippendorff's alpha (default: FALSE)
-#' @param krippMethod Data type for Krippendorff's alpha: "nominal", "ordinal", "interval", "ratio"
-#' @param bootstrap Logical; calculate bootstrap confidence intervals for Krippendorff's alpha
-#' @param gwet Logical; calculate Gwet's AC1/AC2 coefficient (default: FALSE)
-#' @param gwetWeights Weights for Gwet's AC: "unweighted", "linear", "quadratic"
-#' @param showLevelInfo Logical; display variable level ordering information
-#' @param hierarchicalKappa Logical; enable hierarchical/multilevel kappa analysis
-#' @param clusterVariable Variable defining clusters/institutions for hierarchical analysis
-#' @param baConfidenceLevel Confidence level for Bland-Altman limits of agreement (default: 0.95)
-#' @param proportionalBias Logical; test for proportional bias in Bland-Altman plot
-#' @param blandAltmanPlot Logical; generate Bland-Altman plot for continuous agreement
-#' @param sft Logical; display frequency tables
-#' @param showSummary Logical; display plain-language interpretation summary
-#' @param showAbout Logical; display analysis explanation panel
-#' @param consensusVar Logical; create consensus variable from multiple raters
-#' @param consensusRule Consensus rule: "majority", "supermajority", "unanimous"
-#' @param tieBreaker Tie handling: "exclude", "first", "lowest", "highest"
-#' @param consensusName Name for the computed consensus variable
-#' @param referenceRater Reference rater for pairwise comparisons
-#' @param rankRaters Logical; rank raters by kappa relative to reference
-#' @param loaVariable Logical; create level of agreement categorical variable
-#' @param loaThresholds LoA thresholds: "custom", "quartiles", "tertiles"
-#' @param loaHighThreshold High LoA threshold percentage (default: 75)
-#' @param loaLowThreshold Low LoA threshold percentage (default: 56)
-#'
-#' @return jamovi results object containing kappa statistics, tables, and optional outputs
-#'
-#' @details
-#' The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
-#' Weighted kappa accounts for degree of disagreement in ordinal data. Krippendorff's alpha
-#' handles missing data. Gwet's AC corrects for paradoxical kappa behavior with high agreement rates.
-#'
+#' @return Table
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import magrittr
@@ -48,21 +8,9 @@
 #' @importFrom htmlTable htmlTable
 #' @importFrom glue glue
 #'
-#' @references
-#' Cohen, J. (1960). A coefficient of agreement for nominal scales.
-#' \emph{Educational and Psychological Measurement}, 20(1), 37-46.
+#' @description This function calculates interrater reliability for ordinal or categorical data.
 #'
-#' Cohen, J. (1968). Weighted kappa: Nominal scale agreement with provision
-#' for scaled disagreement or partial credit. \emph{Psychological Bulletin}, 70(4), 213-220.
-#'
-#' Fleiss, J. L. (1971). Measuring nominal scale agreement among many raters.
-#' \emph{Psychological Bulletin}, 76(5), 378-382.
-#'
-#' Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for
-#' categorical data. \emph{Biometrics}, 33(1), 159-174.
-#'
-#' Conger, A. J. (1980). Integration and generalization of kappas for multiple raters.
-#' \emph{Psychological Bulletin}, 88(2), 322-328.
+#' @details The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
 #'
 #'
 
@@ -74,20 +22,27 @@
 agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
     inherit = agreementBase, private = list(
 
-        .escapeVar = function(x) {
-            # Escape variable names with spaces/special characters
-            # Mimic jmvcore::composeTerm behavior
-            if (is.null(x) || length(x) == 0) return(character(0))
+        .init = function() {
+            # Initialize plot render functions
+            if (self$options$blandAltmanPlot) {
+                self$results$blandAltman$setRenderFun(private$.blandAltman)
+            }
+        },
 
-            # If already backtick-quoted, return as-is
-            if (grepl("^`.*`$", x)) return(x)
-
-            # If contains spaces or special chars, backtick-quote
-            if (grepl("[^A-Za-z0-9_.]", x)) {
-                return(paste0("`", x, "`"))
+        # Helper function to escape variable names for R code generation
+        # Variable names with spaces or special characters are wrapped in backticks
+        .escapeVariableName = function(varName) {
+            if (is.null(varName) || length(varName) == 0) {
+                return(NULL)
             }
 
-            return(x)
+            # Check if variable name needs escaping
+            # If make.names() would change it, it needs backticks
+            if (!identical(make.names(varName), varName)) {
+                return(paste0('`', varName, '`'))
+            }
+
+            return(varName)
         },
 
         .createSummary = function(result1, result2, wght, exct) {
@@ -425,895 +380,638 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             return(html_output)
         },
 
-        .populateBlandAltmanPlot = function(image, ...) {
-            # Only for 2 raters with continuous data
-            if (length(self$options$vars) != 2) {
+        .blandAltman = function(image, ...) {
+            # Render Bland-Altman plot from stored state
+
+            plotState <- image$state
+
+            if (is.null(plotState)) {
                 return(FALSE)
             }
 
-            mydata <- self$data
-            ratings <- mydata[, self$options$vars, drop = FALSE]
-
-            # Check if data is continuous (numeric)
-            if (!all(sapply(ratings, is.numeric))) {
-                return(FALSE)
-            }
-
-            # Remove missing values
-            ratings <- na.omit(ratings)
-            if (nrow(ratings) == 0) {
-                return(FALSE)
-            }
-
-            # Calculate mean and difference
-            mean_val <- rowMeans(ratings)
-            diff_val <- ratings[[1]] - ratings[[2]]
-
-            # Calculate limits of agreement
-            conf_level <- self$options$baConfidenceLevel
-            z_crit <- qnorm((1 + conf_level) / 2)
-
-            mean_diff <- mean(diff_val)
-            sd_diff <- sd(diff_val)
-
-            loa_upper <- mean_diff + z_crit * sd_diff
-            loa_lower <- mean_diff - z_crit * sd_diff
-
-            # Create plot data
-            plotData <- data.frame(
-                mean = mean_val,
-                diff = diff_val
-            )
-
-            # Test for proportional bias (if requested)
-            prop_bias_text <- ""
-            if (self$options$proportionalBias) {
-                lm_result <- lm(diff ~ mean, data = plotData)
-                p_val <- summary(lm_result)$coefficients[2, 4]
-
-                if (p_val < 0.05) {
-                    prop_bias_text <- sprintf("\nProportional bias detected (p = %.4f)", p_val)
-                } else {
-                    prop_bias_text <- sprintf("\nNo proportional bias (p = %.4f)", p_val)
-                }
-            }
+            # Extract data from state
+            diff <- plotState$diff
+            avg <- plotState$avg
+            mean_diff <- plotState$mean_diff
+            lower_loa <- plotState$lower_loa
+            upper_loa <- plotState$upper_loa
+            conf_level <- plotState$conf_level
+            prop_bias <- plotState$prop_bias
+            rater_names <- plotState$rater_names
 
             # Create plot
-            plot <- ggplot2::ggplot(plotData, ggplot2::aes(x = mean, y = diff)) +
+            plot_data <- data.frame(
+                avg = avg,
+                diff = diff
+            )
+
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = avg, y = diff)) +
                 ggplot2::geom_point(alpha = 0.6, size = 2) +
                 ggplot2::geom_hline(yintercept = mean_diff, linetype = "solid", color = "blue", size = 1) +
-                ggplot2::geom_hline(yintercept = loa_upper, linetype = "dashed", color = "red", size = 0.8) +
-                ggplot2::geom_hline(yintercept = loa_lower, linetype = "dashed", color = "red", size = 0.8) +
-                ggplot2::geom_hline(yintercept = 0, linetype = "dotted", color = "gray50", size = 0.5) +
+                ggplot2::geom_hline(yintercept = lower_loa, linetype = "dashed", color = "red", size = 0.8) +
+                ggplot2::geom_hline(yintercept = upper_loa, linetype = "dashed", color = "red", size = 0.8) +
                 ggplot2::labs(
                     title = "Bland-Altman Plot",
-                    subtitle = paste0(
-                        "Mean difference = ", round(mean_diff, 2),
-                        "\nLimits of agreement: [", round(loa_lower, 2), ", ", round(loa_upper, 2), "]",
-                        prop_bias_text
-                    ),
-                    x = paste0("Mean of ", names(ratings)[1], " and ", names(ratings)[2]),
-                    y = paste0("Difference (", names(ratings)[1], " - ", names(ratings)[2], ")")
+                    subtitle = sprintf("Mean Difference and %g%% Limits of Agreement", conf_level * 100),
+                    x = sprintf("Mean of %s and %s", rater_names[1], rater_names[2]),
+                    y = sprintf("Difference (%s - %s)", rater_names[1], rater_names[2])
                 ) +
-                ggplot2::theme_minimal(base_size = 12) +
+                ggplot2::annotate("text", x = max(avg) * 0.95, y = mean_diff,
+                                label = sprintf("Mean: %.2f", mean_diff),
+                                hjust = 1, vjust = -0.5, color = "blue") +
+                ggplot2::annotate("text", x = max(avg) * 0.95, y = lower_loa,
+                                label = sprintf("Lower LoA: %.2f", lower_loa),
+                                hjust = 1, vjust = 1.2, color = "red") +
+                ggplot2::annotate("text", x = max(avg) * 0.95, y = upper_loa,
+                                label = sprintf("Upper LoA: %.2f", upper_loa),
+                                hjust = 1, vjust = -0.2, color = "red") +
+                ggplot2::theme_minimal() +
                 ggplot2::theme(
-                    plot.title = ggplot2::element_text(face = "bold"),
-                    plot.subtitle = ggplot2::element_text(size = 10)
+                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(hjust = 0.5)
                 )
 
-            # Set plot state
-            image$setState(list(
-                data = plotData,
-                mean_diff = mean_diff,
-                loa_upper = loa_upper,
-                loa_lower = loa_lower
-            ))
+            # Add proportional bias trend line if requested
+            if (prop_bias) {
+                p <- p + ggplot2::geom_smooth(method = "lm", se = TRUE, color = "darkgreen", size = 0.8)
+            }
 
-            print(plot)
+            print(p)
 
             return(TRUE)
         },
 
+        .populateBlandAltman = function(ratings) {
+            # Generate Bland-Altman plot for continuous agreement analysis
+            # Only applicable for 2 raters with numeric/continuous data
+
+            # Validate inputs
+            if (ncol(ratings) != 2) {
+                self$results$blandAltman$setVisible(FALSE)
+                self$results$blandAltmanStats$setVisible(FALSE)
+                self$results$blandAltmanStats$setNote(
+                    "error",
+                    "Bland-Altman analysis requires exactly 2 raters. Please select only 2 variables."
+                )
+                return()
+            }
+
+            # Check if data is numeric/continuous
+            if (!is.numeric(ratings[[1]]) || !is.numeric(ratings[[2]])) {
+                self$results$blandAltman$setVisible(FALSE)
+                self$results$blandAltmanStats$setVisible(FALSE)
+                self$results$blandAltmanStats$setNote(
+                    "error",
+                    "Bland-Altman analysis requires continuous (numeric) data. Your data appears to be categorical."
+                )
+                return()
+            }
+
+            # Calculate Bland-Altman statistics
+            rater1 <- ratings[[1]]
+            rater2 <- ratings[[2]]
+
+            # Remove missing values pairwise
+            complete_idx <- complete.cases(ratings)
+            rater1 <- rater1[complete_idx]
+            rater2 <- rater2[complete_idx]
+
+            # Calculate difference and mean
+            diff <- rater1 - rater2
+            avg <- (rater1 + rater2) / 2
+
+            # Statistics
+            mean_diff <- mean(diff, na.rm = TRUE)
+            sd_diff <- sd(diff, na.rm = TRUE)
+
+            # Limits of Agreement (LoA)
+            conf_level <- self$options$baConfidenceLevel
+            z_value <- qnorm((1 + conf_level) / 2)
+            lower_loa <- mean_diff - z_value * sd_diff
+            upper_loa <- mean_diff + z_value * sd_diff
+
+            # Test for proportional bias (if requested)
+            prop_bias_p <- NA
+            if (self$options$proportionalBias) {
+                tryCatch({
+                    lm_result <- lm(diff ~ avg)
+                    prop_bias_p <- summary(lm_result)$coefficients[2, 4]  # p-value for slope
+                }, error = function(e) {
+                    prop_bias_p <- NA
+                })
+            }
+
+            # Populate statistics table
+            self$results$blandAltmanStats$setRow(rowNo = 1, values = list(
+                meanDiff = mean_diff,
+                sdDiff = sd_diff,
+                lowerLoA = lower_loa,
+                upperLoA = upper_loa,
+                propBiasP = prop_bias_p
+            ))
+
+            # Generate plot
+            plot <- self$results$blandAltman
+            plot$setState(list(
+                diff = diff,
+                avg = avg,
+                mean_diff = mean_diff,
+                lower_loa = lower_loa,
+                upper_loa = upper_loa,
+                conf_level = conf_level,
+                prop_bias = self$options$proportionalBias,
+                rater_names = names(ratings)
+            ))
+        },
+
         .run = function() {
 
-                # Validate input ----
-                if (is.null(self$options$vars) || length(self$options$vars) < 2) {
-                    self$results$welcome$setVisible(TRUE)
-                    self$results$welcome$setContent(
-                        "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                        <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
-                        <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Interrater Reliability Analysis</h2>
-                        <p style='margin: 0; font-size: 14px; color: #666;'>Measure agreement between multiple raters scoring the same cases</p>
-                        </div>
+        # Validate input ----
+        if (is.null(self$options$vars) || length(self$options$vars) < 2) {
+            self$results$welcome$setVisible(TRUE)
+            self$results$welcome$setContent(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
+                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
+                <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Interrater Reliability Analysis</h2>
+                <p style='margin: 0; font-size: 14px; color: #666;'>Measure agreement between multiple raters scoring the same cases</p>
+                </div>
 
-                        <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
-                        <h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Setup Progress</h3>
-                        <div style='margin-bottom: 10px; font-size: 14px;'>
-                        [ ] Raters: 0/2 minimum - Select at least 2 rater variables to begin
-                        </div>
-                        </div>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                <h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Setup Progress</h3>
+                <div style='margin-bottom: 10px; font-size: 14px;'>
+                [ ] Raters: 0/2 minimum - Select at least 2 rater variables to begin
+                </div>
+                </div>
 
-                        <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>
-                        <tr>
-                        <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
-                        <h4 style='margin: 0 0 10px 0; font-size: 15px;'>Quick Start</h4>
-                        <ol style='margin: 0; padding-left: 20px; font-size: 14px;'>
-                        <li>Select 2+ rater variables</li>
-                        <li>For ordinal data, choose weighted kappa</li>
-                        <li>Enable optional outputs as needed</li>
-                        </ol>
-                        </td>
-                        <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
-                        <h4 style='margin: 0 0 10px 0; font-size: 15px;'>Available Methods</h4>
-                        <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>
-                        <li><strong>Cohen's kappa:</strong> 2 raters</li>
-                        <li><strong>Fleiss' kappa:</strong> 3+ raters</li>
-                        <li><strong>Krippendorff's alpha:</strong> Alternative measure</li>
-                        </ul>
-                        </td>
-                        </tr>
-                        </table>
-                        </div>"
+                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>
+                <tr>
+                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
+                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>Quick Start</h4>
+                <ol style='margin: 0; padding-left: 20px; font-size: 14px;'>
+                <li>Select 2+ rater variables</li>
+                <li>For ordinal data, choose weighted kappa</li>
+                <li>Enable optional outputs as needed</li>
+                </ol>
+                </td>
+                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
+                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>Available Methods</h4>
+                <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>
+                <li><strong>Cohen's kappa:</strong> 2 raters</li>
+                <li><strong>Fleiss' kappa:</strong> 3+ raters</li>
+                <li><strong>Krippendorff's alpha:</strong> Alternative measure</li>
+                </ul>
+                </td>
+                </tr>
+                </table>
+                </div>"
+            )
+            return()
+        } else {
+            self$results$welcome$setVisible(FALSE)
+            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+
+            # Data preparation ----
+            exct <- self$options$exct
+            wght <- self$options$wght
+            mydata <- self$data
+
+            # Safe variable selection - ensure proper data frame structure
+            # Note: Variable names with spaces (e.g., "Rater 1") are handled correctly
+            # by R's bracket notation. No special escaping needed for data access.
+            ratings <- mydata[, self$options$vars, drop = FALSE]
+
+            # Ensure it's a proper data frame
+            if (!is.data.frame(ratings)) {
+                ratings <- as.data.frame(ratings)
+            }
+
+            # Preserve jamovi attributes if they exist
+            if (!is.null(attr(mydata, "jmv-desc"))) {
+                # Only copy attributes for selected columns
+                desc_attr <- attr(mydata, "jmv-desc")
+                if (length(desc_attr) > 0) {
+                    selected_desc <- desc_attr[names(desc_attr) %in% self$options$vars]
+                    if (length(selected_desc) > 0) {
+                        attr(ratings, "jmv-desc") <- selected_desc
+                    }
+                }
+            }
+
+            # Check for missing values and notify user ----
+            if (any(is.na(ratings))) {
+                n_total <- nrow(ratings)
+                n_complete <- sum(complete.cases(ratings))
+                n_missing <- n_total - n_complete
+                pct_missing <- round(100 * n_missing / n_total, 1)
+
+                self$results$irrtable$setNote(
+                    "missing",
+                    sprintf("Note: %d of %d cases excluded due to missing values (%.1f%%). Analysis based on %d complete cases.",
+                            n_missing, n_total, pct_missing, n_complete)
+                )
+            }
+
+            # 2 raters: Cohen's kappa ----
+            if (length(self$options$vars) == 2) {
+                xorder <- unlist(lapply(ratings, is.ordered))
+
+                if (wght %in% c("equal", "squared") && !all(xorder == TRUE)) {
+                    stop("Weighted kappa requires ordinal variables. Please select ordinal data or choose 'Unweighted'.")
+                }
+
+                if (exct == TRUE) {
+                    stop("Exact kappa requires at least 3 raters. Please add more rater variables or disable 'Exact Kappa'.")
+                }
+
+
+                # irr::kappa2 ----
+                result2 <- irr::kappa2(ratings = ratings, weight = wght)
+
+            # >=3 raters: Fleiss kappa ----
+            } else if (length(self$options$vars) >= 3) {
+                result2 <- irr::kappam.fleiss(ratings = ratings, exact = exct, detail = TRUE)
+            }
+
+
+            # Percentage agreement ----
+            result1 <- irr::agree(ratings)
+            if (result1[["value"]] > 100) {
+                result1[["value"]] <- "Please check the data. It seems that observers do not agree on any cases"
+            }
+
+            # Populate main results table ----
+            table2 <- self$results$irrtable
+
+            # Note: Exact kappa (Conger's) does not provide z-statistic or p-value
+            # Only Fleiss' formulation allows testing H0: Kappa=0
+            z_stat <- if (!is.null(result2[["statistic"]])) result2[["statistic"]] else NA
+            p_val <- if (!is.null(result2[["p.value"]])) result2[["p.value"]] else NA
+
+            table2$setRow(rowNo = 1, values = list(
+                method = result2[["method"]],
+                subjects = result1[["subjects"]],
+                raters = result1[["raters"]],
+                peragree = result1[["value"]],
+                kappa = result2[["value"]],
+                z = z_stat,
+                p = p_val
+            ))
+
+            # Add note if exact kappa was used (no statistical test)
+            if (exct && length(self$options$vars) >= 3) {
+                table2$setNote(
+                    "exact_note",
+                    "Note: Exact Kappa (Conger, 1980) does not provide statistical test. Use Fleiss' Kappa for hypothesis testing (H0: Kappa=0)."
+                )
+            }
+
+            # Frequency tables (if requested) ----
+            # Control visibility based on number of raters and sft option
+            num_raters <- length(self$options$vars)
+
+            if (self$options$sft) {
+                # Show contingency table only for 2 raters
+                self$results$contingencyTable$setVisible(num_raters == 2)
+
+                # Show rating combinations table only for 3+ raters
+                self$results$ratingCombinationsTable$setVisible(num_raters >= 3)
+
+                # For 2 raters, create a 2x2 contingency table
+                if (num_raters == 2) {
+                    # Create contingency table
+                    cont_table <- table(ratings[[1]], ratings[[2]])
+
+                    # Get row and column names
+                    row_names <- rownames(cont_table)
+                    col_names <- colnames(cont_table)
+
+                    # Create jamovi table with dynamic columns
+                    contTable <- self$results$contingencyTable
+
+                    # Add row name column
+                    # Note: names(ratings)[1] preserves original variable name with spaces
+                    contTable$addColumn(
+                        name = 'rater1',
+                        title = names(ratings)[1],  # Original name (e.g., "Rater 1")
+                        type = 'text'
                     )
-                    return()
+
+                    # Add columns for each category of rater 2
+                    # Note: use make.names() for safe column IDs, display original labels
+                    for (col_name in col_names) {
+                        col_id <- make.names(col_name)
+                        contTable$addColumn(
+                            name = col_id,
+                            title = as.character(col_name),  # Original category label
+                            type = 'integer'
+                        )
+                    }
+
+                    # Add row total column
+                    contTable$addColumn(
+                        name = 'row_total',
+                        title = 'Total',
+                        type = 'integer'
+                    )
+
+                    # Populate data rows
+                    for (i in seq_along(row_names)) {
+                        row_data <- list(rater1 = as.character(row_names[i]))
+
+                        for (j in seq_along(col_names)) {
+                            col_id <- make.names(col_names[j])
+                            row_data[[col_id]] <- as.integer(cont_table[i, j])
+                        }
+
+                        row_data$row_total <- sum(cont_table[i, ])
+                        contTable$addRow(rowKey = i, values = row_data)
+                    }
+
+                    # Add total row
+                    total_row <- list(rater1 = 'Total')
+                    for (j in seq_along(col_names)) {
+                        col_id <- make.names(col_names[j])
+                        total_row[[col_id]] <- sum(cont_table[, j])
+                    }
+                    total_row$row_total <- sum(cont_table)
+                    contTable$addRow(rowKey = 'total', values = total_row)
+
+                    # Add note about percentages
+                    contTable$setNote(
+                        'interpretation',
+                        sprintf('N = %d cases. Cell counts show frequency of agreement/disagreement patterns.',
+                                sum(cont_table))
+                    )
+
                 } else {
-                    self$results$welcome$setVisible(FALSE)
-                    if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+                    # For 3+ raters, show combination counts
+                    freq_table <- ratings %>%
+                        dplyr::group_by_all() %>%
+                        dplyr::count() %>%
+                        as.data.frame()
 
-                    # Data preparation ----
-                    exct <- self$options$exct
-                    wght <- self$options$wght
-                    mydata <- self$data
+                    # Create jamovi table with dynamic columns
+                    combTable <- self$results$ratingCombinationsTable
 
-                    # Safe variable selection - ensure proper data frame structure
-                    ratings <- mydata[, self$options$vars, drop = FALSE]
-
-                    # Ensure it's a proper data frame
-                    if (!is.data.frame(ratings)) {
-                        ratings <- as.data.frame(ratings)
-                    }
-
-                    # Preserve jamovi attributes if they exist
-                    if (!is.null(attr(mydata, "jmv-desc"))) {
-                        # Only copy attributes for selected columns
-                        desc_attr <- attr(mydata, "jmv-desc")
-                        if (length(desc_attr) > 0) {
-                            selected_desc <- desc_attr[names(desc_attr) %in% self$options$vars]
-                            if (length(selected_desc) > 0) {
-                                attr(ratings, "jmv-desc") <- selected_desc
-                            }
-                        }
-                    }
-
-                    # Check for missing values and notify user ----
-                    if (any(is.na(ratings))) {
-                        n_total <- nrow(ratings)
-                        n_complete <- sum(complete.cases(ratings))
-                        n_missing <- n_total - n_complete
-                        pct_missing <- round(100 * n_missing / n_total, 1)
-
-                        self$results$irrtable$setNote(
-                            "missing",
-                            sprintf("Note: %d of %d cases excluded due to missing values (%.1f%%). Analysis based on %d complete cases.",
-                                    n_missing, n_total, pct_missing, n_complete)
+                    # Add columns for each rater
+                    # Note: use make.names() for jamovi column IDs, but keep original
+                    # variable names (with spaces) as titles for display
+                    for (var_name in self$options$vars) {
+                        col_id <- make.names(var_name)
+                        combTable$addColumn(
+                            name = col_id,
+                            title = var_name,  # Original name with spaces preserved
+                            type = 'text'
                         )
                     }
 
-                    # 2 raters: Cohen's kappa ----
-                    if (length(self$options$vars) == 2) {
-                        xorder <- unlist(lapply(ratings, is.ordered))
+                    # Add count column
+                    combTable$addColumn(
+                        name = 'count',
+                        title = 'Count',
+                        type = 'integer'
+                    )
 
-                        if (wght %in% c("equal", "squared") && !all(xorder == TRUE)) {
-                            stop("Weighted kappa requires ordinal variables. Please select ordinal data or choose 'Unweighted'.")
-                        }
+                    # Populate rows (limit to 100 most frequent combinations)
+                    max_display <- min(100, nrow(freq_table))
 
-                        if (exct == TRUE) {
-                            stop("Exact kappa requires at least 3 raters. Please add more rater variables or disable 'Exact Kappa'.")
-                        }
+                    for (i in 1:max_display) {
+                        row_data <- list()
 
-
-                        # irr::kappa2 ----
-                        result2 <- irr::kappa2(ratings = ratings, weight = wght)
-
-                    # >=3 raters: Fleiss kappa ----
-                    } else if (length(self$options$vars) >= 3) {
-                        result2 <- irr::kappam.fleiss(ratings = ratings, exact = exct, detail = TRUE)
-                    }
-
-
-                    # Percentage agreement ----
-                    result1 <- irr::agree(ratings)
-                    if (result1[["value"]] > 100) {
-                        result1[["value"]] <- "Please check the data. It seems that observers do not agree on any cases"
-                    }
-
-                    # Populate main results table ----
-                    table2 <- self$results$irrtable
-
-                    # Note: Exact kappa (Conger's) does not provide z-statistic or p-value
-                    # Only Fleiss' formulation allows testing H0: Kappa=0
-                    z_stat <- if (!is.null(result2[["statistic"]])) result2[["statistic"]] else NA
-                    p_val <- if (!is.null(result2[["p.value"]])) result2[["p.value"]] else NA
-
-                    table2$setRow(rowNo = 1, values = list(
-                        method = result2[["method"]],
-                        subjects = result1[["subjects"]],
-                        raters = result1[["raters"]],
-                        peragree = result1[["value"]],
-                        kappa = result2[["value"]],
-                        z = z_stat,
-                        p = p_val
-                    ))
-
-                    # Add note if exact kappa was used (no statistical test)
-                    if (exct && length(self$options$vars) >= 3) {
-                        table2$setNote(
-                            "exact_note",
-                            "Note: Exact Kappa (Conger, 1980) does not provide statistical test. Use Fleiss' Kappa for hypothesis testing (H0: Kappa=0)."
-                        )
-                    }
-
-                    # Frequency tables (if requested) ----
-                    if (self$options$sft) {
-                        # For 2 raters, create a 2x2 contingency table
-                        if (length(self$options$vars) == 2) {
-                            # Create contingency table
-                            cont_table <- table(ratings[[1]], ratings[[2]])
-
-                            # Format as text output (like janitor::tabyl)
-                            text_output <- paste0(
-                                "\nContingency Table: ", names(ratings)[1], " vs ", names(ratings)[2], "\n",
-                                paste(rep("-", 60), collapse = ""), "\n\n"
-                            )
-
-                            # Create formatted table
-                            capture_output <- capture.output({
-                                print(addmargins(cont_table))
-                                cat("\n")
-                                cat("Row Percentages:\n")
-                                print(round(prop.table(cont_table, 1) * 100, 1))
-                                cat("\n")
-                                cat("Column Percentages:\n")
-                                print(round(prop.table(cont_table, 2) * 100, 1))
-                            })
-
-                            self$results$text$setContent(paste(capture_output, collapse = "\n"))
-
-                            # Compact HTML version
-                            n_row <- nrow(cont_table)
-                            n_col <- ncol(cont_table)
-
-                            html_table <- paste0(
-                                "<div style='font-family: monospace; font-size: 12px; overflow-x: auto;'>",
-                                "<p style='font-weight: bold; margin-bottom: 8px;'>",
-                                names(ratings)[1], " vs ", names(ratings)[2], "</p>",
-                                "<table style='border-collapse: collapse;'>",
-                                "<tr><th style='border: 1px solid #999; padding: 6px; background: #f5f5f5;'></th>"
-                            )
-
-                            # Column headers
-                            for (j in 1:n_col) {
-                                html_table <- paste0(html_table,
-                                    "<th style='border: 1px solid #999; padding: 6px; background: #f5f5f5; text-align: center;'>",
-                                    colnames(cont_table)[j], "</th>")
-                            }
-                            html_table <- paste0(html_table, "<th style='border: 1px solid #999; padding: 6px; background: #e8e8e8;'>Total</th></tr>")
-
-                            # Data rows
-                            for (i in 1:n_row) {
-                                html_table <- paste0(html_table,
-                                    "<tr><th style='border: 1px solid #999; padding: 6px; background: #f5f5f5;'>",
-                                    rownames(cont_table)[i], "</th>")
-
-                                row_total <- sum(cont_table[i, ])
-                                for (j in 1:n_col) {
-                                    pct <- round(cont_table[i, j] / row_total * 100, 1)
-                                    html_table <- paste0(html_table,
-                                        "<td style='border: 1px solid #999; padding: 6px; text-align: center;'>",
-                                        cont_table[i, j], "<br><span style='font-size: 11px; color: #666;'>(",
-                                        pct, "%)</span></td>")
-                                }
-                                html_table <- paste0(html_table,
-                                    "<td style='border: 1px solid #999; padding: 6px; background: #f9f9f9; text-align: center;'>",
-                                    row_total, "</td></tr>")
-                            }
-
-                            # Total row
-                            html_table <- paste0(html_table,
-                                "<tr><th style='border: 1px solid #999; padding: 6px; background: #e8e8e8;'>Total</th>")
-                            grand_total <- sum(cont_table)
-                            for (j in 1:n_col) {
-                                col_total <- sum(cont_table[, j])
-                                html_table <- paste0(html_table,
-                                    "<td style='border: 1px solid #999; padding: 6px; background: #f9f9f9; text-align: center;'>",
-                                    col_total, "</td>")
-                            }
-                            html_table <- paste0(html_table,
-                                "<td style='border: 1px solid #999; padding: 6px; background: #e8e8e8; text-align: center; font-weight: bold;'>",
-                                grand_total, "</td></tr>",
-                                "</table></div>")
-
-                            self$results$text2$setContent(html_table)
-
-                        } else {
-                            # For 3+ raters, show combination counts
-                            freq_table <- ratings %>%
-                                dplyr::group_by_all() %>%
-                                dplyr::count() %>%
-                                as.data.frame()
-
-                            # Text output
-                            self$results$text$setContent(capture.output(print(freq_table)))
-
-                            # Compact HTML for multiple raters
-                            max_display <- min(50, nrow(freq_table))  # Limit to 50 rows
-
-                            html_table <- paste0(
-                                "<div style='font-family: monospace; font-size: 11px; max-height: 400px; overflow-y: auto;'>",
-                                "<p style='font-weight: bold;'>Rating Combinations (showing ", max_display, " of ", nrow(freq_table), ")</p>",
-                                "<table style='width: auto; border-collapse: collapse;'>",
-                                "<tr style='background: #f5f5f5;'>"
-                            )
-
-                            # Headers
-                            for (col_name in names(freq_table)) {
-                                display_name <- if (col_name == "n") "Count" else col_name
-                                html_table <- paste0(html_table,
-                                    "<th style='border: 1px solid #ccc; padding: 4px 8px; font-size: 11px;'>",
-                                    display_name, "</th>")
-                            }
-                            html_table <- paste0(html_table, "</tr>")
-
-                            # Data rows (limited)
-                            for (i in 1:max_display) {
-                                html_table <- paste0(html_table, "<tr>")
-                                for (j in seq_len(ncol(freq_table))) {
-                                    html_table <- paste0(html_table,
-                                        "<td style='border: 1px solid #ccc; padding: 4px 8px;'>",
-                                        freq_table[i, j], "</td>")
-                                }
-                                html_table <- paste0(html_table, "</tr>")
-                            }
-
-                            html_table <- paste0(html_table,
-                                "</table>",
-                                "<p style='margin-top: 8px; font-size: 11px;'>Total: ", sum(freq_table$n), " ratings</p>",
-                                "</div>")
-
-                            self$results$text2$setContent(html_table)
-                        }
-                    }
-
-                    # Weighted Kappa Guide (if using weights) ----
-                    if (wght != "unweighted") {
-                        weight_guide <- private$.createWeightedKappaGuide(wght)
-                        self$results$weightedKappaGuide$setContent(weight_guide)
-                    }
-
-                    # Natural-language summary (if requested) ----
-                    if (self$options$showSummary) {
-                        summary_text <- private$.createSummary(result1, result2, wght, exct)
-                        self$results$summary$setContent(summary_text)
-                    }
-
-                    # About panel (if requested) ----
-                    if (self$options$showAbout) {
-                        about_text <- private$.createAboutPanel()
-                        self$results$about$setContent(about_text)
-                    }
-
-
-
-                    # Krippendorff's Alpha (if requested) ----
-                    if (self$options$kripp) {
-                        # Convert ratings data frame to matrix
-                        ratings_matrix <- as.matrix(ratings)
-
-                        # Ensure numeric conversion if needed
-                        if (!is.numeric(ratings_matrix)) {
-                            # If categorical/factor data, convert to numeric codes
-                            ratings_matrix <- matrix(
-                                as.numeric(factor(ratings_matrix)),
-                                nrow = nrow(ratings_matrix),
-                                ncol = ncol(ratings_matrix)
-                            )
-                        }
-
-                        # Add error handling
-                        tryCatch({
-                            # Calculate Krippendorff's alpha
-                            kripp_result <- irr::kripp.alpha(
-                                ratings_matrix,
-                                method = self$options$krippMethod
-                            )
-
-                            # Initialize values list for table
-                            values_list <- list(
-                                method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
-                                subjects = nrow(ratings_matrix),
-                                raters = ncol(ratings_matrix),
-                                alpha = kripp_result$value
-                            )
-
-                            # Calculate bootstrap CI if requested
-                            if (self$options$bootstrap) {
-                                set.seed(123) # for reproducibility
-                                n_boot <- 1000
-                                alpha_boots <- numeric(n_boot)
-
-                                for(i in 1:n_boot) {
-                                    boot_indices <- sample(1:nrow(ratings_matrix), replace = TRUE)
-                                    boot_data <- ratings_matrix[boot_indices,]
-
-                                    boot_alpha <- try(irr::kripp.alpha(boot_data,
-                                                                    method = self$options$krippMethod)$value,
-                                                    silent = TRUE)
-
-                                    if(!inherits(boot_alpha, "try-error")) {
-                                        alpha_boots[i] <- boot_alpha
-                                    }
-                                }
-
-                                # Calculate 95% confidence intervals
-                                ci <- quantile(alpha_boots, c(0.025, 0.975), na.rm = TRUE)
-
-                                # Add CI values to list
-                                values_list$ci_lower <- ci[1]
-                                values_list$ci_upper <- ci[2]
-                            }
-
-                            # Populate results table
-                            krippTable <- self$results$krippTable
-                            krippTable$setRow(rowNo = 1, values = values_list)
-
-                        }, error = function(e) {
-                            # Handle any errors that occur during calculation
-                            errorMessage <- paste("Error calculating Krippendorff's alpha:", e$message)
-                            warning(errorMessage)
-
-                            # Initialize values list for error case
-                            values_list <- list(
-                                method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
-                                subjects = nrow(ratings_matrix),
-                                raters = ncol(ratings_matrix),
-                                alpha = NA
-                            )
-
-                            if (self$options$bootstrap) {
-                                values_list$ci_lower <- NA
-                                values_list$ci_upper <- NA
-                            }
-
-                            # Populate table with NA values
-                            krippTable <- self$results$krippTable
-                            krippTable$setRow(rowNo = 1, values = values_list)
-
-                            # Add error message as footnote
-                            krippTable$addFootnote(rowNo = 1, col = "alpha", paste0("Error calculating Krippendorff's alpha: ", e$message))
-                        })
-                    }
-
-
-                    # Gwet's AC (if requested) ----
-                    if (self$options$gwet) {
-                        # Determine weight type
-                        gwet_weights <- switch(self$options$gwetWeights,
-                            "unweighted" = "identity",
-                            "linear" = "linear",
-                            "quadratic" = "quadratic"
-                        )
-
-                        tryCatch({
-                            # Calculate Gwet's AC using irrCAC package
-                            if (requireNamespace("irrCAC", quietly = TRUE)) {
-                                gwet_result <- irrCAC::gwet.ac.raw(
-                                    ratings,
-                                    weights = gwet_weights
-                                )
-
-                                gwetTable <- self$results$gwetTable
-                                gwetTable$setRow(rowNo = 1, values = list(
-                                    method = paste0("Gwet's AC (", self$options$gwetWeights, " weights)"),
-                                    subjects = nrow(ratings),
-                                    raters = ncol(ratings),
-                                    coefficient = gwet_result$est$coefficient,
-                                    se = gwet_result$est$se,
-                                    ci_lower = gwet_result$est$conf.int[1],
-                                    ci_upper = gwet_result$est$conf.int[2],
-                                    pvalue = gwet_result$est$p.value
-                                ))
-                            } else {
-                                gwetTable <- self$results$gwetTable
-                                gwetTable$setRow(rowNo = 1, values = list(
-                                    method = paste0("Gwet's AC (", self$options$gwetWeights, " weights)"),
-                                    subjects = nrow(ratings),
-                                    raters = ncol(ratings),
-                                    coefficient = NA,
-                                    se = NA,
-                                    ci_lower = NA,
-                                    ci_upper = NA,
-                                    pvalue = NA
-                                ))
-                                gwetTable$addFootnote(
-                                    rowNo = 1,
-                                    col = "coefficient",
-                                    "Package 'irrCAC' required for Gwet's AC calculation. Install with: install.packages('irrCAC')"
-                                )
-                            }
-
-                        }, error = function(e) {
-                            gwetTable <- self$results$gwetTable
-                            gwetTable$setRow(rowNo = 1, values = list(
-                                method = paste0("Gwet's AC (", self$options$gwetWeights, " weights)"),
-                                subjects = nrow(ratings),
-                                raters = ncol(ratings),
-                                coefficient = NA,
-                                se = NA,
-                                ci_lower = NA,
-                                ci_upper = NA,
-                                pvalue = NA
-                            ))
-                            gwetTable$addFootnote(
-                                rowNo = 1,
-                                col = "coefficient",
-                                paste0("Error calculating Gwet's AC: ", e$message)
-                            )
-                        })
-                    }
-
-
-                    # Show Level Ordering Information (if requested) ----
-                    if (self$options$showLevelInfo) {
-                        level_info_html <- "<div style='font-family: Arial, sans-serif; max-width: 800px;'>"
-                        level_info_html <- paste0(level_info_html,
-                            "<div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>",
-                            "<h3 style='margin: 0 0 5px 0; font-size: 16px;'>Variable Level Ordering</h3>",
-                            "<p style='margin: 0; font-size: 14px; color: #666;'>Current ordering of categorical levels in selected variables</p>",
-                            "</div>")
-
+                        # Add rater values
+                        # Note: freq_table column names preserve spaces from original variables
                         for (var_name in self$options$vars) {
-                            var_data <- self$data[[var_name]]
-
-                            if (is.factor(var_data)) {
-                                var_levels <- levels(var_data)
-                                is_ordered <- is.ordered(var_data)
-
-                                level_info_html <- paste0(level_info_html,
-                                    "<div style='border: 1px solid #ccc; padding: 12px; margin-bottom: 10px;'>",
-                                    "<p style='margin: 0 0 8px 0; font-weight: bold;'>", var_name, "</p>",
-                                    "<p style='margin: 0 0 5px 0; font-size: 13px;'>Type: ",
-                                    ifelse(is_ordered, "<span style='color: green;'>Ordered</span>", "<span style='color: orange;'>Nominal</span>"),
-                                    "</p>",
-                                    "<p style='margin: 0; font-size: 13px;'>Levels: ",
-                                    paste(var_levels, collapse = " → "),
-                                    "</p>",
-                                    "</div>")
-                            } else {
-                                level_info_html <- paste0(level_info_html,
-                                    "<div style='border: 1px solid #ccc; padding: 12px; margin-bottom: 10px;'>",
-                                    "<p style='margin: 0 0 8px 0; font-weight: bold;'>", var_name, "</p>",
-                                    "<p style='margin: 0; font-size: 13px; color: #999;'>Not a factor variable</p>",
-                                    "</div>")
-                            }
+                            col_id <- make.names(var_name)
+                            value <- freq_table[i, var_name, drop = TRUE]  # Explicit drop for clarity
+                            row_data[[col_id]] <- as.character(value)
                         }
 
-                        level_info_html <- paste0(level_info_html, "</div>")
-                        self$results$levelInfo$setContent(level_info_html)
+                        # Add count
+                        row_data$count <- as.integer(freq_table$n[i])
+
+                        combTable$addRow(rowKey = i, values = row_data)
                     }
 
-
-                    # Consensus variable (if requested) ----
-                    if (self$options$consensusVar && length(self$options$vars) >= 2) {
-                        tryCatch({
-                            # Calculate consensus for each row
-                            consensus_scores <- apply(ratings, 1, function(row) {
-                                # Get frequency table
-                                freq_table <- table(row)
-                                if (length(freq_table) == 0) return(NA)
-
-                                max_count <- max(freq_table)
-                                n_raters <- length(row[!is.na(row)])
-
-                                if (n_raters == 0) return(NA)
-
-                                # Check consensus rule
-                                pct_agree <- max_count / n_raters * 100
-
-                                consensus_threshold <- switch(self$options$consensusRule,
-                                    "majority" = 50,
-                                    "supermajority" = 75,
-                                    "unanimous" = 100
-                                )
-
-                                if (pct_agree < consensus_threshold) {
-                                    return(NA)  # No consensus
-                                }
-
-                                # Get modal value(s)
-                                modes <- names(freq_table)[freq_table == max_count]
-
-                                # Handle ties
-                                if (length(modes) > 1) {
-                                    consensus_val <- switch(self$options$tieBreaker,
-                                        "exclude" = NA,
-                                        "first" = modes[1],
-                                        "lowest" = modes[which.min(modes)],
-                                        "highest" = modes[which.max(modes)]
-                                    )
-                                } else {
-                                    consensus_val <- modes[1]
-                                }
-
-                                return(consensus_val)
-                            })
-
-                            # Calculate summary statistics
-                            n_consensus <- sum(!is.na(consensus_scores))
-                            n_ties <- sum(is.na(consensus_scores))
-                            pct_consensus <- round(n_consensus / nrow(ratings) * 100, 1)
-
-                            # Populate summary table
-                            self$results$consensusTable$setRow(rowNo = 1, values = list(
-                                consensus_var = self$options$consensusName,
-                                n_consensus = n_consensus,
-                                n_ties = n_ties,
-                                pct_consensus = pct_consensus
-                            ))
-
-                            # Create output variable
-                            self$results$consensusVar$setValues(consensus_scores)
-                            self$results$consensusVar$setName(self$options$consensusName)
-
-                        }, error = function(e) {
-                            warning("Error creating consensus variable: ", e$message)
-                        })
-                    }
-
-
-                    # Pairwise kappa (if reference rater specified) ----
-                    if (!is.null(self$options$referenceRater) && length(self$options$vars) >= 2) {
-                        ref_rater <- self$data[[self$options$referenceRater]]
-
-                        pairwise_results <- list()
-
-                        for (var_name in self$options$vars) {
-                            if (var_name == self$options$referenceRater) next  # Skip self-comparison
-
-                            test_rater <- self$data[[var_name]]
-
-                            # Create 2-rater data frame
-                            pair_data <- data.frame(
-                                ref = ref_rater,
-                                test = test_rater
-                            )
-                            pair_data <- na.omit(pair_data)
-
-                            if (nrow(pair_data) > 0) {
-                                tryCatch({
-                                    # Calculate kappa
-                                    kappa_result <- irr::kappa2(pair_data, weight = self$options$wght)
-
-                                    # Calculate confidence interval (assuming normal distribution)
-                                    kappa_val <- kappa_result$value
-                                    n <- nrow(pair_data)
-                                    se_kappa <- sqrt((kappa_val * (1 - kappa_val)) / n)  # Simplified SE
-
-                                    ci_lower <- kappa_val - 1.96 * se_kappa
-                                    ci_upper <- kappa_val + 1.96 * se_kappa
-
-                                    # Interpret kappa (Landis & Koch)
-                                    if (is.na(kappa_val) || kappa_val < 0) {
-                                        interp <- "Poor"
-                                    } else if (kappa_val < 0.20) {
-                                        interp <- "Slight"
-                                    } else if (kappa_val < 0.40) {
-                                        interp <- "Fair"
-                                    } else if (kappa_val < 0.60) {
-                                        interp <- "Moderate"
-                                    } else if (kappa_val < 0.80) {
-                                        interp <- "Substantial"
-                                    } else {
-                                        interp <- "Almost Perfect"
-                                    }
-
-                                    pairwise_results[[var_name]] <- list(
-                                        rater = var_name,
-                                        n_cases = nrow(pair_data),
-                                        kappa = kappa_val,
-                                        ci_lower = ci_lower,
-                                        ci_upper = ci_upper,
-                                        interpretation = interp
-                                    )
-                                }, error = function(e) {
-                                    warning("Error calculating pairwise kappa for ", var_name, ": ", e$message)
-                                })
-                            }
-                        }
-
-                        # Sort by kappa if ranking requested
-                        if (self$options$rankRaters && length(pairwise_results) > 0) {
-                            pairwise_results <- pairwise_results[order(
-                                sapply(pairwise_results, function(x) x$kappa),
-                                decreasing = TRUE
-                            )]
-                        }
-
-                        # Populate table
-                        if (length(pairwise_results) > 0) {
-                            pairwise_table <- self$results$pairwiseKappaTable
-                            for (i in seq_along(pairwise_results)) {
-                                row_data <- pairwise_results[[i]]
-                                if (self$options$rankRaters) {
-                                    row_data$rank <- i
-                                }
-                                pairwise_table$setRow(rowNo = i, values = row_data)
-                            }
-                        }
-                    }
-
-
-                    # Level of Agreement variable (if requested) ----
-                    if (self$options$loaVariable && length(self$options$vars) >= 2) {
-                        tryCatch({
-                            # Calculate level of agreement for each case
-                            loa_scores <- apply(ratings, 1, function(row) {
-                                # Remove missing values
-                                row_clean <- row[!is.na(row)]
-                                if (length(row_clean) == 0) return(NA)
-
-                                # Calculate agreement percentage
-                                freq_table <- table(row_clean)
-                                max_count <- max(freq_table)
-                                pct_agree <- (max_count / length(row_clean)) * 100
-
-                                # Categorize based on thresholds
-                                if (self$options$loaThresholds == "custom") {
-                                    high_thresh <- self$options$loaHighThreshold
-                                    low_thresh <- self$options$loaLowThreshold
-
-                                    if (pct_agree == 100) {
-                                        return("Absolute")
-                                    } else if (pct_agree >= high_thresh) {
-                                        return("High")
-                                    } else if (pct_agree >= low_thresh) {
-                                        return("Moderate")
-                                    } else {
-                                        return("Low")
-                                    }
-                                } else if (self$options$loaThresholds == "quartiles") {
-                                    # Will be calculated after all scores
-                                    return(pct_agree)
-                                } else if (self$options$loaThresholds == "tertiles") {
-                                    # Will be calculated after all scores
-                                    return(pct_agree)
-                                }
-                            })
-
-                            # If using data-driven thresholds, calculate them
-                            if (self$options$loaThresholds %in% c("quartiles", "tertiles")) {
-                                numeric_scores <- as.numeric(loa_scores)
-                                numeric_scores <- numeric_scores[!is.na(numeric_scores)]
-
-                                if (self$options$loaThresholds == "quartiles") {
-                                    breaks <- quantile(numeric_scores, probs = c(0, 0.25, 0.5, 0.75, 1))
-                                    loa_scores <- cut(as.numeric(loa_scores),
-                                                    breaks = breaks,
-                                                    labels = c("Low", "Moderate", "High", "Very High"),
-                                                    include.lowest = TRUE)
-                                } else {
-                                    breaks <- quantile(numeric_scores, probs = c(0, 0.33, 0.67, 1))
-                                    loa_scores <- cut(as.numeric(loa_scores),
-                                                    breaks = breaks,
-                                                    labels = c("Low", "Moderate", "High"),
-                                                    include.lowest = TRUE)
-                                }
-
-                                loa_scores <- as.character(loa_scores)
-                            }
-
-                            # Convert to factor with proper ordering
-                            loa_levels <- c("Low", "Moderate", "High", "Very High", "Absolute")
-                            loa_scores_factor <- factor(loa_scores, levels = loa_levels, ordered = TRUE)
-
-                            # Create distribution table
-                            loa_table_data <- as.data.frame(table(loa_scores_factor))
-                            names(loa_table_data) <- c("category", "n")
-                            loa_table_data$percent <- round(loa_table_data$n / sum(loa_table_data$n) * 100, 1)
-
-                            # Populate table
-                            loaTable <- self$results$loaTable
-                            for (i in 1:nrow(loa_table_data)) {
-                                loaTable$setRow(rowNo = i, values = list(
-                                    category = as.character(loa_table_data$category[i]),
-                                    n = loa_table_data$n[i],
-                                    percent = loa_table_data$percent[i]
-                                ))
-                            }
-
-                            # Create output variable
-                            self$results$loaVar$setValues(loa_scores_factor)
-                            self$results$loaVar$setName("level_of_agreement")
-
-                        }, error = function(e) {
-                            warning("Error creating level of agreement variable: ", e$message)
-                        })
-                    }
-
-
-                    # Publication-ready text (if showSummary is enabled) ----
-                    if (self$options$showSummary && exists("result2")) {
-                        # Generate APA-style reporting text
-                        pub_text <- paste0(
-                            "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
-                            "<div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; margin-bottom: 15px;'>",
-                            "<h3 style='margin: 0 0 5px 0; font-size: 16px;'>Publication-Ready Text</h3>",
-                            "<p style='margin: 0; font-size: 14px; color: #666;'>Copy and adapt for your manuscript</p>",
-                            "</div>",
-                            "<div style='background: #fff; border: 1px solid #ccc; padding: 15px; font-size: 14px;'>",
-                            "<p style='margin: 0 0 10px 0;'>",
-                            "Interrater reliability was assessed using ", result2[["method"]], ". ",
-                            "Agreement was calculated for ", result1[["subjects"]], " cases rated by ",
-                            result1[["raters"]], " raters. "
+                    # Add note
+                    if (nrow(freq_table) > max_display) {
+                        combTable$setNote(
+                            'truncated',
+                            sprintf('Showing %d of %d unique rating combinations. Total: %d ratings.',
+                                    max_display, nrow(freq_table), sum(freq_table$n))
                         )
-
-                        if (wght != "unweighted") {
-                            pub_text <- paste0(pub_text,
-                                "Weighted kappa (", wght, " weights) was used to account for the ordinal nature of the data. "
-                            )
-                        }
-
-                        pub_text <- paste0(pub_text,
-                            "The kappa coefficient was ", sprintf("%.3f", result2[["value"]]),
-                            " (", sprintf("%.1f%%", result1[["value"]]), " raw agreement)"
+                    } else {
+                        combTable$setNote(
+                            'complete',
+                            sprintf('%d unique rating combinations. Total: %d ratings.',
+                                    nrow(freq_table), sum(freq_table$n))
                         )
-
-                        if (!is.null(result2[["p.value"]]) && !is.na(result2[["p.value"]])) {
-                            if (result2[["p.value"]] < 0.001) {
-                                pub_text <- paste0(pub_text, ", <em>p</em> < .001")
-                            } else {
-                                pub_text <- paste0(pub_text, ", <em>p</em> = ", sprintf("%.3f", result2[["p.value"]]))
-                            }
-                        }
-
-                        # Add interpretation
-                        kappa_val <- result2[["value"]]
-                        if (!is.na(kappa_val)) {
-                            if (kappa_val < 0) {
-                                interp <- "poor agreement"
-                            } else if (kappa_val < 0.20) {
-                                interp <- "slight agreement"
-                            } else if (kappa_val < 0.40) {
-                                interp <- "fair agreement"
-                            } else if (kappa_val < 0.60) {
-                                interp <- "moderate agreement"
-                            } else if (kappa_val < 0.80) {
-                                interp <- "substantial agreement"
-                            } else {
-                                interp <- "almost perfect agreement"
-                            }
-
-                            pub_text <- paste0(pub_text,
-                                ", indicating ", interp, " (Landis & Koch, 1977)."
-                            )
-                        } else {
-                            pub_text <- paste0(pub_text, ".")
-                        }
-
-                        pub_text <- paste0(pub_text,
-                            "</p>",
-                            "</div>",
-                            "</div>"
-                        )
-
-                        self$results$reportText$setContent(pub_text)
                     }
-                }  # Close else block from line 559
+                }
+            } else {
+                # Hide both frequency tables when sft is disabled
+                self$results$contingencyTable$setVisible(FALSE)
+                self$results$ratingCombinationsTable$setVisible(FALSE)
+            }
 
+            # Weighted Kappa Guide (if using weights) ----
+            if (wght != "unweighted") {
+                weight_guide <- private$.createWeightedKappaGuide(wght)
+                self$results$weightedKappaGuide$setContent(weight_guide)
+            }
 
+            # Natural-language summary (if requested) ----
+            if (self$options$showSummary) {
+                summary_text <- private$.createSummary(result1, result2, wght, exct)
+                self$results$summary$setContent(summary_text)
+            }
 
-
-
-
+            # About panel (if requested) ----
+            if (self$options$showAbout) {
+                about_text <- private$.createAboutPanel()
+                self$results$about$setContent(about_text)
+            }
         }
-    
-    ))
+
+
+
+        # Krippendorff's Alpha (if requested) ----
+        if (self$options$kripp) {
+            # Convert ratings data frame to matrix
+            ratings_matrix <- as.matrix(ratings)
+
+            # Ensure numeric conversion if needed
+            if (!is.numeric(ratings_matrix)) {
+                # If categorical/factor data, convert to numeric codes
+                ratings_matrix <- matrix(
+                    as.numeric(factor(ratings_matrix)),
+                    nrow = nrow(ratings_matrix),
+                    ncol = ncol(ratings_matrix)
+                )
+            }
+
+            # Add error handling
+            tryCatch({
+                # Calculate Krippendorff's alpha
+                kripp_result <- irr::kripp.alpha(
+                    ratings_matrix,
+                    method = self$options$krippMethod
+                )
+
+                # Initialize values list for table
+                values_list <- list(
+                    method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
+                    subjects = nrow(ratings_matrix),
+                    raters = ncol(ratings_matrix),
+                    alpha = kripp_result$value
+                )
+
+                # Calculate bootstrap CI if requested
+                if (self$options$bootstrap) {
+                    set.seed(123) # for reproducibility
+                    n_boot <- 1000
+                    alpha_boots <- numeric(n_boot)
+
+                    for(i in 1:n_boot) {
+                        boot_indices <- sample(1:nrow(ratings_matrix), replace = TRUE)
+                        boot_data <- ratings_matrix[boot_indices,]
+
+                        boot_alpha <- try(irr::kripp.alpha(boot_data,
+                                                           method = self$options$krippMethod)$value,
+                                          silent = TRUE)
+
+                        if(!inherits(boot_alpha, "try-error")) {
+                            alpha_boots[i] <- boot_alpha
+                        }
+                    }
+
+                    # Calculate 95% confidence intervals
+                    ci <- quantile(alpha_boots, c(0.025, 0.975), na.rm = TRUE)
+
+                    # Add CI values to list
+                    values_list$ci_lower <- ci[1]
+                    values_list$ci_upper <- ci[2]
+                }
+
+                # Populate results table
+                krippTable <- self$results$krippTable
+                krippTable$setRow(rowNo = 1, values = values_list)
+
+            }, error = function(e) {
+                # Handle any errors that occur during calculation
+                errorMessage <- paste("Error calculating Krippendorff's alpha:", e$message)
+                warning(errorMessage)
+
+                # Initialize values list for error case
+                values_list <- list(
+                    method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
+                    subjects = nrow(ratings_matrix),
+                    raters = ncol(ratings_matrix),
+                    alpha = NA
+                )
+
+                if (self$options$bootstrap) {
+                    values_list$ci_lower <- NA
+                    values_list$ci_upper <- NA
+                }
+
+                # Populate table with NA values
+                krippTable <- self$results$krippTable
+                krippTable$setRow(rowNo = 1, values = values_list)
+
+                # Add error message as footnote
+                krippTable$addFootnote(rowNo = 1, col = "alpha", paste0("Error calculating Krippendorff's alpha: ", e$message))
+            })
+        }
+
+        # Bland-Altman analysis (if requested) ----
+        if (self$options$blandAltmanPlot) {
+            private$.populateBlandAltman(ratings)
+        }
+
+        }  # End of .run function
+
+    ),  # End of private list
+
+    public = list(
+        #' @description
+        #' Generate R source code for Interrater Reliability analysis
+        #' @return Character string with R syntax for reproducible analysis outside jamovi
+        asSource = function() {
+            vars <- self$options$vars
+
+            # Return empty string if insufficient variables
+            if (is.null(vars) || length(vars) < 2) {
+                return('')
+            }
+
+            # Escape variable names that need backticks
+            vars_escaped <- sapply(vars, function(v) {
+                private$.escapeVariableName(v)
+            })
+
+            # Build vars argument for function call
+            # Each variable name is quoted, with backticks if needed
+            vars_arg <- paste0('vars = c(',
+                             paste(sapply(vars_escaped, function(v) {
+                                 # If already has backticks, preserve them in quotes
+                                 if (grepl("^`.*`$", v)) {
+                                     paste0('"', v, '"')
+                                 } else {
+                                     paste0('"', v, '"')
+                                 }
+                             }), collapse = ', '),
+                             ')')
+
+            # Build other arguments
+            args_list <- c(vars_arg)
+
+            # Add weighted kappa option if not default
+            if (self$options$wght != "unweighted") {
+                wght_arg <- paste0('wght = "', self$options$wght, '"')
+                args_list <- c(args_list, wght_arg)
+            }
+
+            # Add exact kappa option if enabled
+            if (self$options$exct) {
+                args_list <- c(args_list, 'exct = TRUE')
+            }
+
+            # Add Krippendorff's alpha options if enabled
+            if (self$options$kripp) {
+                args_list <- c(args_list, 'kripp = TRUE')
+
+                if (self$options$krippMethod != "nominal") {
+                    args_list <- c(args_list, paste0('krippMethod = "', self$options$krippMethod, '"'))
+                }
+
+                if (self$options$bootstrap) {
+                    args_list <- c(args_list, 'bootstrap = TRUE')
+                }
+            }
+
+            # Add display options if enabled
+            if (self$options$sft) {
+                args_list <- c(args_list, 'sft = TRUE')
+            }
+
+            if (self$options$showSummary) {
+                args_list <- c(args_list, 'showSummary = TRUE')
+            }
+
+            # Build final R code
+            code <- paste0(
+                '# Interrater Reliability Analysis\n',
+                '# Generated by ClinicoPath jamovi module\n\n',
+                'library(ClinicoPath)\n\n',
+                '# Load your data\n',
+                '# data <- read.csv("your_data.csv")\n\n',
+                'agreement(\n',
+                '    data = data,\n',
+                '    ', paste(args_list, collapse = ',\n    '),
+                '\n)'
+            )
+
+            return(code)
+        }
+    )  # End of public list
+    )
