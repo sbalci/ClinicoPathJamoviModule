@@ -111,6 +111,7 @@ A results object containing:
 \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$coefficientTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

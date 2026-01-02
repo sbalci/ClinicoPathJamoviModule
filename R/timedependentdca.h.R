@@ -190,6 +190,7 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         instructionsText = function() private$.items[["instructionsText"]],
+        notices = function() private$.items[["notices"]],
         netBenefitTable = function() private$.items[["netBenefitTable"]],
         summaryTable = function() private$.items[["summaryTable"]],
         interventionsTable = function() private$.items[["interventionsTable"]],
@@ -207,6 +208,11 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="instructionsText",
                 title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -449,6 +455,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructionsText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$netBenefitTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interventionsTable} \tab \tab \tab \tab \tab a table \cr

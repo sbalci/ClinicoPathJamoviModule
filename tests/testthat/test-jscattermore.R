@@ -2,7 +2,7 @@
 # High-performance scatter plots using scattermore package
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Test data setup
 set.seed(123)

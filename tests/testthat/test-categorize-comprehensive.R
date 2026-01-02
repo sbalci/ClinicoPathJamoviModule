@@ -2,7 +2,7 @@
 # Validates binning logic, label generation, frequency tables, and categorized values
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Helper function to extract table data from jamovi results
 extract_table_data <- function(result, table_name) {

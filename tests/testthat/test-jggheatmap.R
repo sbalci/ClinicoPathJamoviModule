@@ -1,5 +1,5 @@
 # Comprehensive tests for jggheatmap function
-library(ClinicoPath)
+devtools::load_all()
 
 # Load test datasets
 data(histopathology, package = "ClinicoPath")

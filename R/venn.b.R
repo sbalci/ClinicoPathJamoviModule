@@ -1906,5 +1906,23 @@ vennClass <- if (requireNamespace('jmvcore'))
 
             # Private field to store exclusion warning message
             .excluded_warning = NULL
-        )
+        ), # End of private list
+        public = list(
+            #' @description
+            #' Generate R source code for venn diagram analysis
+            #' @return Character string with R syntax for reproducible analysis
+            asSource = function() {
+                # Get arguments
+                args <- private$.asArgs(incData = FALSE)
+                if (args != '')
+                    args <- paste0(',\n    ', args)
+
+                # Get package name dynamically
+                pkg_name <- utils::packageName()
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+                # Build complete function call
+                paste0(pkg_name, '::venn(\n    data = data', args, ')')
+            }
+        ) # End of public list
     )

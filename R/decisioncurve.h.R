@@ -14,11 +14,11 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             thresholdMin = 0.05,
             thresholdMax = 0.5,
             thresholdStep = 0.01,
-            showTable = TRUE,
+            showTable = FALSE,
             selectedThresholds = "0.05, 0.10, 0.15, 0.20, 0.25, 0.30",
-            showPlot = TRUE,
+            showPlot = FALSE,
             plotStyle = "standard",
-            showReferenceLinesLabels = TRUE,
+            showReferenceLinesLabels = FALSE,
             highlightRange = FALSE,
             highlightMin = 0.1,
             highlightMax = 0.3,
@@ -28,7 +28,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             confidenceIntervals = FALSE,
             bootReps = 1000,
             ciLevel = 0.95,
-            showOptimalThreshold = TRUE,
+            showOptimalThreshold = FALSE,
             compareModels = FALSE,
             weightedAUC = FALSE,
             clinicalDecisionRule = FALSE,
@@ -43,9 +43,9 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             benefitCorrectTreatment = 10000,
             harmFalseTreatment = 500,
             showStandardizedNetBenefit = FALSE,
-            multiModelComparison = TRUE,
+            multiModelComparison = FALSE,
             comparisonMethod = "bootstrap",
-            showDecisionConsequences = TRUE,
+            showDecisionConsequences = FALSE,
             resourceUtilization = FALSE,
             showRelativeUtility = FALSE, ...) {
 
@@ -107,7 +107,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showTable <- jmvcore::OptionBool$new(
                 "showTable",
                 showTable,
-                default=TRUE)
+                default=FALSE)
             private$..selectedThresholds <- jmvcore::OptionString$new(
                 "selectedThresholds",
                 selectedThresholds,
@@ -115,7 +115,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showPlot <- jmvcore::OptionBool$new(
                 "showPlot",
                 showPlot,
-                default=TRUE)
+                default=FALSE)
             private$..plotStyle <- jmvcore::OptionList$new(
                 "plotStyle",
                 plotStyle,
@@ -127,7 +127,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showReferenceLinesLabels <- jmvcore::OptionBool$new(
                 "showReferenceLinesLabels",
                 showReferenceLinesLabels,
-                default=TRUE)
+                default=FALSE)
             private$..highlightRange <- jmvcore::OptionBool$new(
                 "highlightRange",
                 highlightRange,
@@ -177,7 +177,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showOptimalThreshold <- jmvcore::OptionBool$new(
                 "showOptimalThreshold",
                 showOptimalThreshold,
-                default=TRUE)
+                default=FALSE)
             private$..compareModels <- jmvcore::OptionBool$new(
                 "compareModels",
                 compareModels,
@@ -248,7 +248,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..multiModelComparison <- jmvcore::OptionBool$new(
                 "multiModelComparison",
                 multiModelComparison,
-                default=TRUE)
+                default=FALSE)
             private$..comparisonMethod <- jmvcore::OptionList$new(
                 "comparisonMethod",
                 comparisonMethod,
@@ -260,7 +260,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showDecisionConsequences <- jmvcore::OptionBool$new(
                 "showDecisionConsequences",
                 showDecisionConsequences,
-                default=TRUE)
+                default=FALSE)
             private$..resourceUtilization <- jmvcore::OptionBool$new(
                 "resourceUtilization",
                 resourceUtilization,
@@ -407,6 +407,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         instructions = function() private$.items[["instructions"]],
         procedureNotes = function() private$.items[["procedureNotes"]],
+        notices = function() private$.items[["notices"]],
         resultsTable = function() private$.items[["resultsTable"]],
         optimalTable = function() private$.items[["optimalTable"]],
         clinicalImpactTable = function() private$.items[["clinicalImpactTable"]],
@@ -446,6 +447,21 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="procedureNotes",
                 title="Analysis Summary",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "outcome",
+                    "outcomePositive",
+                    "models",
+                    "thresholdRange",
+                    "thresholdMin",
+                    "thresholdMax",
+                    "thresholdStep",
+                    "selectedThresholds",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="resultsTable",
@@ -983,6 +999,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$optimalTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalImpactTable} \tab \tab \tab \tab \tab a table \cr
@@ -1017,11 +1034,11 @@ decisioncurve <- function(
     thresholdMin = 0.05,
     thresholdMax = 0.5,
     thresholdStep = 0.01,
-    showTable = TRUE,
+    showTable = FALSE,
     selectedThresholds = "0.05, 0.10, 0.15, 0.20, 0.25, 0.30",
-    showPlot = TRUE,
+    showPlot = FALSE,
     plotStyle = "standard",
-    showReferenceLinesLabels = TRUE,
+    showReferenceLinesLabels = FALSE,
     highlightRange = FALSE,
     highlightMin = 0.1,
     highlightMax = 0.3,
@@ -1031,7 +1048,7 @@ decisioncurve <- function(
     confidenceIntervals = FALSE,
     bootReps = 1000,
     ciLevel = 0.95,
-    showOptimalThreshold = TRUE,
+    showOptimalThreshold = FALSE,
     compareModels = FALSE,
     weightedAUC = FALSE,
     clinicalDecisionRule = FALSE,
@@ -1046,9 +1063,9 @@ decisioncurve <- function(
     benefitCorrectTreatment = 10000,
     harmFalseTreatment = 500,
     showStandardizedNetBenefit = FALSE,
-    multiModelComparison = TRUE,
+    multiModelComparison = FALSE,
     comparisonMethod = "bootstrap",
-    showDecisionConsequences = TRUE,
+    showDecisionConsequences = FALSE,
     resourceUtilization = FALSE,
     showRelativeUtility = FALSE) {
 

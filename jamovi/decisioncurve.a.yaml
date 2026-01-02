@@ -109,7 +109,7 @@ options:
     - name: showTable
       title: Show Results Table
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display table with net benefit values at selected thresholds.
@@ -125,7 +125,7 @@ options:
     - name: showPlot
       title: Show Decision Curve Plot
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display the decision curve plot.
@@ -148,7 +148,7 @@ options:
     - name: showReferenceLinesLabels
       title: Show Reference Line Labels
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show labels for "Treat All" and "Treat None" reference lines.
@@ -238,7 +238,7 @@ options:
     - name: showOptimalThreshold
       title: Show Optimal Thresholds
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Identify and display optimal threshold probabilities for each model.
@@ -369,7 +369,7 @@ options:
     - name: multiModelComparison
       title: Enhanced Multi-Model Comparison
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Perform comprehensive pairwise comparisons between all models with statistical tests.
@@ -392,7 +392,7 @@ options:
     - name: showDecisionConsequences
       title: Decision Consequences Table
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show detailed table of decision consequences (TP, FP, TN, FN) at selected thresholds.

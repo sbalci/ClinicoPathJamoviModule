@@ -58,6 +58,7 @@ this analysis, assumptions, and interpretation}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$warnings} \tab \tab \tab \tab \tab Important notices, warnings, and error messages \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab One-paragraph summary of results in plain language \cr
 \code{results$explanations} \tab \tab \tab \tab \tab Educational guide on agreement analysis \cr

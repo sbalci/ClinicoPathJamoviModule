@@ -1,7 +1,7 @@
 # Survival Power Analysis Examples
 # Examples demonstrating survivalpower function capabilities
 
-library(ClinicoPath)
+devtools::load_all()
 
 # Example 1: Oncology Trial - Sample Size Calculation
 # Scenario: Phase III trial comparing new cancer treatment vs standard care

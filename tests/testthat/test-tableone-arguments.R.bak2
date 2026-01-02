@@ -1,0 +1,439 @@
+# ═══════════════════════════════════════════════════════════
+# Argument Combination Tests: tableone
+# ═══════════════════════════════════════════════════════════
+#
+# These tests verify that tableone correctly handles:
+# 1. All table style options (sty parameter)
+# 2. Missing data exclusion (excl parameter)
+# 3. Optional display options (showSummary, showAbout, showReportSentence)
+# 4. All argument combinations
+#
+# Generated: 2026-01-02
+
+library(testthat)
+library(ClinicoPath)
+
+# Load test data
+data(tableone_test, package = "ClinicoPath")
+
+# ═══════════════════════════════════════════════════════════
+# Test 1: Table Style Options
+# ═══════════════════════════════════════════════════════════
+
+test_that("tableone sty='t1' (tableone style) works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorSize", "TumorStage"),
+    sty = "t1"
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone sty='t2' (gtsummary style) works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorSize", "TumorStage"),
+    sty = "t2"
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone sty='t3' (arsenal style) works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorSize", "TumorStage"),
+    sty = "t3"
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone sty='t4' (janitor style) works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Sex", "TumorStage", "Grade", "LymphNodes"),  # Categorical only for janitor
+    sty = "t4"
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone default style works", {
+  # Should use default (t1)
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage")
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 2: Missing Data Handling (excl parameter)
+# ═══════════════════════════════════════════════════════════
+
+test_that("tableone excl=FALSE includes missing data", {
+  # Use variables with known missing values
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Hemoglobin", "Ki67", "CA199"),  # These have missing values
+    excl = FALSE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone excl=TRUE excludes missing data", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Hemoglobin", "Ki67", "CA199"),
+    excl = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone default excl behavior works", {
+  # Default should be FALSE (include missing)
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Hemoglobin")
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 3: Display Options
+# ═══════════════════════════════════════════════════════════
+
+test_that("tableone showSummary=TRUE works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage"),
+    showSummary = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+
+  # Summary output should be visible
+  expect_true(result$summary$visible)
+})
+
+test_that("tableone showSummary=FALSE works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage"),
+    showSummary = FALSE
+  )
+
+  expect_no_error(result)
+  expect_false(result$results$summary$visible)
+})
+
+test_that("tableone showAbout=TRUE works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage"),
+    showAbout = TRUE
+  )
+
+  expect_no_error(result)
+  expect_true(result$results$about$visible)
+})
+
+test_that("tableone showAbout=FALSE works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage"),
+    showAbout = FALSE
+  )
+
+  expect_no_error(result)
+  expect_false(result$results$about$visible)
+})
+
+test_that("tableone showReportSentence=TRUE works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage"),
+    showReportSentence = TRUE
+  )
+
+  expect_no_error(result)
+  expect_true(result$results$reportSentence$visible)
+})
+
+test_that("tableone showReportSentence=FALSE works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage"),
+    showReportSentence = FALSE
+  )
+
+  expect_no_error(result)
+  expect_false(result$results$reportSentence$visible)
+})
+
+test_that("tableone all display options enabled works", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorStage"),
+    showSummary = TRUE,
+    showAbout = TRUE,
+    showReportSentence = TRUE
+  )
+
+  expect_no_error(result)
+  expect_true(result$results$summary$visible)
+  expect_true(result$results$about$visible)
+  expect_true(result$results$reportSentence$visible)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 4: Comprehensive Argument Combinations
+# ═══════════════════════════════════════════════════════════
+
+test_that("tableone works with all options combined (scenario 1)", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorSize", "TumorStage", "Grade"),
+    sty = "t1",
+    excl = FALSE,
+    showSummary = TRUE,
+    showAbout = FALSE,
+    showReportSentence = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone works with all options combined (scenario 2)", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "Hemoglobin", "WBC", "LVI", "PNI"),
+    sty = "t2",
+    excl = TRUE,
+    showSummary = FALSE,
+    showAbout = TRUE,
+    showReportSentence = FALSE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone works with all options combined (scenario 3)", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("TumorStage", "Grade", "LymphNodes", "TumorType"),
+    sty = "t3",
+    excl = FALSE,
+    showSummary = TRUE,
+    showAbout = TRUE,
+    showReportSentence = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone works with janitor style and categorical vars", {
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Sex", "TumorStage", "Grade", "LVI", "PNI", "LymphNodes"),
+    sty = "t4",
+    excl = FALSE,
+    showSummary = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 5: Style-Specific Variable Type Handling
+# ═══════════════════════════════════════════════════════════
+
+test_that("all styles handle continuous variables", {
+  vars_continuous <- c("Age", "TumorSize", "Hemoglobin", "WBC")
+
+  # Test each style with continuous variables
+  for (style in c("t1", "t2", "t3")) {
+    result <- tableone(
+      data = tableone_test,
+      vars = vars_continuous,
+      sty = style
+    )
+    expect_no_error(result)
+  }
+})
+
+test_that("all styles handle categorical variables", {
+  vars_categorical <- c("Sex", "LymphNodes", "LVI", "PNI", "TumorType")
+
+  # Test each style with categorical variables
+  for (style in c("t1", "t2", "t3", "t4")) {
+    result <- tableone(
+      data = tableone_test,
+      vars = vars_categorical,
+      sty = style
+    )
+    expect_no_error(result)
+  }
+})
+
+test_that("all styles handle ordinal factors", {
+  vars_ordinal <- c("TumorStage", "Grade")
+
+  # Test each style with ordinal factors
+  for (style in c("t1", "t2", "t3", "t4")) {
+    result <- tableone(
+      data = tableone_test,
+      vars = vars_ordinal,
+      sty = style
+    )
+    expect_no_error(result)
+  }
+})
+
+test_that("all styles handle mixed variable types", {
+  vars_mixed <- c("Age", "Sex", "TumorSize", "TumorStage", "Grade", "LVI")
+
+  # Test each style with mixed variables
+  for (style in c("t1", "t2", "t3")) {  # Skip t4 as it's categorical-focused
+    result <- tableone(
+      data = tableone_test,
+      vars = vars_mixed,
+      sty = style
+    )
+    expect_no_error(result)
+  }
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 6: Large Variable Sets
+# ═══════════════════════════════════════════════════════════
+
+test_that("tableone handles many variables simultaneously", {
+  # Use most available variables
+  many_vars <- c(
+    "Age", "Sex",
+    "TumorSize", "TumorStage", "Grade", "LymphNodes",
+    "LVI", "PNI", "PreinvasiveComponent", "TumorType",
+    "Hemoglobin", "WBC", "Ki67"
+  )
+
+  result <- tableone(
+    data = tableone_test,
+    vars = many_vars,
+    sty = "t1"
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone handles comprehensive clinical variable set", {
+  # Complete pathology workup
+  clinical_vars <- c(
+    "Age", "Sex",
+    "TumorSize", "TumorStage", "Grade",
+    "LVI", "PNI", "LymphNodes",
+    "Hemoglobin", "Ki67"
+  )
+
+  for (style in c("t1", "t2", "t3")) {
+    result <- tableone(
+      data = tableone_test,
+      vars = clinical_vars,
+      sty = style,
+      excl = TRUE
+    )
+    expect_no_error(result)
+  }
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 7: Publication-Ready Scenarios
+# ═══════════════════════════════════════════════════════════
+
+test_that("tableone generates publication table (gtsummary)", {
+  # Typical publication Table 1
+  result <- tableone(
+    data = tableone_test,
+    vars = c(
+      "Age", "Sex",
+      "TumorStage", "Grade",
+      "TumorSize", "LVI", "PNI",
+      "LymphNodes"
+    ),
+    sty = "t2",  # gtsummary for publication
+    excl = TRUE,
+    showReportSentence = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+test_that("tableone generates comprehensive descriptives (arsenal)", {
+  # Comprehensive table with all details
+  result <- tableone(
+    data = tableone_test,
+    vars = c(
+      "Age", "Sex",
+      "TumorSize", "TumorStage", "Grade",
+      "Hemoglobin", "WBC", "Ki67",
+      "Treatment", "Response"
+    ),
+    sty = "t3",  # arsenal for comprehensive
+    excl = FALSE,
+    showSummary = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 8: Minimal vs Maximal Configurations
+# ═══════════════════════════════════════════════════════════
+
+test_that("tableone works with minimal configuration", {
+  # Absolute minimum: data + vars only
+  result <- tableone(
+    data = tableone_test,
+    vars = "Age"
+  )
+
+  expect_no_error(result)
+})
+
+test_that("tableone works with maximal configuration", {
+  # All options explicitly set
+  result <- tableone(
+    data = tableone_test,
+    vars = c("Age", "Sex", "TumorSize", "TumorStage", "Grade",
+             "LVI", "PNI", "Hemoglobin", "Ki67"),
+    sty = "t2",
+    excl = TRUE,
+    showSummary = TRUE,
+    showAbout = TRUE,
+    showReportSentence = TRUE
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "tableoneResults")
+})

@@ -1124,5 +1124,33 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     return(data)
                 }
             }
-        )
+        ), # End of private list
+        public = list(
+            #' @description
+            #' Generate R source code for decisioncombine analysis
+            #' @return Character string with R syntax for reproducible analysis
+            asSource = function() {
+                gold <- self$options$gold
+                test1 <- self$options$test1
+                test2 <- self$options$test2
+
+                if (is.null(gold) || is.null(test1) || is.null(test2))
+                    return('')
+
+                # Get arguments
+                args <- ''
+                if (!is.null(private$.asArgs)) {
+                    args <- private$.asArgs(incData = FALSE)
+                }
+                if (args != '')
+                    args <- paste0(',\n    ', args)
+
+                # Get package name dynamically
+                pkg_name <- utils::packageName()
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+                # Build complete function call
+                paste0(pkg_name, '::decisioncombine(\n    data = data', args, ')')
+            }
+        ) # End of public list
     )

@@ -2909,5 +2909,62 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             self$results$aboutAnalysis$setContent(about_html)
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for Swimmer Plot analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            startTime <- self$options$startTime
+            endTime <- self$options$endTime
+            groupVar <- self$options$groupVar
+
+            if (is.null(startTime) || is.null(endTime))
+                return('')
+
+            # Escape variable names that contain spaces or special characters
+            startTime_escaped <- if (!is.null(startTime) && !identical(make.names(startTime), startTime)) {
+                paste0('`', startTime, '`')
+            } else {
+                startTime
+            }
+
+            endTime_escaped <- if (!is.null(endTime) && !identical(make.names(endTime), endTime)) {
+                paste0('`', endTime, '`')
+            } else {
+                endTime
+            }
+
+            # Build arguments
+            startTime_arg <- paste0('startTime = "', startTime_escaped, '"')
+            endTime_arg <- paste0('endTime = "', endTime_escaped, '"')
+
+            # Escape groupVar if present
+            groupVar_arg <- ''
+            if (!is.null(groupVar)) {
+                groupVar_escaped <- if (!identical(make.names(groupVar), groupVar)) {
+                    paste0('`', groupVar, '`')
+                } else {
+                    groupVar
+                }
+                groupVar_arg <- paste0(',\n    groupVar = "', groupVar_escaped, '"')
+            }
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::swimmerplot(\n    data = data,\n    ',
+                   startTime_arg, ',\n    ', endTime_arg, groupVar_arg, args, ')')
+        }
+    ) # End of public list
 )

@@ -1278,5 +1278,73 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         }
 
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for Within-Groups Statistics analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            dep1 <- self$options$dep1
+            dep2 <- self$options$dep2
+            dep3 <- self$options$dep3
+            dep4 <- self$options$dep4
+
+            if (is.null(dep1) || is.null(dep2))
+                return('')
+
+            # Escape all variable names
+            dep1_escaped <- if (!is.null(dep1) && !identical(make.names(dep1), dep1)) {
+                paste0('`', dep1, '`')
+            } else {
+                dep1
+            }
+
+            dep2_escaped <- if (!is.null(dep2) && !identical(make.names(dep2), dep2)) {
+                paste0('`', dep2, '`')
+            } else {
+                dep2
+            }
+
+            # Build base arguments
+            dep1_arg <- paste0('dep1 = "', dep1_escaped, '"')
+            dep2_arg <- paste0('dep2 = "', dep2_escaped, '"')
+
+            # Add optional dep3 and dep4
+            dep3_arg <- ''
+            if (!is.null(dep3)) {
+                dep3_escaped <- if (!identical(make.names(dep3), dep3)) {
+                    paste0('`', dep3, '`')
+                } else {
+                    dep3
+                }
+                dep3_arg <- paste0(',\n    dep3 = "', dep3_escaped, '"')
+            }
+
+            dep4_arg <- ''
+            if (!is.null(dep4)) {
+                dep4_escaped <- if (!identical(make.names(dep4), dep4)) {
+                    paste0('`', dep4, '`')
+                } else {
+                    dep4
+                }
+                dep4_arg <- paste0(',\n    dep4 = "', dep4_escaped, '"')
+            }
+
+            # Get other arguments
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::jjwithinstats(\n    data = data,\n    ',
+                   dep1_arg, ',\n    ', dep2_arg, dep3_arg, dep4_arg, args, ')')
+        }
+    ) # End of public list
 )

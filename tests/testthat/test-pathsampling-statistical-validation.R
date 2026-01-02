@@ -1,5 +1,5 @@
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # ==============================================================================
 # CRITICAL TESTS: Beta-Binomial PMF Validation

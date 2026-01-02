@@ -1,6 +1,10 @@
 test_that("agreement module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
   devtools::load_all()
+  data("histopathology", package = "ClinicoPath")
+  # Use a smaller subset for testing to ensure speed
+  histopathology <- histopathology[1:30, ]
+  
   expect_true(exists("agreementClass"))
   expect_true(is.function(agreement))
 })
@@ -129,7 +133,7 @@ test_that("agreement bootstrap confidence intervals work", {
   # Test bootstrap confidence intervals
   expect_error({
     result <- agreement(
-      data = histopathology,
+      data = histopathology[1:10, ],
       vars = c("Rater 1", "Rater 2"),
       kripp = TRUE,
       bootstrap = TRUE

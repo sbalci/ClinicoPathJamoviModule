@@ -68,6 +68,8 @@ children:
             name: forestPlot
             label: Show forest plot
             enable: (metaAnalysis)
+          - type: CheckBox
+            name: overrideMetaAnalysisWarning
   - type: CollapseBox
     label: Fixed Sensitivity/Specificity Analysis
     margin: normal
@@ -146,9 +148,8 @@ children:
             label: Metric Tolerance
             enable: >-
               (method:maximize_metric || method:minimize_metric ||
-              method:maximize_loess_metric || method:minimize_loess_metric
-              || method:maximize_spline_metric ||
-              method:minimize_spline_metric)
+              method:maximize_loess_metric || method:minimize_loess_metric ||
+              method:maximize_spline_metric || method:minimize_spline_metric)
           - type: ComboBox
             name: break_ties
             label: Tie Breaking Method
@@ -161,7 +162,9 @@ children:
             name: seed
             format: number
             label: Random Seed
-            enable: (method:maximize_boot_metric || method:minimize_boot_metric || bootstrapCI || calculateIDI || calculateNRI || bayesianAnalysis)
+            enable: >-
+              (method:maximize_boot_metric || method:minimize_boot_metric ||
+              bootstrapCI || calculateIDI || calculateNRI || bayesianAnalysis)
   - type: CollapseBox
     label: Analysis Options
     margin: normal
@@ -374,10 +377,6 @@ children:
               - type: CheckBox
                 name: effectSizeAnalysis
                 label: Effect Size Analysis
-              - type: ComboBox
-                name: effectSizeMethod
-                label: Effect Size Method
-                enable: (effectSizeAnalysis)
               - type: CheckBox
                 name: powerAnalysis
                 label: Statistical Power Analysis
@@ -414,15 +413,10 @@ children:
         margin: large
         children:
           - type: Label
-            label: Advanced Metrics
-          - type: CheckBox
-            name: advancedMetrics
-            label: Advanced Performance Metrics
-          - type: Label
-            label: Bayesian Analysis
+            label: Bootstrap Analysis with Prior Weighting
           - type: CheckBox
             name: bayesianAnalysis
-            label: Bayesian ROC Analysis
+            label: Bootstrap ROC Analysis (with optional prior)
           - type: TextBox
             name: priorAUC
             format: number

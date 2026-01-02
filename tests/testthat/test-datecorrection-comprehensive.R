@@ -2,7 +2,7 @@
 # Testing actual date correction accuracy, edge cases, and clinical scenarios
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 context("datecorrection - Comprehensive Clinical Scenarios")
 

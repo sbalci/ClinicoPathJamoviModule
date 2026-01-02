@@ -1,7 +1,7 @@
 ---
 name: enhancedROC
 title: Clinical ROC Analysis
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
 version: '0.0.32'
@@ -122,7 +122,7 @@ options:
     - name: useBootstrap
       title: 'Use Bootstrap'
       type: Bool
-      default: true
+      default: false
       description: 'Use bootstrap methods for confidence intervals'
 
     - name: bootstrapMethod
@@ -153,7 +153,7 @@ options:
     - name: stratifiedBootstrap
       title: 'Stratified Bootstrap'
       type: Bool
-      default: true
+      default: false
       description: 'Maintain outcome class proportions in bootstrap samples (recommended for imbalanced data)'
 
     # Comparison Options
@@ -180,13 +180,13 @@ options:
     - name: rocCurve
       title: 'ROC Curve Plot'
       type: Bool
-      default: true
+      default: false
       description: 'Display ROC curve plot'
 
     - name: aucTable
       title: 'AUC Summary Table'
       type: Bool
-      default: true
+      default: false
       description: 'Display AUC summary table'
 
     - name: cutoffTable
@@ -288,7 +288,7 @@ options:
     - name: detectImbalance
       title: 'Detect Class Imbalance'
       type: Bool
-      default: true
+      default: false
       description: 'Automatically detect class imbalance and recommend PRC when appropriate'
 
     - name: imbalanceThreshold
@@ -302,13 +302,13 @@ options:
     - name: showImbalanceWarning
       title: 'Show Imbalance Warning'
       type: Bool
-      default: true
+      default: false
       description: 'Display warning message when class imbalance is detected'
 
     - name: recommendPRC
       title: 'Recommend PRC for Imbalanced Data'
       type: Bool
-      default: true
+      default: false
       description: 'Recommend using Precision-Recall curves when imbalance is detected'
 
     # Clinical Context
@@ -323,7 +323,7 @@ options:
     - name: useObservedPrevalence
       title: 'Use Observed Prevalence'
       type: Bool
-      default: true
+      default: false
       description: 'Use the prevalence observed in the data for PPV/NPV and clinical impact calculations (recommended)'
 
     - name: clinicalContext
@@ -370,7 +370,7 @@ options:
     - name: clinical_interpretation
       title: 'Clinical Interpretation'
       type: Bool
-      default: true
+      default: false
       description: 'Provide clinical context for ROC analysis results'
 
     # Plotting Options
@@ -406,7 +406,7 @@ options:
     - name: showCutoffPoints
       title: 'Show Cutoff Points'
       type: Bool
-      default: true
+      default: false
       description: 'Highlight optimal cutoff points on ROC curve'
 
     - name: showConfidenceBands
@@ -419,13 +419,13 @@ options:
     - name: showMetricsDiff
       title: 'Show Metrics Differences'
       type: Bool
-      default: true
+      default: false
       description: 'Display detailed differences between model metrics'
 
     - name: statisticalComparison
       title: 'Statistical Model Comparison'
       type: Bool
-      default: true
+      default: false
       description: 'Perform comprehensive statistical comparison between models'
 
     # Calibration Analysis Options
@@ -438,13 +438,13 @@ options:
     - name: calibrationPlot
       title: 'Calibration Plot'
       type: Bool
-      default: true
+      default: false
       description: 'Display calibration plot with loess smoothing'
 
     - name: hosmerLemeshow
       title: 'Hosmer-Lemeshow Test'
       type: Bool
-      default: true
+      default: false
       description: 'Perform Hosmer-Lemeshow goodness-of-fit test'
 
     - name: hlGroups
@@ -458,13 +458,13 @@ options:
     - name: brierScore
       title: 'Brier Score'
       type: Bool
-      default: true
+      default: false
       description: 'Calculate Brier score and scaled Brier score'
 
     - name: calibrationMetrics
       title: 'Calibration Metrics'
       type: Bool
-      default: true
+      default: false
       description: 'Calculate calibration slope, intercept, and calibration-in-the-large'
 
     # Advanced Calibration Methods
@@ -541,31 +541,31 @@ options:
       default: macro
       description: 'Method for averaging AUC across classes'
 
-    # Time-Dependent ROC Options
-    - name: timeDependentROC
-      title: 'Time-Dependent ROC'
-      type: Bool
-      default: false
-      description: 'Enable time-dependent ROC analysis for survival/time-to-event outcomes'
-
-    - name: timePoints
-      title: 'Time Points'
-      type: String
-      default: '12,24,36'
-      description: 'Comma-separated time points for time-dependent ROC (e.g., 12,24,36 months)'
-
-    - name: tdRocMethod
-      title: 'Time-Dependent ROC Method'
-      type: List
-      options:
-          - title: 'Kaplan-Meier (KM)'
-            name: km
-          - title: 'Nearest Neighbor Estimation (NNE)'
-            name: nne
-          - title: 'Cox Model'
-            name: cox
-      default: km
-      description: 'Method for estimating time-dependent ROC curves'
+    # Time-Dependent ROC Options (NOT IMPLEMENTED - COMMENTED OUT)
+    # - name: timeDependentROC
+    #   title: 'Time-Dependent ROC'
+    #   type: Bool
+    #   default: false
+    #   description: 'Enable time-dependent ROC analysis for survival/time-to-event outcomes'
+    #
+    # - name: timePoints
+    #   title: 'Time Points'
+    #   type: String
+    #   default: '12,24,36'
+    #   description: 'Comma-separated time points for time-dependent ROC (e.g., 12,24,36 months)'
+    #
+    # - name: tdRocMethod
+    #   title: 'Time-Dependent ROC Method'
+    #   type: List
+    #   options:
+    #       - title: 'Kaplan-Meier (KM)'
+    #         name: km
+    #       - title: 'Nearest Neighbor Estimation (NNE)'
+    #         name: nne
+    #       - title: 'Cox Model'
+    #         name: cox
+    #   default: km
+    #   description: 'Method for estimating time-dependent ROC curves'
 
     # Clinical Impact Options
     - name: clinicalImpact
@@ -577,27 +577,27 @@ options:
     - name: nntCalculation
       title: 'Number Needed to Test/Treat'
       type: Bool
-      default: true
+      default: false
       description: 'Calculate number needed to test and number needed to diagnose'
 
     - name: clinicalUtilityCurve
       title: 'Clinical Utility Curve'
       type: Bool
-      default: true
+      default: false
       description: 'Display clinical utility curve showing test consequences'
 
     - name: decisionImpactTable
       title: 'Decision Impact Table'
       type: Bool
-      default: true
+      default: false
       description: 'Show decision impact at various thresholds'
 
-    # Survival ROC Enhancements
-    - name: survivalROC
-      title: 'Survival ROC Analysis'
-      type: Bool
-      default: false
-      description: 'Enable survival-specific ROC methods (requires time-to-event data)'
+    # Survival ROC Enhancements (NOT IMPLEMENTED - COMMENTED OUT)
+    # - name: survivalROC
+    #   title: 'Survival ROC Analysis'
+    #   type: Bool
+    #   default: false
+    #   description: 'Enable survival-specific ROC methods (requires time-to-event data)'
 
     - name: harrellCIndex
       title: "Harrell's C-Index"
@@ -652,7 +652,7 @@ options:
     - name: optimismCorrection
       title: 'Optimism Correction'
       type: Bool
-      default: true
+      default: false
       description: 'Apply optimism correction to performance metrics'
 
     - name: externalValidation

@@ -1,7 +1,7 @@
 context("test-pathagreement")
 
 # Load required library
-library(ClinicoPath)
+devtools::load_all()
 
 # =============================================================================
 # Basic Functionality Tests

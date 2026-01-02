@@ -1033,5 +1033,66 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(p)
             TRUE
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for jwaffle analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            groups <- self$options$groups
+            facet <- self$options$facet
+            counts <- self$options$counts
+
+            if (is.null(groups))
+                return('')
+
+            # Escape groups variable
+            groups_escaped <- if (!is.null(groups) && !identical(make.names(groups), groups)) {
+                paste0('`', groups, '`')
+            } else {
+                groups
+            }
+
+            # Build required arguments
+            groups_arg <- paste0('groups = "', groups_escaped, '"')
+
+            # Build optional facet argument
+            facet_arg <- ''
+            if (!is.null(facet)) {
+                facet_escaped <- if (!identical(make.names(facet), facet)) {
+                    paste0('`', facet, '`')
+                } else {
+                    facet
+                }
+                facet_arg <- paste0(',\n    facet = "', facet_escaped, '"')
+            }
+
+            # Build optional counts argument
+            counts_arg <- ''
+            if (!is.null(counts)) {
+                counts_escaped <- if (!identical(make.names(counts), counts)) {
+                    paste0('`', counts, '`')
+                } else {
+                    counts
+                }
+                counts_arg <- paste0(',\n    counts = "', counts_escaped, '"')
+            }
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::jwaffle(\n    data = data,\n    ',
+                   groups_arg, facet_arg, counts_arg, args, ')')
+        }
+    ) # End of public list
 )

@@ -7,7 +7,7 @@ context("test-jjbarstats-correctness")
 # 3. Missing data handling aligned with ggstatsplot
 # 4. Statistical requirements check with joint distribution
 
-library(ClinicoPath)
+devtools::load_all()
 
 # Helper function to create aggregated (weighted) data
 create_weighted_data <- function() {

@@ -3,7 +3,7 @@
 
 # Load required libraries for testing
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Test data setup
 setup_cure_test_data <- function() {

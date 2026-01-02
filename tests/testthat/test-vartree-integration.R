@@ -1,7 +1,7 @@
 # Integration tests for vartree module
 # Tests critical bug fixes: percvar wiring, composeTerm backticks, NA transparency
 
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("percvar and percvarLevel are wired to vtree correctly", {
   skip_if_not_installed('jmvReadWrite')

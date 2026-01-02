@@ -7,7 +7,7 @@ context("test-jjarcdiagram-correctness")
 # 3. Selective NA omission
 # 4. Directed network handling
 
-library(ClinicoPath)
+devtools::load_all()
 library(igraph)
 
 test_that("jjarcdiagram correctly handles node-level groups (not edge-level)", {

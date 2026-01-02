@@ -12,6 +12,7 @@ Analyzes and visualizes relationships between biomarker levels and treatment res
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-biomarkerresponseClass-asSource}{\code{biomarkerresponseClass$asSource()}}
 \item \href{#method-biomarkerresponseClass-clone}{\code{biomarkerresponseClass$clone()}}
 }
 }
@@ -33,7 +34,6 @@ Analyzes and visualizes relationships between biomarker levels and treatment res
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setStatePathSource'><code>jmvcore::Analysis$.setStatePathSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
@@ -49,6 +49,19 @@ Analyzes and visualizes relationships between biomarker levels and treatment res
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-biomarkerresponseClass-asSource"></a>}}
+\if{latex}{\out{\hypertarget{method-biomarkerresponseClass-asSource}{}}}
+\subsection{Method \code{asSource()}}{
+Generate R source code for biomarkerresponse analysis
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{biomarkerresponseClass$asSource()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Character string with R syntax for reproducible analysis
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-biomarkerresponseClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-biomarkerresponseClass-clone}{}}}

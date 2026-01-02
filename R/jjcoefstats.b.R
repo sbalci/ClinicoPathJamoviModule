@@ -1057,5 +1057,57 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             TRUE
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for Coefficient Statistics analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            outcome <- self$options$outcome
+            predictors <- self$options$predictors
+
+            if (is.null(outcome))
+                return('')
+
+            # Escape outcome variable
+            outcome_escaped <- if (!is.null(outcome) && !identical(make.names(outcome), outcome)) {
+                paste0('`', outcome, '`')
+            } else {
+                outcome
+            }
+
+            # Build outcome argument
+            outcome_arg <- paste0('outcome = "', outcome_escaped, '"')
+
+            # Escape predictors if present
+            predictors_arg <- ''
+            if (!is.null(predictors) && length(predictors) > 0) {
+                predictors_escaped <- sapply(predictors, function(v) {
+                    if (!is.null(v) && !identical(make.names(v), v))
+                        paste0('`', v, '`')
+                    else
+                        v
+                })
+                predictors_arg <- paste0(',\n    predictors = c(',
+                                       paste(sapply(predictors_escaped, function(v) paste0('"', v, '"')), collapse = ', '),
+                                       ')')
+            }
+
+            # Get other arguments
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::jjcoefstats(\n    data = data,\n    ',
+                   outcome_arg, predictors_arg, args, ')')
+        }
+    ) # End of public list
 )

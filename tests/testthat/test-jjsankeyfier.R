@@ -2,7 +2,7 @@
 # Tests sankey and alluvial diagram functionality
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Test Data Setup
 test_that("Test data loads correctly", {

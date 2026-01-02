@@ -1519,5 +1519,63 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 return(NULL)
             })
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for biomarkerresponse analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            biomarker <- self$options$biomarker
+            response <- self$options$response
+            groupVariable <- self$options$groupVariable
+
+            if (is.null(biomarker) || is.null(response))
+                return('')
+
+            # Escape biomarker variable
+            biomarker_escaped <- if (!is.null(biomarker) && !identical(make.names(biomarker), biomarker)) {
+                paste0('`', biomarker, '`')
+            } else {
+                biomarker
+            }
+
+            # Escape response variable
+            response_escaped <- if (!is.null(response) && !identical(make.names(response), response)) {
+                paste0('`', response, '`')
+            } else {
+                response
+            }
+
+            # Build required arguments
+            biomarker_arg <- paste0('biomarker = "', biomarker_escaped, '"')
+            response_arg <- paste0('response = "', response_escaped, '"')
+
+            # Build optional groupVariable argument
+            groupVariable_arg <- ''
+            if (!is.null(groupVariable)) {
+                groupVariable_escaped <- if (!identical(make.names(groupVariable), groupVariable)) {
+                    paste0('`', groupVariable, '`')
+                } else {
+                    groupVariable
+                }
+                groupVariable_arg <- paste0(',\n    groupVariable = "', groupVariable_escaped, '"')
+            }
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::biomarkerresponse(\n    data = data,\n    ',
+                   biomarker_arg, ',\n    ', response_arg, groupVariable_arg, args, ')')
+        }
+    ) # End of public list
 )

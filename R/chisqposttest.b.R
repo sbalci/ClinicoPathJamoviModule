@@ -1926,5 +1926,51 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for chisqposttest analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            rows <- self$options$rows
+            cols <- self$options$cols
+
+            if (is.null(rows) || is.null(cols))
+                return('')
+
+            # Escape rows variable
+            rows_escaped <- if (!is.null(rows) && !identical(make.names(rows), rows)) {
+                paste0('`', rows, '`')
+            } else {
+                rows
+            }
+
+            # Escape cols variable
+            cols_escaped <- if (!is.null(cols) && !identical(make.names(cols), cols)) {
+                paste0('`', cols, '`')
+            } else {
+                cols
+            }
+
+            # Build arguments
+            rows_arg <- paste0('rows = "', rows_escaped, '"')
+            cols_arg <- paste0('cols = "', cols_escaped, '"')
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::chisqposttest(\n    data = data,\n    ',
+                   rows_arg, ',\n    ', cols_arg, args, ')')
+        }
+    ) # End of public list
 )

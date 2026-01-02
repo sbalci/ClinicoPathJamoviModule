@@ -1,19 +1,176 @@
 ---
 name: create-function
-description: Scaffold a new jamovi function with all required files
+description: Scaffold a new jamovi function with optional interactive wizard
+interactive: true
 args:
   function_name:
     description: Name of the new jamovi function
     required: true
   function_type:
-    description: Type of function (survival, descriptive, plot, decision)
+    description: Type of function (survival, descriptive, plot, decision, diagnostic, agreement)
     required: false
-usage: /create-function <function_name> [function_type]
+  --wizard:
+    description: Launch interactive wizard to gather requirements
+    required: false
+    default: false
+  --template:
+    description: Use specific template (minimal, standard, comprehensive, clinical)
+    required: false
+    default: standard
+  --skip-examples:
+    description: Skip generating example usage code
+    required: false
+    default: false
+usage: /create-function <function_name> [function_type] [--wizard] [--template=standard]
+examples:
+  /create-function myanalysis --wizard                    # Interactive wizard mode
+  /create-function survival_analysis survival             # Quick create with type
+  /create-function diagnostic_test diagnostic --template=clinical
 ---
 
-# New Jamovi Function Scaffolding
+# New Jamovi Function Scaffolding with Interactive Wizard
 
 You are an expert jamovi developer creating a complete, well-structured jamovi function named `$ARGUMENTS`. Generate all 4 required files following best practices and module conventions.
+
+## Wizard Mode
+
+When `--wizard` is specified, guide the user through an interactive questionnaire to gather requirements before generating code. This ensures the generated function matches exact needs.
+
+### Wizard Flow
+
+**Step 1: Function Type Classification**
+```
+🧙 Jamovi Function Creation Wizard
+═══════════════════════════════════
+
+Creating function: {function_name}
+
+❓ What type of analysis will this function perform?
+
+1. Descriptive Statistics (summary tables, frequencies, distributions)
+2. Survival Analysis (Kaplan-Meier, Cox regression, competing risks)
+3. Diagnostic/ROC Analysis (sensitivity, specificity, AUC, decision curves)
+4. Agreement Analysis (kappa, ICC, Bland-Altman)
+5. Decision Analysis (decision trees, Markov models, cost-effectiveness)
+6. Plot/Visualization (specialized statistical plots)
+7. Other/Custom
+
+Your choice [1-7]:
+```
+
+**Step 2: Input Variables**
+```
+❓ What types of input variables will this function use?
+
+☐ Continuous variables (numeric measurements)
+☐ Categorical variables (groups, factors)
+☐ Time-to-event data (survival times, censoring)
+☐ Paired/matched data
+☐ Multiple groups
+☐ Covariates/adjustment variables
+
+Select all that apply [space to toggle, enter when done]:
+```
+
+**Step 3: Primary Output**
+```
+❓ What is the primary output?
+
+1. Statistical table (estimates, CIs, p-values)
+2. Plot/graph
+3. Both table and plot
+4. HTML report
+5. Multiple outputs (will configure later)
+
+Your choice [1-5]:
+```
+
+**Step 4: Statistical Methods**
+```
+❓ What statistical methods will be used?
+
+Examples for {detected_type}:
+- For Survival: Kaplan-Meier, Log-rank test, Cox regression
+- For Diagnostic: ROC curves, DeLong test, Youden index
+- For Descriptive: Mean/SD, Median/IQR, Frequencies
+
+Enter methods (comma-separated):
+```
+
+**Step 5: Special Features**
+```
+❓ Which features should be included?
+
+☐ Explanatory text for clinicians (showExplanations option)
+☐ Reproducible R code generation (showRCode option)
+☐ Multiple testing corrections (Bonferroni, BH, BY)
+☐ Bootstrapping/resampling options
+☐ Subgroup analysis capabilities
+☐ Export options (CSV, clipboard)
+
+Select all that apply:
+```
+
+**Step 6: Template Selection**
+```
+❓ Choose template complexity:
+
+1. Minimal - Basic structure, you'll add most logic
+2. Standard - Common patterns, moderate scaffolding
+3. Comprehensive - Full error handling, validation, notices
+4. Clinical - Comprehensive + clinical thresholds, interpretations
+
+Your choice [1-4]:
+```
+
+**Step 7: Confirmation**
+```
+📋 Function Specification Summary
+═════════════════════════════════
+
+Function name: {function_name}
+Type: {function_type}
+Inputs: {input_types}
+Primary output: {output_type}
+Methods: {methods}
+Features: {features}
+Template: {template}
+
+Proceed with generation? [Y/n]:
+```
+
+## Templates
+
+### Minimal Template
+- Basic R6 class structure
+- Placeholder `.init()` and `.run()` methods
+- TODO comments for key areas
+- Minimal error handling
+- **Use when:** You want maximum flexibility
+
+### Standard Template (default)
+- R6 class with common patterns
+- Input validation stubs
+- Error handling framework
+- TODO output generation
+- Help text placeholders
+- **Use when:** Normal development
+
+### Comprehensive Template
+- Full error handling with jmvcore::Notice
+- Complete input validation
+- Data preparation helpers
+- Explanatory content scaffolding
+- Best practices comments
+- **Use when:** Production-ready function
+
+### Clinical Template
+- All comprehensive features PLUS:
+- Clinical threshold checks (EPV, sample size, prevalence)
+- Domain-specific validation (pathology/oncology)
+- Plain-language explanations
+- Clinical interpretation helpers
+- **Use when:** Clinical/pathology module functions
 
 ## Function Specification
 

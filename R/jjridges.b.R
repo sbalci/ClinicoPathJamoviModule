@@ -2090,5 +2090,50 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             differences <- as.vector(outer(x, y, "-"))
             return(median(differences))
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for Ridge Plot analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            x_var <- self$options$x_var
+            y_var <- self$options$y_var
+
+            if (is.null(x_var) || is.null(y_var))
+                return('')
+
+            # Escape variable names
+            x_var_escaped <- if (!is.null(x_var) && !identical(make.names(x_var), x_var)) {
+                paste0('`', x_var, '`')
+            } else {
+                x_var
+            }
+
+            y_var_escaped <- if (!is.null(y_var) && !identical(make.names(y_var), y_var)) {
+                paste0('`', y_var, '`')
+            } else {
+                y_var
+            }
+
+            # Build arguments
+            x_var_arg <- paste0('x_var = "', x_var_escaped, '"')
+            y_var_arg <- paste0('y_var = "', y_var_escaped, '"')
+
+            # Get other arguments
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::jjridges(\n    data = data,\n    ',
+                   x_var_arg, ',\n    ', y_var_arg, args, ')')
+        }
+    ) # End of public list
 )

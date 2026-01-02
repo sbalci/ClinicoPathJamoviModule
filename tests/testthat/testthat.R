@@ -1,4 +1,4 @@
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 test_check("ClinicoPath")

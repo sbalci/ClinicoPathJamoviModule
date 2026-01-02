@@ -375,8 +375,58 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (is.null(plot)) {
                 return()
             }
-            
+
             print(plot)
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for jcomplexupset analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            set_vars <- self$options$set_vars
+            value_var <- self$options$value_var
+
+            if (is.null(set_vars) || length(set_vars) < 2)
+                return('')
+
+            # Escape set_vars
+            set_vars_escaped <- sapply(set_vars, function(v) {
+                if (!is.null(v) && !identical(make.names(v), v))
+                    paste0('`', v, '`')
+                else
+                    v
+            })
+
+            # Build set_vars argument
+            set_vars_arg <- paste0('set_vars = c(', paste(sapply(set_vars_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
+
+            # Build optional value_var argument
+            value_var_arg <- ''
+            if (!is.null(value_var)) {
+                value_var_escaped <- if (!identical(make.names(value_var), value_var)) {
+                    paste0('`', value_var, '`')
+                } else {
+                    value_var
+                }
+                value_var_arg <- paste0(',\n    value_var = "', value_var_escaped, '"')
+            }
+
+            # Get other arguments
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::jcomplexupset(\n    data = data,\n    ',
+                   set_vars_arg, value_var_arg, args, ')')
+        }
+    ) # End of public list
 )

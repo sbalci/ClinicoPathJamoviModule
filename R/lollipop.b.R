@@ -933,5 +933,50 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             self$results$plot$setState(plotState)
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for Lollipop Plot analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            dep <- self$options$dep
+            group <- self$options$group
+
+            if (is.null(dep) || is.null(group))
+                return('')
+
+            # Escape variable names
+            dep_escaped <- if (!is.null(dep) && !identical(make.names(dep), dep)) {
+                paste0('`', dep, '`')
+            } else {
+                dep
+            }
+
+            group_escaped <- if (!is.null(group) && !identical(make.names(group), group)) {
+                paste0('`', group, '`')
+            } else {
+                group
+            }
+
+            # Build arguments
+            dep_arg <- paste0('dep = "', dep_escaped, '"')
+            group_arg <- paste0('group = "', group_escaped, '"')
+
+            # Get other arguments
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::lollipop(\n    data = data,\n    ',
+                   dep_arg, ',\n    ', group_arg, args, ')')
+        }
+    ) # End of public list
 )

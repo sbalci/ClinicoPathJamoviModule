@@ -242,6 +242,10 @@ children:
                     name: convexHull
                   - type: ComboBox
                     name: tiedScoreHandling
+                  - type: TextBox
+                    name: splineKnots
+                    format: number
+                    enable: (smoothMethod)
   - type: CollapseBox
     label: Advanced Output
     collapsed: true
@@ -286,6 +290,21 @@ children:
                 children:
                   - type: CheckBox
                     name: splineCalibration
+                  - type: CheckBox
+                    name: eoRatio
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: namDagostino
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: greenwoodNam
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: calibrationBelt
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: calibrationDensity
+                    enable: (calibrationAnalysis)
           - type: LayoutBox
             cell:
               column: 1
@@ -317,42 +336,23 @@ children:
           - type: ComboBox
             name: multiClassAveraging
             enable: (multiClassROC)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: splineKnots
-        format: number
-  - type: CollapseBox
-    label: Time-Dependent ROC
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: timeDependentROC
-          - type: TextBox
-            name: timePoints
-            format: string
-            enable: (timeDependentROC)
-          - type: ComboBox
-            name: tdRocMethod
-            enable: (timeDependentROC)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: eoRatio
-      - type: CheckBox
-        name: namDagostino
-      - type: CheckBox
-        name: greenwoodNam
-      - type: CheckBox
-        name: calibrationBelt
-      - type: CheckBox
-        name: calibrationDensity
+  # - type: CollapseBox
+  #   label: Time-Dependent ROC
+  #   collapsed: true
+  #   stretchFactor: 1
+  #   children:
+  #     - type: LayoutBox
+  #       margin: large
+  #       children:
+  #         - type: CheckBox
+  #           name: timeDependentROC
+  #         - type: TextBox
+  #           name: timePoints
+  #           format: string
+  #           enable: (timeDependentROC)
+  #         - type: ComboBox
+  #           name: tdRocMethod
+  #           enable: (timeDependentROC)
   - type: CollapseBox
     label: Clinical Impact
     collapsed: true
@@ -372,8 +372,8 @@ children:
           - type: CheckBox
             name: decisionImpactTable
             enable: (clinicalImpact)
-          - type: CheckBox
-            name: survivalROC
+          # - type: CheckBox
+          #   name: survivalROC
           - type: CheckBox
             name: harrellCIndex
           - type: CheckBox
@@ -384,8 +384,6 @@ children:
             name: cumulativeDynamic
           - type: CheckBox
             name: competingRisksConcordance
-          - type: CheckBox
-            name: internalValidation
   - type: CollapseBox
     label: Plot Settings
     collapsed: true
@@ -400,23 +398,43 @@ children:
           - type: TextBox
             name: plotHeight
             format: number
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Validation & Model Performance
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: ComboBox
-        name: validationMethod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: optimismCorrection
-      - type: CheckBox
-        name: externalValidation
-      - type: CheckBox
-        name: decisionImpactCurves
-      - type: CheckBox
-        name: netBenefitRegression
-      - type: CheckBox
-        name: modelUpdating
-      - type: CheckBox
-        name: transportability
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Validation Settings
+                children:
+                  - type: ComboBox
+                    name: validationMethod
+                  - type: CheckBox
+                    name: optimismCorrection
+                  - type: CheckBox
+                    name: externalValidation
+                  - type: CheckBox
+                    name: internalValidation
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Advanced Performance Analysis
+                children:
+                  - type: CheckBox
+                    name: decisionImpactCurves
+                  - type: CheckBox
+                    name: netBenefitRegression
+                  - type: CheckBox
+                    name: modelUpdating
+                  - type: CheckBox
+                    name: transportability

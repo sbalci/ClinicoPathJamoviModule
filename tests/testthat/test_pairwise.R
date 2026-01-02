@@ -1,5 +1,5 @@
 # Test script for pairwise comparisons in crosstable
-library(ClinicoPath)
+devtools::load_all()
 
 # Create test data with 3 groups
 set.seed(123)

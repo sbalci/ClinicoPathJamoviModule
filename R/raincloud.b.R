@@ -905,5 +905,54 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             ))
         }
 
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for Raincloud Plot analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            dep_var <- self$options$dep_var
+            group_var <- self$options$group_var
+
+            if (is.null(dep_var))
+                return('')
+
+            # Escape variable names that contain spaces or special characters
+            dep_var_escaped <- if (!is.null(dep_var) && !identical(make.names(dep_var), dep_var)) {
+                paste0('`', dep_var, '`')
+            } else {
+                dep_var
+            }
+
+            # Build dep_var argument
+            dep_var_arg <- paste0('dep_var = "', dep_var_escaped, '"')
+
+            # Escape group_var if present
+            group_var_arg <- ''
+            if (!is.null(group_var)) {
+                group_var_escaped <- if (!identical(make.names(group_var), group_var)) {
+                    paste0('`', group_var, '`')
+                } else {
+                    group_var
+                }
+                group_var_arg <- paste0(',\n    group_var = "', group_var_escaped, '"')
+            }
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::raincloud(\n    data = data,\n    ',
+                   dep_var_arg, group_var_arg, args, ')')
+        }
+    ) # End of public list
 )

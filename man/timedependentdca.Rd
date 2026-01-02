@@ -74,6 +74,7 @@ overlay)}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructionsText} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$netBenefitTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$interventionsTable} \tab \tab \tab \tab \tab a table \cr

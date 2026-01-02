@@ -7,7 +7,7 @@ context("test-jjdotplotstats-correctness")
 # 3. Narrative accuracy across different group sizes
 # 4. Overall functionality across statistical methods
 
-library(ClinicoPath)
+devtools::load_all()
 
 # ============================================================================
 # SELECTIVE NA OMISSION TESTS

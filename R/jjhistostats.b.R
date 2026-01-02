@@ -1066,5 +1066,43 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 TRUE
             }
-        )
+        ), # End of private list
+        public = list(
+            #' @description
+            #' Generate R source code for Histogram Statistics analysis
+            #' @return Character string with R syntax for reproducible analysis
+            asSource = function() {
+                dep <- self$options$dep
+
+                if (is.null(dep) || length(dep) == 0)
+                    return('')
+
+                # Escape variable names that contain spaces or special characters
+                dep_escaped <- sapply(dep, function(v) {
+                    if (!is.null(v) && !identical(make.names(v), v))
+                        paste0('`', v, '`')
+                    else
+                        v
+                })
+
+                # Build dep argument
+                dep_arg <- paste0('dep = c(', paste(sapply(dep_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
+
+                # Get other arguments using base helper (if available)
+                args <- ''
+                if (!is.null(private$.asArgs)) {
+                    args <- private$.asArgs(incData = FALSE)
+                }
+                if (args != '')
+                    args <- paste0(',\n    ', args)
+
+                # Get package name dynamically
+                pkg_name <- utils::packageName()
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+                # Build complete function call
+                paste0(pkg_name, '::jjhistostats(\n    data = data,\n    ',
+                       dep_arg, args, ')')
+            }
+        ) # End of public list
     )

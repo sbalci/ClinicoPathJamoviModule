@@ -741,7 +741,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 return(list(
                     Sens = Sens, Spec = Spec, AccurT = AccurT,
                     PPV = PPV, NPV = NPV, LRP = LRP, LRN = LRN,
-                    PriorProb = PriorProb
+                    PriorProb = PriorProb,
+                    zero_cells = zero_cells
                 ))
             },
 
@@ -828,7 +829,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     comparisonTable$addRow(
                         rowKey = paste0(escaped_test_name, "_interp"),
                         values = list(
-                            test = paste0("  → ", clinical_interpretation, ifelse(zero_cells, " (zero cell; LR may be unstable)", "")),
+                            test = paste0("  → ", clinical_interpretation, ifelse(metrics$zero_cells, " (zero cell; LR may be unstable)", "")),
                             Sens = "", Spec = "", AccurT = "", PPV = "", NPV = "", LRP = "", LRN = ""
                         )
                     )
@@ -1307,7 +1308,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         diffTable$addFootnote(
                             rowKey = row_key,
                             col = "diff",
-                            jmvcore::.("Small paired sample/discordant counts; CI may be unstable (n={n}, discordant counts: {counts}).",
+                            jmvcore::format(jmvcore::.("Small paired sample/discordant counts; CI may be unstable (n={n}, discordant counts: {counts})."),
                                 n = result$n,
                                 counts = paste(result$counts, collapse = ", "))
                         )

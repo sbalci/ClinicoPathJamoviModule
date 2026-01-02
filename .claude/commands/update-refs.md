@@ -1,17 +1,68 @@
 ---
 name: update-refs
-description: Parse jamovi .b.R to find used packages and sync them with jamovi/*.r.yaml and jamovi/00refs.yaml
+description: Parse jamovi .b.R to find packages and sync with refs, optionally fetching CRAN metadata
 interactive: true
 args:
   function_name:
     description: Jamovi function name (e.g., tableone) or --all to process every R/*.b.R
     required: true
-usage: /update-refs <function_name>|--all
+  --fetch-metadata:
+    description: Fetch actual package metadata from CRAN (author, year, title)
+    required: false
+    default: false
+  --validate-cran:
+    description: Validate that packages exist on CRAN before adding
+    required: false
+    default: true
+  --include-github:
+    description: Also check GitHub for packages not on CRAN
+    required: false
+    default: false
+usage: /update-refs <function_name>|--all [--fetch-metadata] [--validate-cran]
+examples:
+  /update-refs tableone                        # Basic update with placeholders
+  /update-refs tableone --fetch-metadata       # Fetch real CRAN metadata
+  /update-refs --all --fetch-metadata          # Update all with metadata
 ---
 
-# Update References for Jamovi Function
+# Update References for Jamovi Function with CRAN Metadata Fetching
 
-Synchronize references between `.b.R`, `jamovi/*.r.yaml`, and `jamovi/00refs.yaml`.
+Synchronize references between `.b.R`, `jamovi/*.r.yaml`, and `jamovi/00refs.yaml`. Optionally fetch real package metadata from CRAN to populate author, year, and title fields automatically.
+
+## Metadata Fetching
+
+When `--fetch-metadata` is enabled, the command queries CRAN to get actual package information:
+
+```r
+# Without metadata (default):
+packagename:
+    type: software
+    author:
+    year:
+    title: "packagename: R package"
+    publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=packagename"
+    url: https://CRAN.R-project.org/package=packagename
+
+# With metadata (--fetch-metadata):
+survival:
+    type: software
+    author: Terry M Therneau
+    year: 2023
+    title: "survival: Survival Analysis"
+    publisher: "[R package version 3.5-7]. Retrieved from https://CRAN.R-project.org/package=survival"
+    url: https://CRAN.R-project.org/package=survival
+    version: 3.5-7
+```
+
+**Metadata sources:**
+1. **CRAN packages:** Uses CRAN API to fetch DESCRIPTION file
+2. **GitHub packages:** (if `--include-github`) Uses GitHub API for non-CRAN packages
+3. **Cache:** Maintains local cache to avoid repeated API calls
+
+**Performance:**
+- Without metadata: ~1 second per function
+- With metadata: ~5 seconds per function (first time), ~1 second (cached)
+- With --all: Processes packages in parallel when possible
 
 ## Analysis Target
 

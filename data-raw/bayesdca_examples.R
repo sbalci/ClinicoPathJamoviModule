@@ -4,7 +4,7 @@
 # Load helper functions for multi-format data saving
 source("data-raw/data_save_helpers.R")
 
-library(ClinicoPath)
+devtools::load_all()
 
 # Set seed for reproducibility
 set.seed(20241201)

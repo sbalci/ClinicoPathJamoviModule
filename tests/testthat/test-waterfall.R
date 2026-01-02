@@ -3,7 +3,7 @@
 
 library(testthat)
 library(dplyr)
-library(ClinicoPath)
+devtools::load_all()
 
 # Test datasets
 test_data_percentage <- data.frame(

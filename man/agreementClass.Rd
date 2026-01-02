@@ -4,13 +4,17 @@
 \alias{agreementClass}
 \title{Interrater Reliability Analysis}
 \value{
-Table
+jamovi results object containing kappa statistics, tables, and optional outputs
 }
 \description{
-This function calculates interrater reliability for ordinal or categorical data.
+Calculate interrater reliability for multiple raters using kappa statistics,
+Krippendorff's alpha, and Gwet's AC. Supports weighted kappa for ordinal data,
+hierarchical/multilevel analysis, and consensus score derivation.
 }
 \details{
 The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
+Weighted kappa accounts for degree of disagreement in ordinal data. Krippendorff's alpha
+handles missing data. Gwet's AC corrects for paradoxical kappa behavior with high agreement rates.
 }
 \references{
 Cohen, J. (1960). A coefficient of agreement for nominal scales.

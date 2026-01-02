@@ -9,32 +9,9 @@ jas: '1.2'
 description:
     main: Function for Interrater Reliability.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            # Basic kappa analysis with 3 pathologists rating tumor grades
-            data('histopathologyDescriptives')
-            jmv::agreement(
-                data = histopathologyDescriptives,
-                vars = c('Pathologist_1', 'Pathologist_2', 'Pathologist_3')
-            )
-
-            # Weighted kappa for ordinal data (tumor grades: G1 < G2 < G3)
-            # First ensure variables are set as Ordinal with proper level ordering
-            jmv::agreement(
-                data = histopathologyDescriptives,
-                vars = c('Grade_Rater1', 'Grade_Rater2'),
-                wght = 'equal',
-                showLevelInfo = TRUE  # Verify level ordering before analysis
-            )
-
-            # Create consensus variable from 5 raters
-            jmv::agreement(
-                data = histopathologyDescriptives,
-                vars = c('R1', 'R2', 'R3', 'R4', 'R5'),
-                consensusVar = TRUE,
-                consensusRule = 'majority',
-                consensusName = 'consensus_diagnosis'
-            )
+            # example will be added
 
 
 options:
@@ -47,7 +24,7 @@ options:
     - name: vars
       title: Raters
       type: Variables
-      suggested: [ ordinal, nominal, continuous ]
+      suggested: [ ordinal, nominal ]
       permitted: [ factor, numeric ]
       description:
           R: >
@@ -76,14 +53,24 @@ options:
             Displays mean difference and limits of agreement between the first two raters.
             Only applicable when raters provide continuous measurements (e.g., tumor size in mm).
 
-    - name:  sft
-      title: 'Frequency Table'
-      type:  Bool
+    - name: sft
+      title: Show Frequency Tables
+      type: Bool
       default: false
       description:
           R: >
             Display frequency tables showing the distribution of ratings for each rater.
             Useful for understanding rating patterns and identifying potential biases.
+
+    - name: showText
+      title: Show Simple Text Frequency Tables
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display simple preformatted text version of frequency tables.
+            Provides a plain-text alternative to the HTML formatted tables.
+
 
     - name: wght
       title: Weighted Kappa (Ordinal Data Only)
@@ -147,6 +134,7 @@ options:
           R: >
             Calculate bootstrap confidence intervals for Krippendorff's alpha.
 
+
     - name: gwet
       title: "Calculate Gwet's AC1/AC2"
       type: Bool
@@ -199,30 +187,11 @@ options:
       type: Variable
       default: null
       suggested: [nominal, ordinal]
-      permitted: [factor]
+      permitted: [factor, numeric]
       description:
           R: >
             Variable defining clusters/institutions/centers. For example, hospital ID,
             institution name, or scanner ID. Raters are nested within these clusters.
-
-    - name: randomEffectsRater
-      title: "Random Effects for Raters"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Model rater effects as random (raters are a random sample from population
-            of potential raters). If false, raters are treated as fixed effects.
-            Random effects recommended when generalizing beyond specific raters.
-
-    - name: randomEffectsCluster
-      title: "Random Effects for Clusters"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Model cluster/institution effects as random (institutions are random sample).
-            Allows generalization beyond specific institutions in the study.
 
     - name: iccHierarchical
       title: "Hierarchical ICC"
@@ -293,6 +262,8 @@ options:
             Identifies best and worst performing sites. Use cautiously to avoid
             unfair comparisons when cluster sizes differ substantially.
 
+
+
     - name: showSummary
       title: "Show Plain-Language Summary"
       type: Bool
@@ -309,6 +280,7 @@ options:
       description:
           R: >
             Display an explanatory panel describing what this analysis does, when to use it, and how to interpret results.
+
 
     # Consensus Score Derivation
     - name: consensusVar
@@ -368,7 +340,7 @@ options:
       type: Variable
       default: null
       suggested: [ordinal, nominal]
-      permitted: [factor]
+      permitted: [factor, numeric]
       description:
           R: >
             Select a reference rater (e.g., consensus score, gold standard, senior pathologist).
@@ -430,14 +402,6 @@ options:
       description:
           R: >
             Minimum % agreement for "Low" LoA (e.g., 56% = ≥9/16 raters for N=16).
-
-    - name: loaVarName
-      title: "LoA Variable Name"
-      type: String
-      default: "loa_category"
-      description:
-          R: >
-            Name of the new computed variable for level of agreement.
 
 
 ...

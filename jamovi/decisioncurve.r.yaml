@@ -15,6 +15,22 @@ items:
       type: Html
       visible: true
 
+    # Notice outputs converted to HTML to avoid serialization errors
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+        - outcome
+        - outcomePositive
+        - models
+        - thresholdRange
+        - thresholdMin
+        - thresholdMax
+        - thresholdStep
+        - selectedThresholds
+        - clinicalDecisionRule
+        - decisionRuleVar
+
     # Main results table
     - name: resultsTable
       title: Net Benefit at Selected Thresholds

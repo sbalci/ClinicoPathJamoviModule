@@ -152,6 +152,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-survivalcontClass-asSource}{\code{survivalcontClass$asSource()}}
 \item \href{#method-survivalcontClass-clone}{\code{survivalcontClass$clone()}}
 }
 }
@@ -173,7 +174,6 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setStatePathSource'><code>jmvcore::Analysis$.setStatePathSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
@@ -189,6 +189,19 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-survivalcontClass-asSource"></a>}}
+\if{latex}{\out{\hypertarget{method-survivalcontClass-asSource}{}}}
+\subsection{Method \code{asSource()}}{
+Generate R source code for survivalcont analysis
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{survivalcontClass$asSource()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Character string with R syntax for reproducible analysis
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-survivalcontClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-survivalcontClass-clone}{}}}

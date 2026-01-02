@@ -14,8 +14,57 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-  - type: Label
-    label: Basic Agreement Measures
+      - type: TargetLayoutBox
+        label: Reference Rater
+        children:
+          - type: VariablesListBox
+            name: referenceRater
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Cluster/Institution Variable
+        children:
+          - type: VariablesListBox
+            name: clusterVariable
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sft
+          - type: CheckBox
+            name: showText
+            enable: (sft)
+          - type: CheckBox
+            name: showSummary
+          - type: CheckBox
+            name: showAbout
+          - type: CheckBox
+            name: showLevelInfo
+  - type: CollapseBox
+    label: Consensus Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: consensusVar
+          - type: ComboBox
+            name: consensusRule
+          - type: TextBox
+            name: consensusName
+            format: string
+          - type: ComboBox
+            name: tieBreaker
+  - type: CollapseBox
+    label: Weighted Kappa (Ordinal Data)
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large
@@ -23,12 +72,9 @@ children:
           - type: ComboBox
             name: wght
           - type: CheckBox
-            name: showLevelInfo
-            enable: (wght:unweighted == FALSE)
-          - type: CheckBox
             name: exct
   - type: CollapseBox
-    label: Krippendorff's Alpha
+    label: Advanced Agreement Statistics
     collapsed: true
     children:
       - type: LayoutBox
@@ -42,97 +88,36 @@ children:
           - type: CheckBox
             name: bootstrap
             enable: (kripp)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: baConfidenceLevel
-        format: number
-  - type: CollapseBox
-    label: Gwet's AC1/AC2
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
           - type: CheckBox
             name: gwet
           - type: ComboBox
             name: gwetWeights
-            enable: (gwet)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: proportionalBias
-      - type: CheckBox
-        name: blandAltmanPlot
   - type: CollapseBox
-    label: Pairwise Kappa Analysis
-    collapsed: true
-    children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Reference Rater
-            children:
-              - type: VariablesListBox
-                name: referenceRater
-                isTarget: true
-                maxItemCount: 1
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: rankRaters
-            enable: (referenceRater)
-  - type: CollapseBox
-    label: Consensus Score Derivation
+    label: Bland-Altman Analysis
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: consensusVar
-          - type: ComboBox
-            name: consensusRule
-            enable: (consensusVar)
-          - type: ComboBox
-            name: tieBreaker
-            enable: (consensusVar)
+            name: blandAltmanPlot
+          - type: CheckBox
+            name: proportionalBias
           - type: TextBox
-            name: consensusName
-            format: string
-            enable: (consensusVar)
-  - type: CollapseBox
-    label: Level of Agreement (LoA)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
+            name: baConfidenceLevel
+            format: number
           - type: CheckBox
             name: loaVariable
           - type: ComboBox
             name: loaThresholds
-            enable: (loaVariable)
           - type: TextBox
             name: loaHighThreshold
             format: number
-            enable: (loaVariable && loaThresholds:custom)
           - type: TextBox
             name: loaLowThreshold
             format: number
-            enable: (loaVariable && loaThresholds:custom)
-          - type: TextBox
-            name: loaVarName
-            format: string
-            enable: (loaVariable)
   - type: CollapseBox
-    label: Hierarchical/Multilevel Agreement
+    label: Hierarchical/Cluster Analysis
     collapsed: true
     children:
       - type: LayoutBox
@@ -140,67 +125,26 @@ children:
         children:
           - type: CheckBox
             name: hierarchicalKappa
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Cluster Variable
-            children:
-              - type: VariablesListBox
-                name: clusterVariable
-                isTarget: true
-                maxItemCount: 1
-                enable: (hierarchicalKappa)
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: randomEffectsRater
-            enable: (hierarchicalKappa)
-          - type: CheckBox
-            name: randomEffectsCluster
-            enable: (hierarchicalKappa)
-      - type: LayoutBox
-        margin: large
-        children:
           - type: CheckBox
             name: iccHierarchical
-            enable: (hierarchicalKappa)
           - type: CheckBox
             name: clusterSpecificKappa
-            enable: (hierarchicalKappa)
-      - type: LayoutBox
-        margin: large
-        children:
           - type: CheckBox
             name: betweenClusterVariance
-            enable: (hierarchicalKappa)
           - type: CheckBox
             name: withinClusterVariance
-            enable: (hierarchicalKappa)
-      - type: LayoutBox
-        margin: large
-        children:
           - type: CheckBox
             name: shrinkageEstimates
-            enable: (hierarchicalKappa)
           - type: CheckBox
             name: testClusterHomogeneity
-            enable: (hierarchicalKappa)
           - type: CheckBox
             name: clusterRankings
-            enable: (hierarchicalKappa)
   - type: CollapseBox
-    label: Display Options
+    label: Rater Ranking
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: sft
-          - type: CheckBox
-            name: showSummary
-          - type: CheckBox
-            name: showAbout
+            name: rankRaters

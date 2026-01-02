@@ -4,7 +4,7 @@
 context("Eurostat Map - Turkey Data Tests")
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 library(dplyr)
 
 # Load Turkey datasets

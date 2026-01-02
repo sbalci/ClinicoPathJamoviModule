@@ -12,6 +12,7 @@ jjsegmentedtotalbar(
   fill_var,
   facet_var = NULL,
   show_plot = FALSE,
+  plot_type = "stacked",
   chart_style = "clinical",
   color_palette = "clinical",
   show_percentages = FALSE,
@@ -31,8 +32,14 @@ jjsegmentedtotalbar(
   add_outline = FALSE,
   outline_color = "white",
   export_ready = FALSE,
+  flerlage_show_labels = FALSE,
+  flerlage_label_size = 4,
+  flerlage_label_color = "black",
+  flerlage_alpha = 0.3,
+  flerlage_box_color = "lightgrey",
   show_statistical_tests = FALSE,
   confidence_level = 0.95,
+  exclude_missing = TRUE,
   showExplanations = FALSE
 )
 }
@@ -51,6 +58,9 @@ composition.}
 \item{facet_var}{Optional variable for creating multiple panels.}
 
 \item{show_plot}{Show segmented total bar chart.}
+
+\item{plot_type}{Type of visualization - traditional 100\\% stacked bars or
+Flerlage-style segmented total bars.}
 
 \item{chart_style}{Overall visual style for the chart.}
 
@@ -90,10 +100,24 @@ composition.}
 
 \item{export_ready}{Whether to optimize plot for high-quality export.}
 
+\item{flerlage_show_labels}{Show value labels on Flerlage-style plots.}
+
+\item{flerlage_label_size}{Size of value labels in Flerlage plots.}
+
+\item{flerlage_label_color}{Color of value labels in Flerlage plots.}
+
+\item{flerlage_alpha}{Transparency of background boxes (0=transparent,
+1=opaque).}
+
+\item{flerlage_box_color}{Color of background boxes in Flerlage plots.}
+
 \item{show_statistical_tests}{Whether to perform chi-square tests for
 proportion differences.}
 
 \item{confidence_level}{Confidence level for statistical tests (0.80-0.99).}
+
+\item{exclude_missing}{Whether to exclude rows with missing values in key
+variables.}
 
 \item{showExplanations}{Show explanations of the statistical results}
 }

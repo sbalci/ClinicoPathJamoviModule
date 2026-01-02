@@ -2,7 +2,7 @@
 # These tests validate the correctness of the publication-ready plots function
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Test 1: Data Validation - Numeric X for Boxplot Should Fail ----
 test_that("jjpubr rejects numeric patient IDs as boxplot X variable", {

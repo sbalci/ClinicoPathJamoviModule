@@ -554,10 +554,68 @@ condsurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             Clin Colorectal Cancer. 2010.</p>
             </body>
             </html>"
-            
+
             self$results$methodExplanation$setContent(html)
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for condsurvival analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            time <- self$options$time
+            status <- self$options$status
+            group <- self$options$group
+
+            if (is.null(time) || is.null(status))
+                return('')
+
+            # Escape time variable
+            time_escaped <- if (!is.null(time) && !identical(make.names(time), time)) {
+                paste0('`', time, '`')
+            } else {
+                time
+            }
+
+            # Escape status variable
+            status_escaped <- if (!is.null(status) && !identical(make.names(status), status)) {
+                paste0('`', status, '`')
+            } else {
+                status
+            }
+
+            # Build required arguments
+            time_arg <- paste0('time = "', time_escaped, '"')
+            status_arg <- paste0('status = "', status_escaped, '"')
+
+            # Build optional group argument
+            group_arg <- ''
+            if (!is.null(group)) {
+                group_escaped <- if (!identical(make.names(group), group)) {
+                    paste0('`', group, '`')
+                } else {
+                    group
+                }
+                group_arg <- paste0(',\n    group = "', group_escaped, '"')
+            }
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::condsurvival(\n    data = data,\n    ',
+                   time_arg, ',\n    ', status_arg, group_arg, args, ')')
+        }
+    ) # End of public list
 )
 
 condsurvival <- condsurvivalClass$new

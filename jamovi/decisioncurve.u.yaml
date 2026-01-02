@@ -102,50 +102,126 @@ children:
                 name: costBenefitAnalysis
                 label: Run cost-benefit analysis
   - type: CollapseBox
-    label: Output Options
+    label: Tables & Outputs
     margin: normal
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: Label
-            label: Tables
-            children:
-              - type: CheckBox
-                name: showTable
-                label: Show results table
-              - type: TextBox
-                name: selectedThresholds
-                format: string
-                label: Thresholds for table
-                enable: (showTable)
+          - type: CheckBox
+            name: showTable
+            label: Show results table
+          - type: TextBox
+            name: selectedThresholds
+            format: string
+            label: Thresholds for table (comma-separated)
+            enable: (showTable)
+          - type: CheckBox
+            name: showOptimalThreshold
+            label: Show optimal thresholds
+          - type: CheckBox
+            name: showDecisionConsequences
+            label: Decision consequences table
+  - type: CollapseBox
+    label: Plots
+    margin: normal
+    collapsed: true
+    children:
       - type: LayoutBox
         margin: large
         children:
-          - type: Label
-            label: Plots
-            children:
-              - type: CheckBox
-                name: showPlot
-                label: Show decision curve plot
-              - type: ComboBox
-                name: plotStyle
-                label: Plot style
-                enable: (showPlot)
-              - type: CheckBox
-                name: showReferenceLinesLabels
-                label: Show reference line labels
-                enable: (showPlot)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: testCost
-        format: number
-        label: Test cost
+          - type: CheckBox
+            name: showPlot
+            label: Decision curve plot
+          - type: ComboBox
+            name: plotStyle
+            label: Plot style
+            enable: (showPlot)
+          - type: CheckBox
+            name: showReferenceLinesLabels
+            label: Show reference line labels
+            enable: (showPlot)
+          - type: CheckBox
+            name: highlightRange
+            label: Highlight clinical range
+            enable: (showPlot)
+          - type: TextBox
+            name: highlightMin
+            format: number
+            label: Range minimum
+            enable: (highlightRange && showPlot)
+          - type: TextBox
+            name: highlightMax
+            format: number
+            label: Range maximum
+            enable: (highlightRange && showPlot)
+          - type: CheckBox
+            name: showClinicalImpactPlot
+            label: Clinical impact plot
+          - type: CheckBox
+            name: showNetBenefitCI
+            label: Net benefit confidence intervals
+          - type: CheckBox
+            name: showRelativeUtility
+            label: Relative utility plot
+          - type: CheckBox
+            name: showStandardizedNetBenefit
+            label: Standardized net benefit plot
   - type: CollapseBox
-    label: Clinical Impact Analysis
+    label: Cost-Benefit Analysis
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: costBenefitAnalysis
+            label: Enable cost-benefit analysis
+          - type: TextBox
+            name: testCost
+            format: number
+            label: Cost per test
+            enable: (costBenefitAnalysis)
+          - type: TextBox
+            name: treatmentCost
+            format: number
+            label: Cost per treatment
+            enable: (costBenefitAnalysis)
+          - type: TextBox
+            name: benefitCorrectTreatment
+            format: number
+            label: Benefit of correct treatment
+            enable: (costBenefitAnalysis)
+          - type: TextBox
+            name: harmFalseTreatment
+            format: number
+            label: Harm of false treatment
+            enable: (costBenefitAnalysis)
+  - type: CollapseBox
+    label: Model Comparison
+    margin: normal
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: compareModels
+            label: Statistical comparison
+          - type: CheckBox
+            name: multiModelComparison
+            label: Enhanced pairwise comparison
+          - type: ComboBox
+            name: comparisonMethod
+            label: Test method
+            enable: (compareModels || multiModelComparison)
+          - type: CheckBox
+            name: weightedAUC
+            label: Weighted AUC
+  - type: CollapseBox
+    label: Clinical Impact
     margin: normal
     collapsed: true
     children:
@@ -154,7 +230,7 @@ children:
         children:
           - type: CheckBox
             name: calculateClinicalImpact
-            label: Calculate clinical impact metrics
+            label: Calculate impact metrics
           - type: TextBox
             name: populationSize
             format: number
@@ -164,100 +240,27 @@ children:
             name: showInterventionAvoided
             label: Show interventions avoided
             enable: (calculateClinicalImpact)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: treatmentCost
-        format: number
-        label: Treatment cost
+          - type: CheckBox
+            name: resourceUtilization
+            label: Resource utilization
   - type: CollapseBox
-    label: Plot Customization
+    label: Bootstrap Confidence Intervals
     margin: normal
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: Label
-            label: Highlight Clinical Range
-            children:
-              - type: CheckBox
-                name: highlightRange
-                label: Highlight threshold range
-                enable: (showPlot)
-              - type: TextBox
-                name: highlightMin
-                format: number
-                label: Range minimum
-                enable: (highlightRange)
-              - type: TextBox
-                name: highlightMax
-                format: number
-                label: Range maximum
-                enable: (highlightRange)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: benefitCorrectTreatment
-        format: number
-        label: Benefit of correct treatment
-  - type: CollapseBox
-    label: Advanced Options
-    margin: normal
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Bootstrap Confidence Intervals
-            children:
-              - type: CheckBox
-                name: confidenceIntervals
-                label: Calculate confidence intervals
-              - type: TextBox
-                name: bootReps
-                format: number
-                label: Bootstrap replications
-                enable: (confidenceIntervals)
-              - type: TextBox
-                name: ciLevel
-                format: number
-                label: Confidence level
-                enable: (confidenceIntervals)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: harmFalseTreatment
-        format: number
-        label: Harm of false treatment
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showStandardizedNetBenefit
-        label: Show standardized net benefit
-      - type: CheckBox
-        name: multiModelComparison
-        label: Enhanced pairwise comparison
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: comparisonMethod
-        label: Comparison method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showDecisionConsequences
-        label: Decision consequences table
-      - type: CheckBox
-        name: resourceUtilization
-        label: Resource utilization
-      - type: CheckBox
-        name: showRelativeUtility
-        label: Relative utility plot
+          - type: CheckBox
+            name: confidenceIntervals
+            label: Calculate CIs
+          - type: TextBox
+            name: bootReps
+            format: number
+            label: Bootstrap replications
+            enable: (confidenceIntervals)
+          - type: TextBox
+            name: ciLevel
+            format: number
+            label: Confidence level
+            enable: (confidenceIntervals)

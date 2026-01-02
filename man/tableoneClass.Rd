@@ -16,6 +16,7 @@ It offers several output styles using different packages (tableone, gtsummary, a
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-tableoneClass-asSource}{\code{tableoneClass$asSource()}}
 \item \href{#method-tableoneClass-clone}{\code{tableoneClass$clone()}}
 }
 }
@@ -37,7 +38,6 @@ It offers several output styles using different packages (tableone, gtsummary, a
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setStatePathSource'><code>jmvcore::Analysis$.setStatePathSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
@@ -53,6 +53,19 @@ It offers several output styles using different packages (tableone, gtsummary, a
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-tableoneClass-asSource"></a>}}
+\if{latex}{\out{\hypertarget{method-tableoneClass-asSource}{}}}
+\subsection{Method \code{asSource()}}{
+Generate R source code for Table One analysis
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{tableoneClass$asSource()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Character string with R syntax for reproducible analysis
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-tableoneClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-tableoneClass-clone}{}}}

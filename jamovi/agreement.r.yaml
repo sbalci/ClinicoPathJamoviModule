@@ -58,9 +58,12 @@ items:
     #       - wght
     #       - exct
 
+
+
     - name:  headingIRR
       title: 'Interrater Reliability'
       type:  Preformatted
+
 
 
     - name:  irrtable
@@ -132,6 +135,7 @@ items:
     #       - wght
     #       - exct
 
+
     - name:  headingKripp
       title: "Krippendorff's Alpha"
       type:  Preformatted
@@ -168,6 +172,7 @@ items:
           - vars
           - krippMethod
           - bootstrap
+
 
     - name:  headingGwet
       title: "Gwet's AC Results"
@@ -215,10 +220,6 @@ items:
       type: Html
       visible: (showLevelInfo)
 
-    - name: weightedKappaGuide
-      title: "Weighted Kappa Interpretation Guide"
-      type: Html
-      visible: (showAbout && (wght:unweighted == FALSE))
 
     # Hierarchical/Multilevel Agreement Results
     - name: hierarchicalICCTable
@@ -449,17 +450,35 @@ items:
           - loaThresholds
           - loaHighThreshold
           - loaLowThreshold
-          - loaVarName
+
+
+    - name: weightedKappaGuide
+      title: "Weighted Kappa Interpretation Guide"
+      type: Html
+      visible: (showAbout && (wght:unweighted == FALSE))
 
     - name: summary
       title: "Summary"
       type: Html
       visible: (showSummary)
 
+
+    - name: reportText
+      title: "Publication-Ready Text"
+      type: Html
+      visible: (showSummary)
+      clearWith:
+          - vars
+          - wght
+          - exct
+
+
+
     - name: about
       title: "About This Analysis"
       type: Html
       visible: (showAbout)
+
 
     - name: blandAltmanPlot
       title: "Bland-Altman Plot"
@@ -470,12 +489,10 @@ items:
       visible: (blandAltmanPlot)
 
 
-
-
-
 refs:
     - irr
     - PathologyKappa
     - ClinicoPathJamoviModule
+
 
 ...

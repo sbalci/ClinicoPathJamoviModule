@@ -14,11 +14,11 @@ decisioncurve(
   thresholdMin = 0.05,
   thresholdMax = 0.5,
   thresholdStep = 0.01,
-  showTable = TRUE,
+  showTable = FALSE,
   selectedThresholds = "0.05, 0.10, 0.15, 0.20, 0.25, 0.30",
-  showPlot = TRUE,
+  showPlot = FALSE,
   plotStyle = "standard",
-  showReferenceLinesLabels = TRUE,
+  showReferenceLinesLabels = FALSE,
   highlightRange = FALSE,
   highlightMin = 0.1,
   highlightMax = 0.3,
@@ -28,7 +28,7 @@ decisioncurve(
   confidenceIntervals = FALSE,
   bootReps = 1000,
   ciLevel = 0.95,
-  showOptimalThreshold = TRUE,
+  showOptimalThreshold = FALSE,
   compareModels = FALSE,
   weightedAUC = FALSE,
   clinicalDecisionRule = FALSE,
@@ -43,9 +43,9 @@ decisioncurve(
   benefitCorrectTreatment = 10000,
   harmFalseTreatment = 500,
   showStandardizedNetBenefit = FALSE,
-  multiModelComparison = TRUE,
+  multiModelComparison = FALSE,
   comparisonMethod = "bootstrap",
-  showDecisionConsequences = TRUE,
+  showDecisionConsequences = FALSE,
   resourceUtilization = FALSE,
   showRelativeUtility = FALSE
 )
@@ -172,6 +172,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$optimalTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalImpactTable} \tab \tab \tab \tab \tab a table \cr

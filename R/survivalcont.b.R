@@ -4185,6 +4185,52 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 max_time <- max(time_var, na.rm = TRUE)
                 return(max_time * max_multiplier)
             }
-        )
+        ), # End of private list
+        public = list(
+            #' @description
+            #' Generate R source code for survivalcont analysis
+            #' @return Character string with R syntax for reproducible analysis
+            asSource = function() {
+                elapsedtime <- self$options$elapsedtime
+                outcome <- self$options$outcome
+
+                if (is.null(elapsedtime) || is.null(outcome))
+                    return('')
+
+                # Escape elapsedtime variable
+                elapsedtime_escaped <- if (!is.null(elapsedtime) && !identical(make.names(elapsedtime), elapsedtime)) {
+                    paste0('`', elapsedtime, '`')
+                } else {
+                    elapsedtime
+                }
+
+                # Escape outcome variable
+                outcome_escaped <- if (!is.null(outcome) && !identical(make.names(outcome), outcome)) {
+                    paste0('`', outcome, '`')
+                } else {
+                    outcome
+                }
+
+                # Build arguments
+                elapsedtime_arg <- paste0('elapsedtime = "', elapsedtime_escaped, '"')
+                outcome_arg <- paste0('outcome = "', outcome_escaped, '"')
+
+                # Get other arguments using base helper (if available)
+                args <- ''
+                if (!is.null(private$.asArgs)) {
+                    args <- private$.asArgs(incData = FALSE)
+                }
+                if (args != '')
+                    args <- paste0(',\n    ', args)
+
+                # Get package name dynamically
+                pkg_name <- utils::packageName()
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+                # Build complete function call
+                paste0(pkg_name, '::survivalcont(\n    data = data,\n    ',
+                       elapsedtime_arg, ',\n    ', outcome_arg, args, ')')
+            }
+        ) # End of public list
     )
 }

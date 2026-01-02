@@ -5,7 +5,7 @@
 cat("=== Testing timeinterval function serialization ===\n\n")
 
 # Load the package
-library(ClinicoPath)
+devtools::load_all()
 
 # Load test data
 test_data_path <- "data/timeinterval_test.csv"

@@ -7,10 +7,18 @@ args:
     description: Name of the jamovi function to fix (accepts SANITIZED_FN or any of the 4 core filenames)
     required: true
     autocomplete: functions
-  apply:
-    description: Apply patches to files (true) or only output proposed diffs (false)
+  --dry-run:
+    description: Preview fixes without applying (default true for safety)
+    required: false
+    default: true
+  --apply:
+    description: Apply patches to files immediately
     required: false
     default: false
+  --backup:
+    description: Create timestamped backups before applying changes
+    required: false
+    default: true
   min_severity:
     description: Minimum notice severity to generate (info, warning, strong_warning, error)
     required: false
@@ -29,7 +37,11 @@ args:
     description: Output patch format (unified or context)
     required: false
     default: unified
-usage: /fix-notices &lt;function_name&gt; [apply=false] [min_severity=info] [clinical_profile=true] [insert_position=auto] [patch_format=unified]
+usage: /fix-notices <function_name> [--dry-run] [--apply] [options]
+examples:
+  /fix-notices coxph                               # Preview notice fixes (safe)
+  /fix-notices logreg --apply                      # Apply notice fixes
+  /fix-notices diagnostic --dry-run --min_severity=warning
 ---
 
 # Jamovi Notices Auto-Fixer

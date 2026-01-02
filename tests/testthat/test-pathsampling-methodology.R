@@ -1,5 +1,5 @@
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # ==============================================================================
 # METHODOLOGY VALIDATION TESTS FOR PATHSAMPLING

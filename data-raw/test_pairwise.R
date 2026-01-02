@@ -2,7 +2,7 @@
 # Load helper functions for multi-format data saving
 source("data-raw/data_save_helpers.R")
 
-library(ClinicoPath)
+devtools::load_all()
 
 # Create test data with 3 groups
 set.seed(123)

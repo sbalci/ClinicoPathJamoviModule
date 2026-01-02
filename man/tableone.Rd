@@ -42,14 +42,14 @@ table for manuscript reporting.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
-\code{results$summary} \tab \tab \tab \tab \tab a html \cr
-\code{results$about} \tab \tab \tab \tab \tab a html \cr
-\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$about} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

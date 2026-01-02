@@ -240,7 +240,7 @@ for (dataset_name in test_descriptions$dataset_name) {
 }
 
 cat("\n\nExample usage:\n")
-cat("library(ClinicoPath)\n")
+cat("devtools::load_all()\n")
 cat("result <- jscattermore(\n")
 cat("    data = jscattermore_basic,\n")
 cat("    x_var = 'x',\n")

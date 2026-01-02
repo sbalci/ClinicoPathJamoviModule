@@ -57,14 +57,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             nriThresholds = "",
             idiNriBootRuns = 1000,
             effectSizeAnalysis = FALSE,
-            effectSizeMethod = "cohens_d",
             powerAnalysis = FALSE,
             powerAnalysisType = "post_hoc",
             expectedAUCDifference = 0.1,
             targetPower = 0.8,
             significanceLevel = 0.05,
             correlationROCs = 0.5,
-            advancedMetrics = FALSE,
             bayesianAnalysis = FALSE,
             priorAUC = 0.7,
             priorPrecision = 10,
@@ -82,7 +80,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             metaAnalysis = FALSE,
             metaAnalysisMethod = "both",
             heterogeneityTest = TRUE,
-            forestPlot = FALSE, ...) {
+            forestPlot = FALSE,
+            overrideMetaAnalysisWarning = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -119,6 +118,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..subGroup <- jmvcore::OptionVariable$new(
                 "subGroup",
                 subGroup,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -141,8 +141,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "minimize_metric",
                     "maximize_loess_metric",
                     "minimize_loess_metric",
-                    "maximize_spline_metric",
-                    "minimize_spline_metric",
                     "maximize_boot_metric",
                     "minimize_boot_metric",
                     "oc_youden_kernel",
@@ -366,7 +364,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..refVar <- jmvcore::OptionLevel$new(
                 "refVar",
                 refVar,
-                variable="(dependentVars)")
+                variable="(dependentVars)",
+                allowNone=TRUE)
             private$..nriThresholds <- jmvcore::OptionString$new(
                 "nriThresholds",
                 nriThresholds,
@@ -381,15 +380,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "effectSizeAnalysis",
                 effectSizeAnalysis,
                 default=FALSE)
-            private$..effectSizeMethod <- jmvcore::OptionList$new(
-                "effectSizeMethod",
-                effectSizeMethod,
-                options=list(
-                    "cohens_d",
-                    "delta_auc",
-                    "overlap_coefficient",
-                    "net_benefit_difference"),
-                default="cohens_d")
             private$..powerAnalysis <- jmvcore::OptionBool$new(
                 "powerAnalysis",
                 powerAnalysis,
@@ -426,10 +416,6 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=0.5,
                 min=-1,
                 max=1)
-            private$..advancedMetrics <- jmvcore::OptionBool$new(
-                "advancedMetrics",
-                advancedMetrics,
-                default=FALSE)
             private$..bayesianAnalysis <- jmvcore::OptionBool$new(
                 "bayesianAnalysis",
                 bayesianAnalysis,
@@ -523,6 +509,10 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "forestPlot",
                 forestPlot,
                 default=FALSE)
+            private$..overrideMetaAnalysisWarning <- jmvcore::OptionBool$new(
+                "overrideMetaAnalysisWarning",
+                overrideMetaAnalysisWarning,
+                default=FALSE)
 
             self$.addOption(private$..clinicalMode)
             self$.addOption(private$..dependentVars)
@@ -575,14 +565,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..nriThresholds)
             self$.addOption(private$..idiNriBootRuns)
             self$.addOption(private$..effectSizeAnalysis)
-            self$.addOption(private$..effectSizeMethod)
             self$.addOption(private$..powerAnalysis)
             self$.addOption(private$..powerAnalysisType)
             self$.addOption(private$..expectedAUCDifference)
             self$.addOption(private$..targetPower)
             self$.addOption(private$..significanceLevel)
             self$.addOption(private$..correlationROCs)
-            self$.addOption(private$..advancedMetrics)
             self$.addOption(private$..bayesianAnalysis)
             self$.addOption(private$..priorAUC)
             self$.addOption(private$..priorPrecision)
@@ -601,6 +589,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..metaAnalysisMethod)
             self$.addOption(private$..heterogeneityTest)
             self$.addOption(private$..forestPlot)
+            self$.addOption(private$..overrideMetaAnalysisWarning)
         }),
     active = list(
         clinicalMode = function() private$..clinicalMode$value,
@@ -654,14 +643,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         nriThresholds = function() private$..nriThresholds$value,
         idiNriBootRuns = function() private$..idiNriBootRuns$value,
         effectSizeAnalysis = function() private$..effectSizeAnalysis$value,
-        effectSizeMethod = function() private$..effectSizeMethod$value,
         powerAnalysis = function() private$..powerAnalysis$value,
         powerAnalysisType = function() private$..powerAnalysisType$value,
         expectedAUCDifference = function() private$..expectedAUCDifference$value,
         targetPower = function() private$..targetPower$value,
         significanceLevel = function() private$..significanceLevel$value,
         correlationROCs = function() private$..correlationROCs$value,
-        advancedMetrics = function() private$..advancedMetrics$value,
         bayesianAnalysis = function() private$..bayesianAnalysis$value,
         priorAUC = function() private$..priorAUC$value,
         priorPrecision = function() private$..priorPrecision$value,
@@ -679,7 +666,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         metaAnalysis = function() private$..metaAnalysis$value,
         metaAnalysisMethod = function() private$..metaAnalysisMethod$value,
         heterogeneityTest = function() private$..heterogeneityTest$value,
-        forestPlot = function() private$..forestPlot$value),
+        forestPlot = function() private$..forestPlot$value,
+        overrideMetaAnalysisWarning = function() private$..overrideMetaAnalysisWarning$value),
     private = list(
         ..clinicalMode = NA,
         ..dependentVars = NA,
@@ -732,14 +720,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..nriThresholds = NA,
         ..idiNriBootRuns = NA,
         ..effectSizeAnalysis = NA,
-        ..effectSizeMethod = NA,
         ..powerAnalysis = NA,
         ..powerAnalysisType = NA,
         ..expectedAUCDifference = NA,
         ..targetPower = NA,
         ..significanceLevel = NA,
         ..correlationROCs = NA,
-        ..advancedMetrics = NA,
         ..bayesianAnalysis = NA,
         ..priorAUC = NA,
         ..priorPrecision = NA,
@@ -757,7 +743,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..metaAnalysis = NA,
         ..metaAnalysisMethod = NA,
         ..heterogeneityTest = NA,
-        ..forestPlot = NA)
+        ..forestPlot = NA,
+        ..overrideMetaAnalysisWarning = NA)
 )
 
 psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -791,6 +778,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         powerAnalysisTable = function() private$.items[["powerAnalysisTable"]],
         bayesianROCTable = function() private$.items[["bayesianROCTable"]],
         clinicalUtilityTable = function() private$.items[["clinicalUtilityTable"]],
+        metaAnalysisWarning = function() private$.items[["metaAnalysisWarning"]],
         metaAnalysisTable = function() private$.items[["metaAnalysisTable"]],
         sensitivityAnalysisTable = function() private$.items[["sensitivityAnalysisTable"]],
         decisionCurveTable = function() private$.items[["decisionCurveTable"]],
@@ -1573,6 +1561,16 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 refs=list(
                     "Vickers2006",
                     "Steyerberg2010")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="metaAnalysisWarning",
+                title="Meta-Analysis Warning",
+                visible="(metaAnalysis)",
+                clearWith=list(
+                    "dependentVars",
+                    "classVar",
+                    "positiveClass",
+                    "overrideMetaAnalysisWarning")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="metaAnalysisTable",
@@ -1942,7 +1940,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (gold standard). Must have exactly two levels.
 #' @param positiveClass Specifies which level of the class variable should be
 #'   treated as the positive class.
-#' @param subGroup Optional grouping variable for stratified analysis.  ROC
+#' @param subGroup Optional grouping variable for stratified analysis. ROC
 #'   curves will be calculated separately for each group.
 #' @param clinicalPreset Choose a preset configuration optimized for specific
 #'   clinical scenarios: Screening - High sensitivity to avoid missing cases
@@ -2040,8 +2038,6 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param effectSizeAnalysis Calculate effect sizes for ROC curve differences
 #'   using Cohen's conventions and standardized mean differences between AUC
 #'   values.
-#' @param effectSizeMethod Method for calculating effect sizes between ROC
-#'   curves.
 #' @param powerAnalysis Perform statistical power analysis for ROC curve
 #'   comparisons including sample size estimation and power calculations for
 #'   detecting AUC differences.
@@ -2055,11 +2051,12 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param correlationROCs Expected correlation between paired ROC curves for
 #'   power calculations. Use 0.5 for moderate correlation, 0.0 for independent
 #'   samples.
-#' @param advancedMetrics Calculate additional advanced metrics including
-#'   H-measure, Kolmogorov-Smirnov statistic, and Gini coefficient for
-#'   comprehensive model evaluation.
-#' @param bayesianAnalysis Perform Bayesian analysis of ROC curves with
-#'   credible intervals and posterior probability assessments.
+#' @param bayesianAnalysis Perform bootstrap-based ROC analysis with optional
+#'   prior weighting to estimate uncertainty in AUC. Uses bootstrap resampling
+#'   to create an empirical distribution. NOTE: This is NOT full Bayesian MCMC
+#'   inference; it uses bootstrap simulation with prior parameters as weights.
+#'   Interpret "credible intervals" as bootstrap percentile confidence
+#'   intervals.
 #' @param priorAUC Prior belief about AUC value for Bayesian analysis (center
 #'   of prior distribution).
 #' @param priorPrecision Precision of prior belief (higher values = more
@@ -2099,6 +2096,11 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   statistic to assess heterogeneity between AUC estimates.
 #' @param forestPlot Create forest plot visualization of individual and pooled
 #'   AUC estimates with confidence intervals.
+#' @param overrideMetaAnalysisWarning ADVANCED OPTION: Bypass the independence
+#'   assumption check for meta-analysis. WARNING - Only use if you fully
+#'   understand the statistical implications. Meta-analysis on non-independent
+#'   data produces invalid results and should NOT be used for formal inference.
+#'   Use DeLong's test instead for within-study comparisons of multiple markers.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -2128,6 +2130,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$powerAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bayesianROCTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalUtilityTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$metaAnalysisWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$metaAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sensitivityAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$decisionCurveTable} \tab \tab \tab \tab \tab a table \cr
@@ -2155,7 +2158,7 @@ psychopdaROC <- function(
     dependentVars,
     classVar,
     positiveClass,
-    subGroup,
+    subGroup = NULL,
     clinicalPreset = "none",
     method = "maximize_metric",
     metric = "youden",
@@ -2202,14 +2205,12 @@ psychopdaROC <- function(
     nriThresholds = "",
     idiNriBootRuns = 1000,
     effectSizeAnalysis = FALSE,
-    effectSizeMethod = "cohens_d",
     powerAnalysis = FALSE,
     powerAnalysisType = "post_hoc",
     expectedAUCDifference = 0.1,
     targetPower = 0.8,
     significanceLevel = 0.05,
     correlationROCs = 0.5,
-    advancedMetrics = FALSE,
     bayesianAnalysis = FALSE,
     priorAUC = 0.7,
     priorPrecision = 10,
@@ -2227,7 +2228,8 @@ psychopdaROC <- function(
     metaAnalysis = FALSE,
     metaAnalysisMethod = "both",
     heterogeneityTest = TRUE,
-    forestPlot = FALSE) {
+    forestPlot = FALSE,
+    overrideMetaAnalysisWarning = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("psychopdaROC requires jmvcore to be installed (restart may be required)")
@@ -2297,14 +2299,12 @@ psychopdaROC <- function(
         nriThresholds = nriThresholds,
         idiNriBootRuns = idiNriBootRuns,
         effectSizeAnalysis = effectSizeAnalysis,
-        effectSizeMethod = effectSizeMethod,
         powerAnalysis = powerAnalysis,
         powerAnalysisType = powerAnalysisType,
         expectedAUCDifference = expectedAUCDifference,
         targetPower = targetPower,
         significanceLevel = significanceLevel,
         correlationROCs = correlationROCs,
-        advancedMetrics = advancedMetrics,
         bayesianAnalysis = bayesianAnalysis,
         priorAUC = priorAUC,
         priorPrecision = priorPrecision,
@@ -2322,7 +2322,8 @@ psychopdaROC <- function(
         metaAnalysis = metaAnalysis,
         metaAnalysisMethod = metaAnalysisMethod,
         heterogeneityTest = heterogeneityTest,
-        forestPlot = forestPlot)
+        forestPlot = forestPlot,
+        overrideMetaAnalysisWarning = overrideMetaAnalysisWarning)
 
     analysis <- psychopdaROCClass$new(
         options = options,

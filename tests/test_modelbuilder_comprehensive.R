@@ -2,7 +2,7 @@
 # Tests all features and arguments with realistic clinical data
 
 # Load required libraries
-library(ClinicoPath)  # Or whatever the package name is
+devtools::load_all()  # Or whatever the package name is
 library(dplyr)
 
 # Load all test datasets

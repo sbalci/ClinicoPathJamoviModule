@@ -1,4 +1,4 @@
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("Invalid distance/linkage combinations are rejected", {
   skip_if_not_installed('jmvReadWrite')

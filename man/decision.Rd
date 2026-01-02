@@ -86,6 +86,7 @@ tables.}
 A results object containing:
 \tabular{llllll}{
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$rawContingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$rawCounts} \tab \tab \tab \tab \tab a table \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
@@ -104,6 +105,7 @@ A results object containing:
 \code{results$falsePositiveTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$falseNegativeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$misclassificationInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$saveClassifications} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

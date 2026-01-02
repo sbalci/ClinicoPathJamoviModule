@@ -936,5 +936,78 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             return(html)
 
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for finegray analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            survivalTime <- self$options$survivalTime
+            status <- self$options$status
+            covariates <- self$options$covariates
+            groupVar <- self$options$groupVar
+
+            if (is.null(survivalTime) || is.null(status))
+                return('')
+
+            # Escape survivalTime variable
+            survivalTime_escaped <- if (!is.null(survivalTime) && !identical(make.names(survivalTime), survivalTime)) {
+                paste0('`', survivalTime, '`')
+            } else {
+                survivalTime
+            }
+
+            # Escape status variable
+            status_escaped <- if (!is.null(status) && !identical(make.names(status), status)) {
+                paste0('`', status, '`')
+            } else {
+                status
+            }
+
+            # Build required arguments
+            survivalTime_arg <- paste0('survivalTime = "', survivalTime_escaped, '"')
+            status_arg <- paste0('status = "', status_escaped, '"')
+
+            # Build optional covariates argument
+            covariates_arg <- ''
+            if (!is.null(covariates) && length(covariates) > 0) {
+                covariates_escaped <- sapply(covariates, function(v) {
+                    if (!is.null(v) && !identical(make.names(v), v))
+                        paste0('`', v, '`')
+                    else
+                        v
+                })
+                covariates_arg <- paste0(',\n    covariates = c(',
+                                       paste(sapply(covariates_escaped, function(v) paste0('"', v, '"')), collapse = ', '),
+                                       ')')
+            }
+
+            # Build optional groupVar argument
+            groupVar_arg <- ''
+            if (!is.null(groupVar)) {
+                groupVar_escaped <- if (!identical(make.names(groupVar), groupVar)) {
+                    paste0('`', groupVar, '`')
+                } else {
+                    groupVar
+                }
+                groupVar_arg <- paste0(',\n    groupVar = "', groupVar_escaped, '"')
+            }
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::finegray(\n    data = data,\n    ',
+                   survivalTime_arg, ',\n    ', status_arg, covariates_arg, groupVar_arg, args, ')')
+        }
+    ) # End of public list
 )

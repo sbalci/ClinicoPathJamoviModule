@@ -10,7 +10,7 @@ psychopdaROC(
   dependentVars,
   classVar,
   positiveClass,
-  subGroup,
+  subGroup = NULL,
   clinicalPreset = "none",
   method = "maximize_metric",
   metric = "youden",
@@ -57,14 +57,12 @@ psychopdaROC(
   nriThresholds = "",
   idiNriBootRuns = 1000,
   effectSizeAnalysis = FALSE,
-  effectSizeMethod = "cohens_d",
   powerAnalysis = FALSE,
   powerAnalysisType = "post_hoc",
   expectedAUCDifference = 0.1,
   targetPower = 0.8,
   significanceLevel = 0.05,
   correlationROCs = 0.5,
-  advancedMetrics = FALSE,
   bayesianAnalysis = FALSE,
   priorAUC = 0.7,
   priorPrecision = 10,
@@ -82,7 +80,8 @@ psychopdaROC(
   metaAnalysis = FALSE,
   metaAnalysisMethod = "both",
   heterogeneityTest = TRUE,
-  forestPlot = FALSE
+  forestPlot = FALSE,
+  overrideMetaAnalysisWarning = FALSE
 )
 }
 \arguments{
@@ -102,7 +101,7 @@ performance. Multiple variables can be selected for comparison.}
 \item{positiveClass}{Specifies which level of the class variable should be
 treated as the positive class.}
 
-\item{subGroup}{Optional grouping variable for stratified analysis.  ROC
+\item{subGroup}{Optional grouping variable for stratified analysis. ROC
 curves will be calculated separately for each group.}
 
 \item{clinicalPreset}{Choose a preset configuration optimized for specific
@@ -247,9 +246,6 @@ confidence intervals.}
 using Cohen's conventions and standardized mean differences between AUC
 values.}
 
-\item{effectSizeMethod}{Method for calculating effect sizes between ROC
-curves.}
-
 \item{powerAnalysis}{Perform statistical power analysis for ROC curve
 comparisons including sample size estimation and power calculations for
 detecting AUC differences.}
@@ -269,12 +265,12 @@ calculations and sample size estimation.}
 power calculations. Use 0.5 for moderate correlation, 0.0 for independent
 samples.}
 
-\item{advancedMetrics}{Calculate additional advanced metrics including
-H-measure, Kolmogorov-Smirnov statistic, and Gini coefficient for
-comprehensive model evaluation.}
-
-\item{bayesianAnalysis}{Perform Bayesian analysis of ROC curves with
-credible intervals and posterior probability assessments.}
+\item{bayesianAnalysis}{Perform bootstrap-based ROC analysis with optional
+prior weighting to estimate uncertainty in AUC. Uses bootstrap resampling
+to create an empirical distribution. NOTE: This is NOT full Bayesian MCMC
+inference; it uses bootstrap simulation with prior parameters as weights.
+Interpret "credible intervals" as bootstrap percentile confidence
+intervals.}
 
 \item{priorAUC}{Prior belief about AUC value for Bayesian analysis (center
 of prior distribution).}
@@ -331,6 +327,12 @@ statistic to assess heterogeneity between AUC estimates.}
 
 \item{forestPlot}{Create forest plot visualization of individual and pooled
 AUC estimates with confidence intervals.}
+
+\item{overrideMetaAnalysisWarning}{ADVANCED OPTION: Bypass the independence
+assumption check for meta-analysis. WARNING - Only use if you fully
+understand the statistical implications. Meta-analysis on non-independent
+data produces invalid results and should NOT be used for formal inference.
+Use DeLong's test instead for within-study comparisons of multiple markers.}
 }
 \value{
 A results object containing:
@@ -362,6 +364,7 @@ A results object containing:
 \code{results$powerAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$bayesianROCTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalUtilityTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$metaAnalysisWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$metaAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$sensitivityAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$decisionCurveTable} \tab \tab \tab \tab \tab a table \cr

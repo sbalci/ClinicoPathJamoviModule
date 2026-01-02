@@ -597,5 +597,42 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             self$results$reportSentence$setContent(html_output)
         }
-  ) # End of private list.
+  ), # End of private list.
+  public = list(
+        #' @description
+        #' Generate R source code for Table One analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            vars <- self$options$vars
+            if (is.null(vars) || length(vars) == 0)
+                return('')
+
+            # Escape variable names that contain spaces or special characters
+            vars_escaped <- sapply(vars, function(v) {
+                if (!is.null(v) && !identical(make.names(v), v))
+                    paste0('`', v, '`')
+                else
+                    v
+            })
+
+            # Build vars argument
+            vars_arg <- paste0('vars = c(', paste(sapply(vars_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::tableone(\n    data = data,\n    ',
+                   vars_arg, args, ')')
+        }
+  ) # End of public list.
 ) # End of R6Class definition.

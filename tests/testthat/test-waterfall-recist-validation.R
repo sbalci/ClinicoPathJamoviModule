@@ -3,7 +3,7 @@
 # Purpose: Ensure RECIST category boundaries are mathematically correct
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 context("waterfall RECIST Categorization Validation")
 

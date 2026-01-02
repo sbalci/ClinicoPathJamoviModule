@@ -1,21 +1,38 @@
 ---
 name: fix-function
-description: Generate specific fixes for jamovi function issues
+description: Generate and optionally apply specific fixes for jamovi function issues
 interactive: true
 args:
   function_name:
     description: Name of the jamovi function to fix
     required: true
     autocomplete: functions
-issue_type:
-    description: Type of issue (schema, integration, error-handling, performance)
+  issue_type:
+    description: Type of issue (schema, integration, error-handling, performance, all)
     required: false
-usage: /fix-function <function_name> [issue_type]
+    default: all
+  --dry-run:
+    description: Show fixes without applying them (default true for safety)
+    required: false
+    default: true
+  --apply:
+    description: Apply fixes immediately (use with caution)
+    required: false
+    default: false
+  --backup:
+    description: Create backups before applying fixes
+    required: false
+    default: true
+usage: /fix-function <function_name> [issue_type] [--dry-run] [--apply]
+examples:
+  /fix-function reportcat                        # Preview all fixes (dry-run)
+  /fix-function reportcat schema --apply         # Apply schema fixes
+  /fix-function reportcat --dry-run=false --apply  # Apply all fixes
 ---
 
 
 
-# Jamovi Function Issue Resolution
+# Jamovi Function Issue Resolution with Safe Dry-Run
 
 You are an expert jamovi developer tasked with providing specific, implementable fixes for the jamovi function `$ARGUMENTS`.
 
@@ -23,6 +40,44 @@ You are an expert jamovi developer tasked with providing specific, implementable
 
 Function: **`$ARGUMENTS`**
 Issue Focus: **$ARGUMENTS** (if specified)
+
+## Dry-Run vs. Apply Mode
+
+### Dry-Run Mode (default, --dry-run or no flags)
+**Safe preview mode** - recommended workflow:
+- ✅ Analyze all files and identify issues
+- ✅ Generate specific fix recommendations
+- ✅ Show exact code changes (diffs)
+- ✅ Display affected files and line numbers
+- ❌ NO files are modified
+- ❌ NO changes are applied
+- 📋 Output: "Would fix X issues in Y files"
+
+**Use for:**
+- Understanding what needs fixing
+- Reviewing changes before applying
+- Generating fix documentation
+- CI/CD validation
+
+### Apply Mode (--apply)
+**Active mode** - applies changes:
+- ✅ All dry-run analysis
+- ✅ Creates timestamped backups (if --backup=true)
+- ✅ Applies code changes to files
+- ✅ Runs jmvtools::prepare() if needed
+- ⚠️ Modifies your source files
+- 📋 Output: "Applied X fixes to Y files"
+
+**Use for:**
+- Applying reviewed fixes
+- Batch corrections
+- Automated workflows (with caution)
+
+### Safety Features
+- **Default is dry-run** - you must explicitly --apply
+- **Automatic backups** - creates .bak files before changes
+- **Confirmation prompts** - asks before destructive changes
+- **Rollback info** - shows how to restore from backups
 
 ## Analysis & Fix Approach
 

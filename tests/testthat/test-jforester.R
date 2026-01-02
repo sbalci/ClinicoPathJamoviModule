@@ -1,5 +1,5 @@
 # Comprehensive tests for jforester function
-library(ClinicoPath)
+devtools::load_all()
 
 # Load test datasets
 data(jforester_meta_analysis_data, package = "ClinicoPath")

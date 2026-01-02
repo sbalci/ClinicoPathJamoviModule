@@ -197,6 +197,7 @@ A results object containing:
 \code{results$statistics} \tab \tab \tab \tab \tab a table \cr
 \code{results$tests} \tab \tab \tab \tab \tab a table \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

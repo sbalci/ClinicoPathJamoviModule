@@ -19,30 +19,43 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .thresholds = NULL,
         .results_by_time = NULL,
 
+        # Utility: Escape variable names
+        .escapeVar = function(x) {
+            if (is.null(x) || length(x) == 0 || x == "") return(x)
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         #---------------------------------------------
         # INIT
         #---------------------------------------------
         .init = function() {
 
             # Instructions
-            html <- "<h3>Time-Dependent Decision Curve Analysis</h3>
-            <p>Time-dependent DCA evaluates the clinical utility of prognostic models for time-to-event outcomes.</p>
-            <h4>Net Benefit Formula (Time-Dependent):</h4>
-            <p style='font-family: monospace;'>
-            NB(t, p<sub>t</sub>) = [TP(t) / N] - [FP(t) / N] × [p<sub>t</sub> / (1 - p<sub>t</sub>)]
-            </p>
-            <p>Where:</p>
+            html <- "<div class='jmv-welcome'>
+            <h2>Time-Dependent Decision Curve Analysis</h2>
+            <p class='jmv-welcome-desc'>Evaluate the clinical utility of prognostic models for time-to-event outcomes.</p>
+
+            <div class='jmv-info-box'>
+            <h3>Net Benefit Formula (Time-Dependent):</h3>
+            <p class='formula'>NB(t, p<sub>t</sub>) = [TP(t) / N] - [FP(t) / N] × [p<sub>t</sub> / (1 - p<sub>t</sub>)]</p>
+
+            <h4>Where:</h4>
             <ul>
-            <li><b>t:</b> Time point of interest (e.g., 1 year, 5 years)</li>
-            <li><b>p<sub>t</sub>:</b> Threshold probability at time t</li>
-            <li><b>TP(t):</b> True positives (events correctly predicted by time t)</li>
-            <li><b>FP(t):</b> False positives (non-events incorrectly predicted)</li>
+            <li><strong>t:</strong> Time point of interest (e.g., 1 year, 5 years)</li>
+            <li><strong>p<sub>t</sub>:</strong> Threshold probability at time t</li>
+            <li><strong>TP(t):</strong> True positives (events correctly predicted by time t)</li>
+            <li><strong>FP(t):</strong> False positives (non-events incorrectly predicted)</li>
             </ul>
-            <h4>Applications:</h4>
+            </div>
+
+            <div class='jmv-info-box'>
+            <h3>Applications:</h3>
             <ul>
-            <li><b>Recurrence prediction:</b> Serial biopsy surveillance decisions</li>
-            <li><b>Survival models:</b> Treatment vs palliative care thresholds</li>
-            </ul>"
+            <li><strong>Recurrence prediction:</strong> Serial biopsy surveillance decisions</li>
+            <li><strong>Survival models:</strong> Treatment vs palliative care thresholds</li>
+            </ul>
+            </div>
+            </div>"
 
             self$results$instructionsText$setContent(html)
 
@@ -71,32 +84,78 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
 
         #---------------------------------------------
-        # NOTICE HELPER
+        # NOTICE HELPERS (HTML-based to avoid serialization)
         #---------------------------------------------
+        .noticeList = list(),
+
         .addNotice = function(type, content, name = NULL, position = NULL) {
             if (is.null(name)) {
-                name <- paste0('notice_', gsub('[^a-zA-Z0-9]', '_', substr(content, 1, 20)))
+                name <- paste0('notice_', length(private$.noticeList) + 1)
             }
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = name,
-                type = type
+
+            type_name <- switch(
+                as.character(type),
+                "1" = "ERROR",
+                "2" = "STRONG_WARNING",
+                "3" = "WARNING",
+                "4" = "INFO",
+                "INFO"
             )
-            notice$setContent(content)
 
-            if (is.null(position)) {
-                # Auto-position: ERROR/STRONG_WARNING at top, WARNING mid, INFO bottom
-                position <- switch(
-                    as.character(type),
-                    "1" = 1,    # ERROR
-                    "2" = 1,    # STRONG_WARNING
-                    "3" = 50,   # WARNING
-                    "4" = 999,  # INFO
-                    1
-                )
+            private$.noticeList[[name]] <- list(
+                type = type_name,
+                content = content
+            )
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setVisible(FALSE)
+                return()
             }
 
-            self$results$insert(position, notice)
+            html_parts <- c('<div class="jmv-results-notice-container">')
+
+            # Order: ERROR/STRONG_WARNING first, then WARNING, then INFO
+            type_order <- c("ERROR", "STRONG_WARNING", "WARNING", "INFO")
+            ordered_notices <- list()
+
+            for (t in type_order) {
+                for (name in names(private$.noticeList)) {
+                    notice <- private$.noticeList[[name]]
+                    if (notice$type == t) {
+                        ordered_notices[[length(ordered_notices) + 1]] <- notice
+                    }
+                }
+            }
+
+            for (notice in ordered_notices) {
+                css_class <- switch(
+                    notice$type,
+                    "ERROR" = "error",
+                    "STRONG_WARNING" = "strong-warning",
+                    "WARNING" = "warning",
+                    "INFO" = "info",
+                    "info"
+                )
+
+                icon <- switch(
+                    notice$type,
+                    "ERROR" = "⛔",
+                    "STRONG_WARNING" = "⚠️",
+                    "WARNING" = "⚠",
+                    "INFO" = "ℹ",
+                    "ℹ"
+                )
+
+                html_parts <- c(html_parts, sprintf(
+                    '<div class="jmv-results-notice %s"><span class="jmv-results-notice-icon">%s</span><span class="jmv-results-notice-content">%s</span></div>',
+                    css_class, icon, notice$content
+                ))
+            }
+
+            html_parts <- c(html_parts, '</div>')
+            self$results$notices$setContent(paste(html_parts, collapse = '\n'))
         },
 
         #---------------------------------------------
@@ -289,6 +348,9 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 name = 'analysisComplete',
                 position = 999
             )
+
+            # Render all notices at end
+            private$.renderNotices()
         },
 
         #---------------------------------------------
@@ -305,6 +367,11 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             time <- jmvcore::toNumeric(data[[time_var]])
             event <- jmvcore::toNumeric(data[[event_var]])
             predictor <- jmvcore::toNumeric(data[[predictor_var]])
+
+            # Escape variable names for safe handling
+            time_var_clean <- private$.escapeVar(time_var)
+            event_var_clean <- private$.escapeVar(event_var)
+            predictor_var_clean <- private$.escapeVar(predictor_var)
 
             # Validate time variable
             if (any(time <= 0, na.rm = TRUE)) {

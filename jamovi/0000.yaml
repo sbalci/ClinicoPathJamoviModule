@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.67
+version: 0.0.32.68
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-01-01'
+date: '2026-01-02'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1384,7 +1384,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1413,7 +1413,7 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
@@ -1428,7 +1428,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1476,7 +1476,7 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -1488,7 +1488,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
@@ -1524,7 +1524,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Analyze combined test results
@@ -1537,7 +1537,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
@@ -4780,7 +4780,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -5586,7 +5586,7 @@ analyses:
     ns: ClinicoPath
     category: analyses
     menuGroup: meddecideT
-    menuSubgroup: Medical Decision Analysis
+    menuSubgroup: Decision Curve Analysis
     menuTitle: Time-Dependent DCA
     menuSubtitle: Net benefit for survival and longitudinal data
     description: >-

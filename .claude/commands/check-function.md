@@ -1,12 +1,20 @@
 ---
 name: check-function
-description: Run actionable checks and fixes for a jamovi function (favor functionality over prose)
+description: Run actionable checks and fixes for a jamovi function with preset profiles
 interactive: true
 args:
   function_name:
     description: Name of the jamovi function to check
     required: true
     autocomplete: functions
+  --profile:
+    description: Preset profile (quick, standard, production, release, custom)
+    required: false
+    default: standard
+  --dry-run:
+    description: Show what would be done without making changes
+    required: false
+    default: false
   apply_escape_vars:
     description: Enforce/implement escapeVariableNames logic for variables with spaces/special chars
     required: false
@@ -60,16 +68,112 @@ args:
   upstream_fn:
     description: Upstream function name if it differs from SANITIZED_FN
     required: false
-usage: /check-function <function_name> [--apply_escape_vars] [--align_labelled_logic] [--regroup_ui] [--remove_placeholders] [--defaults_false] [--style_welcome] [--run_prepare] [--run_document] [--gen_test_data] [--move_project_files]
+usage: /check-function <function_name> [--profile=standard] [--dry-run] [options]
+examples:
+  /check-function tableone                           # Standard check with defaults
+  /check-function tableone --profile=quick           # Fast check, critical issues only
+  /check-function tableone --profile=release         # Full pre-release validation
+  /check-function tableone --dry-run                 # Preview changes without applying
+  /check-function tableone --profile=custom --apply_escape_vars --remove_placeholders
 ---
 
-# Jamovi Function Check & Fixer
+# Jamovi Function Check & Fixer with Preset Profiles
 
 Perform concrete checks and apply fixes for `$ARGUMENTS` across `.a.yaml`, `.b.R`, `.r.yaml`, `.u.yaml`. Minimize prose; output concise checklists, diffs, and exact edits.
 
 ## Analysis Target
 
 Function: **`$ARGUMENTS`**
+
+## Preset Profiles
+
+Profiles provide predefined combinations of flags for common workflows. When `--profile` is specified, individual flags are ignored unless using `--profile=custom`.
+
+### Quick Profile (`--profile=quick`)
+**Purpose:** Fast iteration during development
+**Time:** ~30 seconds
+**Flags activated:**
+```
+apply_escape_vars: false
+align_labelled_logic: false
+regroup_ui: false
+remove_placeholders: false
+defaults_false: false
+style_welcome: false
+run_prepare: true
+run_document: false
+gen_test_data: false
+move_project_files: false
+```
+**Use when:** Rapid prototyping, checking basic integration
+
+### Standard Profile (`--profile=standard`, default)
+**Purpose:** Balanced check for regular development
+**Time:** ~2 minutes
+**Flags activated:**
+```
+apply_escape_vars: true
+align_labelled_logic: true
+regroup_ui: false
+remove_placeholders: false
+defaults_false: false
+style_welcome: false
+run_prepare: true
+run_document: true
+gen_test_data: false
+move_project_files: false
+```
+**Use when:** Normal development workflow, pre-commit checks
+
+### Production Profile (`--profile=production`)
+**Purpose:** Prepare function for production use
+**Time:** ~5 minutes
+**Flags activated:**
+```
+apply_escape_vars: true
+align_labelled_logic: true
+regroup_ui: true
+remove_placeholders: true
+defaults_false: true
+style_welcome: true
+run_prepare: true
+run_document: true
+gen_test_data: true
+move_project_files: true
+```
+**Use when:** Function nearing completion, preparing for distribution
+
+### Release Profile (`--profile=release`)
+**Purpose:** Full pre-release validation
+**Time:** ~10 minutes
+**Flags activated:**
+```
+All production flags PLUS:
+check_external: true
+run comprehensive validation
+generate release checklist
+verify all tests pass
+check documentation completeness
+```
+**Use when:** Final validation before module release
+
+### Custom Profile (`--profile=custom`)
+**Purpose:** Use explicit flags for fine-grained control
+**Time:** Varies
+**Flags activated:** Only those explicitly specified
+**Use when:** You need specific combination of checks
+
+## Dry-Run Mode
+
+When `--dry-run` is enabled:
+- ✅ All checks are performed
+- ✅ All fixes are identified and shown
+- ✅ Diffs/patches are displayed
+- ❌ NO files are modified
+- ❌ NO commands are executed (prepare/document)
+- 📋 Summary shows "Would apply X changes"
+
+**Use for:** Previewing changes, understanding what would happen, CI/CD validation
 
 ### Argument normalization (safety)
 

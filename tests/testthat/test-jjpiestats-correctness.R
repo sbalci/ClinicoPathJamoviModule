@@ -2,7 +2,7 @@
 # These tests validate the correctness of the pie chart function
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Test 1: Selective NA Omission ----
 test_that("jjpiestats uses selective NA omission for relevant variables only", {

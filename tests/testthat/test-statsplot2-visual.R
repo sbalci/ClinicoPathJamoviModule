@@ -3,7 +3,7 @@
 # Validates that all 8 dispatch paths render correctly
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Helper function to check if vdiffr is installed
 skip_if_not_installed_vdiffr <- function() {

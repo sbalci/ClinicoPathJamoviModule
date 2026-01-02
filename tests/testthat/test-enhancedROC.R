@@ -18,10 +18,12 @@ test_that('enhancedROC analysis works', {
     model <- enhancedROC(
       data = data,
     outcome = 'outcome',
+    positiveClass = 'A',
     predictors = c('predictors1', 'predictors2', 'predictors3'),
     analysisType = 'single',
     direction = 'auto',
     youdenOptimization = FALSE,
+    customCutoffs = NULL,
     sensitivityThreshold = 0.8,
     specificityThreshold = 0.8,
     confidenceLevel = 95,

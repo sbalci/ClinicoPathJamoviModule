@@ -2,7 +2,7 @@
 # Comprehensive testing of all features and arguments
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Test data setup ----
 setup_test_data <- function() {

@@ -774,11 +774,7 @@ contTablesClass <- R6::R6Class(
             return(list(nnt=nnt, lower=lower, upper=upper))
         },
 
-        .sourcifyOption = function(option) {
-            if (option$name %in% c('rows', 'cols', 'counts'))
-                return('')
-            super$.sourcifyOption(option)
-        },
+
         .formula=function() {
             rhs <- list()
             if ( ! is.null(self$options$rows)) {
@@ -789,5 +785,23 @@ contTablesClass <- R6::R6Class(
                 }
             }
             jmvcore:::composeFormula(self$options$counts, list(rhs))
-        })
+        }),
+    public = list(
+        #' @description
+        #' Generate R source code for Contingency Tables analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            # Get arguments
+            args <- private$.asArgs(incData = FALSE)
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::conttables(\n    data = data', args, ')')
+        }
+    ) # End of public list
 )

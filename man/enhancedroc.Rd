@@ -17,15 +17,15 @@ enhancedROC(
   specificityThreshold = 0.8,
   confidenceLevel = 95,
   bootstrapSamples = 1000,
-  useBootstrap = TRUE,
+  useBootstrap = FALSE,
   bootstrapMethod = "bca",
   bootstrapCutoffCI = FALSE,
   bootstrapPartialAUC = FALSE,
-  stratifiedBootstrap = TRUE,
+  stratifiedBootstrap = FALSE,
   pairwiseComparisons = FALSE,
   comparisonMethod = "delong",
-  rocCurve = TRUE,
-  aucTable = TRUE,
+  rocCurve = FALSE,
+  aucTable = FALSE,
   cutoffTable = FALSE,
   optimalCutoffs = FALSE,
   diagnosticMetrics = FALSE,
@@ -38,29 +38,29 @@ enhancedROC(
   crocAlpha = 7,
   convexHull = FALSE,
   tiedScoreHandling = "average",
-  detectImbalance = TRUE,
+  detectImbalance = FALSE,
   imbalanceThreshold = 3,
-  showImbalanceWarning = TRUE,
-  recommendPRC = TRUE,
+  showImbalanceWarning = FALSE,
+  recommendPRC = FALSE,
   prevalence = 0.1,
-  useObservedPrevalence = TRUE,
+  useObservedPrevalence = FALSE,
   clinicalContext = "general",
   clinicalPresets = "custom",
   comprehensive_output = FALSE,
-  clinical_interpretation = TRUE,
+  clinical_interpretation = FALSE,
   plotTheme = "clinical",
   plotWidth = 600,
   plotHeight = 600,
-  showCutoffPoints = TRUE,
+  showCutoffPoints = FALSE,
   showConfidenceBands = FALSE,
-  showMetricsDiff = TRUE,
-  statisticalComparison = TRUE,
+  showMetricsDiff = FALSE,
+  statisticalComparison = FALSE,
   calibrationAnalysis = FALSE,
-  calibrationPlot = TRUE,
-  hosmerLemeshow = TRUE,
+  calibrationPlot = FALSE,
+  hosmerLemeshow = FALSE,
   hlGroups = 10,
-  brierScore = TRUE,
-  calibrationMetrics = TRUE,
+  brierScore = FALSE,
+  calibrationMetrics = FALSE,
   splineCalibration = FALSE,
   splineKnots = 4,
   eoRatio = FALSE,
@@ -71,14 +71,10 @@ enhancedROC(
   multiClassROC = FALSE,
   multiClassStrategy = "ovr",
   multiClassAveraging = "macro",
-  timeDependentROC = FALSE,
-  timePoints = "12,24,36",
-  tdRocMethod = "km",
   clinicalImpact = FALSE,
-  nntCalculation = TRUE,
-  clinicalUtilityCurve = TRUE,
-  decisionImpactTable = TRUE,
-  survivalROC = FALSE,
+  nntCalculation = FALSE,
+  clinicalUtilityCurve = FALSE,
+  decisionImpactTable = FALSE,
   harrellCIndex = FALSE,
   unoCStatistic = FALSE,
   incidentDynamic = FALSE,
@@ -86,7 +82,7 @@ enhancedROC(
   competingRisksConcordance = FALSE,
   internalValidation = FALSE,
   validationMethod = "bootstrap",
-  optimismCorrection = TRUE,
+  optimismCorrection = FALSE,
   externalValidation = FALSE,
   decisionImpactCurves = FALSE,
   netBenefitRegression = FALSE,
@@ -263,14 +259,6 @@ levels}
 
 \item{multiClassAveraging}{Method for averaging AUC across classes}
 
-\item{timeDependentROC}{Enable time-dependent ROC analysis for
-survival/time-to-event outcomes}
-
-\item{timePoints}{Comma-separated time points for time-dependent ROC (e.g.,
-12,24,36 months)}
-
-\item{tdRocMethod}{Method for estimating time-dependent ROC curves}
-
 \item{clinicalImpact}{Calculate clinical impact metrics (NNT, NND, clinical
 utility)}
 
@@ -281,9 +269,6 @@ diagnose}
 consequences}
 
 \item{decisionImpactTable}{Show decision impact at various thresholds}
-
-\item{survivalROC}{Enable survival-specific ROC methods (requires
-time-to-event data)}
 
 \item{harrellCIndex}{Calculate Harrell's concordance index for
 time-to-event outcomes}
@@ -321,8 +306,8 @@ probabilities}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$results$imbalanceWarning} \tab \tab \tab \tab \tab Warning and recommendations for imbalanced datasets \cr
 \code{results$results$imbalanceMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$results$precisionRecallTable} \tab \tab \tab \tab \tab Metrics for imbalanced data analysis \cr
 \code{results$results$analysisSummary} \tab \tab \tab \tab \tab Plain language summary of key findings \cr
@@ -355,9 +340,6 @@ A results object containing:
 \code{results$results$multiClassAUC} \tab \tab \tab \tab \tab AUC values for each class in multi-class analysis \cr
 \code{results$results$multiClassAverage} \tab \tab \tab \tab \tab Averaged AUC across all classes \cr
 \code{results$results$multiClassROCPlot} \tab \tab \tab \tab \tab ROC curves for all classes \cr
-\code{results$results$timeDependentAUC} \tab \tab \tab \tab \tab AUC values at different time points \cr
-\code{results$results$timeDependentROCPlot} \tab \tab \tab \tab \tab ROC curves at multiple time points \cr
-\code{results$results$aucTimeCoursePlot} \tab \tab \tab \tab \tab AUC evolution over time \cr
 \code{results$results$clinicalImpactTable} \tab \tab \tab \tab \tab Number needed to test and clinical utility metrics \cr
 \code{results$results$decisionImpactSummary} \tab \tab \tab \tab \tab Clinical consequences at various decision thresholds \cr
 \code{results$results$clinicalUtilityPlot} \tab \tab \tab \tab \tab Clinical utility showing test consequences across thresholds \cr

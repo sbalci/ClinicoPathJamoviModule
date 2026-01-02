@@ -3532,5 +3532,54 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       }
 
 
-    )
+    ), # End of private list
+    public = list(
+      #' @description
+      #' Generate R source code for Waterfall Plot analysis
+      #' @return Character string with R syntax for reproducible analysis
+      asSource = function() {
+        responseVar <- self$options$responseVar
+        groupVar <- self$options$groupVar
+
+        if (is.null(responseVar))
+          return('')
+
+        # Escape variable names that contain spaces or special characters
+        responseVar_escaped <- if (!is.null(responseVar) && !identical(make.names(responseVar), responseVar)) {
+          paste0('`', responseVar, '`')
+        } else {
+          responseVar
+        }
+
+        # Escape group variable if present
+        groupVar_arg <- ''
+        if (!is.null(groupVar)) {
+          groupVar_escaped <- if (!identical(make.names(groupVar), groupVar)) {
+            paste0('`', groupVar, '`')
+          } else {
+            groupVar
+          }
+          groupVar_arg <- paste0(',\n    groupVar = "', groupVar_escaped, '"')
+        }
+
+        # Build responseVar argument
+        responseVar_arg <- paste0('responseVar = "', responseVar_escaped, '"')
+
+        # Get other arguments using base helper (if available)
+        args <- ''
+        if (!is.null(private$.asArgs)) {
+          args <- private$.asArgs(incData = FALSE)
+        }
+        if (args != '')
+          args <- paste0(',\n    ', args)
+
+        # Get package name dynamically
+        pkg_name <- utils::packageName()
+        if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+        # Build complete function call
+        paste0(pkg_name, '::waterfall(\n    data = data,\n    ',
+               responseVar_arg, groupVar_arg, args, ')')
+      }
+    ) # End of public list
 )

@@ -8,7 +8,7 @@ context("test-jjcorrmat-correctness")
 # 4. Partial correlation handling in summary text
 # 5. Overall functionality across correlation types
 
-library(ClinicoPath)
+devtools::load_all()
 
 # ============================================================================
 # SELECTIVE NA OMISSION TESTS

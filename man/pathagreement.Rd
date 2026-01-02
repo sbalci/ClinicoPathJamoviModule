@@ -21,22 +21,18 @@ pathagreement(
   consensus_method = "majority",
   tie_breaking = "exclude",
   show_consensus_table = FALSE,
-  showClinicalSummary = TRUE,
+  showClinicalSummary = FALSE,
   showAboutAnalysis = FALSE,
   showAssumptions = FALSE,
   showWeightedKappaGuide = FALSE,
   showStatisticalGlossary = FALSE,
-  diagnosticStyleAnalysis = FALSE,
-  styleClusterMethod = "ward",
   styleDistanceMetric = "agreement",
-  styleGroups = 3,
   raterCharacteristics = FALSE,
   experienceVar,
   trainingVar,
   institutionVar,
   specialtyVar,
   identifyDiscordantCases = FALSE,
-  styleHeatmap = FALSE,
   caseID,
   icc = FALSE,
   bootstrap = FALSE,
@@ -140,18 +136,8 @@ options, including when to use linear vs quadratic weighting schemes.}
 \item{showStatisticalGlossary}{Show glossary of statistical terms (kappa,
 ICC, alpha, etc.) with clinical interpretations and usage guidelines.}
 
-\item{diagnosticStyleAnalysis}{Enable diagnostic style clustering analysis
-using the Usubutun method to identify pathologist "schools" or diagnostic
-approaches.}
-
-\item{styleClusterMethod}{Hierarchical clustering method for diagnostic
-style analysis. Ward's linkage is the Usubutun standard.}
-
 \item{styleDistanceMetric}{Distance metric for measuring diagnostic
 similarity between raters for style clustering.}
-
-\item{styleGroups}{Number of diagnostic style groups to identify. Usubutun
-et al. found 3 groups optimal for most analyses.}
 
 \item{raterCharacteristics}{Include rater background characteristics
 (experience, training, institution) in style analysis.}
@@ -170,8 +156,6 @@ subspecialty information}
 
 \item{identifyDiscordantCases}{Identify cases that distinguish different
 diagnostic styles - useful for training and consensus development.}
-
-\item{styleHeatmap}{Display diagnostic style heatmap.}
 
 \item{caseID}{Optional variable containing case identifiers. If not
 specified, cases will be numbered automatically.}

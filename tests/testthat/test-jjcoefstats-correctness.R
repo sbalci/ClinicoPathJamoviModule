@@ -8,7 +8,7 @@ context("test-jjcoefstats-correctness")
 # 4. Input validation for logistic and Cox models
 # 5. Overall functionality across model types
 
-library(ClinicoPath)
+devtools::load_all()
 
 # ============================================================================
 # PRECOMPUTED MODE TESTS

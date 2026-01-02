@@ -1461,5 +1461,31 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 }
             }
 
-        )
+        ), # End of private list
+        public = list(
+            #' @description
+            #' Generate R source code for Statistical Plot analysis
+            #' @return Character string with R syntax for reproducible analysis
+            asSource = function() {
+                dep <- self$options$dep
+
+                if (is.null(dep))
+                    return('')
+
+                # Get arguments using base helper (if available)
+                args <- ''
+                if (!is.null(private$.asArgs)) {
+                    args <- private$.asArgs(incData = FALSE)
+                }
+                if (args != '')
+                    args <- paste0(',\n    ', args)
+
+                # Get package name dynamically
+                pkg_name <- utils::packageName()
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+                # Build complete function call
+                paste0(pkg_name, '::statsplot2(\n    data = data', args, ')')
+            }
+        ) # End of public list
     )

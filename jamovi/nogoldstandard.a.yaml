@@ -1,7 +1,7 @@
 ---
 name: nogoldstandard
 title: Analysis Without Gold Standard
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Multiple Test Analysis Without Gold Standard
 version: '0.0.32'
@@ -75,13 +75,13 @@ options:
         - name: none
           title: Custom Analysis (no preset)
         - name: diagnostic_validation
-          title: 🔬 Diagnostic Test Validation
+          title: Diagnostic Test Validation
         - name: pathology_agreement
-          title: 👥 Pathologist Agreement
+          title: Pathologist Agreement
         - name: tumor_markers
-          title: 🎗️ Tumor Marker Evaluation
+          title: Tumor Marker Evaluation
         - name: screening_evaluation
-          title: 🩺 Screening Test Assessment
+          title: Screening Test Assessment
       default: none
       description:
           R: >

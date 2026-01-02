@@ -77,15 +77,15 @@ children:
             label: "Analysis Method"
             options:
               - name: latent_class
-                title: "🏆 Latent Class Analysis (Recommended)"
+                title: "Latent Class Analysis (Recommended)"
               - name: bayesian  
-                title: "📊 Bayesian Analysis"
+                title: "Bayesian Analysis"
               - name: composite
-                title: "🗳️ Composite Reference"
+                title: "Composite Reference"
               - name: all_positive
-                title: "🔒 All Tests Positive"
+                title: "All Tests Positive"
               - name: any_positive
-                title: "🔓 Any Test Positive"
+                title: "Any Test Positive"
 
   - type: Label
     label: Bootstrap Options  

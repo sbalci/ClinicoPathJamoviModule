@@ -1,7 +1,7 @@
 context("test-desctools")
 
 # Load required library
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("desctools function exists and is callable", {
   skip_if_not_installed('jmvReadWrite')

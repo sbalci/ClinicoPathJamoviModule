@@ -1,7 +1,7 @@
 context("test-crosstablepivot")
 
 # Load required library
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("crosstablepivot basic functionality", {
   skip_if_not_installed('jmvReadWrite')

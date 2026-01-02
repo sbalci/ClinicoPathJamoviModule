@@ -9,6 +9,11 @@ items:
       type: Html
       visible: true
 
+    - name: notices
+      title: Notices
+      type: Html
+      visible: true
+
     - name: netBenefitTable
       title: Net Benefit at Selected Time Points
       type: Table

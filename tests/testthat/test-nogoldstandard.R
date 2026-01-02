@@ -1,7 +1,7 @@
 # Tests for nogoldstandard function
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Load test data
 data(nogoldstandard_test_data)

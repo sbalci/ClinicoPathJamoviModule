@@ -3,7 +3,7 @@
 
 context("test-diagnosticmeta-critical-fixes")
 
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("SROC pooled point uses probabilities directly (no double plogis)", {
   skip_if_not_installed('jmvReadWrite')

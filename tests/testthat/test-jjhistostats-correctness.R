@@ -7,7 +7,7 @@ context("test-jjhistostats-correctness")
 # 3. Default test.value warning (testing mean = 0 is rarely relevant)
 # 4. Overall functionality across statistical methods
 
-library(ClinicoPath)
+devtools::load_all()
 
 # ============================================================================
 # SELECTIVE NA OMISSION TESTS

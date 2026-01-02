@@ -1,7 +1,7 @@
 # Integration tests for venn module
 # Tests critical bug fixes: selected-variable naOmit, set calculations correctness
 
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("venn only excludes cases with NAs in SELECTED variables", {
   skip_if_not_installed('jmvReadWrite')

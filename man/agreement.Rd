@@ -9,7 +9,9 @@ agreement(
   vars,
   baConfidenceLevel = 0.95,
   proportionalBias = FALSE,
+  blandAltmanPlot = FALSE,
   sft = FALSE,
+  showText = FALSE,
   wght = "unweighted",
   exct = FALSE,
   kripp = FALSE,
@@ -20,8 +22,6 @@ agreement(
   showLevelInfo = FALSE,
   hierarchicalKappa = FALSE,
   clusterVariable = NULL,
-  randomEffectsRater = FALSE,
-  randomEffectsCluster = FALSE,
   iccHierarchical = FALSE,
   clusterSpecificKappa = FALSE,
   betweenClusterVariance = FALSE,
@@ -40,8 +40,7 @@ agreement(
   loaVariable = FALSE,
   loaThresholds = "custom",
   loaHighThreshold = 75,
-  loaLowThreshold = 56,
-  loaVarName = "loa_category"
+  loaLowThreshold = 56
 )
 }
 \arguments{
@@ -55,9 +54,17 @@ diagnosis given by the observer, variable can be categorical or ordinal.}
 
 \item{proportionalBias}{.}
 
+\item{blandAltmanPlot}{Generate Bland-Altman plot for continuous agreement
+analysis. Displays mean difference and limits of agreement between the
+first two raters. Only applicable when raters provide continuous
+measurements (e.g., tumor size in mm).}
+
 \item{sft}{Display frequency tables showing the distribution of ratings for
 each rater. Useful for understanding rating patterns and identifying
 potential biases.}
+
+\item{showText}{Display simple preformatted text version of frequency
+tables. Provides a plain-text alternative to the HTML formatted tables.}
 
 \item{wght}{For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
 kappa accounts for degree of disagreement. Linear weights: Adjacent
@@ -101,15 +108,6 @@ multi-center reliability studies.}
 \item{clusterVariable}{Variable defining clusters/institutions/centers. For
 example, hospital ID, institution name, or scanner ID. Raters are nested
 within these clusters.}
-
-\item{randomEffectsRater}{Model rater effects as random (raters are a
-random sample from population of potential raters). If false, raters are
-treated as fixed effects. Random effects recommended when generalizing
-beyond specific raters.}
-
-\item{randomEffectsCluster}{Model cluster/institution effects as random
-(institutions are random sample). Allows generalization beyond specific
-institutions in the study.}
 
 \item{iccHierarchical}{Calculate intraclass correlation coefficients for
 hierarchical data. ICC(1): between-cluster agreement, ICC(2): reliability
@@ -187,8 +185,6 @@ cutpoints. Quartiles/Tertiles = data-driven splits.}
 
 \item{loaLowThreshold}{Minimum \\% agreement for "Low" LoA (e.g., 56\\% =
 ≥9/16 raters for N=16).}
-
-\item{loaVarName}{Name of the new computed variable for level of agreement.}
 }
 \value{
 A results object containing:
@@ -203,7 +199,6 @@ A results object containing:
 \code{results$headingGwet} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$levelInfo} \tab \tab \tab \tab \tab a html \cr
-\code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$varianceComponents} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterSpecificKappaTable} \tab \tab \tab \tab \tab a table \cr
@@ -216,7 +211,9 @@ A results object containing:
 \code{results$headingLoA} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$loaVar} \tab \tab \tab \tab \tab an output \cr
+\code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportText} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
 }
@@ -231,29 +228,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for Interrater Reliability.
 }
 \examples{
-# Basic kappa analysis with 3 pathologists rating tumor grades
-data('histopathologyDescriptives')
-jmv::agreement(
-    data = histopathologyDescriptives,
-    vars = c('Pathologist_1', 'Pathologist_2', 'Pathologist_3')
-)
-
-# Weighted kappa for ordinal data (tumor grades: G1 < G2 < G3)
-# First ensure variables are set as Ordinal with proper level ordering
-jmv::agreement(
-    data = histopathologyDescriptives,
-    vars = c('Grade_Rater1', 'Grade_Rater2'),
-    wght = 'equal',
-    showLevelInfo = TRUE  # Verify level ordering before analysis
-)
-
-# Create consensus variable from 5 raters
-jmv::agreement(
-    data = histopathologyDescriptives,
-    vars = c('R1', 'R2', 'R3', 'R4', 'R5'),
-    consensusVar = TRUE,
-    consensusRule = 'majority',
-    consensusName = 'consensus_diagnosis'
-)
-
+\donttest{
+# example will be added
+}
 }

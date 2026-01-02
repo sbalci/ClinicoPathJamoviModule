@@ -1193,5 +1193,51 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             self$results$icc_selection_guide$setContent(guide_html)
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for pathologyagreement analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            dep1 <- self$options$dep1
+            dep2 <- self$options$dep2
+
+            if (is.null(dep1) || is.null(dep2))
+                return('')
+
+            # Escape dep1 variable
+            dep1_escaped <- if (!is.null(dep1) && !identical(make.names(dep1), dep1)) {
+                paste0('`', dep1, '`')
+            } else {
+                dep1
+            }
+
+            # Escape dep2 variable
+            dep2_escaped <- if (!is.null(dep2) && !identical(make.names(dep2), dep2)) {
+                paste0('`', dep2, '`')
+            } else {
+                dep2
+            }
+
+            # Build arguments
+            dep1_arg <- paste0('dep1 = "', dep1_escaped, '"')
+            dep2_arg <- paste0('dep2 = "', dep2_escaped, '"')
+
+            # Get other arguments using base helper (if available)
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::pathologyagreement(\n    data = data,\n    ',
+                   dep1_arg, ',\n    ', dep2_arg, args, ')')
+        }
+    ) # End of public list
 )

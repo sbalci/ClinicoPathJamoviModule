@@ -3,7 +3,7 @@
 
 context("test-outlierdetection-integration")
 
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("Univariate mode extracts per-method scores from check_outliers()", {
   skip_if_not_installed('jmvReadWrite')

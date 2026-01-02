@@ -5,7 +5,7 @@
 # Load helper functions for multi-format data saving
 source("data-raw/data_save_helpers.R")
 
-library(ClinicoPath)
+devtools::load_all()
 
 # Load test data
 test_data <- read.csv("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/jjoncoplot_test_data.csv")

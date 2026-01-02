@@ -1,7 +1,7 @@
 # Tests for group-based colouring options in waterfall analysis
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 set.seed(123)
 test_data <- data.frame(

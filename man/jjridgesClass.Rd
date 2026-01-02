@@ -12,6 +12,7 @@ Creates advanced ridgeline plots with robust statistical analysis
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-jjridgesClass-asSource}{\code{jjridgesClass$asSource()}}
 \item \href{#method-jjridgesClass-clone}{\code{jjridgesClass$clone()}}
 }
 }
@@ -33,7 +34,6 @@ Creates advanced ridgeline plots with robust statistical analysis
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setStatePathSource'><code>jmvcore::Analysis$.setStatePathSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
@@ -49,6 +49,19 @@ Creates advanced ridgeline plots with robust statistical analysis
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-jjridgesClass-asSource"></a>}}
+\if{latex}{\out{\hypertarget{method-jjridgesClass-asSource}{}}}
+\subsection{Method \code{asSource()}}{
+Generate R source code for Ridge Plot analysis
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{jjridgesClass$asSource()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Character string with R syntax for reproducible analysis
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-jjridgesClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-jjridgesClass-clone}{}}}

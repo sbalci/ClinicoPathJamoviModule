@@ -1,7 +1,7 @@
 context("test-crosstable")
 
 # Load required library
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("crosstable works", {
   devtools::load_all()

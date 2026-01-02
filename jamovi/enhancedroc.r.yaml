@@ -23,13 +23,6 @@ items:
             type: Html
             visible: true
 
-          # Class Imbalance Warning (DEPRECATED - now using Notice API)
-          - name: imbalanceWarning
-            title: Class Imbalance Detection
-            type: Html
-            visible: false
-            description: Warning and recommendations for imbalanced datasets
-
           # Imbalance Metrics Table
           - name: imbalanceMetrics
             title: Class Imbalance Metrics
@@ -766,56 +759,56 @@ items:
             width: 600
             height: 600
 
-          # Time-Dependent ROC Results
-          - name: timeDependentAUC
-            title: Time-Dependent AUC
-            type: Table
-            description: AUC values at different time points
-            visible: (timeDependentROC)
-            columns:
-                - name: predictor
-                  title: 'Predictor'
-                  type: text
-                - name: time_point
-                  title: 'Time Point'
-                  type: number
-                  format: zto
-                - name: auc
-                  title: 'AUC(t)'
-                  type: number
-                  format: zto
-                - name: auc_lower
-                  title: 'AUC Lower CI'
-                  type: number
-                  format: zto
-                - name: auc_upper
-                  title: 'AUC Upper CI'
-                  type: number
-                  format: zto
-                - name: n_events
-                  title: 'N Events'
-                  type: integer
-                - name: n_at_risk
-                  title: 'N At Risk'
-                  type: integer
-
-          - name: timeDependentROCPlot
-            title: Time-Dependent ROC Curves
-            type: Image
-            description: ROC curves at multiple time points
-            visible: (timeDependentROC)
-            renderFun: .plotTimeDependentROC
-            width: 600
-            height: 600
-
-          - name: aucTimeCoursePlot
-            title: AUC Time Course
-            type: Image
-            description: AUC evolution over time
-            visible: (timeDependentROC)
-            renderFun: .plotAUCTimeCourse
-            width: 600
-            height: 600
+          # Time-Dependent ROC Results (NOT IMPLEMENTED - COMMENTED OUT)
+          # - name: timeDependentAUC
+          #   title: Time-Dependent AUC
+          #   type: Table
+          #   description: AUC values at different time points
+          #   visible: (timeDependentROC)
+          #   columns:
+          #       - name: predictor
+          #         title: 'Predictor'
+          #         type: text
+          #       - name: time_point
+          #         title: 'Time Point'
+          #         type: number
+          #         format: zto
+          #       - name: auc
+          #         title: 'AUC(t)'
+          #         type: number
+          #         format: zto
+          #       - name: auc_lower
+          #         title: 'AUC Lower CI'
+          #         type: number
+          #         format: zto
+          #       - name: auc_upper
+          #         title: 'AUC Upper CI'
+          #         type: number
+          #         format: zto
+          #       - name: n_events
+          #         title: 'N Events'
+          #         type: integer
+          #       - name: n_at_risk
+          #         title: 'N At Risk'
+          #         type: integer
+          #
+          # - name: timeDependentROCPlot
+          #   title: Time-Dependent ROC Curves
+          #   type: Image
+          #   description: ROC curves at multiple time points
+          #   visible: (timeDependentROC)
+          #   renderFun: .plotTimeDependentROC
+          #   width: 600
+          #   height: 600
+          #
+          # - name: aucTimeCoursePlot
+          #   title: AUC Time Course
+          #   type: Image
+          #   description: AUC evolution over time
+          #   visible: (timeDependentROC)
+          #   renderFun: .plotAUCTimeCourse
+          #   width: 600
+          #   height: 600
 
           # Clinical Impact Results
           - name: clinicalImpactTable

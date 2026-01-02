@@ -7,7 +7,7 @@ context("test-jjbetweenstats-correctness")
 # 3. Multi-endpoint clarity
 # 4. Actual statistical analysis execution
 
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("jjbetweenstats uses selective NA omission, not global", {
   skip_if_not_installed('jmvReadWrite')

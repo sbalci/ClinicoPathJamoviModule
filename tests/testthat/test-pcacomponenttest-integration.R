@@ -3,7 +3,7 @@
 
 context("test-pcacomponenttest-integration")
 
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("Sequential permutation test is mathematically sound", {
   skip_if_not_installed('jmvReadWrite')

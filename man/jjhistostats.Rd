@@ -35,12 +35,12 @@ jjhistostats(
   plotheight = 450,
   addGGPubrPlot = FALSE,
   ggpubrPalette = "#0073C2FF",
-  ggpubrAddDensity = TRUE,
+  ggpubrAddDensity = FALSE,
   ggpubrAddMean = FALSE,
   addDistributionDiagnostics = FALSE,
   ggpubrDensityColor = "#0073C2FF",
-  ggpubrShowQQ = TRUE,
-  ggpubrShowECDF = TRUE
+  ggpubrShowQQ = FALSE,
+  ggpubrShowECDF = FALSE
 )
 }
 \arguments{

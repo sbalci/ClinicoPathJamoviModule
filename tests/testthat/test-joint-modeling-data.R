@@ -3,7 +3,7 @@
 # and suitable for analysis
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 library(dplyr)
 
 # Helper function to test dataset structure

@@ -1,5 +1,5 @@
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 make_clean_data <- function() {
     data.frame(ts = c("2023-01-15 14:30:00", "2024-02-20 09:00:00", "2023-03-10 12:00:00"))

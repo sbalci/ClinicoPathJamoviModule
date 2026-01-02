@@ -91,7 +91,7 @@ enhancedROCClass <- R6::R6Class(
 
           html <- paste0(html, "</div>")
 
-          self$results$notices$setContent(html)
+          self$results$results$notices$setContent(html)
         },
 
         .init = function() {
@@ -238,14 +238,14 @@ enhancedROCClass <- R6::R6Class(
             }
 
 
-
-            if (self$options$timeDependentROC || self$options$survivalROC) {
-                private$.addNotice(
-                    type = "WARNING",
-                    title = "Time-Dependent ROC Not Supported",
-                    content = "Time-Dependent and Survival ROC analyses are not currently supported. • These features require time-to-event input variables (event time, censoring indicator) which are not yet available in this interface. • For survival ROC analysis, please use standard ROC analysis with risk scores or predicted probabilities from survival models."
-                )
-            }
+            # NOT IMPLEMENTED - Time-Dependent ROC Warning (commented out)
+            # if (self$options$timeDependentROC || self$options$survivalROC) {
+            #     private$.addNotice(
+            #         type = "WARNING",
+            #         title = "Time-Dependent ROC Not Supported",
+            #         content = "Time-Dependent and Survival ROC analyses are not currently supported. • These features require time-to-event input variables (event time, censoring indicator) which are not yet available in this interface. • For survival ROC analysis, please use standard ROC analysis with risk scores or predicted probabilities from survival models."
+            #     )
+            # }
             
             # Generate natural language summary
             if (length(private$.rocResults) > 0) {
@@ -3017,6 +3017,91 @@ enhancedROCClass <- R6::R6Class(
             })
         },
 
+        .plotPRC = function(image, ggtheme, theme, ...) {
+            if (!self$options$detectImbalance) return(FALSE)
+
+            # Set custom plot dimensions
+            width <- self$options$plotWidth %||% 600
+            height <- self$options$plotHeight %||% 600
+            image$setState(list(width = width, height = height))
+
+            tryCatch({
+                library(ggplot2)
+                
+                plot_data <- data.frame()
+                baseline <- 0.5 # Default baseline
+
+                for (predictor in names(private$.rocResults)) {
+                    # Get data again
+                    data <- private$.data
+                    outcome <- data[[private$.outcome]]
+                    scores <- data[[predictor]]
+                    
+                    # Ensure outcome is binary 0/1, where 1 is the positive class
+                    # We need to respect the private$.positiveClass logic
+                    posClass <- private$.positiveClass %||% levels(outcome)[2]
+                    y_binary <- as.numeric(outcome == posClass)
+                    
+                    baseline <- mean(y_binary) # Actual baseline is prevalence
+
+                    # We can use pROC to get coords, but pROC doesn't do PRC natively in the same way.
+                    # However, we can calculate Precision (PPV) and Recall (Sensitivity) from coords.
+                    roc_obj <- private$.rocResults[[predictor]]$roc
+                    
+                    # Get all coordinates
+                    coords <- pROC::coords(roc_obj, x="all", ret=c("threshold", "sensitivity", "specificity"))
+                    
+                    # Calculate Precision: TP / (TP + FP)
+                    # Sensitivity = TP / (TP + FN) -> TP = Sens * Positives
+                    # Specificity = TN / (TN + FP) -> FP = (1 - Spec) * Negatives
+                    n_pos <- sum(y_binary == 1)
+                    n_neg <- sum(y_binary == 0)
+                    
+                    tp <- coords$sensitivity * n_pos
+                    fp <- (1 - coords$specificity) * n_neg
+                    
+                    precision <- tp / (tp + fp)
+                    recall <- coords$sensitivity
+                    
+                    # Handle division by zero/NaNs at extremes
+                    precision[is.na(precision)] <- 1 # Usually at threshold 1 where TP=0, FP=0? 
+                    # If TP+FP=0, it means no positive predictions. Precision is undefined but often treated as 1 or 0.
+                    
+                    pr_df <- data.frame(
+                        Recall = recall,
+                        Precision = precision,
+                        Predictor = predictor
+                    )
+                    plot_data <- rbind(plot_data, pr_df)
+                }
+                
+                if (nrow(plot_data) == 0) return(FALSE)
+
+                p <- ggplot(plot_data, aes(x = Recall, y = Precision, color = Predictor)) +
+                    geom_line(size = 1.2) +
+                    geom_hline(yintercept = baseline, linetype = "dashed", color = "gray50") +
+                    labs(
+                        x = "Recall (Sensitivity)",
+                        y = "Precision (PPV)",
+                        title = "Precision-Recall Curve",
+                        subtitle = paste("Baseline (Prevalence) =", round(baseline, 3))
+                    ) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        legend.position = "bottom"
+                    )
+
+                print(p)
+                TRUE
+
+            }, error = function(e) {
+                warning(paste("Failed to create Precision-Recall plot:", e$message))
+                FALSE
+            })
+        },
+
         .plotCROC = function(image, ggtheme, theme, ...) {
             if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
                 return(FALSE)
@@ -3542,6 +3627,60 @@ enhancedROCClass <- R6::R6Class(
             })
         },
 
+        # NOT IMPLEMENTED - Time-Dependent ROC Stub Functions (commented out)
+        # .plotTimeDependentROC = function(image, ggtheme, theme, ...) {
+        #     # Stub for Time-Dependent ROC Plot
+        #     # Currently not supported, as indicated by the warning in .run()
+        #     # Returns FALSE to indicate no plot generated, or generates a placeholder
+        #
+        #     if (!self$options$timeDependentROC) return(FALSE)
+        #
+        #     width <- self$options$plotWidth %||% 600
+        #     height <- self$options$plotHeight %||% 600
+        #     image$setState(list(width = width, height = height))
+        #
+        #     tryCatch({
+        #         library(ggplot2)
+        #
+        #         # Create a placeholder plot
+        #         df <- data.frame(x = 0.5, y = 0.5, label = "Time-Dependent ROC\nCurrently Not Supported")
+        #         p <- ggplot(df, aes(x=x, y=y, label=label)) +
+        #             geom_text(size = 6) +
+        #             theme_void() +
+        #             theme(plot.background = element_rect(fill = "white", color = NA))
+        #
+        #         print(p)
+        #         TRUE
+        #     }, error = function(e) {
+        #         FALSE
+        #     })
+        # },
+        #
+        # .plotAUCTimeCourse = function(image, ggtheme, theme, ...) {
+        #     # Stub for AUC Time Course Plot
+        #     if (!self$options$timeDependentROC) return(FALSE)
+        #
+        #     width <- self$options$plotWidth %||% 600
+        #     height <- self$options$plotHeight %||% 600
+        #     image$setState(list(width = width, height = height))
+        #
+        #     tryCatch({
+        #         library(ggplot2)
+        #
+        #         # Create a placeholder plot
+        #         df <- data.frame(x = 0.5, y = 0.5, label = "AUC Time Course\nCurrently Not Supported")
+        #         p <- ggplot(df, aes(x=x, y=y, label=label)) +
+        #             geom_text(size = 6) +
+        #             theme_void() +
+        #             theme(plot.background = element_rect(fill = "white", color = NA))
+        #
+        #         print(p)
+        #         TRUE
+        #     }, error = function(e) {
+        #         FALSE
+        #     })
+        # },
+
         .populateClinicalImpact = function() {
             if (!self$options$clinicalImpact) return()
             
@@ -3794,5 +3933,32 @@ enhancedROCClass <- R6::R6Class(
             current_content <- self$results$results$analysisSummary$content
             self$results$results$analysisSummary$setContent(paste(current_content, summary_text, sep = "<br>"))
         }
-    )
+    ), # End of private list
+    public = list(
+        #' @description
+        #' Generate R source code for enhancedROC analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            outcome <- self$options$outcome
+            predictors <- self$options$predictors
+
+            if (is.null(outcome) || is.null(predictors) || length(predictors) == 0)
+                return('')
+
+            # Get arguments
+            args <- ''
+            if (!is.null(private$.asArgs)) {
+                args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::enhancedROC(\n    data = data', args, ')')
+        }
+    ) # End of public list
 )

@@ -5,7 +5,7 @@
 cat("=== Testing biomarkerresponse Fixes ===\n\n")
 
 # Load library
-library(ClinicoPath)
+devtools::load_all()
 
 # ===========================================================================
 # TEST 1: Fix #1 - Clinical Validation Notices

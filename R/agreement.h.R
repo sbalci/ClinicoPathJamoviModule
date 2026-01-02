@@ -11,6 +11,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             proportionalBias = FALSE,
             blandAltmanPlot = FALSE,
             sft = FALSE,
+            showText = FALSE,
             wght = "unweighted",
             exct = FALSE,
             kripp = FALSE,
@@ -21,8 +22,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showLevelInfo = FALSE,
             hierarchicalKappa = FALSE,
             clusterVariable = NULL,
-            randomEffectsRater = FALSE,
-            randomEffectsCluster = FALSE,
             iccHierarchical = FALSE,
             clusterSpecificKappa = FALSE,
             betweenClusterVariance = FALSE,
@@ -41,8 +40,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             loaVariable = FALSE,
             loaThresholds = "custom",
             loaHighThreshold = 75,
-            loaLowThreshold = 56,
-            loaVarName = "loa_category", ...) {
+            loaLowThreshold = 56, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -55,8 +53,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 vars,
                 suggested=list(
                     "ordinal",
-                    "nominal",
-                    "continuous"),
+                    "nominal"),
                 permitted=list(
                     "factor",
                     "numeric"))
@@ -77,6 +74,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..sft <- jmvcore::OptionBool$new(
                 "sft",
                 sft,
+                default=FALSE)
+            private$..showText <- jmvcore::OptionBool$new(
+                "showText",
+                showText,
                 default=FALSE)
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
@@ -135,15 +136,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
-            private$..randomEffectsRater <- jmvcore::OptionBool$new(
-                "randomEffectsRater",
-                randomEffectsRater,
-                default=FALSE)
-            private$..randomEffectsCluster <- jmvcore::OptionBool$new(
-                "randomEffectsCluster",
-                randomEffectsCluster,
-                default=FALSE)
+                    "factor",
+                    "numeric"))
             private$..iccHierarchical <- jmvcore::OptionBool$new(
                 "iccHierarchical",
                 iccHierarchical,
@@ -213,7 +207,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor",
+                    "numeric"))
             private$..rankRaters <- jmvcore::OptionBool$new(
                 "rankRaters",
                 rankRaters,
@@ -242,16 +237,13 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=56,
                 min=30,
                 max=75)
-            private$..loaVarName <- jmvcore::OptionString$new(
-                "loaVarName",
-                loaVarName,
-                default="loa_category")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
             self$.addOption(private$..proportionalBias)
             self$.addOption(private$..blandAltmanPlot)
             self$.addOption(private$..sft)
+            self$.addOption(private$..showText)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
             self$.addOption(private$..kripp)
@@ -262,8 +254,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showLevelInfo)
             self$.addOption(private$..hierarchicalKappa)
             self$.addOption(private$..clusterVariable)
-            self$.addOption(private$..randomEffectsRater)
-            self$.addOption(private$..randomEffectsCluster)
             self$.addOption(private$..iccHierarchical)
             self$.addOption(private$..clusterSpecificKappa)
             self$.addOption(private$..betweenClusterVariance)
@@ -283,7 +273,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..loaThresholds)
             self$.addOption(private$..loaHighThreshold)
             self$.addOption(private$..loaLowThreshold)
-            self$.addOption(private$..loaVarName)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -291,6 +280,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         proportionalBias = function() private$..proportionalBias$value,
         blandAltmanPlot = function() private$..blandAltmanPlot$value,
         sft = function() private$..sft$value,
+        showText = function() private$..showText$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
         kripp = function() private$..kripp$value,
@@ -301,8 +291,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showLevelInfo = function() private$..showLevelInfo$value,
         hierarchicalKappa = function() private$..hierarchicalKappa$value,
         clusterVariable = function() private$..clusterVariable$value,
-        randomEffectsRater = function() private$..randomEffectsRater$value,
-        randomEffectsCluster = function() private$..randomEffectsCluster$value,
         iccHierarchical = function() private$..iccHierarchical$value,
         clusterSpecificKappa = function() private$..clusterSpecificKappa$value,
         betweenClusterVariance = function() private$..betweenClusterVariance$value,
@@ -321,14 +309,14 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         loaVariable = function() private$..loaVariable$value,
         loaThresholds = function() private$..loaThresholds$value,
         loaHighThreshold = function() private$..loaHighThreshold$value,
-        loaLowThreshold = function() private$..loaLowThreshold$value,
-        loaVarName = function() private$..loaVarName$value),
+        loaLowThreshold = function() private$..loaLowThreshold$value),
     private = list(
         ..vars = NA,
         ..baConfidenceLevel = NA,
         ..proportionalBias = NA,
         ..blandAltmanPlot = NA,
         ..sft = NA,
+        ..showText = NA,
         ..wght = NA,
         ..exct = NA,
         ..kripp = NA,
@@ -339,8 +327,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showLevelInfo = NA,
         ..hierarchicalKappa = NA,
         ..clusterVariable = NA,
-        ..randomEffectsRater = NA,
-        ..randomEffectsCluster = NA,
         ..iccHierarchical = NA,
         ..clusterSpecificKappa = NA,
         ..betweenClusterVariance = NA,
@@ -359,8 +345,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..loaVariable = NA,
         ..loaThresholds = NA,
         ..loaHighThreshold = NA,
-        ..loaLowThreshold = NA,
-        ..loaVarName = NA)
+        ..loaLowThreshold = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -377,7 +362,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         headingGwet = function() private$.items[["headingGwet"]],
         gwetTable = function() private$.items[["gwetTable"]],
         levelInfo = function() private$.items[["levelInfo"]],
-        weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
         hierarchicalICCTable = function() private$.items[["hierarchicalICCTable"]],
         varianceComponents = function() private$.items[["varianceComponents"]],
         clusterSpecificKappaTable = function() private$.items[["clusterSpecificKappaTable"]],
@@ -390,7 +374,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         headingLoA = function() private$.items[["headingLoA"]],
         loaTable = function() private$.items[["loaTable"]],
         loaVar = function() private$.items[["loaVar"]],
+        weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
         summary = function() private$.items[["summary"]],
+        reportText = function() private$.items[["reportText"]],
         about = function() private$.items[["about"]],
         blandAltmanPlot = function() private$.items[["blandAltmanPlot"]]),
     private = list(),
@@ -565,11 +551,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="levelInfo",
                 title="Variable Level Ordering",
                 visible="(showLevelInfo)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="weightedKappaGuide",
-                title="Weighted Kappa Interpretation Guide",
-                visible="(showAbout && (wght:unweighted == FALSE))"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="hierarchicalICCTable",
@@ -834,13 +815,26 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "loaThresholds",
                     "loaHighThreshold",
-                    "loaLowThreshold",
-                    "loaVarName")))
+                    "loaLowThreshold")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="weightedKappaGuide",
+                title="Weighted Kappa Interpretation Guide",
+                visible="(showAbout && (wght:unweighted == FALSE))"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
                 title="Summary",
                 visible="(showSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportText",
+                title="Publication-Ready Text",
+                visible="(showSummary)",
+                clearWith=list(
+                    "vars",
+                    "wght",
+                    "exct")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -881,31 +875,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for Interrater Reliability.
 #'
 #' @examples
-#' # Basic kappa analysis with 3 pathologists rating tumor grades
-#' data('histopathologyDescriptives')
-#' jmv::agreement(
-#'     data = histopathologyDescriptives,
-#'     vars = c('Pathologist_1', 'Pathologist_2', 'Pathologist_3')
-#' )
-#'
-#' # Weighted kappa for ordinal data (tumor grades: G1 < G2 < G3)
-#' # First ensure variables are set as Ordinal with proper level ordering
-#' jmv::agreement(
-#'     data = histopathologyDescriptives,
-#'     vars = c('Grade_Rater1', 'Grade_Rater2'),
-#'     wght = 'equal',
-#'     showLevelInfo = TRUE  # Verify level ordering before analysis
-#' )
-#'
-#' # Create consensus variable from 5 raters
-#' jmv::agreement(
-#'     data = histopathologyDescriptives,
-#'     vars = c('R1', 'R2', 'R3', 'R4', 'R5'),
-#'     consensusVar = TRUE,
-#'     consensusRule = 'majority',
-#'     consensusName = 'consensus_diagnosis'
-#' )
-#'
+#' \donttest{
+#' # example will be added
+#'}
 #' @param data The data as a data frame. The data should be in long format,
 #'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the
@@ -919,6 +891,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sft Display frequency tables showing the distribution of ratings for
 #'   each rater. Useful for understanding rating patterns and identifying
 #'   potential biases.
+#' @param showText Display simple preformatted text version of frequency
+#'   tables. Provides a plain-text alternative to the HTML formatted tables.
 #' @param wght For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
 #'   kappa accounts for degree of disagreement. Linear weights: Adjacent
 #'   disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
@@ -952,13 +926,6 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clusterVariable Variable defining clusters/institutions/centers. For
 #'   example, hospital ID, institution name, or scanner ID. Raters are nested
 #'   within these clusters.
-#' @param randomEffectsRater Model rater effects as random (raters are a
-#'   random sample from population of potential raters). If false, raters are
-#'   treated as fixed effects. Random effects recommended when generalizing
-#'   beyond specific raters.
-#' @param randomEffectsCluster Model cluster/institution effects as random
-#'   (institutions are random sample). Allows generalization beyond specific
-#'   institutions in the study.
 #' @param iccHierarchical Calculate intraclass correlation coefficients for
 #'   hierarchical data. ICC(1): between-cluster agreement, ICC(2): reliability
 #'   of cluster means, ICC(3): within-cluster agreement. Decomposes variance
@@ -1017,7 +984,6 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   ≥12/16 raters for N=16).
 #' @param loaLowThreshold Minimum \% agreement for "Low" LoA (e.g., 56\% =
 #'   ≥9/16 raters for N=16).
-#' @param loaVarName Name of the new computed variable for level of agreement.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -1030,7 +996,6 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$headingGwet} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$levelInfo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$varianceComponents} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clusterSpecificKappaTable} \tab \tab \tab \tab \tab a table \cr
@@ -1043,7 +1008,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$headingLoA} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$loaVar} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
@@ -1062,6 +1029,7 @@ agreement <- function(
     proportionalBias = FALSE,
     blandAltmanPlot = FALSE,
     sft = FALSE,
+    showText = FALSE,
     wght = "unweighted",
     exct = FALSE,
     kripp = FALSE,
@@ -1072,8 +1040,6 @@ agreement <- function(
     showLevelInfo = FALSE,
     hierarchicalKappa = FALSE,
     clusterVariable = NULL,
-    randomEffectsRater = FALSE,
-    randomEffectsCluster = FALSE,
     iccHierarchical = FALSE,
     clusterSpecificKappa = FALSE,
     betweenClusterVariance = FALSE,
@@ -1092,8 +1058,7 @@ agreement <- function(
     loaVariable = FALSE,
     loaThresholds = "custom",
     loaHighThreshold = 75,
-    loaLowThreshold = 56,
-    loaVarName = "loa_category") {
+    loaLowThreshold = 56) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -1108,6 +1073,7 @@ agreement <- function(
             `if`( ! missing(clusterVariable), clusterVariable, NULL),
             `if`( ! missing(referenceRater), referenceRater, NULL))
 
+    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in clusterVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in referenceRater) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -1117,6 +1083,7 @@ agreement <- function(
         proportionalBias = proportionalBias,
         blandAltmanPlot = blandAltmanPlot,
         sft = sft,
+        showText = showText,
         wght = wght,
         exct = exct,
         kripp = kripp,
@@ -1127,8 +1094,6 @@ agreement <- function(
         showLevelInfo = showLevelInfo,
         hierarchicalKappa = hierarchicalKappa,
         clusterVariable = clusterVariable,
-        randomEffectsRater = randomEffectsRater,
-        randomEffectsCluster = randomEffectsCluster,
         iccHierarchical = iccHierarchical,
         clusterSpecificKappa = clusterSpecificKappa,
         betweenClusterVariance = betweenClusterVariance,
@@ -1147,8 +1112,7 @@ agreement <- function(
         loaVariable = loaVariable,
         loaThresholds = loaThresholds,
         loaHighThreshold = loaHighThreshold,
-        loaLowThreshold = loaLowThreshold,
-        loaVarName = loaVarName)
+        loaLowThreshold = loaLowThreshold)
 
     analysis <- agreementClass$new(
         options = options,

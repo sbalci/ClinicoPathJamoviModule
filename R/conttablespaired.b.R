@@ -303,14 +303,28 @@ contTablesPairedClass <- R6::R6Class(
 
             rows
         },
-        .sourcifyOption = function(option) {
-            if (option$name %in% c('rows', 'cols', 'counts'))
-                return('')
-            super$.sourcifyOption(option)
-        },
+
         .formula=function() {
             if (is.null(self$options$rows) || is.null(self$options$cols))
                 return('~')
             jmvcore:::composeFormula(self$options$counts, list(list(self$options$rows, self$options$cols)))
-        })
+        }),
+    public = list(
+        #' @description
+        #' Generate R source code for Paired Contingency Tables analysis
+        #' @return Character string with R syntax for reproducible analysis
+        asSource = function() {
+            # Get arguments
+            args <- private$.asArgs(incData = FALSE)
+            if (args != '')
+                args <- paste0(',\n    ', args)
+
+            # Get package name dynamically
+            pkg_name <- utils::packageName()
+            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
+            # Build complete function call
+            paste0(pkg_name, '::conttablespaired(\n    data = data', args, ')')
+        }
+    ) # End of public list
 )

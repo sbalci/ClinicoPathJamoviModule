@@ -1,6 +1,6 @@
 # Test file for dataquality function
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 test_that("dataquality basic functionality", {
   skip_if_not_installed('jmvReadWrite')
