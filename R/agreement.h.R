@@ -7,15 +7,24 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
+            baConfidenceLevel = 0.95,
+            proportionalBias = FALSE,
+            blandAltmanPlot = FALSE,
             sft = FALSE,
-            showText = FALSE,
             wght = "unweighted",
             exct = FALSE,
             kripp = FALSE,
             krippMethod = "nominal",
             bootstrap = FALSE,
             showSummary = FALSE,
-            showAbout = FALSE, ...) {
+            showAbout = FALSE,
+            agreementStatus = FALSE,
+            agreementThreshold = 50,
+            showAgreementTable = FALSE,
+            consensusName = "consensus_rating",
+            consensusRule = "majority",
+            tieBreaker = "exclude",
+            agreementStatusName = "agreement_status", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -25,19 +34,24 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"))
+                vars)
+            private$..baConfidenceLevel <- jmvcore::OptionNumber$new(
+                "baConfidenceLevel",
+                baConfidenceLevel,
+                default=0.95,
+                min=0.5,
+                max=0.99)
+            private$..proportionalBias <- jmvcore::OptionBool$new(
+                "proportionalBias",
+                proportionalBias,
+                default=FALSE)
+            private$..blandAltmanPlot <- jmvcore::OptionBool$new(
+                "blandAltmanPlot",
+                blandAltmanPlot,
+                default=FALSE)
             private$..sft <- jmvcore::OptionBool$new(
                 "sft",
                 sft,
-                default=FALSE)
-            private$..showText <- jmvcore::OptionBool$new(
-                "showText",
-                showText,
                 default=FALSE)
             private$..wght <- jmvcore::OptionList$new(
                 "wght",
@@ -76,10 +90,55 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showAbout",
                 showAbout,
                 default=FALSE)
+            private$..agreementStatus <- jmvcore::OptionBool$new(
+                "agreementStatus",
+                agreementStatus,
+                default=FALSE)
+            private$..agreementThreshold <- jmvcore::OptionNumber$new(
+                "agreementThreshold",
+                agreementThreshold,
+                default=50,
+                min=50,
+                max=100)
+            private$..showAgreementTable <- jmvcore::OptionBool$new(
+                "showAgreementTable",
+                showAgreementTable,
+                default=FALSE)
+            private$..consensusName <- jmvcore::OptionString$new(
+                "consensusName",
+                consensusName,
+                default="consensus_rating")
+            private$..consensusVar <- jmvcore::OptionOutput$new(
+                "consensusVar")
+            private$..consensusRule <- jmvcore::OptionList$new(
+                "consensusRule",
+                consensusRule,
+                options=list(
+                    "majority",
+                    "supermajority",
+                    "unanimous"),
+                default="majority")
+            private$..tieBreaker <- jmvcore::OptionList$new(
+                "tieBreaker",
+                tieBreaker,
+                options=list(
+                    "exclude",
+                    "first",
+                    "lowest",
+                    "highest"),
+                default="exclude")
+            private$..agreementStatusName <- jmvcore::OptionString$new(
+                "agreementStatusName",
+                agreementStatusName,
+                default="agreement_status")
+            private$..addAgreementStatus <- jmvcore::OptionOutput$new(
+                "addAgreementStatus")
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..baConfidenceLevel)
+            self$.addOption(private$..proportionalBias)
+            self$.addOption(private$..blandAltmanPlot)
             self$.addOption(private$..sft)
-            self$.addOption(private$..showText)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
             self$.addOption(private$..kripp)
@@ -87,29 +146,60 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..bootstrap)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showAbout)
+            self$.addOption(private$..agreementStatus)
+            self$.addOption(private$..agreementThreshold)
+            self$.addOption(private$..showAgreementTable)
+            self$.addOption(private$..consensusName)
+            self$.addOption(private$..consensusVar)
+            self$.addOption(private$..consensusRule)
+            self$.addOption(private$..tieBreaker)
+            self$.addOption(private$..agreementStatusName)
+            self$.addOption(private$..addAgreementStatus)
         }),
     active = list(
         vars = function() private$..vars$value,
+        baConfidenceLevel = function() private$..baConfidenceLevel$value,
+        proportionalBias = function() private$..proportionalBias$value,
+        blandAltmanPlot = function() private$..blandAltmanPlot$value,
         sft = function() private$..sft$value,
-        showText = function() private$..showText$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
         kripp = function() private$..kripp$value,
         krippMethod = function() private$..krippMethod$value,
         bootstrap = function() private$..bootstrap$value,
         showSummary = function() private$..showSummary$value,
-        showAbout = function() private$..showAbout$value),
+        showAbout = function() private$..showAbout$value,
+        agreementStatus = function() private$..agreementStatus$value,
+        agreementThreshold = function() private$..agreementThreshold$value,
+        showAgreementTable = function() private$..showAgreementTable$value,
+        consensusName = function() private$..consensusName$value,
+        consensusVar = function() private$..consensusVar$value,
+        consensusRule = function() private$..consensusRule$value,
+        tieBreaker = function() private$..tieBreaker$value,
+        agreementStatusName = function() private$..agreementStatusName$value,
+        addAgreementStatus = function() private$..addAgreementStatus$value),
     private = list(
         ..vars = NA,
+        ..baConfidenceLevel = NA,
+        ..proportionalBias = NA,
+        ..blandAltmanPlot = NA,
         ..sft = NA,
-        ..showText = NA,
         ..wght = NA,
         ..exct = NA,
         ..kripp = NA,
         ..krippMethod = NA,
         ..bootstrap = NA,
         ..showSummary = NA,
-        ..showAbout = NA)
+        ..showAbout = NA,
+        ..agreementStatus = NA,
+        ..agreementThreshold = NA,
+        ..showAgreementTable = NA,
+        ..consensusName = NA,
+        ..consensusVar = NA,
+        ..consensusRule = NA,
+        ..tieBreaker = NA,
+        ..agreementStatusName = NA,
+        ..addAgreementStatus = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -120,12 +210,18 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         irrtable = function() private$.items[["irrtable"]],
         contingencyTable = function() private$.items[["contingencyTable"]],
         ratingCombinationsTable = function() private$.items[["ratingCombinationsTable"]],
-        text2 = function() private$.items[["text2"]],
-        text = function() private$.items[["text"]],
+        blandAltman = function() private$.items[["blandAltman"]],
+        blandAltmanStats = function() private$.items[["blandAltmanStats"]],
         krippTable = function() private$.items[["krippTable"]],
         weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
         summary = function() private$.items[["summary"]],
-        about = function() private$.items[["about"]]),
+        about = function() private$.items[["about"]],
+        agreementStatusTable = function() private$.items[["agreementStatusTable"]],
+        agreementStatusDetail = function() private$.items[["agreementStatusDetail"]],
+        consensusTable = function() private$.items[["consensusTable"]],
+        computedVariablesInfo = function() private$.items[["computedVariablesInfo"]],
+        consensusVar = function() private$.items[["consensusVar"]],
+        addAgreementStatus = function() private$.items[["addAgreementStatus"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -185,7 +281,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="contingencyTable",
                 title="Contingency Table (2 Raters)",
-                visible="(sft && len(vars) == 2)",
+                visible="(sft)",
                 rows=0,
                 columns=list(),
                 clearWith=list(
@@ -196,31 +292,57 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ratingCombinationsTable",
                 title="Rating Combinations (3+ Raters)",
-                visible="(sft && len(vars) >= 3)",
+                visible="(sft)",
                 rows=0,
                 columns=list(),
                 clearWith=list(
                     "vars",
                     "wght",
                     "exct")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Image$new(
                 options=options,
-                name="text2",
-                title="Table (HTML)",
-                visible="(sft && showText)",
+                name="blandAltman",
+                title="Bland-Altman Plot",
+                width=500,
+                height=400,
+                visible="(blandAltmanPlot)",
+                requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "wght",
-                    "exct")))
-            self$add(jmvcore::Preformatted$new(
+                    "baConfidenceLevel")))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text",
-                title="Table (Text)",
-                visible="(sft && showText)",
+                name="blandAltmanStats",
+                title="Bland-Altman Statistics",
+                visible="(blandAltmanPlot)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="meanDiff", 
+                        `title`="Mean Difference", 
+                        `type`="number"),
+                    list(
+                        `name`="sdDiff", 
+                        `title`="SD of Difference", 
+                        `type`="number"),
+                    list(
+                        `name`="lowerLoA", 
+                        `title`="Lower LoA", 
+                        `type`="number"),
+                    list(
+                        `name`="upperLoA", 
+                        `title`="Upper LoA", 
+                        `type`="number"),
+                    list(
+                        `name`="propBiasP", 
+                        `title`="Proportional Bias (p)", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(proportionalBias)")),
                 clearWith=list(
                     "vars",
-                    "wght",
-                    "exct")))
+                    "baConfidenceLevel",
+                    "proportionalBias")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="krippTable",
@@ -272,7 +394,122 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="about",
                 title="About This Analysis",
-                visible="(showAbout)"))}))
+                visible="(showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="agreementStatusTable",
+                title="Agreement Status Distribution",
+                visible="(agreementStatus && showAgreementTable)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="status", 
+                        `title`="Agreement Status", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "agreementThreshold")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="agreementStatusDetail",
+                title="Case-Level Agreement Details",
+                visible="(agreementStatus)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case", 
+                        `type`="integer"),
+                    list(
+                        `name`="agreement_status", 
+                        `title`="Status", 
+                        `type`="text"),
+                    list(
+                        `name`="agreement_percent", 
+                        `title`="Agreement %", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="modal_category", 
+                        `title`="Most Common Rating", 
+                        `type`="text"),
+                    list(
+                        `name`="n_agreeing", 
+                        `title`="N Agreeing", 
+                        `type`="integer")),
+                clearWith=list(
+                    "vars",
+                    "agreementThreshold")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="consensusTable",
+                title="Consensus Variable Summary",
+                visible="(consensusVar)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="consensus_count", 
+                        `title`="N Cases (Consensus)", 
+                        `type`="integer"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="avg_agreement", 
+                        `title`="Avg Agreement %", 
+                        `type`="number", 
+                        `format`="pc")),
+                clearWith=list(
+                    "vars",
+                    "consensusRule",
+                    "tieBreaker")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="computedVariablesInfo",
+                title="Computed Variables Added to Dataset",
+                visible="(consensusVar || addAgreementStatus)"))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="consensusVar",
+                title="Add Consensus Variable to Data",
+                varTitle="`{consensusName}`",
+                varDescription="Consensus (modal) rating across raters based on selected consensus rule",
+                measureType="nominal",
+                clearWith=list(
+                    "vars",
+                    "consensusRule",
+                    "tieBreaker",
+                    "consensusName")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="addAgreementStatus",
+                title="Add Agreement Status to Data",
+                varTitle="`{agreementStatusName}`",
+                varDescription="Agreement status categorization (All Agreed, Majority Agreed, No Agreement)",
+                measureType="nominal",
+                clearWith=list(
+                    "vars",
+                    "agreementThreshold",
+                    "agreementStatusName")))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -292,7 +529,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Interrater Reliability
@@ -307,11 +544,18 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the
 #'   diagnosis given by the observer, variable can be categorical or ordinal.
+#' @param baConfidenceLevel Confidence level for Bland-Altman limits of
+#'   agreement (LoA). Typically 0.95 for 95\% confidence intervals.
+#' @param proportionalBias Test whether the difference between raters changes
+#'   systematically with the magnitude of measurement (proportional bias). Uses
+#'   linear regression of difference vs. mean.
+#' @param blandAltmanPlot Generate Bland-Altman plot for continuous agreement
+#'   analysis. Displays mean difference and limits of agreement between the
+#'   first two raters. Only applicable when raters provide continuous
+#'   measurements (e.g., tumor size in mm).
 #' @param sft Display frequency tables showing the distribution of ratings for
 #'   each rater. Useful for understanding rating patterns and identifying
 #'   potential biases.
-#' @param showText Display simple preformatted text version of frequency
-#'   tables. Provides a plain-text alternative to the HTML formatted tables.
 #' @param wght For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
 #'   kappa accounts for degree of disagreement. Linear weights: Adjacent
 #'   disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
@@ -332,18 +576,46 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reports and presentations.
 #' @param showAbout Display an explanatory panel describing what this analysis
 #'   does, when to use it, and how to interpret results.
+#' @param agreementStatus Calculate case-by-case agreement status and display
+#'   distribution. Categorizes each case as: All Agreed, Majority Agreed, or No
+#'   Agreement. Useful for identifying difficult/controversial cases requiring
+#'   review.
+#' @param agreementThreshold Minimum percentage of raters needed for "Majority
+#'   Agreed" status. 50\% = simple majority, 75\% = supermajority, 100\% =
+#'   unanimous. Example: With 4 raters, 50\% requires ≥3 raters agreeing.
+#' @param showAgreementTable Display table showing how many cases fall into
+#'   each agreement category (All Agreed, Majority Agreed, No Agreement).
+#' @param consensusName Name of the new computed variable containing consensus
+#'   ratings. Will be added to the dataset and available for downstream
+#'   analyses.
+#' @param consensusRule Rule for defining consensus. Simple majority = modal
+#'   category with >50\% of votes. Supermajority requires ≥75\% agreement.
+#'   Unanimous requires 100\% agreement. Cases not meeting threshold are set to
+#'   NA in consensus variable.
+#' @param tieBreaker How to handle ties when no single category meets the
+#'   consensus threshold (e.g., 2-2 split with 4 raters). Exclude = set
+#'   consensus to NA for tied cases. First = use first category that appears.
+#'   Lowest/Highest = use min/max of tied categories.
+#' @param agreementStatusName Name of the new computed variable containing
+#'   agreement status categories.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$agreementStatusTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$agreementStatusDetail} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$computedVariablesInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$addAgreementStatus} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -356,15 +628,24 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 agreement <- function(
     data,
     vars,
+    baConfidenceLevel = 0.95,
+    proportionalBias = FALSE,
+    blandAltmanPlot = FALSE,
     sft = FALSE,
-    showText = FALSE,
     wght = "unweighted",
     exct = FALSE,
     kripp = FALSE,
     krippMethod = "nominal",
     bootstrap = FALSE,
     showSummary = FALSE,
-    showAbout = FALSE) {
+    showAbout = FALSE,
+    agreementStatus = FALSE,
+    agreementThreshold = 50,
+    showAgreementTable = FALSE,
+    consensusName = "consensus_rating",
+    consensusRule = "majority",
+    tieBreaker = "exclude",
+    agreementStatusName = "agreement_status") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -375,19 +656,27 @@ agreement <- function(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL))
 
-    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- agreementOptions$new(
         vars = vars,
+        baConfidenceLevel = baConfidenceLevel,
+        proportionalBias = proportionalBias,
+        blandAltmanPlot = blandAltmanPlot,
         sft = sft,
-        showText = showText,
         wght = wght,
         exct = exct,
         kripp = kripp,
         krippMethod = krippMethod,
         bootstrap = bootstrap,
         showSummary = showSummary,
-        showAbout = showAbout)
+        showAbout = showAbout,
+        agreementStatus = agreementStatus,
+        agreementThreshold = agreementThreshold,
+        showAgreementTable = showAgreementTable,
+        consensusName = consensusName,
+        consensusRule = consensusRule,
+        tieBreaker = tieBreaker,
+        agreementStatusName = agreementStatusName)
 
     analysis <- agreementClass$new(
         options = options,

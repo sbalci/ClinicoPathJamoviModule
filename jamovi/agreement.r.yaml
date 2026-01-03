@@ -216,9 +216,109 @@ items:
       type: Html
       visible: (showAbout)
 
+    # Agreement Status Results
+    - name: agreementStatusTable
+      title: "Agreement Status Distribution"
+      type: Table
+      visible: (agreementStatus && showAgreementTable)
+      rows: 0
+      columns:
+        - name: status
+          title: 'Agreement Status'
+          type: text
+        - name: count
+          title: 'N Cases'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: pc
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - agreementThreshold
 
+    - name: agreementStatusDetail
+      title: "Case-Level Agreement Details"
+      type: Table
+      visible: (agreementStatus)
+      rows: 0
+      columns:
+        - name: case_id
+          title: 'Case'
+          type: integer
+        - name: agreement_status
+          title: 'Status'
+          type: text
+        - name: agreement_percent
+          title: 'Agreement %'
+          type: number
+          format: pc
+        - name: modal_category
+          title: 'Most Common Rating'
+          type: text
+        - name: n_agreeing
+          title: 'N Agreeing'
+          type: integer
+      clearWith:
+          - vars
+          - agreementThreshold
 
+    - name: consensusTable
+      title: "Consensus Variable Summary"
+      type: Table
+      visible: (consensusVar)
+      rows: 0
+      columns:
+        - name: category
+          title: 'Category'
+          type: text
+        - name: consensus_count
+          title: 'N Cases (Consensus)'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: pc
+        - name: avg_agreement
+          title: 'Avg Agreement %'
+          type: number
+          format: pc
+      clearWith:
+          - vars
+          - consensusRule
+          - tieBreaker
 
+    - name: computedVariablesInfo
+      title: "Computed Variables Added to Dataset"
+      type: Html
+      visible: (consensusVar || addAgreementStatus)
+
+    # Output Variables (Computed Columns Added to Dataset)
+    - name: consensusVar
+      title: Add Consensus Variable to Data
+      type: Output
+      varTitle: '`{consensusName}`'
+      varDescription: 'Consensus (modal) rating across raters based on selected consensus rule'
+      measureType: nominal
+      clearWith:
+          - vars
+          - consensusRule
+          - tieBreaker
+          - consensusName
+
+    - name: addAgreementStatus
+      title: Add Agreement Status to Data
+      type: Output
+      varTitle: '`{agreementStatusName}`'
+      varDescription: 'Agreement status categorization (All Agreed, Majority Agreed, No Agreement)'
+      measureType: nominal
+      clearWith:
+          - vars
+          - agreementThreshold
+          - agreementStatusName
 
 refs:
     - irr

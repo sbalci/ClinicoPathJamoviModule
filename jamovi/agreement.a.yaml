@@ -288,7 +288,110 @@ options:
           R: >
             Display an explanatory panel describing what this analysis does, when to use it, and how to interpret results.
 
+    # Agreement Status Categorization
+    - name: agreementStatus
+      title: "Calculate Agreement Status"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate case-by-case agreement status and display distribution.
+            Categorizes each case as: All Agreed, Majority Agreed, or No Agreement.
+            Useful for identifying difficult/controversial cases requiring review.
 
+    - name: agreementThreshold
+      title: "Majority Threshold (%)"
+      type: Number
+      default: 50
+      min: 50
+      max: 100
+      description:
+          R: >
+            Minimum percentage of raters needed for "Majority Agreed" status.
+            50% = simple majority, 75% = supermajority, 100% = unanimous.
+            Example: With 4 raters, 50% requires ≥3 raters agreeing.
+
+    - name: showAgreementTable
+      title: "Show Agreement Status Distribution"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display table showing how many cases fall into each agreement category
+            (All Agreed, Majority Agreed, No Agreement).
+
+    - name: consensusName
+      title: "Consensus Variable Name"
+      type: String
+      default: "consensus_rating"
+      description:
+          R: >
+            Name of the new computed variable containing consensus ratings.
+            Will be added to the dataset and available for downstream analyses.
+
+    # Create Consensus Variable
+    - name: consensusVar
+      title: "Create Consensus Variable"
+      type: Output
+      description:
+          R: >
+            Calculate consensus (modal) rating across raters and add as new computed column.
+            Essential for creating reference standards from multi-rater panels.
+            Adds new variable to dataset with most common rating for each case.
+
+    - name: consensusRule
+      title: "Consensus Rule"
+      type: List
+      options:
+        - title: 'Simple Majority (>50%)'
+          name: majority
+        - title: 'Supermajority (≥75%)'
+          name: supermajority
+        - title: 'Unanimous (100%)'
+          name: unanimous
+      default: majority
+      description:
+          R: >
+            Rule for defining consensus. Simple majority = modal category with >50% of votes.
+            Supermajority requires ≥75% agreement. Unanimous requires 100% agreement.
+            Cases not meeting threshold are set to NA in consensus variable.
+
+    - name: tieBreaker
+      title: "Tie Handling"
+      type: List
+      options:
+        - title: 'Set to NA (exclude case)'
+          name: exclude
+        - title: 'Use first occurring mode'
+          name: first
+        - title: 'Use lowest category'
+          name: lowest
+        - title: 'Use highest category'
+          name: highest
+      default: exclude
+      description:
+          R: >
+            How to handle ties when no single category meets the consensus threshold
+            (e.g., 2-2 split with 4 raters). Exclude = set consensus to NA for tied cases.
+            First = use first category that appears. Lowest/Highest = use min/max of tied categories.
+
+    - name: agreementStatusName
+      title: "Agreement Status Variable Name"
+      type: String
+      default: "agreement_status"
+      description:
+          R: >
+            Name of the new computed variable containing agreement status categories.
+
+    # Add Agreement Status to Data
+    - name: addAgreementStatus
+      title: "Add Agreement Status to Dataset"
+      type: Output
+      description:
+          R: >
+            Add agreement status variable to dataset (All Agreed, Majority Agreed, No Agreement).
+            Creates new computed column showing level of agreement for each case.
+            Useful for filtering difficult cases or quality control.
 
 
 

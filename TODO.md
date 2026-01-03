@@ -1,3 +1,26 @@
+## Project review - potential improvement areas (2026-01-03)
+
+### 🧹 Project Hygiene & Cleanup
+- [ ] **Remove Redundant Backups**: Systematically remove `*.bak`, `*.backup`, `*.bak2`, and timestamped backup files from `jamovi/` and `R/`. Canonical versions should be kept, and a dedicated `backups/` folder (git-ignored) should be used if necessary.
+- [ ] **Clean Temp Artifacts**: Purge tracked temp/output artifacts from repo root (`temp*`, `Rplots.pdf`, `*_output*.txt`).
+- [ ] **Scripted Consistency Check**: Implement a script to detect orphaned analysis files (e.g., `.a.yaml` without matching `.b.R` or `.h.R`) and mismatched option names between YAML and R code.
+
+### 📦 Dependency & Infrastructure Optimization
+- [ ] **Audit DESCRIPTION Imports**: Review the ~250 dependencies. Identify packages that can be moved to `Suggests` to reduce initial installation burden.
+- [ ] **Fix Redundant Dependencies**: Remove duplicate entries for `tidyr` and `stringr` in `DESCRIPTION`.
+- [ ] **Resolve Architecture Mismatch**: Debug and fix the `arm64` vs `x86_64` error encountered during module installation in jamovi. Ensure build environment consistency.
+- [ ] **Namespace Synchronization**: Ensure `NAMESPACE` and `DESCRIPTION` are perfectly synced, potentially using the `sync_namespace_description` mode in `_updateModules.R`.
+
+### 📝 Documentation & Reporting
+- [ ] **Fix Rd Macro Warnings**: Address "unknown macro \item" and "unexpected section header" warnings in `Rd` generation by reviewing `roxygen2` comments in `R/*.b.R` files.
+- [ ] **Build pkgdown Site**: Successfully build and deploy the `pkgdown` site, ensuring all vignettes are correctly included and examples are functional.
+- [ ] **Standardize menuGroup Statuses**: Clean up `menuGroup` suffixes (`D`, `T`, `T2`) to follow a consistent "Draft/Testing/Stable" convention.
+
+### 🧪 Stabilization & Testing
+- [ ] **Promote 'To be Tested' Functions**: Prioritize unit testing for functions in the "To be Tested" category (e.g., `decisioncurve`, `stagemigration`) to move them to "Stable".
+- [ ] **Smoke Test Suite**: Create a minimal CI smoke suite that runs a basic analysis for each "Stable" function to prevent regressions during the massive dependency updates.
+- [ ] **Data Reproducibility**: Verify `data-raw` regen scripts for all `.rda` files in `data/` to ensure datasets are reproducible.
+
 ## check articles
 
 source .venv/bin/activate
@@ -2493,9 +2516,880 @@ When prioritizing features, consider:
 
 ---
 
+## 🎯 **CRITICAL IMPROVEMENT AREAS (2026 Q1-Q2)**
+
+### **Priority 1: Technical Debt & Code Quality**
+
+#### **[H] ⚠️ Notice Serialization Migration (URGENT)**
+**Status:** 34 of 364 files still using deprecated `insert(999, Notice)` pattern
+**Impact:** Serialization errors, potential data loss, unreliable notice display
+**Effort:** 2-3 weeks
+
+**Files requiring conversion (see CLAUDE.md for pattern):**
+```bash
+# Identified files with insert(999, issues:
+- clinicalheatmap.b.R
+- flexparametric.b.R
+- greyzoneroc.b.R
+- jjcorrmat.b.R
+- jjpiestats.b.R
+- jjwithinstats.b.R
+- oddsratio.b.R
+- ordinalroc.b.R
+- precisionrecall.b.R
+- psychopdaROC.b.R
+- [24 additional files - run grep to identify]
+```
+
+**Action items:**
+- [ ] Complete conversion using waterfall.b.R as reference template
+- [ ] Add `.noticeList`, `.addNotice()`, `.renderNotices()` helper methods
+- [ ] Convert Notice objects to HTML output items in .r.yaml
+- [ ] Test each converted function with jmvtools::prepare()
+- [ ] Update CLAUDE.md status tracking
+
+**Reference:** `docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md`, `R/waterfall.b.R` (complete example)
+
+---
+
+#### **[H] Resolve TODO/FIXME Technical Debt**
+**Status:** 10 files contain TODO/FIXME/HACK comments indicating incomplete features
+**Impact:** Incomplete functionality, potential bugs, user confusion
+**Effort:** 1-2 weeks
+
+**Files identified:**
+```
+clinicalheatmap.b.R - Incomplete features
+flexparametric.b.R - TODO markers
+greyzoneroc.b.R - FIXME comments
+jjcorrmat.b.R - Implementation gaps
+jjpiestats.b.R - Placeholder code
+jjwithinstats.b.R - Known issues
+oddsratio.b.R - HACK workarounds
+ordinalroc.b.R - TODO features
+precisionrecall.b.R - Incomplete logic
+psychopdaROC.b.R - FIXME warnings
+```
+
+**Action plan:**
+1. Audit each TODO/FIXME comment for criticality
+2. Create GitHub issues for feature requests vs bugs
+3. Fix critical bugs immediately (P0)
+4. Schedule feature completion or remove non-functional options from UI
+5. Document decisions in commit messages
+
+---
+
+#### **[M] Automated Testing Infrastructure**
+**Status:** Test guides exist but limited automated unit tests
+**Coverage:** Unknown (estimate <20% based on testthat setup)
+**Effort:** 4-6 weeks ongoing
+
+**Current state:**
+- ✅ Manual test guides in `tests/` directory (good documentation!)
+- ❌ Limited automated testthat suite
+- ❌ No CI/CD test automation
+- ❌ No coverage reporting
+
+**Recommendations:**
+```yaml
+Phase 1 (Weeks 1-2): Core function testing
+  - Add testthat tests for top 20 most-used functions
+  - Focus on:
+    - Input validation (variable types, missing data)
+    - Edge cases (empty data, single observation, all NA)
+    - Output structure (table dimensions, column names)
+  - Target: 40% coverage of core modules
+
+Phase 2 (Weeks 3-4): Statistical accuracy validation
+  - Compare outputs to validated R packages (survival, pROC, meta)
+  - Test against published datasets with known results
+  - Validate effect sizes, CIs, p-values
+  - Target: 100% accuracy for statistical calculations
+
+Phase 3 (Weeks 5-6): CI/CD integration
+  - Set up GitHub Actions workflow
+  - Run tests on every PR and merge to main
+  - Generate coverage reports (codecov.io)
+  - Block merges if tests fail or coverage drops
+```
+
+**Example test structure:**
+```r
+# tests/testthat/test-enhancedROC.R
+test_that("enhancedROC handles binary outcome correctly", {
+  data <- data.frame(
+    outcome = factor(c(rep("disease", 50), rep("healthy", 50))),
+    predictor = c(rnorm(50, mean = 1), rnorm(50, mean = 0))
+  )
+
+  result <- enhancedROC(data, outcome = outcome, predictors = predictor)
+
+  expect_true(result$auc > 0.5)  # Should discriminate
+  expect_equal(nrow(result$rocTable), 1)
+  expect_named(result$rocTable, c("predictor", "auc", "ci_lower", "ci_upper"))
+})
+```
+
+**Priority test coverage:**
+1. enhancedROC - comprehensive ROC analysis
+2. survival - Kaplan-Meier and Cox regression
+3. decisioncurve - decision curve analysis
+4. diagnosticmeta - meta-analysis
+5. conttables - contingency tables with effect sizes
+
+---
+
+### **Priority 2: Documentation & User Experience**
+
+#### **[H] ⚠️ Severe Documentation Gap**
+**Status:** Only 6 vignettes for 364 analysis functions (1.6% coverage!)
+**Impact:** Users cannot learn/use 98%+ of module features
+**Effort:** 8-12 weeks (phased approach required)
+
+**Current vignette inventory:**
+```bash
+# Existing (6 total):
+- General vignettes (domain-based distribution working well)
+- Module-specific guides scattered across vignettes/
+```
+
+**Phased documentation plan:**
+
+**Phase 1 - High-Impact Quick Wins (Weeks 1-2):**
+Create comprehensive guides for top 10 most-used functions:
+```
+Priority vignettes needed:
+1. enhancedROC-comprehensive.qmd - Diagnostic ROC analysis
+2. survival-comprehensive.qmd - Kaplan-Meier & Cox regression
+3. decisioncurve-comprehensive.qmd - Clinical decision analysis
+4. crosstable-comprehensive.qmd - Table One generation
+5. conttables-comprehensive.qmd - Contingency tables
+6. diagnosticmeta-comprehensive.qmd - Meta-analysis
+7. waterfall-comprehensive.qmd - Treatment response plots
+8. swimmer-comprehensive.qmd - Patient timelines
+9. oddsratio-comprehensive.qmd - Logistic regression
+10. agreement-comprehensive.qmd - Inter-rater reliability
+```
+
+**Phase 2 - Modular Function Groups (Weeks 3-6):**
+```
+Survival module cluster (jsurvival-XX-*.qmd):
+- jsurvival-01-kaplan-meier.qmd
+- jsurvival-02-cox-regression.qmd
+- jsurvival-03-competing-risks.qmd
+- jsurvival-04-time-dependent-covariates.qmd
+
+ROC/Diagnostic cluster (meddecide-XX-*.qmd):
+- meddecide-01-basic-roc.qmd
+- meddecide-02-comparative-roc.qmd
+- meddecide-03-calibration.qmd
+- meddecide-04-decision-curves.qmd
+
+[Repeat for each of 5 main modules]
+```
+
+**Phase 3 - Workflow Tutorials (Weeks 7-8):**
+```
+End-to-end clinical research workflows:
+- workflow-01-biomarker-validation.qmd
+  (Descriptives → ROC → Decision curve → Publication export)
+
+- workflow-02-survival-analysis.qmd
+  (KM curves → Cox regression → Validation → Reporting)
+
+- workflow-03-diagnostic-meta-analysis.qmd
+  (Data preparation → Meta-analysis → Publication bias → GRADE)
+```
+
+**Vignette template structure:**
+```markdown
+---
+title: "Function Name - Comprehensive Guide"
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Function Name - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Clinical Use Case
+[Why would a pathologist/clinician use this?]
+
+## Data Requirements
+[Required variables, format, sample size considerations]
+
+## Step-by-Step Tutorial
+[Numbered steps with screenshots]
+
+## Interpreting Results
+[How to read each output table/plot]
+
+## Clinical Examples
+[2-3 real-world scenarios with interpretation]
+
+## Statistical Details
+[Methods, assumptions, limitations]
+
+## References
+[Key papers, guidelines]
+```
+
+**Automation opportunities:**
+- Generate skeleton vignettes from .a.yaml analysis definitions
+- Auto-extract option descriptions from YAML to reduce manual writing
+- Use AI to draft initial content, human review for accuracy
+
+---
+
+#### **[M] Clinical Presets System Expansion**
+**Status:** Only enhancedROC has clinicalPresets feature (massive success!)
+**Opportunity:** Expand to 15-20 additional high-value analyses
+**Impact:** Reduces cognitive load, prevents misconfiguration, speeds workflow
+**Effort:** 3-4 weeks
+
+**Current implementation (enhancedROC):**
+```yaml
+# jamovi/enhancedROC.a.yaml
+- name: clinicalPresets
+  type: List
+  options:
+    - title: 'Custom Configuration'
+      name: custom
+    - title: 'Biomarker Screening (High Sensitivity)'
+      name: biomarker_screening
+    - title: 'Diagnostic Test Validation (Balanced)'
+      name: diagnostic_validation
+    - title: 'Confirmatory Testing (High Specificity)'
+      name: confirmatory_testing
+    - title: 'Research Analysis (Comprehensive)'
+      name: research_comprehensive
+```
+
+**Target modules for preset expansion:**
+
+1. **survival.b.R** - Survival analysis presets:
+   ```
+   - Early-stage cancer (5-year follow-up focus)
+   - Advanced cancer (short-term outcomes)
+   - Screening cohort (long follow-up, few events)
+   - Clinical trial (strict proportional hazards checks)
+   ```
+
+2. **diagnosticmeta.b.R** - Meta-analysis presets:
+   ```
+   - QUADAS-C compliant (cancer screening)
+   - High heterogeneity expected (subgroup focus)
+   - Publication bias concern (extensive diagnostics)
+   - Network meta-analysis ready
+   ```
+
+3. **decisioncurve.b.R** - Decision curve presets:
+   ```
+   - Screening decision (low threshold range 0.01-0.10)
+   - Diagnostic decision (mid threshold 0.10-0.50)
+   - Treatment decision (high threshold 0.30-0.80)
+   ```
+
+4. **conttables.b.R** - Table One presets:
+   ```
+   - Randomized trial (balance checking, SMD)
+   - Observational study (full covariate adjustment)
+   - Case-control study (matched pairs emphasis)
+   - Diagnostic accuracy (sensitivity/specificity focus)
+   ```
+
+5. **oddsratio.b.R** - Logistic regression presets:
+   ```
+   - Prediction model development (calibration priority)
+   - Risk factor identification (parsimonious model)
+   - External validation (performance metrics only)
+   ```
+
+**Implementation pattern (from enhancedROC.b.R):**
+```r
+.applyClinicalPresets = function() {
+  preset <- self$options$clinicalPresets
+  if (is.null(preset) || preset == "custom") return()
+
+  private$.presetConfig <- switch(preset,
+    biomarker_screening = list(
+      sensitivityThreshold = 0.90,
+      specificityThreshold = 0.60,
+      youdenOptimization = TRUE,
+      rocCurve = TRUE,
+      # ... preset configuration
+    ),
+    # ... other presets
+  )
+}
+```
+
+**JavaScript UI automation** (see CLAUDE.md reference):
+```javascript
+// jamovi/js/enhancedROC.events.js
+onUpdate: function(ui) {
+  let preset = ui.clinicalPresets.value();
+
+  if (preset === 'biomarker_screening') {
+    ui.sensitivityThreshold.setValue(0.90);
+    ui.specificityThreshold.setValue(0.60);
+    ui.youdenOptimization.setValue(true);
+    ui.rocCurve.setValue(true);
+  }
+  // ... handle other presets
+}
+```
+
+---
+
+#### **[M] Consistent Variable Name Handling**
+**Status:** Mixed implementation - some modules escape, others don't
+**Issue:** Variables with spaces/special characters break in plots/tables
+**Files affected:** Unknown (requires systematic audit)
+**Effort:** 2-3 weeks
+
+**Problem examples:**
+```
+User variable names with issues:
+- "Age at Diagnosis" (space)
+- "ER+" (special character)
+- "Stage (AJCC 8th)" (parentheses + space)
+- "Ki-67 (%)" (hyphen + parentheses)
+```
+
+**Current best practice (from oddsratio.b.R):**
+```r
+# Apply labelled variable logic to preserve original names
+.escapeVar = function(x) {
+  if (is.character(x)) {
+    x <- gsub("[^A-Za-z0-9_]", "_", make.names(x))
+  }
+  return(x)
+}
+
+# Use jmvcore helpers
+lhs <- jmvcore::composeTerm(self$options$dep)
+rhs <- jmvcore::composeTerms(modelTerms)
+```
+
+**Systematic fix required:**
+1. Audit all 364 .b.R files for variable name handling
+2. Implement `.escapeVar()` consistently across modules
+3. Preserve original names in output using `labelled` package
+4. Test with pathology datasets (known to have complex variable names)
+
+**See:** `vignettes/jamovi_module_patterns_guide.md` - Data Handling section
+
+---
+
+### **Priority 3: Feature Enhancements**
+
+#### **[H] enhancedROC Feature Extensions**
+**Status:** Comprehensive but missing key clinical workflows
+**Opportunity:** Build on successful foundation
+**Effort:** 2-3 weeks
+
+**Proposed enhancements:**
+
+1. **Multi-marker combination strategies:**
+   ```
+   Options to add:
+   - Simple sum/average of markers
+   - Logistic regression combination
+   - Machine learning ensemble (random forest, XGBoost)
+   - Clinical algorithm (if marker1 > X, then marker2)
+   ```
+
+2. **Time-dependent ROC integration:**
+   ```
+   # Currently commented out in enhancedROC.a.yaml (lines 544-568)
+   # IMPLEMENT THIS - high clinical value!
+
+   Use cases:
+   - Biomarker measured at baseline, predict 1/3/5-year survival
+   - Validate prognostic scores (Oncotype DX, PREDICT, etc.)
+   - Time-varying AUC plots
+   ```
+
+3. **Automated reporting enhancements:**
+   ```
+   Current: Plain text summary
+   Proposed:
+   - STARD-compliant checklist export
+   - Copy-ready methods section
+   - Copy-ready results paragraph
+   - Journal-formatted table (NEJM, Lancet, JAMA styles)
+   ```
+
+4. **Clinical decision integration:**
+   ```
+   Link to decisioncurve module:
+   - "Calculate net benefit" button → pre-fills decisioncurve analysis
+   - Automatic threshold recommendation based on clinical context
+   - Cost-effectiveness integration (if costs provided)
+   ```
+
+5. **Expand clinical presets:**
+   ```
+   Additional presets needed:
+   - PD-L1 scoring (ASCO/CAP guidelines)
+   - HER2 testing (binary + continuous IHC)
+   - ctDNA detection (ultra-high specificity required)
+   - Liquid biopsy validation
+   ```
+
+---
+
+#### **[M] Cross-Module Workflow Integration**
+**Status:** Modules work independently but no seamless handoffs
+**Opportunity:** Reduce copy-paste, errors, and user frustration
+**Effort:** 4-5 weeks
+
+**Proposed integration points:**
+
+1. **Descriptives → Survival:**
+   ```
+   crosstable.b.R / summary.b.R:
+   - Add "Send to jSurvival" button
+   - Pre-populate time/event variables if detected
+   - Transfer grouping variables automatically
+   ```
+
+2. **ROC → Decision Curves:**
+   ```
+   enhancedROC.b.R:
+   - "Evaluate clinical utility" button
+   - Passes predicted probabilities to decisioncurve
+   - Links optimal cutoff to threshold probabilities
+   ```
+
+3. **Swimmer → Survival:**
+   ```
+   swimmer.b.R:
+   - "Generate KM curve" button
+   - Auto-derives PFS/OS from swimmer data
+   - Transfers treatment arms as strata
+   ```
+
+4. **Table One → Export:**
+   ```
+   crosstable.b.R:
+   - One-click DOCX export (CONSORT-style)
+   - Embedded footnotes with statistical methods
+   - Automatic STROBE checklist generation
+   ```
+
+**Implementation approach:**
+```r
+# Add to .b.R files:
+.exportToModule = function(targetModule) {
+  # Prepare data in format expected by target module
+  transferData <- list(
+    variables = self$options$selectedVars,
+    data = private$.data,
+    options = list(...)  # Pre-configured options
+  )
+
+  # Use jamovi session state to pass data
+  self$results$.setExportData(transferData)
+
+  # Trigger target module (requires jamovi API enhancement)
+  # OR: Export as temporary .omv file that user opens
+}
+```
+
+---
+
+#### **[L] Performance Optimization for Large Datasets**
+**Status:** No systematic optimization; users report slowness with >10k rows
+**Target:** Sub-2 second response for n=10,000; sub-10s for n=100,000
+**Effort:** 3-4 weeks
+
+**Optimization strategies:**
+
+1. **Lazy evaluation & caching:**
+   ```r
+   # Only recompute when options change
+   private$.cache <- list()
+
+   .getCachedResult = function(key, computeFn) {
+     if (is.null(private$.cache[[key]])) {
+       private$.cache[[key]] <- computeFn()
+     }
+     return(private$.cache[[key]])
+   }
+   ```
+
+2. **Progress indicators for long operations:**
+   ```r
+   # For bootstrap, permutation, cross-validation
+   .runBootstrap = function(nIter = 1000) {
+     for (i in 1:nIter) {
+       # Checkpoint every 100 iterations for cancellation
+       if (i %% 100 == 0) {
+         private$.checkpoint()
+       }
+       # ... bootstrap iteration
+     }
+   }
+   ```
+
+3. **Data.table for aggregation:**
+   ```r
+   # Replace dplyr for large datasets
+   library(data.table)
+
+   .aggregateLargeData = function(data) {
+     dt <- as.data.table(data)
+     dt[, .(mean = mean(value), sd = sd(value)), by = group]
+   }
+   ```
+
+4. **Parallel processing for independence:**
+   ```r
+   # Use future/furrr for bootstrap
+   library(future)
+   library(furrr)
+
+   plan(multisession, workers = 4)
+
+   bootstrap_results <- future_map(1:1000, ~{
+     # Bootstrap iteration
+   }, .options = furrr_options(seed = TRUE))
+   ```
+
+---
+
+### **Priority 4: Quality Assurance & Standards**
+
+#### **[H] Statistical Accuracy Validation**
+**Status:** No systematic validation against reference implementations
+**Risk:** Incorrect results damage reputation, mislead clinical decisions
+**Effort:** 3-4 weeks (one-time audit + ongoing testing)
+
+**Validation protocol:**
+
+1. **Benchmark against validated packages:**
+   ```r
+   # Test survival.b.R against survival package
+   test_that("Cox regression matches survival::coxph", {
+     library(survival)
+
+     # Use built-in lung dataset
+     data(lung)
+
+     # ClinicoPath result
+     cp_result <- survival(data = lung, time = time,
+                           event = status, covariates = c(age, sex))
+
+     # Reference result
+     ref_result <- coxph(Surv(time, status) ~ age + sex, data = lung)
+
+     # Compare coefficients (within floating point tolerance)
+     expect_equal(cp_result$coef, coef(ref_result), tolerance = 1e-6)
+     expect_equal(cp_result$hr, exp(coef(ref_result)), tolerance = 1e-6)
+   })
+   ```
+
+2. **Validate against published datasets:**
+   ```
+   Use canonical datasets with known results:
+   - Mayo Clinic lung cancer (survival analysis)
+   - Framingham Heart Study (logistic regression)
+   - Scottish thyroid cancer (competing risks)
+   - Kidney function eGFR (ROC curves)
+
+   Compare ClinicoPath outputs to published papers
+   ```
+
+3. **Edge case testing:**
+   ```r
+   test_that("survivalhandlesedgecases",{
+     # Single event
+     # All censored
+     # Ties in event times
+     # Missing covariates
+     # Zero variance covariate
+     # Perfect separation in logistic regression
+   })
+   ```
+
+---
+
+#### **[M] UI/UX Consistency Audit**
+**Status:** 364 analyses created over time → inconsistent patterns
+**Impact:** Confusing for users, increases learning curve
+**Effort:** 2 weeks audit + 3-4 weeks fixes
+
+**Inconsistencies to address:**
+
+1. **Option naming conventions:**
+   ```
+   Current problems:
+   - Some use camelCase, others use snake_case
+   - Inconsistent abbreviations (CI vs ci vs confInt)
+   - Unclear labels ("Advanced options" vs "Statistical options")
+
+   Standard to adopt:
+   - All options: camelCase (jamovi convention)
+   - All titles: Title Case with Full Words
+   - Grouping: "Analysis Options", "Output Options",
+              "Statistical Settings", "Plot Settings"
+   ```
+
+2. **Checkbox defaults:**
+   ```
+   Current: Mixed (some analyses default to many outputs, causing slowness)
+   Recommended:
+   - Core tables: TRUE by default
+   - Advanced tables: FALSE by default
+   - Plots: FALSE by default (user opts in)
+   - Diagnostic plots: FALSE by default
+   ```
+
+3. **CollapseBox organization:**
+   ```
+   Standard structure for all analyses:
+   1. Variable Selection (always first, never collapsed)
+   2. Analysis Options (collapsed: false for simple analyses)
+   3. Output Options (collapsed: false)
+   4. Statistical Options (collapsed: true)
+   5. Plot Settings (collapsed: true)
+   6. Advanced/Experimental (collapsed: true)
+   ```
+
+4. **Help text standardization:**
+   ```
+   Every option should have description in .a.yaml:
+
+   - name: bootstrapSamples
+     title: 'Bootstrap Samples'
+     type: Integer
+     default: 1000
+     min: 100
+     max: 10000
+     description: 'Number of bootstrap resamples for confidence intervals. Higher values increase precision but slow computation. Recommended: 1000 for exploratory, 5000+ for publication.'
+   ```
+
+---
+
+### **Priority 5: Community & Adoption**
+
+#### **[M] Example Dataset Repository**
+**Status:** Scattered example data, unclear provenance
+**Need:** Curated, documented, clinically realistic datasets
+**Effort:** 2-3 weeks
+
+**Proposed structure:**
+```
+data/
+├── README.md (dataset catalog)
+├── breast_ihc_validation.csv
+│   └── Description: 500 patients, ER/PR/HER2/Ki67 IHC scores
+│       Use cases: enhancedROC, agreement, ihccluster
+├── lung_cancer_survival.csv
+│   └── Description: 228 patients from Mayo Clinic lung cancer study
+│       Use cases: survival, cox, competingrisks
+├── diagnostic_meta_thyroid.csv
+│   └── Description: 24 studies of thyroid FNA diagnostic accuracy
+│       Use cases: diagnosticmeta, meta-analysis
+├── recist_trial_lesions.csv
+│   └── Description: Synthetic trial data with lesion measurements
+│       Use cases: waterfall, swimmer, recist
+└── ... [15-20 total datasets]
+
+data-raw/
+├── generate_breast_ihc.R (data generation scripts)
+├── generate_lung_survival.R
+└── ...
+```
+
+**Dataset requirements:**
+- Realistic clinical variable names (with spaces, special characters)
+- Missing data patterns typical of real studies
+- Adequate sample size for statistical power
+- Documented data dictionary
+- Clear provenance (simulated vs real de-identified)
+- Covers all major module functions
+
+---
+
+#### **[L] Video Tutorial Series**
+**Status:** No video content
+**Platform:** YouTube (ClinicoPath channel)
+**Effort:** 4-6 weeks (1-2 videos/week)
+
+**Proposed series (10 videos, 5-15 min each):**
+
+1. **Getting Started with ClinicoPath** (10 min)
+   - Installing jamovi + ClinicoPath
+   - Interface overview
+   - Loading example data
+   - Running first analysis (Table One)
+
+2. **Creating Publication-Ready Table One** (12 min)
+   - crosstable module
+   - Selecting variables
+   - Statistical tests
+   - Export to DOCX
+
+3. **Survival Analysis Fundamentals** (15 min)
+   - Kaplan-Meier curves
+   - Log-rank test
+   - Cox regression basics
+   - Interpreting hazard ratios
+
+4. **ROC Curve Analysis for Biomarker Validation** (15 min)
+   - enhancedROC module
+   - Youden index optimization
+   - Comparing multiple markers
+   - Clinical interpretation
+
+5. **Decision Curve Analysis** (12 min)
+   - decisioncurve module
+   - Net benefit interpretation
+   - Threshold selection
+   - Clinical decision making
+
+6. **Diagnostic Test Meta-Analysis** (15 min)
+   - diagnosticmeta module
+   - Sensitivity/specificity pooling
+   - SROC curves
+   - Heterogeneity assessment
+
+7. **Treatment Response Visualization** (10 min)
+   - waterfall plots
+   - swimmer plots
+   - RECIST integration
+
+8. **Agreement & Reliability Analysis** (12 min)
+   - Cohen's kappa
+   - ICC for continuous measures
+   - Bland-Altman plots
+
+9. **Advanced Survival: Competing Risks** (15 min)
+   - competingsurvival module
+   - Cumulative incidence functions
+   - Fine-Gray regression
+
+10. **End-to-End Workflow: Biomarker Study** (20 min)
+    - Data import → Descriptives → ROC → Decision curves → Export
+    - Publication-ready outputs
+
+**Recording setup:**
+- Screen recording (1080p minimum)
+- Clear narration with clinical context
+- Closed captions (accessibility)
+- Time-stamped chapters
+- Accompanying written transcript
+
+---
+
+## 📌 **IMPLEMENTATION ROADMAP UPDATE (2026)**
+
+### **Q1 2026 (Jan-Mar): Critical Fixes & Foundation**
+
+**Week 1-2:**
+- [ ] Complete notice serialization migration (34 remaining files)
+- [ ] Resolve critical TODO/FIXME issues (P0 bugs only)
+
+**Week 3-4:**
+- [ ] Create automated test framework
+- [ ] Write tests for top 5 functions (enhancedROC, survival, decisioncurve, crosstable, diagnosticmeta)
+
+**Week 5-8:**
+- [ ] Write 10 high-priority comprehensive vignettes
+- [ ] Launch first 2 video tutorials (Getting Started + Table One)
+
+**Week 9-12:**
+- [ ] Expand clinical presets to 5 additional modules
+- [ ] Implement cross-module integration (3 key workflows)
+- [ ] Curate and document 10 example datasets
+
+**Deliverables:**
+- ✅ Zero serialization errors
+- ✅ 40% test coverage for core functions
+- ✅ 10 comprehensive vignettes published
+- ✅ 6 modules with clinical presets
+- ✅ 10 documented example datasets
+- ✅ 2 video tutorials live
+
+---
+
+### **Q2 2026 (Apr-Jun): Enhanced UX & Quality**
+
+**Week 1-3:**
+- [ ] UI/UX consistency audit across all 364 functions
+- [ ] Standardize option naming, defaults, help text
+- [ ] Implement consistent CollapseBox organization
+
+**Week 4-6:**
+- [ ] Statistical accuracy validation (benchmark top 20 functions)
+- [ ] Performance optimization (n=100k target)
+- [ ] Add progress indicators to long-running analyses
+
+**Week 7-9:**
+- [ ] Variable name handling standardization (all modules)
+- [ ] Systematic .escapeVar() implementation
+- [ ] Test with real pathology datasets (complex names)
+
+**Week 10-12:**
+- [ ] Complete remaining 8 video tutorials
+- [ ] Write 10 additional vignettes (cumulative: 20 total)
+- [ ] CI/CD integration with automated testing
+
+**Deliverables:**
+- ✅ Consistent UI/UX across all modules
+- ✅ 80% test coverage for statistical calculations
+- ✅ <2s response time for n=10,000 rows
+- ✅ 20 comprehensive vignettes (5.5% coverage)
+- ✅ 10 video tutorials complete
+- ✅ GitHub Actions CI/CD running
+
+---
+
+## 📊 **SUCCESS METRICS (Updated 2026)**
+
+### **Technical Quality**
+- [ ] **Zero** serialization errors in released version
+- [ ] **<5** open P0/P1 bugs at any time
+- [ ] **80%+** test coverage for core statistical functions
+- [ ] **100%** accuracy vs reference implementations
+- [ ] **All** 364 functions pass jmvtools::prepare()
+
+### **Documentation**
+- [ ] **20+** comprehensive vignettes by Q2 2026 (target: 50+ by year-end)
+- [ ] **10** video tutorials by Q2 2026
+- [ ] **15+** curated example datasets
+- [ ] **100%** of new functions documented before release
+
+### **User Experience**
+- [ ] **10+** modules with clinical presets
+- [ ] **<2s** analysis response for typical datasets (n ≤ 10,000)
+- [ ] **Consistent** UI patterns across all modules
+- [ ] **5+** cross-module workflow integrations
+
+### **Adoption & Impact**
+- [ ] **15k+** jamovi library downloads/year (up from 10k target)
+- [ ] **50+** citations in peer-reviewed literature
+- [ ] **100+** active forum discussions
+- [ ] **4.5+/5** user satisfaction rating
+
+---
+
 ## 📌 **Conclusion**
 
 This roadmap provides a comprehensive, **jamovi-compatible** enhancement plan for the ClinicoPath module ecosystem. All features are designed to work within jamovi's tabular data structure, with clear specifications for variable types, data formats, and UI elements.
+
+**CRITICAL NEXT STEPS (Start Immediately):**
+1. ✅ Complete notice serialization migration (34 files)
+2. ✅ Write first 10 comprehensive vignettes
+3. ✅ Implement automated testing for top 20 functions
+4. ✅ Expand clinical presets to 5 key modules
+5. ✅ Create 10 curated example datasets
 
 **Key Principles**:
 

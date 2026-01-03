@@ -524,6 +524,263 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             ))
         },
 
+        .calculateAgreementStatus = function(ratings) {
+            # Calculate agreement status for each case
+            # Categorizes as: All Agreed, Majority Agreed, No Agreement
+
+            threshold <- self$options$agreementThreshold
+            n_raters <- ncol(ratings)
+            n_cases <- nrow(ratings)
+
+            # Initialize results storage
+            agreement_results <- data.frame(
+                case_id = 1:n_cases,
+                agreement_status = character(n_cases),
+                agreement_percent = numeric(n_cases),
+                modal_category = character(n_cases),
+                n_agreeing = integer(n_cases),
+                stringsAsFactors = FALSE
+            )
+
+            # Calculate for each case
+            for (i in 1:n_cases) {
+                row_ratings <- unlist(ratings[i, ])
+                row_ratings <- row_ratings[!is.na(row_ratings)]
+
+                if (length(row_ratings) == 0) {
+                    agreement_results$agreement_status[i] <- "Missing Data"
+                    agreement_results$agreement_percent[i] <- NA
+                    agreement_results$modal_category[i] <- NA
+                    agreement_results$n_agreeing[i] <- 0
+                    next
+                }
+
+                # Find mode (most common rating)
+                freq_table <- table(row_ratings)
+                max_freq <- max(freq_table)
+                modal_value <- names(freq_table)[which.max(freq_table)]
+
+                # Calculate agreement percentage
+                agree_pct <- (max_freq / length(row_ratings)) * 100
+
+                # Categorize agreement status
+                if (max_freq == length(row_ratings)) {
+                    status <- "All Agreed"
+                } else if (agree_pct >= threshold) {
+                    status <- "Majority Agreed"
+                } else {
+                    status <- "No Agreement"
+                }
+
+                # Store results
+                agreement_results$agreement_status[i] <- status
+                agreement_results$agreement_percent[i] <- agree_pct / 100  # Convert to proportion for format: pc
+                agreement_results$modal_category[i] <- modal_value
+                agreement_results$n_agreeing[i] <- max_freq
+            }
+
+            # Populate case-level detail table
+            detail_table <- self$results$agreementStatusDetail
+            for (i in 1:n_cases) {
+                detail_table$addRow(rowKey = i, values = list(
+                    case_id = agreement_results$case_id[i],
+                    agreement_status = agreement_results$agreement_status[i],
+                    agreement_percent = agreement_results$agreement_percent[i],
+                    modal_category = agreement_results$modal_category[i],
+                    n_agreeing = agreement_results$n_agreeing[i]
+                ))
+            }
+
+            # Calculate distribution summary (if requested)
+            if (self$options$showAgreementTable) {
+                status_counts <- table(agreement_results$agreement_status)
+                status_table <- self$results$agreementStatusTable
+
+                status_order <- c("All Agreed", "Majority Agreed", "No Agreement", "Missing Data")
+                for (status in status_order) {
+                    if (status %in% names(status_counts)) {
+                        count <- as.integer(status_counts[status])
+                        pct <- count / n_cases
+
+                        # Interpretation text
+                        interpretation <- switch(status,
+                            "All Agreed" = "Complete consensus across all raters",
+                            "Majority Agreed" = sprintf("≥%.0f%% of raters agree", threshold),
+                            "No Agreement" = sprintf("<%.0f%% agreement - review recommended", threshold),
+                            "Missing Data" = "Insufficient data for classification"
+                        )
+
+                        status_table$addRow(rowKey = status, values = list(
+                            status = status,
+                            count = count,
+                            percentage = pct,
+                            interpretation = interpretation
+                        ))
+                    }
+                }
+            }
+
+            # Add agreement status variable to dataset (if requested)
+            if (self$options$addAgreementStatus) {
+                self$results$addAgreementStatus$setRowNums(1:n_cases)
+                self$results$addAgreementStatus$setValues(agreement_results$agreement_status)
+            }
+
+            # Update computed variables info
+            if (self$options$consensusVar || self$options$addAgreementStatus) {
+                private$.updateComputedVariablesInfo()
+            }
+        },
+
+        .createConsensusVariable = function(ratings) {
+            # Create consensus (modal) rating variable based on selected rule
+
+            consensus_rule <- self$options$consensusRule
+            tie_breaker <- self$options$tieBreaker
+            n_cases <- nrow(ratings)
+            n_raters <- ncol(ratings)
+
+            # Initialize consensus vector
+            consensus <- character(n_cases)
+
+            # Calculate threshold based on rule
+            threshold <- switch(consensus_rule,
+                "majority" = 0.5,        # >50%
+                "supermajority" = 0.75,  # ≥75%
+                "unanimous" = 1.0        # 100%
+            )
+
+            # Calculate for each case
+            for (i in 1:n_cases) {
+                row_ratings <- unlist(ratings[i, ])
+                row_ratings <- row_ratings[!is.na(row_ratings)]
+
+                if (length(row_ratings) == 0) {
+                    consensus[i] <- NA
+                    next
+                }
+
+                # Find mode and frequency
+                freq_table <- table(row_ratings)
+                max_freq <- max(freq_table)
+                modes <- names(freq_table)[freq_table == max_freq]
+
+                # Calculate agreement proportion
+                agree_prop <- max_freq / length(row_ratings)
+
+                # Check if consensus meets threshold
+                if (agree_prop >= threshold) {
+                    if (length(modes) == 1) {
+                        # Single mode - use it
+                        consensus[i] <- modes[1]
+                    } else {
+                        # Tie - apply tie breaker
+                        consensus[i] <- switch(tie_breaker,
+                            "exclude" = NA,
+                            "first" = modes[1],
+                            "lowest" = {
+                                # Convert to numeric if possible for comparison
+                                numeric_modes <- suppressWarnings(as.numeric(modes))
+                                if (all(!is.na(numeric_modes))) {
+                                    modes[which.min(numeric_modes)]
+                                } else {
+                                    # For character data, use alphabetical order
+                                    modes[order(modes)[1]]
+                                }
+                            },
+                            "highest" = {
+                                # Convert to numeric if possible for comparison
+                                numeric_modes <- suppressWarnings(as.numeric(modes))
+                                if (all(!is.na(numeric_modes))) {
+                                    modes[which.max(numeric_modes)]
+                                } else {
+                                    # For character data, use alphabetical order
+                                    modes[order(modes, decreasing = TRUE)[1]]
+                                }
+                            },
+                            NA  # Default: exclude
+                        )
+                    }
+                } else {
+                    # Does not meet threshold
+                    consensus[i] <- NA
+                }
+            }
+
+            # Populate consensus summary table
+            consensus_no_na <- consensus[!is.na(consensus)]
+            if (length(consensus_no_na) > 0) {
+                freq_table <- table(consensus_no_na)
+                consensus_table <- self$results$consensusTable
+
+                # Calculate average agreement for each consensus category
+                for (category in names(freq_table)) {
+                    # Find cases with this consensus category
+                    matching_cases <- which(consensus == category)
+
+                    # Calculate average agreement percentage for these cases
+                    avg_agreement <- mean(sapply(matching_cases, function(case_idx) {
+                        row_ratings <- unlist(ratings[case_idx, ])
+                        row_ratings <- row_ratings[!is.na(row_ratings)]
+                        if (length(row_ratings) == 0) return(NA)
+                        max_freq <- max(table(row_ratings))
+                        return(max_freq / length(row_ratings))
+                    }), na.rm = TRUE)
+
+                    consensus_table$addRow(rowKey = category, values = list(
+                        category = category,
+                        consensus_count = as.integer(freq_table[category]),
+                        percentage = as.integer(freq_table[category]) / n_cases,
+                        avg_agreement = avg_agreement
+                    ))
+                }
+            }
+
+            # Add consensus variable to dataset (if requested)
+            if (self$options$consensusVar) {
+                self$results$consensusVar$setRowNums(1:n_cases)
+                self$results$consensusVar$setValues(consensus)
+            }
+
+            # Update computed variables info
+            if (self$options$consensusVar || self$options$addAgreementStatus) {
+                private$.updateComputedVariablesInfo()
+            }
+        },
+
+        .updateComputedVariablesInfo = function() {
+            # Generate HTML info about computed variables added to dataset
+
+            info_html <- "<div style='font-family: Arial, sans-serif; padding: 10px;'>"
+            info_html <- paste0(info_html, "<h4 style='margin-top: 0;'>Computed Variables Added:</h4><ul>")
+
+            if (self$options$consensusVar) {
+                var_name <- self$options$consensusName
+                rule_text <- switch(self$options$consensusRule,
+                    "majority" = "Simple Majority (>50%)",
+                    "supermajority" = "Supermajority (≥75%)",
+                    "unanimous" = "Unanimous (100%)"
+                )
+                info_html <- paste0(info_html,
+                    "<li><strong>", var_name, "</strong>: Consensus rating (", rule_text, ")</li>")
+            }
+
+            if (self$options$addAgreementStatus) {
+                var_name <- self$options$agreementStatusName
+                threshold <- self$options$agreementThreshold
+                info_html <- paste0(info_html,
+                    "<li><strong>", var_name, "</strong>: Agreement status (threshold: ", threshold, "%)</li>")
+            }
+
+            info_html <- paste0(info_html, "</ul>")
+            info_html <- paste0(info_html,
+                "<p style='color: #666; font-size: 12px;'>",
+                "These variables are now available in your dataset for further analysis.",
+                "</p></div>")
+
+            self$results$computedVariablesInfo$setContent(info_html)
+        },
+
         .run = function() {
 
         # Validate input ----
@@ -921,6 +1178,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 # Add error message as footnote
                 krippTable$addFootnote(rowNo = 1, col = "alpha", paste0("Error calculating Krippendorff's alpha: ", e$message))
             })
+        }
+
+        # Agreement Status Calculation (if requested) ----
+        if (self$options$agreementStatus) {
+            private$.calculateAgreementStatus(ratings)
+        }
+
+        # Consensus Variable Calculation (if requested) ----
+        if (self$options$consensusVar) {
+            private$.createConsensusVariable(ratings)
         }
 
         # Bland-Altman analysis (if requested) ----

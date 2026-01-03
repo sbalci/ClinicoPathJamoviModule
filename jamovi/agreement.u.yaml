@@ -69,3 +69,42 @@ children:
           - type: CheckBox
             name: proportionalBias
             enable: (blandAltmanPlot)
+
+  - type: Label
+    label: "Agreement Status Analysis"
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: agreementStatus
+          - type: TextBox
+            name: agreementThreshold
+            format: number
+            enable: (agreementStatus)
+          - type: CheckBox
+            name: showAgreementTable
+            enable: (agreementStatus)
+          - type: TextBox
+            name: agreementStatusName
+            format: string
+            enable: (agreementStatus)
+          - type: Output
+            name: addAgreementStatus
+            enable: (agreementStatus)
+
+  - type: Label
+    label: "Create Consensus Variable"
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: consensusName
+            format: string
+          - type: ComboBox
+            name: consensusRule
+          - type: ComboBox
+            name: tieBreaker
+          - type: Output
+            name: consensusVar

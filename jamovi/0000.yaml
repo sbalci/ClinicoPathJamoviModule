@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.69
+version: 0.0.32.70
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-01-02'
+date: '2026-01-03'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1375,7 +1375,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -2215,7 +2215,7 @@ analyses:
   - title: Predictive Power Score Analysis
     name: jpps
     ns: ClinicoPath
-    menuGroup: meddicideD
+    menuGroup: meddecideD
     menuSubgroup: Correlation & Association
     menuTitle: Predictive Power Score Analysis
     ribbon: analyses

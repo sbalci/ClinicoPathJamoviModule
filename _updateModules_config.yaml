@@ -10,21 +10,21 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.32.69"
-new_date: "2026-01-02"
+new_version: "0.0.32.70"
+new_date: "2026-01-03"
 quick: false
 # TEST: true
 # meddecide: false
-# jjstatsplot: false
-# jsurvival: false
-# ClinicoPathDescriptives: false
-# OncoPath: false
+jjstatsplot: false
+jsurvival: false
+ClinicoPathDescriptives: false
+OncoPath: false
 TEST: false
 meddecide: true
-jjstatsplot: true
-jsurvival: true
-ClinicoPathDescriptives: true
-OncoPath: true
+# jjstatsplot: true
+# jsurvival: true
+# ClinicoPathDescriptives: true
+# OncoPath: true
 
 
 
